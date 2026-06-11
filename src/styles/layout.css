@@ -1,0 +1,308 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+html {
+  font-size: var(--ishare-font-size-base);
+}
+
+body {
+  font-family: var(--ishare-font);
+  background: var(--ishare-bg);
+  color: var(--ishare-text-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  height: 100%;
+  width: 100%;
+}
+
+/* Thin scrollbar — shared across panels (AI chat, nav lists, help, etc.) */
+.ishare-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
+}
+
+.ishare-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ishare-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ishare-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.18);
+  border-radius: 999px;
+}
+
+.ishare-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.32);
+}
+
+/* Text inputs — pill shape + Google Sans (placeholders included) */
+input[type='search'],
+input[type='text'] {
+  font-family: var(--ishare-font-display);
+  border-radius: 999px;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+input::placeholder {
+  font-family: var(--ishare-font-display);
+  color: var(--ishare-text-muted);
+}
+
+.viewer-area {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.viewer-area--fullscreen {
+  min-height: 0;
+}
+
+.viewer-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Custom top progress bar replaces PSV's built-in loader */
+.viewer-container .psv-loader-container,
+.viewer-container .psv-virtual-tour-loader {
+  display: none !important;
+}
+
+/* Fallback: keep PSV error overlay compact if it flashes before hideError() */
+.viewer-container .psv-overlay-image svg {
+  width: 1.75rem !important;
+  max-width: 1.75rem;
+  height: auto;
+}
+
+.viewer-container .psv-overlay-title {
+  margin-top: 0.5rem;
+  font-size: var(--ishare-font-size-lg) !important;
+}
+
+.viewer-container .psv-overlay-text {
+  font-size: var(--ishare-font-size-sm) !important;
+}
+
+/* PSV navbar — horizontal glass pill (bottom center) */
+.viewer-container .psv-navbar {
+  top: auto;
+  left: 50%;
+  right: auto;
+  bottom: 24px;
+  width: auto;
+  height: auto;
+  transform: translateX(-50%) translateY(0);
+  flex-direction: row;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.52);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  border: none;
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+  font-family: var(--ishare-font);
+  align-items: center;
+  gap: 0;
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.2s,
+    box-shadow 0.2s,
+    opacity 0.22s ease,
+    visibility 0s linear 0s;
+}
+
+.viewer-container:not(.viewer-container--controls-hidden) .psv-navbar {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Hidden until toggled from top-right tune button */
+.viewer-container.viewer-container--controls-hidden .psv-navbar {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(calc(100% + 28px));
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.2s,
+    box-shadow 0.2s,
+    opacity 0.22s ease,
+    visibility 0s linear 0.28s;
+}
+
+.viewer-container .psv-navbar--open {
+  top: auto;
+  left: 50%;
+  right: auto;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(0);
+}
+
+.viewer-container .psv-navbar:hover {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 12px 32px rgba(15, 23, 42, 0.16),
+    0 5px 14px rgba(15, 23, 42, 0.09);
+}
+
+/* Icon buttons — keep zoom slider separate */
+.viewer-container {
+  --psv-nav-icon-size: 16px;
+}
+
+.viewer-container .psv-button:not(.psv-zoom-range) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  box-sizing: border-box;
+  color: var(--ishare-text-muted);
+  background: transparent;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+}
+
+.viewer-container .psv-button:not(.psv-zoom-range) .psv-button-svg {
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+}
+
+.viewer-container .psv-zoom-range.psv-button {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 30px;
+  margin: 0 2px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.viewer-container .psv-zoom-range-line {
+  position: relative;
+  width: 56px;
+  height: 2px;
+  margin: 0 auto;
+  background: rgba(100, 116, 139, 0.35);
+  pointer-events: auto;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.viewer-container .psv-zoom-range-handle {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  border-radius: 50%;
+  background: var(--ishare-text-muted);
+  transform: translate(-50%, -50%);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.viewer-container .psv-zoom-range:not(.psv-button--disabled):hover .psv-zoom-range-handle {
+  transform: translate(-50%, -50%) scale(1.15);
+  background: var(--ishare-primary);
+}
+
+/* Control groups: zoom | move | fullscreen (horizontal) */
+.viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
+  margin-left: 10px;
+}
+
+.viewer-container .psv-navbar .psv-move-button+.psv-fullscreen-button {
+  margin-left: 10px;
+}
+
+.viewer-container .psv-move-button+.psv-move-button {
+  margin-left: -4px;
+}
+
+.viewer-container .psv-button:not(.psv-zoom-range):hover {
+  color: var(--ishare-text);
+  background: rgba(0, 123, 139, 0.08);
+}
+
+.viewer-container .psv-button--active {
+  background: rgba(0, 123, 139, 0.12);
+  color: var(--ishare-primary);
+}
+
+/* Move arrows — thin stroke chevrons */
+.viewer-container .psv-move-button .psv-button-svg {
+  display: none;
+}
+
+.viewer-container .psv-move-button::before {
+  content: '';
+  flex-shrink: 0;
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 6l6 6-6 6'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.viewer-container .psv-move-button[title='Move left']::before {
+  transform: rotate(180deg);
+}
+
+.viewer-container .psv-move-button[title='Move up']::before {
+  transform: rotate(-90deg);
+}
+
+.viewer-container .psv-move-button[title='Move down']::before {
+  transform: rotate(90deg);
+}
+
+/* PSV navbar sits at bottom center — ensure overlays clear it */
+.viewer-area .pnlm-container {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+
+  .viewer-container .psv-navbar,
+  .viewer-container .psv-navbar--open {
+    bottom: 16px;
+    padding: 6px 12px;
+  }
+}

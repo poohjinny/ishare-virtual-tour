@@ -1,0 +1,43 @@
+:root {
+  --ishare-primary: #007b8b;
+  --ishare-primary-dark: #006270;
+  --ishare-primary-light: #1a9aab;
+  --ishare-accent: #e8a838;
+  --ishare-bg: #f8fafc;
+  --ishare-surface: #ffffff;
+  --ishare-surface-elevated: #f1f5f9;
+  --ishare-border: rgba(15, 23, 42, 0.12);
+  --ishare-text: #0f172a;
+  --ishare-text-body: #1e293b;
+  --ishare-text-muted: #64748b;
+  --ishare-danger: #ef4444;
+  --ishare-radius: 8px;
+  --ishare-radius-md: 10px;
+  --ishare-radius-lg: 12px;
+  --ishare-radius-xl: 20px;
+  --ishare-shadow: 0 4px 20px rgba(15, 23, 42, 0.1);
+  /* Body/UI — matches Google Maps (.gm-style uses Roboto) */
+  --ishare-font: 'Roboto', Arial, sans-serif;
+  /* Headings / product name (iShare Guide, etc.) */
+  --ishare-font-display: 'Google Sans', system-ui, sans-serif;
+  /* Type scale — html sets base to 16px; rem tokens below */
+  --ishare-font-size-base: 16px;
+  --ishare-font-size-2xs: 0.625rem;
+  /* 10px */
+  --ishare-font-size-xs: 0.6875rem;
+  /* 11px */
+  --ishare-font-size-sm: 0.75rem;
+  /* 12px */
+  --ishare-font-size-md: 0.8125rem;
+  /* 13px — chat bubbles, compact UI */
+  --ishare-font-size-lg: 0.875rem;
+  /* 14px */
+  --ishare-font-size-xl: 1.0625rem;
+  /* 17px — panel titles */
+  --ishare-font-size-2xl: 1.125rem;
+  /* 18px */
+  --ishare-font-size-3xl: 1.25rem;
+  /* 20px */
+  --ishare-font-size-icon: 1.625rem;
+  /* 26px — icon-only controls */
+}
