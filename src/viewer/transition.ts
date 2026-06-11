@@ -59,14 +59,7 @@ async function fadeToScene(
   }
 }
 
-async function waitForPanoramaReady(viewer: Viewer): Promise<void> {
-  await new Promise<void>((resolve) => {
-    const onLoaded = () => {
-      viewer.removeEventListener('panorama-loaded', onLoaded);
-      resolve();
-    };
-    viewer.addEventListener('panorama-loaded', onLoaded);
-  });
+async function waitFrame(): Promise<void> {
   await new Promise<void>((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
   });
@@ -180,7 +173,7 @@ async function navigateDeeper(
   }
 
   await viewer.stopAnimation();
-  await waitForPanoramaReady(viewer);
+  await waitFrame();
 
   logTransition('deeper:arrive-wide', {
     yaw: targetView.yaw,
@@ -242,7 +235,7 @@ async function navigateShallower(
   }
 
   await viewer.stopAnimation();
-  await waitForPanoramaReady(viewer);
+  await waitFrame();
 
   if (ingress) {
     logTransition('shallower:ingress', ingress.position);
