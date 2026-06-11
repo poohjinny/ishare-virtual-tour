@@ -1,4 +1,5 @@
 import type { Tour, TourKnowledge } from '../types/tour';
+import { withBaseUrl } from '../utils/assetUrl';
 import kensargenthouseTour from '../../tours/kensargenthouse.json';
 import kensargenthouseKnowledge from '../../tours/kensargenthouse-knowledge.json';
 
@@ -9,6 +10,25 @@ const TOURS: Record<string, Tour> = {
 const KNOWLEDGE: Record<string, TourKnowledge> = {
   kensargenthouse: kensargenthouseKnowledge as TourKnowledge,
 };
+
+function normalizeTourAssets(tour: Tour): Tour {
+  return {
+    ...tour,
+    branding:
+      tour.branding ?
+        {
+          ...tour.branding,
+          logo: withBaseUrl(tour.branding.logo),
+        }
+      : undefined,
+    scenes: Object.fromEntries(
+      Object.entries(tour.scenes).map(([id, scene]) => [
+        id,
+        { ...scene, panorama: withBaseUrl(scene.panorama) },
+      ]),
+    ),
+  };
+}
 
 export const DEFAULT_TOUR_ID = 'kensargenthouse';
 
@@ -23,7 +43,7 @@ export function loadTour(tourId = DEFAULT_TOUR_ID): Tour {
       `Unknown tour: ${tourId}. Available: ${listTourIds().join(', ')}`,
     );
   }
-  return tour;
+  return normalizeTourAssets(tour);
 }
 
 export function loadKnowledge(tourId = DEFAULT_TOUR_ID): TourKnowledge {
