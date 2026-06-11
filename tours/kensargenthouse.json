@@ -1,0 +1,96 @@
+{
+  "id": "kensargenthouse",
+  "url": "https://kensargenthouse.ca/",
+  "title": "Ken Sargent House Virtual Tour",
+  "branding": {
+    "logo": "/assets/kensargenthouse/brand/logo_ken-sargent-house.png",
+    "logoAlt": "Ken Sargent House — Founding Partner Rotary Clubs of Grande Prairie"
+  },
+  "firstScene": "overview",
+  "defaultTransition": { "speed": "500ms", "effect": "fade" },
+  "scenes": {
+    "overview": {
+      "id": "overview",
+      "title": "Overview",
+      "panorama": "/assets/kensargenthouse/panoramas/overview.jpg",
+      "defaultView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 },
+      "hotspots": [
+        {
+          "id": "info-overview",
+          "type": "info",
+          "position": { "yaw": 0, "pitch": -35 },
+          "popup": {
+            "title": "Ken Sargent House",
+            "body": "Welcome to the virtual tour of Ken Sargent House. A home away from home for patients and families accessing healthcare in Grande Prairie. Explore the campus from above, then visit the main entrance and reception."
+          }
+        },
+        {
+          "id": "nav-to-entrance",
+          "type": "nav",
+          "label": "Main Entrance",
+          "position": { "yaw": 117.3, "pitch": -62.5 },
+          "targetScene": "main-entrance",
+          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+        }
+      ]
+    },
+    "main-entrance": {
+      "id": "main-entrance",
+      "title": "Main Entrance",
+      "panorama": "/assets/kensargenthouse/panoramas/main-entrance.jpg",
+      "defaultView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 },
+      "hotspots": [
+        {
+          "id": "nav-back-overview",
+          "type": "nav",
+          "label": "Overview",
+          "position": { "yaw": 180, "pitch": -10 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 }
+        },
+        {
+          "id": "info-welcome",
+          "type": "info",
+          "position": { "yaw": 5, "pitch": -5 },
+          "popup": {
+            "title": "Welcome",
+            "body": "Welcome to Ken Sargent House. The main entrance features accessible ramp access on the left and glass doors leading to reception."
+          }
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "label": "Reception",
+          "position": { "yaw": 0, "pitch": -8 },
+          "targetScene": "reception",
+          "targetView": { "yaw": 90, "pitch": 0, "zoom": 0 }
+        }
+      ]
+    },
+    "reception": {
+      "id": "reception",
+      "title": "Reception",
+      "panorama": "/assets/kensargenthouse/panoramas/reception.jpg",
+      "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
+      "hotspots": [
+        {
+          "id": "nav-back-entrance",
+          "type": "nav",
+          "label": "Main Entrance",
+          "position": { "yaw": 170, "pitch": -5 },
+          "targetScene": "main-entrance",
+          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+        },
+        {
+          "id": "info-reception",
+          "type": "info",
+          "position": { "yaw": 95, "pitch": -5 },
+          "popup": {
+            "title": "Reception Desk",
+            "body": "Check in at the front desk. Our staff are available to assist with directions, appointments, and general enquiries."
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "id": "kensargenthouse",
+  "url": "https://kensargenthouse.ca/",
+  "global": {
+    "facilityName": "Ken Sargent House",
+    "summary": "Ken Sargent House is a home away from home for patients receiving treatment at the Grande Prairie Regional Hospital and their families — promoting excellence in healthcare through supported accommodations."
+  },
+  "scenes": {
+    "overview": {
+      "title": "Overview",
+      "description": "Aerial view of the entire Ken Sargent House campus and building layout.",
+      "facts": [
+        "The building has a main entrance on the front wooden deck.",
+        "Parking is available on the right side of the campus.",
+        "The facility is surrounded by green fields and landscaped grounds.",
+        "The house is within walking distance of the Grande Prairie Regional Hospital."
+      ],
+      "faqs": [
+        {
+          "q": "What is this building?",
+          "a": "This is Ken Sargent House — a home away from home for patients and families accessing healthcare in Grande Prairie. Learn more at kensargenthouse.ca."
+        },
+        {
+          "q": "Where is the main entrance?",
+          "a": "The main entrance is on the front of the building, accessible via the wooden deck. Click the Main Entrance hotspot to go there."
+        },
+        {
+          "q": "Is there parking?",
+          "a": "Yes. Parking is located on the right side of the campus, visible from this overview."
+        },
+        {
+          "q": "How close is the hospital?",
+          "a": "Ken Sargent House is within walking distance of the Grande Prairie Regional Hospital — a short walk for patients and families."
+        }
+      ],
+      "suggestedQuestions": [
+        "What is this building?",
+        "Where is the main entrance?",
+        "Is there parking?",
+        "How close is the hospital?"
+      ]
+    },
+    "main-entrance": {
+      "title": "Main Entrance",
+      "description": "Exterior ground-level view of the main entrance with accessible ramp and welcome signage.",
+      "facts": [
+        "ADA-accessible ramp is on the left side of the stairs.",
+        "Welcome signage is illuminated above the glass doors.",
+        "The entrance leads directly to the reception lobby."
+      ],
+      "faqs": [
+        {
+          "q": "Is the entrance wheelchair accessible?",
+          "a": "Yes. A concrete ramp with white railings is located on the left side of the main stairs, suitable for wheelchair access."
+        },
+        {
+          "q": "How do I get to reception?",
+          "a": "Enter through the glass doors ahead. Click the Reception hotspot or use the scene panel to navigate to the reception lobby."
+        },
+        {
+          "q": "Where can I park?",
+          "a": "Visitor parking is in the lot visible from the entrance area. Return to Overview for a full campus view of parking locations."
+        }
+      ],
+      "suggestedQuestions": [
+        "Is the entrance wheelchair accessible?",
+        "How do I get to reception?",
+        "Where can I park?"
+      ]
+    },
+    "reception": {
+      "title": "Reception",
+      "description": "Interior lobby with reception desk, lounge area, and access to dining hall.",
+      "facts": [
+        "Check in at the front desk with the WELCOME sign.",
+        "Dining Hall is to the left past the elevator.",
+        "A comfortable lounge area is available for visitors."
+      ],
+      "faqs": [
+        {
+          "q": "Where do I check in?",
+          "a": "Check in at the reception desk on your right, marked with the WELCOME sign. Staff can assist with appointments and directions."
+        },
+        {
+          "q": "Where is the dining hall?",
+          "a": "The Dining Hall is located to the left of the lobby, past the elevator area. Signage is visible from the reception area."
+        },
+        {
+          "q": "How do I go back outside?",
+          "a": "Use the Main Entrance hotspot or the scene panel to return to the exterior entrance view."
+        }
+      ],
+      "suggestedQuestions": [
+        "Where do I check in?",
+        "Where is the dining hall?",
+        "How do I go back outside?"
+      ]
+    }
+  }
+}
