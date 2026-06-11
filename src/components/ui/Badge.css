@@ -1,0 +1,82 @@
+/* Reusable pill badge — outline (bordered) or soft (tinted fill) */
+.ishare-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--ishare-font);
+  font-size: var(--ishare-font-size-2xs);
+  font-weight: 500;
+  line-height: 1.2;
+  border-radius: 999px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.ishare-badge--outline {
+  color: var(--ishare-text-muted);
+  background: transparent;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  padding: 3px 8px;
+}
+
+.ishare-badge--soft {
+  border: none;
+  padding: 2px 6px;
+}
+
+.ishare-badge--tone-primary {
+  color: var(--ishare-primary);
+}
+
+.ishare-badge--soft.ishare-badge--tone-primary {
+  font-weight: 600;
+  background: rgba(0, 123, 139, 0.1);
+}
+
+.ishare-badge--tone-accent {
+  color: var(--ishare-accent);
+}
+
+.ishare-badge--soft.ishare-badge--tone-accent {
+  font-weight: 600;
+  background: rgba(232, 168, 56, 0.12);
+}
+
+.ishare-badge--tone-muted {
+  color: var(--ishare-text-muted);
+}
+
+.ishare-badge--soft.ishare-badge--tone-muted {
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.ishare-badge--uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ishare-badge__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ishare-badge--outline .ishare-badge__dot {
+  background: var(--ishare-accent);
+  opacity: 0.85;
+}
+
+.ishare-badge--tone-primary .ishare-badge__dot {
+  background: var(--ishare-primary);
+}
+
+.ishare-badge--tone-accent .ishare-badge__dot {
+  background: var(--ishare-accent);
+  opacity: 0.85;
+}
+
+.ishare-badge--tone-muted .ishare-badge__dot {
+  background: var(--ishare-text-muted);
+  opacity: 0.65;
+}
