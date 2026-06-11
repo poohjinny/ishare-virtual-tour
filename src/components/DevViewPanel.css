@@ -1,0 +1,95 @@
+.dev-panel {
+  position: absolute;
+  bottom: 56px;
+  left: 16px;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.85);
+  color: #e2e8f0;
+  font-family: monospace;
+  font-size: var(--ishare-font-size-xs);
+  padding: 12px 14px;
+  border-radius: var(--ishare-radius);
+  border: 1px solid rgba(0, 255, 128, 0.35);
+  max-width: 360px;
+  pointer-events: auto;
+}
+
+.dev-panel__title {
+  color: #4ade80;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dev-panel__scene-id {
+  color: #86efac;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.dev-panel__row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.dev-panel__label {
+  color: #94a3b8;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+
+.dev-panel__value {
+  color: #f0fdf4;
+  word-break: break-all;
+}
+
+.dev-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.dev-panel__btn {
+  background: #166534;
+  border: 1px solid #4ade80;
+  color: #f0fdf4;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: var(--ishare-font-size-2xs);
+  cursor: pointer;
+}
+
+.dev-panel__btn:hover {
+  background: #15803d;
+}
+
+.dev-panel__btn--secondary {
+  background: #1e293b;
+  border-color: #64748b;
+}
+
+.dev-panel__btn--secondary:hover:not(:disabled) {
+  background: #334155;
+}
+
+.dev-panel__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dev-panel__hint {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: var(--ishare-font-size-2xs);
+  line-height: 1.4;
+}
+
+.dev-panel__hint code {
+  color: #86efac;
+}
