@@ -1,0 +1,116 @@
+{
+  "id": "gphospitalfoundation",
+  "url": "https://gphospitalfoundation.ca",
+  "title": "Ken Sargent House Virtual Tour",
+  "organization": {
+    "name": "Grande Prairie Regional Hospital Foundation",
+    "website": "https://gphospitalfoundation.ca",
+    "email": "info@gphospitalfoundation.ca",
+    "phone": "825-412-4130",
+    "phoneLabel": "Telephone",
+    "address": "11205 – 110 Street, Grande Prairie, AB T8V 4B1"
+  },
+  "branding": {
+    "logo": "/assets/gphospitalfoundation/brand/logo.png",
+    "logoAlt": "Grande Prairie Regional Hospital Foundation",
+    "primaryColor": "#cb007c"
+  },
+  "firstScene": "overview",
+  "defaultTransition": { "speed": "500ms", "effect": "fade" },
+  "scenes": {
+    "overview": {
+      "id": "overview",
+      "title": "Overview",
+      "panorama": "/assets/gphospitalfoundation/panoramas/overview.jpg",
+      "defaultView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 },
+      "hotspots": [
+        {
+          "id": "nav-to-entrance",
+          "type": "nav",
+          "label": "Main Entrance",
+          "position": { "yaw": 117.3, "pitch": -62.5 },
+          "targetScene": "main-entrance",
+          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+        }
+      ]
+    },
+    "main-entrance": {
+      "id": "main-entrance",
+      "title": "Main Entrance",
+      "panorama": "/assets/gphospitalfoundation/panoramas/main-entrance.jpg",
+      "defaultView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 },
+      "hotspots": [
+        {
+          "id": "nav-back-overview",
+          "type": "nav",
+          "label": "Overview",
+          "position": { "yaw": 180, "pitch": -10 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 }
+        },
+        {
+          "id": "info-welcome",
+          "type": "info",
+          "position": { "yaw": 5, "pitch": -5 },
+          "popup": {
+            "title": "Main Entrance",
+            "namingOpportunity": {
+              "name": "Main Entrance Naming Opportunity",
+              "price": "$200,000",
+              "status": "sold"
+            },
+            "body": "Welcome to Ken Sargent House. The main entrance features accessible ramp access on the left and glass doors leading to reception.",
+            "cta": {
+              "product": "giftabulator",
+              "url": "https://gphospitalfoundation.giftabulatornow.com/give-now?locale=en-CA"
+            }
+          }
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "label": "Reception",
+          "position": { "yaw": 105.9, "pitch": 3.8 },
+          "targetScene": "reception",
+          "targetView": { "yaw": 90, "pitch": 0, "zoom": 0 }
+        }
+      ]
+    },
+    "reception": {
+      "id": "reception",
+      "title": "Reception",
+      "panorama": "/assets/gphospitalfoundation/panoramas/reception.jpg",
+      "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
+      "hotspots": [
+        {
+          "id": "nav-back-entrance",
+          "type": "nav",
+          "label": "Main Entrance",
+          "position": { "yaw": 170, "pitch": -5 },
+          "targetScene": "main-entrance",
+          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+        },
+        {
+          "id": "info-reception",
+          "type": "info",
+          "position": { "yaw": 91.1, "pitch": -10.5 },
+          "popup": {
+            "display": "anchored",
+            "title": "Reception Desk",
+            "namingOpportunity": {
+              "name": "Reception Desk Naming Opportunity",
+              "price": "$150,000",
+              "status": "on_sale"
+            },
+            "body": "The reception at Ken Sargent House offers a warm and welcoming atmosphere for all guests. As the first point of contact, our reception team is dedicated to providing excellent customer service, ensuring that every visitor feels comfortable and well-informed.\n\nThe reception area is designed with a blend of modern comfort and classic charm, featuring stylish seating, soft lighting, and a cozy ambiance. Whether you're checking in, seeking assistance, or just looking for information, our friendly staff is always ready to help.",
+            "videoUrl": "https://www.youtube.com/watch?v=sUe_TSb4Ffo",
+            "cta": {
+              "product": "giftabulator",
+              "url": "https://gphospitalfoundation.giftabulatornow.com/give-now?locale=en-CA&view=result&zoom=100&calc=eyJwcm92aW5jZSI6IkFCIiwiaW5jb21lIjoiMTUwMDAwIiwiYXNzZXQiOiJzdG9jayIsImFzc2V0VmFsdWUiOiIxMDAwMDAiLCJhc3NldENvc3QiOiI0NTAwMCIsImRvbmF0aW9uIjoiMTUwMDAwIiwicGxlZGdlUGVyaW9kIjoiNSJ9"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

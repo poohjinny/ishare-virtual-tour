@@ -1,6 +1,6 @@
 /**
  * Derives a client id from a website URL — hostname without www and without TLD.
- * e.g. https://kensargenthouse.ca/ → "kensargenthouse"
+ * e.g. https://gphospitalfoundation.ca/ → "gphospitalfoundation"
  */
 export function clientIdFromUrl(websiteUrl: string): string {
   const hostname = new URL(websiteUrl).hostname

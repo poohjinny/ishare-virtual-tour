@@ -1,8 +1,9 @@
 # iShare Virtual Tour
 
-In-house 360° virtual tour MVP for **Ken Sargent House**, built to demonstrate a
-SeekBeak replacement with improved navigation, smooth scene transitions, styled
-hotspots, and a scene-aware AI assistant.
+In-house 360° virtual tour MVP for **Ken Sargent House** (Grande Prairie
+Regional Hospital Foundation) and **Cancer Research Society**, built to
+demonstrate a SeekBeak replacement with improved navigation, smooth scene
+transitions, styled hotspots, and a scene-aware AI assistant.
 
 ## Quick Start
 
@@ -34,13 +35,14 @@ to move between scenes.
 Path-based URLs (scene changes update the address bar; browser back/forward
 works).
 
-| Path                         | Description                          |
-| ---------------------------- | ------------------------------------ |
-| `/`                          | Default tour, overview (first scene) |
-| `/main-entrance`             | Default tour, main entrance          |
-| `/reception`                 | Default tour, reception              |
-| `/kensargenthouse`           | Explicit tour id, first scene        |
-| `/kensargenthouse/reception` | Explicit tour + scene                |
+| Path                              | Description                          |
+| --------------------------------- | ------------------------------------ |
+| `/`                               | Default tour, overview (first scene) |
+| `/main-entrance`                  | Default tour, main entrance          |
+| `/reception`                      | Default tour, reception              |
+| `/gphospitalfoundation`           | GPRHF tour, first scene              |
+| `/gphospitalfoundation/reception` | GPRHF tour + scene                   |
+| `/cancerresearchsociety`          | Cancer Research Society, first scene |
 
 Legacy query links (`?tour=` / `?scene=`) redirect to the paths above.
 
@@ -111,14 +113,14 @@ http://localhost:5173/?dev=1
 | **Landing view** (`defaultView`) | Pan/zoom to the desired start angle → **Copy landing JSON (L)** |
 | **Hotspot** (`position`)         | Click the panorama → **Copy hotspot JSON**                      |
 
-Paste into [`tours/kensargenthouse.json`](tours/kensargenthouse.json) under the
-relevant scene.
+Paste into [`tours/gphospitalfoundation.json`](tours/gphospitalfoundation.json)
+under the relevant scene.
 
 ## AI Assistant
 
 The bottom-right **AI** button opens a chat panel that knows your current scene.
 MVP uses mock responses from
-[`tours/kensargenthouse-knowledge.json`](tours/kensargenthouse-knowledge.json).
+[`tours/gphospitalfoundation-knowledge.json`](tours/gphospitalfoundation-knowledge.json).
 Replace `mockAssistant.ts` with an API call for production LLM integration.
 
 ## Tech Stack

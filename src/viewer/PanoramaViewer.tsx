@@ -11,7 +11,13 @@ import type { ClickCoords } from '../utils/devHotspotLogger';
 import { logHotspotClick, toViewPosition } from '../utils/devHotspotLogger';
 import { fromPsvZoom, toPsvZoom } from '../utils/psvZoom';
 import { hotspotToMarkerConfig } from './buildMarkers';
-import { navigateToScene } from './transition';
+import {
+  closeAnchoredInfoPanel,
+  isAnchoredPopup,
+  toggleAnchoredInfoPanel,
+} from './infoPanelMarker';
+import { setActiveInfoHotspot } from './infoHotspotActive';
+import { navigateToScene, preloadOtherScenes } from './transition';
 import { patchZoomSliderSmoothZoom } from './patchZoomSlider';
 import {
   LANDING_ZOOM_OUT,
@@ -42,6 +48,7 @@ export interface PanoramaViewerHandle {
     fromSceneId?: string,
   ) => Promise<boolean>;
   retryScene: (sceneId?: string) => Promise<boolean>;
+  clearActiveInfoHotspot: () => void;
 }
 
 interface PanoramaViewerProps {
@@ -55,6 +62,8 @@ interface PanoramaViewerProps {
   suppressKeyboard?: boolean;
   onSceneChange: (sceneId: string) => void;
   onInfoHotspot: (popup: PopupContent) => void;
+  /** Scene nav from panorama hotspots — same path as location menu (TourPage handleNavigate). */
+  onNavigateToScene?: (sceneId: string, targetView?: ViewPosition) => void;
   onTransitionStart: () => void;
   onTransitionEnd: () => void;
   onDevClick?: (coords: ClickCoords) => void;
@@ -105,6 +114,7 @@ export const PanoramaViewer = forwardRef<
     suppressKeyboard = false,
     onSceneChange,
     onInfoHotspot,
+    onNavigateToScene,
     onTransitionStart,
     onTransitionEnd,
     onDevClick,
@@ -120,12 +130,15 @@ export const PanoramaViewer = forwardRef<
   const containerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Viewer | null>(null);
   const virtualTourRef = useRef<VirtualTourPlugin | null>(null);
+  const markersRef = useRef<MarkersPlugin | null>(null);
   const pendingSceneIdRef = useRef<string | null>(null);
   const deferredErrorRef = useRef<PanoramaLoadErrorInfo | null>(null);
   const transitioningRef = useRef(false);
   const disabledRef = useRef(disabled);
   const suppressKeyboardRef = useLatestRef(suppressKeyboard);
   const tourRef = useLatestRef(tour);
+  /** Fixed at mount — URL scene changes must not recreate the PSV viewer (causes black flash). */
+  const initialSceneIdAtMount = useRef(initialSceneId);
 
   const syncKeyboardControl = (viewer: Viewer) => {
     if (
@@ -143,6 +156,7 @@ export const PanoramaViewer = forwardRef<
 
   const onSceneChangeRef = useLatestRef(onSceneChange);
   const onInfoHotspotRef = useLatestRef(onInfoHotspot);
+  const onNavigateToSceneRef = useLatestRef(onNavigateToScene);
   const onTransitionStartRef = useLatestRef(onTransitionStart);
   const onTransitionEndRef = useLatestRef(onTransitionEnd);
   const onDevClickRef = useLatestRef(onDevClick);
@@ -192,12 +206,7 @@ export const PanoramaViewer = forwardRef<
   }, [suppressKeyboard, disabled]);
 
   useImperativeHandle(ref, () => ({
-    navigateToScene: async (
-      sceneId,
-      targetView,
-      hotspotPosition,
-      fromSceneId,
-    ) => {
+    navigateToScene: async (sceneId, targetView) => {
       const viewer = viewerRef.current;
       const virtualTour = virtualTourRef.current;
       if (
@@ -209,28 +218,20 @@ export const PanoramaViewer = forwardRef<
         return false;
       }
 
-      const originSceneId =
-        fromSceneId ??
-        virtualTour.getCurrentNode()?.id ??
-        tourRef.current.firstScene;
-
       pendingSceneIdRef.current = sceneId;
       deferredErrorRef.current = null;
       transitioningRef.current = true;
+      onLoadStartRef.current?.();
       onTransitionStartRef.current();
 
       let navOk = false;
       try {
-        const scene = tourRef.current.scenes[sceneId];
-        const view = targetView ?? scene?.defaultView;
         navOk = await navigateToScene(
           viewer,
           virtualTour,
-          sceneId,
-          view,
-          hotspotPosition,
           tourRef.current,
-          originSceneId,
+          sceneId,
+          targetView,
         );
         if (navOk) {
           onPanoramaRecoveredRef.current?.();
@@ -269,6 +270,9 @@ export const PanoramaViewer = forwardRef<
         reportPanoramaErrorRef.current({ sceneId: targetSceneId });
         return false;
       }
+    },
+    clearActiveInfoHotspot: () => {
+      if (markersRef.current) setActiveInfoHotspot(markersRef.current, null);
     },
   }));
 
@@ -330,11 +334,15 @@ export const PanoramaViewer = forwardRef<
 
     reportPanoramaErrorRef.current = reportPanoramaError;
 
+    const tourData = tourRef.current;
+    const startSceneId = initialSceneIdAtMount.current;
+
     const firstScene =
-      tour.scenes[initialSceneId] ?? tour.scenes[tour.firstScene];
+      tourData.scenes[startSceneId] ?? tourData.scenes[tourData.firstScene];
     const initialView = firstScene.defaultView;
     const randomStart = devMode ? initialView : pickRandomLandingView();
     let landingStarted = false;
+    let landingSuppressLoadProgress = false;
     let viewerReady = false;
     let initialLoadNotified = false;
 
@@ -349,6 +357,8 @@ export const PanoramaViewer = forwardRef<
       minFov: MIN_FOV,
       maxFov: MAX_FOV,
       moveInertia: MOVE_INERTIA,
+      canvasBackground: '#000000',
+      rendererParameters: { alpha: false, antialias: true },
       navbar: ['zoom', 'move', 'fullscreen'],
       keyboard: 'always',
       keyboardActions: {
@@ -368,14 +378,10 @@ export const PanoramaViewer = forwardRef<
           VirtualTourPlugin,
           {
             renderMode: '3d',
+            // VT defaults: effect fade, speed 20rpm, rotation true — only hide loader
             transitionOptions: (_node: unknown, fromNode?: unknown) =>
               fromNode ?
-                {
-                  showLoader: false,
-                  speed: '400ms',
-                  effect: 'fade' as const,
-                  rotation: false,
-                }
+                { showLoader: false, effect: 'fade' as const, rotation: false }
               : {
                   showLoader: false,
                   speed: '0ms',
@@ -385,8 +391,8 @@ export const PanoramaViewer = forwardRef<
                   zoomTo:
                     devMode ? toPsvZoom(initialView.zoom) : LANDING_ZOOM_OUT,
                 },
-            nodes: buildNodes(tour),
-            startNodeId: initialSceneId,
+            nodes: buildNodes(tourData),
+            startNodeId: startSceneId,
           },
         ],
       ],
@@ -404,11 +410,13 @@ export const PanoramaViewer = forwardRef<
       landingStarted = true;
 
       void (async () => {
+        landingSuppressLoadProgress = true;
         transitioningRef.current = true;
         onTransitionStartRef.current();
         try {
           await playLandingTransition(viewer, randomStart, initialView);
         } finally {
+          landingSuppressLoadProgress = false;
           transitioningRef.current = false;
           onTransitionEndRef.current();
         }
@@ -422,13 +430,16 @@ export const PanoramaViewer = forwardRef<
     document.addEventListener('focusout', onFocusChange);
     syncKeyboardControl(viewer);
 
-    const markers = viewer.getPlugin(MarkersPlugin);
+    const markers = viewer.getPlugin<MarkersPlugin>(MarkersPlugin)!;
+    markersRef.current = markers;
 
     viewer.addEventListener('panorama-load', () => {
+      if (landingSuppressLoadProgress) return;
       onLoadStartRef.current?.();
     });
 
     viewer.addEventListener('load-progress', (e) => {
+      if (landingSuppressLoadProgress) return;
       onLoadProgressRef.current?.(e.progress);
     });
 
@@ -438,25 +449,28 @@ export const PanoramaViewer = forwardRef<
         sceneId:
           pendingSceneIdRef.current ??
           sceneIdFromPanorama(String(e.panorama)) ??
-          initialSceneId,
+          startSceneId,
       });
     });
 
     viewer.addEventListener('show-overlay', (e) => {
       if (e.overlayId !== 'error') return;
       reportPanoramaError({
-        sceneId: pendingSceneIdRef.current ?? initialSceneId,
+        sceneId: pendingSceneIdRef.current ?? startSceneId,
       });
     });
 
     viewer.addEventListener('panorama-loaded', () => {
       pendingSceneIdRef.current = null;
 
-      if (initialLoadNotified) {
-        onLoadCompleteRef.current?.();
+      if (!initialLoadNotified) {
+        notifyInitialLoadComplete();
+        const currentId = virtualTour.getCurrentNode()?.id ?? startSceneId;
+        preloadOtherScenes(viewer, virtualTour, tourRef.current, currentId);
         return;
       }
-      notifyInitialLoadComplete();
+
+      onLoadCompleteRef.current?.();
     });
 
     viewer.addEventListener('ready', () => {
@@ -465,52 +479,87 @@ export const PanoramaViewer = forwardRef<
     });
 
     virtualTour.addEventListener('node-changed', (e) => {
+      closeAnchoredInfoPanel(markers, false);
       onSceneChangeRef.current(e.node.id);
       deferredErrorRef.current = null;
       onPanoramaRecoveredRef.current?.();
+      preloadOtherScenes(viewer, virtualTour, tourRef.current, e.node.id);
     });
 
-    const handleMarkerSelect = async (hotspot: Hotspot) => {
+    const handlePanelPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const panel = target.closest('[data-info-panel="true"]');
+      if (!panel) return;
+
+      event.stopPropagation();
+
+      if (target.closest('[data-info-panel-close]')) {
+        event.preventDefault();
+        closeAnchoredInfoPanel(markers);
+      }
+    };
+
+    const handlePanelWheel = (event: WheelEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (!target.closest('[data-info-panel="true"]')) return;
+      event.stopPropagation();
+    };
+
+    const handlePanelTouchMove = (event: TouchEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const body = target.closest('.tour-glass-panel__body');
+      if (!body) return;
+      if (body.scrollHeight > body.clientHeight + 1) {
+        event.stopPropagation();
+      }
+    };
+
+    containerRef.current.addEventListener(
+      'pointerdown',
+      handlePanelPointerDown,
+      true,
+    );
+    containerRef.current.addEventListener('wheel', handlePanelWheel, {
+      capture: true,
+      passive: true,
+    });
+    containerRef.current.addEventListener('touchmove', handlePanelTouchMove, {
+      capture: true,
+      passive: true,
+    });
+
+    const handleMarkerSelect = (hotspot: Hotspot) => {
       if (transitioningRef.current || disabledRef.current) return;
 
       if (hotspot.type === 'info' && hotspot.popup) {
+        if (isAnchoredPopup(hotspot.popup)) {
+          toggleAnchoredInfoPanel(markers, hotspot);
+          return;
+        }
+        closeAnchoredInfoPanel(markers, false);
+        setActiveInfoHotspot(markers, hotspot.id);
         onInfoHotspotRef.current(hotspot.popup);
         return;
       }
 
-      if (hotspot.type === 'nav' && hotspot.targetScene) {
-        pendingSceneIdRef.current = hotspot.targetScene;
-        deferredErrorRef.current = null;
-        transitioningRef.current = true;
-        onTransitionStartRef.current();
+      closeAnchoredInfoPanel(markers, false);
+      setActiveInfoHotspot(markers, null);
 
-        let navOk = false;
-        try {
-          const currentTour = tourRef.current;
-          const targetScene = currentTour.scenes[hotspot.targetScene];
-          const targetView = hotspot.targetView ?? targetScene?.defaultView;
-          const fromSceneId = virtualTour.getCurrentNode()?.id;
-          navOk = await navigateToScene(
-            viewer,
-            virtualTour,
-            hotspot.targetScene,
-            targetView,
-            hotspot.position,
-            currentTour,
-            fromSceneId,
-          );
-          if (navOk) {
-            onPanoramaRecoveredRef.current?.();
-          }
-        } finally {
-          endNavigation(navOk);
-        }
+      if (hotspot.type === 'nav' && hotspot.targetScene) {
+        const targetView =
+          hotspot.targetView ??
+          tourRef.current.scenes[hotspot.targetScene]?.defaultView;
+        onNavigateToSceneRef.current?.(hotspot.targetScene, targetView);
       }
     };
 
     markers.addEventListener('select-marker', (e) => {
       const hotspot = e.marker.data?.hotspot as Hotspot | undefined;
-      if (hotspot) void handleMarkerSelect(hotspot);
+      if (hotspot) handleMarkerSelect(hotspot);
     });
 
     let devRaf = 0;
@@ -549,13 +598,29 @@ export const PanoramaViewer = forwardRef<
       reportPanoramaErrorRef.current = () => {};
       tryStartLandingRef.current = null;
       cancelAnimationFrame(devRaf);
+      containerRef.current?.removeEventListener(
+        'pointerdown',
+        handlePanelPointerDown,
+        true,
+      );
+      containerRef.current?.removeEventListener(
+        'wheel',
+        handlePanelWheel,
+        true,
+      );
+      containerRef.current?.removeEventListener(
+        'touchmove',
+        handlePanelTouchMove,
+        true,
+      );
       document.removeEventListener('focusin', onFocusChange);
       document.removeEventListener('focusout', onFocusChange);
       viewer.destroy();
       viewerRef.current = null;
       virtualTourRef.current = null;
+      markersRef.current = null;
     };
-  }, [tour, initialSceneId, devMode]);
+  }, [tour.id, devMode]);
 
   return (
     <div

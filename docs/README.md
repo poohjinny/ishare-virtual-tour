@@ -1,6 +1,6 @@
 # iShare Virtual Tour — Documentation
 
-Project documentation for the Ken Sargent House virtual tour MVP.
+Project documentation for the iShare virtual tour MVP (multi-client).
 
 | Document                                       | Description                                                               |
 | ---------------------------------------------- | ------------------------------------------------------------------------- |
@@ -12,7 +12,9 @@ Project documentation for the Ken Sargent House virtual tour MVP.
 ## Quick Links
 
 - [Root README](../README.md) — install and run
-- [Tour config](../tours/kensargenthouse.json) — scenes, hotspots, client `id` +
-  `url`
-- [AI knowledge base](../tours/kensargenthouse-knowledge.json) — mock assistant
-  content
+- [GPRHF tour config](../tours/gphospitalfoundation.json) — Ken Sargent House
+  scenes, hotspots, organization
+- [CRS tour config](../tours/cancerresearchsociety.json) — Cancer Research
+  Society tour
+- [AI knowledge base](../tours/gphospitalfoundation-knowledge.json) — mock
+  assistant content

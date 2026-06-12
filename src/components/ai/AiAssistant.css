@@ -31,12 +31,16 @@
   background: #fff;
   overflow: hidden;
   cursor: pointer;
+  /* Platform iShare yellow — not client primary theme */
+  --ai-fab-glow-rgb: 232, 168, 56;
+  --ai-fab-glow-light: #f0bc5c;
   box-shadow:
     0 14px 40px rgba(15, 23, 42, 0.24),
     0 6px 18px rgba(15, 23, 42, 0.16);
   transition:
     max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.2s ease;
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .ai-fab__avatar {
@@ -71,9 +75,10 @@
 @media (hover: hover) {
   .ai-fab:hover:not(.ai-fab--exit):not(.ai-fab--enter) {
     max-width: 168px;
+    transform: scale(1.05);
     box-shadow:
-      0 6px 28px rgba(232, 168, 56, 0.5),
-      0 0 20px rgba(232, 168, 56, 0.35);
+      0 6px 28px rgba(var(--ai-fab-glow-rgb), 0.45),
+      0 0 20px rgba(var(--ai-fab-glow-rgb), 0.28);
   }
 
   .ai-fab:hover:not(.ai-fab--exit):not(.ai-fab--enter) .ai-fab__label {
@@ -84,8 +89,12 @@
 
 .ai-fab:focus-visible:not(.ai-fab--exit):not(.ai-fab--enter) {
   max-width: 168px;
-  outline: 2px solid var(--ishare-primary-light);
+  transform: scale(1.05);
+  outline: 2px solid var(--ai-fab-glow-light);
   outline-offset: 2px;
+  box-shadow:
+    0 6px 28px rgba(var(--ai-fab-glow-rgb), 0.45),
+    0 0 20px rgba(var(--ai-fab-glow-rgb), 0.28);
 }
 
 .ai-fab:focus-visible:not(.ai-fab--exit):not(.ai-fab--enter) .ai-fab__label {
@@ -314,8 +323,9 @@
 
 .ai-message--assistant {
   align-self: flex-start;
-  background: #e8ecf1;
+  background: rgba(var(--ishare-primary-rgb), 0.035);
   color: var(--ishare-text-body);
+  border: 1px solid rgba(var(--ishare-primary-rgb), 0.07);
 }
 
 .ai-panel__suggestions {
@@ -338,7 +348,8 @@
 }
 
 .ai-suggestion:hover {
-  background: var(--ishare-primary-dark);
+  background: var(--ishare-primary);
+  border-color: var(--ishare-primary);
   color: #fff;
 }
 
@@ -393,9 +404,9 @@
 .ai-composer__pill:focus-within {
   width: 100%;
   background: rgba(255, 255, 255, 0.84);
-  border-color: rgba(0, 123, 139, 0.28);
+  border-color: rgba(var(--ishare-primary-rgb), 0.28);
   box-shadow:
-    0 10px 36px rgba(0, 123, 139, 0.12),
+    0 10px 36px rgba(var(--ishare-primary-rgb), 0.12),
     0 4px 14px rgba(15, 23, 42, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 1);
 }

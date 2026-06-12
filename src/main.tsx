@@ -5,6 +5,7 @@ import App from './App';
 import './styles/tokens.css';
 import './styles/layout.css';
 import './styles/hotspots.css';
+import './components/TourGlassPanel.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,24 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
+import { buildScenePath } from '../viewer/sceneDepth';
 import type { Scene } from '../types/tour';
 import { Badge } from './ui/Badge';
+import {
+  TourGlassPanel,
+  type TourGlassPanelAnimation,
+} from './TourGlassPanel';
 import './TourNavFloat.css';
 
 interface TourNavFloatProps {
   scenes: Scene[];
   currentSceneId: string;
-  sceneHistory: string[];
-  breadcrumbRoot?: string;
+  firstSceneId: string;
   tourTitle?: string;
   clientLogo?: string;
   logoAlt?: string;
   websiteUrl?: string;
   disabled?: boolean;
-  canGoBack: boolean;
   controlsVisible: boolean;
   onControlsToggle: () => void;
   onSelectScene: (sceneId: string) => void;
-  onBreadcrumbNavigate: (target: 'root' | string) => void;
-  onBack: () => void;
+  onBreadcrumbNavigate: (sceneId: string) => void;
 }
 
 type PanelMode = 'menu' | 'search' | 'help' | null;
@@ -27,8 +30,10 @@ type PanelAnimPhase = 'enter' | 'exit' | 'idle';
 const PANEL_ENTER_MS = 150;
 const PANEL_EXIT_MS = 140;
 
-function panelAnimClass(phase: PanelAnimPhase): string {
-  return phase === 'idle' ? '' : ` tour-nav-actions__panel--${phase}`;
+function panelAnimation(phase: PanelAnimPhase): TourGlassPanelAnimation {
+  if (phase === 'enter') return 'enter';
+  if (phase === 'exit') return 'exit';
+  return 'none';
 }
 
 const VIEWER_CONTROLS = [
@@ -40,7 +45,7 @@ const VIEWER_CONTROLS = [
 ] as const;
 
 interface BreadcrumbItem {
-  id: 'root' | string;
+  id: string;
   title: string;
   isCurrent: boolean;
 }
@@ -174,53 +179,108 @@ function PanelSearchIcon() {
   );
 }
 
+function HistoryBackIcon() {
+  return (
+    <svg
+      className='tour-nav-history-btn__icon'
+      viewBox='0 0 20 20'
+      fill='none'
+      aria-hidden='true'
+    >
+      <path
+        d='M12.5 15L7.5 10L12.5 5'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      />
+    </svg>
+  );
+}
+
+function HistoryForwardIcon() {
+  return (
+    <svg
+      className='tour-nav-history-btn__icon'
+      viewBox='0 0 20 20'
+      fill='none'
+      aria-hidden='true'
+    >
+      <path
+        d='M7.5 5L12.5 10L7.5 15'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      />
+    </svg>
+  );
+}
+
+function BreadcrumbLayerIcon() {
+  return (
+    <svg
+      className='tour-nav-breadcrumb__layer-icon'
+      viewBox='0 0 24 24'
+      fill='none'
+      aria-hidden='true'
+    >
+      <path
+        d='M12 2L2 7l10 5 10-5-10-5z'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinejoin='round'
+      />
+      <path
+        d='M2 12l10 5 10-5'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinejoin='round'
+      />
+      <path
+        d='M2 17l10 5 10-5'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinejoin='round'
+      />
+    </svg>
+  );
+}
+
 function buildBreadcrumbItems(
-  sceneHistory: string[],
+  firstSceneId: string,
   scenes: Scene[],
-  rootLabel: string,
   currentSceneId: string,
 ): BreadcrumbItem[] {
   const sceneMap = new Map(scenes.map((scene) => [scene.id, scene]));
-  const items: BreadcrumbItem[] = [
-    { id: 'root', title: rootLabel, isCurrent: false },
-  ];
+  const scenesById = Object.fromEntries(
+    scenes.map((scene) => [scene.id, scene]),
+  );
+  const pathIds = buildScenePath(firstSceneId, scenesById, currentSceneId);
 
-  for (const sceneId of sceneHistory) {
+  return pathIds.map((sceneId, index) => {
     const scene = sceneMap.get(sceneId);
-    if (!scene) continue;
-    items.push({
+    return {
       id: sceneId,
-      title: scene.title,
-      isCurrent: sceneId === currentSceneId,
-    });
-  }
-
-  if (items.length > 1) {
-    items[items.length - 1].isCurrent = true;
-    items[0].isCurrent = false;
-  } else {
-    items[0].isCurrent = true;
-  }
-
-  return items;
+      title: scene?.title ?? sceneId,
+      isCurrent: index === pathIds.length - 1,
+    };
+  });
 }
 
 export function TourNavFloat({
   scenes,
   currentSceneId,
-  sceneHistory,
-  breadcrumbRoot = 'Home',
+  firstSceneId,
   tourTitle = 'Virtual Tour',
   clientLogo,
   logoAlt,
   websiteUrl,
   disabled = false,
-  canGoBack,
   controlsVisible,
   onControlsToggle,
   onSelectScene,
   onBreadcrumbNavigate,
-  onBack,
 }: TourNavFloatProps) {
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [displayPanel, setDisplayPanel] = useState<PanelMode>(null);
@@ -228,16 +288,14 @@ export function TourNavFloat({
   const [search, setSearch] = useState('');
   const actionsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const { showBack, showForward, goBack, goForward } = useHistoryNavControls();
+
+  /** Root depth has no structural “back” — hide ← even if browser history exists. */
+  const showHistoryBack = showBack && currentSceneId !== firstSceneId;
 
   const breadcrumbItems = useMemo(
-    () =>
-      buildBreadcrumbItems(
-        sceneHistory,
-        scenes,
-        breadcrumbRoot,
-        currentSceneId,
-      ),
-    [sceneHistory, scenes, breadcrumbRoot, currentSceneId],
+    () => buildBreadcrumbItems(firstSceneId, scenes, currentSceneId),
+    [firstSceneId, scenes, currentSceneId],
   );
 
   const filteredScenes = useMemo(
@@ -263,7 +321,10 @@ export function TourNavFloat({
     if (panelMode !== displayPanel) {
       setDisplayPanel(panelMode);
       setPanelPhase('enter');
-      const timer = window.setTimeout(() => setPanelPhase('idle'), PANEL_ENTER_MS);
+      const timer = window.setTimeout(
+        () => setPanelPhase('idle'),
+        PANEL_ENTER_MS,
+      );
       return () => window.clearTimeout(timer);
     }
   }, [panelMode, displayPanel]);
@@ -395,40 +456,71 @@ export function TourNavFloat({
   return (
     <>
       <nav className='tour-nav-breadcrumb' aria-label='Tour location'>
-        <div className='tour-nav-breadcrumb__bar'>
-          <ol className='tour-nav-breadcrumb__list'>
-            {breadcrumbItems.map((item, index) => (
-              <li key={item.id} className='tour-nav-breadcrumb__item'>
-                {index > 0 && (
-                  <span className='tour-nav-breadcrumb__sep' aria-hidden='true'>
-                    ›
-                  </span>
-                )}
-                {item.isCurrent ?
-                  <span
-                    className='tour-nav-breadcrumb__current'
-                    aria-current='location'
-                  >
-                    <span className='tour-nav-breadcrumb__current-label'>
-                      {item.title}
-                    </span>
+        <div className='tour-nav-breadcrumb__row'>
+          {showHistoryBack && (
+            <button
+              type='button'
+              className='tour-nav-history-btn'
+              aria-label='Previous view'
+              disabled={disabled}
+              onClick={goBack}
+            >
+              <HistoryBackIcon />
+            </button>
+          )}
+
+          <div className='tour-nav-breadcrumb__bar'>
+            <ol className='tour-nav-breadcrumb__list'>
+              {breadcrumbItems.map((item, index) => (
+                <li key={item.id} className='tour-nav-breadcrumb__item'>
+                  {index > 0 && (
                     <span
-                      className='tour-nav-breadcrumb__pulse-dot'
+                      className='tour-nav-breadcrumb__sep'
                       aria-hidden='true'
-                    />
-                  </span>
-                : <button
-                    type='button'
-                    className='tour-nav-breadcrumb__link'
-                    disabled={disabled}
-                    onClick={() => onBreadcrumbNavigate(item.id)}
-                  >
-                    {item.title}
-                  </button>
-                }
-              </li>
-            ))}
-          </ol>
+                    >
+                      ›
+                    </span>
+                  )}
+                  {item.isCurrent ?
+                    <span
+                      className='tour-nav-breadcrumb__current'
+                      aria-current='location'
+                    >
+                      {index === 0 && <BreadcrumbLayerIcon />}
+                      <span className='tour-nav-breadcrumb__current-label'>
+                        {item.title}
+                      </span>
+                      <span
+                        className='tour-nav-breadcrumb__pulse-dot'
+                        aria-hidden='true'
+                      />
+                    </span>
+                  : <button
+                      type='button'
+                      className='tour-nav-breadcrumb__link'
+                      disabled={disabled}
+                      onClick={() => onBreadcrumbNavigate(item.id)}
+                    >
+                      {index === 0 && <BreadcrumbLayerIcon />}
+                      {item.title}
+                    </button>
+                  }
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          {showForward && (
+            <button
+              type='button'
+              className='tour-nav-history-btn'
+              aria-label='Next view'
+              disabled={disabled}
+              onClick={goForward}
+            >
+              <HistoryForwardIcon />
+            </button>
+          )}
         </div>
       </nav>
 
@@ -437,60 +529,31 @@ export function TourNavFloat({
         ref={actionsRef}
       >
         {displayPanel === 'menu' && (
-          <div
-            id='tour-nav-menu-panel'
-            className={`tour-nav-actions__panel tour-nav-actions__panel--menu${panelAnimClass(panelPhase)}`}
-            role='dialog'
-            aria-labelledby='tour-nav-menu-title'
-          >
-            <div className='tour-nav-actions__panel-header'>
-              <h2
-                id='tour-nav-menu-title'
-                className='tour-nav-actions__panel-title'
-              >
-                All locations
-              </h2>
-            </div>
-
-            <div className='tour-nav-actions__panel-body ishare-scrollbar'>
+          <div id='tour-nav-menu-panel' className='tour-nav-actions__panel-slot'>
+            <TourGlassPanel
+              title='All locations'
+              titleId='tour-nav-menu-title'
+              onClose={closePanel}
+              animation={panelAnimation(panelPhase)}
+            >
               {logoNode && (
                 <div className='tour-nav-actions__panel-logo'>{logoNode}</div>
               )}
 
               {renderSceneList(scenes)}
-
-              <button
-                type='button'
-                className='tour-nav-actions__back'
-                disabled={disabled || !canGoBack}
-                onClick={() => {
-                  onBack();
-                  closePanel();
-                }}
-              >
-                ← Back
-              </button>
-            </div>
+            </TourGlassPanel>
           </div>
         )}
 
         {displayPanel === 'search' && (
-          <div
-            id='tour-nav-search-panel'
-            className={`tour-nav-actions__panel tour-nav-actions__panel--search${panelAnimClass(panelPhase)}`}
-            role='dialog'
-            aria-labelledby='tour-nav-search-title'
-          >
-            <div className='tour-nav-actions__panel-header'>
-              <h2
-                id='tour-nav-search-title'
-                className='tour-nav-actions__panel-title'
-              >
-                Search locations
-              </h2>
-            </div>
-
-            <div className='tour-nav-actions__panel-body tour-nav-actions__panel-body--search'>
+          <div id='tour-nav-search-panel' className='tour-nav-actions__panel-slot'>
+            <TourGlassPanel
+              title='Search locations'
+              titleId='tour-nav-search-title'
+              onClose={closePanel}
+              animation={panelAnimation(panelPhase)}
+              bodyClassName='tour-glass-panel__body--search'
+            >
               <div className='tour-nav-actions__search-wrap'>
                 <PanelSearchIcon />
                 <input
@@ -510,27 +573,19 @@ export function TourNavFloat({
               <div className='tour-nav-actions__panel-scroll ishare-scrollbar'>
                 {search.trim() ? renderSceneList(filteredScenes) : null}
               </div>
-            </div>
+            </TourGlassPanel>
           </div>
         )}
 
         {displayPanel === 'help' && (
-          <div
-            id='tour-nav-help-panel'
-            className={`tour-nav-actions__panel tour-nav-actions__panel--help${panelAnimClass(panelPhase)}`}
-            role='dialog'
-            aria-labelledby='tour-nav-help-title'
-          >
-            <div className='tour-nav-actions__panel-header'>
-              <h2
-                id='tour-nav-help-title'
-                className='tour-nav-actions__panel-title'
-              >
-                About this tour
-              </h2>
-            </div>
-
-            <div className='tour-nav-actions__panel-body ishare-scrollbar'>
+          <div id='tour-nav-help-panel' className='tour-nav-actions__panel-slot'>
+            <TourGlassPanel
+              title='About this tour'
+              titleId='tour-nav-help-title'
+              onClose={closePanel}
+              animation={panelAnimation(panelPhase)}
+              bodyClassName='tour-glass-panel__body--help'
+            >
               <p className='tour-nav-actions__help-lead'>
                 Welcome to {tourTitle}. Explore each location in 360°, move
                 between scenes with hotspots, and use the tools below to find
@@ -539,8 +594,9 @@ export function TourNavFloat({
 
               <ul className='tour-nav-actions__help-list'>
                 <li>
-                  The breadcrumb at the top shows where you are — tap an earlier
-                  stop to go back.
+                  The breadcrumb shows where you are in the tour — tap an
+                  earlier stop to move up. Use the arrows beside it to retrace
+                  your recent views (hidden on the overview).
                 </li>
                 <li>
                   Open the menu to browse all locations, or search by name.
@@ -566,7 +622,7 @@ export function TourNavFloat({
                   <li key={item}>{item}</li>
                 ))}
               </ul>
-            </div>
+            </TourGlassPanel>
           </div>
         )}
 

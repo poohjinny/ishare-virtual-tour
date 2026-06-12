@@ -39,6 +39,54 @@ export function isGoingDeeper(
   return getSceneDepth(tour, toSceneId) > getSceneDepth(tour, fromSceneId);
 }
 
+/** Shortest nav path from firstScene to target (BFS along nav hotspots). */
+export function buildScenePath(
+  firstSceneId: string,
+  scenes: Record<string, Scene>,
+  targetSceneId: string,
+): string[] {
+  if (targetSceneId === firstSceneId) {
+    return [firstSceneId];
+  }
+
+  const parent = new Map<string, string>();
+  const queue = [firstSceneId];
+  const visited = new Set<string>([firstSceneId]);
+
+  while (queue.length > 0) {
+    const sceneId = queue.shift()!;
+    if (sceneId === targetSceneId) break;
+
+    const scene = scenes[sceneId];
+    if (!scene) continue;
+
+    for (const hotspot of scene.hotspots) {
+      if (
+        hotspot.type !== 'nav' ||
+        !hotspot.targetScene ||
+        visited.has(hotspot.targetScene)
+      ) {
+        continue;
+      }
+      visited.add(hotspot.targetScene);
+      parent.set(hotspot.targetScene, sceneId);
+      queue.push(hotspot.targetScene);
+    }
+  }
+
+  if (!visited.has(targetSceneId)) {
+    return [targetSceneId];
+  }
+
+  const path: string[] = [];
+  let cursor: string | undefined = targetSceneId;
+  while (cursor) {
+    path.unshift(cursor);
+    cursor = parent.get(cursor);
+  }
+  return path;
+}
+
 /** Nav hotspot on target that links back toward the scene we came from. */
 export function findIngressHotspot(
   targetScene: Scene,

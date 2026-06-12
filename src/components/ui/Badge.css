@@ -30,7 +30,7 @@
 
 .ishare-badge--soft.ishare-badge--tone-primary {
   font-weight: 600;
-  background: rgba(0, 123, 139, 0.1);
+  background: rgba(var(--ishare-primary-rgb), 0.1);
 }
 
 .ishare-badge--tone-accent {

@@ -1,9 +1,9 @@
 {
-  "id": "kensargenthouse",
-  "url": "https://kensargenthouse.ca/",
+  "id": "gphospitalfoundation",
+  "url": "https://gphospitalfoundation.ca",
   "global": {
     "facilityName": "Ken Sargent House",
-    "summary": "Ken Sargent House is a home away from home for patients receiving treatment at the Grande Prairie Regional Hospital and their families — promoting excellence in healthcare through supported accommodations."
+    "summary": "Ken Sargent House is a home away from home for patients receiving treatment at the Grande Prairie Regional Hospital and their families — a program of the Grande Prairie Regional Hospital Foundation."
   },
   "scenes": {
     "overview": {
@@ -18,7 +18,7 @@
       "faqs": [
         {
           "q": "What is this building?",
-          "a": "This is Ken Sargent House — a home away from home for patients and families accessing healthcare in Grande Prairie. Learn more at kensargenthouse.ca."
+          "a": "This is Ken Sargent House — a home away from home for patients and families accessing healthcare in Grande Prairie, supported by the Grande Prairie Regional Hospital Foundation."
         },
         {
           "q": "Where is the main entrance?",

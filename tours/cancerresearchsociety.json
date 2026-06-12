@@ -1,0 +1,119 @@
+{
+  "id": "cancerresearchsociety",
+  "url": "https://cancerresearchsociety.ca",
+  "title": "Cancer Research Society Virtual Tour",
+  "organization": {
+    "name": "Cancer Research Society",
+    "website": "https://cancerresearchsociety.ca",
+    "email": "mboustani@src-crs.ca",
+    "phones": [
+      { "number": "514-861-9227", "label": "Telephone" },
+      { "number": "1-888-766-2262", "label": "Toll free" }
+    ],
+    "fax": "514-861-9220",
+    "faxLabel": "Fax",
+    "address": "625 President-Kennedy Avenue Suite 402, Montreal, QC H3A 3S5"
+  },
+  "branding": {
+    "logo": "/assets/cancerresearchsociety/brand/logo.png",
+    "logoAlt": "Cancer Research Society",
+    "primaryColor": "#0054a6"
+  },
+  "firstScene": "overview",
+  "defaultTransition": { "speed": "500ms", "effect": "fade" },
+  "scenes": {
+    "overview": {
+      "id": "overview",
+      "title": "Overview",
+      "panorama": "/assets/gphospitalfoundation/panoramas/overview.jpg",
+      "defaultView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 },
+      "hotspots": [
+        {
+          "id": "nav-to-entrance",
+          "type": "nav",
+          "label": "Main Entrance",
+          "position": { "yaw": 117.3, "pitch": -62.5 },
+          "targetScene": "main-entrance",
+          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+        }
+      ]
+    },
+    "main-entrance": {
+      "id": "main-entrance",
+      "title": "Main Entrance",
+      "panorama": "/assets/gphospitalfoundation/panoramas/main-entrance.jpg",
+      "defaultView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 },
+      "hotspots": [
+        {
+          "id": "nav-back-overview",
+          "type": "nav",
+          "label": "Overview",
+          "position": { "yaw": 180, "pitch": -10 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 }
+        },
+        {
+          "id": "info-welcome",
+          "type": "info",
+          "position": { "yaw": 5, "pitch": -5 },
+          "popup": {
+            "title": "Main Entrance",
+            "namingOpportunity": {
+              "name": "Main Entrance Naming Opportunity",
+              "price": "Contact us",
+              "status": "reserved"
+            },
+            "body": "Welcome to the Cancer Research Society. Explore naming opportunities that support breakthrough cancer research and lasting impact across Canada.",
+            "cta": {
+              "product": "giftabulator",
+              "url": "https://cancerresearchsociety.ca"
+            }
+          }
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "label": "Reception",
+          "position": { "yaw": 105.9, "pitch": 3.8 },
+          "targetScene": "reception",
+          "targetView": { "yaw": 90, "pitch": 0, "zoom": 0 }
+        }
+      ]
+    },
+    "reception": {
+      "id": "reception",
+      "title": "Reception",
+      "panorama": "/assets/gphospitalfoundation/panoramas/reception.jpg",
+      "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
+      "hotspots": [
+        {
+          "id": "nav-back-entrance",
+          "type": "nav",
+          "label": "Main Entrance",
+          "position": { "yaw": 170, "pitch": -5 },
+          "targetScene": "main-entrance",
+          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+        },
+        {
+          "id": "info-reception",
+          "type": "info",
+          "position": { "yaw": 91.1, "pitch": -10.5 },
+          "popup": {
+            "display": "anchored",
+            "title": "Reception Desk",
+            "namingOpportunity": {
+              "name": "Reception Desk Naming Opportunity",
+              "price": "Contact us",
+              "status": "on_sale"
+            },
+            "body": "The reception area welcomes visitors and supporters of the Cancer Research Society. Naming opportunities here help fund innovative research that advances prevention, detection, and treatment across Canada.",
+            "cta": {
+              "product": "giftabulator",
+              "url": "https://cancerresearchsociety.ca"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

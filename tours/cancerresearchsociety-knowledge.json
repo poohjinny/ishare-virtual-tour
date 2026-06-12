@@ -1,0 +1,94 @@
+{
+  "id": "cancerresearchsociety",
+  "url": "https://cancerresearchsociety.ca",
+  "global": {
+    "facilityName": "Cancer Research Society",
+    "summary": "The Cancer Research Society is dedicated to funding innovative cancer research across Canada, supporting scientists and advancing treatments that save lives."
+  },
+  "scenes": {
+    "overview": {
+      "title": "Overview",
+      "description": "Overview of the Cancer Research Society virtual experience.",
+      "facts": [
+        "The Cancer Research Society funds peer-reviewed cancer research across Canada.",
+        "Naming opportunities support breakthrough research and lasting impact.",
+        "Donors can explore tax-efficient giving strategies with GIFTABULATOR®."
+      ],
+      "faqs": [
+        {
+          "q": "What does the Cancer Research Society do?",
+          "a": "We fund innovative cancer research across Canada, supporting scientists working to improve prevention, detection, and treatment."
+        },
+        {
+          "q": "How can I contact the Society?",
+          "a": "Email mboustani@src-crs.ca, call 514-861-9227 or toll-free 1-888-766-2262, or visit cancerresearchsociety.ca."
+        },
+        {
+          "q": "Where is the office located?",
+          "a": "625 President-Kennedy Avenue Suite 402, Montreal, QC H3A 3S5."
+        }
+      ],
+      "suggestedQuestions": [
+        "What does the Cancer Research Society do?",
+        "How can I contact the Society?",
+        "Where is the office located?"
+      ]
+    },
+    "main-entrance": {
+      "title": "Main Entrance",
+      "description": "Main entrance view of the Cancer Research Society virtual tour.",
+      "facts": [
+        "The main entrance leads to the reception area.",
+        "Naming opportunities are available at key locations throughout the tour.",
+        "GIFTABULATOR® can help you explore tax-efficient giving options."
+      ],
+      "faqs": [
+        {
+          "q": "How do I get to reception?",
+          "a": "Click the Reception hotspot or use the scene panel to navigate to the reception area."
+        },
+        {
+          "q": "What naming opportunities are available?",
+          "a": "Naming opportunities are available at the campus, main entrance, and reception desk. Contact us for details."
+        },
+        {
+          "q": "How can I support cancer research?",
+          "a": "Explore naming opportunities in the tour or visit cancerresearchsociety.ca to learn about giving options."
+        }
+      ],
+      "suggestedQuestions": [
+        "How do I get to reception?",
+        "What naming opportunities are available?",
+        "How can I support cancer research?"
+      ]
+    },
+    "reception": {
+      "title": "Reception",
+      "description": "Reception area of the Cancer Research Society virtual tour.",
+      "facts": [
+        "The reception desk is a key naming opportunity location.",
+        "Staff welcome visitors and supporters of cancer research.",
+        "GIFTABULATOR® can help calculate your tax-efficient giving potential."
+      ],
+      "faqs": [
+        {
+          "q": "What is the reception desk naming opportunity?",
+          "a": "The reception desk naming opportunity supports the Cancer Research Society's mission. Contact us for investment details."
+        },
+        {
+          "q": "How do I go back outside?",
+          "a": "Use the Main Entrance hotspot or the scene panel to return to the exterior entrance view."
+        },
+        {
+          "q": "How can I contact the Society?",
+          "a": "Email mboustani@src-crs.ca, call 514-861-9227 or toll-free 1-888-766-2262."
+        }
+      ],
+      "suggestedQuestions": [
+        "What is the reception desk naming opportunity?",
+        "How do I go back outside?",
+        "How can I contact the Society?"
+      ]
+    }
+  }
+}

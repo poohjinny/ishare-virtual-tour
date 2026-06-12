@@ -66,7 +66,8 @@ export function useTourRouteSync({
     if (
       routeSceneId === currentSceneId ||
       isTransitioning ||
-      syncingToUrlRef.current
+      syncingToUrlRef.current ||
+      syncingFromUrlRef.current
     ) {
       return;
     }
@@ -80,12 +81,7 @@ export function useTourRouteSync({
     syncSceneFromRoute(routeSceneId);
 
     void viewerRef.current
-      ?.navigateToScene(
-        routeSceneId,
-        scene.defaultView,
-        undefined,
-        currentSceneId,
-      )
+      ?.navigateToScene(routeSceneId, scene.defaultView)
       .finally(() => {
         syncingFromUrlRef.current = false;
       });
@@ -103,6 +99,11 @@ export function useTourRouteSync({
   const syncSceneToUrl = useCallback(
     (sceneId: string) => {
       if (syncingFromUrlRef.current) {
+        return;
+      }
+
+      // Client switch can update the URL before this tour instance unmounts.
+      if (route.tourId !== tour.id) {
         return;
       }
 
@@ -127,6 +128,7 @@ export function useTourRouteSync({
       location.pathname,
       location.search,
       navigate,
+      route.tourId,
       searchParams,
       tour.firstScene,
       tour.id,

@@ -14,6 +14,10 @@ export function useTourState(initialSceneId: string) {
     }
     setHistory((prev) => {
       if (prev[prev.length - 1] === sceneId) return prev;
+      const existingIndex = prev.indexOf(sceneId);
+      if (existingIndex >= 0) {
+        return prev.slice(0, existingIndex + 1);
+      }
       return [...prev, sceneId];
     });
   }, []);
@@ -72,6 +76,5 @@ export function useTourState(initialSceneId: string) {
     jumpToRoot,
     syncSceneFromRoute,
     history,
-    canGoBack: history.length > 1,
   };
 }

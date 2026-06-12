@@ -16,14 +16,15 @@ assets/
     │   ├── main-entrance.jpg
     │   └── reception.jpg
     └── brand/
-        └── logo_ken-sargent-house.png
+        └── logo.png
 ```
 
 ### Current clients
 
-| id                | website                     | assets folder             |
-| ----------------- | --------------------------- | ------------------------- |
-| `kensargenthouse` | https://kensargenthouse.ca/ | `assets/kensargenthouse/` |
+| id                      | website                           | assets folder                   |
+| ----------------------- | --------------------------------- | ------------------------------- |
+| `gphospitalfoundation`  | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/`  |
+| `cancerresearchsociety` | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/` |
 
 ## Client id convention
 
@@ -31,10 +32,11 @@ The `id` matches the tour JSON `id` field and the `?tour=` URL parameter.
 
 Derive from the client website URL — hostname without `www` and without TLD:
 
-| URL                           | id                |
-| ----------------------------- | ----------------- |
-| `https://kensargenthouse.ca/` | `kensargenthouse` |
-| `https://www.example.com/`    | `example`         |
+| URL                                 | id                      |
+| ----------------------------------- | ----------------------- |
+| `https://gphospitalfoundation.ca/`  | `gphospitalfoundation`  |
+| `https://cancerresearchsociety.ca/` | `cancerresearchsociety` |
+| `https://www.example.com/`          | `example`               |
 
 Use `clientIdFromUrl()` in `src/utils/clientId.ts` when adding new clients.
 
@@ -47,7 +49,7 @@ Use `clientIdFromUrl()` in `src/utils/clientId.ts` when adding new clients.
 
 ### Path examples
 
-| File type | Location                                 | JSON reference                                   |
-| --------- | ---------------------------------------- | ------------------------------------------------ |
-| Panorama  | `kensargenthouse/panoramas/overview.jpg` | `/assets/kensargenthouse/panoramas/overview.jpg` |
-| Logo      | `kensargenthouse/brand/logo.png`         | `/assets/kensargenthouse/brand/logo.png`         |
+| File type | Location                                      | JSON reference                                        |
+| --------- | --------------------------------------------- | ----------------------------------------------------- |
+| Panorama  | `gphospitalfoundation/panoramas/overview.jpg` | `/assets/gphospitalfoundation/panoramas/overview.jpg` |
+| Logo      | `gphospitalfoundation/brand/logo.png`         | `/assets/gphospitalfoundation/brand/logo.png`         |

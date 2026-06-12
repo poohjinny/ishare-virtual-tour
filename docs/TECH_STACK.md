@@ -141,7 +141,7 @@ ishare-virtual-tour/
 │   ├── viewer/
 │   │   ├── PanoramaViewer.tsx   # PSV instance + plugins
 │   │   ├── buildMarkers.ts      # Hotspot HTML → marker config
-│   │   └── transition.ts        # Deeper/shallower zoom + fade (see SCENE_TRANSITIONS.md)
+│   │   └── transition.ts        # VT setCurrentNode wrapper (see SCENE_TRANSITIONS.md)
 │   ├── components/
 │   │   ├── SceneNav.tsx
 │   │   ├── TourHeader.tsx
@@ -176,7 +176,7 @@ tours/ken-sargent.json
         │
         ├─► PanoramaViewer (PSV nodes + markers)
         ├─► SceneNav (scene list)
-        └─► transition.ts (targetView per navigation)
+        └─► transition.ts → virtualTour.setCurrentNode (rotateTo / zoomTo)
 
 tours/ken-sargent-knowledge.json
         │

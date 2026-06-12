@@ -1,0 +1,440 @@
+/* ── Shared glass panel — nav menus + panorama anchored popups ── */
+
+.tour-glass-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(320px, calc(100vw - 48px));
+  max-height: min(88vh, 720px);
+  margin: 0;
+  padding: 0;
+  font-family: var(--ishare-font);
+  color: var(--ishare-text-body);
+}
+
+.tour-glass-panel--anchored {
+  pointer-events: auto;
+  cursor: default;
+  filter: drop-shadow(0 10px 28px rgba(15, 23, 42, 0.14),
+      0 4px 12px rgba(15, 23, 42, 0.08));
+}
+
+/* Off-screen content measurement — natural height without viewport cap */
+.tour-glass-panel--measure,
+.tour-glass-panel--measure .tour-glass-panel__shell {
+  max-height: none;
+}
+
+/* PSV HTML marker: fixed size on .psv-marker — panel fills box and body scrolls */
+.viewer-container .psv-marker .tour-glass-panel--anchored {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tour-glass-panel--anchored .tour-glass-panel__body {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.tour-glass-panel--dock {
+  background: transparent;
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border-radius: var(--ishare-radius-lg);
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+  transform-origin: top right;
+}
+
+.tour-glass-panel__shell {
+  display: flex;
+  flex-direction: column;
+  max-height: min(88vh, 720px);
+  overflow: hidden;
+  border-radius: var(--ishare-radius-lg);
+}
+
+.tour-glass-panel--dock .tour-glass-panel__shell {
+  border-radius: 0;
+  max-height: min(88vh, 720px);
+}
+
+.tour-glass-panel--anchored .tour-glass-panel__shell {
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.tour-glass-panel__shell--enter {
+  animation: tour-glass-panel-in 0.15s ease-out forwards;
+}
+
+.tour-glass-panel__shell--exit {
+  animation: tour-glass-panel-out 0.14s ease-in forwards;
+  pointer-events: none;
+}
+
+.tour-glass-panel__header {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.84);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.tour-glass-panel__title-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tour-glass-panel__title {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-family: var(--ishare-font-display);
+  font-size: var(--ishare-font-size-xl);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ishare-text);
+}
+
+.tour-glass-panel__close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ishare-text-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.tour-glass-panel__close:hover,
+.tour-glass-panel__close:focus-visible {
+  color: var(--ishare-text);
+  background: rgba(15, 23, 42, 0.06);
+  outline: none;
+}
+
+.tour-glass-panel__close-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.tour-glass-panel__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  background: rgba(232, 168, 56, 0.14);
+  color: #9a6b12;
+}
+
+.tour-glass-panel__badge--sponsor {
+  padding: 4px 10px;
+}
+
+.tour-glass-panel__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tour-glass-panel__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-glass-panel__badge--naming {
+  color: #9a6b12;
+}
+
+.tour-glass-panel__badge--price {
+  padding: 4px 12px;
+  background: rgba(var(--ishare-primary-rgb), 0.1);
+  color: var(--ishare-primary);
+}
+
+.tour-glass-panel__badge--price .tour-glass-panel__badge-text {
+  font-size: var(--ishare-font-size-sm);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.tour-glass-panel__badge--price-sold {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--ishare-text-muted);
+}
+
+.tour-glass-panel__badge--price-sold .tour-glass-panel__badge-text {
+  text-decoration: line-through;
+  text-decoration-color: rgba(15, 23, 42, 0.28);
+}
+
+.tour-glass-panel__badge--status {
+  padding: 4px 10px;
+}
+
+.tour-glass-panel__badge--status-on-sale {
+  background: rgba(34, 197, 94, 0.14);
+  color: #15803d;
+}
+
+.tour-glass-panel__badge--status-sold {
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--ishare-text-muted);
+}
+
+.tour-glass-panel__badge--status-reserved {
+  background: rgba(232, 168, 56, 0.14);
+  color: #9a6b12;
+}
+
+.tour-glass-panel__price-label {
+  margin: 0;
+  font-size: var(--ishare-font-size-xs);
+  font-weight: 500;
+  color: var(--ishare-text-muted);
+}
+
+.tour-glass-panel__badge-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.tour-glass-panel__badge-text {
+  font-family: var(--ishare-font-display);
+  font-size: var(--ishare-font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tour-glass-panel__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px 28px 28px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.tour-glass-panel__footer {
+  flex-shrink: 0;
+  padding: 16px 20px 22px;
+  background: rgba(255, 255, 255, 0.84);
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  overflow: visible;
+}
+
+.tour-glass-panel__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tour-glass-panel__paragraph {
+  margin: 0;
+  font-family: var(--ishare-font);
+  font-size: var(--ishare-font-size-lg);
+  line-height: 1.72;
+  color: var(--ishare-text-body);
+}
+
+.tour-glass-panel__video {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  border-radius: var(--ishare-radius);
+  overflow: hidden;
+  background: #0f172a;
+  aspect-ratio: 16 / 9;
+}
+
+.tour-glass-panel__body>.tour-glass-panel__video {
+  flex-shrink: 0;
+}
+
+.tour-glass-panel__video iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  pointer-events: auto;
+}
+
+.tour-glass-panel__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 36px;
+  height: auto;
+  padding: 7px 14px 7px 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ishare-primary);
+  color: #fff;
+  font-family: var(--ishare-font-display);
+  font-size: var(--ishare-font-size-md);
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  cursor: pointer;
+  box-shadow:
+    0 8px 22px rgba(var(--ishare-primary-rgb), 0.28),
+    0 3px 10px rgba(var(--ishare-primary-rgb), 0.16);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.tour-glass-panel__cta-text {
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+
+.tour-glass-panel__reg {
+  font-size: 0.62em;
+  line-height: 0;
+  vertical-align: super;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.tour-glass-panel__cta-icon {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+}
+
+.tour-glass-panel__cta:hover,
+.tour-glass-panel__cta:focus-visible {
+  background: var(--ishare-primary-dark);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.tour-glass-panel__cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.tour-glass-panel__cta-sublabel {
+  margin: 0;
+  font-size: var(--ishare-font-size-sm);
+  line-height: 1.45;
+  color: var(--ishare-text-muted);
+  text-align: center;
+}
+
+@keyframes tour-glass-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tour-glass-panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+.tour-glass-panel__body--search {
+  overflow: hidden;
+}
+
+.tour-glass-panel__body--help {
+  gap: 16px;
+  padding-bottom: 28px;
+}
+
+@media (max-width: 480px) {
+  .tour-glass-panel {
+    width: min(300px, calc(100vw - 32px));
+  }
+
+  .tour-glass-panel__header {
+    padding: 16px;
+  }
+
+  .tour-glass-panel__body {
+    padding: 22px 22px 18px;
+  }
+
+  .tour-glass-panel__footer {
+    padding: 14px 16px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .tour-glass-panel__shell--enter,
+  .tour-glass-panel__shell--exit {
+    animation: none;
+  }
+}

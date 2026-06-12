@@ -73,15 +73,27 @@ input::placeholder {
   position: relative;
   width: 100%;
   height: 100%;
-}
-
-.viewer-area--fullscreen {
-  min-height: 0;
+  background: #000;
 }
 
 .viewer-container {
   width: 100%;
   height: 100%;
+  background: #000;
+}
+
+/* Anchored NO popup — override PSV marker pointer / panorama drag cursor */
+.viewer-container .psv-marker:has([data-info-panel='true']) {
+  cursor: default;
+}
+
+.viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__close,
+.viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__cta {
+  cursor: pointer;
+}
+
+.viewer-area--fullscreen {
+  min-height: 0;
 }
 
 /* Custom top progress bar replaces PSV's built-in loader */
@@ -233,7 +245,7 @@ input::placeholder {
 
 .viewer-container .psv-zoom-range:not(.psv-button--disabled):hover .psv-zoom-range-handle {
   transform: translate(-50%, -50%) scale(1.15);
-  background: var(--ishare-primary);
+  background: var(--ishare-text);
 }
 
 /* Control groups: zoom | move | fullscreen (horizontal) */
@@ -251,12 +263,12 @@ input::placeholder {
 
 .viewer-container .psv-button:not(.psv-zoom-range):hover {
   color: var(--ishare-text);
-  background: rgba(0, 123, 139, 0.08);
+  background: rgba(15, 23, 42, 0.08);
 }
 
 .viewer-container .psv-button--active {
-  background: rgba(0, 123, 139, 0.12);
-  color: var(--ishare-primary);
+  background: rgba(15, 23, 42, 0.1);
+  color: var(--ishare-text);
 }
 
 /* Move arrows — thin stroke chevrons */
@@ -278,18 +290,36 @@ input::placeholder {
   mask-position: center;
   -webkit-mask-size: contain;
   mask-size: contain;
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
+
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button:not(.psv-button--disabled):hover::before {
+  transform: scale(1.2);
 }
 
 .viewer-container .psv-move-button[title='Move left']::before {
-  transform: rotate(180deg);
+  transform: rotate(180deg) scale(1);
+}
+
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move left']:not(.psv-button--disabled):hover::before {
+  transform: rotate(180deg) scale(1.2);
 }
 
 .viewer-container .psv-move-button[title='Move up']::before {
-  transform: rotate(-90deg);
+  transform: rotate(-90deg) scale(1);
+}
+
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move up']:not(.psv-button--disabled):hover::before {
+  transform: rotate(-90deg) scale(1.2);
 }
 
 .viewer-container .psv-move-button[title='Move down']::before {
-  transform: rotate(90deg);
+  transform: rotate(90deg) scale(1);
+}
+
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move down']:not(.psv-button--disabled):hover::before {
+  transform: rotate(90deg) scale(1.2);
 }
 
 /* PSV navbar sits at bottom center — ensure overlays clear it */
