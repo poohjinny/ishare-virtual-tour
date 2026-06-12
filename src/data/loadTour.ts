@@ -22,15 +22,6 @@ const KNOWLEDGE: Record<string, TourKnowledge> = {
   cancerresearchsociety: cancerresearchsocietyKnowledge as TourKnowledge,
 };
 
-/** All tours share this client's panoramas until per-client assets exist. */
-const SHARED_PANORAMA_CLIENT_ID = 'gphospitalfoundation';
-
-function resolveSharedPanorama(panorama: string): string {
-  const filename = panorama.split('/panoramas/').pop();
-  if (!filename) return panorama;
-  return `/assets/${SHARED_PANORAMA_CLIENT_ID}/panoramas/${filename}`;
-}
-
 function normalizeTourAssets(tour: Tour): Tour {
   return {
     ...tour,
@@ -44,10 +35,7 @@ function normalizeTourAssets(tour: Tour): Tour {
       Object.entries(tour.scenes).map(([id, scene]) => [
         id,
 
-        {
-          ...scene,
-          panorama: withBaseUrl(resolveSharedPanorama(scene.panorama)),
-        },
+        { ...scene, panorama: withBaseUrl(scene.panorama) },
       ]),
     ),
   };

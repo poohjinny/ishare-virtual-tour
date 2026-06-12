@@ -34,34 +34,6 @@
         "Where is the office located?"
       ]
     },
-    "main-entrance": {
-      "title": "Main Entrance",
-      "description": "Main entrance view of the Cancer Research Society virtual tour.",
-      "facts": [
-        "The main entrance leads to the reception area.",
-        "Naming opportunities are available at key locations throughout the tour.",
-        "GIFTABULATOR® can help you explore tax-efficient giving options."
-      ],
-      "faqs": [
-        {
-          "q": "How do I get to reception?",
-          "a": "Click the Reception hotspot or use the scene panel to navigate to the reception area."
-        },
-        {
-          "q": "What naming opportunities are available?",
-          "a": "Naming opportunities are available at the campus, main entrance, and reception desk. Contact us for details."
-        },
-        {
-          "q": "How can I support cancer research?",
-          "a": "Explore naming opportunities in the tour or visit cancerresearchsociety.ca to learn about giving options."
-        }
-      ],
-      "suggestedQuestions": [
-        "How do I get to reception?",
-        "What naming opportunities are available?",
-        "How can I support cancer research?"
-      ]
-    },
     "reception": {
       "title": "Reception",
       "description": "Reception area of the Cancer Research Society virtual tour.",
@@ -76,18 +48,18 @@
           "a": "The reception desk naming opportunity supports the Cancer Research Society's mission. Contact us for investment details."
         },
         {
-          "q": "How do I go back outside?",
-          "a": "Use the Main Entrance hotspot or the scene panel to return to the exterior entrance view."
+          "q": "How do I go back to the overview?",
+          "a": "Use the Overview hotspot or the scene panel to return to the exterior view."
         },
         {
-          "q": "How can I contact the Society?",
-          "a": "Email mboustani@src-crs.ca, call 514-861-9227 or toll-free 1-888-766-2262."
+          "q": "How can I support cancer research?",
+          "a": "Explore naming opportunities in the tour or visit cancerresearchsociety.ca to learn about giving options."
         }
       ],
       "suggestedQuestions": [
         "What is the reception desk naming opportunity?",
-        "How do I go back outside?",
-        "How can I contact the Society?"
+        "How do I go back to the overview?",
+        "How can I support cancer research?"
       ]
     }
   }

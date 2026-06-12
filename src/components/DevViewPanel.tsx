@@ -17,11 +17,7 @@ interface DevViewPanelProps {
   clickCoords: ClickCoords | null;
 }
 
-export function DevViewPanel({
-  scene,
-  view,
-  clickCoords,
-}: DevViewPanelProps) {
+export function DevViewPanel({ scene, view, clickCoords }: DevViewPanelProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
   const copyLanding = useCallback(async () => {
@@ -58,7 +54,8 @@ export function DevViewPanel({
   return (
     <div className='dev-panel'>
       <p className='dev-panel__title'>
-        DEV — {scene.title ?? scene.id}
+        DEV — {scene.clientId ? `${scene.clientId} / ` : ''}
+        {scene.title ?? scene.id}
         {scene.title && (
           <span className='dev-panel__scene-id'> ({scene.id})</span>
         )}
@@ -97,8 +94,9 @@ export function DevViewPanel({
       </div>
 
       <p className='dev-panel__hint'>
-        Pan to the desired start view, then copy landing JSON into{' '}
-        <code>defaultView</code> in tours JSON.
+        Pan to the desired start view, then copy landing JSON into the matching
+        client&apos;s <code>tours/&#123;client&#125;.json</code>{' '}
+        <code>defaultView</code>.
       </p>
     </div>
   );

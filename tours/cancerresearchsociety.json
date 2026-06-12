@@ -17,7 +17,7 @@
   "branding": {
     "logo": "/assets/cancerresearchsociety/brand/logo.png",
     "logoAlt": "Cancer Research Society",
-    "primaryColor": "#0054a6"
+    "primaryColor": "#e12827"
   },
   "firstScene": "overview",
   "defaultTransition": { "speed": "500ms", "effect": "fade" },
@@ -25,56 +25,14 @@
     "overview": {
       "id": "overview",
       "title": "Overview",
-      "panorama": "/assets/gphospitalfoundation/panoramas/overview.jpg",
-      "defaultView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 },
+      "panorama": "/assets/cancerresearchsociety/panoramas/overview.jpg",
+      "defaultView": { "yaw": 74.2, "pitch": -62.7, "zoom": 10 },
       "hotspots": [
-        {
-          "id": "nav-to-entrance",
-          "type": "nav",
-          "label": "Main Entrance",
-          "position": { "yaw": 117.3, "pitch": -62.5 },
-          "targetScene": "main-entrance",
-          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
-        }
-      ]
-    },
-    "main-entrance": {
-      "id": "main-entrance",
-      "title": "Main Entrance",
-      "panorama": "/assets/gphospitalfoundation/panoramas/main-entrance.jpg",
-      "defaultView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 },
-      "hotspots": [
-        {
-          "id": "nav-back-overview",
-          "type": "nav",
-          "label": "Overview",
-          "position": { "yaw": 180, "pitch": -10 },
-          "targetScene": "overview",
-          "targetView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 }
-        },
-        {
-          "id": "info-welcome",
-          "type": "info",
-          "position": { "yaw": 5, "pitch": -5 },
-          "popup": {
-            "title": "Main Entrance",
-            "namingOpportunity": {
-              "name": "Main Entrance Naming Opportunity",
-              "price": "Contact us",
-              "status": "reserved"
-            },
-            "body": "Welcome to the Cancer Research Society. Explore naming opportunities that support breakthrough cancer research and lasting impact across Canada.",
-            "cta": {
-              "product": "giftabulator",
-              "url": "https://cancerresearchsociety.ca"
-            }
-          }
-        },
         {
           "id": "nav-to-reception",
           "type": "nav",
           "label": "Reception",
-          "position": { "yaw": 105.9, "pitch": 3.8 },
+          "position": { "yaw": 58.2, "pitch": -27.5 },
           "targetScene": "reception",
           "targetView": { "yaw": 90, "pitch": 0, "zoom": 0 }
         }
@@ -83,16 +41,16 @@
     "reception": {
       "id": "reception",
       "title": "Reception",
-      "panorama": "/assets/gphospitalfoundation/panoramas/reception.jpg",
+      "panorama": "/assets/cancerresearchsociety/panoramas/reception.jpg",
       "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
       "hotspots": [
         {
-          "id": "nav-back-entrance",
+          "id": "nav-back-overview",
           "type": "nav",
-          "label": "Main Entrance",
-          "position": { "yaw": 170, "pitch": -5 },
-          "targetScene": "main-entrance",
-          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+          "label": "Overview",
+          "position": { "yaw": 180, "pitch": -10 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 74.2, "pitch": -62.7, "zoom": 10 }
         },
         {
           "id": "info-reception",
@@ -100,16 +58,17 @@
           "position": { "yaw": 91.1, "pitch": -10.5 },
           "popup": {
             "display": "anchored",
-            "title": "Reception Desk",
+            "title": "Welcome Area",
             "namingOpportunity": {
-              "name": "Reception Desk Naming Opportunity",
-              "price": "Contact us",
+              "name": "Welcome Area Naming Opportunity",
+              "price": "$5,000,000",
               "status": "on_sale"
             },
-            "body": "The reception area welcomes visitors and supporters of the Cancer Research Society. Naming opportunities here help fund innovative research that advances prevention, detection, and treatment across Canada.",
+            "body": "The Welcome Area is where every patient's journey begins — and where fear first meets reassurance.\n\nThis $5 million investment creates a space that does more than receive patients — it supports them. From the first moment, it communicates warmth, clarity, and confidence in the care ahead.\n\nDesigned as the heart of the Centre, it ensures that every patient and family feels guided, understood, and not alone.",
+            "videoUrl": "https://www.youtube.com/watch?v=sUe_TSb4Ffo",
             "cta": {
               "product": "giftabulator",
-              "url": "https://cancerresearchsociety.ca"
+              "url": "https://cancerresearchsociety.giftabulatornow.com/"
             }
           }
         }

@@ -29,11 +29,17 @@ export function toViewPosition(
 export interface DevSceneRef {
   id: string;
   title?: string;
+  /** Tour / client id — included in landing JSON for multi-client tours. */
+  clientId?: string;
 }
 
-export function formatLandingJson(scene: DevSceneRef, view: ViewPosition): string {
+export function formatLandingJson(
+  scene: DevSceneRef,
+  view: ViewPosition,
+): string {
   return JSON.stringify(
     {
+      ...(scene.clientId ? { client: scene.clientId } : {}),
       scene: scene.id,
       ...(scene.title ? { sceneTitle: scene.title } : {}),
       defaultView: {
@@ -61,8 +67,9 @@ export function logHotspotClick(coords: ClickCoords): void {
 }
 
 export function logLandingView(scene: DevSceneRef, view: ViewPosition): void {
+  const clientLabel = scene.clientId ? ` [${scene.clientId}]` : '';
   console.log(
-    `[dev] Landing view for "${scene.id}"${scene.title ? ` (${scene.title})` : ''} — ${formatViewPosition(view)}`,
+    `[dev] Landing view${clientLabel} "${scene.id}"${scene.title ? ` (${scene.title})` : ''} — ${formatViewPosition(view)}`,
   );
   console.log(formatLandingJson(scene, view));
 }

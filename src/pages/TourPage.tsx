@@ -172,12 +172,7 @@ export function TourPage() {
         targetView ?? scene.defaultView,
       );
     },
-    [
-      currentSceneId,
-      handleLoadStart,
-      syncSceneToUrl,
-      tour.scenes,
-    ],
+    [currentSceneId, handleLoadStart, syncSceneToUrl, tour.scenes],
   );
 
   const handleBreadcrumbNavigate = useCallback(
@@ -225,7 +220,10 @@ export function TourPage() {
     if (!scene) return;
     setPanoramaError(null);
     syncSceneToUrl(tour.firstScene);
-    await viewerRef.current?.navigateToScene(tour.firstScene, scene.defaultView);
+    await viewerRef.current?.navigateToScene(
+      tour.firstScene,
+      scene.defaultView,
+    );
   }, [syncSceneToUrl, tour.firstScene, tour.scenes]);
 
   return (
@@ -301,6 +299,7 @@ export function TourPage() {
             scene={{
               id: currentSceneId,
               title: tour.scenes[currentSceneId]?.title,
+              clientId: tour.id,
             }}
             view={devViewCoords}
             clickCoords={devClickCoords}

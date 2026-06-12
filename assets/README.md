@@ -13,8 +13,8 @@ assets/
 └── {clientId}/              # id = website hostname without TLD
     ├── panoramas/           # 360° equirectangular images
     │   ├── overview.jpg
-    │   ├── main-entrance.jpg
-    │   └── reception.jpg
+    │   ├── main-entrance.jpg   # gphospitalfoundation
+    │   ├── reception.jpg           # cancerresearchsociety, gphospitalfoundation
     └── brand/
         └── logo.png
 ```
