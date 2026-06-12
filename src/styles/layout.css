@@ -128,7 +128,7 @@ input::placeholder {
   height: auto;
   transform: translateX(-50%) translateY(0);
   flex-direction: row;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.52);
   backdrop-filter: blur(6px) saturate(120%);
@@ -250,15 +250,15 @@ input::placeholder {
 
 /* Control groups: zoom | move | fullscreen (horizontal) */
 .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
-  margin-left: 10px;
+  margin-left: 18px;
 }
 
 .viewer-container .psv-navbar .psv-move-button+.psv-fullscreen-button {
-  margin-left: 10px;
+  margin-left: 18px;
 }
 
 .viewer-container .psv-move-button+.psv-move-button {
-  margin-left: -4px;
+  margin-left: -2px;
 }
 
 .viewer-container .psv-button:not(.psv-zoom-range):hover {
@@ -333,6 +333,11 @@ input::placeholder {
   .viewer-container .psv-navbar,
   .viewer-container .psv-navbar--open {
     bottom: 16px;
-    padding: 6px 12px;
+    padding: 8px 14px;
+  }
+
+  .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button,
+  .viewer-container .psv-navbar .psv-move-button+.psv-fullscreen-button {
+    margin-left: 14px;
   }
 }
