@@ -3,10 +3,7 @@ import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
 import { buildScenePath } from '../viewer/sceneDepth';
 import type { Scene } from '../types/tour';
 import { Badge } from './ui/Badge';
-import {
-  TourGlassPanel,
-  type TourGlassPanelAnimation,
-} from './TourGlassPanel';
+import { TourGlassPanel, type TourGlassPanelAnimation } from './TourGlassPanel';
 import './TourNavFloat.css';
 
 interface TourNavFloatProps {
@@ -18,6 +15,8 @@ interface TourNavFloatProps {
   logoAlt?: string;
   websiteUrl?: string;
   disabled?: boolean;
+  /** Fade breadcrumb during scene-to-scene navigation (not landing zoom). */
+  breadcrumbHidden?: boolean;
   controlsVisible: boolean;
   onControlsToggle: () => void;
   onSelectScene: (sceneId: string) => void;
@@ -277,6 +276,7 @@ export function TourNavFloat({
   logoAlt,
   websiteUrl,
   disabled = false,
+  breadcrumbHidden = false,
   controlsVisible,
   onControlsToggle,
   onSelectScene,
@@ -469,7 +469,9 @@ export function TourNavFloat({
             </button>
           )}
 
-          <div className='tour-nav-breadcrumb__bar'>
+          <div
+            className={`tour-nav-breadcrumb__bar${breadcrumbHidden ? ' tour-nav-breadcrumb__bar--hidden' : ''}`}
+          >
             <ol className='tour-nav-breadcrumb__list'>
               {breadcrumbItems.map((item, index) => (
                 <li key={item.id} className='tour-nav-breadcrumb__item'>
@@ -529,7 +531,10 @@ export function TourNavFloat({
         ref={actionsRef}
       >
         {displayPanel === 'menu' && (
-          <div id='tour-nav-menu-panel' className='tour-nav-actions__panel-slot'>
+          <div
+            id='tour-nav-menu-panel'
+            className='tour-nav-actions__panel-slot'
+          >
             <TourGlassPanel
               title='All locations'
               titleId='tour-nav-menu-title'
@@ -546,7 +551,10 @@ export function TourNavFloat({
         )}
 
         {displayPanel === 'search' && (
-          <div id='tour-nav-search-panel' className='tour-nav-actions__panel-slot'>
+          <div
+            id='tour-nav-search-panel'
+            className='tour-nav-actions__panel-slot'
+          >
             <TourGlassPanel
               title='Search locations'
               titleId='tour-nav-search-title'
@@ -578,7 +586,10 @@ export function TourNavFloat({
         )}
 
         {displayPanel === 'help' && (
-          <div id='tour-nav-help-panel' className='tour-nav-actions__panel-slot'>
+          <div
+            id='tour-nav-help-panel'
+            className='tour-nav-actions__panel-slot'
+          >
             <TourGlassPanel
               title='About this tour'
               titleId='tour-nav-help-title'

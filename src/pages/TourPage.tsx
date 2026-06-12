@@ -141,12 +141,26 @@ export function TourPage() {
     syncSceneFromRoute,
   } = useTourState(initialScene);
 
+  const [transitionTargetSceneId, setTransitionTargetSceneId] = useState<
+    string | null
+  >(null);
+
+  const prepareSceneNavigate = useCallback(
+    (sceneId: string) => {
+      if (sceneId !== currentSceneId) {
+        setTransitionTargetSceneId(sceneId);
+      }
+    },
+    [currentSceneId],
+  );
+
   const { syncSceneToUrl } = useTourRouteSync({
     tour,
     currentSceneId,
     isTransitioning,
     viewerRef,
     syncSceneFromRoute,
+    prepareSceneNavigate,
   });
 
   const handleSceneChange = useCallback(
@@ -164,6 +178,7 @@ export function TourPage() {
       const scene = tour.scenes[sceneId];
       if (!scene || sceneId === currentSceneId) return;
 
+      prepareSceneNavigate(sceneId);
       handleLoadStart();
       syncSceneToUrl(sceneId);
 
@@ -172,23 +187,39 @@ export function TourPage() {
         targetView ?? scene.defaultView,
       );
     },
-    [currentSceneId, handleLoadStart, syncSceneToUrl, tour.scenes],
+    [
+      currentSceneId,
+      handleLoadStart,
+      prepareSceneNavigate,
+      syncSceneToUrl,
+      tour.scenes,
+    ],
   );
 
   const handleBreadcrumbNavigate = useCallback(
     async (sceneId: string) => {
       if (sceneId === currentSceneId) return;
+      prepareSceneNavigate(sceneId);
       handleLoadStart();
       syncSceneToUrl(sceneId);
       const scene = tour.scenes[sceneId];
       if (!scene) return;
       await viewerRef.current?.navigateToScene(sceneId, scene.defaultView);
     },
-    [currentSceneId, handleLoadStart, syncSceneToUrl, tour.scenes],
+    [
+      currentSceneId,
+      handleLoadStart,
+      prepareSceneNavigate,
+      syncSceneToUrl,
+      tour.scenes,
+    ],
   );
 
   const handleTransitionStart = useCallback(() => setIsTransitioning(true), []);
-  const handleTransitionEnd = useCallback(() => setIsTransitioning(false), []);
+  const handleTransitionEnd = useCallback(() => {
+    setIsTransitioning(false);
+    setTransitionTargetSceneId(null);
+  }, []);
 
   const loadErrorSceneId = panoramaError?.sceneId ?? currentSceneId;
   const showLoadError = panoramaError !== null || searchParams.errorTest;
@@ -197,6 +228,7 @@ export function TourPage() {
     (info: PanoramaLoadErrorInfo) => {
       setPanoramaError(info);
       setIsTransitioning(false);
+      setTransitionTargetSceneId(null);
     },
     [setIsTransitioning],
   );
@@ -219,12 +251,13 @@ export function TourPage() {
     const scene = tour.scenes[tour.firstScene];
     if (!scene) return;
     setPanoramaError(null);
+    prepareSceneNavigate(tour.firstScene);
     syncSceneToUrl(tour.firstScene);
     await viewerRef.current?.navigateToScene(
       tour.firstScene,
       scene.defaultView,
     );
-  }, [syncSceneToUrl, tour.firstScene, tour.scenes]);
+  }, [prepareSceneNavigate, syncSceneToUrl, tour.firstScene, tour.scenes]);
 
   return (
     <div className='app'>
@@ -277,6 +310,7 @@ export function TourPage() {
           logoAlt={tour.branding?.logoAlt}
           websiteUrl={getTourWebsite(tour)}
           disabled={isTransitioning}
+          breadcrumbHidden={transitionTargetSceneId !== null}
           controlsVisible={controlsVisible}
           onControlsToggle={() => setControlsVisible((visible) => !visible)}
           onSelectScene={handleNavigate}

@@ -8,6 +8,7 @@ Project documentation for the iShare virtual tour MVP (multi-client).
 | [TECH_STACK.md](./TECH_STACK.md)               | Technology choices, library comparison, dependencies, deployment          |
 | [MVP_PLAN.md](./MVP_PLAN.md)                   | Feature specifications, data schemas, UI layout, implementation checklist |
 | [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md) | Deeper/shallower scene transition UX, zoom semantics, tuning              |
+| [ROADMAP.md](./ROADMAP.md)                     | Post-MVP roadmap — VR/XR, database, mobile, integrations                  |
 
 ## Quick Links
 
