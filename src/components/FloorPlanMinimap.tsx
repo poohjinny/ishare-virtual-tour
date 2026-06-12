@@ -47,70 +47,74 @@ export function FloorPlanMinimap({
   return (
     <div className='floor-plan-minimap' aria-label='Floor plan mini-map'>
       <div className='floor-plan-minimap__frame'>
-        <img
-          className='floor-plan-minimap__image'
-          src={floorPlan.image}
-          alt=''
-          width={width}
-          height={height}
-          draggable={false}
-        />
+        <div className='floor-plan-minimap__map'>
+          <img
+            className='floor-plan-minimap__image'
+            src={floorPlan.image}
+            alt=''
+            width={width}
+            height={height}
+            draggable={false}
+          />
 
-        <svg
-          className='floor-plan-minimap__overlay'
-          viewBox={`0 0 ${width} ${height}`}
-          aria-hidden='true'
-        >
-          {wedgePath && (
-            <path className='floor-plan-minimap__fov' d={wedgePath} />
-          )}
+          <svg
+            className='floor-plan-minimap__overlay'
+            viewBox={`0 0 ${width} ${height}`}
+            aria-hidden='true'
+          >
+            {wedgePath && (
+              <path className='floor-plan-minimap__fov' d={wedgePath} />
+            )}
 
-          {mapPoints.map((point) => {
-            const px = point.x * width;
-            const py = point.y * height;
-            const isCurrent = point.sceneId === currentSceneId;
+            {mapPoints.map((point) => {
+              const px = point.x * width;
+              const py = point.y * height;
+              const isCurrent = point.sceneId === currentSceneId;
 
-            return (
-              <g key={point.sceneId}>
-                {isCurrent && (
+              return (
+                <g key={point.sceneId}>
+                  {isCurrent && (
+                    <circle
+                      className='floor-plan-minimap__pulse'
+                      cx={px}
+                      cy={py}
+                      r={22}
+                    />
+                  )}
                   <circle
-                    className='floor-plan-minimap__pulse'
+                    className={`floor-plan-minimap__dot${isCurrent ? ' floor-plan-minimap__dot--current' : ''}`}
                     cx={px}
                     cy={py}
-                    r={22}
-                  />
-                )}
-                <circle
-                  className={`floor-plan-minimap__dot${isCurrent ? ' floor-plan-minimap__dot--current' : ''}`}
-                  cx={px}
-                  cy={py}
-                  r={isCurrent ? 14 : 10}
-                  role={onSelectScene ? 'button' : undefined}
-                  tabIndex={onSelectScene && !disabled ? 0 : undefined}
-                  aria-label={
-                    isCurrent ? `${point.title}, current location` : point.title
-                  }
-                  onClick={() => {
-                    if (disabled || !onSelectScene || isCurrent) return;
-                    onSelectScene(point.sceneId);
-                  }}
-                  onKeyDown={(event) => {
-                    if (
-                      disabled ||
-                      !onSelectScene ||
-                      isCurrent ||
-                      (event.key !== 'Enter' && event.key !== ' ')
-                    ) {
-                      return;
+                    r={isCurrent ? 14 : 10}
+                    role={onSelectScene ? 'button' : undefined}
+                    tabIndex={onSelectScene && !disabled ? 0 : undefined}
+                    aria-label={
+                      isCurrent ?
+                        `${point.title}, current location`
+                      : point.title
                     }
-                    event.preventDefault();
-                    onSelectScene(point.sceneId);
-                  }}
-                />
-              </g>
-            );
-          })}
-        </svg>
+                    onClick={() => {
+                      if (disabled || !onSelectScene || isCurrent) return;
+                      onSelectScene(point.sceneId);
+                    }}
+                    onKeyDown={(event) => {
+                      if (
+                        disabled ||
+                        !onSelectScene ||
+                        isCurrent ||
+                        (event.key !== 'Enter' && event.key !== ' ')
+                      ) {
+                        return;
+                      }
+                      event.preventDefault();
+                      onSelectScene(point.sceneId);
+                    }}
+                  />
+                </g>
+              );
+            })}
+          </svg>
+        </div>
       </div>
     </div>
   );

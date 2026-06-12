@@ -8,17 +8,25 @@
 
 .floor-plan-minimap__frame {
   position: relative;
-  width: 128px;
-  height: auto;
-  border-radius: 12px;
+  width: fit-content;
+  padding: 10px;
+  line-height: 0;
+  border-radius: 10px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(6px) saturate(120%);
-  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(4px) saturate(110%);
+  -webkit-backdrop-filter: blur(4px) saturate(110%);
+  border: none;
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.14),
     0 4px 12px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+.floor-plan-minimap__map {
+  position: relative;
+  width: 108px;
+  overflow: hidden;
+  border-radius: 6px;
 }
 
 .floor-plan-minimap__image {
@@ -76,6 +84,7 @@
 }
 
 @keyframes floor-plan-minimap-pulse {
+
   0%,
   100% {
     opacity: 0.55;
@@ -93,8 +102,13 @@
   }
 
   .floor-plan-minimap__frame {
-    width: 96px;
-    border-radius: 10px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .floor-plan-minimap__map {
+    width: 80px;
+    border-radius: 5px;
   }
 }
 
