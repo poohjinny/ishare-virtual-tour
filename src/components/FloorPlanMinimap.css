@@ -8,7 +8,7 @@
 
 .floor-plan-minimap__frame {
   position: relative;
-  width: 148px;
+  width: 128px;
   height: auto;
   border-radius: 12px;
   overflow: hidden;
@@ -76,7 +76,6 @@
 }
 
 @keyframes floor-plan-minimap-pulse {
-
   0%,
   100% {
     opacity: 0.55;
@@ -94,7 +93,7 @@
   }
 
   .floor-plan-minimap__frame {
-    width: 108px;
+    width: 96px;
     border-radius: 10px;
   }
 }

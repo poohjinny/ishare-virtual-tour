@@ -14,9 +14,9 @@
   pointer-events: auto;
 }
 
-/* Minimap: bottom 24px, ~111px tall (148px @ 4:3) */
+/* Minimap: bottom 24px, ~96px tall (128px @ 4:3) */
 .dev-panel--above-minimap {
-  bottom: 148px;
+  bottom: 132px;
 }
 
 .dev-panel__title {
@@ -101,6 +101,6 @@
 
 @media (max-width: 480px) {
   .dev-panel--above-minimap {
-    bottom: 112px;
+    bottom: 100px;
   }
 }

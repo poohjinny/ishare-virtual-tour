@@ -31,6 +31,11 @@ function normalizeTourAssets(tour: Tour): Tour {
         { ...tour.branding, logo: withBaseUrl(tour.branding.logo) }
       : undefined,
 
+    floorPlan:
+      tour.floorPlan ?
+        { ...tour.floorPlan, image: withBaseUrl(tour.floorPlan.image) }
+      : undefined,
+
     scenes: Object.fromEntries(
       Object.entries(tour.scenes).map(([id, scene]) => [
         id,
