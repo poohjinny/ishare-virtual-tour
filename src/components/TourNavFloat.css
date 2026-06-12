@@ -16,6 +16,24 @@
   gap: 10px;
   width: fit-content;
   max-width: 100%;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s ease,
+    visibility 0s linear 0s;
+}
+
+.tour-nav-breadcrumb__row--hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(calc(-100% - 28px));
+  pointer-events: none;
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.22s ease,
+    visibility 0s linear 0.28s;
 }
 
 .tour-nav-breadcrumb__bar {
@@ -34,17 +52,6 @@
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.14),
     0 4px 12px rgba(15, 23, 42, 0.08);
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 0.24s ease,
-    transform 0.24s ease;
-}
-
-.tour-nav-breadcrumb__bar--hidden {
-  opacity: 0;
-  transform: translateY(-5px);
-  pointer-events: none;
 }
 
 .tour-nav-history-btn {

@@ -6,7 +6,13 @@ import '@photo-sphere-viewer/core/index.css';
 import '@photo-sphere-viewer/markers-plugin/index.css';
 import '@photo-sphere-viewer/virtual-tour-plugin/index.css';
 
-import type { Hotspot, PopupContent, Tour, ViewPosition } from '../types/tour';
+import type {
+  Hotspot,
+  PopupContent,
+  Tour,
+  ViewPosition,
+  ViewerOrientation,
+} from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import { logHotspotClick, toViewPosition } from '../utils/devHotspotLogger';
 import { fromPsvZoom, toPsvZoom } from '../utils/psvZoom';
@@ -68,6 +74,7 @@ interface PanoramaViewerProps {
   onTransitionEnd: () => void;
   onDevClick?: (coords: ClickCoords) => void;
   onDevViewUpdate?: (view: ViewPosition) => void;
+  onViewUpdate?: (view: ViewerOrientation) => void;
   onLoadStart?: () => void;
   onLoadProgress?: (progress: number) => void;
   onLoadComplete?: () => void;
@@ -119,6 +126,7 @@ export const PanoramaViewer = forwardRef<
     onTransitionEnd,
     onDevClick,
     onDevViewUpdate,
+    onViewUpdate,
     onLoadStart,
     onLoadProgress,
     onLoadComplete,
@@ -161,6 +169,7 @@ export const PanoramaViewer = forwardRef<
   const onTransitionEndRef = useLatestRef(onTransitionEnd);
   const onDevClickRef = useLatestRef(onDevClick);
   const onDevViewUpdateRef = useLatestRef(onDevViewUpdate);
+  const onViewUpdateRef = useLatestRef(onViewUpdate);
   const onLoadStartRef = useLatestRef(onLoadStart);
   const onLoadProgressRef = useLatestRef(onLoadProgress);
   const onLoadCompleteRef = useLatestRef(onLoadComplete);
@@ -564,24 +573,32 @@ export const PanoramaViewer = forwardRef<
 
     let devRaf = 0;
     const emitViewPosition = () => {
-      if (!onDevViewUpdateRef.current) return;
+      if (!onDevViewUpdateRef.current && !onViewUpdateRef.current) return;
       cancelAnimationFrame(devRaf);
       devRaf = requestAnimationFrame(() => {
         const position = viewer.getPosition();
-        onDevViewUpdateRef.current?.(
-          toViewPosition(
-            (position.yaw * 180) / Math.PI,
-            (position.pitch * 180) / Math.PI,
-            fromPsvZoom(viewer.getZoomLevel()),
-          ),
-        );
+        const yaw = (position.yaw * 180) / Math.PI;
+        const pitch = (position.pitch * 180) / Math.PI;
+        const zoom = fromPsvZoom(viewer.getZoomLevel());
+        const vFov = viewer.dataHelper.zoomLevelToFov(viewer.getZoomLevel());
+        const hFov = viewer.dataHelper.vFovToHFov(vFov);
+
+        onDevViewUpdateRef.current?.(toViewPosition(yaw, pitch, zoom));
+        onViewUpdateRef.current?.({ yaw, pitch, zoom, hFov });
       });
     };
 
-    if (devMode) {
-      viewer.addEventListener('position-updated', emitViewPosition);
-      viewer.addEventListener('ready', emitViewPosition);
+    const trackViewOrientation = devMode || Boolean(onViewUpdateRef.current);
 
+    if (trackViewOrientation) {
+      viewer.addEventListener('position-updated', emitViewPosition);
+      viewer.addEventListener('zoom-updated', emitViewPosition);
+      viewer.addEventListener('ready', emitViewPosition);
+      viewer.addEventListener('panorama-loaded', emitViewPosition);
+      virtualTour.addEventListener('node-changed', emitViewPosition);
+    }
+
+    if (devMode) {
       viewer.addEventListener('click', (e) => {
         const coords = {
           yaw: (e.data.yaw * 180) / Math.PI,

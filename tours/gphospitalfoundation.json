@@ -16,6 +16,11 @@
     "primaryColor": "#cb007c"
   },
   "firstScene": "overview",
+  "floorPlan": {
+    "image": "/assets/gphospitalfoundation/maps/floorplan.svg",
+    "width": 400,
+    "height": 300
+  },
   "defaultTransition": { "speed": "500ms", "effect": "fade" },
   "scenes": {
     "overview": {
@@ -23,6 +28,7 @@
       "title": "Overview",
       "panorama": "/assets/gphospitalfoundation/panoramas/overview.jpg",
       "defaultView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 },
+      "map": { "x": 0.5, "y": 0.24, "heading": 149.2 },
       "hotspots": [
         {
           "id": "nav-to-entrance",
@@ -39,6 +45,7 @@
       "title": "Main Entrance",
       "panorama": "/assets/gphospitalfoundation/panoramas/main-entrance.jpg",
       "defaultView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 },
+      "map": { "x": 0.5, "y": 0.82, "heading": 14.6 },
       "hotspots": [
         {
           "id": "nav-back-overview",
@@ -81,6 +88,7 @@
       "title": "Reception",
       "panorama": "/assets/gphospitalfoundation/panoramas/reception.jpg",
       "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
+      "map": { "x": 0.5, "y": 0.45, "heading": 100 },
       "hotspots": [
         {
           "id": "nav-back-entrance",

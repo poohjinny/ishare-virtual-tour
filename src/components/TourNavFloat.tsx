@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
 import { buildScenePath } from '../viewer/sceneDepth';
 import type { Scene } from '../types/tour';
 import { Badge } from './ui/Badge';
@@ -17,6 +16,10 @@ interface TourNavFloatProps {
   disabled?: boolean;
   /** Fade breadcrumb during scene-to-scene navigation (not landing zoom). */
   breadcrumbHidden?: boolean;
+  showHistoryBack?: boolean;
+  showHistoryForward?: boolean;
+  onHistoryBack?: () => void;
+  onHistoryForward?: () => void;
   controlsVisible: boolean;
   onControlsToggle: () => void;
   onSelectScene: (sceneId: string) => void;
@@ -28,6 +31,8 @@ type PanelAnimPhase = 'enter' | 'exit' | 'idle';
 
 const PANEL_ENTER_MS = 150;
 const PANEL_EXIT_MS = 140;
+/** Match `.tour-nav-breadcrumb__row` transform duration in TourNavFloat.css */
+const BREADCRUMB_EXIT_MS = 280;
 
 function panelAnimation(phase: PanelAnimPhase): TourGlassPanelAnimation {
   if (phase === 'enter') return 'enter';
@@ -277,6 +282,10 @@ export function TourNavFloat({
   websiteUrl,
   disabled = false,
   breadcrumbHidden = false,
+  showHistoryBack = false,
+  showHistoryForward = false,
+  onHistoryBack,
+  onHistoryForward,
   controlsVisible,
   onControlsToggle,
   onSelectScene,
@@ -288,14 +297,33 @@ export function TourNavFloat({
   const [search, setSearch] = useState('');
   const actionsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const { showBack, showForward, goBack, goForward } = useHistoryNavControls();
+  const [displaySceneId, setDisplaySceneId] = useState(currentSceneId);
+  const [displayShowHistoryBack, setDisplayShowHistoryBack] =
+    useState(showHistoryBack);
+  const [displayShowHistoryForward, setDisplayShowHistoryForward] =
+    useState(showHistoryForward);
 
-  /** Root depth has no structural “back” — hide ← even if browser history exists. */
-  const showHistoryBack = showBack && currentSceneId !== firstSceneId;
+  // Defer breadcrumb row updates until slide-out finishes (labels + ←/→ buttons).
+  useEffect(() => {
+    if (!breadcrumbHidden) {
+      setDisplaySceneId(currentSceneId);
+      setDisplayShowHistoryBack(showHistoryBack);
+      setDisplayShowHistoryForward(showHistoryForward);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setDisplaySceneId(currentSceneId);
+      setDisplayShowHistoryBack(showHistoryBack);
+      setDisplayShowHistoryForward(showHistoryForward);
+    }, BREADCRUMB_EXIT_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [breadcrumbHidden, currentSceneId, showHistoryBack, showHistoryForward]);
 
   const breadcrumbItems = useMemo(
-    () => buildBreadcrumbItems(firstSceneId, scenes, currentSceneId),
-    [firstSceneId, scenes, currentSceneId],
+    () => buildBreadcrumbItems(firstSceneId, scenes, displaySceneId),
+    [displaySceneId, firstSceneId, scenes],
   );
 
   const filteredScenes = useMemo(
@@ -456,22 +484,22 @@ export function TourNavFloat({
   return (
     <>
       <nav className='tour-nav-breadcrumb' aria-label='Tour location'>
-        <div className='tour-nav-breadcrumb__row'>
-          {showHistoryBack && (
+        <div
+          className={`tour-nav-breadcrumb__row${breadcrumbHidden ? ' tour-nav-breadcrumb__row--hidden' : ''}`}
+        >
+          {displayShowHistoryBack && (
             <button
               type='button'
               className='tour-nav-history-btn'
               aria-label='Previous view'
               disabled={disabled}
-              onClick={goBack}
+              onClick={onHistoryBack}
             >
               <HistoryBackIcon />
             </button>
           )}
 
-          <div
-            className={`tour-nav-breadcrumb__bar${breadcrumbHidden ? ' tour-nav-breadcrumb__bar--hidden' : ''}`}
-          >
+          <div className='tour-nav-breadcrumb__bar'>
             <ol className='tour-nav-breadcrumb__list'>
               {breadcrumbItems.map((item, index) => (
                 <li key={item.id} className='tour-nav-breadcrumb__item'>
@@ -512,13 +540,13 @@ export function TourNavFloat({
             </ol>
           </div>
 
-          {showForward && (
+          {displayShowHistoryForward && (
             <button
               type='button'
               className='tour-nav-history-btn'
               aria-label='Next view'
               disabled={disabled}
-              onClick={goForward}
+              onClick={onHistoryForward}
             >
               <HistoryForwardIcon />
             </button>

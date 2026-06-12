@@ -15,9 +15,16 @@ interface DevViewPanelProps {
   scene: DevSceneRef;
   view: ViewPosition | null;
   clickCoords: ClickCoords | null;
+  /** Stack above bottom-left floor plan minimap */
+  aboveMinimap?: boolean;
 }
 
-export function DevViewPanel({ scene, view, clickCoords }: DevViewPanelProps) {
+export function DevViewPanel({
+  scene,
+  view,
+  clickCoords,
+  aboveMinimap = false,
+}: DevViewPanelProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
   const copyLanding = useCallback(async () => {
@@ -52,7 +59,9 @@ export function DevViewPanel({ scene, view, clickCoords }: DevViewPanelProps) {
   }, [copyLanding]);
 
   return (
-    <div className='dev-panel'>
+    <div
+      className={`dev-panel${aboveMinimap ? ' dev-panel--above-minimap' : ''}`}
+    >
       <p className='dev-panel__title'>
         DEV — {scene.clientId ? `${scene.clientId} / ` : ''}
         {scene.title ?? scene.id}

@@ -62,6 +62,24 @@ export interface Hotspot {
   popup?: PopupContent;
 }
 
+export interface SceneMapPosition {
+  /** 0–1 horizontal position on the floor plan */
+  x: number;
+  /** 0–1 vertical position on the floor plan */
+  y: number;
+  /**
+   * Map bearing (°) when viewer yaw equals defaultView.yaw.
+   * 0 = up on the plan, clockwise. Must be calibrated per scene — not equal to yaw.
+   */
+  heading: number;
+}
+
+export interface FloorPlan {
+  image: string;
+  width: number;
+  height: number;
+}
+
 export interface Scene {
   id: string;
   title: string;
@@ -69,6 +87,7 @@ export interface Scene {
   thumbnail?: string;
   defaultView: ViewPosition;
   hotspots: Hotspot[];
+  map?: SceneMapPosition;
 }
 
 export interface OrganizationPhone {
@@ -103,9 +122,15 @@ export interface Tour {
   title: string;
   organization?: TourOrganization;
   branding?: TourBranding;
+  floorPlan?: FloorPlan;
   firstScene: string;
   defaultTransition?: { speed?: string; effect?: 'fade' | 'black' };
   scenes: Record<string, Scene>;
+}
+
+/** Live viewer orientation for mini-map and dev tooling */
+export interface ViewerOrientation extends ViewPosition {
+  hFov: number;
 }
 
 export interface FaqEntry {

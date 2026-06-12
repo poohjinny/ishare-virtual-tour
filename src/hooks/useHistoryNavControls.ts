@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   NavigationType,
   useLocation,
@@ -68,5 +68,22 @@ export function useHistoryNavControls() {
   const goBack = () => navigate(-1);
   const goForward = () => navigate(1);
 
-  return { showBack, showForward, goBack, goForward };
+  /** Jump to an earlier in-app URL without pushing — preserves forward history. */
+  const goToHref = useCallback(
+    (href: string): boolean => {
+      const stack = stackRef.current;
+      const currentIndex = indexRef.current;
+      const targetIndex = stack.findIndex((item) => item.href === href);
+
+      if (targetIndex < 0 || targetIndex >= currentIndex) {
+        return false;
+      }
+
+      navigate(targetIndex - currentIndex);
+      return true;
+    },
+    [navigate],
+  );
+
+  return { showBack, showForward, goBack, goForward, goToHref };
 }

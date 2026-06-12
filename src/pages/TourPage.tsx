@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { AiAssistant } from '../components/ai/AiAssistant';
 import { ClientSelector } from '../components/ClientSelector';
 import { DevViewPanel } from '../components/DevViewPanel';
@@ -7,6 +7,7 @@ import { InfoPopup } from '../components/InfoPopup';
 import { LoadProgressBar } from '../components/LoadProgressBar';
 import { PanoramaLoadError } from '../components/PanoramaLoadError';
 import { TourLoadSplash } from '../components/TourLoadSplash';
+import { FloorPlanMinimap } from '../components/FloorPlanMinimap';
 import { TourNavFloat } from '../components/TourNavFloat';
 import {
   getSceneList,
@@ -19,9 +20,18 @@ import { useTourAssistant } from '../hooks/useTourAssistant';
 import { useTourRouteSync } from '../hooks/useTourRouteSync';
 import { useTourState } from '../hooks/useTourState';
 import { useClientTheme } from '../hooks/useClientTheme';
-import type { PopupContent, ViewPosition } from '../types/tour';
+import type {
+  PopupContent,
+  ViewPosition,
+  ViewerOrientation,
+} from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
-import { resolveSceneId, resolveTourRoute } from '../utils/tourPaths';
+import {
+  resolveSceneId,
+  resolveTourRoute,
+  buildTourLocation,
+} from '../utils/tourPaths';
+import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
 import {
   PanoramaViewer,
   type PanoramaLoadErrorInfo,
@@ -34,6 +44,7 @@ const DEV_SPLASH_HOLD_MS = 2000;
 
 export function TourPage() {
   const searchParams = useAppSearchParams();
+  const [urlSearchParams] = useSearchParams();
   const {
     tourOrScene,
     tourId,
@@ -84,6 +95,8 @@ export function TourPage() {
   }, [tour.id, searchParams.errorTest]);
 
   const [controlsVisible, setControlsVisible] = useState(false);
+  const [viewerOrientation, setViewerOrientation] =
+    useState<ViewerOrientation | null>(null);
   const [panoramaError, setPanoramaError] =
     useState<PanoramaLoadErrorInfo | null>(null);
 
@@ -154,6 +167,9 @@ export function TourPage() {
     [currentSceneId],
   );
 
+  const { showBack, showForward, goBack, goForward, goToHref } =
+    useHistoryNavControls();
+
   const { syncSceneToUrl } = useTourRouteSync({
     tour,
     currentSceneId,
@@ -201,6 +217,18 @@ export function TourPage() {
       if (sceneId === currentSceneId) return;
       prepareSceneNavigate(sceneId);
       handleLoadStart();
+
+      const targetHref = buildTourLocation(
+        tour.id,
+        sceneId,
+        tour.firstScene,
+        urlSearchParams,
+      );
+
+      if (goToHref(targetHref)) {
+        return;
+      }
+
       syncSceneToUrl(sceneId);
       const scene = tour.scenes[sceneId];
       if (!scene) return;
@@ -208,10 +236,14 @@ export function TourPage() {
     },
     [
       currentSceneId,
+      goToHref,
       handleLoadStart,
       prepareSceneNavigate,
       syncSceneToUrl,
+      tour.firstScene,
+      tour.id,
       tour.scenes,
+      urlSearchParams,
     ],
   );
 
@@ -259,6 +291,10 @@ export function TourPage() {
     );
   }, [prepareSceneNavigate, syncSceneToUrl, tour.firstScene, tour.scenes]);
 
+  const handleViewUpdate = useCallback((view: ViewerOrientation) => {
+    setViewerOrientation(view);
+  }, []);
+
   return (
     <div className='app'>
       <div className='viewer-area viewer-area--fullscreen'>
@@ -279,6 +315,7 @@ export function TourPage() {
           onTransitionEnd={handleTransitionEnd}
           onDevClick={setDevClickCoords}
           onDevViewUpdate={setDevViewCoords}
+          onViewUpdate={tour.floorPlan ? handleViewUpdate : undefined}
           onLoadStart={handleLoadStart}
           onLoadProgress={handleLoadProgress}
           onLoadComplete={handleLoadComplete}
@@ -301,6 +338,17 @@ export function TourPage() {
           disabled={isTransitioning}
         />
 
+        {tour.floorPlan && (
+          <FloorPlanMinimap
+            floorPlan={tour.floorPlan}
+            tour={tour}
+            currentSceneId={currentSceneId}
+            view={viewerOrientation}
+            disabled={isTransitioning}
+            onSelectScene={handleNavigate}
+          />
+        )}
+
         <TourNavFloat
           scenes={scenes}
           currentSceneId={currentSceneId}
@@ -311,6 +359,10 @@ export function TourPage() {
           websiteUrl={getTourWebsite(tour)}
           disabled={isTransitioning}
           breadcrumbHidden={transitionTargetSceneId !== null}
+          showHistoryBack={showBack && currentSceneId !== tour.firstScene}
+          showHistoryForward={showForward}
+          onHistoryBack={goBack}
+          onHistoryForward={goForward}
           controlsVisible={controlsVisible}
           onControlsToggle={() => setControlsVisible((visible) => !visible)}
           onSelectScene={handleNavigate}
@@ -337,6 +389,7 @@ export function TourPage() {
             }}
             view={devViewCoords}
             clickCoords={devClickCoords}
+            aboveMinimap={Boolean(tour.floorPlan)}
           />
         )}
       </div>
