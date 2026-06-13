@@ -12,10 +12,12 @@
 }
 
 .tour-glass-panel--anchored {
+  --ishare-panel-shadow:
+    0 12px 28px rgba(15, 23, 42, 0.16),
+    0 4px 10px rgba(15, 23, 42, 0.08);
+  --ishare-panel-border: 1px solid rgba(15, 23, 42, 0.11);
   pointer-events: auto;
   cursor: default;
-  filter: drop-shadow(0 10px 28px rgba(15, 23, 42, 0.14),
-      0 4px 12px rgba(15, 23, 42, 0.08));
 }
 
 /* Off-screen content measurement — natural height without viewport cap */
@@ -30,7 +32,7 @@
   height: 100%;
   max-height: none;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
 }
@@ -43,12 +45,53 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: transparent;
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border: var(--ishare-panel-border);
+  box-shadow: var(--ishare-panel-shadow);
+  transform-origin: bottom center;
 }
 
 .tour-glass-panel--anchored .tour-glass-panel__body {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body,
+.viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body * {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body {
+  cursor: text;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body button {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  cursor: pointer;
+}
+
+.viewer-container .psv-marker:has([data-info-panel='true']) {
+  cursor: auto;
+}
+
+/* Anchored panels: avoid display:none flicker when PSV toggles visibility */
+.viewer-container .psv-marker:has([data-nav-panel='true']),
+.viewer-container .psv-marker:has([data-info-panel='true']) {
+  display: block !important;
+  overflow: visible;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.viewer-container .psv-marker:has([data-nav-panel='true']).psv-marker--visible,
+.viewer-container .psv-marker:has([data-info-panel='true']).psv-marker--visible {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .tour-glass-panel--dock {
@@ -77,10 +120,15 @@
 }
 
 .tour-glass-panel--anchored .tour-glass-panel__shell {
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
+  background: transparent;
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border: var(--ishare-panel-border);
+  box-shadow: var(--ishare-panel-shadow);
+  transform-origin: bottom center;
 }
 
 .tour-glass-panel__shell--enter {
@@ -301,6 +349,12 @@
   height: 100%;
   border: 0;
   pointer-events: auto;
+}
+
+.tour-glass-panel__video-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .tour-glass-panel__cta {

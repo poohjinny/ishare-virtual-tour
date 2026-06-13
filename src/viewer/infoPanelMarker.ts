@@ -1,20 +1,59 @@
+import type { Viewer } from '@photo-sphere-viewer/core';
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
-import type { Hotspot, PopupContent } from '../types/tour';
+import type { Hotspot, PopupContent, ViewPosition } from '../types/tour';
 import {
   buildAnchoredPopupHtml,
   glassPanelMarkerSize,
+  mountAnchoredPopupVideo,
 } from '../components/tourGlassPanelHtml';
 import { setActiveInfoHotspot } from './infoHotspotActive';
+import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
+import {
+  anchoredPanelMarkerPosition,
+  correctAnchoredPanelPixelGap,
+  INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
+  measureHotspotHalfHeightPx,
+} from './anchoredPanelPosition';
+import { scheduleNudgeCameraForClippedPanel } from './anchoredPanelCameraNudge';
 
-/** Degrees above hotspot pitch — panel anchor is bottom center */
-const PANEL_PITCH_OFFSET = 5;
 const PANEL_ID_SUFFIX = '-panel';
 const PANEL_EXIT_MS = 150;
 
 const closingPanelIds = new Set<string>();
 
+interface InfoPanelPositionTrack {
+  panelId: string;
+  hostHotspotId: string;
+  hostPosition: ViewPosition;
+}
+
+let infoPanelPositionTrack: InfoPanelPositionTrack | null = null;
+
 function panelMarkerId(hotspotId: string): string {
   return `${hotspotId}${PANEL_ID_SUFFIX}`;
+}
+
+function clearInfoPanelPositionTrack(): void {
+  infoPanelPositionTrack = null;
+}
+
+export function syncInfoPanelPosition(
+  viewer: Viewer,
+  markers: MarkersPlugin,
+): void {
+  if (
+    infoPanelPositionTrack &&
+    !markers.getMarker(infoPanelPositionTrack.panelId)
+  ) {
+    clearInfoPanelPositionTrack();
+  }
+
+  correctAnchoredPanelPixelGap(
+    viewer,
+    markers,
+    infoPanelPositionTrack,
+    INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
+  );
 }
 
 export function closeAnchoredInfoPanel(
@@ -25,6 +64,8 @@ export function closeAnchoredInfoPanel(
 
   for (const marker of markers.getMarkers()) {
     if (!marker.data?.infoPanel) continue;
+
+    clearInfoPanelPositionTrack();
 
     if (!clearingActive) {
       setActiveInfoHotspot(markers, null);
@@ -74,6 +115,7 @@ export function getOpenAnchoredPanelHostId(
 }
 
 export function openAnchoredInfoPanel(
+  viewer: Viewer,
   markers: MarkersPlugin,
   hotspot: Hotspot,
 ): void {
@@ -82,22 +124,55 @@ export function openAnchoredInfoPanel(
   closeAnchoredInfoPanel(markers, false);
 
   const id = panelMarkerId(hotspot.id);
+  const hostMarker = markers.getMarker(hotspot.id);
+  const halfHeight = measureHotspotHalfHeightPx(
+    hostMarker?.domElement,
+    INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
+  );
+
   markers.addMarker({
     id,
     html: buildAnchoredPopupHtml(hotspot.popup, hotspot.id),
     size: glassPanelMarkerSize(hotspot.popup, hotspot.id),
-    position: {
-      yaw: `${hotspot.position.yaw}deg`,
-      pitch: `${hotspot.position.pitch + PANEL_PITCH_OFFSET}deg`,
-    },
+    position: anchoredPanelMarkerPosition(viewer, hotspot.position, halfHeight),
     anchor: 'bottom center',
     data: { infoPanel: true, hostHotspotId: hotspot.id },
   });
 
+  infoPanelPositionTrack = {
+    panelId: id,
+    hostHotspotId: hotspot.id,
+    hostPosition: hotspot.position,
+  };
+
+  const marker = markers.getMarker(id);
+  if (marker?.domElement instanceof HTMLElement) {
+    enableGlassPanelTextSelection(marker.domElement);
+  }
+
   setActiveInfoHotspot(markers, hotspot.id);
+
+  scheduleNudgeCameraForClippedPanel(
+    viewer,
+    () => {
+      const panelMarker = markers.getMarker(id);
+      return panelMarker?.domElement instanceof HTMLElement ?
+          panelMarker.domElement
+        : null;
+    },
+    {
+      afterSettled: () => {
+        const panelMarker = markers.getMarker(id);
+        if (panelMarker?.domElement instanceof HTMLElement) {
+          mountAnchoredPopupVideo(panelMarker.domElement);
+        }
+      },
+    },
+  );
 }
 
 export function toggleAnchoredInfoPanel(
+  viewer: Viewer,
   markers: MarkersPlugin,
   hotspot: Hotspot,
 ): void {
@@ -106,7 +181,7 @@ export function toggleAnchoredInfoPanel(
     closeAnchoredInfoPanel(markers, true);
     return;
   }
-  openAnchoredInfoPanel(markers, hotspot);
+  openAnchoredInfoPanel(viewer, markers, hotspot);
 }
 
 export function isAnchoredPopup(popup: PopupContent): boolean {

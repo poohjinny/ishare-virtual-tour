@@ -25,6 +25,7 @@
     "overview": {
       "id": "overview",
       "title": "Overview",
+      "description": "Begin your visit with an overview of the Cancer Research Society experience. This starting view introduces the virtual tour and the spaces where supporters can learn about naming opportunities that fund innovative cancer research across Canada.",
       "panorama": "/assets/cancerresearchsociety/panoramas/overview.jpg",
       "defaultView": { "yaw": 74.2, "pitch": -62.7, "zoom": 10 },
       "hotspots": [
@@ -41,6 +42,7 @@
     "reception": {
       "id": "reception",
       "title": "Reception",
+      "description": "Enter the reception area of the Cancer Research Society virtual tour. This welcome space is where visitors first connect with the Society's mission — and where naming opportunities help fund breakthrough research that improves prevention, detection, and treatment for patients across Canada.",
       "panorama": "/assets/cancerresearchsociety/panoramas/reception.jpg",
       "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
       "hotspots": [
@@ -48,6 +50,7 @@
           "id": "nav-back-overview",
           "type": "nav",
           "label": "Overview",
+          "instant": true,
           "position": { "yaw": 180, "pitch": -10 },
           "targetScene": "overview",
           "targetView": { "yaw": 74.2, "pitch": -62.7, "zoom": 10 }

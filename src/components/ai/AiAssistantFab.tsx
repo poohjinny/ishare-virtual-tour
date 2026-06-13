@@ -1,7 +1,6 @@
 import {
-  ISHARE_GUIDE_CTA,
+  ISHARE_GUIDE_AVATAR,
   ISHARE_GUIDE_NAME,
-  ISHARE_SYMBOL,
 } from '../../constants/branding';
 import './AiAssistant.css';
 
@@ -25,9 +24,11 @@ export function AiAssistantFab({ phase, onClick }: AiAssistantFabProps) {
       aria-expanded={false}
     >
       <span className='ai-fab__avatar'>
-        <img className='ai-fab__icon' src={ISHARE_SYMBOL} alt='' />
+        <img className='ai-fab__icon' src={ISHARE_GUIDE_AVATAR} alt='' />
       </span>
-      <span className='ai-fab__label'>{ISHARE_GUIDE_CTA}</span>
+      <span className='ai-fab__label'>
+        Ask <span className='ai-fab__label-accent'>Guide</span>
+      </span>
     </button>
   );
 }

@@ -6,6 +6,8 @@ export interface AppSearchParams {
   dev: boolean;
   chatTest: boolean;
   errorTest: boolean;
+  /** Nav preview mini PSV hero — false when `navPreview=0` (debug). */
+  navPreview: boolean;
 }
 
 export function useAppSearchParams(): AppSearchParams {
@@ -17,6 +19,7 @@ export function useAppSearchParams(): AppSearchParams {
       dev: searchParams.get('dev') === '1',
       chatTest: searchParams.get('chatTest') === '1',
       errorTest: searchParams.get('errorTest') === '1',
+      navPreview: searchParams.get('navPreview') !== '0',
     }),
     [searchParams],
   );

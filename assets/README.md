@@ -7,10 +7,13 @@ Source-of-truth for tour media, organised **per client**. Synced to
 
 ```
 assets/
-├── favicon.ico              # Site favicon → synced to public/favicon.ico
-├── brand/
-│   └── logo_ishare.png      # iShare product logo (platform-wide)
+    ├── favicon.ico              # Platform default → synced to public/favicon.ico
+    ├── brand/
+│   ├── logo_ishare.png      # iShare product logo (platform-wide)
+│   ├── symbol_ishare.png    # iShare symbol mark
+│   └── tour-guide.png       # iShare Guide avatar (platform-wide)
 └── {clientId}/              # id = website hostname without TLD
+    ├── favicon.ico          # Client tab icon → /assets/{clientId}/favicon.ico
     ├── panoramas/           # 360° equirectangular images
     │   ├── overview.jpg
     │   ├── main-entrance.jpg   # gphospitalfoundation
@@ -53,3 +56,4 @@ Use `clientIdFromUrl()` in `src/utils/clientId.ts` when adding new clients.
 | --------- | --------------------------------------------- | ----------------------------------------------------- |
 | Panorama  | `gphospitalfoundation/panoramas/overview.jpg` | `/assets/gphospitalfoundation/panoramas/overview.jpg` |
 | Logo      | `gphospitalfoundation/brand/logo.png`         | `/assets/gphospitalfoundation/brand/logo.png`         |
+| Favicon   | `gphospitalfoundation/favicon.ico`            | `/assets/gphospitalfoundation/favicon.ico` (auto)     |

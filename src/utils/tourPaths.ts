@@ -68,6 +68,7 @@ export const PRESERVED_SEARCH_KEYS = [
   'dev',
   'chatTest',
   'errorTest',
+  'navPreview',
 ] as const;
 
 export function preserveSearchString(searchParams: URLSearchParams): string {

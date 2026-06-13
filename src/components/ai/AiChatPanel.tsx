@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CHAT_SCROLL_TEST_MESSAGES } from '../../data/chatScrollTestMessages';
 import {
+  ISHARE_GUIDE_AVATAR,
   ISHARE_GUIDE_NAME,
   ISHARE_GUIDE_PREVIEW_NOTICE,
-  ISHARE_SYMBOL,
 } from '../../constants/branding';
 import type { ChatMessage } from '../../types/tour';
 import { LocationBadge } from './LocationBadge';
@@ -162,12 +162,14 @@ export function AiChatPanel({
         <div className='ai-panel__header-main'>
           <img
             className='ai-panel__symbol'
-            src={ISHARE_SYMBOL}
+            src={ISHARE_GUIDE_AVATAR}
             alt=''
             draggable={false}
           />
           <div className='ai-panel__header-text'>
-            <p className='ai-panel__title'>{ISHARE_GUIDE_NAME}</p>
+            <p className='ai-panel__title'>
+              iShare <span className='ai-panel__title-accent'>Guide</span>
+            </p>
             <LocationBadge title={locationTitle} />
           </div>
         </div>

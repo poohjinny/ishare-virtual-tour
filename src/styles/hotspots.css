@@ -1,4 +1,4 @@
-/* ── Nav hotspot — scene transition (pill + arrow) ── */
+/* ── Nav hotspot — scene transition (pill label) ── */
 
 .hotspot-nav {
   position: relative;
@@ -16,24 +16,14 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.hotspot-nav__pulse {
-  position: absolute;
-  inset: 0;
-  border-radius: 999px;
-  transform-origin: center;
-  background: rgba(var(--ishare-primary-rgb), 0.22);
-  animation: hotspot-nav-pulse 2.2s ease-out infinite;
-  pointer-events: none;
-}
-
 .hotspot-nav__pill {
   position: relative;
   z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 36px;
-  padding: 4px 6px 4px 14px;
+  min-height: 32px;
+  padding: 2px 18px 2px 14px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px) saturate(120%);
@@ -42,27 +32,32 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
   transition:
     transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.22s ease,
-    background 0.22s ease;
+    box-shadow 0.22s ease;
 }
 
-.hotspot-nav__icon-wrap {
+.hotspot-nav__dot {
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--ishare-primary);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(var(--ishare-primary-rgb), 0.32);
+  box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.4);
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    outline 0.22s ease,
+    outline-offset 0.22s ease;
 }
 
-.hotspot-nav__arrow {
-  width: 17px;
-  height: 17px;
-  display: block;
+.hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__dot {
+  animation: hotspot-nav-dot-glow 2.8s ease-out infinite;
+}
+
+.hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__pill {
+  transition:
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.22s ease,
+    background 0.22s ease;
 }
 
 .hotspot-nav__label {
@@ -75,8 +70,8 @@
   white-space: nowrap;
 }
 
-.hotspot-nav:hover .hotspot-nav__pill,
-.hotspot-nav:focus-visible .hotspot-nav__pill {
+.hotspot-nav:not(.hotspot-nav--active):hover .hotspot-nav__pill,
+.hotspot-nav:not(.hotspot-nav--active):focus-visible .hotspot-nav__pill {
   transform: scale(1.06);
   background: rgba(255, 255, 255, 0.86);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
@@ -86,21 +81,31 @@
   outline: none;
 }
 
-@keyframes hotspot-nav-pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
+.hotspot-nav--active .hotspot-nav__pill,
+.hotspot-nav--active:hover .hotspot-nav__pill,
+.hotspot-nav--active:focus-visible .hotspot-nav__pill {
+  transform: scale(1.06);
+  background: var(--ishare-primary);
+  box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
+  transition:
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0s,
+    background 0s;
+}
 
-  70% {
-    transform: scale(1.12);
-    opacity: 0;
-  }
+.hotspot-nav--active .hotspot-nav__label,
+.hotspot-nav--active:hover .hotspot-nav__label,
+.hotspot-nav--active:focus-visible .hotspot-nav__label {
+  color: #fff;
+}
 
-  100% {
-    transform: scale(1.12);
-    opacity: 0;
-  }
+.hotspot-nav--active .hotspot-nav__dot,
+.hotspot-nav--active:hover .hotspot-nav__dot,
+.hotspot-nav--active:focus-visible .hotspot-nav__dot {
+  background: #fff;
+  box-shadow: none;
+  outline: 1.5px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 3px;
 }
 
 /* ── Info hotspot — naming opportunity pill (primary + heart) ── */
@@ -118,16 +123,19 @@
   cursor: pointer;
   pointer-events: auto;
   outline: none;
+  overflow: visible;
   -webkit-tap-highlight-color: transparent;
 }
 
 .hotspot-info__pulse {
   position: absolute;
-  inset: 0;
+  inset: -3px;
+  z-index: 0;
   border-radius: 999px;
   transform-origin: center;
-  background: rgba(var(--ishare-primary-rgb), 0.16);
-  animation: hotspot-info-pulse 2.6s ease-out infinite;
+  border: 2px solid rgba(255, 255, 255, 0.42);
+  background: rgba(var(--ishare-primary-rgb), 0.18);
+  animation: hotspot-info-pulse 2.4s ease-out infinite;
   pointer-events: none;
 }
 
@@ -136,9 +144,9 @@
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 3px;
   min-height: 36px;
-  padding: 4px 20px 4px 4px;
+  padding: 4px 24px 4px 6px;
   border-radius: 999px;
   background: var(--ishare-primary);
   color: #fff;
@@ -207,8 +215,7 @@
 
 .hotspot-info--active .hotspot-info__pulse {
   animation: none;
-  opacity: 0.42;
-  background: rgba(var(--ishare-primary-rgb), 0.22);
+  opacity: 0;
 }
 
 .hotspot-info--active.hotspot-info--status-sold .hotspot-info__pill {
@@ -243,28 +250,41 @@
   box-shadow: 0 12px 28px rgba(154, 107, 18, 0.34);
 }
 
-@keyframes hotspot-info-pulse {
+@keyframes hotspot-nav-dot-glow {
   0% {
-    transform: scale(1);
-    opacity: 0.48;
+    box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.42);
   }
 
-  70% {
-    transform: scale(1.12);
-    opacity: 0;
+  55% {
+    box-shadow: 0 0 0 5px rgba(var(--ishare-primary-rgb), 0);
   }
 
   100% {
-    transform: scale(1.12);
+    box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0);
+  }
+}
+
+@keyframes hotspot-info-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+
+  100% {
+    transform: scale(1.5);
     opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
 
-  .hotspot-nav__pulse,
+  .hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__dot {
+    animation: none;
+  }
+
   .hotspot-info__pulse {
     animation: none;
     opacity: 0.35;
+    transform: scale(1.08);
   }
 }

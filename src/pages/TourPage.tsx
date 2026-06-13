@@ -20,6 +20,7 @@ import { useTourAssistant } from '../hooks/useTourAssistant';
 import { useTourRouteSync } from '../hooks/useTourRouteSync';
 import { useTourState } from '../hooks/useTourState';
 import { useClientTheme } from '../hooks/useClientTheme';
+import { useClientFavicon } from '../hooks/useClientFavicon';
 import type {
   PopupContent,
   ViewPosition,
@@ -61,6 +62,7 @@ export function TourPage() {
   const scenes = useMemo(() => getSceneList(tour), [tour]);
 
   useClientTheme(tour);
+  useClientFavicon(tour);
 
   const initialScene = useMemo(
     () => resolveSceneId(route.tourId, route.sceneId),
@@ -189,6 +191,13 @@ export function TourPage() {
 
   const assistant = useTourAssistant(knowledge, currentSceneId);
 
+  const handleNavPreviewAskGuide = useCallback(
+    (sceneId: string) => {
+      assistant.openAndAskAboutScene(sceneId);
+    },
+    [assistant],
+  );
+
   const handleNavigate = useCallback(
     async (sceneId: string, targetView?: ViewPosition) => {
       const scene = tour.scenes[sceneId];
@@ -211,6 +220,11 @@ export function TourPage() {
       tour.scenes,
     ],
   );
+
+  const handleDismissModalPopups = useCallback(() => {
+    setActivePopup(null);
+    viewerRef.current?.clearActiveInfoHotspot();
+  }, []);
 
   const handleBreadcrumbNavigate = useCallback(
     async (sceneId: string) => {
@@ -310,7 +324,9 @@ export function TourPage() {
           suppressKeyboard={assistant.isOpen}
           onSceneChange={handleSceneChange}
           onInfoHotspot={setActivePopup}
+          onDismissModalPopups={handleDismissModalPopups}
           onNavigateToScene={handleNavigate}
+          onNavPreviewAskGuide={handleNavPreviewAskGuide}
           onTransitionStart={handleTransitionStart}
           onTransitionEnd={handleTransitionEnd}
           onDevClick={setDevClickCoords}
@@ -354,6 +370,7 @@ export function TourPage() {
           currentSceneId={currentSceneId}
           firstSceneId={tour.firstScene}
           tourTitle={tour.title}
+          organization={tour.organization}
           clientLogo={tour.branding?.logo}
           logoAlt={tour.branding?.logoAlt}
           websiteUrl={getTourWebsite(tour)}

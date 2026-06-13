@@ -50,3 +50,8 @@ export function namingOpportunityCtaEnabled(
 ): boolean {
   return namingOpportunityStatusConfig(status).ctaEnabled;
 }
+
+/** Display name without trailing "Naming Opportunity" (JSON stores full legal title). */
+export function stripNamingOpportunitySuffix(name: string): string {
+  return name.replace(/\s+Naming Opportunity\s*$/i, '').trim();
+}

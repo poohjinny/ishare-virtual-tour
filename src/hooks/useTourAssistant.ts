@@ -66,6 +66,29 @@ export function useTourAssistant(
   const close = useCallback(() => setIsOpen(false), []);
   const resetChat = useCallback(() => setMessages([]), []);
 
+  const openAndAskAboutScene = useCallback(
+    (sceneId: string) => {
+      const title = getSceneTitle(knowledge, sceneId);
+      const question = `Tell me about ${title}`;
+
+      setIsOpen(true);
+
+      const userMsg: ChatMessage = {
+        id: nextId(),
+        role: 'user',
+        content: question,
+      };
+      const assistantMsg: ChatMessage = {
+        id: nextId(),
+        role: 'assistant',
+        content: askMockAssistant(knowledge, sceneId, question),
+      };
+
+      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    },
+    [knowledge],
+  );
+
   return {
     messages,
     isOpen,
@@ -73,6 +96,7 @@ export function useTourAssistant(
     close,
     resetChat,
     sendMessage,
+    openAndAskAboutScene,
     suggestedQuestions,
     locationTitle,
   };

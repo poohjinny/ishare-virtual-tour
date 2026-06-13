@@ -26,6 +26,7 @@
     "overview": {
       "id": "overview",
       "title": "Overview",
+      "description": "Take in an aerial view of Ken Sargent House and the surrounding campus. From here you can see the full building layout, the main entrance, visitor parking, and the landscaped grounds that welcome patients and families. The house sits within walking distance of the Grande Prairie Regional Hospital, making it a convenient home away from home during treatment.",
       "panorama": "/assets/gphospitalfoundation/panoramas/overview.jpg",
       "defaultView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 },
       "map": { "x": 0.5, "y": 0.139, "heading": 149.2 },
@@ -43,6 +44,7 @@
     "main-entrance": {
       "id": "main-entrance",
       "title": "Main Entrance",
+      "description": "Arrive at the ground-level main entrance of Ken Sargent House. Glass doors open directly into the reception lobby, with an accessible ramp and railings on the left side of the front stairs. Illuminated welcome signage helps visitors find their way, whether arriving during the day or in the evening.",
       "panorama": "/assets/gphospitalfoundation/panoramas/main-entrance.jpg",
       "defaultView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 },
       "map": { "x": 0.5, "y": 0.944, "heading": 14.6 },
@@ -51,6 +53,7 @@
           "id": "nav-back-overview",
           "type": "nav",
           "label": "Overview",
+          "instant": true,
           "position": { "yaw": 180, "pitch": -10 },
           "targetScene": "overview",
           "targetView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 }
@@ -86,6 +89,7 @@
     "reception": {
       "id": "reception",
       "title": "Reception",
+      "description": "Step into the reception lobby at Ken Sargent House — the first point of contact for guests and families. Check in at the welcome desk, take a seat in the comfortable lounge area, and get directions to the dining hall and other guest spaces. Our reception team is here to help everyone feel informed, supported, and at home.",
       "panorama": "/assets/gphospitalfoundation/panoramas/reception.jpg",
       "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
       "map": { "x": 0.5, "y": 0.431, "heading": 100 },
@@ -94,6 +98,7 @@
           "id": "nav-back-entrance",
           "type": "nav",
           "label": "Main Entrance",
+          "instant": true,
           "position": { "yaw": 170, "pitch": -5 },
           "targetScene": "main-entrance",
           "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }

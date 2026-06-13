@@ -8,7 +8,7 @@
   "scenes": {
     "overview": {
       "title": "Overview",
-      "description": "Overview of the Cancer Research Society virtual experience.",
+      "description": "Begin your visit with an overview of the Cancer Research Society experience. This starting view introduces the virtual tour and the spaces where supporters can learn about naming opportunities that fund innovative cancer research across Canada.",
       "facts": [
         "The Cancer Research Society funds peer-reviewed cancer research across Canada.",
         "Naming opportunities support breakthrough research and lasting impact.",
@@ -36,7 +36,7 @@
     },
     "reception": {
       "title": "Reception",
-      "description": "Reception area of the Cancer Research Society virtual tour.",
+      "description": "Enter the reception area of the Cancer Research Society virtual tour. This welcome space is where visitors first connect with the Society's mission — and where naming opportunities help fund breakthrough research that improves prevention, detection, and treatment for patients across Canada.",
       "facts": [
         "The reception desk is a key naming opportunity location.",
         "Staff welcome visitors and supporters of cancer research.",

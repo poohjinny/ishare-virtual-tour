@@ -6,8 +6,9 @@
   "scripts": {
     "sync-assets": "node scripts/sync-assets.mjs",
     "dev": "npm run sync-assets && vite",
-    "build": "npm run sync-assets && tsc -b && vite build",
-    "build:ghpages": "npm run sync-assets && tsc -b && vite build --mode ghpages",
+    "build": "npm run sync-assets && tsgo -b && vite build",
+    "build:ghpages": "npm run sync-assets && tsgo -b && vite build --mode ghpages",
+    "typecheck": "tsgo -b",
     "postbuild": "node scripts/postbuild.mjs",
     "preview": "vite preview"
   },
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260421.2",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "~5.7.2",
     "vite": "^6.0.0"

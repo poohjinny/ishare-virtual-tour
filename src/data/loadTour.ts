@@ -1,4 +1,4 @@
-import type { Tour, TourKnowledge } from '../types/tour';
+import type { Hotspot, Tour, TourKnowledge } from '../types/tour';
 
 import { withBaseUrl } from '../utils/assetUrl';
 
@@ -22,6 +22,15 @@ const KNOWLEDGE: Record<string, TourKnowledge> = {
   cancerresearchsociety: cancerresearchsocietyKnowledge as TourKnowledge,
 };
 
+function normalizeHotspot(hotspot: Hotspot): Hotspot {
+  if (!hotspot.preview?.image) return hotspot;
+
+  return {
+    ...hotspot,
+    preview: { ...hotspot.preview, image: withBaseUrl(hotspot.preview.image) },
+  };
+}
+
 function normalizeTourAssets(tour: Tour): Tour {
   return {
     ...tour,
@@ -40,7 +49,12 @@ function normalizeTourAssets(tour: Tour): Tour {
       Object.entries(tour.scenes).map(([id, scene]) => [
         id,
 
-        { ...scene, panorama: withBaseUrl(scene.panorama) },
+        {
+          ...scene,
+          panorama: withBaseUrl(scene.panorama),
+          thumbnail: scene.thumbnail ? withBaseUrl(scene.thumbnail) : undefined,
+          hotspots: scene.hotspots.map(normalizeHotspot),
+        },
       ]),
     ),
   };

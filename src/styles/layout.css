@@ -82,13 +82,22 @@ input::placeholder {
   background: #000;
 }
 
-/* Anchored NO popup — override PSV marker pointer / panorama drag cursor */
-.viewer-container .psv-marker:has([data-info-panel='true']) {
+/* Hotspot HTML markers — allow pulse rings to extend outside the pill box */
+.viewer-container .psv-marker:has(.hotspot-info),
+.viewer-container .psv-marker:has(.hotspot-nav) {
+  overflow: visible;
+}
+
+/* Anchored popup — override PSV marker pointer / panorama drag cursor */
+.viewer-container .psv-marker:has([data-info-panel='true']),
+.viewer-container .psv-marker:has([data-nav-panel='true']) {
   cursor: default;
 }
 
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__close,
-.viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__cta {
+.viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__cta,
+.viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__close,
+.viewer-container .psv-marker:has([data-nav-panel='true']) .tour-glass-panel__cta {
   cursor: pointer;
 }
 

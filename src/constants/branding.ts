@@ -3,8 +3,11 @@ import { withBaseUrl } from '../utils/assetUrl';
 /** Platform product logo (shared across all client tours). */
 export const ISHARE_PRODUCT_LOGO = withBaseUrl('/assets/brand/logo_ishare.png');
 
-/** iShare symbol — iShare Guide avatar (shared across all client tours). */
+/** iShare symbol (platform mark). */
 export const ISHARE_SYMBOL = withBaseUrl('/assets/brand/symbol_ishare.png');
+
+/** iShare Guide avatar — shared across all client tours. */
+export const ISHARE_GUIDE_AVATAR = withBaseUrl('/assets/brand/tour-guide.png');
 
 /** Unified AI assistant product name (shared across all client tours). */
 export const ISHARE_GUIDE_NAME = 'iShare Guide';

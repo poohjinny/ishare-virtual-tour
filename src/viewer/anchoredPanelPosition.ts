@@ -1,0 +1,160 @@
+import type { Viewer } from '@photo-sphere-viewer/core';
+import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
+
+import type { ViewPosition } from '../types/tour';
+
+/** Gap between hotspot top edge and anchored panel bottom edge (px). */
+export const ANCHORED_PANEL_GAP_PX = 32;
+
+/** Nav pill min-height 32px / 2 */
+export const NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX = 17;
+
+/** Info pill min-height 36px / 2 */
+export const INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX = 18;
+
+const PITCH_OFFSET_MIN_DEG = 0.5;
+const PITCH_OFFSET_MAX_DEG = 45;
+const PITCH_OFFSET_FALLBACK_DEG = 2;
+
+export interface AnchoredPanelPositionTrack {
+  panelId: string;
+  hostHotspotId: string;
+  hostPosition: ViewPosition;
+}
+
+type MarkerRuntimeState = {
+  state?: {
+    position2D?: { x: number; y: number } | null;
+    size?: { width: number; height: number };
+  };
+  domElement: HTMLElement | SVGElement;
+};
+
+function toRad(deg: number): number {
+  return (deg * Math.PI) / 180;
+}
+
+/**
+ * Pitch offset (deg above hotspot) for initial panel placement at open.
+ * Ongoing camera movement is corrected via screen-space translate only.
+ */
+export function resolveAnchoredPanelPitchOffsetDeg(
+  viewer: Viewer,
+  hotspotPosition: ViewPosition,
+  hotspotHalfHeightPx: number,
+  gapPx = ANCHORED_PANEL_GAP_PX,
+): number {
+  const { dataHelper } = viewer;
+  const yawRad = toRad(hotspotPosition.yaw);
+  const pitchRad = toRad(hotspotPosition.pitch);
+
+  const hotspotPoint = dataHelper.sphericalCoordsToViewerCoords({
+    yaw: yawRad,
+    pitch: pitchRad,
+  });
+
+  const targetPanelBottomY = hotspotPoint.y - hotspotHalfHeightPx - gapPx;
+
+  let low = PITCH_OFFSET_MIN_DEG;
+  let high = PITCH_OFFSET_MAX_DEG;
+
+  for (let i = 0; i < 24; i++) {
+    const mid = (low + high) / 2;
+    const panelPoint = dataHelper.sphericalCoordsToViewerCoords({
+      yaw: yawRad,
+      pitch: pitchRad + toRad(mid),
+    });
+
+    if (panelPoint.y > targetPanelBottomY) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  const offset = (low + high) / 2;
+  if (!Number.isFinite(offset)) return PITCH_OFFSET_FALLBACK_DEG;
+
+  return Math.max(PITCH_OFFSET_MIN_DEG, Math.min(PITCH_OFFSET_MAX_DEG, offset));
+}
+
+export function anchoredPanelMarkerPosition(
+  viewer: Viewer,
+  hotspotPosition: ViewPosition,
+  hotspotHalfHeightPx: number,
+): { yaw: string; pitch: string } {
+  const offset = resolveAnchoredPanelPitchOffsetDeg(
+    viewer,
+    hotspotPosition,
+    hotspotHalfHeightPx,
+  );
+
+  return {
+    yaw: `${hotspotPosition.yaw}deg`,
+    pitch: `${hotspotPosition.pitch + offset}deg`,
+  };
+}
+
+export function measureHotspotHalfHeightPx(
+  hostMarkerEl: Element | null | undefined,
+  fallbackPx: number,
+): number {
+  if (hostMarkerEl instanceof HTMLElement && hostMarkerEl.offsetHeight > 0) {
+    return hostMarkerEl.offsetHeight / 2;
+  }
+  return fallbackPx;
+}
+
+/**
+ * After PSV renderMarkers, nudge panel translate to keep a fixed px gap.
+ * Does not change spherical position — avoids visibility flicker on drag.
+ */
+export function correctAnchoredPanelPixelGap(
+  viewer: Viewer,
+  markers: MarkersPlugin,
+  track: AnchoredPanelPositionTrack | null,
+  hotspotHalfFallbackPx: number,
+): void {
+  if (!track) return;
+
+  const panelMarker = markers.getMarker(track.panelId) as
+    | MarkerRuntimeState
+    | undefined;
+  const hostMarker = markers.getMarker(track.hostHotspotId);
+
+  if (!panelMarker?.domElement || !hostMarker?.domElement) return;
+
+  const panelEl = panelMarker.domElement;
+  const hostEl = hostMarker.domElement;
+
+  if (
+    !panelEl.classList.contains('psv-marker--visible') ||
+    !hostEl.classList.contains('psv-marker--visible')
+  ) {
+    return;
+  }
+
+  const pos2d = panelMarker.state?.position2D;
+  if (!pos2d) return;
+
+  const hostHalf = measureHotspotHalfHeightPx(hostEl, hotspotHalfFallbackPx);
+
+  const hostPoint = viewer.dataHelper.sphericalCoordsToViewerCoords({
+    yaw: toRad(track.hostPosition.yaw),
+    pitch: toRad(track.hostPosition.pitch),
+  });
+
+  const targetPanelBottomY = hostPoint.y - hostHalf - ANCHORED_PANEL_GAP_PX;
+  const panelHeight =
+    panelMarker.state?.size?.height ??
+    (panelEl instanceof HTMLElement ? panelEl.offsetHeight : 0);
+
+  if (panelHeight <= 0) return;
+
+  const currentPanelBottomY = pos2d.y + panelHeight;
+  const deltaY = targetPanelBottomY - currentPanelBottomY;
+
+  if (Math.abs(deltaY) < 0.5) return;
+
+  panelEl.style.translate = `${Math.round(pos2d.x)}px ${Math.round(pos2d.y + deltaY)}px 0px`;
+}

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildScenePath } from '../viewer/sceneDepth';
-import type { Scene } from '../types/tour';
+import type { Scene, TourOrganization } from '../types/tour';
 import { Badge } from './ui/Badge';
+import { TourContactInfo } from './TourContactInfo';
 import { TourGlassPanel, type TourGlassPanelAnimation } from './TourGlassPanel';
 import './TourNavFloat.css';
 
@@ -10,6 +11,7 @@ interface TourNavFloatProps {
   currentSceneId: string;
   firstSceneId: string;
   tourTitle?: string;
+  organization?: TourOrganization;
   clientLogo?: string;
   logoAlt?: string;
   websiteUrl?: string;
@@ -277,6 +279,7 @@ export function TourNavFloat({
   currentSceneId,
   firstSceneId,
   tourTitle = 'Virtual Tour',
+  organization,
   clientLogo,
   logoAlt,
   websiteUrl,
@@ -619,12 +622,18 @@ export function TourNavFloat({
             className='tour-nav-actions__panel-slot'
           >
             <TourGlassPanel
-              title='About this tour'
+              title='Help & contact'
               titleId='tour-nav-help-title'
               onClose={closePanel}
               animation={panelAnimation(panelPhase)}
               bodyClassName='tour-glass-panel__body--help'
             >
+              {logoNode && (
+                <div className='tour-nav-actions__panel-logo'>{logoNode}</div>
+              )}
+
+              <p className='tour-nav-actions__section-title'>Using this tour</p>
+
               <p className='tour-nav-actions__help-lead'>
                 Welcome to {tourTitle}. Explore each location in 360°, move
                 between scenes with hotspots, and use the tools below to find
@@ -653,14 +662,14 @@ export function TourNavFloat({
                 </li>
               </ul>
 
-              <p className='tour-nav-actions__controls-title'>
-                Viewer controls
-              </p>
+              <p className='tour-nav-actions__section-title'>Viewer controls</p>
               <ul className='tour-nav-actions__controls-list'>
                 {VIEWER_CONTROLS.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
+
+              <TourContactInfo organization={organization} />
             </TourGlassPanel>
           </div>
         )}
@@ -712,7 +721,11 @@ export function TourNavFloat({
             onClick={handleHelpClick}
             aria-expanded={panelMode === 'help'}
             aria-controls='tour-nav-help-panel'
-            aria-label={panelMode === 'help' ? 'Close help' : 'Tour help'}
+            aria-label={
+              panelMode === 'help' ?
+                'Close help and contact'
+              : 'Open help and contact'
+            }
           >
             <HelpIcon />
           </button>

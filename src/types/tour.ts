@@ -60,6 +60,38 @@ export interface Hotspot {
   targetScene?: string;
   targetView?: ViewPosition;
   popup?: PopupContent;
+  /** Skip preview card and navigate immediately (e.g. back links). */
+  instant?: boolean;
+  /** Optional overrides for nav preview card */
+  preview?: { image?: string };
+}
+
+/** Naming opportunity summary — accordion row in nav preview. */
+export interface NavPreviewNamingItem {
+  /** Info hotspot id — used to open the naming opportunity in-scene */
+  hotspotId: string;
+  name: string;
+  statusLabel: string;
+  statusModifier: string;
+  price: string;
+  priceLabel?: string;
+  /** First paragraph from info popup body */
+  description?: string;
+}
+
+/** Lightweight nav destination preview — shown before scene transition. */
+export interface NavPreviewContent {
+  targetSceneId: string;
+  title: string;
+  /** Target scene panorama — used for mini 360 preview */
+  panorama?: string;
+  /** Static fallback (thumbnail) for reduced-motion / load errors */
+  image?: string;
+  description?: string;
+  namingItems?: NavPreviewNamingItem[];
+  targetView?: ViewPosition;
+  /** Hotspot label — used for CTA copy when present */
+  ctaLabel?: string;
 }
 
 export interface SceneMapPosition {
@@ -83,6 +115,7 @@ export interface FloorPlan {
 export interface Scene {
   id: string;
   title: string;
+  description?: string;
   panorama: string;
   thumbnail?: string;
   defaultView: ViewPosition;
@@ -112,6 +145,8 @@ export interface TourBranding {
   logoAlt: string;
   /** Client brand primary — e.g. "#cb007c" */
   primaryColor?: string;
+  /** Optional override — defaults to /assets/{clientId}/favicon.ico */
+  favicon?: string;
 }
 
 export interface Tour {
