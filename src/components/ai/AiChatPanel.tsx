@@ -6,6 +6,10 @@ import {
   ISHARE_GUIDE_PREVIEW_NOTICE,
 } from '../../constants/branding';
 import type { ChatMessage } from '../../types/tour';
+import {
+  GlassPanelCloseIcon,
+  TourGlassPanel,
+} from '../TourGlassPanel';
 import { LocationBadge } from './LocationBadge';
 import { SuggestedQuestions } from './SuggestedQuestions';
 import './AiAssistant.css';
@@ -19,24 +23,6 @@ interface AiChatPanelProps {
   onClose: () => void;
   onReset: () => void;
   onSend: (text: string) => void;
-}
-
-function CloseIcon() {
-  return (
-    <svg
-      className='ai-panel__header-icon'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden
-    >
-      <line x1='18' y1='6' x2='6' y2='18' />
-      <line x1='6' y1='6' x2='18' y2='18' />
-    </svg>
-  );
 }
 
 function ResetIcon() {
@@ -153,103 +139,104 @@ export function AiChatPanel({
   };
 
   return (
-    <div
-      className={`ai-panel${panelClass}`}
-      role='dialog'
-      aria-label={ISHARE_GUIDE_NAME}
-    >
-      <div className='ai-panel__header'>
-        <div className='ai-panel__header-main'>
-          <img
-            className='ai-panel__symbol'
-            src={ISHARE_GUIDE_AVATAR}
-            alt=''
-            draggable={false}
-          />
-          <div className='ai-panel__header-text'>
-            <p className='ai-panel__title'>
-              iShare <span className='ai-panel__title-accent'>Guide</span>
-            </p>
-            <LocationBadge title={locationTitle} />
-          </div>
-        </div>
-        <div className='ai-panel__header-actions'>
-          {!chatTest && (
-            <button
-              type='button'
-              className='ai-panel__header-btn ai-panel__reset'
-              onClick={handleReset}
-              disabled={!canReset}
-              aria-label='Reset conversation'
-              title='Reset conversation'
-            >
-              <ResetIcon />
-            </button>
-          )}
-          <button
-            type='button'
-            className='ai-panel__header-btn ai-panel__close'
-            onClick={onClose}
-            aria-label='Close'
-          >
-            <CloseIcon />
-          </button>
-        </div>
-      </div>
-
-      <div className='ai-panel__body'>
-        <div className='ai-panel__messages ishare-scrollbar' ref={messagesRef}>
-          {!chatTest && (
-            <div className='ai-panel__intro'>
-              <p className='ai-panel__notice' role='note'>
-                {ISHARE_GUIDE_PREVIEW_NOTICE}
-              </p>
-              <p className='ai-message ai-message--assistant'>{greeting}</p>
-              <SuggestedQuestions
-                questions={suggestedQuestions}
-                onSelect={onSend}
-              />
-            </div>
-          )}
-          {displayMessages.map((msg) => (
-            <div key={msg.id} className={`ai-message ai-message--${msg.role}`}>
-              {msg.content}
-            </div>
-          ))}
-        </div>
-
-        <form className='ai-composer' onSubmit={handleSubmit}>
-          <div className='ai-composer__pill'>
-            <input
-              className='ai-composer__input'
-              type='text'
-              placeholder={`Ask ${ISHARE_GUIDE_NAME}...`}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              aria-label='Your question'
+    <TourGlassPanel
+      variant='dock'
+      className={`tour-glass-panel--ai${panelClass}`}
+      titleId='ai-guide-panel-title'
+      animation='none'
+      bodyClassName='tour-glass-panel__body--ai'
+      header={
+        <>
+          <div className='ai-panel__header-main'>
+            <img
+              className='ai-panel__symbol'
+              src={ISHARE_GUIDE_AVATAR}
+              alt=''
+              draggable={false}
             />
-            <div className='ai-composer__actions'>
+            <div className='ai-panel__header-text'>
+              <p id='ai-guide-panel-title' className='ai-panel__title'>
+                iShare <span className='ai-panel__title-accent'>Guide</span>
+              </p>
+              <LocationBadge title={locationTitle} />
+            </div>
+          </div>
+          <div className='ai-panel__header-actions'>
+            {!chatTest && (
               <button
                 type='button'
-                className='ai-composer__voice'
-                aria-label='Voice input (coming soon)'
-                title='Voice input (coming soon)'
+                className='tour-glass-panel__close ai-panel__header-btn ai-panel__reset'
+                onClick={handleReset}
+                disabled={!canReset}
+                aria-label='Reset conversation'
+                title='Reset conversation'
               >
-                <MicIcon />
+                <ResetIcon />
               </button>
-              {hasInput && (
-                <button
-                  type='submit'
-                  className='ai-composer__send'
-                  aria-label='Send message'
-                >
-                  <ArrowUpIcon />
-                </button>
-              )}
-            </div>
+            )}
+            <button
+              type='button'
+              className='tour-glass-panel__close ai-panel__header-btn ai-panel__close'
+              onClick={onClose}
+              aria-label='Close'
+            >
+              <GlassPanelCloseIcon />
+            </button>
           </div>
-        </form>
+        </>
+      }
+    >
+      <div className='ai-panel__messages ishare-scrollbar' ref={messagesRef}>
+        {!chatTest && (
+          <div className='ai-panel__intro'>
+            <p className='ai-panel__notice' role='note'>
+              {ISHARE_GUIDE_PREVIEW_NOTICE}
+            </p>
+            <p className='ai-message ai-message--assistant'>{greeting}</p>
+            <SuggestedQuestions
+              questions={suggestedQuestions}
+              onSelect={onSend}
+            />
+          </div>
+        )}
+        {displayMessages.map((msg) => (
+          <div key={msg.id} className={`ai-message ai-message--${msg.role}`}>
+            {msg.content}
+          </div>
+        ))}
       </div>
-    </div>
+
+      <form className='ai-composer' onSubmit={handleSubmit}>
+        <div className='ai-composer__pill'>
+          <input
+            className='ai-composer__input'
+            type='text'
+            placeholder={`Ask ${ISHARE_GUIDE_NAME}...`}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            aria-label='Your question'
+          />
+          <div className='ai-composer__actions'>
+            <button
+              type='button'
+              className='ai-composer__voice'
+              aria-label='Voice input (coming soon)'
+              title='Voice input (coming soon)'
+            >
+              <MicIcon />
+            </button>
+            {hasInput && (
+              <button
+                type='submit'
+                className='ai-composer__send'
+                aria-label='Send message'
+              >
+                <ArrowUpIcon />
+              </button>
+            )}
+          </div>
+        </div>
+      </form>
+    </TourGlassPanel>
   );
 }

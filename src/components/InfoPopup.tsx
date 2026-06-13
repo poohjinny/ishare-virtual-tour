@@ -8,6 +8,7 @@ import {
 } from './popupContentUi';
 import { namingOpportunityCtaEnabled } from '../data/namingOpportunityStatus';
 import { resolveGlassPanelWidth } from './tourGlassPanelHtml';
+import { GlassPanelCloseIcon } from './TourGlassPanel';
 import './TourGlassPanel.css';
 import './InfoPopup.css';
 
@@ -66,58 +67,54 @@ export function InfoPopup({ popup, onClose }: InfoPopupProps) {
   return (
     <div
       className={`info-popup-backdrop${isExiting ? ' info-popup-backdrop--exit' : ''}`}
-      role='dialog'
-      aria-modal='true'
-      aria-labelledby='info-popup-title'
       onClick={(e) => {
         if (e.target === e.currentTarget) handleDismiss();
       }}
     >
-      <div
-        className={`info-popup${isExiting ? ' info-popup--exit' : ''}`}
+      <article
+        className={`info-popup tour-glass-panel tour-glass-panel--dock tour-glass-panel--modal${isExiting ? ' info-popup--exit' : ''}`}
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby='info-popup-title'
         style={{ maxWidth: resolveGlassPanelWidth(shown) }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className='info-popup__header'>
-          <div className='info-popup__title-row'>
-            <h2 id='info-popup-title' className='info-popup__title'>
-              {shown.title}
-            </h2>
-            <button
-              ref={closeRef}
-              type='button'
-              className='info-popup__close'
-              onClick={handleDismiss}
-              aria-label='Close'
-            >
-              <svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
-                <path
-                  d='M6 6l12 12M18 6L6 18'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                  strokeLinecap='round'
-                />
-              </svg>
-            </button>
+        <div className='tour-glass-panel__shell'>
+          <header className='tour-glass-panel__header'>
+            <div className='tour-glass-panel__title-row info-popup__title-row'>
+              <h2 id='info-popup-title' className='tour-glass-panel__title info-popup__title'>
+                {shown.title}
+              </h2>
+              <button
+                ref={closeRef}
+                type='button'
+                className='tour-glass-panel__close'
+                onClick={handleDismiss}
+                aria-label='Close'
+              >
+                <GlassPanelCloseIcon />
+              </button>
+            </div>
+            <PopupHeaderMeta popup={shown} />
+          </header>
+
+          <div className='tour-glass-panel__body ishare-scrollbar'>
+            {shown.image && (
+              <img src={shown.image} alt='' className='info-popup__image' />
+            )}
+            <PopupBodyCopy body={shown.body} />
+            {shown.videoUrl && (
+              <PopupVideoEmbed videoUrl={shown.videoUrl} title={shown.title} />
+            )}
           </div>
-          <PopupHeaderMeta popup={shown} />
-        </div>
 
-        <div className='info-popup__scroll ishare-scrollbar'>
-          {shown.image && (
-            <img src={shown.image} alt='' className='info-popup__image' />
-          )}
-          <PopupBodyCopy body={shown.body} />
-          {shown.videoUrl && (
-            <PopupVideoEmbed videoUrl={shown.videoUrl} title={shown.title} />
-          )}
+          {shown.cta &&
+            (!shown.namingOpportunity ||
+              namingOpportunityCtaEnabled(shown.namingOpportunity.status)) && (
+              <PopupCtaBlock cta={shown.cta} />
+            )}
         </div>
-
-        {shown.cta &&
-          (!shown.namingOpportunity ||
-            namingOpportunityCtaEnabled(shown.namingOpportunity.status)) && (
-            <PopupCtaBlock cta={shown.cta} />
-          )}
-      </div>
+      </article>
     </div>
   );
 }

@@ -46,10 +46,12 @@ export function GlassPanelInfoBadge() {
 }
 
 interface TourGlassPanelProps {
-  title: string;
+  title?: string;
   titleId: string;
   onClose?: () => void;
   badge?: ReactNode;
+  header?: ReactNode;
+  footer?: ReactNode;
   variant?: TourGlassPanelVariant;
   animation?: TourGlassPanelAnimation;
   className?: string;
@@ -69,6 +71,8 @@ export function TourGlassPanel({
   titleId,
   onClose,
   badge,
+  header,
+  footer,
   variant = 'dock',
   animation = 'none',
   className = '',
@@ -89,28 +93,35 @@ export function TourGlassPanel({
     >
       <div className={`tour-glass-panel__shell${shellAnimationClass(animation)}`}>
         <header className='tour-glass-panel__header'>
-          <div className='tour-glass-panel__title-row'>
-            <h2 id={titleId} className='tour-glass-panel__title'>
-              {title}
-            </h2>
-            {onClose && (
-              <button
-                type='button'
-                className='tour-glass-panel__close'
-                onClick={onClose}
-                aria-label='Close'
-              >
-                <GlassPanelCloseIcon />
-              </button>
-            )}
-          </div>
-          {badge}
+          {header ?? (
+            <>
+              <div className='tour-glass-panel__title-row'>
+                {title ?
+                  <h2 id={titleId} className='tour-glass-panel__title'>
+                    {title}
+                  </h2>
+                : null}
+                {onClose && (
+                  <button
+                    type='button'
+                    className='tour-glass-panel__close'
+                    onClick={onClose}
+                    aria-label='Close'
+                  >
+                    <GlassPanelCloseIcon />
+                  </button>
+                )}
+              </div>
+              {badge}
+            </>
+          )}
         </header>
         <div
           className={`tour-glass-panel__body ishare-scrollbar${bodyClassName ? ` ${bodyClassName}` : ''}`}
         >
           {children}
         </div>
+        {footer}
       </div>
     </article>
   );

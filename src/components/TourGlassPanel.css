@@ -12,10 +12,8 @@
 }
 
 .tour-glass-panel--anchored {
-  --ishare-panel-shadow:
-    0 12px 28px rgba(15, 23, 42, 0.16),
-    0 4px 10px rgba(15, 23, 42, 0.08);
-  --ishare-panel-border: 1px solid rgba(15, 23, 42, 0.11);
+  --ishare-panel-shadow: var(--ishare-glass-anchored-shadow);
+  --ishare-panel-border: var(--ishare-glass-anchored-border);
   pointer-events: auto;
   cursor: default;
 }
@@ -46,8 +44,8 @@
   flex-direction: column;
   overflow: hidden;
   background: transparent;
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: var(--ishare-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-glass-blur);
   border: var(--ishare-panel-border);
   box-shadow: var(--ishare-panel-shadow);
   transform-origin: bottom center;
@@ -96,12 +94,10 @@
 
 .tour-glass-panel--dock {
   background: transparent;
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: var(--ishare-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-glass-blur);
   border-radius: var(--ishare-radius-lg);
-  box-shadow:
-    0 10px 28px rgba(15, 23, 42, 0.14),
-    0 4px 12px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--ishare-glass-dock-shadow);
   overflow: hidden;
   transform-origin: top right;
 }
@@ -124,8 +120,8 @@
   min-height: 0;
   overflow: hidden;
   background: transparent;
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: var(--ishare-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-glass-blur);
   border: var(--ishare-panel-border);
   box-shadow: var(--ishare-panel-shadow);
   transform-origin: bottom center;
@@ -146,8 +142,8 @@
   flex-direction: column;
   gap: 10px;
   padding: 18px 20px;
-  background: rgba(255, 255, 255, 0.84);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--ishare-glass-header-bg);
+  border-bottom: var(--ishare-glass-divider);
 }
 
 .tour-glass-panel__title-row {
@@ -302,14 +298,14 @@
   flex-direction: column;
   gap: 16px;
   padding: 32px 28px 28px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--ishare-glass-body-bg);
 }
 
 .tour-glass-panel__footer {
   flex-shrink: 0;
   padding: 16px 20px 22px;
-  background: rgba(255, 255, 255, 0.84);
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: var(--ishare-glass-footer-bg);
+  border-top: var(--ishare-glass-divider);
   overflow: visible;
 }
 
@@ -465,6 +461,50 @@
 .tour-glass-panel__body--help {
   gap: 16px;
   padding-bottom: 28px;
+}
+
+.tour-glass-panel--modal {
+  width: 100%;
+  max-width: min(500px, calc(100vw - 40px));
+  max-height: min(90vh, 720px);
+}
+
+.tour-glass-panel--modal .tour-glass-panel__header {
+  padding: 20px 22px 14px;
+}
+
+.tour-glass-panel--modal .tour-glass-panel__body {
+  padding: 20px 22px 22px;
+}
+
+.tour-glass-panel--modal .tour-glass-panel__footer {
+  padding: 16px 22px 24px;
+}
+
+.tour-glass-panel--ai {
+  width: 380px;
+  height: min(560px, calc(100vh - 112px));
+  max-height: 560px;
+  transform-origin: bottom right;
+}
+
+.tour-glass-panel--ai .tour-glass-panel__shell {
+  height: 100%;
+  max-height: none;
+}
+
+.tour-glass-panel--ai .tour-glass-panel__header {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tour-glass-panel__body--ai {
+  position: relative;
+  gap: 0;
+  padding: 0;
+  --ai-panel-inline-padding: 20px;
 }
 
 @media (max-width: 480px) {
