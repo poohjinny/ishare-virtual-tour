@@ -76,6 +76,13 @@ input::placeholder {
   background: #000;
 }
 
+.viewer-area:fullscreen,
+.viewer-area:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
 .viewer-container {
   width: 100%;
   height: 100%;
@@ -164,7 +171,7 @@ input::placeholder {
   transform: translateX(-50%) translateY(0);
 }
 
-/* Hidden until toggled from top-right tune button */
+/* Hidden when toggled off from top-right tune button */
 .viewer-container.viewer-container--controls-hidden .psv-navbar {
   opacity: 0;
   visibility: hidden;
@@ -254,30 +261,55 @@ input::placeholder {
 
 .viewer-container .psv-zoom-range:not(.psv-button--disabled):hover .psv-zoom-range-handle {
   transform: translate(-50%, -50%) scale(1.15);
-  background: var(--ishare-text);
+  background: var(--ishare-primary);
 }
 
-/* Control groups: zoom | move | fullscreen (horizontal) */
+/* Control groups: zoom | move | default view + fullscreen */
 .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
   margin-left: 18px;
 }
 
-.viewer-container .psv-navbar .psv-move-button+.psv-fullscreen-button {
+.viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
   margin-left: 18px;
 }
 
-.viewer-container .psv-move-button+.psv-move-button {
-  margin-left: -2px;
+.viewer-container .psv-recenter-button+.psv-fullscreen-button {
+  margin-left: 4px;
 }
 
-.viewer-container .psv-button:not(.psv-zoom-range):hover {
-  color: var(--ishare-text);
-  background: rgba(15, 23, 42, 0.08);
+.viewer-container .psv-move-button+.psv-move-button {
+  margin-left: 4px;
+}
+
+.viewer-container .psv-button:not(.psv-zoom-range):not(.psv-button--disabled):hover,
+.viewer-container .psv-button:not(.psv-zoom-range):not(.psv-button--disabled):focus-visible {
+  color: var(--ishare-primary);
+  background: rgba(var(--ishare-primary-rgb), 0.08);
 }
 
 .viewer-container .psv-button--active {
-  background: rgba(15, 23, 42, 0.1);
-  color: var(--ishare-text);
+  background: var(--ishare-primary);
+  color: #fff;
+}
+
+.viewer-container .psv-button--active:hover,
+.viewer-container .psv-button--active:focus-visible {
+  background: var(--ishare-primary-dark);
+  color: #fff;
+}
+
+.viewer-area:fullscreen .viewer-container .psv-fullscreen-button,
+.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button {
+  color: #fff;
+  background: var(--ishare-primary);
+}
+
+.viewer-area:fullscreen .viewer-container .psv-fullscreen-button:hover,
+.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:hover,
+.viewer-area:fullscreen .viewer-container .psv-fullscreen-button:focus-visible,
+.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:focus-visible {
+  color: #fff;
+  background: var(--ishare-primary-dark);
 }
 
 /* Move arrows — thin stroke chevrons */
@@ -300,7 +332,7 @@ input::placeholder {
   -webkit-mask-size: contain;
   mask-size: contain;
   transform: scale(1);
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .viewer-container .psv-container:not(.psv--is-touch) .psv-move-button:not(.psv-button--disabled):hover::before {
@@ -331,6 +363,16 @@ input::placeholder {
   transform: rotate(90deg) scale(1.2);
 }
 
+/* Zoom, default view, fullscreen — scale icon on hover (move uses ::before above) */
+.viewer-container .psv-button:not(.psv-zoom-range):not(.psv-move-button) .psv-button-svg {
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
+
+.viewer-container .psv-container:not(.psv--is-touch) .psv-button:not(.psv-zoom-range):not(.psv-move-button):not(.psv-button--disabled):hover .psv-button-svg {
+  transform: scale(1.2);
+}
+
 /* PSV navbar sits at bottom center — ensure overlays clear it */
 .viewer-area .pnlm-container {
   width: 100%;
@@ -346,7 +388,12 @@ input::placeholder {
   }
 
   .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button,
-  .viewer-container .psv-navbar .psv-move-button+.psv-fullscreen-button {
+  .viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
     margin-left: 14px;
+  }
+
+  .viewer-container .psv-recenter-button+.psv-fullscreen-button,
+  .viewer-container .psv-move-button+.psv-move-button {
+    margin-left: 4px;
   }
 }

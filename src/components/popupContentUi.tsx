@@ -1,10 +1,25 @@
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { NamingOpportunity, PopupContent, PopupCta } from '../types/tour';
 import {
   GIFTABULATOR_PRODUCT,
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
+import { PlatformBrandLink } from './PlatformBrandLink';
+import {
+  partitionPopupCtas,
+  popupCtaRowClassName,
+  popupCtaWrapClassName,
+  resolvePopupCtaLayoutMode,
+} from '../utils/popupCtaLayout';
 import { namingOpportunityStatusConfig } from '../data/namingOpportunityStatus';
-import { youtubeEmbedUrl } from './tourGlassPanelHtml';
+import { popupVideoAutoplayUrl, resolvePopupVideo } from '../utils/popupVideo';
+import {
+  isNamingStatusIconModifier,
+  NamingStatusBadgeIcon,
+} from './namingStatusBadgeIcons';
+import { BADGE_CLASS } from './ui/badgeClasses';
+import type { NamingStatusModifier } from './ui/Badge';
+import { applyCtaTextOverflowTitle } from '../utils/glassPanelCtaOverflow';
 
 export function splitPopupBody(body: string): string[] {
   return body
@@ -15,7 +30,7 @@ export function splitPopupBody(body: string): string[] {
 
 const NAMING_BADGE_ICON = (
   <svg
-    className='tour-glass-panel__badge-icon'
+    className={BADGE_CLASS.icon}
     viewBox='0 0 24 24'
     fill='none'
     aria-hidden='true'
@@ -29,43 +44,59 @@ const NAMING_BADGE_ICON = (
   </svg>
 );
 
+function StatusBadgeIcon({ modifier }: { modifier: string }) {
+  if (!isNamingStatusIconModifier(modifier)) return null;
+
+  return <NamingStatusBadgeIcon modifier={modifier} />;
+}
+
+export function NamingOpportunityPrice({
+  opportunity,
+}: {
+  opportunity: NamingOpportunity;
+}) {
+  const priceSold =
+    namingOpportunityStatusConfig(opportunity.status).cssModifier === 'sold';
+
+  return (
+    <p
+      className={
+        priceSold ?
+          'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--sold'
+        : 'tour-glass-panel__price tour-glass-panel__price--under-title'
+      }
+    >
+      <span className='tour-glass-panel__price-sep' aria-hidden='true'>
+        |
+      </span>
+      <span className='tour-glass-panel__price-value'>{opportunity.price}</span>
+    </p>
+  );
+}
+
 export function NamingOpportunityMeta({
   opportunity,
 }: {
   opportunity: NamingOpportunity;
 }) {
   const statusConfig = namingOpportunityStatusConfig(opportunity.status);
-  const priceSold = statusConfig.cssModifier === 'sold';
 
   return (
     <div className='tour-glass-panel__meta' aria-label={opportunity.name}>
       <div className='tour-glass-panel__meta-row'>
-        <span className='tour-glass-panel__badge tour-glass-panel__badge--naming'>
+        <span className={BADGE_CLASS.fillLgPrimaryIcon}>
           {NAMING_BADGE_ICON}
-          <span className='tour-glass-panel__badge-text'>
-            Naming Opportunity
-          </span>
+          <span className={BADGE_CLASS.label}>Naming Opportunity</span>
         </span>
         <span
-          className={`tour-glass-panel__badge tour-glass-panel__badge--status tour-glass-panel__badge--status-${statusConfig.cssModifier}`}
+          className={BADGE_CLASS.fillLgStatusIcon(
+            statusConfig.cssModifier as NamingStatusModifier,
+          )}
         >
-          <span className='tour-glass-panel__badge-text'>
-            {statusConfig.label}
-          </span>
-        </span>
-        <span
-          className={`tour-glass-panel__badge tour-glass-panel__badge--price${priceSold ? ' tour-glass-panel__badge--price-sold' : ''}`}
-        >
-          <span className='tour-glass-panel__badge-text'>
-            {opportunity.price}
-          </span>
+          <StatusBadgeIcon modifier={statusConfig.cssModifier} />
+          <span className={BADGE_CLASS.label}>{statusConfig.label}</span>
         </span>
       </div>
-      {opportunity.priceLabel && (
-        <p className='tour-glass-panel__price-label'>
-          {opportunity.priceLabel}
-        </p>
-      )}
     </div>
   );
 }
@@ -77,8 +108,8 @@ export function PopupHeaderMeta({ popup }: { popup: PopupContent }) {
 
   if (popup.sponsor) {
     return (
-      <span className='tour-glass-panel__badge tour-glass-panel__badge--sponsor'>
-        <span className='tour-glass-panel__badge-text'>
+      <span className={BADGE_CLASS.fillLgSponsor}>
+        <span className={BADGE_CLASS.label}>
           {popup.sponsor.label ?? 'Presented by'} {popup.sponsor.name}
         </span>
       </span>
@@ -86,9 +117,9 @@ export function PopupHeaderMeta({ popup }: { popup: PopupContent }) {
   }
 
   return (
-    <span className='tour-glass-panel__badge'>
+    <span className={BADGE_CLASS.fillLgAccentIcon}>
       <svg
-        className='tour-glass-panel__badge-icon'
+        className={BADGE_CLASS.icon}
         viewBox='0 0 24 24'
         fill='none'
         aria-hidden='true'
@@ -102,7 +133,7 @@ export function PopupHeaderMeta({ popup }: { popup: PopupContent }) {
         />
         <circle cx='12' cy='8' r='1.25' fill='currentColor' />
       </svg>
-      <span className='tour-glass-panel__badge-text'>Info</span>
+      <span className={BADGE_CLASS.label}>Info</span>
     </span>
   );
 }
@@ -121,25 +152,86 @@ export function PopupBodyCopy({ body }: { body: string }) {
   );
 }
 
+export function PopupVideoPlayIcon() {
+  return (
+    <svg
+      className='tour-glass-panel__video-play-icon'
+      viewBox='0 0 56 56'
+      fill='none'
+      aria-hidden='true'
+    >
+      <circle
+        className='tour-glass-panel__video-play-ring'
+        cx='28'
+        cy='28'
+        r='26'
+        stroke='currentColor'
+        strokeWidth='2.5'
+        fill='transparent'
+      />
+      <path
+        className='tour-glass-panel__video-play-glyph'
+        d='M23 18.5v19l14-9.5-14-9.5z'
+        fill='currentColor'
+      />
+    </svg>
+  );
+}
+
 export function PopupVideoEmbed({
   videoUrl,
   title,
+  poster,
 }: {
   videoUrl: string;
   title: string;
+  poster?: string;
 }) {
-  const embedUrl = youtubeEmbedUrl(videoUrl);
-  if (!embedUrl) return null;
+  const resolved = resolvePopupVideo(videoUrl, poster);
+  const [playing, setPlaying] = useState(false);
+
+  if (!resolved) return null;
+
+  if (playing) {
+    return (
+      <div className='tour-glass-panel__video tour-glass-panel__video--playing'>
+        {resolved.kind === 'youtube' ?
+          <iframe
+            src={popupVideoAutoplayUrl(resolved.sourceUrl)}
+            title={`${title} video`}
+            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+            allowFullScreen
+            referrerPolicy='strict-origin-when-cross-origin'
+          />
+        : <video
+            src={resolved.sourceUrl}
+            title={`${title} video`}
+            controls
+            playsInline
+            autoPlay
+          />
+        }
+      </div>
+    );
+  }
 
   return (
-    <div className='tour-glass-panel__video'>
-      <iframe
-        src={embedUrl}
-        title={`${title} video`}
-        allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-        allowFullScreen
-        referrerPolicy='strict-origin-when-cross-origin'
-      />
+    <div className='tour-glass-panel__video tour-glass-panel__video--preview'>
+      {resolved.thumbnailUrl ?
+        <img
+          className='tour-glass-panel__video-thumb'
+          src={resolved.thumbnailUrl}
+          alt=''
+        />
+      : null}
+      <button
+        type='button'
+        className='tour-glass-panel__video-play'
+        aria-label={`Play video: ${title}`}
+        onClick={() => setPlaying(true)}
+      >
+        <PopupVideoPlayIcon />
+      </button>
     </div>
   );
 }
@@ -166,14 +258,11 @@ export function PopupCtaArrowIcon() {
 export function PopupCtaLabel({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
 
-  if (resolved.kind === 'giftabulator') {
+  if (resolved.kind === 'giftabulator' && !cta.label) {
     return (
       <>
-        {resolved.labelPrefix}
-        {GIFTABULATOR_PRODUCT.name}
-        <sup className='tour-glass-panel__reg' aria-hidden='true'>
-          {GIFTABULATOR_PRODUCT.mark}
-        </sup>
+        {GIFTABULATOR_PRODUCT.ctaButtonLabelPrefix}
+        <PlatformBrandLink brandId='giftabulator' link={false} />
       </>
     );
   }
@@ -181,28 +270,124 @@ export function PopupCtaLabel({ cta }: { cta: PopupCta }) {
   return <>{resolved.label}</>;
 }
 
-export function PopupCtaBlock({ cta }: { cta: PopupCta }) {
+function GlassPanelCtaText({
+  label,
+  children,
+}: {
+  label: string;
+  children?: React.ReactNode;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  const syncOverflowTitle = useCallback(() => {
+    if (ref.current) {
+      applyCtaTextOverflowTitle(ref.current);
+    }
+  }, []);
+
+  useLayoutEffect(() => {
+    syncOverflowTitle();
+
+    const element = ref.current;
+    if (!element) return;
+
+    const resizeObserver = new ResizeObserver(syncOverflowTitle);
+    resizeObserver.observe(element);
+
+    const footer = element.closest('.tour-glass-panel__footer');
+    if (footer instanceof HTMLElement) {
+      resizeObserver.observe(footer);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [label, syncOverflowTitle]);
+
+  return (
+    <span
+      ref={ref}
+      className='tour-glass-panel__cta-text'
+      data-cta-label={label}
+    >
+      {children ?? label}
+    </span>
+  );
+}
+
+export function PopupCtaButton({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
+  const isSecondary = cta.variant === 'secondary';
+
+  return (
+    <a
+      className={`tour-glass-panel__cta${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}`}
+      href={resolved.url}
+      target='_blank'
+      rel='noopener noreferrer'
+      aria-label={resolved.ariaLabel}
+    >
+      <GlassPanelCtaText label={resolved.label}>
+        <PopupCtaLabel cta={cta} />
+      </GlassPanelCtaText>
+      {!isSecondary && <PopupCtaArrowIcon />}
+    </a>
+  );
+}
+
+export function PopupCtasBlock({ ctas }: { ctas: PopupCta[] }) {
+  if (ctas.length === 0) return null;
+
+  const mode = resolvePopupCtaLayoutMode(ctas);
+  const wrapClassName = popupCtaWrapClassName(mode);
+
+  if (mode === 'full') {
+    const cta = ctas[0];
+
+    return (
+      <footer className='tour-glass-panel__footer'>
+        <div className={wrapClassName}>
+          <PopupCtaButton cta={cta} />
+        </div>
+      </footer>
+    );
+  }
+
+  const { ordered, primary, secondaries } = partitionPopupCtas(ctas);
+
+  if (mode === 'row-equal') {
+    return (
+      <footer className='tour-glass-panel__footer'>
+        <div className={wrapClassName}>
+          {ordered.map((cta, index) => (
+            <PopupCtaButton key={`${cta.url}-${index}`} cta={cta} />
+          ))}
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className='tour-glass-panel__footer'>
-      <div className='tour-glass-panel__cta-wrap'>
-        <a
-          className='tour-glass-panel__cta'
-          href={resolved.url}
-          target='_blank'
-          rel='noopener noreferrer'
-          aria-label={resolved.ariaLabel}
-        >
-          <span className='tour-glass-panel__cta-text'>
-            <PopupCtaLabel cta={cta} />
-          </span>
-          <PopupCtaArrowIcon />
-        </a>
-        {resolved.sublabel && (
-          <p className='tour-glass-panel__cta-sublabel'>{resolved.sublabel}</p>
-        )}
+      <div className={wrapClassName}>
+        {secondaries.length > 1 ?
+          <div className={popupCtaRowClassName(secondaries.length)}>
+            {secondaries.map((cta, index) => (
+              <PopupCtaButton key={`${cta.url}-${index}`} cta={cta} />
+            ))}
+          </div>
+        : secondaries.map((cta, index) => (
+            <PopupCtaButton key={`${cta.url}-${index}`} cta={cta} />
+          ))
+        }
+        <div className='tour-glass-panel__cta-primary-group'>
+          <PopupCtaButton cta={primary} />
+        </div>
       </div>
     </footer>
   );
+}
+
+export function PopupCtaBlock({ cta }: { cta: PopupCta }) {
+  return <PopupCtasBlock ctas={[cta]} />;
 }

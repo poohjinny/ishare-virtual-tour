@@ -4,12 +4,57 @@ export interface NavPreviewNamingPanelHandlers {
   onGoToNaming: (infoHotspotId: string) => void;
 }
 
+const PANEL_TRANSITION_MS = 240;
+
 let panelHandlers: NavPreviewNamingPanelHandlers | null = null;
+
+const panelUnmountTimers = new WeakMap<HTMLElement, number>();
 
 export function setNavPreviewNamingPanelHandlers(
   handlers: NavPreviewNamingPanelHandlers | null,
 ): void {
   panelHandlers = handlers;
+}
+
+function getPanelTransitionMs(): number {
+  if (
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    return 0;
+  }
+  return PANEL_TRANSITION_MS;
+}
+
+function setPanelMounted(card: HTMLElement, mounted: boolean): void {
+  card.classList.toggle(
+    'nav-preview-panel__naming-card--panel-mounted',
+    mounted,
+  );
+}
+
+function cancelPanelUnmount(card: HTMLElement): void {
+  const existing = panelUnmountTimers.get(card);
+  if (existing !== undefined) {
+    window.clearTimeout(existing);
+    panelUnmountTimers.delete(card);
+  }
+}
+
+function schedulePanelUnmount(card: HTMLElement): void {
+  cancelPanelUnmount(card);
+
+  const ms = getPanelTransitionMs();
+  if (ms === 0) {
+    setPanelMounted(card, false);
+    return;
+  }
+
+  const timer = window.setTimeout(() => {
+    panelUnmountTimers.delete(card);
+    setPanelMounted(card, false);
+  }, ms);
+  panelUnmountTimers.set(card, timer);
 }
 
 function setNamingPanelExpanded(
@@ -21,6 +66,13 @@ function setNamingPanelExpanded(
 
   trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
   card.classList.toggle('nav-preview-panel__naming-card--open', expanded);
+
+  if (expanded) {
+    cancelPanelUnmount(card);
+    setPanelMounted(card, true);
+  } else {
+    schedulePanelUnmount(card);
+  }
 
   if (panelWrap instanceof HTMLElement) {
     panelWrap.setAttribute('aria-hidden', expanded ? 'false' : 'true');

@@ -3,6 +3,33 @@
   --ishare-primary-dark: #006270;
   --ishare-primary-light: #1a9aab;
   --ishare-primary-rgb: 0, 123, 139;
+  /* Opaque “primary 8% on white” — matches Explore active row on panel (not glass-over-pano) */
+  --ishare-active-item-bg: color-mix(in srgb, var(--ishare-primary) 8%, #ffffff);
+  --ishare-active-item-border: rgba(var(--ishare-primary-rgb), 0.2);
+  --ishare-active-item-sold-bg: color-mix(in srgb, #475569 10%, #ffffff);
+  --ishare-active-item-sold-border: rgba(71, 85, 105, 0.22);
+  --ishare-hotspot-active-glow:
+    0 8px 24px rgba(15, 23, 42, 0.12),
+    0 0 16px rgba(var(--ishare-primary-rgb), 0.28),
+    0 0 32px rgba(var(--ishare-primary-rgb), 0.12);
+  --ishare-hotspot-active-glow-strong:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 0 20px rgba(var(--ishare-primary-rgb), 0.36),
+    0 0 40px rgba(var(--ishare-primary-rgb), 0.16);
+  --ishare-hotspot-active-glow-sold:
+    0 8px 24px rgba(15, 23, 42, 0.12),
+    0 0 16px rgba(71, 85, 105, 0.22),
+    0 0 32px rgba(71, 85, 105, 0.1);
+  --ishare-hotspot-active-glow-sold-strong:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 0 20px rgba(71, 85, 105, 0.3),
+    0 0 40px rgba(71, 85, 105, 0.12);
+  --ishare-active-icon-leading-sold-bg: rgba(71, 85, 105, 0.1);
+  --ishare-active-icon-leading-sold-ring: 0 0 0 2px rgba(71, 85, 105, 0.12);
+  /* Explore directory active icon — location dot / naming leading */
+  --ishare-active-icon-dot-ring: 0 0 0 4px rgba(var(--ishare-primary-rgb), 0.15);
+  --ishare-active-icon-leading-bg: rgba(var(--ishare-primary-rgb), 0.1);
+  --ishare-active-icon-leading-ring: 0 0 0 2px rgba(var(--ishare-primary-rgb), 0.12);
   --ishare-accent: #e8a838;
   --ishare-bg: #f8fafc;
   --ishare-surface: #ffffff;
@@ -32,7 +59,7 @@
   --ishare-glass-divider: 1px solid rgba(15, 23, 42, 0.08);
   /* Body/UI — matches Google Maps (.gm-style uses Roboto) */
   --ishare-font: 'Roboto', Arial, sans-serif;
-  /* Headings / product name (iShare Guide, etc.) */
+  /* Headings / product name (iShare Virtual Tour, Virtual Tour Guide, etc.) */
   --ishare-font-display: 'Google Sans', system-ui, sans-serif;
   /* Type scale — html sets base to 16px; rem tokens below */
   --ishare-font-size-base: 16px;
@@ -54,4 +81,23 @@
   /* 20px */
   --ishare-font-size-icon: 1.625rem;
   /* 26px — icon-only controls */
+  /* Naming opportunity status badges (shared across tour UI) */
+  --ishare-naming-status-on-sale-bg: rgba(34, 197, 94, 0.14);
+  --ishare-naming-status-on-sale-color: #15803d;
+  --ishare-naming-status-sold-bg: rgba(15, 23, 42, 0.08);
+  --ishare-naming-status-sold-color: var(--ishare-text-muted);
+  --ishare-naming-status-reserved-bg: var(--ishare-badge-accent-bg);
+  --ishare-naming-status-reserved-color: var(--ishare-badge-accent-color);
+  --ishare-naming-status-coming-soon-bg: rgba(56, 189, 248, 0.14);
+  --ishare-naming-status-coming-soon-color: #0284c7;
+  /* Badge variants */
+  --ishare-badge-outline-gap: 7px;
+  --ishare-badge-outline-pad: 6px 11px 6px 10px;
+  --ishare-badge-outline-border: rgba(15, 23, 42, 0.1);
+  --ishare-badge-fill-sm-pad: 3px 8px;
+  --ishare-badge-fill-lg-gap: 6px;
+  --ishare-badge-fill-lg-pad: 5px 12px;
+  --ishare-badge-fill-lg-pad-icon: 5px 12px 5px 8px;
+  --ishare-badge-accent-bg: rgba(232, 168, 56, 0.14);
+  --ishare-badge-accent-color: #9a6b12;
 }

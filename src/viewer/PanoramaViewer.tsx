@@ -1,4 +1,10 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  type RefObject,
+} from 'react';
 import { CONSTANTS, Viewer } from '@photo-sphere-viewer/core';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
@@ -17,6 +23,7 @@ import { buildNavPreview } from '../utils/navPreview';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import { logHotspotClick, toViewPosition } from '../utils/devHotspotLogger';
 import { fromPsvZoom, toPsvZoom } from '../utils/psvZoom';
+import { VIEWER_CONTROLS_VISIBLE_DEFAULT } from '../utils/viewerControlsPreference';
 import { hotspotToMarkerConfig } from './buildMarkers';
 import {
   closeAnchoredInfoPanel,
@@ -33,10 +40,21 @@ import {
 import { setNavPreviewNamingPanelHandlers } from './navPreviewNamingAccordion';
 import {
   type PendingNamingInfoTarget,
+  animateViewerToView,
+  isNamingHotspotInViewport,
   scheduleOpenPendingNamingInfoHotspot,
+  resolveNamingOpportunityView,
 } from './pendingNamingInfoHotspot';
-import { setActiveInfoHotspot } from './infoHotspotActive';
+import {
+  setActiveInfoHotspot,
+  setActiveInfoHotspotChangeListener,
+} from './infoHotspotActive';
 import { navigateToScene, preloadOtherScenes } from './transition';
+import { createRecenterViewNavbarButton } from './recenterViewNavbarButton';
+import {
+  bindTourFullscreenNavbarButton,
+  createTourFullscreenNavbarButton,
+} from './tourFullscreenNavbarButton';
 import { patchZoomSliderSmoothZoom } from './patchZoomSlider';
 import {
   LANDING_ZOOM_OUT,
@@ -63,16 +81,17 @@ export interface PanoramaViewerHandle {
   navigateToScene: (
     sceneId: string,
     targetView?: ViewPosition,
-    hotspotPosition?: ViewPosition,
-    fromSceneId?: string,
   ) => Promise<boolean>;
   retryScene: (sceneId?: string) => Promise<boolean>;
   clearActiveInfoHotspot: () => void;
+  goToNamingOpportunity: (sceneId: string, hotspotId: string) => void;
 }
 
 interface PanoramaViewerProps {
   tour: Tour;
   initialSceneId: string;
+  /** Root element for browser fullscreen — keeps tour overlays visible. */
+  fullscreenRootRef?: RefObject<HTMLElement | null>;
   controlsVisible?: boolean;
   devMode?: boolean;
   /** True once first-load splash begins dismissing — gates landing transition. */
@@ -81,12 +100,12 @@ interface PanoramaViewerProps {
   suppressKeyboard?: boolean;
   onSceneChange: (sceneId: string) => void;
   onInfoHotspot: (popup: PopupContent) => void;
+  /** Fires when an info hotspot becomes active on the panorama (or clears). */
+  onActiveInfoHotspotChange?: (hotspotId: string | null) => void;
   /** Close modal info popup when an anchored panel opens on the panorama. */
   onDismissModalPopups?: () => void;
   /** Scene nav from panorama hotspots — same path as location menu (TourPage handleNavigate). */
   onNavigateToScene?: (sceneId: string, targetView?: ViewPosition) => void;
-  /** Open iShare Guide about the nav preview destination. */
-  onNavPreviewAskGuide?: (sceneId: string) => void;
   onTransitionStart: () => void;
   onTransitionEnd: () => void;
   onDevClick?: (coords: ClickCoords) => void;
@@ -131,16 +150,17 @@ export const PanoramaViewer = forwardRef<
   {
     tour,
     initialSceneId,
-    controlsVisible = false,
+    fullscreenRootRef,
+    controlsVisible = VIEWER_CONTROLS_VISIBLE_DEFAULT,
     devMode = false,
     splashDone = false,
     disabled = false,
     suppressKeyboard = false,
     onSceneChange,
     onInfoHotspot,
+    onActiveInfoHotspotChange,
     onDismissModalPopups,
     onNavigateToScene,
-    onNavPreviewAskGuide,
     onTransitionStart,
     onTransitionEnd,
     onDevClick,
@@ -162,11 +182,15 @@ export const PanoramaViewer = forwardRef<
   const pendingNamingInfoHotspotRef = useRef<PendingNamingInfoTarget | null>(
     null,
   );
+  const goToNamingOpportunityRef = useRef<
+    (sceneId: string, hotspotId: string) => void
+  >(() => {});
   const deferredErrorRef = useRef<PanoramaLoadErrorInfo | null>(null);
   const transitioningRef = useRef(false);
   const disabledRef = useRef(disabled);
   const suppressKeyboardRef = useLatestRef(suppressKeyboard);
   const tourRef = useLatestRef(tour);
+  const fullscreenRootRefLatest = useLatestRef(fullscreenRootRef);
   /** Fixed at mount — URL scene changes must not recreate the PSV viewer (causes black flash). */
   const initialSceneIdAtMount = useRef(initialSceneId);
 
@@ -186,9 +210,9 @@ export const PanoramaViewer = forwardRef<
 
   const onSceneChangeRef = useLatestRef(onSceneChange);
   const onInfoHotspotRef = useLatestRef(onInfoHotspot);
+  const onActiveInfoHotspotChangeRef = useLatestRef(onActiveInfoHotspotChange);
   const onDismissModalPopupsRef = useLatestRef(onDismissModalPopups);
   const onNavigateToSceneRef = useLatestRef(onNavigateToScene);
-  const onNavPreviewAskGuideRef = useLatestRef(onNavPreviewAskGuide);
   const onTransitionStartRef = useLatestRef(onTransitionStart);
   const onTransitionEndRef = useLatestRef(onTransitionEnd);
   const onDevClickRef = useLatestRef(onDevClick);
@@ -234,6 +258,13 @@ export const PanoramaViewer = forwardRef<
   useEffect(() => {
     if (splashDone) tryStartLandingRef.current?.();
   }, [splashDone]);
+
+  useEffect(() => {
+    setActiveInfoHotspotChangeListener((hotspotId) => {
+      onActiveInfoHotspotChangeRef.current?.(hotspotId);
+    });
+    return () => setActiveInfoHotspotChangeListener(null);
+  }, []);
 
   useEffect(() => {
     const viewer = viewerRef.current;
@@ -311,6 +342,9 @@ export const PanoramaViewer = forwardRef<
     clearActiveInfoHotspot: () => {
       if (!markersRef.current) return;
       setActiveInfoHotspot(markersRef.current, null);
+    },
+    goToNamingOpportunity: (sceneId, hotspotId) => {
+      goToNamingOpportunityRef.current(sceneId, hotspotId);
     },
   }));
 
@@ -390,6 +424,19 @@ export const PanoramaViewer = forwardRef<
       onLoadCompleteRef.current?.();
     };
 
+    const recenterViewButton = createRecenterViewNavbarButton(
+      () => {
+        const sceneId = virtualTourRef.current?.getCurrentNode()?.id;
+        if (!sceneId) return null;
+        return tourRef.current.scenes[sceneId]?.defaultView ?? null;
+      },
+      () => disabledRef.current || transitioningRef.current,
+    );
+
+    const fullscreenButton = createTourFullscreenNavbarButton(
+      () => fullscreenRootRefLatest.current?.current ?? null,
+    );
+
     const viewer = new Viewer({
       container: containerRef.current,
       minFov: MIN_FOV,
@@ -397,7 +444,7 @@ export const PanoramaViewer = forwardRef<
       moveInertia: MOVE_INERTIA,
       canvasBackground: '#000000',
       rendererParameters: { alpha: false, antialias: true },
-      navbar: ['zoom', 'move', 'fullscreen'],
+      navbar: ['zoom', 'move', recenterViewButton, fullscreenButton],
       keyboard: 'always',
       keyboardActions: {
         [CONSTANTS.KEY_CODES.ArrowUp]: CONSTANTS.ACTIONS.ROTATE_UP,
@@ -437,6 +484,10 @@ export const PanoramaViewer = forwardRef<
     });
 
     viewerRef.current = viewer;
+    const unbindTourFullscreen = bindTourFullscreenNavbarButton(
+      viewer,
+      () => fullscreenRootRefLatest.current?.current ?? null,
+    );
     patchZoomSliderSmoothZoom(viewer);
     const virtualTour = viewer.getPlugin<VirtualTourPlugin>(VirtualTourPlugin);
     virtualTourRef.current = virtualTour;
@@ -554,51 +605,51 @@ export const PanoramaViewer = forwardRef<
       }
     });
 
-    setNavPreviewNamingPanelHandlers({
-      onGoToNaming: (infoHotspotId) => {
-        const navTarget = getNavPanelNavigateTarget(markers);
-        if (!navTarget) return;
+    goToNamingOpportunityRef.current = (sceneId, hotspotId) => {
+      const targetView = resolveNamingOpportunityView(
+        tourRef.current,
+        sceneId,
+        hotspotId,
+      );
+      if (!targetView) return;
 
-        const scene = tourRef.current.scenes[navTarget.sceneId];
-        const infoHotspot = scene?.hotspots.find(
-          (hotspot) => hotspot.id === infoHotspotId,
+      const pending: PendingNamingInfoTarget = { sceneId, hotspotId };
+      pendingNamingInfoHotspotRef.current = pending;
+      closeAnchoredNavPreviewPanel(markers, false);
+      closeAnchoredInfoPanel(markers, false);
+
+      const openPending = () => {
+        scheduleOpenPendingNamingInfoHotspot(
+          viewer,
+          markers,
+          () => virtualTour.getCurrentNode()?.id,
+          tourRef.current,
+          pending,
+          (popup) => onInfoHotspotRef.current?.(popup),
+          () => {
+            pendingNamingInfoHotspotRef.current = null;
+          },
         );
-        if (!infoHotspot?.popup) return;
+      };
 
-        const targetView = {
-          yaw: infoHotspot.position.yaw,
-          pitch: infoHotspot.position.pitch,
-          zoom: infoHotspot.position.zoom ?? navTarget.targetView?.zoom,
-        };
-
-        const pending: PendingNamingInfoTarget = {
-          sceneId: navTarget.sceneId,
-          hotspotId: infoHotspotId,
-        };
-
-        pendingNamingInfoHotspotRef.current = pending;
-        closeAnchoredNavPreviewPanel(markers, false);
-
-        const openPending = () => {
-          scheduleOpenPendingNamingInfoHotspot(
-            viewer,
-            markers,
-            () => virtualTour.getCurrentNode()?.id,
-            tourRef.current,
-            pending,
-            (popup) => onInfoHotspotRef.current?.(popup),
-            () => {
-              pendingNamingInfoHotspotRef.current = null;
-            },
-          );
-        };
-
-        if (virtualTour.getCurrentNode()?.id === navTarget.sceneId) {
+      if (virtualTour.getCurrentNode()?.id === sceneId) {
+        if (isNamingHotspotInViewport(viewer, markers, hotspotId, targetView)) {
           openPending();
           return;
         }
 
-        onNavigateToSceneRef.current?.(navTarget.sceneId, targetView);
+        void animateViewerToView(viewer, targetView).then(openPending);
+        return;
+      }
+
+      onNavigateToSceneRef.current?.(sceneId, targetView);
+    };
+
+    setNavPreviewNamingPanelHandlers({
+      onGoToNaming: (infoHotspotId) => {
+        const navTarget = getNavPanelNavigateTarget(markers);
+        if (!navTarget) return;
+        goToNamingOpportunityRef.current(navTarget.sceneId, infoHotspotId);
       },
     });
 
@@ -625,17 +676,6 @@ export const PanoramaViewer = forwardRef<
               navTarget.sceneId,
               navTarget.targetView,
             );
-          }
-          return;
-        }
-
-        if (target.closest('[data-nav-panel-guide]')) {
-          event.preventDefault();
-          event.stopPropagation();
-          const navTarget = getNavPanelNavigateTarget(markers);
-          closeAnchoredNavPreviewPanel(markers, false);
-          if (navTarget) {
-            onNavPreviewAskGuideRef.current?.(navTarget.sceneId);
           }
           return;
         }
@@ -699,7 +739,7 @@ export const PanoramaViewer = forwardRef<
         if (isAnchoredPopup(hotspot.popup)) {
           onDismissModalPopupsRef.current?.();
           setActiveInfoHotspot(markers, null);
-          toggleAnchoredInfoPanel(viewer, markers, hotspot);
+          toggleAnchoredInfoPanel(viewer, markers, hotspot, tourRef.current);
           return;
         }
         closeAnchoredInfoPanel(markers, false);
@@ -781,7 +821,12 @@ export const PanoramaViewer = forwardRef<
           yaw: (e.data.yaw * 180) / Math.PI,
           pitch: (e.data.pitch * 180) / Math.PI,
         };
-        logHotspotClick(coords);
+        const sceneId = virtualTour.getCurrentNode()?.id ?? startSceneId;
+        logHotspotClick(coords, {
+          id: sceneId,
+          title: tourRef.current.scenes[sceneId]?.title,
+          clientId: tourRef.current.id,
+        });
         onDevClickRef.current?.(coords);
       });
     }
@@ -811,6 +856,7 @@ export const PanoramaViewer = forwardRef<
       );
       document.removeEventListener('focusin', onFocusChange);
       document.removeEventListener('focusout', onFocusChange);
+      unbindTourFullscreen();
       viewer.destroy();
       viewerRef.current = null;
       virtualTourRef.current = null;

@@ -1,12 +1,12 @@
 import type { ChatMessage } from '../types/tour';
+import { VIRTUAL_TOUR_GUIDE_NAME } from '../constants/branding';
 
 /** TODO(test): remove when scroll UX is verified — enable with ?chatTest=1 */
 export const CHAT_SCROLL_TEST_MESSAGES: ChatMessage[] = [
   {
     id: 'test-1',
     role: 'assistant',
-    content:
-      "Hi! I'm iShare Guide. You're on Overview — ask me anything you'd like to know about this area.",
+    content: `Hi! I'm ${VIRTUAL_TOUR_GUIDE_NAME}. You're on Overview — ask me anything you'd like to know about this area.`,
   },
   {
     id: 'test-2',

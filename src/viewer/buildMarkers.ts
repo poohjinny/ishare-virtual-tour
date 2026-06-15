@@ -38,7 +38,12 @@ function buildInfoHtml(hotspot: Hotspot): string {
     : statusConfig ? statusConfig.hotspotLabel
     : (hotspot.label?.trim() ?? 'Learn more');
   const statusClass =
-    statusConfig ? ` hotspot-info--status-${statusConfig.cssModifier}` : '';
+    (
+      naming &&
+      namingOpportunityStatusConfig(naming.status).cssModifier === 'sold'
+    ) ?
+      ' hotspot-info--status-sold'
+    : '';
 
   return `
     <button type="button" class="hotspot-info${statusClass}" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}">

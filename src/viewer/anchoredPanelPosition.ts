@@ -9,8 +9,8 @@ export const ANCHORED_PANEL_GAP_PX = 32;
 /** Nav pill min-height 32px / 2 */
 export const NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX = 17;
 
-/** Info pill min-height 36px / 2 */
-export const INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX = 18;
+/** Info pill min-height 34px / 2 */
+export const INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX = 17;
 
 const PITCH_OFFSET_MIN_DEG = 0.5;
 const PITCH_OFFSET_MAX_DEG = 45;
@@ -105,6 +105,57 @@ export function measureHotspotHalfHeightPx(
   return fallbackPx;
 }
 
+/** Visible panel bottom within the PSV marker box (px from marker top). */
+export function measureAnchoredPanelBottomOffsetPx(
+  panelMarkerEl: HTMLElement,
+): number | null {
+  const article = panelMarkerEl.querySelector('.tour-glass-panel--anchored');
+  if (!(article instanceof HTMLElement) || article.offsetHeight <= 0) {
+    return null;
+  }
+
+  const markerRect = panelMarkerEl.getBoundingClientRect();
+  const articleRect = article.getBoundingClientRect();
+  if (markerRect.height <= 0) return null;
+
+  return articleRect.bottom - markerRect.top;
+}
+
+/** Shrink the PSV marker box to match rendered panel height (content-height panels). */
+export function fitAnchoredPanelMarkerSize(
+  markers: MarkersPlugin,
+  panelId: string,
+): boolean {
+  const marker = markers.getMarker(panelId) as
+    | { config?: { size?: { width: number; height: number } | number } }
+    | undefined;
+  const el = markers.getMarker(panelId)?.domElement;
+  if (!(el instanceof HTMLElement)) return false;
+
+  const article = el.querySelector('.tour-glass-panel--anchored');
+  if (!(article instanceof HTMLElement)) return false;
+
+  const width = Math.round(article.offsetWidth);
+  const height = Math.round(article.offsetHeight);
+  if (width <= 0 || height <= 0) return false;
+
+  const size = marker?.config?.size;
+  const current =
+    typeof size === 'number' ?
+      { width: size, height: size }
+    : (size ?? { width: 0, height: 0 });
+
+  if (
+    Math.abs(current.width - width) < 1 &&
+    Math.abs(current.height - height) < 1
+  ) {
+    return false;
+  }
+
+  markers.updateMarker({ id: panelId, size: { width, height } });
+  return true;
+}
+
 /**
  * After PSV renderMarkers, nudge panel translate to keep a fixed px gap.
  * Does not change spherical position — avoids visibility flicker on drag.
@@ -145,13 +196,18 @@ export function correctAnchoredPanelPixelGap(
   });
 
   const targetPanelBottomY = hostPoint.y - hostHalf - ANCHORED_PANEL_GAP_PX;
-  const panelHeight =
+  const markerHeight =
     panelMarker.state?.size?.height ??
     (panelEl instanceof HTMLElement ? panelEl.offsetHeight : 0);
 
-  if (panelHeight <= 0) return;
+  if (markerHeight <= 0) return;
 
-  const currentPanelBottomY = pos2d.y + panelHeight;
+  const visibleBottomOffset =
+    panelEl instanceof HTMLElement ?
+      measureAnchoredPanelBottomOffsetPx(panelEl)
+    : null;
+
+  const currentPanelBottomY = pos2d.y + (visibleBottomOffset ?? markerHeight);
   const deltaY = targetPanelBottomY - currentPanelBottomY;
 
   if (Math.abs(deltaY) < 0.5) return;

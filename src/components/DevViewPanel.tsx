@@ -37,10 +37,10 @@ export function DevViewPanel({
   const copyHotspot = useCallback(async () => {
     if (!clickCoords) return;
     const ok = await copyToClipboard(
-      formatHotspotPositionJson(clickCoords.yaw, clickCoords.pitch),
+      formatHotspotPositionJson(clickCoords.yaw, clickCoords.pitch, scene),
     );
     setCopied(ok ? 'hotspot' : null);
-  }, [clickCoords]);
+  }, [clickCoords, scene]);
 
   useEffect(() => {
     if (!copied) return;
@@ -105,7 +105,8 @@ export function DevViewPanel({
       <p className='dev-panel__hint'>
         Pan to the desired start view, then copy landing JSON into the matching
         client&apos;s <code>tours/&#123;client&#125;.json</code>{' '}
-        <code>defaultView</code>.
+        <code>defaultView</code>. Click the panorama for hotspot coords — copy
+        includes <code>scene</code> and <code>position</code>.
       </p>
     </div>
   );

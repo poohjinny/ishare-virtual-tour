@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { PopupContent } from '../types/tour';
+import type { PopupContent, Tour } from '../types/tour';
 import {
   PopupBodyCopy,
-  PopupCtaBlock,
+  PopupCtasBlock,
   PopupHeaderMeta,
+  NamingOpportunityPrice,
   PopupVideoEmbed,
 } from './popupContentUi';
-import { namingOpportunityCtaEnabled } from '../data/namingOpportunityStatus';
+import { resolvePopupContentCtas } from '../data/namingOpportunityStatus';
 import { resolveGlassPanelWidth } from './tourGlassPanelHtml';
 import { GlassPanelCloseIcon } from './TourGlassPanel';
 import './TourGlassPanel.css';
@@ -16,10 +17,11 @@ const POPUP_EXIT_MS = 280;
 
 interface InfoPopupProps {
   popup: PopupContent | null;
+  tour: Tour;
   onClose: () => void;
 }
 
-export function InfoPopup({ popup, onClose }: InfoPopupProps) {
+export function InfoPopup({ popup, tour, onClose }: InfoPopupProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [shown, setShown] = useState<PopupContent | null>(null);
   const [isExiting, setIsExiting] = useState(false);
@@ -64,6 +66,8 @@ export function InfoPopup({ popup, onClose }: InfoPopupProps) {
 
   if (!shown) return null;
 
+  const resolvedCtas = resolvePopupContentCtas(shown, tour);
+
   return (
     <div
       className={`info-popup-backdrop${isExiting ? ' info-popup-backdrop--exit' : ''}`}
@@ -76,15 +80,32 @@ export function InfoPopup({ popup, onClose }: InfoPopupProps) {
         role='dialog'
         aria-modal='true'
         aria-labelledby='info-popup-title'
-        style={{ maxWidth: resolveGlassPanelWidth(shown) }}
+        style={{ maxWidth: resolveGlassPanelWidth(shown, tour) }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className='tour-glass-panel__shell'>
           <header className='tour-glass-panel__header'>
             <div className='tour-glass-panel__title-row info-popup__title-row'>
-              <h2 id='info-popup-title' className='tour-glass-panel__title info-popup__title'>
-                {shown.title}
-              </h2>
+              <div className='tour-glass-panel__title-block'>
+                <div className='tour-glass-panel__title-line'>
+                  <h2
+                    id='info-popup-title'
+                    className='tour-glass-panel__title info-popup__title'
+                  >
+                    {shown.title}
+                  </h2>
+                  {shown.namingOpportunity && (
+                    <NamingOpportunityPrice
+                      opportunity={shown.namingOpportunity}
+                    />
+                  )}
+                </div>
+                {shown.namingOpportunity?.priceLabel && (
+                  <p className='tour-glass-panel__price-label'>
+                    {shown.namingOpportunity.priceLabel}
+                  </p>
+                )}
+              </div>
               <button
                 ref={closeRef}
                 type='button'
@@ -104,15 +125,15 @@ export function InfoPopup({ popup, onClose }: InfoPopupProps) {
             )}
             <PopupBodyCopy body={shown.body} />
             {shown.videoUrl && (
-              <PopupVideoEmbed videoUrl={shown.videoUrl} title={shown.title} />
+              <PopupVideoEmbed
+                videoUrl={shown.videoUrl}
+                title={shown.title}
+                poster={shown.videoPoster}
+              />
             )}
           </div>
 
-          {shown.cta &&
-            (!shown.namingOpportunity ||
-              namingOpportunityCtaEnabled(shown.namingOpportunity.status)) && (
-              <PopupCtaBlock cta={shown.cta} />
-            )}
+          {resolvedCtas.length > 0 && <PopupCtasBlock ctas={resolvedCtas} />}
         </div>
       </article>
     </div>

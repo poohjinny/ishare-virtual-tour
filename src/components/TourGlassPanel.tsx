@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { BADGE_CLASS } from './ui/badgeClasses';
 import './TourGlassPanel.css';
 
 export type TourGlassPanelVariant = 'anchored' | 'dock';
@@ -24,9 +25,9 @@ export function GlassPanelCloseIcon() {
 
 export function GlassPanelInfoBadge() {
   return (
-    <span className='tour-glass-panel__badge'>
+    <span className={BADGE_CLASS.fillLgAccentIcon}>
       <svg
-        className='tour-glass-panel__badge-icon'
+        className={BADGE_CLASS.icon}
         viewBox='0 0 24 24'
         fill='none'
         aria-hidden='true'
@@ -40,7 +41,7 @@ export function GlassPanelInfoBadge() {
         />
         <circle cx='12' cy='8' r='1.25' fill='currentColor' />
       </svg>
-      <span className='tour-glass-panel__badge-text'>Info</span>
+      <span className={BADGE_CLASS.label}>Info</span>
     </span>
   );
 }
@@ -91,7 +92,9 @@ export function TourGlassPanel({
       role={role}
       aria-labelledby={titleId}
     >
-      <div className={`tour-glass-panel__shell${shellAnimationClass(animation)}`}>
+      <div
+        className={`tour-glass-panel__shell${shellAnimationClass(animation)}`}
+      >
         <header className='tour-glass-panel__header'>
           {header ?? (
             <>

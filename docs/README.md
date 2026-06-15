@@ -2,13 +2,18 @@
 
 Project documentation for the iShare virtual tour MVP (multi-client).
 
-| Document                                       | Description                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------- |
-| [PLANNING.md](./PLANNING.md)                   | Project goals, SeekBeak context, phases, timeline, success criteria       |
-| [TECH_STACK.md](./TECH_STACK.md)               | Technology choices, library comparison, dependencies, deployment          |
-| [MVP_PLAN.md](./MVP_PLAN.md)                   | Feature specifications, data schemas, UI layout, implementation checklist |
-| [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md) | Deeper/shallower scene transition UX, zoom semantics, tuning              |
-| [ROADMAP.md](./ROADMAP.md)                     | Post-MVP roadmap — VR/XR, database, mobile, integrations                  |
+| Document                                             | Description                                                               |
+| ---------------------------------------------------- | ------------------------------------------------------------------------- |
+| [PLANNING.md](./PLANNING.md)                         | Project goals, SeekBeak context, phases, timeline, success criteria       |
+| [TECH_STACK.md](./TECH_STACK.md)                     | Technology choices, library comparison, dependencies, deployment          |
+| [MVP_PLAN.md](./MVP_PLAN.md)                         | Feature specifications, data schemas, UI layout, implementation checklist |
+| [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md)       | Deeper/shallower scene transition UX, zoom semantics, tuning              |
+| [COMPONENTS.md](./COMPONENTS.md)                     | Shared UI components — reuse across React and HTML marker popups          |
+| [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)             | Platform vs client tour vs AI assistant naming (in-app vs docs-only)      |
+| [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) | Naming status values and status-driven popup CTAs                         |
+| [ROADMAP.md](./ROADMAP.md)                           | Post-MVP roadmap — VR/XR, database, mobile, integrations                  |
+| [PERFORMANCE.md](./PERFORMANCE.md)                   | Performance baseline and optimization backlog (deferred)                  |
+| [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                 | Git commit/push guidelines — one task per commit                            |
 
 ## Quick Links
 

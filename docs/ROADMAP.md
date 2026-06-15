@@ -118,6 +118,7 @@ Onboard new clients using the established pattern:
 - Screen reader labels for nav and panels where practical
 - CDN or asset pipeline for large panoramas
 - Error recovery and offline / slow-network messaging
+- Detailed optimization backlog: [PERFORMANCE.md](./PERFORMANCE.md)
 
 ---
 

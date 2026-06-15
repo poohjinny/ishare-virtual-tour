@@ -21,18 +21,20 @@
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   min-height: 32px;
-  padding: 2px 18px 2px 14px;
+  padding: 2px 16px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px) saturate(120%);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
-  border: none;
+  border: 1.5px solid transparent;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
   transition:
     transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.22s ease;
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .hotspot-nav__dot {
@@ -42,15 +44,10 @@
   border-radius: 50%;
   background: var(--ishare-primary);
   box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.4);
+  animation: hotspot-nav-dot-glow 2.8s ease-out infinite;
   transition:
     background 0.22s ease,
-    box-shadow 0.22s ease,
-    outline 0.22s ease,
-    outline-offset 0.22s ease;
-}
-
-.hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__dot {
-  animation: hotspot-nav-dot-glow 2.8s ease-out infinite;
+    box-shadow 0.22s ease;
 }
 
 .hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__pill {
@@ -81,31 +78,30 @@
   outline: none;
 }
 
+/* Active — panel open: glass pill, theme label, dot pulse, theme glow */
 .hotspot-nav--active .hotspot-nav__pill,
 .hotspot-nav--active:hover .hotspot-nav__pill,
 .hotspot-nav--active:focus-visible .hotspot-nav__pill {
-  transform: scale(1.06);
-  background: var(--ishare-primary);
-  box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
-  transition:
-    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0s,
-    background 0s;
+  box-shadow: var(--ishare-hotspot-active-glow);
+}
+
+.hotspot-nav--active:hover .hotspot-nav__pill,
+.hotspot-nav--active:focus-visible .hotspot-nav__pill {
+  box-shadow: var(--ishare-hotspot-active-glow-strong);
 }
 
 .hotspot-nav--active .hotspot-nav__label,
 .hotspot-nav--active:hover .hotspot-nav__label,
 .hotspot-nav--active:focus-visible .hotspot-nav__label {
-  color: #fff;
+  color: var(--ishare-primary);
 }
 
 .hotspot-nav--active .hotspot-nav__dot,
 .hotspot-nav--active:hover .hotspot-nav__dot,
 .hotspot-nav--active:focus-visible .hotspot-nav__dot {
-  background: #fff;
-  box-shadow: none;
-  outline: 1.5px solid rgba(255, 255, 255, 0.55);
-  outline-offset: 3px;
+  background: var(--ishare-primary);
+  box-shadow: var(--ishare-active-icon-dot-ring);
+  animation: none;
 }
 
 /* ── Info hotspot — naming opportunity pill (primary + heart) ── */
@@ -144,18 +140,20 @@
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  min-height: 36px;
-  padding: 4px 24px 4px 6px;
+  gap: 6px;
+  min-height: 34px;
+  padding: 3px 18px 3px 12px;
   border-radius: 999px;
   background: var(--ishare-primary);
   color: #fff;
-  border: none;
+  border: 1.5px solid transparent;
   box-shadow: 0 8px 24px rgba(var(--ishare-primary-rgb), 0.28);
   transition:
     transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.22s ease,
-    background 0.22s ease;
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease;
 }
 
 .hotspot-info__icon-wrap {
@@ -163,15 +161,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   overflow: visible;
   color: rgba(255, 255, 255, 0.58);
+  border-radius: 50%;
+  transition:
+    color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    width 0.22s ease,
+    height 0.22s ease;
 }
 
 .hotspot-info__icon {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
   display: block;
   overflow: visible;
 }
@@ -193,9 +198,31 @@
   box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
 }
 
+.hotspot-info--active:not(.hotspot-info--status-sold):hover .hotspot-info__pill,
+.hotspot-info--active:not(.hotspot-info--status-sold):focus-visible .hotspot-info__pill {
+  transform: scale(1.04);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--ishare-hotspot-active-glow-strong);
+}
+
 .hotspot-info:hover .hotspot-info__icon-wrap,
 .hotspot-info:focus-visible .hotspot-info__icon-wrap {
   color: rgba(255, 255, 255, 0.78);
+}
+
+.hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__icon-wrap,
+.hotspot-info--active:not(.hotspot-info--status-sold):hover .hotspot-info__icon-wrap,
+.hotspot-info--active:not(.hotspot-info--status-sold):focus-visible .hotspot-info__icon-wrap {
+  width: 22px;
+  height: 22px;
+  background: var(--ishare-active-icon-leading-bg);
+  box-shadow: var(--ishare-active-icon-leading-ring);
+  color: var(--ishare-primary);
+}
+
+.hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__icon {
+  width: 15px;
+  height: 15px;
 }
 
 .hotspot-info:focus-visible .hotspot-info__pill {
@@ -203,51 +230,93 @@
   outline-offset: 2px;
 }
 
-/* Active — popup open (same as hover, no scale) */
-.hotspot-info--active:not(.hotspot-info--status-sold):not(.hotspot-info--status-reserved) .hotspot-info__pill {
-  background: var(--ishare-primary-dark);
-  box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
+/* Active — popup open: glass pill, theme label/icon + glow (no pulse — already engaged) */
+.hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__pill {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border-color: transparent;
+  box-shadow: var(--ishare-hotspot-active-glow);
+  transform: none;
 }
 
-.hotspot-info--active:not(.hotspot-info--status-sold):not(.hotspot-info--status-reserved) .hotspot-info__icon-wrap {
-  color: rgba(255, 255, 255, 0.78);
+.hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__label {
+  color: var(--ishare-primary);
 }
 
-.hotspot-info--active .hotspot-info__pulse {
+.hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__pulse {
+  animation: none;
+  opacity: 0;
+}
+
+/* Sold — muted pill, no pulse (status detail lives in popup / directory) */
+.hotspot-info--status-sold .hotspot-info__pulse {
   animation: none;
   opacity: 0;
 }
 
 .hotspot-info--active.hotspot-info--status-sold .hotspot-info__pill {
-  background: rgba(51, 65, 85, 0.92);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border-color: var(--ishare-active-item-sold-border);
+  box-shadow: var(--ishare-hotspot-active-glow-sold);
+  transform: none;
 }
 
-.hotspot-info--active.hotspot-info--status-reserved .hotspot-info__pill {
-  background: #85600f;
-  box-shadow: 0 12px 28px rgba(154, 107, 18, 0.34);
+.hotspot-info--active.hotspot-info--status-sold .hotspot-info__label {
+  color: var(--ishare-text);
+}
+
+.hotspot-info--active.hotspot-info--status-sold .hotspot-info__icon-wrap {
+  width: 22px;
+  height: 22px;
+  background: var(--ishare-active-icon-leading-sold-bg);
+  box-shadow: var(--ishare-active-icon-leading-sold-ring);
+  color: rgba(71, 85, 105, 0.72);
+}
+
+.hotspot-info--active.hotspot-info--status-sold .hotspot-info__icon {
+  width: 15px;
+  height: 15px;
+}
+
+.hotspot-info--active.hotspot-info--status-sold .hotspot-info__pulse {
+  animation: none;
+  opacity: 0;
+}
+
+.hotspot-info--active.hotspot-info--status-sold:hover .hotspot-info__pill,
+.hotspot-info--active.hotspot-info--status-sold:focus-visible .hotspot-info__pill {
+  transform: scale(1.04);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--ishare-hotspot-active-glow-sold-strong);
+}
+
+.hotspot-info--active.hotspot-info--status-sold:hover .hotspot-info__icon-wrap,
+.hotspot-info--active.hotspot-info--status-sold:focus-visible .hotspot-info__icon-wrap {
+  color: rgba(51, 65, 85, 0.82);
 }
 
 .hotspot-info--status-sold .hotspot-info__pill {
-  background: rgba(71, 85, 105, 0.88);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+  background: rgba(71, 85, 105, 0.82);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
 }
 
-.hotspot-info--status-sold:hover .hotspot-info__pill,
-.hotspot-info--status-sold:focus-visible .hotspot-info__pill {
-  background: rgba(51, 65, 85, 0.92);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.24);
+.hotspot-info--status-sold:not(.hotspot-info--active):hover .hotspot-info__pill,
+.hotspot-info--status-sold:not(.hotspot-info--active):focus-visible .hotspot-info__pill {
+  transform: scale(1.04);
+  background: rgba(51, 65, 85, 0.88);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.2);
 }
 
-.hotspot-info--status-reserved .hotspot-info__pill {
-  background: #9a6b12;
-  box-shadow: 0 8px 24px rgba(154, 107, 18, 0.28);
+.hotspot-info--status-sold .hotspot-info__icon-wrap {
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.hotspot-info--status-reserved:hover .hotspot-info__pill,
-.hotspot-info--status-reserved:focus-visible .hotspot-info__pill {
-  background: #85600f;
-  box-shadow: 0 12px 28px rgba(154, 107, 18, 0.34);
+.hotspot-info--status-sold:not(.hotspot-info--active):hover .hotspot-info__icon-wrap,
+.hotspot-info--status-sold:not(.hotspot-info--active):focus-visible .hotspot-info__icon-wrap {
+  color: rgba(255, 255, 255, 0.58);
 }
 
 @keyframes hotspot-nav-dot-glow {
@@ -278,8 +347,12 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-  .hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__dot {
+  .hotspot-nav__dot {
     animation: none;
+  }
+
+  .hotspot-nav--active .hotspot-nav__dot {
+    box-shadow: var(--ishare-active-icon-dot-ring);
   }
 
   .hotspot-info__pulse {

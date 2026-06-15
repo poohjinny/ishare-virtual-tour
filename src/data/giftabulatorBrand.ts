@@ -1,14 +1,29 @@
 import type { PopupCta } from '../types/tour';
+import { GIFTABULATOR } from './platformBrands';
+import { platformBrandLinkedNameHtml } from '../utils/platformBrandHtml';
 
-/** iShare Giftabulator product branding — single source of truth for popup CTAs. */
+/** Giftabulator popup CTA copy — brand metadata lives in `platformBrands.ts`. */
 export const GIFTABULATOR_PRODUCT = {
-  id: 'giftabulator',
-  name: 'GIFTABULATOR',
-  mark: '®',
-  ctaLabelPrefix: 'Calculate your gift with ',
-  defaultSublabel: 'See your tax-efficient giving potential',
-  ariaLabel: 'Calculate your gift with GIFTABULATOR registered trademark',
+  ...GIFTABULATOR,
+  ctaButtonLabelPrefix: 'See your tax-efficient giving potential with ',
+  ctaSublabelPrefix: 'Calculate your gift with ',
+  ariaLabel: 'See your tax-efficient giving potential with GIFTABULATOR',
 } as const;
+
+export function giftabulatorCtaButtonPlainLabel(): string {
+  const mark = GIFTABULATOR.mark ?? '';
+  return `${GIFTABULATOR_PRODUCT.ctaButtonLabelPrefix}${GIFTABULATOR.name}${mark}`;
+}
+
+export function giftabulatorCtaButtonLabelHtml(
+  regClass = 'tour-glass-panel__reg',
+): string {
+  const markHtml =
+    GIFTABULATOR.mark ?
+      `<sup class="${regClass}" aria-hidden="true">${GIFTABULATOR.mark}</sup>`
+    : '';
+  return `${GIFTABULATOR_PRODUCT.ctaButtonLabelPrefix}${GIFTABULATOR.name}${markHtml}`;
+}
 
 export type GiftabulatorProductId = typeof GIFTABULATOR_PRODUCT.id;
 
@@ -16,8 +31,8 @@ export type ResolvedPopupCta =
   | {
       kind: 'giftabulator';
       url: string;
-      sublabel: string;
-      labelPrefix: string;
+      label: string;
+      sublabelOverride?: string;
       ariaLabel: string;
     }
   | {
@@ -33,9 +48,9 @@ export function resolvePopupCta(cta: PopupCta): ResolvedPopupCta {
     return {
       kind: 'giftabulator',
       url: cta.url,
-      sublabel: cta.sublabel ?? GIFTABULATOR_PRODUCT.defaultSublabel,
-      labelPrefix: GIFTABULATOR_PRODUCT.ctaLabelPrefix,
-      ariaLabel: cta.label ?? GIFTABULATOR_PRODUCT.ariaLabel,
+      label: cta.label ?? giftabulatorCtaButtonPlainLabel(),
+      sublabelOverride: cta.sublabel,
+      ariaLabel: cta.ariaLabel ?? GIFTABULATOR_PRODUCT.ariaLabel,
     };
   }
 
@@ -44,22 +59,16 @@ export function resolvePopupCta(cta: PopupCta): ResolvedPopupCta {
     url: cta.url,
     sublabel: cta.sublabel,
     label: cta.label ?? '',
-    ariaLabel: cta.label ?? 'Learn more',
+    ariaLabel: cta.ariaLabel ?? cta.label ?? 'Learn more',
   };
 }
 
-export function giftabulatorCtaLabelHtml(regClass = 'tour-glass-panel__reg'): string {
-  return `${GIFTABULATOR_PRODUCT.ctaLabelPrefix}${GIFTABULATOR_PRODUCT.name}<sup class="${regClass}" aria-hidden="true">&reg;</sup>`;
+export function giftabulatorCtaSublabelHtml(
+  regClass = 'tour-glass-panel__reg',
+): string {
+  return `${GIFTABULATOR_PRODUCT.ctaSublabelPrefix}${platformBrandLinkedNameHtml(GIFTABULATOR, { regClass })}`;
 }
 
 export function popupCtaLabelLength(cta: PopupCta): number {
-  const resolved = resolvePopupCta(cta);
-  if (resolved.kind === 'giftabulator') {
-    return (
-      resolved.labelPrefix.length +
-      GIFTABULATOR_PRODUCT.name.length +
-      GIFTABULATOR_PRODUCT.mark.length
-    );
-  }
-  return resolved.label.length;
+  return resolvePopupCta(cta).label.length;
 }

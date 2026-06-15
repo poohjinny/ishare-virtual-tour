@@ -11,6 +11,22 @@ export function phoneToTelHref(phone: string): string {
   return cleaned ? `tel:${cleaned}` : '';
 }
 
+/** Google Maps search URL for an organization address. */
+export function addressToGoogleMapsHref(
+  address: string,
+  organizationName?: string,
+): string {
+  const trimmedAddress = address.trim();
+  const trimmedName = organizationName?.trim() ?? '';
+  const query =
+    trimmedName && trimmedAddress ?
+      `${trimmedAddress}, ${trimmedName}`
+    : trimmedAddress || trimmedName;
+
+  if (!query) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
 export function getOrganizationPhones(
   organization: TourOrganization,
 ): OrganizationPhoneEntry[] {

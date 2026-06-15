@@ -14,6 +14,10 @@ import {
 } from './navPreviewMiniViewer';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import {
+  bindGlassPanelCtaOverflowTitles,
+  refreshGlassPanelCtaOverflowTitles,
+} from '../utils/glassPanelCtaOverflow';
+import {
   anchoredPanelMarkerPosition,
   correctAnchoredPanelPixelGap,
   measureHotspotHalfHeightPx,
@@ -23,14 +27,21 @@ import { bindNavPreviewNamingAccordion } from './navPreviewNamingAccordion';
 import { scheduleNudgeCameraForClippedPanel } from './anchoredPanelCameraNudge';
 
 const PANEL_ID_SUFFIX = '-nav-panel';
-const PANEL_EXIT_MS = 150;
+const PANEL_EXIT_MS = 200;
 
 const closingPanelIds = new Set<string>();
 const namingAccordionCleanups = new Map<string, () => void>();
+const ctaOverflowCleanups = new Map<string, () => void>();
+
+function clearNavPreviewCtaOverflow(panelId: string): void {
+  ctaOverflowCleanups.get(panelId)?.();
+  ctaOverflowCleanups.delete(panelId);
+}
 
 function clearNavPreviewNamingAccordion(panelId: string): void {
   namingAccordionCleanups.get(panelId)?.();
   namingAccordionCleanups.delete(panelId);
+  clearNavPreviewCtaOverflow(panelId);
 }
 
 interface NavPanelPositionTrack {
@@ -182,6 +193,10 @@ export function openAnchoredNavPreviewPanel(
   const marker = markers.getMarker(id);
   if (marker?.domElement instanceof HTMLElement) {
     enableGlassPanelTextSelection(marker.domElement);
+    ctaOverflowCleanups.set(
+      id,
+      bindGlassPanelCtaOverflowTitles(marker.domElement),
+    );
     namingAccordionCleanups.set(
       id,
       bindNavPreviewNamingAccordion(marker.domElement),
@@ -198,6 +213,7 @@ export function openAnchoredNavPreviewPanel(
         afterSettled: () => {
           const panelMarker = markers.getMarker(id);
           if (!(panelMarker?.domElement instanceof HTMLElement)) return;
+          refreshGlassPanelCtaOverflowTitles(panelMarker.domElement);
           if (isNavPreviewMiniViewerEnabled()) {
             mountNavPreviewMiniViewer(id, panelMarker.domElement, preview);
           } else {

@@ -3,6 +3,16 @@ import type { Hotspot } from '../types/tour';
 
 export const INFO_HOTSPOT_ACTIVE_CLASS = 'hotspot-info--active';
 
+type ActiveInfoHotspotListener = (hotspotId: string | null) => void;
+
+let activeInfoHotspotListener: ActiveInfoHotspotListener | null = null;
+
+export function setActiveInfoHotspotChangeListener(
+  listener: ActiveInfoHotspotListener | null,
+): void {
+  activeInfoHotspotListener = listener;
+}
+
 export function setActiveInfoHotspot(
   markers: MarkersPlugin,
   hotspotId: string | null,
@@ -18,4 +28,6 @@ export function setActiveInfoHotspot(
     button.classList.toggle(INFO_HOTSPOT_ACTIVE_CLASS, isActive);
     button.setAttribute('aria-expanded', isActive ? 'true' : 'false');
   }
+
+  activeInfoHotspotListener?.(hotspotId);
 }

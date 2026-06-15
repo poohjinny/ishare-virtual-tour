@@ -1,23 +1,25 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
-import type { Hotspot, PopupContent, ViewPosition } from '../types/tour';
+import type { Hotspot, PopupContent, Tour, ViewPosition } from '../types/tour';
 import {
   buildAnchoredPopupHtml,
   glassPanelMarkerSize,
-  mountAnchoredPopupVideo,
+  initPopupVideoPlayers,
 } from '../components/tourGlassPanelHtml';
 import { setActiveInfoHotspot } from './infoHotspotActive';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
+import { bindGlassPanelCtaOverflowTitles } from '../utils/glassPanelCtaOverflow';
 import {
   anchoredPanelMarkerPosition,
   correctAnchoredPanelPixelGap,
+  fitAnchoredPanelMarkerSize,
   INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
   measureHotspotHalfHeightPx,
 } from './anchoredPanelPosition';
 import { scheduleNudgeCameraForClippedPanel } from './anchoredPanelCameraNudge';
 
 const PANEL_ID_SUFFIX = '-panel';
-const PANEL_EXIT_MS = 150;
+const PANEL_EXIT_MS = 200;
 
 const closingPanelIds = new Set<string>();
 
@@ -46,6 +48,10 @@ export function syncInfoPanelPosition(
     !markers.getMarker(infoPanelPositionTrack.panelId)
   ) {
     clearInfoPanelPositionTrack();
+  }
+
+  if (infoPanelPositionTrack) {
+    fitAnchoredPanelMarkerSize(markers, infoPanelPositionTrack.panelId);
   }
 
   correctAnchoredPanelPixelGap(
@@ -118,6 +124,7 @@ export function openAnchoredInfoPanel(
   viewer: Viewer,
   markers: MarkersPlugin,
   hotspot: Hotspot,
+  tour: Tour,
 ): void {
   if (!hotspot.popup) return;
 
@@ -132,8 +139,8 @@ export function openAnchoredInfoPanel(
 
   markers.addMarker({
     id,
-    html: buildAnchoredPopupHtml(hotspot.popup, hotspot.id),
-    size: glassPanelMarkerSize(hotspot.popup, hotspot.id),
+    html: buildAnchoredPopupHtml(hotspot.popup, hotspot.id, { tour }),
+    size: glassPanelMarkerSize(hotspot.popup, hotspot.id, tour),
     position: anchoredPanelMarkerPosition(viewer, hotspot.position, halfHeight),
     anchor: 'bottom center',
     data: { infoPanel: true, hostHotspotId: hotspot.id },
@@ -148,42 +155,35 @@ export function openAnchoredInfoPanel(
   const marker = markers.getMarker(id);
   if (marker?.domElement instanceof HTMLElement) {
     enableGlassPanelTextSelection(marker.domElement);
+    initPopupVideoPlayers(marker.domElement);
+    bindGlassPanelCtaOverflowTitles(marker.domElement);
   }
 
   setActiveInfoHotspot(markers, hotspot.id);
 
-  scheduleNudgeCameraForClippedPanel(
-    viewer,
-    () => {
-      const panelMarker = markers.getMarker(id);
-      return panelMarker?.domElement instanceof HTMLElement ?
-          panelMarker.domElement
-        : null;
-    },
-    {
-      afterSettled: () => {
-        const panelMarker = markers.getMarker(id);
-        if (panelMarker?.domElement instanceof HTMLElement) {
-          mountAnchoredPopupVideo(panelMarker.domElement);
-        }
-      },
-    },
-  );
+  scheduleNudgeCameraForClippedPanel(viewer, () => {
+    const panelMarker = markers.getMarker(id);
+    return panelMarker?.domElement instanceof HTMLElement ?
+        panelMarker.domElement
+      : null;
+  });
 }
 
 export function toggleAnchoredInfoPanel(
   viewer: Viewer,
   markers: MarkersPlugin,
   hotspot: Hotspot,
+  tour: Tour,
 ): void {
   const openHostId = getOpenAnchoredPanelHostId(markers);
   if (openHostId === hotspot.id) {
     closeAnchoredInfoPanel(markers, true);
     return;
   }
-  openAnchoredInfoPanel(viewer, markers, hotspot);
+  openAnchoredInfoPanel(viewer, markers, hotspot, tour);
 }
 
 export function isAnchoredPopup(popup: PopupContent): boolean {
+  if (popup.namingOpportunity) return true;
   return popup.display === 'anchored';
 }

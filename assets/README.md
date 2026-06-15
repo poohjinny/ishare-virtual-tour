@@ -10,6 +10,7 @@ assets/
     ├── favicon.ico              # Platform default → synced to public/favicon.ico
     ├── brand/
 │   ├── logo_ishare.png      # iShare product logo (platform-wide)
+│   ├── logo_fmi.png         # Funding Matters logo (Help → Contact tour support)
 │   ├── symbol_ishare.png    # iShare symbol mark
 │   └── tour-guide.png       # iShare Guide avatar (platform-wide)
 └── {clientId}/              # id = website hostname without TLD

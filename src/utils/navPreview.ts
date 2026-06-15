@@ -77,11 +77,14 @@ export function buildNavPreview(
   };
 }
 
-export function navPreviewCtaLabel(): string {
-  return 'Visit';
+export function navPreviewVisitDestination(preview: NavPreviewContent): string {
+  return preview.ctaLabel?.trim() || preview.title;
+}
+
+export function navPreviewCtaLabel(preview: NavPreviewContent): string {
+  return `Visit ${navPreviewVisitDestination(preview)}`;
 }
 
 export function navPreviewVisitAriaLabel(preview: NavPreviewContent): string {
-  const destination = preview.ctaLabel?.trim() || preview.title;
-  return `Visit ${destination}`;
+  return navPreviewCtaLabel(preview);
 }

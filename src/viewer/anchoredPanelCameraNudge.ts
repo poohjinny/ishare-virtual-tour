@@ -2,24 +2,14 @@ import type { Viewer } from '@photo-sphere-viewer/core';
 
 const NUDGE_DURATION_MS = 600;
 const MAX_MEASURE_ATTEMPTS = 36;
-const PANEL_ENTER_ANIM_MS = 160;
+const PANEL_ENTER_ANIM_MS = 220;
 
-/** Extra clearance below breadcrumb chrome (px). */
-const TOP_BREADCRUMB_BUFFER_PX = 10;
-
-/** Fallback insets when overlay elements are not in the DOM. */
-const FALLBACK_INSETS = { top: 88, left: 24, right: 24, bottom: 24 } as const;
+/** Skip nudge when panel center is already near viewport center. */
+const MIN_CENTER_OFFSET_PX = 12;
 
 export interface PanelScreenRect {
   left: number;
   top: number;
-  right: number;
-  bottom: number;
-}
-
-export interface PanelSafeInsets {
-  top: number;
-  left: number;
   right: number;
   bottom: number;
 }
@@ -71,89 +61,18 @@ function waitForPanelEnterShell(panelEl: HTMLElement): Promise<void> {
 
     const onEnd = (event: AnimationEvent) => {
       if (event.target !== shell) return;
-      if (event.animationName !== 'tour-glass-panel-in') return;
+      if (
+        event.animationName !== 'tour-glass-panel-in' &&
+        event.animationName !== 'tour-glass-panel-anchored-in'
+      ) {
+        return;
+      }
       finish();
     };
 
     shell.addEventListener('animationend', onEnd);
     window.setTimeout(finish, PANEL_ENTER_ANIM_MS);
   });
-}
-
-function elementLeftInset(
-  el: Element | null,
-  containerRect: DOMRect,
-  fallback: number,
-): number {
-  if (!(el instanceof HTMLElement)) return fallback;
-  return el.getBoundingClientRect().left - containerRect.left;
-}
-
-function elementTopInsetFromBottom(
-  el: Element | null,
-  containerRect: DOMRect,
-): number | null {
-  if (!(el instanceof HTMLElement)) return null;
-  const rect = el.getBoundingClientRect();
-  if (rect.height <= 0) return null;
-  return containerRect.bottom - rect.top;
-}
-
-/**
- * Safe viewport insets for anchored panels, aligned with tour chrome:
- * - top: breadcrumb bottom + buffer (or client selector when breadcrumb hidden)
- * - left: client selector / floor plan minimap left edge
- * - right: tour action dock left edge
- * - bottom: tallest bottom overlay (minimap or AI stack)
- */
-export function measurePanelSafeInsets(viewer: Viewer): PanelSafeInsets {
-  const containerRect = viewer.container.getBoundingClientRect();
-
-  const clientSelector = document.querySelector('.client-selector');
-  const minimap = document.querySelector('.floor-plan-minimap');
-  const navActionsDock = document.querySelector('.tour-nav-actions__dock');
-  const navActions = document.querySelector('.tour-nav-actions');
-  const breadcrumb = document.querySelector('.tour-nav-breadcrumb');
-  const breadcrumbRow = document.querySelector('.tour-nav-breadcrumb__row');
-  const aiStack = document.querySelector('.ai-assistant-stack');
-
-  const leftCandidates = [
-    elementLeftInset(clientSelector, containerRect, FALLBACK_INSETS.left),
-    elementLeftInset(minimap, containerRect, FALLBACK_INSETS.left),
-  ];
-  const left = Math.min(...leftCandidates);
-
-  let top = FALLBACK_INSETS.top;
-  const breadcrumbHidden = breadcrumbRow?.classList.contains(
-    'tour-nav-breadcrumb__row--hidden',
-  );
-
-  if (breadcrumb instanceof HTMLElement && !breadcrumbHidden) {
-    const breadcrumbBottom = breadcrumb.getBoundingClientRect().bottom;
-    top = breadcrumbBottom - containerRect.top + TOP_BREADCRUMB_BUFFER_PX;
-  } else if (clientSelector instanceof HTMLElement) {
-    const selectorBottom = clientSelector.getBoundingClientRect().bottom;
-    top = selectorBottom - containerRect.top + TOP_BREADCRUMB_BUFFER_PX;
-  }
-
-  let right = FALLBACK_INSETS.right;
-  const rightAnchor = navActionsDock ?? navActions;
-  if (rightAnchor instanceof HTMLElement) {
-    right = containerRect.right - rightAnchor.getBoundingClientRect().left;
-  }
-
-  let bottom: number = FALLBACK_INSETS.bottom;
-  for (const el of [minimap, aiStack]) {
-    const inset = elementTopInsetFromBottom(el, containerRect);
-    if (inset !== null) bottom = Math.max(bottom, inset);
-  }
-
-  return {
-    top: Math.max(0, top),
-    left: Math.max(0, left),
-    right: Math.max(0, right),
-    bottom: Math.max(0, bottom),
-  };
 }
 
 export function measurePanelScreenRect(
@@ -171,62 +90,34 @@ export function measurePanelScreenRect(
   };
 }
 
-function isPanelClipped(
-  rect: PanelScreenRect,
-  vw: number,
-  vh: number,
-  insets: PanelSafeInsets,
-): boolean {
-  return (
-    rect.left < insets.left ||
-    rect.top < insets.top ||
-    rect.right > vw - insets.right ||
-    rect.bottom > vh - insets.bottom
-  );
-}
-
 /**
- * Minimum camera correction so clipped edges fit inside safe insets.
- * Only adjusts yaw when horizontally clipped and pitch when vertically clipped.
+ * Camera correction to move the panel bbox center toward the viewport center.
  */
-export function computePanelClipCorrection(
+export function computePanelCenterCorrection(
   viewer: Viewer,
   rect: PanelScreenRect,
-  insets: PanelSafeInsets = measurePanelSafeInsets(viewer),
 ): { yawDeg: number; pitchDeg: number } | null {
   const vw = viewer.container.clientWidth;
   const vh = viewer.container.clientHeight;
   if (vw <= 0 || vh <= 0) return null;
 
-  if (!isPanelClipped(rect, vw, vh, insets)) return null;
+  const panelCenterX = (rect.left + rect.right) / 2;
+  const panelCenterY = (rect.top + rect.bottom) / 2;
+  const shiftX = vw / 2 - panelCenterX;
+  const shiftY = vh / 2 - panelCenterY;
 
-  const clippedLeft = rect.left < insets.left;
-  const clippedRight = rect.right > vw - insets.right;
-  const clippedTop = rect.top < insets.top;
-  const clippedBottom = rect.bottom > vh - insets.bottom;
-
-  let shiftX = 0;
-  let shiftY = 0;
-
-  if (clippedLeft && !clippedRight) {
-    shiftX = insets.left - rect.left;
-  } else if (clippedRight && !clippedLeft) {
-    shiftX = vw - insets.right - rect.right;
+  if (
+    Math.abs(shiftX) < MIN_CENTER_OFFSET_PX &&
+    Math.abs(shiftY) < MIN_CENTER_OFFSET_PX
+  ) {
+    return null;
   }
-
-  if (clippedTop && !clippedBottom) {
-    shiftY = insets.top - rect.top;
-  } else if (clippedBottom && !clippedTop) {
-    shiftY = vh - insets.bottom - rect.bottom;
-  }
-
-  if (Math.abs(shiftX) < 0.5 && Math.abs(shiftY) < 0.5) return null;
 
   const vFov = viewer.dataHelper.zoomLevelToFov(viewer.getZoomLevel());
   const hFov = viewer.dataHelper.vFovToHFov(vFov);
 
-  const yawDeg = Math.abs(shiftX) >= 0.5 ? (-shiftX / vw) * hFov : 0;
-  const pitchDeg = Math.abs(shiftY) >= 0.5 ? (shiftY / vh) * vFov : 0;
+  const yawDeg = (-shiftX / vw) * hFov;
+  const pitchDeg = (shiftY / vh) * vFov;
 
   if (Math.abs(yawDeg) < 0.25 && Math.abs(pitchDeg) < 0.25) return null;
 
@@ -239,7 +130,7 @@ export async function nudgeCameraForClippedPanel(
 ): Promise<boolean> {
   if (prefersReducedMotion()) return false;
 
-  const correction = computePanelClipCorrection(
+  const correction = computePanelCenterCorrection(
     viewer,
     measurePanelScreenRect(viewer, panelEl),
   );
@@ -277,7 +168,7 @@ export function willNudgeCameraForPanel(
 ): boolean {
   if (prefersReducedMotion()) return false;
   return (
-    computePanelClipCorrection(
+    computePanelCenterCorrection(
       viewer,
       measurePanelScreenRect(viewer, panelEl),
     ) !== null

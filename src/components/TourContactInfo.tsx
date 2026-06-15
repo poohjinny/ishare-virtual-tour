@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react';
 import type { TourOrganization } from '../types/tour';
 import {
+  addressToGoogleMapsHref,
   getOrganizationPhones,
   hasOrganizationContact,
   phoneToTelHref,
@@ -7,6 +9,9 @@ import {
 
 interface TourContactInfoProps {
   organization?: TourOrganization;
+  logo?: ReactNode;
+  /** Skip top divider when rendered inside help accordion. */
+  embedded?: boolean;
 }
 
 function formatWebsiteLabel(url: string): string {
@@ -17,7 +22,11 @@ function formatWebsiteLabel(url: string): string {
   }
 }
 
-export function TourContactInfo({ organization }: TourContactInfoProps) {
+export function TourContactInfo({
+  organization,
+  logo,
+  embedded = false,
+}: TourContactInfoProps) {
   if (!hasOrganizationContact(organization)) return null;
 
   const phones = getOrganizationPhones(organization);
@@ -25,11 +34,25 @@ export function TourContactInfo({ organization }: TourContactInfoProps) {
 
   return (
     <>
-      <hr className='tour-nav-actions__help-divider' aria-hidden='true' />
+      {!embedded && (
+        <hr className='tour-nav-actions__help-divider' aria-hidden='true' />
+      )}
 
-      <p className='tour-nav-actions__section-title'>
-        Contact {organization.name}
-      </p>
+      <div
+        className={[
+          'tour-nav-actions__contact-brand',
+          logo && 'tour-nav-actions__contact-brand--has-logo',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {logo ?
+          <div className='tour-nav-actions__panel-logo'>{logo}</div>
+        : null}
+        {!logo ?
+          <p className='tour-nav-actions__contact-name'>{organization.name}</p>
+        : null}
+      </div>
 
       <dl className='tour-nav-actions__contact-list'>
         {organization.website ?
@@ -100,7 +123,18 @@ export function TourContactInfo({ organization }: TourContactInfoProps) {
           <div className='tour-nav-actions__contact-item'>
             <dt className='tour-nav-actions__contact-label'>Address</dt>
             <dd className='tour-nav-actions__contact-value tour-nav-actions__contact-value--address'>
-              {organization.address}
+              <a
+                className='tour-nav-actions__contact-link'
+                href={addressToGoogleMapsHref(
+                  organization.address,
+                  organization.name,
+                )}
+                target='_blank'
+                rel='noopener noreferrer'
+                aria-label={`Open in Google Maps: ${organization.address}, ${organization.name}`}
+              >
+                {organization.address}
+              </a>
             </dd>
           </div>
         : null}

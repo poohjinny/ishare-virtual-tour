@@ -6,6 +6,7 @@ import './styles/tokens.css';
 import './styles/layout.css';
 import './styles/hotspots.css';
 import './components/TourGlassPanel.css';
+import './components/ui/Accordion.css';
 import './components/NavPreviewPanel.css';
 
 createRoot(document.getElementById('root')!).render(

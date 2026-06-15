@@ -17,9 +17,16 @@ export interface PopupCta {
   label?: string;
   url: string;
   sublabel?: string;
+  ariaLabel?: string;
+  /** Footer button style — defaults to primary */
+  variant?: 'primary' | 'secondary';
 }
 
-export type NamingOpportunityStatus = 'on_sale' | 'sold' | 'reserved';
+export type NamingOpportunityStatus =
+  | 'on_sale'
+  | 'sold'
+  | 'reserved'
+  | 'coming_soon';
 
 export interface NamingOpportunity {
   /** Full naming opportunity title (e.g. "Reception Desk Naming Opportunity") */
@@ -48,7 +55,12 @@ export interface PopupContent {
   namingOpportunity?: NamingOpportunity;
   image?: string;
   videoUrl?: string;
+  /** Optional poster for local `videoUrl` (mp4/webm) */
+  videoPoster?: string;
+  /** Single CTA override — primary; status contact CTA added as secondary when present */
   cta?: PopupCta;
+  /** Full footer CTA override (replaces status defaults) */
+  ctas?: PopupCta[];
   sponsor?: PopupSponsor;
 }
 
@@ -154,7 +166,10 @@ export interface Tour {
   id: string;
   /** Primary website URL (often organization website) */
   url: string;
+  /** Facility or experience title (e.g. "Ken Sargent House") */
   title: string;
+  /** Optional override — defaults to `{organization.name} Virtual Tour` */
+  productFullName?: string;
   organization?: TourOrganization;
   branding?: TourBranding;
   floorPlan?: FloorPlan;

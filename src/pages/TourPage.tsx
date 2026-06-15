@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { AiAssistant } from '../components/ai/AiAssistant';
 import { ClientSelector } from '../components/ClientSelector';
 import { DevViewPanel } from '../components/DevViewPanel';
@@ -15,6 +15,7 @@ import {
   loadKnowledge,
   loadTour,
 } from '../data/loadTour';
+import { getTourProductFullName } from '../utils/tourProductName';
 import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { useTourAssistant } from '../hooks/useTourAssistant';
 import { useTourRouteSync } from '../hooks/useTourRouteSync';
@@ -33,6 +34,7 @@ import {
   buildTourLocation,
 } from '../utils/tourPaths';
 import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
+import { useViewerControlsVisible } from '../hooks/useViewerControlsVisible';
 import {
   PanoramaViewer,
   type PanoramaLoadErrorInfo,
@@ -46,6 +48,7 @@ const DEV_SPLASH_HOLD_MS = 2000;
 export function TourPage() {
   const searchParams = useAppSearchParams();
   const [urlSearchParams] = useSearchParams();
+  const location = useLocation();
   const {
     tourOrScene,
     tourId,
@@ -58,11 +61,16 @@ export function TourPage() {
   );
 
   const tour = useMemo(() => loadTour(route.tourId), [route.tourId]);
+  const productFullName = useMemo(() => getTourProductFullName(tour), [tour]);
   const knowledge = useMemo(() => loadKnowledge(route.tourId), [route.tourId]);
   const scenes = useMemo(() => getSceneList(tour), [tour]);
 
   useClientTheme(tour);
   useClientFavicon(tour);
+
+  useEffect(() => {
+    document.title = productFullName;
+  }, [productFullName]);
 
   const initialScene = useMemo(
     () => resolveSceneId(route.tourId, route.sceneId),
@@ -70,7 +78,15 @@ export function TourPage() {
   );
 
   const viewerRef = useRef<PanoramaViewerHandle>(null);
+  const viewerAreaRef = useRef<HTMLDivElement>(null);
+  const pendingNamingSelectionRef = useRef<{
+    sceneId: string;
+    hotspotId: string;
+  } | null>(null);
   const [activePopup, setActivePopup] = useState<PopupContent | null>(null);
+  const [activeNamingHotspotId, setActiveNamingHotspotId] = useState<
+    string | null
+  >(null);
   const [devClickCoords, setDevClickCoords] = useState<ClickCoords | null>(
     null,
   );
@@ -96,7 +112,7 @@ export function TourPage() {
     }
   }, [tour.id, searchParams.errorTest]);
 
-  const [controlsVisible, setControlsVisible] = useState(false);
+  const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
   const [viewerOrientation, setViewerOrientation] =
     useState<ViewerOrientation | null>(null);
   const [panoramaError, setPanoramaError] =
@@ -169,8 +185,7 @@ export function TourPage() {
     [currentSceneId],
   );
 
-  const { showBack, showForward, goBack, goForward, goToHref } =
-    useHistoryNavControls();
+  const { showBack, showForward, goBack, goForward } = useHistoryNavControls();
 
   const { syncSceneToUrl } = useTourRouteSync({
     tour,
@@ -191,15 +206,24 @@ export function TourPage() {
 
   const assistant = useTourAssistant(knowledge, currentSceneId);
 
-  const handleNavPreviewAskGuide = useCallback(
-    (sceneId: string) => {
-      assistant.openAndAskAboutScene(sceneId);
+  const handleSelectNamingOpportunity = useCallback(
+    (sceneId: string, hotspotId: string) => {
+      const scene = tour.scenes[sceneId];
+      const hotspot = scene?.hotspots.find((item) => item.id === hotspotId);
+      if (!hotspot?.popup) return;
+
+      pendingNamingSelectionRef.current = { sceneId, hotspotId };
+      setActiveNamingHotspotId(hotspotId);
+
+      viewerRef.current?.goToNamingOpportunity(sceneId, hotspotId);
     },
-    [assistant],
+    [tour.scenes],
   );
 
   const handleNavigate = useCallback(
     async (sceneId: string, targetView?: ViewPosition) => {
+      pendingNamingSelectionRef.current = null;
+
       const scene = tour.scenes[sceneId];
       if (!scene || sceneId === currentSceneId) return;
 
@@ -222,13 +246,36 @@ export function TourPage() {
   );
 
   const handleDismissModalPopups = useCallback(() => {
+    pendingNamingSelectionRef.current = null;
     setActivePopup(null);
     viewerRef.current?.clearActiveInfoHotspot();
   }, []);
 
+  const handleActiveInfoHotspotChange = useCallback(
+    (hotspotId: string | null) => {
+      if (hotspotId !== null) {
+        pendingNamingSelectionRef.current = null;
+        setActiveNamingHotspotId(hotspotId);
+        return;
+      }
+
+      if (pendingNamingSelectionRef.current) {
+        return;
+      }
+
+      setActiveNamingHotspotId(null);
+    },
+    [],
+  );
+
   const handleBreadcrumbNavigate = useCallback(
     async (sceneId: string) => {
       if (sceneId === currentSceneId) return;
+
+      pendingNamingSelectionRef.current = null;
+      setActiveNamingHotspotId(null);
+      viewerRef.current?.clearActiveInfoHotspot();
+
       prepareSceneNavigate(sceneId);
       handleLoadStart();
 
@@ -238,20 +285,22 @@ export function TourPage() {
         tour.firstScene,
         urlSearchParams,
       );
+      const currentHref = location.pathname + location.search;
 
-      if (goToHref(targetHref)) {
-        return;
+      if (currentHref !== targetHref) {
+        syncSceneToUrl(sceneId);
       }
 
-      syncSceneToUrl(sceneId);
       const scene = tour.scenes[sceneId];
       if (!scene) return;
+
       await viewerRef.current?.navigateToScene(sceneId, scene.defaultView);
     },
     [
       currentSceneId,
-      goToHref,
       handleLoadStart,
+      location.pathname,
+      location.search,
       prepareSceneNavigate,
       syncSceneToUrl,
       tour.firstScene,
@@ -311,12 +360,13 @@ export function TourPage() {
 
   return (
     <div className='app'>
-      <div className='viewer-area viewer-area--fullscreen'>
+      <div ref={viewerAreaRef} className='viewer-area viewer-area--fullscreen'>
         <PanoramaViewer
           key={tour.id}
           ref={viewerRef}
           tour={tour}
           initialSceneId={initialScene}
+          fullscreenRootRef={viewerAreaRef}
           controlsVisible={controlsVisible}
           devMode={searchParams.dev}
           splashDone={splashPhase !== 'active'}
@@ -324,9 +374,9 @@ export function TourPage() {
           suppressKeyboard={assistant.isOpen}
           onSceneChange={handleSceneChange}
           onInfoHotspot={setActivePopup}
+          onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
           onDismissModalPopups={handleDismissModalPopups}
           onNavigateToScene={handleNavigate}
-          onNavPreviewAskGuide={handleNavPreviewAskGuide}
           onTransitionStart={handleTransitionStart}
           onTransitionEnd={handleTransitionEnd}
           onDevClick={setDevClickCoords}
@@ -369,7 +419,7 @@ export function TourPage() {
           scenes={scenes}
           currentSceneId={currentSceneId}
           firstSceneId={tour.firstScene}
-          tourTitle={tour.title}
+          tourTitle={productFullName}
           organization={tour.organization}
           clientLogo={tour.branding?.logo}
           logoAlt={tour.branding?.logoAlt}
@@ -381,13 +431,20 @@ export function TourPage() {
           onHistoryBack={goBack}
           onHistoryForward={goForward}
           controlsVisible={controlsVisible}
-          onControlsToggle={() => setControlsVisible((visible) => !visible)}
+          onControlsToggle={toggleControlsVisible}
           onSelectScene={handleNavigate}
+          onSelectNamingOpportunity={handleSelectNamingOpportunity}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
+          activeNamingHotspotId={activeNamingHotspotId}
         />
 
         {splashPhase !== 'done' && (
-          <TourLoadSplash exiting={splashPhase === 'exit'} />
+          <TourLoadSplash
+            exiting={splashPhase === 'exit'}
+            logo={tour.branding?.logo}
+            logoAlt={tour.branding?.logoAlt}
+            productName={productFullName}
+          />
         )}
 
         <LoadProgressBar
@@ -413,8 +470,11 @@ export function TourPage() {
 
       <InfoPopup
         popup={activePopup}
+        tour={tour}
         onClose={() => {
+          pendingNamingSelectionRef.current = null;
           setActivePopup(null);
+          setActiveNamingHotspotId(null);
           viewerRef.current?.clearActiveInfoHotspot();
         }}
       />

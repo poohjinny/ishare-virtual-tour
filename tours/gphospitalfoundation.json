@@ -1,7 +1,7 @@
 {
   "id": "gphospitalfoundation",
   "url": "https://gphospitalfoundation.ca",
-  "title": "Ken Sargent House Virtual Tour",
+  "title": "Ken Sargent House",
   "organization": {
     "name": "Grande Prairie Regional Hospital Foundation",
     "website": "https://gphospitalfoundation.ca",
@@ -37,7 +37,7 @@
           "label": "Main Entrance",
           "position": { "yaw": 117.3, "pitch": -62.5 },
           "targetScene": "main-entrance",
-          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+          "targetView": { "yaw": 104.6, "pitch": 6.5, "zoom": 35 }
         }
       ]
     },
@@ -46,7 +46,7 @@
       "title": "Main Entrance",
       "description": "Arrive at the ground-level main entrance of Ken Sargent House. Glass doors open directly into the reception lobby, with an accessible ramp and railings on the left side of the front stairs. Illuminated welcome signage helps visitors find their way, whether arriving during the day or in the evening.",
       "panorama": "/assets/gphospitalfoundation/panoramas/main-entrance.jpg",
-      "defaultView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 },
+      "defaultView": { "yaw": 104.6, "pitch": 6.5, "zoom": 35 },
       "map": { "x": 0.5, "y": 0.944, "heading": 14.6 },
       "hotspots": [
         {
@@ -59,30 +59,27 @@
           "targetView": { "yaw": 86.5, "pitch": -53.8, "zoom": 24 }
         },
         {
-          "id": "info-welcome",
-          "type": "info",
-          "position": { "yaw": 5, "pitch": -5 },
-          "popup": {
-            "title": "Main Entrance",
-            "namingOpportunity": {
-              "name": "Main Entrance Naming Opportunity",
-              "price": "$200,000",
-              "status": "sold"
-            },
-            "body": "Welcome to Ken Sargent House. The main entrance features accessible ramp access on the left and glass doors leading to reception.",
-            "cta": {
-              "product": "giftabulator",
-              "url": "https://gphospitalfoundation.giftabulatornow.com/give-now?locale=en-CA"
-            }
-          }
-        },
-        {
           "id": "nav-to-reception",
           "type": "nav",
           "label": "Reception",
           "position": { "yaw": 105.9, "pitch": 3.8 },
           "targetScene": "reception",
-          "targetView": { "yaw": 90, "pitch": 0, "zoom": 0 }
+          "targetView": { "yaw": 89.6, "pitch": 2.1, "zoom": 17 }
+        },
+        {
+          "id": "info-parking-lot",
+          "type": "info",
+          "position": { "yaw": 217, "pitch": -2.4 },
+          "popup": {
+            "display": "anchored",
+            "title": "Parking Lot",
+            "namingOpportunity": {
+              "name": "Parking Lot Naming Opportunity",
+              "price": "$75,000",
+              "status": "coming_soon"
+            },
+            "body": "Visitor parking at Ken Sargent House provides convenient, accessible spaces for families and guests arriving for short or extended stays. This naming opportunity will recognize partners who help keep welcome and comfort within easy reach from the moment guests arrive.\n\nNaming details for the parking area will be announced soon. Contact the Foundation to register your interest."
+          }
         }
       ]
     },
@@ -91,7 +88,7 @@
       "title": "Reception",
       "description": "Step into the reception lobby at Ken Sargent House — the first point of contact for guests and families. Check in at the welcome desk, take a seat in the comfortable lounge area, and get directions to the dining hall and other guest spaces. Our reception team is here to help everyone feel informed, supported, and at home.",
       "panorama": "/assets/gphospitalfoundation/panoramas/reception.jpg",
-      "defaultView": { "yaw": 90, "pitch": 0, "zoom": 0 },
+      "defaultView": { "yaw": 89.6, "pitch": 2.1, "zoom": 17 },
       "map": { "x": 0.5, "y": 0.431, "heading": 100 },
       "hotspots": [
         {
@@ -101,7 +98,7 @@
           "instant": true,
           "position": { "yaw": 170, "pitch": -5 },
           "targetScene": "main-entrance",
-          "targetView": { "yaw": 120.5, "pitch": -1.5, "zoom": 0 }
+          "targetView": { "yaw": 104.6, "pitch": 6.5, "zoom": 35 }
         },
         {
           "id": "info-reception",
@@ -121,6 +118,36 @@
               "product": "giftabulator",
               "url": "https://gphospitalfoundation.giftabulatornow.com/give-now?locale=en-CA&view=result&zoom=100&calc=eyJwcm92aW5jZSI6IkFCIiwiaW5jb21lIjoiMTUwMDAwIiwiYXNzZXQiOiJzdG9jayIsImFzc2V0VmFsdWUiOiIxMDAwMDAiLCJhc3NldENvc3QiOiI0NTAwMCIsImRvbmF0aW9uIjoiMTUwMDAwIiwicGxlZGdlUGVyaW9kIjoiNSJ9"
             }
+          }
+        },
+        {
+          "id": "info-donor-wall",
+          "type": "info",
+          "position": { "yaw": 314.1, "pitch": 1.1 },
+          "popup": {
+            "display": "anchored",
+            "title": "Donor Wall",
+            "namingOpportunity": {
+              "name": "Donor Wall Naming Opportunity",
+              "price": "$100,000",
+              "status": "sold"
+            },
+            "body": "The Donor Wall at Ken Sargent House honours the generosity of partners who help families feel at home during treatment. Each recognition on the wall celebrates a lasting commitment to compassionate care and community support.\n\nThank you to our naming partners whose gifts continue to make a difference for patients and families at Grande Prairie Regional Hospital."
+          }
+        },
+        {
+          "id": "info-guest-shelter",
+          "type": "info",
+          "position": { "yaw": 243.7, "pitch": -6.3 },
+          "popup": {
+            "display": "anchored",
+            "title": "Guest Shelter",
+            "namingOpportunity": {
+              "name": "Guest Shelter Naming Opportunity",
+              "price": "$75,000",
+              "status": "reserved"
+            },
+            "body": "The Guest Shelter at Ken Sargent House offers a covered outdoor space where families can pause, gather, and take a breath before heading inside. It extends a sense of welcome from the parking area to the front doors — a quiet moment of shelter on the way in or out.\n\nThis naming opportunity is currently reserved. Contact the Foundation with questions about availability or other ways to support Ken Sargent House."
           }
         }
       ]

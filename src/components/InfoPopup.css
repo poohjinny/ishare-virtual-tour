@@ -22,12 +22,18 @@
   animation: info-popup-in 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.info-popup .tour-glass-panel__shell {
+.info-popup.tour-glass-panel--dock .tour-glass-panel__shell {
   max-height: min(90vh, 720px);
 }
 
 .info-popup__title-row {
   margin-bottom: 10px;
+}
+
+.info-popup .tour-glass-panel__price--under-title {
+  font-size: var(--ishare-font-size-2xl);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
 .info-popup__title {
@@ -38,7 +44,7 @@
 }
 
 .info-popup__header .tour-glass-panel__meta,
-.info-popup__header .tour-glass-panel__badge {
+.info-popup__header .ishare-badge {
   display: inline-flex;
 }
 
@@ -142,7 +148,8 @@
     padding: 14px 18px calc(20px + env(safe-area-inset-bottom, 0px));
   }
 
-  .info-popup__title {
+  .info-popup__title,
+  .info-popup .tour-glass-panel__price--under-title {
     font-size: var(--ishare-font-size-xl);
   }
 }

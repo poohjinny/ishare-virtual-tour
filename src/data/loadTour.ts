@@ -1,6 +1,10 @@
 import type { Hotspot, Tour, TourKnowledge } from '../types/tour';
 
 import { withBaseUrl } from '../utils/assetUrl';
+import {
+  getTourClientFullName,
+  getTourProductFullName,
+} from '../utils/tourProductName';
 
 import gphospitalfoundationTour from '../../tours/gphospitalfoundation.json';
 
@@ -67,6 +71,9 @@ export interface TourListItem {
 
   label: string;
 
+  /** Client tour product — `{client full name} Virtual Tour`. */
+  productFullName: string;
+
   facilityTitle: string;
 }
 
@@ -81,7 +88,9 @@ export function listTours(): TourListItem[] {
     return {
       id,
 
-      label: tour.organization?.name ?? tour.title,
+      label: getTourClientFullName(tour),
+
+      productFullName: getTourProductFullName(tour),
 
       facilityTitle: tour.title,
     };

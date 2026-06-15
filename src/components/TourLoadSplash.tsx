@@ -1,24 +1,35 @@
-import { ISHARE_PRODUCT_LOGO } from '../constants/branding';
+import { PLATFORM_PRODUCT_LOGO } from '../constants/branding';
 import './TourLoadSplash.css';
 
 interface TourLoadSplashProps {
   exiting?: boolean;
+  logo?: string;
+  logoAlt?: string;
+  productName?: string;
 }
 
-/** Centered iShare logo — first panorama load only. */
-export function TourLoadSplash({ exiting = false }: TourLoadSplashProps) {
+/** Centered client logo — first panorama load only. */
+export function TourLoadSplash({
+  exiting = false,
+  logo,
+  logoAlt,
+  productName,
+}: TourLoadSplashProps) {
+  const splashLogo = logo ?? PLATFORM_PRODUCT_LOGO;
+  const splashAlt = logoAlt ?? productName ?? 'Virtual Tour';
+
   return (
     <div
       className={`tour-load-splash${exiting ? ' tour-load-splash--exit' : ''}`}
       role='status'
       aria-live='polite'
-      aria-label='Loading virtual tour'
+      aria-label={`Loading ${productName ?? 'virtual tour'}`}
     >
       <div className='tour-load-splash__card'>
         <img
           className='tour-load-splash__logo'
-          src={ISHARE_PRODUCT_LOGO}
-          alt='iShare'
+          src={splashLogo}
+          alt={splashAlt}
           draggable={false}
         />
       </div>

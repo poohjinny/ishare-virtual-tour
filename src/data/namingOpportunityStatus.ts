@@ -1,12 +1,38 @@
-import type { NamingOpportunityStatus } from '../types/tour';
+import type {
+  NamingOpportunity,
+  NamingOpportunityStatus,
+  PopupContent,
+  PopupCta,
+  Tour,
+} from '../types/tour';
+import { TOUR_CONTACT_US_MAILTO, buildTourNotifyMeMailto } from '../constants/tourContact';
+
+export type NamingOpportunityContactIntent = 'inquiry' | 'simple' | 'notify';
+
+export type NamingOpportunityCtaPreset =
+  | 'contact'
+  | 'website'
+  | 'giftabulator'
+  | 'none';
+
+export interface NamingOpportunityStatusCtaConfig {
+  preset: NamingOpportunityCtaPreset;
+  label: string;
+  sublabel?: string;
+  ariaLabel?: string;
+  variant?: 'primary' | 'secondary';
+  /** Contact preset routing — defaults to org inquiry mailto. */
+  contactIntent?: NamingOpportunityContactIntent;
+  /** @deprecated Prefer {@link contactIntent} `'simple'`. */
+  mailto?: string;
+}
 
 export interface NamingOpportunityStatusConfig {
   label: string;
   /** Hotspot pill label when this is a naming-opportunity hotspot */
   hotspotLabel: string;
   cssModifier: string;
-  /** Giftabulator / CTA footer — only shown when available for purchase */
-  ctaEnabled: boolean;
+  ctas: NamingOpportunityStatusCtaConfig[];
 }
 
 const STATUS_CONFIG: Record<
@@ -17,19 +43,85 @@ const STATUS_CONFIG: Record<
     label: 'On sale',
     hotspotLabel: 'Naming opportunity',
     cssModifier: 'on-sale',
-    ctaEnabled: true,
-  },
-  sold: {
-    label: 'Sold',
-    hotspotLabel: 'Sold',
-    cssModifier: 'sold',
-    ctaEnabled: false,
+    ctas: [
+      {
+        preset: 'contact',
+        label: 'Express your interest',
+        sublabel: 'Contact our team about this naming opportunity',
+        ariaLabel: 'Express your interest in this naming opportunity',
+        variant: 'primary',
+      },
+      {
+        preset: 'website',
+        label: 'Visit our website',
+        ariaLabel: 'Visit our website to learn more about naming opportunities',
+        variant: 'secondary',
+      },
+    ],
   },
   reserved: {
     label: 'Reserved',
     hotspotLabel: 'Reserved',
     cssModifier: 'reserved',
-    ctaEnabled: false,
+    ctas: [
+      {
+        preset: 'contact',
+        label: 'Contact us',
+        contactIntent: 'simple',
+        sublabel:
+          'A naming commitment is in progress — reach out with questions',
+        ariaLabel: 'Contact us about this reserved naming opportunity',
+        variant: 'primary',
+      },
+      {
+        preset: 'website',
+        label: 'Visit our website',
+        ariaLabel: 'Visit our website to learn more',
+        variant: 'secondary',
+      },
+    ],
+  },
+  coming_soon: {
+    label: 'Coming soon',
+    hotspotLabel: 'Coming soon',
+    cssModifier: 'coming-soon',
+    ctas: [
+      {
+        preset: 'contact',
+        label: 'Notify me',
+        contactIntent: 'notify',
+        sublabel: 'Be first to know when this naming opportunity opens',
+        ariaLabel: 'Request notification for this naming opportunity',
+        variant: 'primary',
+      },
+      {
+        preset: 'website',
+        label: 'Visit our website',
+        ariaLabel: 'Visit our website to learn more',
+        variant: 'secondary',
+      },
+    ],
+  },
+  sold: {
+    label: 'Sold',
+    hotspotLabel: 'Sold',
+    cssModifier: 'sold',
+    ctas: [
+      {
+        preset: 'website',
+        label: 'Support our mission',
+        sublabel: 'Thank you to our naming partners',
+        ariaLabel: 'Visit our website to support our mission',
+        variant: 'primary',
+      },
+      {
+        preset: 'contact',
+        label: 'Contact us',
+        contactIntent: 'simple',
+        ariaLabel: 'Contact us about other ways to support our mission',
+        variant: 'secondary',
+      },
+    ],
   },
 };
 
@@ -45,10 +137,208 @@ export function namingOpportunityStatusConfig(
   return STATUS_CONFIG[resolveNamingOpportunityStatus(status)];
 }
 
+/** @deprecated Use {@link resolvePopupContentCtas} */
 export function namingOpportunityCtaEnabled(
   status?: NamingOpportunityStatus,
 ): boolean {
-  return namingOpportunityStatusConfig(status).ctaEnabled;
+  return namingOpportunityStatusConfig(status).ctas.some(
+    (cta) => cta.preset !== 'none',
+  );
+}
+
+function buildContactMailto(email: string, naming: NamingOpportunity): string {
+  const name = naming.name.trim();
+  const params = new URLSearchParams();
+  params.set('subject', `Naming opportunity inquiry: ${name}`);
+  params.set(
+    'body',
+    `Hello,\n\nI am interested in learning more about the ${name}.\n\n`,
+  );
+  return `mailto:${email}?${params.toString()}`;
+}
+
+function buildCtaFromPreset(
+  ctaConfig: NamingOpportunityStatusCtaConfig,
+  tour: Tour,
+  naming: NamingOpportunity,
+): PopupCta | null {
+  switch (ctaConfig.preset) {
+    case 'none':
+      return null;
+    case 'contact': {
+      if (ctaConfig.mailto || ctaConfig.contactIntent === 'simple') {
+        return {
+          label: ctaConfig.label,
+          sublabel: ctaConfig.sublabel,
+          ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
+          url: ctaConfig.mailto ?? TOUR_CONTACT_US_MAILTO,
+          variant: ctaConfig.variant ?? 'primary',
+        };
+      }
+
+      if (ctaConfig.contactIntent === 'notify') {
+        return {
+          label: ctaConfig.label,
+          sublabel: ctaConfig.sublabel,
+          ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
+          url: buildTourNotifyMeMailto(naming),
+          variant: ctaConfig.variant ?? 'primary',
+        };
+      }
+
+      const email = tour.organization?.email?.trim();
+      const url =
+        email ?
+          buildContactMailto(email, naming)
+        : (tour.organization?.website ?? tour.url);
+      return {
+        label: ctaConfig.label,
+        sublabel: ctaConfig.sublabel,
+        ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
+        url,
+        variant: ctaConfig.variant ?? 'primary',
+      };
+    }
+    case 'website': {
+      return {
+        label: ctaConfig.label,
+        sublabel: ctaConfig.sublabel,
+        ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
+        url: tour.organization?.website ?? tour.url,
+        variant: ctaConfig.variant ?? 'primary',
+      };
+    }
+    case 'giftabulator':
+      return null;
+    default:
+      return null;
+  }
+}
+
+function buildCtasFromConfigs(
+  ctaConfigs: NamingOpportunityStatusCtaConfig[],
+  tour: Tour,
+  naming: NamingOpportunity,
+): PopupCta[] {
+  return ctaConfigs
+    .map((ctaConfig) => buildCtaFromPreset(ctaConfig, tour, naming))
+    .filter((cta): cta is PopupCta => cta !== null);
+}
+
+function normalizePopupCtaVariants(ctas: PopupCta[]): PopupCta[] {
+  return ctas.map((cta, index) => ({
+    ...cta,
+    variant: cta.variant ?? (index === 0 ? 'primary' : 'secondary'),
+  }));
+}
+
+/** Secondary left, primary right — matches nav preview footer. */
+export function orderPopupCtasForFooter(ctas: PopupCta[]): PopupCta[] {
+  if (ctas.length <= 1) return ctas;
+
+  return [...ctas].sort((a, b) => {
+    const rank = (cta: PopupCta) => (cta.variant === 'secondary' ? 0 : 1);
+    return rank(a) - rank(b);
+  });
+}
+
+export function findPrimaryPopupCta(ctas: PopupCta[]): PopupCta | undefined {
+  if (ctas.length === 0) return undefined;
+
+  return (
+    ctas.find((cta) => cta.variant === 'primary') ??
+    ctas.find((cta) => cta.variant !== 'secondary') ??
+    ctas[ctas.length - 1]
+  );
+}
+
+export function findSecondaryPopupCtas(
+  ctas: PopupCta[],
+  primary: PopupCta,
+): PopupCta[] {
+  return ctas.filter((cta) => cta !== primary);
+}
+
+function buildContactSecondaryFromStatus(
+  status: NamingOpportunityStatus | undefined,
+  tour: Tour,
+  naming: NamingOpportunity,
+): PopupCta | null {
+  const contactConfig = namingOpportunityStatusConfig(status).ctas.find(
+    (cta) => cta.preset === 'contact',
+  );
+  if (!contactConfig) return null;
+
+  return buildCtaFromPreset(
+    { ...contactConfig, variant: 'secondary', sublabel: undefined },
+    tour,
+    naming,
+  );
+}
+
+/** Status-driven CTAs for naming popups; `popup.cta` / `popup.ctas` override defaults. */
+export function resolveNamingOpportunityPopupCtas(
+  popup: PopupContent,
+  tour: Tour,
+): PopupCta[] {
+  const naming = popup.namingOpportunity;
+  if (!naming) return [];
+
+  if (popup.ctas?.length) {
+    return orderPopupCtasForFooter(normalizePopupCtaVariants(popup.ctas));
+  }
+
+  if (popup.cta) {
+    const primary: PopupCta = {
+      ...popup.cta,
+      variant: popup.cta.variant ?? 'primary',
+    };
+    const secondary = buildContactSecondaryFromStatus(
+      naming.status,
+      tour,
+      naming,
+    );
+
+    return orderPopupCtasForFooter(
+      secondary ? [primary, secondary] : [primary],
+    );
+  }
+
+  return orderPopupCtasForFooter(
+    buildCtasFromConfigs(
+      namingOpportunityStatusConfig(naming.status).ctas,
+      tour,
+      naming,
+    ),
+  );
+}
+
+/** @deprecated Use {@link resolveNamingOpportunityPopupCtas} */
+export function resolveNamingOpportunityPopupCta(
+  popup: PopupContent,
+  tour: Tour,
+): PopupCta | null {
+  return resolveNamingOpportunityPopupCtas(popup, tour)[0] ?? null;
+}
+
+/** Effective footer CTAs — naming status defaults or popup.cta. */
+export function resolvePopupContentCtas(
+  popup: PopupContent,
+  tour: Tour,
+): PopupCta[] {
+  if (popup.namingOpportunity) {
+    return resolveNamingOpportunityPopupCtas(popup, tour);
+  }
+
+  return popup.cta ? [popup.cta] : [];
+}
+
+/** @deprecated Use {@link resolvePopupContentCtas} */
+export function resolvePopupContentCta(
+  popup: PopupContent,
+  tour: Tour,
+): PopupCta | null {
+  return resolvePopupContentCtas(popup, tour)[0] ?? null;
 }
 
 /** Display name without trailing "Naming Opportunity" (JSON stores full legal title). */

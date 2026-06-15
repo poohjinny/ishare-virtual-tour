@@ -83,9 +83,11 @@ tours/                 Tour JSON + AI knowledge base per client
 src/
   viewer/            Photo Sphere Viewer integration
   components/        UI (nav, popups, AI assistant)
+    ui/              Shared primitives (Badge, Accordion, …)
   hooks/             Tour state, embed mode, assistant
   services/          Mock AI assistant
 docs/MVP_PLAN.md     Full specification
+docs/COMPONENTS.md   Shared component reuse (React + HTML)
 ```
 
 ## Assets

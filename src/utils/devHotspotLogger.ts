@@ -53,17 +53,33 @@ export function formatLandingJson(
   );
 }
 
-export function formatHotspotPositionJson(yaw: number, pitch: number): string {
+export function formatHotspotPositionJson(
+  yaw: number,
+  pitch: number,
+  scene?: DevSceneRef,
+): string {
   return JSON.stringify(
-    { position: { yaw: roundCoord(yaw), pitch: roundCoord(pitch) } },
+    {
+      ...(scene?.clientId ? { client: scene.clientId } : {}),
+      ...(scene?.id ? { scene: scene.id } : {}),
+      ...(scene?.title ? { sceneTitle: scene.title } : {}),
+      position: { yaw: roundCoord(yaw), pitch: roundCoord(pitch) },
+    },
     null,
     2,
   );
 }
 
-export function logHotspotClick(coords: ClickCoords): void {
-  console.log(`[dev] Hotspot click — ${formatCoords(coords)}`);
-  console.log(formatHotspotPositionJson(coords.yaw, coords.pitch));
+export function logHotspotClick(
+  coords: ClickCoords,
+  scene?: DevSceneRef,
+): void {
+  const clientLabel = scene?.clientId ? ` [${scene.clientId}]` : '';
+  const sceneLabel = scene?.id ? ` "${scene.id}"` : '';
+  console.log(
+    `[dev] Hotspot click${clientLabel}${sceneLabel} — ${formatCoords(coords)}`,
+  );
+  console.log(formatHotspotPositionJson(coords.yaw, coords.pitch, scene));
 }
 
 export function logLandingView(scene: DevSceneRef, view: ViewPosition): void {
