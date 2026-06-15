@@ -133,9 +133,11 @@ Replace `mockAssistant.ts` with an API call for production LLM integration.
 
 ## Documentation
 
-| Document                                   | Description                                           |
-| ------------------------------------------ | ----------------------------------------------------- |
-| [`docs/README.md`](docs/README.md)         | Documentation index                                   |
-| [`docs/PLANNING.md`](docs/PLANNING.md)     | Project goals, SeekBeak context, phases, demo script  |
-| [`docs/TECH_STACK.md`](docs/TECH_STACK.md) | Technology choices, library comparison, deployment    |
-| [`docs/MVP_PLAN.md`](docs/MVP_PLAN.md)     | Feature specs, data schemas, implementation checklist |
+| Document                                                 | Description                                           |
+| -------------------------------------------------------- | ----------------------------------------------------- |
+| [`docs/README.md`](docs/README.md)                       | Documentation index                                   |
+| [`docs/CODING_GUIDELINES.md`](docs/CODING_GUIDELINES.md) | Engineering conventions & doc map                     |
+| [`docs/GIT_WORKFLOW.md`](docs/GIT_WORKFLOW.md)           | Commit/push — one task per commit                     |
+| [`docs/PLANNING.md`](docs/PLANNING.md)                   | Project goals, SeekBeak context, phases, demo script  |
+| [`docs/TECH_STACK.md`](docs/TECH_STACK.md)               | Technology choices, library comparison, deployment    |
+| [`docs/MVP_PLAN.md`](docs/MVP_PLAN.md)                   | Feature specs, data schemas, implementation checklist |

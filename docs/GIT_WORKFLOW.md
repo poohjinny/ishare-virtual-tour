@@ -1,14 +1,16 @@
 # Git workflow — commit & push guidelines
 
 > How we push changes to GitHub for **iShare Virtual Tour**.  
-> Goal: small, reviewable commits that map **one task = one commit** (or one PR).
+> Goal: small, reviewable commits that map **one task = one commit** (or one
+> PR).
 
 ---
 
 ## Golden rule
 
-**Do not push one giant commit** that mixes unrelated work (e.g. NO panel CSS + fullscreen +
-explore hover + docs). Split by **logical task** so `git log` and PR review stay readable.
+**Do not push one giant commit** that mixes unrelated work (e.g. NO panel CSS +
+fullscreen + explore hover + docs). Split by **logical task** so `git log` and
+PR review stay readable.
 
 ---
 
@@ -16,15 +18,16 @@ explore hover + docs). Split by **logical task** so `git log` and PR review stay
 
 A task is a single user-visible fix or feature, or one cohesive refactor:
 
-| ✅ One commit | ❌ Split or combine differently |
-| ------------- | ------------------------------- |
-| Fix NO panel body whitespace | NO panel fix + navbar fullscreen in same commit |
+| ✅ One commit                                        | ❌ Split or combine differently                                   |
+| ---------------------------------------------------- | ----------------------------------------------------------------- |
+| Fix NO panel body whitespace                         | NO panel fix + navbar fullscreen in same commit                   |
 | Default viewer controls ON + localStorage preference | Controls default only vs persistence (ok together — same feature) |
-| Explore directory item hover colors | Unrelated Help panel copy |
-| Add `docs/PERFORMANCE.md` | Performance doc + unrelated component refactor |
-| Custom fullscreen targeting `.viewer-area` | Fullscreen + FAB tooltip labels (separate if unrelated) |
+| Explore directory item hover colors                  | Unrelated Help panel copy                                         |
+| Add `docs/PERFORMANCE.md`                            | Performance doc + unrelated component refactor                    |
+| Custom fullscreen targeting `.viewer-area`           | Fullscreen + FAB tooltip labels (separate if unrelated)           |
 
-When in doubt: **if you would describe it as two bullet points in a PR summary, use two commits.**
+When in doubt: **if you would describe it as two bullet points in a PR summary,
+use two commits.**
 
 ---
 
@@ -77,13 +80,13 @@ so the 32px hotspot gap stays correct after content-height sizing.
 
 **Prefixes** (use when helpful, not required):
 
-| Prefix | Use for |
-| ------ | ------- |
-| `Add` | New feature, file, or UI |
-| `Fix` | Bug fix |
-| `Polish` / `Update` | UX/CSS copy tweaks |
-| `Docs` | Documentation only |
-| `Refactor` | Behavior unchanged |
+| Prefix              | Use for                  |
+| ------------------- | ------------------------ |
+| `Add`               | New feature, file, or UI |
+| `Fix`               | Bug fix                  |
+| `Polish` / `Update` | UX/CSS copy tweaks       |
+| `Docs`              | Documentation only       |
+| `Refactor`          | Behavior unchanged       |
 
 ### 4. Push
 
@@ -120,13 +123,13 @@ Each commit should **build** (`npm run build`) at that point when possible.
 
 ## Files often touched together (keep in one commit)
 
-| Task | Files |
-| ---- | ----- |
-| Anchored NO panel sizing | `TourGlassPanel.css`, `tourGlassPanelHtml.ts`, `anchoredPanelPosition.ts`, `infoPanelMarker.ts` |
-| Fullscreen overlay | `tourFullscreenNavbarButton.ts`, `PanoramaViewer.tsx`, `TourPage.tsx`, `layout.css` |
-| Viewer controls preference | `useViewerControlsVisible.ts`, `viewerControlsPreference.ts`, `TourPage.tsx` |
-| Explore directory UX | `TourNavFloat.tsx`, `TourNavFloat.css`, `tourNavActions.ts` |
-| Shared UI primitive | `ui/Badge.*`, `Badge.css`, `badgeClasses.ts` + consumers in same task only |
+| Task                       | Files                                                                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| Anchored NO panel sizing   | `TourGlassPanel.css`, `tourGlassPanelHtml.ts`, `anchoredPanelPosition.ts`, `infoPanelMarker.ts` |
+| Fullscreen overlay         | `tourFullscreenNavbarButton.ts`, `PanoramaViewer.tsx`, `TourPage.tsx`, `layout.css`             |
+| Viewer controls preference | `useViewerControlsVisible.ts`, `viewerControlsPreference.ts`, `TourPage.tsx`                    |
+| Explore directory UX       | `TourNavFloat.tsx`, `TourNavFloat.css`, `tourNavActions.ts`                                     |
+| Shared UI primitive        | `ui/Badge.*`, `Badge.css`, `badgeClasses.ts` + consumers in same task only                      |
 
 ---
 
@@ -146,11 +149,13 @@ When opening a PR, list commits or summarize by task:
 
 ```markdown
 ## Summary
+
 - Fix NO panel body whitespace and marker gap
 - Viewer controls default ON + localStorage
 - Explore nav hover: black text, theme icons
 
 ## Test plan
+
 - [ ] Open Parking Lot NO — no gap under body
 - [ ] Toggle controls, refresh — preference kept
 - [ ] Explore → hover location / NO items
