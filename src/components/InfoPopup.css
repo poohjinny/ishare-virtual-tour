@@ -30,8 +30,8 @@
   margin-bottom: 0;
 }
 
-.info-popup .tour-glass-panel__header-leading {
-  gap: 16px;
+.info-popup .tour-glass-panel__header {
+  gap: 8px;
 }
 
 .info-popup .tour-glass-panel__price--under-title {
@@ -47,8 +47,7 @@
   padding-right: 4px;
 }
 
-.info-popup__header .tour-glass-panel__meta,
-.info-popup__header .ishare-badge {
+.info-popup .tour-glass-panel__header>.ishare-badge {
   display: inline-flex;
 }
 

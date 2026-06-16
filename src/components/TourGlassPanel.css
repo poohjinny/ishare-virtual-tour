@@ -234,8 +234,14 @@
   gap: 2px;
 }
 
-.tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__header-leading {
-  gap: 16px;
+.tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__header {
+  gap: 8px;
+}
+
+.tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__header>.tour-glass-panel__meta,
+.info-popup .tour-glass-panel__header>.tour-glass-panel__meta,
+.info-popup .tour-glass-panel__header>.ishare-badge {
+  width: 100%;
 }
 
 .tour-glass-panel__title-actions {

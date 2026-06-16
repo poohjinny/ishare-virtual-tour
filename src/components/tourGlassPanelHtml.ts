@@ -619,7 +619,6 @@ export function buildTourGlassPanelHtml(
                 </div>
                 ${titleSubHtml}
               </div>
-              ${badgeHtml}
             </div>
             <div class="${GLASS_PANEL.titleActions}">
               ${headerActionsHtml}
@@ -633,6 +632,7 @@ export function buildTourGlassPanelHtml(
               </button>
             </div>
           </div>
+          ${badgeHtml}
         </div>
         <div class="${GLASS_PANEL.body} ishare-scrollbar">
           ${mediaHtml}

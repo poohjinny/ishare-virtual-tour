@@ -167,7 +167,6 @@ export function InfoPopup({
                     </p>
                   )}
                 </div>
-                <PopupHeaderMeta popup={shown} />
               </div>
               <div className='tour-glass-panel__title-actions'>
                 <GlassPanelHeaderActions
@@ -193,6 +192,7 @@ export function InfoPopup({
                 </button>
               </div>
             </div>
+            <PopupHeaderMeta popup={shown} />
           </header>
 
           <div className='tour-glass-panel__body ishare-scrollbar'>
