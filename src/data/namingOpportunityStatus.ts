@@ -5,7 +5,10 @@ import type {
   PopupCta,
   Tour,
 } from '../types/tour';
-import { TOUR_CONTACT_US_MAILTO, buildTourNotifyMeMailto } from '../constants/tourContact';
+import {
+  TOUR_CONTACT_US_MAILTO,
+  buildTourNotifyMeMailto,
+} from '../constants/tourContact';
 
 export type NamingOpportunityContactIntent = 'inquiry' | 'simple' | 'notify';
 
@@ -29,11 +32,17 @@ export interface NamingOpportunityStatusCtaConfig {
 
 export interface NamingOpportunityStatusConfig {
   label: string;
+  /** Compact chip copy — search / narrow lists */
+  shortLabel: string;
   /** Hotspot pill label when this is a naming-opportunity hotspot */
   hotspotLabel: string;
   cssModifier: string;
   ctas: NamingOpportunityStatusCtaConfig[];
 }
+
+/** Panel / popup type badge — heart + label row */
+export const NAMING_OPPORTUNITY_BADGE_LABEL = 'Naming Opportunity';
+export const NAMING_OPPORTUNITY_BADGE_SHORT_LABEL = 'NO';
 
 const STATUS_CONFIG: Record<
   NamingOpportunityStatus,
@@ -41,6 +50,7 @@ const STATUS_CONFIG: Record<
 > = {
   on_sale: {
     label: 'On sale',
+    shortLabel: 'Sale',
     hotspotLabel: 'Naming opportunity',
     cssModifier: 'on-sale',
     ctas: [
@@ -61,6 +71,7 @@ const STATUS_CONFIG: Record<
   },
   reserved: {
     label: 'Reserved',
+    shortLabel: 'Rsvd',
     hotspotLabel: 'Reserved',
     cssModifier: 'reserved',
     ctas: [
@@ -83,6 +94,7 @@ const STATUS_CONFIG: Record<
   },
   coming_soon: {
     label: 'Coming soon',
+    shortLabel: 'Soon',
     hotspotLabel: 'Coming soon',
     cssModifier: 'coming-soon',
     ctas: [
@@ -104,6 +116,7 @@ const STATUS_CONFIG: Record<
   },
   sold: {
     label: 'Sold',
+    shortLabel: 'Sold',
     hotspotLabel: 'Sold',
     cssModifier: 'sold',
     ctas: [
@@ -135,6 +148,14 @@ export function namingOpportunityStatusConfig(
   status?: NamingOpportunityStatus,
 ): NamingOpportunityStatusConfig {
   return STATUS_CONFIG[resolveNamingOpportunityStatus(status)];
+}
+
+export function namingOpportunityStatusDisplayLabel(
+  status?: NamingOpportunityStatus,
+  compact = false,
+): string {
+  const config = namingOpportunityStatusConfig(status);
+  return compact ? config.shortLabel : config.label;
 }
 
 /** @deprecated Use {@link resolvePopupContentCtas} */

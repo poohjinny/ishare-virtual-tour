@@ -99,23 +99,27 @@ export function TourGlassPanel({
           {header ?? (
             <>
               <div className='tour-glass-panel__title-row'>
-                {title ?
-                  <h2 id={titleId} className='tour-glass-panel__title'>
-                    {title}
-                  </h2>
-                : null}
+                <div className='tour-glass-panel__header-leading'>
+                  {title ?
+                    <h2 id={titleId} className='tour-glass-panel__title'>
+                      {title}
+                    </h2>
+                  : null}
+                  {badge}
+                </div>
                 {onClose && (
-                  <button
-                    type='button'
-                    className='tour-glass-panel__close'
-                    onClick={onClose}
-                    aria-label='Close'
-                  >
-                    <GlassPanelCloseIcon />
-                  </button>
+                  <div className='tour-glass-panel__title-actions'>
+                    <button
+                      type='button'
+                      className='tour-glass-panel__close'
+                      onClick={onClose}
+                      aria-label='Close'
+                    >
+                      <GlassPanelCloseIcon />
+                    </button>
+                  </div>
                 )}
               </div>
-              {badge}
             </>
           )}
         </header>

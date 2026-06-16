@@ -6,6 +6,10 @@ export interface NamingStatusBadgeProps {
   status?: NamingOpportunityStatus;
   statusModifier?: NamingStatusModifier;
   label?: string;
+  /** Accessible name when visible label is abbreviated */
+  ariaLabel?: string;
+  /** Search / compact lists — uses status short label when `status` is set */
+  compact?: boolean;
   uppercase?: boolean;
   className?: string;
 }
@@ -14,6 +18,8 @@ export function NamingStatusBadge({
   status,
   statusModifier: statusModifierProp,
   label: labelProp,
+  ariaLabel: ariaLabelProp,
+  compact = false,
   uppercase = true,
   className = '',
 }: NamingStatusBadgeProps) {
@@ -22,7 +28,15 @@ export function NamingStatusBadge({
   const statusModifier = (config?.cssModifier ?? statusModifierProp) as
     | NamingStatusModifier
     | undefined;
-  const label = labelProp ?? config?.label;
+  const label =
+    labelProp ??
+    (config ?
+      compact ? config.shortLabel
+      : config.label
+    : undefined);
+  const ariaLabel =
+    ariaLabelProp ??
+    (compact && config && label !== config.label ? config.label : undefined);
 
   if (!statusModifier || !label) return null;
 
@@ -33,6 +47,7 @@ export function NamingStatusBadge({
       statusModifier={statusModifier}
       uppercase={uppercase}
       className={className}
+      aria-label={ariaLabel}
     >
       {label}
     </Badge>

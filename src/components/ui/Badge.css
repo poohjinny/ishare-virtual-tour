@@ -10,7 +10,7 @@
   width: fit-content;
   flex-shrink: 0;
   white-space: nowrap;
-  font-family: var(--ishare-font);
+  font-family: var(--ishare-body-font);
   line-height: 1.2;
   border-radius: 999px;
 }
@@ -57,7 +57,7 @@
 .ishare-badge--fill-lg {
   gap: var(--ishare-badge-fill-lg-gap);
   padding: var(--ishare-badge-fill-lg-pad);
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-xs);
   font-weight: 700;
   letter-spacing: 0.04em;

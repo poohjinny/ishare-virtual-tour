@@ -5,9 +5,9 @@ import { platformBrandLinkedNameHtml } from '../utils/platformBrandHtml';
 /** Giftabulator popup CTA copy — brand metadata lives in `platformBrands.ts`. */
 export const GIFTABULATOR_PRODUCT = {
   ...GIFTABULATOR,
-  ctaButtonLabelPrefix: 'See your tax-efficient giving potential with ',
+  ctaButtonLabelPrefix: 'See your tax-efficient giving with ',
   ctaSublabelPrefix: 'Calculate your gift with ',
-  ariaLabel: 'See your tax-efficient giving potential with GIFTABULATOR',
+  ariaLabel: 'See your tax-efficient giving with GIFTABULATOR',
 } as const;
 
 export function giftabulatorCtaButtonPlainLabel(): string {

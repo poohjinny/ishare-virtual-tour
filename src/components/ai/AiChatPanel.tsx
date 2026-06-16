@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CHAT_SCROLL_TEST_MESSAGES } from '../../data/chatScrollTestMessages';
 import {
-  VIRTUAL_TOUR_GUIDE_AVATAR,
   VIRTUAL_TOUR_GUIDE_NAME,
   VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE,
 } from '../../constants/branding';
@@ -9,11 +8,13 @@ import type { ChatMessage } from '../../types/tour';
 import { GlassPanelCloseIcon, TourGlassPanel } from '../TourGlassPanel';
 import { PlatformBrandLink } from '../PlatformBrandLink';
 import { LocationBadge } from './LocationBadge';
+import { GuideAvatarImage } from './GuideAvatarImage';
 import { SuggestedQuestions } from './SuggestedQuestions';
 import './AiAssistant.css';
 
 interface AiChatPanelProps {
   panelPhase: 'idle' | 'enter' | 'exit';
+  guideAvatarUrl: string;
   chatTest?: boolean;
   messages: ChatMessage[];
   locationTitle: string;
@@ -83,6 +84,7 @@ function ArrowUpIcon() {
 
 export function AiChatPanel({
   panelPhase,
+  guideAvatarUrl,
   chatTest = false,
   messages,
   locationTitle,
@@ -146,9 +148,9 @@ export function AiChatPanel({
       header={
         <>
           <div className='ai-panel__header-main'>
-            <img
+            <GuideAvatarImage
               className='ai-panel__symbol'
-              src={VIRTUAL_TOUR_GUIDE_AVATAR}
+              src={guideAvatarUrl}
               alt=''
               draggable={false}
             />
@@ -160,12 +162,11 @@ export function AiChatPanel({
             </div>
           </div>
           <div className='ai-panel__header-actions'>
-            {!chatTest && (
+            {canReset && (
               <button
                 type='button'
                 className='tour-glass-panel__close ai-panel__header-btn ai-panel__reset'
                 onClick={handleReset}
-                disabled={!canReset}
                 aria-label='Reset conversation'
                 title='Reset conversation'
               >
@@ -186,8 +187,7 @@ export function AiChatPanel({
       footer={
         <footer className='tour-glass-panel__footer ai-panel__footer'>
           <p className='ai-panel__powered-by'>
-            Powered by{' '}
-            <PlatformBrandLink brandId='fundingMattersAiSuite' />
+            Powered by <PlatformBrandLink brandId='fundingMattersAiSuite' />
           </p>
         </footer>
       }

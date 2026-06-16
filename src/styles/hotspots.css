@@ -44,10 +44,12 @@
   border-radius: 50%;
   background: var(--ishare-primary);
   box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.4);
-  animation: hotspot-nav-dot-glow 2.8s ease-out infinite;
+  transform-origin: center;
+  animation: hotspot-nav-dot-glow 2.5s ease-out infinite;
   transition:
     background 0.22s ease,
-    box-shadow 0.22s ease;
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
 }
 
 .hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__pill {
@@ -58,7 +60,7 @@
 }
 
 .hotspot-nav__label {
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-md);
   font-weight: 600;
   line-height: 1.1;
@@ -102,6 +104,7 @@
   background: var(--ishare-primary);
   box-shadow: var(--ishare-active-icon-dot-ring);
   animation: none;
+  transform: none;
 }
 
 /* ── Info hotspot — naming opportunity pill (primary + heart) ── */
@@ -182,7 +185,7 @@
 }
 
 .hotspot-info__label {
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-md);
   font-weight: 600;
   line-height: 1.1;
@@ -321,15 +324,24 @@
 
 @keyframes hotspot-nav-dot-glow {
   0% {
-    box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.42);
+    transform: scale(1);
+    box-shadow:
+      0 0 3px rgba(var(--ishare-primary-rgb), 0.38),
+      0 0 0 0 rgba(var(--ishare-primary-rgb), 0.52);
   }
 
-  55% {
-    box-shadow: 0 0 0 5px rgba(var(--ishare-primary-rgb), 0);
+  45% {
+    transform: scale(1.1);
+    box-shadow:
+      0 0 4px rgba(var(--ishare-primary-rgb), 0.28),
+      0 0 0 7px rgba(var(--ishare-primary-rgb), 0);
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0);
+    transform: scale(1);
+    box-shadow:
+      0 0 3px rgba(var(--ishare-primary-rgb), 0.2),
+      0 0 0 0 rgba(var(--ishare-primary-rgb), 0);
   }
 }
 
@@ -349,6 +361,7 @@
 
   .hotspot-nav__dot {
     animation: none;
+    transform: none;
   }
 
   .hotspot-nav--active .hotspot-nav__dot {
@@ -359,5 +372,42 @@
     animation: none;
     opacity: 0.35;
     transform: scale(1.08);
+  }
+}
+
+/* ── Post–scene-change enter (delay + fade + scale) ── */
+
+.viewer-container--hotspots-hold .psv-marker:has(.hotspot-nav).psv-marker--visible,
+.viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible {
+  opacity: 0 !important;
+}
+
+.viewer-container--hotspots-enter .psv-marker:has(.hotspot-nav).psv-marker--visible .hotspot-nav,
+.viewer-container--hotspots-enter .psv-marker:has(.hotspot-info).psv-marker--visible .hotspot-info {
+  animation: hotspot-enter 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes hotspot-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .viewer-container--hotspots-hold .psv-marker:has(.hotspot-nav).psv-marker--visible,
+  .viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible {
+    opacity: 1 !important;
+  }
+
+  .viewer-container--hotspots-enter .psv-marker:has(.hotspot-nav).psv-marker--visible .hotspot-nav,
+  .viewer-container--hotspots-enter .psv-marker:has(.hotspot-info).psv-marker--visible .hotspot-info {
+    animation: none;
   }
 }

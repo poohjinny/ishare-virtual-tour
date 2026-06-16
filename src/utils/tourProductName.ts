@@ -3,8 +3,8 @@ import type { Tour } from '../types/tour';
 /**
  * Client tour product naming (in-app).
  *
- * Platform SaaS name (`iShare Virtual Tour`) is documented in `docs/PRODUCT_NAMING.md`
- * and `ISHARE_VIRTUAL_TOUR_NAME` in `constants/branding.ts` — not shown in the app UI.
+ * Platform SaaS name (`iShare Virtual Tour`) — see `docs/PRODUCT_NAMING.md`.
+ * Shown on platform-level screens only; in-tour UI uses `getTourProductFullName(tour)`.
  */
 
 /** Client tour product suffix. */

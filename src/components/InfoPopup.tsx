@@ -1,13 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PopupContent, Tour } from '../types/tour';
 import {
   PopupBodyCopy,
-  PopupCtasBlock,
   PopupHeaderMeta,
   NamingOpportunityPrice,
+  PopupPrimaryCtaFooter,
   PopupVideoEmbed,
 } from './popupContentUi';
-import { resolvePopupContentCtas } from '../data/namingOpportunityStatus';
+import {
+  resolvePopupContentCtas,
+  stripNamingOpportunitySuffix,
+} from '../data/namingOpportunityStatus';
+import { TOUR_SHARE_OPPORTUNITY_ARIA } from '../constants/tourShare';
+import {
+  buildAbsoluteShareUrl,
+  buildShareMessage,
+} from '../utils/buildShareUrl';
+import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
+import { GlassPanelHeaderActions } from './GlassPanelHeaderActions';
 import { resolveGlassPanelWidth } from './tourGlassPanelHtml';
 import { GlassPanelCloseIcon } from './TourGlassPanel';
 import './TourGlassPanel.css';
@@ -18,10 +28,20 @@ const POPUP_EXIT_MS = 280;
 interface InfoPopupProps {
   popup: PopupContent | null;
   tour: Tour;
+  tourTitle: string;
+  sceneId: string;
+  namingHotspotId?: string | null;
   onClose: () => void;
 }
 
-export function InfoPopup({ popup, tour, onClose }: InfoPopupProps) {
+export function InfoPopup({
+  popup,
+  tour,
+  tourTitle,
+  sceneId,
+  namingHotspotId = null,
+  onClose,
+}: InfoPopupProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [shown, setShown] = useState<PopupContent | null>(null);
   const [isExiting, setIsExiting] = useState(false);
@@ -64,9 +84,49 @@ export function InfoPopup({ popup, tour, onClose }: InfoPopupProps) {
     onClose();
   }, [isExiting, onClose]);
 
+  const resolvedCtas = useMemo(
+    () => (shown ? resolvePopupContentCtas(shown, tour) : []),
+    [shown, tour],
+  );
+
+  const { primary: footerPrimary, headerCtas } = useMemo(
+    () => partitionPopupCtasForPlacement(resolvedCtas),
+    [resolvedCtas],
+  );
+
+  const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
+  const namingName =
+    shown?.namingOpportunity ?
+      stripNamingOpportunitySuffix(shown.namingOpportunity.name)
+    : null;
+
+  const shareUrl = useMemo(
+    () =>
+      buildAbsoluteShareUrl({
+        tourId: tour.id,
+        sceneId,
+        firstSceneId: tour.firstScene,
+        namingHotspotId:
+          shown?.namingOpportunity && namingHotspotId ? namingHotspotId : null,
+      }),
+    [
+      namingHotspotId,
+      sceneId,
+      shown?.namingOpportunity,
+      tour.firstScene,
+      tour.id,
+    ],
+  );
+
+  const shareMessage = useMemo(
+    () => buildShareMessage(tourTitle, sceneTitle, namingName),
+    [namingName, sceneTitle, tourTitle],
+  );
+
   if (!shown) return null;
 
-  const resolvedCtas = resolvePopupContentCtas(shown, tour);
+  const showNamingShare =
+    Boolean(shown.namingOpportunity) && Boolean(namingHotspotId);
 
   return (
     <div
@@ -86,37 +146,53 @@ export function InfoPopup({ popup, tour, onClose }: InfoPopupProps) {
         <div className='tour-glass-panel__shell'>
           <header className='tour-glass-panel__header'>
             <div className='tour-glass-panel__title-row info-popup__title-row'>
-              <div className='tour-glass-panel__title-block'>
-                <div className='tour-glass-panel__title-line'>
-                  <h2
-                    id='info-popup-title'
-                    className='tour-glass-panel__title info-popup__title'
-                  >
-                    {shown.title}
-                  </h2>
-                  {shown.namingOpportunity && (
-                    <NamingOpportunityPrice
-                      opportunity={shown.namingOpportunity}
-                    />
+              <div className='tour-glass-panel__header-leading'>
+                <div className='tour-glass-panel__title-block'>
+                  <div className='tour-glass-panel__title-line'>
+                    <h2
+                      id='info-popup-title'
+                      className='tour-glass-panel__title info-popup__title'
+                    >
+                      {shown.title}
+                    </h2>
+                    {shown.namingOpportunity && (
+                      <NamingOpportunityPrice
+                        opportunity={shown.namingOpportunity}
+                      />
+                    )}
+                  </div>
+                  {shown.namingOpportunity?.priceLabel && (
+                    <p className='tour-glass-panel__price-label'>
+                      {shown.namingOpportunity.priceLabel}
+                    </p>
                   )}
                 </div>
-                {shown.namingOpportunity?.priceLabel && (
-                  <p className='tour-glass-panel__price-label'>
-                    {shown.namingOpportunity.priceLabel}
-                  </p>
-                )}
+                <PopupHeaderMeta popup={shown} />
               </div>
-              <button
-                ref={closeRef}
-                type='button'
-                className='tour-glass-panel__close'
-                onClick={handleDismiss}
-                aria-label='Close'
-              >
-                <GlassPanelCloseIcon />
-              </button>
+              <div className='tour-glass-panel__title-actions'>
+                <GlassPanelHeaderActions
+                  headerCtas={headerCtas}
+                  share={
+                    showNamingShare ?
+                      {
+                        shareUrl,
+                        message: shareMessage,
+                        ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
+                      }
+                    : undefined
+                  }
+                />
+                <button
+                  ref={closeRef}
+                  type='button'
+                  className='tour-glass-panel__close'
+                  onClick={handleDismiss}
+                  aria-label='Close'
+                >
+                  <GlassPanelCloseIcon />
+                </button>
+              </div>
             </div>
-            <PopupHeaderMeta popup={shown} />
           </header>
 
           <div className='tour-glass-panel__body ishare-scrollbar'>
@@ -133,7 +209,7 @@ export function InfoPopup({ popup, tour, onClose }: InfoPopupProps) {
             )}
           </div>
 
-          {resolvedCtas.length > 0 && <PopupCtasBlock ctas={resolvedCtas} />}
+          {footerPrimary && <PopupPrimaryCtaFooter cta={footerPrimary} />}
         </div>
       </article>
     </div>

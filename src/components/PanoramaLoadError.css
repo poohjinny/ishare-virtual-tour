@@ -61,7 +61,7 @@
 }
 
 .panorama-load-error__title {
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-2xl);
   font-weight: 600;
   color: var(--ishare-text);
@@ -92,7 +92,7 @@
   padding: 0.625rem 1rem;
   border: none;
   border-radius: 999px;
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-lg);
   font-weight: 600;
   cursor: pointer;

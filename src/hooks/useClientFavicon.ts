@@ -6,5 +6,5 @@ export function useClientFavicon(tour: Tour): void {
   useEffect(() => {
     applyClientFavicon(tour);
     return resetClientFavicon;
-  }, [tour.id, tour.branding?.favicon]);
+  }, [tour.id, tour.clientId, tour.branding?.favicon]);
 }

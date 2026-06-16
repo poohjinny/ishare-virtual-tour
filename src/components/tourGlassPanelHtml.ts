@@ -16,15 +16,18 @@ import {
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
 import {
+  NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
   resolvePopupContentCtas,
 } from '../data/namingOpportunityStatus';
 import {
-  partitionPopupCtas,
-  popupCtaRowClassName,
-  popupCtaWrapClassName,
-  resolvePopupCtaLayoutMode,
-} from '../utils/popupCtaLayout';
+  TOUR_SHARE_LOCATION_ARIA,
+  TOUR_SHARE_OPPORTUNITY_ARIA,
+} from '../constants/tourShare';
+import {
+  partitionPopupCtasForPlacement,
+  isMailtoCtaUrl,
+} from '../utils/popupCtaPlacement';
 import {
   isNamingStatusIconModifier,
   namingStatusBadgeIconHtml,
@@ -181,6 +184,7 @@ export const GLASS_PANEL = {
   shellEnter: 'tour-glass-panel__shell--enter',
   header: 'tour-glass-panel__header',
   titleRow: 'tour-glass-panel__title-row',
+  headerLeading: 'tour-glass-panel__header-leading',
   titleBlock: 'tour-glass-panel__title-block',
   titleLine: 'tour-glass-panel__title-line',
   title: 'tour-glass-panel__title',
@@ -218,6 +222,11 @@ export const GLASS_PANEL = {
   ctaText: 'tour-glass-panel__cta-text',
   reg: 'tour-glass-panel__reg',
   ctaIcon: 'tour-glass-panel__cta-icon',
+  titleActions: 'tour-glass-panel__title-actions',
+  headerActions: 'tour-glass-panel__header-actions',
+  headerBtn: 'tour-glass-panel__header-btn',
+  headerBtnIcon: 'tour-glass-panel__header-btn-icon',
+  ctaSublabel: 'tour-glass-panel__cta-sublabel',
 } as const;
 
 function readMeasuredAnchoredPanelHeight(host: ParentNode): number {
@@ -248,6 +257,103 @@ export function glassPanelCloseIconHtml(): string {
 </svg>`;
 }
 
+function glassPanelShareIconHtml(): string {
+  return `<svg class="${GLASS_PANEL.headerBtnIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <circle cx="18" cy="5" r="2.25" stroke="currentColor" stroke-width="1.75"/>
+  <circle cx="6" cy="12" r="2.25" stroke="currentColor" stroke-width="1.75"/>
+  <circle cx="18" cy="19" r="2.25" stroke="currentColor" stroke-width="1.75"/>
+  <path d="M8.1 10.9 15.9 6.6M8.1 13.1l7.8 4.3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+}
+
+function navPreviewShareIconHtml(): string {
+  return `<svg class="nav-preview-panel__header-btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <circle cx="18" cy="5" r="2.25" stroke="currentColor" stroke-width="1.75"/>
+  <circle cx="6" cy="12" r="2.25" stroke="currentColor" stroke-width="1.75"/>
+  <circle cx="18" cy="19" r="2.25" stroke="currentColor" stroke-width="1.75"/>
+  <path d="M8.1 10.9 15.9 6.6M8.1 13.1l7.8 4.3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+}
+
+function glassPanelMailIconHtml(): string {
+  return `<svg class="${GLASS_PANEL.headerBtnIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+  <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+}
+
+function glassPanelExternalLinkIconHtml(): string {
+  return `<svg class="${GLASS_PANEL.headerBtnIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path d="M14 5h5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 14 19 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19 14v5H5V5h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+}
+
+function buildShareHeaderButtonHtml(
+  dataAttr: string,
+  ariaLabel: string,
+  className = GLASS_PANEL.headerBtn,
+): string {
+  return `<button
+        type="button"
+        class="${className}"
+        data-${dataAttr}="true"
+        aria-label="${escapeHtml(ariaLabel)}"
+        title="${escapeHtml(ariaLabel)}"
+      >${glassPanelShareIconHtml()}</button>`;
+}
+
+function buildPopupHeaderActionHtml(cta: PopupCta): string {
+  const resolved = resolvePopupCta(cta);
+  const iconHtml =
+    isMailtoCtaUrl(resolved.url) ?
+      glassPanelMailIconHtml()
+    : glassPanelExternalLinkIconHtml();
+
+  return `<a
+        class="${GLASS_PANEL.headerBtn}"
+        href="${escapeHtml(resolved.url)}"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="${escapeHtml(resolved.ariaLabel)}"
+        title="${escapeHtml(resolved.label)}"
+      >${iconHtml}</a>`;
+}
+
+function buildPopupHeaderActionsHtml(options: {
+  headerCtas: PopupCta[];
+  shareHtml?: string;
+}): string {
+  const actionHtml = [
+    options.shareHtml ?? '',
+    ...options.headerCtas.map((cta) => buildPopupHeaderActionHtml(cta)),
+  ]
+    .filter(Boolean)
+    .join('');
+
+  if (!actionHtml) return '';
+
+  return `<div class="${GLASS_PANEL.headerActions}">${actionHtml}</div>`;
+}
+
+function buildPopupPrimaryFooterInnerHtml(primary: PopupCta): string {
+  const primaryCta: PopupCta = { ...primary, variant: 'primary' };
+  const resolved = resolvePopupCta(primaryCta);
+  const sublabel =
+    primaryCta.sublabel ??
+    (resolved.kind === 'custom' ? resolved.sublabel : undefined);
+  const sublabelHtml =
+    sublabel ?
+      `<p class="${GLASS_PANEL.ctaSublabel}">${escapeHtml(sublabel)}</p>`
+    : '';
+
+  return `<div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
+      ${buildPopupCtaButtonHtml(primaryCta)}
+      ${sublabelHtml}
+    </div>`;
+}
+
 function navPreviewCloseIconHtml(): string {
   return `<svg class="nav-preview-panel__close-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
   <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
@@ -272,6 +378,12 @@ export function glassPanelNamingBadgeIconHtml(): string {
   return `<svg class="${GLASS_PANEL.badgeIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
 </svg>`;
+}
+
+export function buildPopupImageHtml(popup: PopupContent): string {
+  if (!popup.image) return '';
+
+  return `<img class="tour-glass-panel__image" src="${escapeHtml(popup.image)}" alt="" />`;
 }
 
 export function buildPopupVideoHtml(popup: PopupContent): string {
@@ -351,7 +463,7 @@ export function buildPopupBadgeHtml(popup: PopupContent): string {
       <div class="${GLASS_PANEL.metaRow}">
         <span class="${GLASS_PANEL.badgeNaming}">
           ${glassPanelNamingBadgeIconHtml()}
-          <span class="${GLASS_PANEL.badgeText}">Naming Opportunity</span>
+          <span class="${GLASS_PANEL.badgeText}">${escapeHtml(NAMING_OPPORTUNITY_BADGE_LABEL)}</span>
         </span>
         <span class="${GLASS_PANEL.badgeStatusIcon(escapeHtml(statusModifier))}">
           ${statusIconHtml}
@@ -411,24 +523,9 @@ export function buildPopupCtaButtonHtml(cta: PopupCta): string {
 }
 
 function buildPopupFooterButtonsHtml(ctas: PopupCta[]): string {
-  const mode = resolvePopupCtaLayoutMode(ctas);
-
-  if (mode === 'full') {
-    return buildPopupCtaButtonHtml(ctas[0]);
-  }
-
-  const { ordered, primary, secondaries } = partitionPopupCtas(ctas);
-
-  if (mode === 'row-equal') {
-    return ordered.map((cta) => buildPopupCtaButtonHtml(cta)).join('');
-  }
-
-  const secondaryHtml =
-    secondaries.length > 1 ?
-      `<div class="${popupCtaRowClassName(secondaries.length)}">${secondaries.map((cta) => buildPopupCtaButtonHtml(cta)).join('')}</div>`
-    : secondaries.map((cta) => buildPopupCtaButtonHtml(cta)).join('');
-
-  return `${secondaryHtml}<div class="${GLASS_PANEL.ctaPrimaryGroup}">${buildPopupCtaButtonHtml(primary)}</div>`;
+  const { primary } = partitionPopupCtasForPlacement(ctas);
+  if (!primary) return '';
+  return buildPopupPrimaryFooterInnerHtml(primary);
 }
 
 export function buildPopupFooterHtml(popup: PopupContent, tour?: Tour): string {
@@ -440,12 +537,10 @@ export function buildPopupFooterHtml(popup: PopupContent, tour?: Tour): string {
   if (ctas.length === 0) return '';
 
   const buttonsHtml = buildPopupFooterButtonsHtml(ctas);
-  const wrapClass = popupCtaWrapClassName(resolvePopupCtaLayoutMode(ctas));
+  if (!buttonsHtml) return '';
 
   return `<footer class="${GLASS_PANEL.footer}">
-    <div class="${wrapClass}">
-      ${buttonsHtml}
-    </div>
+    ${buttonsHtml}
   </footer>`;
 }
 
@@ -460,6 +555,7 @@ export interface GlassPanelHtmlOptions {
   mediaHtml?: string;
   videoHtml?: string;
   footerHtml?: string;
+  headerActionsHtml?: string;
   variant?: 'anchored' | 'dock';
   animate?: boolean;
   closeDataAttr?: string;
@@ -480,6 +576,7 @@ export function buildTourGlassPanelHtml(
     mediaHtml = '',
     videoHtml = '',
     footerHtml = '',
+    headerActionsHtml = '',
     variant = 'anchored',
     animate = true,
     closeDataAttr,
@@ -512,25 +609,30 @@ export function buildTourGlassPanelHtml(
       <div class="${shellClass}">
         <div class="${GLASS_PANEL.header}">
           <div class="${GLASS_PANEL.titleRow}">
-            <div class="${GLASS_PANEL.titleBlock}">
-              <div class="${GLASS_PANEL.titleLine}">
-                <h3 id="${escapeHtml(titleId)}" class="${GLASS_PANEL.title}">
-                  ${escapeHtml(title)}
-                </h3>
-                ${titleAfterHtml}
+            <div class="${GLASS_PANEL.headerLeading}">
+              <div class="${GLASS_PANEL.titleBlock}">
+                <div class="${GLASS_PANEL.titleLine}">
+                  <h3 id="${escapeHtml(titleId)}" class="${GLASS_PANEL.title}">
+                    ${escapeHtml(title)}
+                  </h3>
+                  ${titleAfterHtml}
+                </div>
+                ${titleSubHtml}
               </div>
-              ${titleSubHtml}
+              ${badgeHtml}
             </div>
-            <button
-              type="button"
-              class="${GLASS_PANEL.close}"
-              aria-label="Close"
-              ${closeAttr}
-            >
-              ${glassPanelCloseIconHtml()}
-            </button>
+            <div class="${GLASS_PANEL.titleActions}">
+              ${headerActionsHtml}
+              <button
+                type="button"
+                class="${GLASS_PANEL.close}"
+                aria-label="Close"
+                ${closeAttr}
+              >
+                ${glassPanelCloseIconHtml()}
+              </button>
+            </div>
           </div>
-          ${badgeHtml}
         </div>
         <div class="${GLASS_PANEL.body} ishare-scrollbar">
           ${mediaHtml}
@@ -563,6 +665,24 @@ export function buildAnchoredPopupHtml(
       `<p class="${GLASS_PANEL.priceLabel}">${escapeHtml(naming.priceLabel)}</p>`
     : '';
 
+  const ctas =
+    options?.tour ? resolvePopupContentCtas(popup, options.tour) : [];
+  const { primary, headerCtas } = partitionPopupCtasForPlacement(ctas);
+  const headerActionsHtml = buildPopupHeaderActionsHtml({
+    headerCtas,
+    shareHtml:
+      naming ?
+        buildShareHeaderButtonHtml(
+          'info-panel-share',
+          TOUR_SHARE_OPPORTUNITY_ARIA,
+        )
+      : undefined,
+  });
+  const footerHtml =
+    primary ?
+      `<footer class="${GLASS_PANEL.footer}">${buildPopupPrimaryFooterInnerHtml(primary)}</footer>`
+    : buildPopupFooterHtml(popup, options?.tour);
+
   return buildTourGlassPanelHtml({
     title: popup.title,
     titleId,
@@ -570,14 +690,17 @@ export function buildAnchoredPopupHtml(
     titleSubHtml,
     badgeHtml: buildPopupBadgeHtml(popup),
     bodyHtml: buildGlassPanelParagraphsHtml(popup.body),
+    mediaHtml: buildPopupImageHtml(popup),
     videoHtml: buildPopupVideoHtml(popup),
-    footerHtml: buildPopupFooterHtml(popup, options?.tour),
+    headerActionsHtml,
+    footerHtml,
     variant: 'anchored',
     animate: options?.animate ?? true,
     closeDataAttr: 'info-panel-close',
     rootDataAttrs: {
       'data-info-panel': 'true',
       'data-info-panel-for': hotspotId,
+      ...(naming ? { 'data-info-panel-naming': 'true' } : {}),
     },
   });
 }
@@ -808,24 +931,42 @@ export function buildAnchoredNavPreviewHtml(
           : ''
         }
         ${heroTitleOverlayHtml}
-        <button
-          type="button"
-          class="nav-preview-panel__close"
-          data-nav-panel-close="true"
-          aria-label="Close"
-        >${navPreviewCloseIconHtml()}</button>
+        <div class="nav-preview-panel__hero-actions">
+          <button
+            type="button"
+            class="nav-preview-panel__header-btn"
+            data-nav-panel-share="true"
+            aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
+            title="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
+          >${navPreviewShareIconHtml()}</button>
+          <button
+            type="button"
+            class="nav-preview-panel__close"
+            data-nav-panel-close="true"
+            aria-label="Close"
+          >${navPreviewCloseIconHtml()}</button>
+        </div>
       </div>`
     : '';
 
   const closeInBodyHtml =
     preview.panorama ? '' : (
       `<div class="nav-preview-panel__body-toolbar">
-        <button
-          type="button"
-          class="nav-preview-panel__close nav-preview-panel__close--inline"
-          data-nav-panel-close="true"
-          aria-label="Close"
-        >${navPreviewCloseIconHtml()}</button>
+        <div class="nav-preview-panel__toolbar-actions">
+          <button
+            type="button"
+            class="nav-preview-panel__header-btn nav-preview-panel__header-btn--inline"
+            data-nav-panel-share="true"
+            aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
+            title="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
+          >${navPreviewShareIconHtml()}</button>
+          <button
+            type="button"
+            class="nav-preview-panel__close nav-preview-panel__close--inline"
+            data-nav-panel-close="true"
+            aria-label="Close"
+          >${navPreviewCloseIconHtml()}</button>
+        </div>
       </div>`
     );
 

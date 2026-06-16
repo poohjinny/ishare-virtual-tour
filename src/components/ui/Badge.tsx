@@ -8,7 +8,7 @@ export type BadgeLegacyVariant = BadgeVariant | 'soft';
 
 export type BadgeSize = 'sm' | 'lg';
 
-export type BadgeTone = 'primary' | 'accent' | 'muted';
+export type BadgeTone = 'primary' | 'accent' | 'muted' | 'none';
 
 export type NamingStatusModifier =
   | 'on-sale'
@@ -72,7 +72,7 @@ export function Badge({
 
     statusModifier ?
       `ishare-badge--status-${statusModifier}`
-    : `ishare-badge--tone-${tone}`,
+    : tone !== 'none' && `ishare-badge--tone-${tone}`,
 
     uppercase && 'ishare-badge--uppercase',
 

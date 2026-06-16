@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 324 216" fill="none">
+  <g transform="translate(10, 10)">
+    <path
+      d="M0 196 L72 196 L72 148 L232 148 L232 196 L304 196 L304 0 L0 0 Z"
+      fill="#c5d0dc"
+      stroke="#94a3b8"
+      stroke-width="2"
+    />
+    <rect x="82" y="148" width="140" height="48" fill="#b8c5d4" stroke="#64748b" stroke-width="1.5"/>
+    <rect x="120" y="156" width="64" height="32" fill="#94a3b8" opacity="0.5"/>
+    <text x="152" y="173" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#475569">Entrance</text>
+    <rect x="107" y="43" width="90" height="70" fill="#d1dbe8" stroke="#64748b" stroke-width="1"/>
+    <text x="152" y="83" text-anchor="middle" font-family="system-ui,sans-serif" font-size="10" fill="#475569">Reception</text>
+    <ellipse cx="152" cy="20" rx="28" ry="14" fill="#cbd5e1" stroke="#64748b" stroke-width="1" stroke-dasharray="3 2"/>
+    <text x="152" y="24" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" fill="#64748b">Overview</text>
+    <path d="M152 34 L152 43" stroke="#64748b" stroke-width="1" stroke-dasharray="2 2"/>
+    <path d="M152 113 L152 148" stroke="#64748b" stroke-width="1" stroke-dasharray="2 2"/>
+    <circle cx="272" cy="178" r="18" fill="#b8c5d4" stroke="#94a3b8" stroke-width="1"/>
+    <text x="272" y="182" text-anchor="middle" font-family="system-ui,sans-serif" font-size="8" fill="#64748b">P</text>
+  </g>
+</svg>

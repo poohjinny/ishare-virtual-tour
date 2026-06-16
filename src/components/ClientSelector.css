@@ -74,7 +74,7 @@
 
 .client-selector__label {
   flex-shrink: 0;
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-sm);
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -101,7 +101,7 @@
   border-radius: 0;
   background: transparent;
   appearance: none;
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-md);
   font-weight: 600;
   line-height: 1.2;

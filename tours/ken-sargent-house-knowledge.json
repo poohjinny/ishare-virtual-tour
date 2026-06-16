@@ -1,0 +1,144 @@
+{
+  "id": "ken-sargent-house",
+  "url": "https://gphospitalfoundation.ca",
+  "global": {
+    "facilityName": "Ken Sargent House",
+    "summary": "Ken Sargent House is a home away from home for patients receiving treatment at the Grande Prairie Regional Hospital and their families — a program of the Grande Prairie Regional Hospital Foundation."
+  },
+  "scenes": {
+    "overview": {
+      "title": "Overview",
+      "description": "Take in an aerial view of Ken Sargent House and the surrounding campus. From here you can see the full building layout, the main entrance, visitor parking, and the landscaped grounds that welcome patients and families. The house sits within walking distance of the Grande Prairie Regional Hospital, making it a convenient home away from home during treatment.",
+      "facts": [
+        "The building has a main entrance on the front wooden deck.",
+        "Parking is available on the right side of the campus.",
+        "The facility is surrounded by green fields and landscaped grounds.",
+        "The house is within walking distance of the Grande Prairie Regional Hospital."
+      ],
+      "faqs": [
+        {
+          "q": "What is this building?",
+          "a": "This is Ken Sargent House — a home away from home for patients and families accessing healthcare in Grande Prairie, supported by the Grande Prairie Regional Hospital Foundation."
+        },
+        {
+          "q": "Where is the main entrance?",
+          "a": "The main entrance is on the front of the building, accessible via the wooden deck. Click the Main Entrance hotspot to go there."
+        },
+        {
+          "q": "Is there parking?",
+          "a": "Yes. Parking is located on the right side of the campus, visible from this overview."
+        },
+        {
+          "q": "How close is the hospital?",
+          "a": "Ken Sargent House is within walking distance of the Grande Prairie Regional Hospital — a short walk for patients and families."
+        }
+      ],
+      "suggestedQuestions": [
+        "What is this building?",
+        "Where is the main entrance?",
+        "Is there parking?",
+        "How close is the hospital?"
+      ]
+    },
+    "kitchen": {
+      "title": "Kitchen",
+      "description": "The kitchen at Ken Sargent House is a shared space where guests and families can prepare meals, store food, and gather during their stay.",
+      "facts": [
+        "The kitchen is a shared amenity for guests staying at Ken Sargent House.",
+        "Families can prepare meals and store food during extended stays."
+      ],
+      "faqs": [
+        {
+          "q": "Can guests use the kitchen?",
+          "a": "Yes. The kitchen is a shared space for guests and families to prepare meals and store food during their stay at Ken Sargent House."
+        }
+      ],
+      "suggestedQuestions": ["Can guests use the kitchen?"]
+    },
+    "entrance-to-the-base-level": {
+      "title": "Entrance to the Base Level",
+      "description": "Approach the base-level entrance of Ken Sargent House from the landscaped grounds. This lower entry provides access to guest spaces on the building's foundation level.",
+      "facts": [
+        "The base-level entrance is on the lower side of the building.",
+        "Landscaped grounds surround the approach to this entry."
+      ],
+      "faqs": [
+        {
+          "q": "What is the base-level entrance?",
+          "a": "The base-level entrance is a lower entry to Ken Sargent House, accessible from the landscaped grounds. Use the Overview scene to see how it fits within the campus layout."
+        }
+      ],
+      "suggestedQuestions": ["What is the base-level entrance?"]
+    },
+    "comfort-corner": {
+      "title": "Comfort Corner",
+      "description": "The Comfort Corner at Ken Sargent House offers a welcoming space where guests can pause, connect, and find a moment of calm during their stay.",
+      "facts": [
+        "Comfort Corner is a welcoming lounge space for guests and families."
+      ],
+      "faqs": [
+        {
+          "q": "What is the Comfort Corner?",
+          "a": "Comfort Corner is a welcoming space at Ken Sargent House where guests can pause, connect, and find a moment of calm during their stay."
+        }
+      ],
+      "suggestedQuestions": ["What is the Comfort Corner?"]
+    },
+    "main-entrance": {
+      "title": "Main Entrance",
+      "description": "Arrive at the ground-level main entrance of Ken Sargent House. Glass doors open directly into the reception lobby, with an accessible ramp and railings on the left side of the front stairs. Illuminated welcome signage helps visitors find their way, whether arriving during the day or in the evening.",
+      "facts": [
+        "ADA-accessible ramp is on the left side of the stairs.",
+        "Welcome signage is illuminated above the glass doors.",
+        "The entrance leads directly to the reception lobby."
+      ],
+      "faqs": [
+        {
+          "q": "Is the entrance wheelchair accessible?",
+          "a": "Yes. A concrete ramp with white railings is located on the left side of the main stairs, suitable for wheelchair access."
+        },
+        {
+          "q": "How do I get to reception?",
+          "a": "Enter through the glass doors ahead. Click the Reception hotspot or use the scene panel to navigate to the reception lobby."
+        },
+        {
+          "q": "Where can I park?",
+          "a": "Visitor parking is in the lot visible from the entrance area. Click the Parking Lot naming opportunity marker or return to Overview for a full campus view."
+        }
+      ],
+      "suggestedQuestions": [
+        "Is the entrance wheelchair accessible?",
+        "How do I get to reception?",
+        "Where can I park?"
+      ]
+    },
+    "reception": {
+      "title": "Reception",
+      "description": "Step into the reception lobby at Ken Sargent House — the first point of contact for guests and families. Check in at the welcome desk, take a seat in the comfortable lounge area, and get directions to the dining hall and other guest spaces. Our reception team is here to help everyone feel informed, supported, and at home.",
+      "facts": [
+        "Check in at the front desk with the WELCOME sign.",
+        "Dining Hall is to the left past the elevator.",
+        "A comfortable lounge area is available for visitors."
+      ],
+      "faqs": [
+        {
+          "q": "Where do I check in?",
+          "a": "Check in at the reception desk on your right, marked with the WELCOME sign. Staff can assist with appointments and directions."
+        },
+        {
+          "q": "Where is the dining hall?",
+          "a": "The Dining Hall is located to the left of the lobby, past the elevator area. Signage is visible from the reception area."
+        },
+        {
+          "q": "How do I go back outside?",
+          "a": "Use the Main Entrance hotspot or the scene panel to return to the exterior entrance view."
+        }
+      ],
+      "suggestedQuestions": [
+        "Where do I check in?",
+        "Where is the dining hall?",
+        "How do I go back outside?"
+      ]
+    }
+  }
+}

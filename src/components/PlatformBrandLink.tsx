@@ -33,29 +33,30 @@ export function PlatformBrandLink({
     </>
   );
 
+  const suffix =
+    legalSuffix && 'legalSuffix' in brand ? brand.legalSuffix : null;
+
   if (!link) {
     return (
       <span className={className}>
         {nameContent}
-        {legalSuffix && 'legalSuffix' in brand ? brand.legalSuffix : null}
+        {suffix}
       </span>
     );
   }
 
   return (
-    <>
-      <a
-        className={[PLATFORM_BRAND_LINK_CLASS, className]
-          .filter(Boolean)
-          .join(' ')}
-        href={brand.url}
-        target='_blank'
-        rel='noopener noreferrer'
-        aria-label={platformBrandAriaLabel(brand)}
-      >
-        {nameContent}
-      </a>
-      {legalSuffix && 'legalSuffix' in brand ? brand.legalSuffix : null}
-    </>
+    <a
+      className={[PLATFORM_BRAND_LINK_CLASS, className]
+        .filter(Boolean)
+        .join(' ')}
+      href={brand.url}
+      target='_blank'
+      rel='noopener noreferrer'
+      aria-label={platformBrandAriaLabel(brand)}
+    >
+      {nameContent}
+      {suffix}
+    </a>
   );
 }

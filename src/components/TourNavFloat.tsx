@@ -5,9 +5,19 @@ import {
   TOUR_DIRECTORY_SECTION_LOCATIONS,
   TOUR_DIRECTORY_SECTION_NAMING,
   TOUR_DIRECTORY_TABS,
+  TOUR_DIRECTORY_EMPTY_LOCATIONS,
+  TOUR_DIRECTORY_EMPTY_NAMING,
+  TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
+  TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL,
+  TOUR_DIRECTORY_EMPTY_SEARCH,
   type TourDirectoryTab,
 } from '../constants/tourDirectory';
+import { NamingPriceRangeFilter } from './NamingPriceRangeFilter';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
+import {
+  TOUR_SHARE_PANEL_TITLE,
+  tourNavShareActionLabel,
+} from '../constants/tourShare';
 import {
   TOUR_NAV_ACTION_SEARCH_CLOSE,
   TOUR_NAV_ACTION_SEARCH_OPEN,
@@ -16,6 +26,11 @@ import {
   tourNavHelpActionLabel,
   tourNavIconButtonA11y,
 } from '../constants/tourNavActions';
+import {
+  buildAbsoluteShareUrl,
+  buildShareMessage,
+} from '../utils/buildShareUrl';
+import { ShareTourPanel } from './ShareTourPanel';
 import { buildScenePath } from '../viewer/sceneDepth';
 import type { Scene, TourOrganization } from '../types/tour';
 import {
@@ -24,18 +39,25 @@ import {
   filterTourScenes,
   type TourDirectoryNamingItem,
 } from '../utils/tourDirectory';
+import {
+  computeNamingPriceBounds,
+  filterTourNamingByPriceRange,
+} from '../utils/namingPrice';
 import { Badge, type NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import { TourHelpPanel } from './TourHelpPanel';
+import { TourHelpFooter } from './TourHelpFooter';
 import {
   TourGlassPanel,
   GlassPanelCloseIcon,
   type TourGlassPanelAnimation,
 } from './TourGlassPanel';
+import { ShareIcon } from './icons/ShareIcon';
 import './TourNavFloat.css';
 
 interface TourNavFloatProps {
   scenes: Scene[];
+  tourId: string;
   currentSceneId: string;
   firstSceneId: string;
   tourTitle?: string;
@@ -59,8 +81,8 @@ interface TourNavFloatProps {
   activeNamingHotspotId?: string | null;
 }
 
-type PanelMode = 'explore' | 'help' | null;
-type DisplayPanel = 'explore' | 'help' | null;
+type PanelMode = 'explore' | 'help' | 'share' | null;
+type DisplayPanel = 'explore' | 'help' | 'share' | null;
 type PanelAnimPhase = 'enter' | 'exit' | 'idle';
 
 const PANEL_ENTER_MS = 150;
@@ -192,6 +214,11 @@ function HelpIcon() {
     </svg>
   );
 }
+
+function ShareIconButton() {
+  return <ShareIcon className='tour-nav-actions__circle-icon' />;
+}
+
 function PanelSearchIcon() {
   return (
     <svg
@@ -255,8 +282,22 @@ function HistoryForwardIcon() {
   );
 }
 
-function BreadcrumbLayerIcon() {
-  return <TourLayersIcon className='tour-nav-breadcrumb__layer-icon' />;
+function BreadcrumbRootIcon() {
+  return (
+    <svg
+      className='tour-nav-breadcrumb__root-icon'
+      viewBox='0 0 24 24'
+      fill='none'
+      aria-hidden='true'
+    >
+      <path
+        d='M4 10.75 12 4.5l8 6.25V19a1.25 1.25 0 0 1-1.25 1.25H15v-5.75H9V20.25H5.25A1.25 1.25 0 0 1 4 19V10.75Z'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinejoin='round'
+      />
+    </svg>
+  );
 }
 
 function buildBreadcrumbItems(
@@ -282,6 +323,7 @@ function buildBreadcrumbItems(
 
 export function TourNavFloat({
   scenes,
+  tourId,
   currentSceneId,
   firstSceneId,
   tourTitle = 'Virtual Tour',
@@ -344,6 +386,87 @@ export function TourNavFloat({
   );
 
   const namingItems = useMemo(() => buildTourNamingDirectory(scenes), [scenes]);
+
+  const currentSceneTitle = useMemo(() => {
+    return (
+      scenes.find((scene) => scene.id === currentSceneId)?.title ??
+      currentSceneId
+    );
+  }, [currentSceneId, scenes]);
+
+  const activeNamingItem = useMemo(() => {
+    if (!activeNamingHotspotId) return null;
+
+    return (
+      namingItems.find(
+        (item) =>
+          item.hotspotId === activeNamingHotspotId &&
+          item.sceneId === currentSceneId,
+      ) ?? null
+    );
+  }, [activeNamingHotspotId, currentSceneId, namingItems]);
+
+  const shareUrl = useMemo(
+    () =>
+      buildAbsoluteShareUrl({
+        tourId,
+        sceneId: currentSceneId,
+        firstSceneId,
+        namingHotspotId: activeNamingHotspotId,
+      }),
+    [activeNamingHotspotId, currentSceneId, firstSceneId, tourId],
+  );
+
+  const shareMessage = useMemo(
+    () =>
+      buildShareMessage(tourTitle, currentSceneTitle, activeNamingItem?.name),
+    [activeNamingItem?.name, currentSceneTitle, tourTitle],
+  );
+
+  const shareContextLabel = activeNamingItem?.name ?? currentSceneTitle;
+
+  const namingPriceBounds = useMemo(
+    () => computeNamingPriceBounds(namingItems),
+    [namingItems],
+  );
+
+  const [namingPriceMin, setNamingPriceMin] = useState<number | null>(null);
+  const [namingPriceMax, setNamingPriceMax] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!namingPriceBounds) {
+      setNamingPriceMin(null);
+      setNamingPriceMax(null);
+      return;
+    }
+
+    setNamingPriceMin(namingPriceBounds.min);
+    setNamingPriceMax(namingPriceBounds.max);
+  }, [namingPriceBounds]);
+
+  const exploreNamingItems = useMemo(() => {
+    if (
+      namingPriceMin == null ||
+      namingPriceMax == null ||
+      !namingPriceBounds
+    ) {
+      return namingItems;
+    }
+
+    return filterTourNamingByPriceRange(
+      namingItems,
+      namingPriceMin,
+      namingPriceMax,
+    );
+  }, [namingItems, namingPriceBounds, namingPriceMin, namingPriceMax]);
+
+  const handleNamingPriceRangeChange = useCallback(
+    (nextMin: number, nextMax: number) => {
+      setNamingPriceMin(nextMin);
+      setNamingPriceMax(nextMax);
+    },
+    [],
+  );
 
   const filteredScenes = useMemo(
     () => filterTourScenes(scenes, search),
@@ -444,7 +567,7 @@ export function TourNavFloat({
   }, [searchOpen, closeSearch]);
 
   useEffect(() => {
-    if (!searchOpen && panelMode !== 'help') return;
+    if (!searchOpen && panelMode !== 'help' && panelMode !== 'share') return;
 
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -454,7 +577,7 @@ export function TourNavFloat({
         if (searchOpen) {
           closeSearch();
         }
-        if (panelMode === 'help') {
+        if (panelMode === 'help' || panelMode === 'share') {
           setPanelMode(null);
         }
       }
@@ -542,6 +665,16 @@ export function TourNavFloat({
 
     closeSearch();
     setPanelMode('help');
+  };
+
+  const handleShareClick = () => {
+    if (panelMode === 'share') {
+      closePanel();
+      return;
+    }
+
+    closeSearch();
+    setPanelMode('share');
   };
 
   const handleTuneClick = () => {
@@ -669,7 +802,11 @@ export function TourNavFloat({
 
   const renderNamingList = (
     items: TourDirectoryNamingItem[],
-    options?: { showSectionTitle?: boolean; emptyMessage?: string },
+    options?: {
+      showSectionTitle?: boolean;
+      showPriceFilter?: boolean;
+      emptyMessage?: string;
+    },
   ) => (
     <section
       className='tour-nav-actions__directory-section'
@@ -687,6 +824,22 @@ export function TourNavFloat({
           {TOUR_DIRECTORY_SECTION_NAMING}
         </h3>
       )}
+
+      {options?.showPriceFilter &&
+        namingPriceBounds &&
+        namingPriceMin != null &&
+        namingPriceMax != null && (
+          <NamingPriceRangeFilter
+            label={TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL}
+            min={namingPriceBounds.min}
+            max={namingPriceBounds.max}
+            step={namingPriceBounds.step}
+            valueMin={namingPriceMin}
+            valueMax={namingPriceMax}
+            disabled={disabled}
+            onChange={handleNamingPriceRangeChange}
+          />
+        )}
 
       {items.length > 0 ?
         <ul
@@ -724,7 +877,8 @@ export function TourNavFloat({
                   </span>
                   <NamingStatusBadge
                     statusModifier={item.statusModifier as NamingStatusModifier}
-                    label={item.statusLabel}
+                    label={item.statusShortLabel}
+                    ariaLabel={item.statusLabel}
                     className='tour-nav-actions__item-badge'
                   />
                 </button>
@@ -758,19 +912,17 @@ export function TourNavFloat({
         {showLocations &&
           renderLocationsList(scenes, {
             showSectionTitle: showSectionTitles,
-            emptyMessage:
-              directoryTab === 'locations' ?
-                'No locations in this tour.'
-              : undefined,
+            emptyMessage: TOUR_DIRECTORY_EMPTY_LOCATIONS,
           })}
 
         {showNaming &&
-          renderNamingList(namingItems, {
+          renderNamingList(exploreNamingItems, {
             showSectionTitle: showSectionTitles,
+            showPriceFilter: true,
             emptyMessage:
-              directoryTab === 'naming' ?
-                'No naming opportunities in this tour.'
-              : undefined,
+              namingItems.length === 0 ?
+                TOUR_DIRECTORY_EMPTY_NAMING
+              : TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
           })}
       </div>
     );
@@ -782,9 +934,7 @@ export function TourNavFloat({
 
     if (!hasScenes && !hasNaming) {
       return (
-        <p className='tour-nav-actions__empty'>
-          No locations or naming opportunities match your search.
-        </p>
+        <p className='tour-nav-actions__empty'>{TOUR_DIRECTORY_EMPTY_SEARCH}</p>
       );
     }
 
@@ -881,6 +1031,8 @@ export function TourNavFloat({
     </div>
   );
 
+  const showBreadcrumbRootIcon = breadcrumbItems.length >= 2;
+
   return (
     <>
       <nav className='tour-nav-breadcrumb' aria-label='Tour location'>
@@ -916,7 +1068,9 @@ export function TourNavFloat({
                       className='tour-nav-breadcrumb__current'
                       aria-current='location'
                     >
-                      {index === 0 && <BreadcrumbLayerIcon />}
+                      {index === 0 && showBreadcrumbRootIcon && (
+                        <BreadcrumbRootIcon />
+                      )}
                       <span className='tour-nav-breadcrumb__current-label'>
                         {item.title}
                       </span>
@@ -931,7 +1085,9 @@ export function TourNavFloat({
                       disabled={disabled}
                       onClick={() => onBreadcrumbNavigate(item.id)}
                     >
-                      {index === 0 && <BreadcrumbLayerIcon />}
+                      {index === 0 && showBreadcrumbRootIcon && (
+                        <BreadcrumbRootIcon />
+                      )}
                       {item.title}
                     </button>
                   }
@@ -977,11 +1133,33 @@ export function TourNavFloat({
               onClose={closePanel}
               animation={panelAnimation(panelPhase)}
               bodyClassName='tour-glass-panel__body--help'
+              footer={<TourHelpFooter />}
             >
               <TourHelpPanel
                 tourTitle={tourTitle}
                 organization={organization}
                 logo={logoNode}
+              />
+            </TourGlassPanel>
+          </div>
+        )}
+
+        {displayPanel === 'share' && (
+          <div
+            id='tour-nav-share-panel'
+            className='tour-nav-actions__panel-slot tour-nav-actions__panel-slot--share'
+          >
+            <TourGlassPanel
+              title={TOUR_SHARE_PANEL_TITLE}
+              titleId='tour-nav-share-title'
+              onClose={closePanel}
+              animation={panelAnimation(panelPhase)}
+              bodyClassName='tour-glass-panel__body--share'
+            >
+              <ShareTourPanel
+                contextLabel={shareContextLabel}
+                shareUrl={shareUrl}
+                message={shareMessage}
               />
             </TourGlassPanel>
           </div>
@@ -1005,7 +1183,20 @@ export function TourNavFloat({
 
           <button
             type='button'
-            className={`tour-nav-actions__circle-btn${controlsVisible ? ' tour-nav-actions__circle-btn--active' : ''}`}
+            className={`tour-nav-actions__circle-btn${panelMode === 'share' ? ' tour-nav-actions__circle-btn--active' : ''}`}
+            onClick={handleShareClick}
+            aria-expanded={panelMode === 'share'}
+            aria-controls='tour-nav-share-panel'
+            {...tourNavIconButtonA11y(
+              tourNavShareActionLabel(panelMode === 'share'),
+            )}
+          >
+            <ShareIconButton />
+          </button>
+
+          <button
+            type='button'
+            className='tour-nav-actions__circle-btn'
             onClick={handleTuneClick}
             aria-pressed={controlsVisible}
             {...tourNavIconButtonA11y(

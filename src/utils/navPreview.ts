@@ -43,6 +43,7 @@ export function buildNavPreviewNamingItems(
       hotspotId: hotspot.id,
       name: stripNamingOpportunitySuffix(naming.name),
       statusLabel: statusConfig.label,
+      statusShortLabel: statusConfig.shortLabel,
       statusModifier: statusConfig.cssModifier,
       price: naming.price,
       priceLabel: naming.priceLabel,
@@ -62,8 +63,7 @@ export function buildNavPreview(
   const scene = tour.scenes[hotspot.targetScene];
   if (!scene) return null;
 
-  const image =
-    hotspot.preview?.image ?? scene.thumbnail ?? scene.panorama ?? undefined;
+  const image = hotspot.preview?.image ?? scene.panorama ?? undefined;
 
   return {
     targetSceneId: hotspot.targetScene,

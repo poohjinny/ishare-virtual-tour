@@ -30,6 +30,12 @@ body {
   width: 100%;
 }
 
+.tour-page {
+  font-family: var(--ishare-body-font);
+  --ishare-body-font: var(--client-font, var(--ishare-font));
+  --ishare-display-font: var(--client-font, var(--ishare-font-display));
+}
+
 /* Thin scrollbar — shared across panels (AI chat, nav lists, help, etc.) */
 .ishare-scrollbar {
   scrollbar-width: thin;
@@ -56,7 +62,7 @@ body {
 /* Text inputs — pill shape + Google Sans (placeholders included) */
 input[type='search'],
 input[type='text'] {
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   border-radius: 999px;
   transition:
     border-color 0.2s ease,
@@ -65,7 +71,7 @@ input[type='text'] {
 }
 
 input::placeholder {
-  font-family: var(--ishare-font-display);
+  font-family: var(--ishare-display-font);
   color: var(--ishare-text-muted);
 }
 
@@ -102,8 +108,11 @@ input::placeholder {
 }
 
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__close,
+.viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__header-btn,
+.viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__video-play,
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__cta,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__close,
+.viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__header-btn,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .tour-glass-panel__cta {
   cursor: pointer;
 }
@@ -153,7 +162,7 @@ input::placeholder {
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.14),
     0 4px 12px rgba(15, 23, 42, 0.08);
-  font-family: var(--ishare-font);
+  font-family: var(--ishare-body-font);
   align-items: center;
   gap: 0;
   transition:
@@ -261,20 +270,112 @@ input::placeholder {
 
 .viewer-container .psv-zoom-range:not(.psv-button--disabled):hover .psv-zoom-range-handle {
   transform: translate(-50%, -50%) scale(1.15);
-  background: var(--ishare-primary);
+  background: var(--ishare-text);
 }
 
-/* Control groups: zoom | move | default view + fullscreen */
+/* Control groups: zoom | move + default view | fullscreen */
 .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
   margin-left: 18px;
 }
 
 .viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
+  margin-left: 4px;
+}
+
+.viewer-container .psv-recenter-button+.psv-immersive-bg-button {
   margin-left: 18px;
 }
 
 .viewer-container .psv-recenter-button+.psv-fullscreen-button {
+  margin-left: 18px;
+}
+
+.viewer-container .psv-immersive-bg-button+.psv-fullscreen-button {
   margin-left: 4px;
+}
+
+.viewer-container .psv-immersive-bg-volume {
+  overflow: visible;
+}
+
+.viewer-container .psv-immersive-bg-bar {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: immersive-bg-volume-bar 0.85s ease-in-out infinite;
+}
+
+.viewer-container .psv-immersive-bg-bar--1 {
+  animation-delay: 0s;
+}
+
+.viewer-container .psv-immersive-bg-bar--2 {
+  animation-delay: 0.12s;
+}
+
+.viewer-container .psv-immersive-bg-bar--3 {
+  animation-delay: 0.24s;
+}
+
+.viewer-container .psv-immersive-bg-bar--4 {
+  animation-delay: 0.36s;
+}
+
+@keyframes immersive-bg-volume-bar {
+
+  0%,
+  100% {
+    transform: scaleY(0.32);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.viewer-container .psv-immersive-bg-button--loading .psv-immersive-bg-bar {
+  animation: immersive-bg-loading-bar 0.7s ease-in-out infinite;
+  animation-delay: 0s !important;
+}
+
+.viewer-container .psv-immersive-bg-button--loading .psv-immersive-bg-bar--2 {
+  animation-delay: 0.08s !important;
+}
+
+.viewer-container .psv-immersive-bg-button--loading .psv-immersive-bg-bar--3 {
+  animation-delay: 0.16s !important;
+}
+
+.viewer-container .psv-immersive-bg-button--loading .psv-immersive-bg-bar--4 {
+  animation-delay: 0.24s !important;
+}
+
+@keyframes immersive-bg-loading-bar {
+
+  0%,
+  100% {
+    transform: scaleY(0.28);
+    opacity: 0.45;
+  }
+
+  50% {
+    transform: scaleY(0.92);
+    opacity: 1;
+  }
+}
+
+.viewer-container .psv-immersive-bg-button--muted .psv-immersive-bg-mute-slash {
+  opacity: 0.95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewer-container .psv-immersive-bg-bar {
+    animation: none;
+    transform: scaleY(0.72);
+  }
+
+  .viewer-container .psv-immersive-bg-button--loading .psv-immersive-bg-bar {
+    opacity: 0.72;
+  }
 }
 
 .viewer-container .psv-move-button+.psv-move-button {
@@ -283,8 +384,8 @@ input::placeholder {
 
 .viewer-container .psv-button:not(.psv-zoom-range):not(.psv-button--disabled):hover,
 .viewer-container .psv-button:not(.psv-zoom-range):not(.psv-button--disabled):focus-visible {
-  color: var(--ishare-primary);
-  background: rgba(var(--ishare-primary-rgb), 0.08);
+  color: var(--ishare-text);
+  background: rgba(15, 23, 42, 0.06);
 }
 
 .viewer-container .psv-button--active {
@@ -292,14 +393,39 @@ input::placeholder {
   color: #fff;
 }
 
-.viewer-container .psv-button--active:hover,
-.viewer-container .psv-button--active:focus-visible {
-  background: var(--ishare-primary-dark);
+/* Toggle-on — fullscreen (exit) + immersive bg (playing) */
+.viewer-container .psv-fullscreen-button.psv-button--active,
+.viewer-container .psv-immersive-bg-button.psv-button--active {
+  background: var(--ishare-primary);
   color: #fff;
 }
 
+.viewer-container .psv-fullscreen-button.psv-button--active:hover,
+.viewer-container .psv-fullscreen-button.psv-button--active:focus-visible,
+.viewer-container .psv-immersive-bg-button.psv-button--active:hover,
+.viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible {
+  color: var(--ishare-text);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.viewer-container .psv-immersive-bg-button.psv-button--active .psv-button-svg,
+.viewer-container .psv-immersive-bg-button.psv-button--active .psv-immersive-bg-bar {
+  color: #fff;
+  fill: #fff;
+}
+
+.viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-button-svg,
+.viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-immersive-bg-bar,
+.viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-button-svg,
+.viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-immersive-bg-bar {
+  color: var(--ishare-text);
+  fill: var(--ishare-text);
+}
+
 .viewer-area:fullscreen .viewer-container .psv-fullscreen-button,
-.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button {
+.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active {
   color: #fff;
   background: var(--ishare-primary);
 }
@@ -307,9 +433,33 @@ input::placeholder {
 .viewer-area:fullscreen .viewer-container .psv-fullscreen-button:hover,
 .viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:hover,
 .viewer-area:fullscreen .viewer-container .psv-fullscreen-button:focus-visible,
-.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:focus-visible {
+.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:focus-visible,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:hover,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:hover,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible {
+  color: var(--ishare-text);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-button-svg,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-button-svg,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-immersive-bg-bar,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-immersive-bg-bar {
   color: #fff;
-  background: var(--ishare-primary-dark);
+  fill: #fff;
+}
+
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-button-svg,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-button-svg,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-immersive-bg-bar,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-immersive-bg-bar,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-button-svg,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-button-svg,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-immersive-bg-bar,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-immersive-bg-bar {
+  color: var(--ishare-text);
+  fill: var(--ishare-text);
 }
 
 /* Move arrows — thin stroke chevrons */
@@ -387,12 +537,26 @@ input::placeholder {
     padding: 8px 14px;
   }
 
-  .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button,
-  .viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
+  .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
     margin-left: 14px;
   }
 
-  .viewer-container .psv-recenter-button+.psv-fullscreen-button,
+  .viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
+    margin-left: 4px;
+  }
+
+  .viewer-container .psv-recenter-button+.psv-immersive-bg-button {
+    margin-left: 14px;
+  }
+
+  .viewer-container .psv-recenter-button+.psv-fullscreen-button {
+    margin-left: 14px;
+  }
+
+  .viewer-container .psv-immersive-bg-button+.psv-fullscreen-button {
+    margin-left: 4px;
+  }
+
   .viewer-container .psv-move-button+.psv-move-button {
     margin-left: 4px;
   }

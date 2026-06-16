@@ -1,0 +1,7 @@
+.share-tour-button {
+  cursor: pointer;
+}
+
+.share-tour-button--feedback {
+  opacity: 0.92;
+}

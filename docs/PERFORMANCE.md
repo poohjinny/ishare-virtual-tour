@@ -37,10 +37,12 @@ before JS splitting.**
 
 ### P0 — Panorama assets (highest impact)
 
+- [x] **WebP in repo** — convention: every JPG added under `panoramas/` is
+      converted with `scripts/convert-jpg-to-webp.mjs`; tour JSON references
+      `.webp` only. See
+      [`assets/README.md`](../assets/README.md#panoramas--jpg--webp-required).
 - [ ] **Compress source panoramas** — target ~800 KB–1.2 MB per scene at
       acceptable quality (current exports are 1.1–2.4 MB).
-- [ ] **WebP (or AVIF) variants** — serve modern formats with JPG fallback, or
-      WebP-only if browser support is sufficient for the audience.
 - [ ] **Resolution tiers** — optional mobile/downlink-aware URLs (e.g. 4K
       desktop, 2K mobile) via tour JSON or a small loader wrapper.
 - [ ] **CDN / cache headers** — long-cache static assets under `public/assets/`;
@@ -48,7 +50,7 @@ before JS splitting.**
 - [ ] **Thumbnail previews** — use generated thumbs for nav preview / directory
       instead of full panoramas where possible (see ROADMAP thumbnails item).
 
-**Touch:** `assets/{clientId}/panoramas/`, `tours/*.json` (`panorama`,
+**Touch:** `assets/{clientId}/{tourId}/panoramas/`, `tours/*.json` (`panorama`,
 `thumbnail` fields), deploy/CDN config.
 
 ---

@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useGuideAvatar } from '../../hooks/useGuideAvatar';
 import type { useTourAssistant } from '../../hooks/useTourAssistant';
+import type { Tour } from '../../types/tour';
 import { AiAssistantFab } from './AiAssistantFab';
-import { AiChatPanel } from './AiChatPanel';
+import { AiChatPanelFallback } from './AiChatPanelFallback';
+import { AiChatPanelLazy, preloadAiChatPanel } from './aiChatPanelLazy';
 
 const FAB_ANIM_MS = 140;
 const PANEL_REVEAL_MS = 70;
@@ -11,13 +14,19 @@ const PANEL_ENTER_MS = 170;
 type AssistantState = ReturnType<typeof useTourAssistant>;
 
 interface AiAssistantProps {
+  tour: Pick<Tour, 'id' | 'clientId'>;
   assistant: AssistantState;
   chatTest?: boolean;
 }
 
 type AnimPhase = 'idle' | 'enter' | 'exit';
 
-export function AiAssistant({ assistant, chatTest = false }: AiAssistantProps) {
+export function AiAssistant({
+  tour,
+  assistant,
+  chatTest = false,
+}: AiAssistantProps) {
+  const guideAvatarUrl = useGuideAvatar(tour);
   const {
     isOpen,
     toggle,
@@ -77,8 +86,24 @@ export function AiAssistant({ assistant, chatTest = false }: AiAssistantProps) {
     return () => window.clearTimeout(timer);
   }, [panelPhase]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const idleId = window.requestIdleCallback?.(
+      () => preloadAiChatPanel(),
+      { timeout: 4000 },
+    );
+
+    return () => {
+      if (idleId !== undefined) {
+        window.cancelIdleCallback?.(idleId);
+      }
+    };
+  }, []);
+
   const handleFabClick = () => {
     if (!isOpen && fabPhase === 'idle' && panelPhase === 'idle') {
+      preloadAiChatPanel();
       toggle();
     }
   };
@@ -91,18 +116,28 @@ export function AiAssistant({ assistant, chatTest = false }: AiAssistantProps) {
 
   return (
     <div className='ai-assistant-stack'>
-      {fabShown && <AiAssistantFab phase={fabPhase} onClick={handleFabClick} />}
-      {panelShown && (
-        <AiChatPanel
-          panelPhase={panelPhase}
-          chatTest={chatTest}
-          messages={messages}
-          locationTitle={locationTitle}
-          suggestedQuestions={suggestedQuestions}
-          onClose={handleClose}
-          onReset={resetChat}
-          onSend={sendMessage}
+      {fabShown && (
+        <AiAssistantFab
+          phase={fabPhase}
+          guideAvatarUrl={guideAvatarUrl}
+          onClick={handleFabClick}
+          onWarmup={preloadAiChatPanel}
         />
+      )}
+      {panelShown && (
+        <Suspense fallback={<AiChatPanelFallback />}>
+          <AiChatPanelLazy
+            panelPhase={panelPhase}
+            guideAvatarUrl={guideAvatarUrl}
+            chatTest={chatTest}
+            messages={messages}
+            locationTitle={locationTitle}
+            suggestedQuestions={suggestedQuestions}
+            onClose={handleClose}
+            onReset={resetChat}
+            onSend={sendMessage}
+          />
+        </Suspense>
       )}
     </div>
   );

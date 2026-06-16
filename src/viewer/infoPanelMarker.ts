@@ -9,6 +9,7 @@ import {
 import { setActiveInfoHotspot } from './infoHotspotActive';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import { bindGlassPanelCtaOverflowTitles } from '../utils/glassPanelCtaOverflow';
+import { releaseAllTourMedia } from '../utils/tourMediaCoordinator';
 import {
   anchoredPanelMarkerPosition,
   correctAnchoredPanelPixelGap,
@@ -66,6 +67,7 @@ export function closeAnchoredInfoPanel(
   markers: MarkersPlugin,
   animate = true,
 ): void {
+  releaseAllTourMedia();
   let clearingActive = false;
 
   for (const marker of markers.getMarkers()) {

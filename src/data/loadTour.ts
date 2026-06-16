@@ -1,37 +1,88 @@
-import type { Hotspot, Tour, TourKnowledge } from '../types/tour';
-
+import type {
+  Hotspot,
+  Tour,
+  TourImmersiveBackground,
+  TourKnowledge,
+  ViewPosition,
+} from '../types/tour';
 import { withBaseUrl } from '../utils/assetUrl';
-import {
-  getTourClientFullName,
-  getTourProductFullName,
-} from '../utils/tourProductName';
+import { getTourProductFullName } from '../utils/tourProductName';
+import type { TourCategory } from '../constants/tourCategories';
+import { GLOBAL_IMMERSIVE_BACKGROUND } from '../constants/immersiveBackground';
+import { listCatalogTours } from './tourCatalog';
+export {
+  listCatalogTours,
+  listCatalogToursByCategory,
+  listTourCategories,
+} from './tourCatalog';
+export { getTourClientId } from '../utils/tourClientId';
+export type { CatalogTourListItem } from './tourCatalog';
 
-import gphospitalfoundationTour from '../../tours/gphospitalfoundation.json';
+import kenSargentHouseTour from '../../tours/ken-sargent-house.json';
 
-import gphospitalfoundationKnowledge from '../../tours/gphospitalfoundation-knowledge.json';
+import kenSargentHouseKnowledge from '../../tours/ken-sargent-house-knowledge.json';
 
-import cancerresearchsocietyTour from '../../tours/cancerresearchsociety.json';
+import cancerResearchTour from '../../tours/cancer-research.json';
 
-import cancerresearchsocietyKnowledge from '../../tours/cancerresearchsociety-knowledge.json';
+import cancerResearchKnowledge from '../../tours/cancer-research-knowledge.json';
+
+import holodomorMuseumTour from '../../tours/holodomor-museum.json';
+
+import holodomorMuseumKnowledge from '../../tours/holodomor-museum-knowledge.json';
 
 const TOURS: Record<string, Tour> = {
-  gphospitalfoundation: gphospitalfoundationTour as Tour,
+  'ken-sargent-house': kenSargentHouseTour as Tour,
 
-  cancerresearchsociety: cancerresearchsocietyTour as Tour,
+  'cancer-research': cancerResearchTour as Tour,
+
+  'holodomor-museum': holodomorMuseumTour as Tour,
 };
 
 const KNOWLEDGE: Record<string, TourKnowledge> = {
-  gphospitalfoundation: gphospitalfoundationKnowledge as TourKnowledge,
+  'ken-sargent-house': kenSargentHouseKnowledge as TourKnowledge,
 
-  cancerresearchsociety: cancerresearchsocietyKnowledge as TourKnowledge,
+  'cancer-research': cancerResearchKnowledge as TourKnowledge,
+
+  'holodomor-museum': holodomorMuseumKnowledge as TourKnowledge,
 };
 
 function normalizeHotspot(hotspot: Hotspot): Hotspot {
-  if (!hotspot.preview?.image) return hotspot;
+  const preview =
+    hotspot.preview?.image ?
+      {
+        ...hotspot.preview,
+        image: withBaseUrl(hotspot.preview.image),
+      }
+    : hotspot.preview;
+
+  const popup =
+    hotspot.popup?.image ?
+      {
+        ...hotspot.popup,
+        image: withBaseUrl(hotspot.popup.image),
+      }
+    : hotspot.popup;
+
+  if (preview === hotspot.preview && popup === hotspot.popup) return hotspot;
 
   return {
     ...hotspot,
-    preview: { ...hotspot.preview, image: withBaseUrl(hotspot.preview.image) },
+    ...(preview !== undefined ? { preview } : {}),
+    ...(popup !== undefined ? { popup } : {}),
+  };
+}
+
+function normalizeImmersiveBackground(
+  config: TourImmersiveBackground,
+): TourImmersiveBackground {
+  return {
+    ...config,
+    audio: config.audio ? withBaseUrl(config.audio) : undefined,
+    playlist: config.playlist?.map(withBaseUrl),
+    playlistManifest:
+      config.playlistManifest ?
+        withBaseUrl(config.playlistManifest)
+      : undefined,
   };
 }
 
@@ -49,6 +100,9 @@ function normalizeTourAssets(tour: Tour): Tour {
         { ...tour.floorPlan, image: withBaseUrl(tour.floorPlan.image) }
       : undefined,
 
+    immersiveBackground: normalizeImmersiveBackground(
+      tour.immersiveBackground ?? GLOBAL_IMMERSIVE_BACKGROUND,
+    ),
     scenes: Object.fromEntries(
       Object.entries(tour.scenes).map(([id, scene]) => [
         id,
@@ -56,7 +110,6 @@ function normalizeTourAssets(tour: Tour): Tour {
         {
           ...scene,
           panorama: withBaseUrl(scene.panorama),
-          thumbnail: scene.thumbnail ? withBaseUrl(scene.thumbnail) : undefined,
           hotspots: scene.hotspots.map(normalizeHotspot),
         },
       ]),
@@ -64,35 +117,39 @@ function normalizeTourAssets(tour: Tour): Tour {
   };
 }
 
-export const DEFAULT_TOUR_ID = 'gphospitalfoundation';
+export const DEFAULT_TOUR_ID = 'ken-sargent-house';
 
 export interface TourListItem {
   id: string;
-
+  clientId: string;
+  category: TourCategory;
   label: string;
-
   /** Client tour product — `{client full name} Virtual Tour`. */
   productFullName: string;
-
+  /** Experience / facility name from catalog. */
   facilityTitle: string;
 }
 
 export function listTourIds(): string[] {
-  return Object.keys(TOURS);
+  return listCatalogTours().map((entry) => entry.tourId);
 }
 
 export function listTours(): TourListItem[] {
-  return listTourIds().map((id) => {
-    const tour = TOURS[id];
+  return listCatalogTours().map((entry) => {
+    const tour = TOURS[entry.tourId];
+    if (!tour) {
+      throw new Error(
+        `Catalog tour "${entry.tourId}" is not registered in loadTour.ts`,
+      );
+    }
 
     return {
-      id,
-
-      label: getTourClientFullName(tour),
-
+      id: entry.tourId,
+      clientId: entry.clientId,
+      category: entry.category,
+      label: entry.clientName,
       productFullName: getTourProductFullName(tour),
-
-      facilityTitle: tour.title,
+      facilityTitle: entry.tourName,
     };
   });
 }
@@ -125,4 +182,20 @@ export function getSceneList(tour: Tour) {
 
 export function getTourWebsite(tour: Tour): string {
   return tour.organization?.website ?? tour.url;
+}
+
+export interface CatalogTourPreviewSource {
+  panorama: string;
+  view: ViewPosition;
+}
+
+/** Panorama + default view for intro card preview rendering. */
+export function getCatalogTourPreviewSource(
+  tourId: string,
+): CatalogTourPreviewSource | null {
+  const tour = loadTour(tourId);
+  const scene = tour.scenes[tour.firstScene];
+  if (!scene?.panorama) return null;
+
+  return { panorama: scene.panorama, view: scene.defaultView };
 }

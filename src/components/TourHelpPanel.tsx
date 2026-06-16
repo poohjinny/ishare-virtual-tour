@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react';
 
-import { PLATFORM_FMI_LOGO, VIRTUAL_TOUR_GUIDE_NAME } from '../constants/branding';
+import {
+  PLATFORM_FMI_LOGO,
+  VIRTUAL_TOUR_GUIDE_NAME,
+} from '../constants/branding';
 
 import type { TourOrganization } from '../types/tour';
 
@@ -15,7 +18,10 @@ import {
 } from '../constants/tourHelp';
 
 import { PLATFORM_TOUR_SUPPORT } from '../data/platformContact';
-import { FUNDING_MATTERS } from '../data/platformBrands';
+import {
+  FUNDING_MATTERS,
+  platformBrandMarkedName,
+} from '../data/platformBrands';
 
 import { hasOrganizationContact } from '../utils/tourOrganizationContact';
 
@@ -52,7 +58,7 @@ export function TourHelpPanel({
       <img
         className='tour-nav-actions__logo'
         src={PLATFORM_FMI_LOGO}
-        alt={FUNDING_MATTERS.name}
+        alt={platformBrandMarkedName(FUNDING_MATTERS, { legalSuffix: true })}
       />
     </a>
   );
@@ -89,7 +95,8 @@ export function TourHelpPanel({
             </li>
 
             <li>
-              Tap the tune icon to show or hide viewer controls at the bottom.
+              Viewer controls appear at the bottom by default; tap the tune icon
+              to show or hide them.
             </li>
           </ul>
         </AccordionItem>
@@ -129,7 +136,10 @@ export function TourHelpPanel({
             : null}
 
             {showClientContact && showTourSupport ?
-              <hr className='tour-nav-actions__help-divider' aria-hidden='true' />
+              <hr
+                className='tour-nav-actions__help-divider'
+                aria-hidden='true'
+              />
             : null}
 
             {showTourSupport ?

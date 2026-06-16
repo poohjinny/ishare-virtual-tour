@@ -48,4 +48,10 @@ export const TOUR_HELP_FAQ: TourHelpFaqItem[] = [
     answer:
       'Drag to pan, scroll or pinch to zoom, and use the control pill at the bottom for zoom, move, and fullscreen.',
   },
+  {
+    id: 'share-tour',
+    question: 'How can I share this tour?',
+    answer:
+      'Tap Share in the top-right nav to copy a link or send it through email, WhatsApp, or your device’s share menu. The link opens the same tour location you are viewing.',
+  },
 ];

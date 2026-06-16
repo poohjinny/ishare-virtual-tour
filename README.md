@@ -32,41 +32,43 @@ to move between scenes.
 
 ## Routes
 
-Path-based URLs (scene changes update the address bar; browser back/forward
-works).
+Path-based URLs — `{tourId}` and `{sceneId}` come from
+[`tours/catalog.json`](tours/catalog.json) and each tour JSON. Scene changes
+update the address bar; browser back/forward works.
 
-| Path                              | Description                          |
-| --------------------------------- | ------------------------------------ |
-| `/`                               | Default tour, overview (first scene) |
-| `/main-entrance`                  | Default tour, main entrance          |
-| `/reception`                      | Default tour, reception              |
-| `/gphospitalfoundation`           | GPRHF tour, first scene              |
-| `/gphospitalfoundation/reception` | GPRHF tour + scene                   |
-| `/cancerresearchsociety`          | Cancer Research Society, first scene |
+| Path                  | Description                                               |
+| --------------------- | --------------------------------------------------------- |
+| `/`                   | Client intro — pick a tour from the gallery               |
+| `/{tourId}/{sceneId}` | A specific tour and scene                                 |
+| `/{tourId}`           | Tour first scene (canonicalizes to `/{tourId}/{sceneId}`) |
 
-Legacy query links (`?tour=` / `?scene=`) redirect to the paths above.
+Legacy client-id paths and `?tour=` / `?scene=` query links redirect to the
+canonical `/{tourId}/{sceneId}` form.
+
+`?embed=1` on `/` skips the intro and loads a tour directly (for iframe embeds).
 
 ## Query flags
 
-| Parameter   | Example        | Description                                        |
-| ----------- | -------------- | -------------------------------------------------- |
-| `embed`     | `?embed=1`     | Minimal chrome for iShare iframe embed             |
-| `dev`       | `?dev=1`       | Click panorama to log yaw/pitch for hotspot tuning |
-| `errorTest` | `?errorTest=1` | Show panorama load-error UI for layout debugging   |
+| Parameter   | Example              | Description                                        |
+| ----------- | -------------------- | -------------------------------------------------- |
+| `embed`     | `?embed=1`           | Minimal chrome for iShare iframe embed             |
+| `dev`       | `?dev=1`             | Click panorama to log yaw/pitch for hotspot tuning |
+| `no`        | `?no=info-reception` | Open a naming-opportunity panel (survives refresh) |
+| `errorTest` | `?errorTest=1`       | Show panorama load-error UI for layout debugging   |
 
 **Examples:**
 
-- Dev mode: `http://localhost:5173/?dev=1`
-- Main entrance: `http://localhost:5173/main-entrance`
-- Reception + dev: `http://localhost:5173/reception?dev=1`
+- Dev mode: `http://localhost:5173/ken-sargent-house/overview?dev=1`
 - Embed: `http://localhost:5173/?embed=1`
+- Direct tour link: `http://localhost:5173/cancer-research/reception`
+- Naming opportunity deep link:
+  `http://localhost:5173/ken-sargent-house/reception?no=info-reception`
 
 ## iShare Embed
 
 ```html
 <iframe
-  src="https://your-domain.com/?embed=1"
-  <!-- or https://your-domain.com/main-entrance?embed=1 -->
+  src="https://your-domain.com/ken-sargent-house/overview?embed=1"
   title="Ken Sargent House Virtual Tour"
   allow="fullscreen"
   loading="lazy"
@@ -79,7 +81,7 @@ Legacy query links (`?tour=` / `?scene=`) redirect to the paths above.
 ```
 assets/{clientId}/     Per-client media (panoramas, brand logos)
 public/assets/         Auto-synced copy (served at /assets/...)
-tours/                 Tour JSON + AI knowledge base per client
+tours/                 `{tourId}.json`, `{tourId}-knowledge.json`, `catalog.json`
 src/
   viewer/            Photo Sphere Viewer integration
   components/        UI (nav, popups, AI assistant)
@@ -92,8 +94,11 @@ docs/COMPONENTS.md   Shared component reuse (React + HTML)
 
 ## Assets
 
-Add files under `assets/{clientId}/` (see
-[`assets/README.md`](assets/README.md)), then run:
+Add files under `assets/{clientId}/{tourId}/` (see
+[`assets/README.md`](assets/README.md)). **Panorama JPGs in `panoramas/` must be
+converted to WebP** before referencing them in tour JSON — see
+[`assets/README.md` — Panoramas — JPG → WebP](assets/README.md#panoramas--jpg--webp-required).
+Then run:
 
 ```bash
 npm run sync-assets
@@ -107,7 +112,7 @@ This copies `assets/` → `public/assets/` (also runs automatically on `dev` and
 Open dev mode (works in Cursor Simple Browser too):
 
 ```
-http://localhost:5173/?dev=1
+http://localhost:5173/ken-sargent-house/overview?dev=1
 ```
 
 | Goal                             | Action                                                          |
@@ -115,15 +120,13 @@ http://localhost:5173/?dev=1
 | **Landing view** (`defaultView`) | Pan/zoom to the desired start angle → **Copy landing JSON (L)** |
 | **Hotspot** (`position`)         | Click the panorama → **Copy hotspot JSON**                      |
 
-Paste into [`tours/gphospitalfoundation.json`](tours/gphospitalfoundation.json)
-under the relevant scene.
+Paste into the relevant scene in `tours/{tourId}.json`.
 
 ## AI Assistant
 
 The bottom-right **AI** button opens a chat panel that knows your current scene.
-MVP uses mock responses from
-[`tours/gphospitalfoundation-knowledge.json`](tours/gphospitalfoundation-knowledge.json).
-Replace `mockAssistant.ts` with an API call for production LLM integration.
+MVP uses mock responses from `tours/{tourId}-knowledge.json`. Replace
+`mockAssistant.ts` with an API call for production LLM integration.
 
 ## Tech Stack
 

@@ -5,8 +5,17 @@ import { toPsvZoom } from '../utils/psvZoom';
 /** PSV zoom level 0 = widest FOV (max zoom out). */
 export const LANDING_ZOOM_OUT = 0;
 
-/** PSV animate(): number = duration in ms ('2200ms' string is invalid). */
-const LANDING_DURATION_MS = 3000;
+/** Random landing start — pitch (°). */
+const LANDING_PITCH_MIN = -42;
+const LANDING_PITCH_MAX = 18;
+
+/** Random landing start — PSV zoom (0 = widest … 24 = still fairly wide). */
+const LANDING_RANDOM_ZOOM_MIN = 0;
+const LANDING_RANDOM_ZOOM_MAX = 24;
+
+/** Landing animate duration bounds (ms) — scaled by travel distance. */
+const LANDING_DURATION_MIN_MS = 1400;
+const LANDING_DURATION_MAX_MS = 3200;
 
 function toDeg(deg: number): string {
   return `${deg}deg`;
@@ -21,8 +30,45 @@ function applyView(viewer: Viewer, view: ViewPosition): void {
   viewer.zoom(toPsvZoom(view.zoom));
 }
 
+/** Apply landing start pose — zoom is a raw PSV level (0 = max wide). */
+function applyLandingStartView(viewer: Viewer, view: ViewPosition): void {
+  viewer.rotate(toPsvPosition(view));
+  viewer.zoom(view.zoom ?? LANDING_ZOOM_OUT);
+}
+
+function landingStartPsvZoom(view: ViewPosition): number {
+  return view.zoom ?? LANDING_ZOOM_OUT;
+}
+
+function targetPsvZoom(view: ViewPosition): number {
+  return toPsvZoom(view.zoom);
+}
+
 function yawDeltaDeg(a: number, b: number): number {
   return Math.abs(((a - b + 180) % 360) - 180);
+}
+
+/**
+ * Map start → target travel to landing duration.
+ * Yaw dominates; pitch and zoom add smaller contributions.
+ */
+export function resolveLandingDurationMs(
+  from: ViewPosition,
+  to: ViewPosition,
+): number {
+  const yaw = yawDeltaDeg(from.yaw, to.yaw);
+  const pitch = Math.abs(from.pitch - to.pitch);
+  const zoom = Math.abs(landingStartPsvZoom(from) - targetPsvZoom(to));
+
+  const normalized = Math.min(
+    1,
+    (yaw / 160) * 0.62 + (pitch / 55) * 0.23 + (zoom / 50) * 0.15,
+  );
+
+  return Math.round(
+    LANDING_DURATION_MIN_MS +
+      normalized * (LANDING_DURATION_MAX_MS - LANDING_DURATION_MIN_MS),
+  );
 }
 
 function isNearLandingStart(viewer: Viewer, start: ViewPosition): boolean {
@@ -32,13 +78,21 @@ function isNearLandingStart(viewer: Viewer, start: ViewPosition): boolean {
   return (
     yawDeltaDeg(yaw, start.yaw) < 2 &&
     Math.abs(pitch - start.pitch) < 2 &&
-    Math.abs(viewer.getZoomLevel() - LANDING_ZOOM_OUT) < 2
+    Math.abs(viewer.getZoomLevel() - landingStartPsvZoom(start)) < 2
   );
 }
 
 /** Random wide-angle starting pose for the landing reveal. */
 export function pickRandomLandingView(): ViewPosition {
-  return { yaw: Math.random() * 360, pitch: -32 + Math.random() * 36, zoom: 0 };
+  const pitch =
+    LANDING_PITCH_MIN + Math.random() * (LANDING_PITCH_MAX - LANDING_PITCH_MIN);
+  const zoom =
+    LANDING_RANDOM_ZOOM_MIN +
+    Math.floor(
+      Math.random() * (LANDING_RANDOM_ZOOM_MAX - LANDING_RANDOM_ZOOM_MIN + 1),
+    );
+
+  return { yaw: Math.random() * 360, pitch, zoom };
 }
 
 export async function playLandingTransition(
@@ -49,17 +103,19 @@ export async function playLandingTransition(
   await viewer.stopAnimation();
 
   if (!isNearLandingStart(viewer, start)) {
-    applyView(viewer, { ...start, zoom: LANDING_ZOOM_OUT });
+    applyLandingStartView(viewer, start);
     await new Promise<void>((resolve) =>
       requestAnimationFrame(() => resolve()),
     );
   }
 
+  const durationMs = resolveLandingDurationMs(start, target);
+
   try {
     const animation = viewer.animate({
       ...toPsvPosition(target),
       zoom: toPsvZoom(target.zoom),
-      speed: LANDING_DURATION_MS,
+      speed: durationMs,
       easing: 'inOutCubic',
     });
     if (animation) await animation;

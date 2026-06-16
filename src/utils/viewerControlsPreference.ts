@@ -1,4 +1,5 @@
-const VIEWER_CONTROLS_VISIBLE_KEY = 'ishare-tour-viewer-controls-visible';
+/** Persisted only after the user toggles Controls; absent key → default visible. */
+const VIEWER_CONTROLS_VISIBLE_KEY = 'ishare-tour-viewer-controls-visible-v2';
 
 export const VIEWER_CONTROLS_VISIBLE_DEFAULT = true;
 

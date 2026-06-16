@@ -5,14 +5,17 @@ import {
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
 import { PlatformBrandLink } from './PlatformBrandLink';
+import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
 import {
-  partitionPopupCtas,
-  popupCtaRowClassName,
-  popupCtaWrapClassName,
-  resolvePopupCtaLayoutMode,
-} from '../utils/popupCtaLayout';
-import { namingOpportunityStatusConfig } from '../data/namingOpportunityStatus';
-import { popupVideoAutoplayUrl, resolvePopupVideo } from '../utils/popupVideo';
+  NAMING_OPPORTUNITY_BADGE_LABEL,
+  namingOpportunityStatusConfig,
+} from '../data/namingOpportunityStatus';
+import {
+  bindYoutubeIframeForegroundMedia,
+  popupVideoYoutubeEmbedUrl,
+  resolvePopupVideo,
+} from '../utils/popupVideo';
+import { bindHtmlVideoForegroundMedia } from '../utils/tourMediaCoordinator';
 import {
   isNamingStatusIconModifier,
   NamingStatusBadgeIcon,
@@ -86,7 +89,9 @@ export function NamingOpportunityMeta({
       <div className='tour-glass-panel__meta-row'>
         <span className={BADGE_CLASS.fillLgPrimaryIcon}>
           {NAMING_BADGE_ICON}
-          <span className={BADGE_CLASS.label}>Naming Opportunity</span>
+          <span className={BADGE_CLASS.label}>
+            {NAMING_OPPORTUNITY_BADGE_LABEL}
+          </span>
         </span>
         <span
           className={BADGE_CLASS.fillLgStatusIcon(
@@ -189,6 +194,25 @@ export function PopupVideoEmbed({
 }) {
   const resolved = resolvePopupVideo(videoUrl, poster);
   const [playing, setPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useLayoutEffect(() => {
+    if (!playing || !resolved) return;
+
+    const mediaId = `info-popup-video:${resolved.kind}:${resolved.sourceUrl}`;
+
+    if (resolved.kind === 'youtube') {
+      const iframe = iframeRef.current;
+      if (!iframe) return;
+      return bindYoutubeIframeForegroundMedia(iframe, mediaId);
+    }
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    return bindHtmlVideoForegroundMedia(video, mediaId);
+  }, [playing, resolved]);
 
   if (!resolved) return null;
 
@@ -197,13 +221,15 @@ export function PopupVideoEmbed({
       <div className='tour-glass-panel__video tour-glass-panel__video--playing'>
         {resolved.kind === 'youtube' ?
           <iframe
-            src={popupVideoAutoplayUrl(resolved.sourceUrl)}
+            ref={iframeRef}
+            src={popupVideoYoutubeEmbedUrl(resolved.sourceUrl)}
             title={`${title} video`}
             allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
             allowFullScreen
             referrerPolicy='strict-origin-when-cross-origin'
           />
         : <video
+            ref={videoRef}
             src={resolved.sourceUrl}
             title={`${title} video`}
             controls
@@ -335,57 +361,40 @@ export function PopupCtaButton({ cta }: { cta: PopupCta }) {
   );
 }
 
-export function PopupCtasBlock({ ctas }: { ctas: PopupCta[] }) {
-  if (ctas.length === 0) return null;
-
-  const mode = resolvePopupCtaLayoutMode(ctas);
-  const wrapClassName = popupCtaWrapClassName(mode);
-
-  if (mode === 'full') {
-    const cta = ctas[0];
-
-    return (
-      <footer className='tour-glass-panel__footer'>
-        <div className={wrapClassName}>
-          <PopupCtaButton cta={cta} />
-        </div>
-      </footer>
-    );
-  }
-
-  const { ordered, primary, secondaries } = partitionPopupCtas(ctas);
-
-  if (mode === 'row-equal') {
-    return (
-      <footer className='tour-glass-panel__footer'>
-        <div className={wrapClassName}>
-          {ordered.map((cta, index) => (
-            <PopupCtaButton key={`${cta.url}-${index}`} cta={cta} />
-          ))}
-        </div>
-      </footer>
-    );
-  }
+export function PopupPrimaryCtaFooter({ cta }: { cta: PopupCta }) {
+  const resolved = resolvePopupCta(cta);
+  const sublabel =
+    cta.sublabel ??
+    (resolved.kind === 'custom' ? resolved.sublabel : undefined);
 
   return (
     <footer className='tour-glass-panel__footer'>
-      <div className={wrapClassName}>
-        {secondaries.length > 1 ?
-          <div className={popupCtaRowClassName(secondaries.length)}>
-            {secondaries.map((cta, index) => (
-              <PopupCtaButton key={`${cta.url}-${index}`} cta={cta} />
-            ))}
-          </div>
-        : secondaries.map((cta, index) => (
-            <PopupCtaButton key={`${cta.url}-${index}`} cta={cta} />
-          ))
-        }
-        <div className='tour-glass-panel__cta-primary-group'>
-          <PopupCtaButton cta={primary} />
-        </div>
+      <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
+        <PopupCtaButton cta={{ ...cta, variant: 'primary' }} />
+        {sublabel && (
+          <p className='tour-glass-panel__cta-sublabel'>{sublabel}</p>
+        )}
       </div>
     </footer>
   );
+}
+
+export function PopupCtasContent({ ctas }: { ctas: PopupCta[] }) {
+  const { primary } = partitionPopupCtasForPlacement(ctas);
+  if (!primary) return null;
+
+  return (
+    <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
+      <PopupCtaButton cta={{ ...primary, variant: 'primary' }} />
+    </div>
+  );
+}
+
+export function PopupCtasBlock({ ctas }: { ctas: PopupCta[] }) {
+  const { primary } = partitionPopupCtasForPlacement(ctas);
+  if (!primary) return null;
+
+  return <PopupPrimaryCtaFooter cta={primary} />;
 }
 
 export function PopupCtaBlock({ cta }: { cta: PopupCta }) {

@@ -142,13 +142,14 @@ export function getOpenNavPreviewHostId(markers: MarkersPlugin): string | null {
 
 export function getNavPanelNavigateTarget(
   markers: MarkersPlugin,
-): { sceneId: string; targetView?: ViewPosition } | null {
+): { sceneId: string; targetView?: ViewPosition; tourId?: string } | null {
   for (const marker of markers.getMarkers()) {
     if (!marker.data?.navPanel) continue;
 
     return {
       sceneId: marker.data.targetSceneId as string,
       targetView: marker.data.targetView as ViewPosition | undefined,
+      tourId: marker.data.tourId as string | undefined,
     };
   }
   return null;
@@ -159,6 +160,7 @@ export function openAnchoredNavPreviewPanel(
   markers: MarkersPlugin,
   hotspot: Hotspot,
   preview: NavPreviewContent,
+  tourId: string,
 ): void {
   closeAnchoredNavPreviewPanel(markers, false, false);
   setActiveNavHotspot(markers, hotspot.id);
@@ -181,6 +183,7 @@ export function openAnchoredNavPreviewPanel(
       hostHotspotId: hotspot.id,
       targetSceneId: preview.targetSceneId,
       targetView: preview.targetView,
+      tourId,
     },
   });
 
@@ -230,11 +233,12 @@ export function toggleAnchoredNavPreviewPanel(
   markers: MarkersPlugin,
   hotspot: Hotspot,
   preview: NavPreviewContent,
+  tourId: string,
 ): void {
   const openHostId = getOpenNavPreviewHostId(markers);
   if (openHostId === hotspot.id) {
     closeAnchoredNavPreviewPanel(markers, true);
     return;
   }
-  openAnchoredNavPreviewPanel(viewer, markers, hotspot, preview);
+  openAnchoredNavPreviewPanel(viewer, markers, hotspot, preview, tourId);
 }

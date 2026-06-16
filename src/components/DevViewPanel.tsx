@@ -1,12 +1,16 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ViewPosition } from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import {
   copyToClipboard,
-  formatHotspotPositionJson,
   formatLandingJson,
+  formatNavHotspotJson,
+  formatNamingHotspotJson,
   formatViewPosition,
+  getDevHotspotName,
   logLandingView,
+  setDevHotspotName,
+  slugifyHotspotName,
   type DevSceneRef,
 } from '../utils/devHotspotLogger';
 import './DevViewPanel.css';
@@ -26,6 +30,23 @@ export function DevViewPanel({
   aboveMinimap = false,
 }: DevViewPanelProps) {
   const [copied, setCopied] = useState<string | null>(null);
+  const [hotspotName, setHotspotName] = useState(
+    () => getDevHotspotName() ?? '',
+  );
+
+  const nameOptions = useMemo(
+    () => (hotspotName.trim() ? { name: hotspotName.trim() } : undefined),
+    [hotspotName],
+  );
+
+  const hotspotSlug = useMemo(() => {
+    const trimmed = hotspotName.trim();
+    return trimmed ? slugifyHotspotName(trimmed) : '';
+  }, [hotspotName]);
+
+  useEffect(() => {
+    setDevHotspotName(hotspotName);
+  }, [hotspotName]);
 
   const copyLanding = useCallback(async () => {
     if (!view) return;
@@ -34,13 +55,31 @@ export function DevViewPanel({
     setCopied(ok ? 'landing' : null);
   }, [scene, view]);
 
-  const copyHotspot = useCallback(async () => {
+  const copyNavHotspot = useCallback(async () => {
     if (!clickCoords) return;
     const ok = await copyToClipboard(
-      formatHotspotPositionJson(clickCoords.yaw, clickCoords.pitch, scene),
+      formatNavHotspotJson(
+        clickCoords.yaw,
+        clickCoords.pitch,
+        scene,
+        nameOptions,
+      ),
     );
-    setCopied(ok ? 'hotspot' : null);
-  }, [clickCoords, scene]);
+    setCopied(ok ? 'nav' : null);
+  }, [clickCoords, nameOptions, scene]);
+
+  const copyNamingHotspot = useCallback(async () => {
+    if (!clickCoords) return;
+    const ok = await copyToClipboard(
+      formatNamingHotspotJson(
+        clickCoords.yaw,
+        clickCoords.pitch,
+        scene,
+        nameOptions,
+      ),
+    );
+    setCopied(ok ? 'naming' : null);
+  }, [clickCoords, nameOptions, scene]);
 
   useEffect(() => {
     if (!copied) return;
@@ -63,51 +102,88 @@ export function DevViewPanel({
       className={`dev-panel${aboveMinimap ? ' dev-panel--above-minimap' : ''}`}
     >
       <p className='dev-panel__title'>
-        DEV — {scene.clientId ? `${scene.clientId} / ` : ''}
-        {scene.title ?? scene.id}
+        DEV — {scene.tourId ?? scene.id}
+        {scene.clientId && scene.clientId !== (scene.tourId ?? scene.id) ?
+          ` · ${scene.clientId}`
+        : ''}{' '}
+        / {scene.title ?? scene.id}
         {scene.title && (
           <span className='dev-panel__scene-id'> ({scene.id})</span>
         )}
       </p>
 
-      <div className='dev-panel__row'>
-        <span className='dev-panel__label'>Landing (view)</span>
-        <span className='dev-panel__value'>
+      <section className='dev-panel__section dev-panel__section--landing'>
+        <h3 className='dev-panel__section-title'>Landing view</h3>
+        <p className='dev-panel__section-lead'>
+          Pan the scene — updates <code>defaultView</code>
+        </p>
+        <p className='dev-panel__coords'>
           {view ? formatViewPosition(view) : '—'}
-        </span>
-      </div>
+        </p>
+        <div className='dev-panel__actions'>
+          <button
+            type='button'
+            className='dev-panel__btn'
+            onClick={() => void copyLanding()}
+            disabled={!view}
+          >
+            {copied === 'landing' ? 'Copied!' : 'Copy landing JSON (L)'}
+          </button>
+        </div>
+      </section>
 
-      <div className='dev-panel__row'>
-        <span className='dev-panel__label'>Click (hotspot)</span>
-        <span className='dev-panel__value'>
+      <section className='dev-panel__section dev-panel__section--hotspot'>
+        <h3 className='dev-panel__section-title'>Hotspot</h3>
+        <p className='dev-panel__section-lead'>
+          Click the panorama for marker position
+        </p>
+        <p className='dev-panel__coords'>
           {clickCoords ? formatViewPosition({ ...clickCoords, zoom: 0 }) : '—'}
-        </span>
-      </div>
+        </p>
 
-      <div className='dev-panel__actions'>
-        <button
-          type='button'
-          className='dev-panel__btn'
-          onClick={() => void copyLanding()}
-        >
-          {copied === 'landing' ? 'Copied!' : 'Copy landing JSON (L)'}
-        </button>
-        <button
-          type='button'
-          className='dev-panel__btn dev-panel__btn--secondary'
-          onClick={() => void copyHotspot()}
-          disabled={!clickCoords}
-        >
-          {copied === 'hotspot' ? 'Copied!' : 'Copy hotspot JSON'}
-        </button>
-      </div>
+        <label className='dev-panel__field'>
+          <span className='dev-panel__field-label'>Hotspot name</span>
+          <input
+            className='dev-panel__input'
+            type='text'
+            value={hotspotName}
+            onChange={(e) => setHotspotName(e.target.value)}
+            placeholder='e.g. Parking Lot'
+            spellCheck={false}
+            autoComplete='off'
+          />
+        </label>
 
-      <p className='dev-panel__hint'>
-        Pan to the desired start view, then copy landing JSON into the matching
-        client&apos;s <code>tours/&#123;client&#125;.json</code>{' '}
-        <code>defaultView</code>. Click the panorama for hotspot coords — copy
-        includes <code>scene</code> and <code>position</code>.
-      </p>
+        {hotspotSlug ?
+          <p className='dev-panel__slug-preview'>
+            nav <code>nav-to-{hotspotSlug}</code> · NO{' '}
+            <code>info-{hotspotSlug}</code>
+          </p>
+        : null}
+
+        <div className='dev-panel__actions'>
+          <button
+            type='button'
+            className='dev-panel__btn dev-panel__btn--secondary'
+            onClick={() => void copyNavHotspot()}
+            disabled={!clickCoords}
+          >
+            {copied === 'nav' ? 'Copied!' : 'Copy nav JSON'}
+          </button>
+          <button
+            type='button'
+            className='dev-panel__btn dev-panel__btn--secondary'
+            onClick={() => void copyNamingHotspot()}
+            disabled={!clickCoords}
+          >
+            {copied === 'naming' ? 'Copied!' : 'Copy NO JSON'}
+          </button>
+        </div>
+        <p className='dev-panel__section-hint'>
+          <strong>nav</strong> = scene preview marker · <strong>NO</strong> =
+          naming opportunity on target scene
+        </p>
+      </section>
     </div>
   );
 }

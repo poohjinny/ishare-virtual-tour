@@ -1,3 +1,9 @@
+import {
+  bindHtmlVideoForegroundMedia,
+  claimTourMedia,
+  releaseTourMedia,
+} from './tourMediaCoordinator';
+
 export type PopupVideoKind = 'youtube' | 'file';
 
 export interface ResolvedPopupVideo {
@@ -83,6 +89,101 @@ export function popupVideoAutoplayUrl(sourceUrl: string): string {
   return `${sourceUrl}${joiner}autoplay=1&rel=0`;
 }
 
+/** YouTube embed with IFrame API postMessage — play/pause sync for bg ducking. */
+export function popupVideoYoutubeEmbedUrl(embedUrl: string): string {
+  const url = new URL(embedUrl);
+  url.searchParams.set('autoplay', '1');
+  url.searchParams.set('rel', '0');
+  url.searchParams.set('enablejsapi', '1');
+  url.searchParams.set('origin', window.location.origin);
+  return url.toString();
+}
+
+const YOUTUBE_ORIGIN = 'https://www.youtube.com';
+
+function parseYoutubePlayerState(data: unknown): number | null {
+  if (!data || typeof data !== 'object') return null;
+
+  const record = data as Record<string, unknown>;
+
+  if (record.event === 'onStateChange' && typeof record.info === 'number') {
+    return record.info;
+  }
+
+  if (
+    record.event === 'infoDelivery' &&
+    record.info &&
+    typeof record.info === 'object'
+  ) {
+    const info = record.info as Record<string, unknown>;
+    if (typeof info.playerState === 'number') {
+      return info.playerState;
+    }
+  }
+
+  return null;
+}
+
+function isYoutubeForegroundPlaying(state: number): boolean {
+  return state === 1 || state === 3;
+}
+
+export function bindYoutubeIframeForegroundMedia(
+  iframe: HTMLIFrameElement,
+  mediaId: string,
+): () => void {
+  let claimed = false;
+
+  const setClaimed = (next: boolean) => {
+    if (claimed === next) return;
+    claimed = next;
+    if (next) {
+      claimTourMedia(mediaId);
+    } else {
+      releaseTourMedia(mediaId);
+    }
+  };
+
+  const onMessage = (event: MessageEvent) => {
+    if (event.origin !== YOUTUBE_ORIGIN) return;
+    if (event.source !== iframe.contentWindow) return;
+
+    let payload: unknown = event.data;
+    if (typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload);
+      } catch {
+        return;
+      }
+    }
+
+    const state = parseYoutubePlayerState(payload);
+    if (state == null) return;
+
+    setClaimed(isYoutubeForegroundPlaying(state));
+  };
+
+  const requestListening = () => {
+    iframe.contentWindow?.postMessage(
+      JSON.stringify({ event: 'listening' }),
+      YOUTUBE_ORIGIN,
+    );
+  };
+
+  iframe.addEventListener('load', requestListening);
+  window.addEventListener('message', onMessage);
+
+  // Autoplay embed — claim until YouTube reports pause/end.
+  setClaimed(true);
+
+  return () => {
+    iframe.removeEventListener('load', requestListening);
+    window.removeEventListener('message', onMessage);
+    releaseTourMedia(mediaId);
+    claimed = false;
+  };
+}
+
 export function popupVideoPlayIconHtml(
   className = 'tour-glass-panel__video-play-icon',
 ): string {
@@ -90,6 +191,30 @@ export function popupVideoPlayIconHtml(
     <circle class="tour-glass-panel__video-play-ring" cx="28" cy="28" r="26" stroke="currentColor" stroke-width="2.5" fill="transparent"/>
     <path class="tour-glass-panel__video-play-glyph" d="M23 18.5v19l14-9.5-14-9.5z" fill="currentColor"/>
   </svg>`;
+}
+
+export function bindPopupVideoForegroundMedia(
+  shell: HTMLElement,
+  kind: PopupVideoKind,
+): () => void {
+  const source = shell.dataset.popupVideoSrc ?? 'unknown';
+  const mediaId = `popup-video:${kind}:${source}`;
+
+  if (kind === 'youtube') {
+    const iframe = shell.querySelector('iframe');
+    if (iframe instanceof HTMLIFrameElement) {
+      return bindYoutubeIframeForegroundMedia(iframe, mediaId);
+    }
+    return () => releaseTourMedia(mediaId);
+  }
+
+  const video = shell.querySelector('video');
+  if (!(video instanceof HTMLVideoElement)) {
+    claimTourMedia(mediaId);
+    return () => releaseTourMedia(mediaId);
+  }
+
+  return bindHtmlVideoForegroundMedia(video, mediaId);
 }
 
 export function mountPopupVideoPlayer(shell: HTMLElement): void {
@@ -110,7 +235,7 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
 
   if (kind === 'youtube') {
     const iframe = document.createElement('iframe');
-    iframe.src = popupVideoAutoplayUrl(src);
+    iframe.src = popupVideoYoutubeEmbedUrl(src);
     iframe.title = `${title} video`;
     iframe.setAttribute(
       'allow',
@@ -119,6 +244,7 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
     iframe.allowFullscreen = true;
     iframe.referrerPolicy = 'strict-origin-when-cross-origin';
     shell.appendChild(iframe);
+    bindPopupVideoForegroundMedia(shell, kind);
     return;
   }
 
@@ -129,6 +255,7 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
   video.setAttribute('playsinline', '');
   video.title = `${title} video`;
   shell.appendChild(video);
+  bindPopupVideoForegroundMedia(shell, kind);
   void video.play().catch(() => undefined);
 }
 
@@ -143,7 +270,8 @@ export function initPopupVideoPlayers(root: ParentNode): void {
 
     const button = node.querySelector('.tour-glass-panel__video-play');
     if (button instanceof HTMLButtonElement) {
-      button.addEventListener('click', (event) => {
+      button.addEventListener('pointerdown', (event) => {
+        event.preventDefault();
         event.stopPropagation();
         play();
       });

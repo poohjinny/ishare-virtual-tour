@@ -84,6 +84,7 @@ export interface NavPreviewNamingItem {
   hotspotId: string;
   name: string;
   statusLabel: string;
+  statusShortLabel: string;
   statusModifier: string;
   price: string;
   priceLabel?: string;
@@ -97,7 +98,7 @@ export interface NavPreviewContent {
   title: string;
   /** Target scene panorama — used for mini 360 preview */
   panorama?: string;
-  /** Static fallback (thumbnail) for reduced-motion / load errors */
+  /** Static fallback for reduced-motion / load errors — defaults to target panorama */
   image?: string;
   description?: string;
   namingItems?: NavPreviewNamingItem[];
@@ -129,7 +130,6 @@ export interface Scene {
   title: string;
   description?: string;
   panorama: string;
-  thumbnail?: string;
   defaultView: ViewPosition;
   hotspots: Hotspot[];
   map?: SceneMapPosition;
@@ -157,13 +157,36 @@ export interface TourBranding {
   logoAlt: string;
   /** Client brand primary — e.g. "#cb007c" */
   primaryColor?: string;
-  /** Optional override — defaults to /assets/{clientId}/favicon.ico */
+  /** Client tour font — sets `--client-font` on `.tour-page` (body + headings) */
+  fontFamily?: string;
+  /** Google Fonts stylesheet URL (https://fonts.googleapis.com/… only) */
+  fontSourceUrl?: string;
+  /** Optional override — defaults to /assets/{clientId}/{tourId}/favicon.ico */
   favicon?: string;
 }
 
+/** Immersive bed — toggled from the viewer navbar. */
+export interface TourImmersiveBackground {
+  /** Single track (loops). Use `playlist` or `playlistManifest` for multi-track. */
+  audio?: string;
+  /** Inline track list — random start, random next on end. */
+  playlist?: string[];
+  /**
+   * Online JSON manifest — `{ "playlist": ["https://…mp3", …], "volume"?: 0.28 }`.
+   * Root-relative or absolute HTTPS. Takes precedence over inline `playlist`.
+   */
+  playlistManifest?: string;
+  /** 0–1, default 0.35 */
+  volume?: number;
+}
+
 export interface Tour {
-  /** Client id — hostname without TLD, matches assets/{id}/ and ?tour= param */
+  /** Tour id — unique per experience; used in URL paths and `loadTour()`. */
   id: string;
+  /** Owning client id — defaults to `id` when one tour per client. */
+  clientId?: string;
+  /** Platform category — e.g. Healthcare, Education. */
+  category?: string;
   /** Primary website URL (often organization website) */
   url: string;
   /** Facility or experience title (e.g. "Ken Sargent House") */
@@ -172,6 +195,8 @@ export interface Tour {
   productFullName?: string;
   organization?: TourOrganization;
   branding?: TourBranding;
+  /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
+  immersiveBackground?: TourImmersiveBackground;
   floorPlan?: FloorPlan;
   firstScene: string;
   defaultTransition?: { speed?: string; effect?: 'fade' | 'black' };

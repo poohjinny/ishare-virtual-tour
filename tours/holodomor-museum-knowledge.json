@@ -1,0 +1,38 @@
+{
+  "id": "holodomor-museum",
+  "url": "https://holodomor.ca",
+  "global": {
+    "facilityName": "Holodomor Museum",
+    "summary": "The Holodomor Research and Education Consortium (HREC) promotes the research, study, and understanding of the Holodomor — the famine-genocide in Ukraine of 1932–33. Established in 2013 at the Canadian Institute of Ukrainian Studies, University of Alberta, HREC supports scholarship, education, and public remembrance through its Toronto and Edmonton offices and partners in Ukraine."
+  },
+  "scenes": {
+    "reception": {
+      "title": "Reception",
+      "description": "Welcome to the Holodomor Museum virtual tour. This reception area introduces visitors to the Holodomor Research and Education Consortium (HREC) — a project of the Canadian Institute of Ukrainian Studies at the University of Alberta — and the research, education, and remembrance work that preserves the memory of the 1932–33 famine-genocide in Ukraine.",
+      "facts": [
+        "HREC was established in 2013 by the Temerty Foundation at the Canadian Institute of Ukrainian Studies, University of Alberta.",
+        "The Holodomor refers to the man-made famine in Soviet Ukraine during 1932–33 that killed millions.",
+        "HREC supports research grants, publications, educator training, and public outreach on the Holodomor."
+      ],
+      "faqs": [
+        {
+          "q": "What is the Holodomor?",
+          "a": "The Holodomor was the famine-genocide in Ukraine of 1932–33, during which millions of Ukrainians died as a result of Soviet policies. HREC promotes research and education to deepen understanding of this history."
+        },
+        {
+          "q": "What does HREC do?",
+          "a": "HREC conducts and supports research, publishes scholarly work, develops educational resources, and organizes conferences and outreach to advance study of the Holodomor in Canada, the United States, and Ukraine."
+        },
+        {
+          "q": "How can I contact HREC?",
+          "a": "Email hrec@ualberta.ca, call 416-923-4732, or visit holodomor.ca. The Toronto office is at 620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4."
+        }
+      ],
+      "suggestedQuestions": [
+        "What is the Holodomor?",
+        "What does HREC do?",
+        "How can I contact HREC?"
+      ]
+    }
+  }
+}

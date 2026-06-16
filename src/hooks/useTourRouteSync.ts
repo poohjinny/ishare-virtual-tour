@@ -8,11 +8,18 @@ import {
 import type { Tour } from '../types/tour';
 import type { PanoramaViewerHandle } from '../viewer/PanoramaViewer';
 import {
+  NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
   legacyQueryRedirectPath,
+  legacyTourPathRedirect,
   resolveSceneId,
   resolveTourRoute,
 } from '../utils/tourPaths';
+
+export interface SyncSceneToUrlOptions {
+  /** Drop `?no=` when updating the scene path (normal scene navigation). */
+  clearNamingOpportunity?: boolean;
+}
 
 interface UseTourRouteSyncOptions {
   tour: Tour;
@@ -21,6 +28,10 @@ interface UseTourRouteSyncOptions {
   viewerRef: RefObject<PanoramaViewerHandle | null>;
   syncSceneFromRoute: (sceneId: string) => void;
   prepareSceneNavigate?: (sceneId: string) => void;
+  pendingNamingSelectionRef?: RefObject<{
+    sceneId: string;
+    hotspotId: string;
+  } | null>;
 }
 
 export function useTourRouteSync({
@@ -30,6 +41,7 @@ export function useTourRouteSync({
   viewerRef,
   syncSceneFromRoute,
   prepareSceneNavigate,
+  pendingNamingSelectionRef,
 }: UseTourRouteSyncOptions) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,7 +66,9 @@ export function useTourRouteSync({
   );
 
   useEffect(() => {
-    const legacyPath = legacyQueryRedirectPath(searchParams);
+    const legacyPath =
+      legacyQueryRedirectPath(searchParams) ??
+      legacyTourPathRedirect(location.pathname, searchParams);
     if (legacyPath && legacyPath !== location.pathname + location.search) {
       navigate(legacyPath, { replace: true });
     }
@@ -70,6 +84,15 @@ export function useTourRouteSync({
       isTransitioning ||
       syncingToUrlRef.current ||
       syncingFromUrlRef.current
+    ) {
+      return;
+    }
+
+    const pendingNaming = pendingNamingSelectionRef?.current;
+    if (
+      pendingNaming?.sceneId === routeSceneId &&
+      searchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY) ===
+        pendingNaming.hotspotId
     ) {
       return;
     }
@@ -98,10 +121,55 @@ export function useTourRouteSync({
     tour.scenes,
     viewerRef,
     prepareSceneNavigate,
+    pendingNamingSelectionRef,
+    searchParams,
+  ]);
+
+  useEffect(() => {
+    if (route.tourId !== tour.id) {
+      return;
+    }
+
+    if (
+      isTransitioning ||
+      syncingFromUrlRef.current ||
+      syncingToUrlRef.current ||
+      currentSceneId !== routeSceneId
+    ) {
+      return;
+    }
+
+    const target = buildTourLocation(
+      tour.id,
+      currentSceneId,
+      tour.firstScene,
+      searchParams,
+    );
+
+    if (location.pathname + location.search === target) {
+      return;
+    }
+
+    syncingToUrlRef.current = true;
+    navigate(target, { replace: true });
+    queueMicrotask(() => {
+      syncingToUrlRef.current = false;
+    });
+  }, [
+    currentSceneId,
+    isTransitioning,
+    location.pathname,
+    location.search,
+    navigate,
+    route.tourId,
+    routeSceneId,
+    searchParams,
+    tour.firstScene,
+    tour.id,
   ]);
 
   const syncSceneToUrl = useCallback(
-    (sceneId: string) => {
+    (sceneId: string, options?: SyncSceneToUrlOptions) => {
       if (syncingFromUrlRef.current) {
         return;
       }
@@ -111,11 +179,17 @@ export function useTourRouteSync({
         return;
       }
 
+      const patch =
+        options?.clearNamingOpportunity ?
+          { [NAMING_OPPORTUNITY_SEARCH_KEY]: null }
+        : undefined;
+
       const target = buildTourLocation(
         tour.id,
         sceneId,
         tour.firstScene,
         searchParams,
+        patch,
       );
 
       if (location.pathname + location.search === target) {

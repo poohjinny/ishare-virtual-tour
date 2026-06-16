@@ -1,16 +1,17 @@
 import type { Tour } from '../types/tour';
+import { tourAssetPath } from './tourAssetPath';
 
 const DEFAULT_FAVICON = '/favicon.ico';
 const FAVICON_SELECTOR = 'link[rel="icon"][data-client-favicon]';
 
 export function resolveClientFavicon(
-  tour: Pick<Tour, 'id' | 'branding'>,
+  tour: Pick<Tour, 'id' | 'clientId' | 'branding'>,
 ): string {
   if (tour.branding?.favicon) {
     return tour.branding.favicon;
   }
 
-  return `/assets/${tour.id}/favicon.ico`;
+  return tourAssetPath(tour, 'favicon.ico');
 }
 
 function getFaviconLink(): HTMLLinkElement {
@@ -27,7 +28,9 @@ function getFaviconLink(): HTMLLinkElement {
   return link;
 }
 
-export function applyClientFavicon(tour: Pick<Tour, 'id' | 'branding'>): void {
+export function applyClientFavicon(
+  tour: Pick<Tour, 'id' | 'clientId' | 'branding'>,
+): void {
   getFaviconLink().href = resolveClientFavicon(tour);
 }
 

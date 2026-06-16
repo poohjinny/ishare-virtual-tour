@@ -1,13 +1,13 @@
-/** Funding Matters entity brands — import when a name or URL is needed in the tour app. */
+/** FUNDING matters® entity brands — import when a name or URL is needed in the tour app. */
 
 export const FUNDING_MATTERS = {
   id: 'fundingMatters',
   kind: 'company',
-  name: 'Funding Matters',
+  name: 'FUNDING matters',
   mark: '®',
   legalSuffix: ' Inc.',
   url: 'https://fundingmatters.com',
-  description: 'Funding Matters Inc.',
+  description: 'FUNDING matters® Inc.',
 } as const;
 
 export const FUNDING_MATTERS_AI_SUITE = {
@@ -15,7 +15,7 @@ export const FUNDING_MATTERS_AI_SUITE = {
   kind: 'suite',
   name: 'FUNDING matters AI SUITE',
   url: 'https://fundingmatters.ai',
-  description: 'Umbrella marketing name for Funding Matters AI products',
+  description: 'Umbrella marketing name for FUNDING matters AI products',
 } as const;
 
 export const GIFTABULATOR = {

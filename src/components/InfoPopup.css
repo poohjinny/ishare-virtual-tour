@@ -27,7 +27,11 @@
 }
 
 .info-popup__title-row {
-  margin-bottom: 10px;
+  margin-bottom: 0;
+}
+
+.info-popup .tour-glass-panel__header-leading {
+  gap: 16px;
 }
 
 .info-popup .tour-glass-panel__price--under-title {

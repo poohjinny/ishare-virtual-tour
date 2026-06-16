@@ -31,6 +31,8 @@
   --ishare-active-icon-leading-bg: rgba(var(--ishare-primary-rgb), 0.1);
   --ishare-active-icon-leading-ring: 0 0 0 2px rgba(var(--ishare-primary-rgb), 0.12);
   --ishare-accent: #e8a838;
+  --ishare-platform-product-gold: #e8a838;
+  --ishare-platform-product-gold-dark: #9a6b12;
   --ishare-bg: #f8fafc;
   --ishare-surface: #ffffff;
   --ishare-surface-elevated: #f1f5f9;
@@ -57,10 +59,13 @@
   --ishare-glass-header-bg: rgba(255, 255, 255, 0.92);
   --ishare-glass-footer-bg: rgba(255, 255, 255, 0.84);
   --ishare-glass-divider: 1px solid rgba(15, 23, 42, 0.08);
-  /* Body/UI — matches Google Maps (.gm-style uses Roboto) */
+  --ishare-glass-body-text: color-mix(in srgb, var(--ishare-text-body) 42%, var(--ishare-text-muted));
+  /* Platform font sources — never overridden */
   --ishare-font: 'Roboto', Arial, sans-serif;
-  /* Headings / product name (iShare Virtual Tour, Virtual Tour Guide, etc.) */
   --ishare-font-display: 'Google Sans', system-ui, sans-serif;
+  /* Resolved UI fonts — platform default; .tour-page swaps both when --client-font is set */
+  --ishare-body-font: var(--ishare-font);
+  --ishare-display-font: var(--ishare-font-display);
   /* Type scale — html sets base to 16px; rem tokens below */
   --ishare-font-size-base: 16px;
   --ishare-font-size-2xs: 0.625rem;
@@ -90,6 +95,21 @@
   --ishare-naming-status-reserved-color: var(--ishare-badge-accent-color);
   --ishare-naming-status-coming-soon-bg: rgba(56, 189, 248, 0.14);
   --ishare-naming-status-coming-soon-color: #0284c7;
+  /* Client intro — tour category badges (opaque pastels — no rgba / color-mix) */
+  --ishare-tour-category-healthcare-bg: #e0eff1;
+  --ishare-tour-category-healthcare-color: var(--ishare-primary-dark);
+  --ishare-tour-category-education-bg: #e4eefe;
+  --ishare-tour-category-education-color: #1d4ed8;
+  --ishare-tour-category-culture-bg: #f3e7fe;
+  --ishare-tour-category-culture-color: #7e22ce;
+  --ishare-tour-category-sporting-venues-bg: #e0f7e8;
+  --ishare-tour-category-sporting-venues-color: #15803d;
+  --ishare-tour-category-international-aid-bg: #feebde;
+  --ishare-tour-category-international-aid-color: #c2410c;
+  --ishare-tour-category-social-services-bg: #e9eafd;
+  --ishare-tour-category-social-services-color: #4338ca;
+  --ishare-tour-category-tourism-bg: #ddf2fc;
+  --ishare-tour-category-tourism-color: #0369a1;
   /* Badge variants */
   --ishare-badge-outline-gap: 7px;
   --ishare-badge-outline-pad: 6px 11px 6px 10px;

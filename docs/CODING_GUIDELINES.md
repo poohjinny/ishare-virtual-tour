@@ -60,7 +60,8 @@ npm run build  # required before push — see GIT_WORKFLOW.md
 ```
 
 `npm run sync-assets` copies `assets/` → `public/assets/` (runs on `dev` and
-`build`).
+`build`). `postbuild` copies `dist/index.html` → `dist/404.html` for GitHub
+Pages SPA routing — see `scripts/`.
 
 ---
 
@@ -69,6 +70,7 @@ npm run build  # required before push — see GIT_WORKFLOW.md
 ```
 ishare-virtual-tour/
 ├── assets/              Source media (synced → public/assets/)
+├── scripts/             Node build scripts (not bundled — run via package.json)
 ├── tours/               Tour JSON + *-knowledge.json per client
 ├── public/              Static output + synced assets
 ├── src/
@@ -182,10 +184,13 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 
 ## Tour content & new clients
 
-1. `assets/{clientId}/` + `tours/{clientId}.json` (+ `-knowledge.json`)
+1. `assets/{clientId}/{tourId}/` + `tours/{tourId}.json` (+ `-knowledge.json`)
 2. Register in [`loadTour.ts`](../src/data/loadTour.ts)
-3. `clientId` = hostname without TLD — [`assets/README.md`](../assets/README.md)
-4. JSON paths `/assets/{clientId}/panoramas/...` — `withBaseUrl()` at load
+3. `clientId` / `tourId` layout — [`assets/README.md`](../assets/README.md)
+4. **Panoramas:** convert every JPG in `panoramas/` to WebP before commit; JSON
+   paths use `.webp` —
+   [`assets/README.md`](../assets/README.md#panoramas--jpg--webp-required)
+5. JSON paths `/assets/{clientId}/{tourId}/...` — `withBaseUrl()` at load
 
 Naming CTAs: [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) — do not
 hand-roll footer buttons in JSON unless overriding.
@@ -196,19 +201,20 @@ hand-roll footer buttons in JSON unless overriding.
 
 [PRODUCT_NAMING.md](./PRODUCT_NAMING.md):
 
-| UI                                 | Source                             |
-| ---------------------------------- | ---------------------------------- |
-| Tab / splash title                 | `getTourProductFullName(tour)`     |
-| AI assistant                       | `VIRTUAL_TOUR_GUIDE_NAME`          |
-| **iShare Virtual Tour** (platform) | Docs/internal only — not in app UI |
+| UI                                 | Source                                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------- |
+| Tab / splash title                 | `getTourProductFullName(tour)`                                                              |
+| AI assistant                       | `VIRTUAL_TOUR_GUIDE_NAME`                                                                   |
+| **iShare Virtual Tour** (platform) | Platform-level UI only — e.g. client intro `/` (`TourProductBranding` without `clientName`) |
 
 ---
 
 ## Project-specific preferences
 
-**Viewer controls visibility** — default ON; persisted in `localStorage` key
-`ishare-tour-viewer-controls-visible` via `useViewerControlsVisible` /
-`viewerControlsPreference.ts`.
+**Viewer controls visibility** — default ON on first visit; only persisted after
+the user toggles Controls (`localStorage` key
+`ishare-tour-viewer-controls-visible-v2` via `useViewerControlsVisible` /
+`viewerControlsPreference.ts`).
 
 ---
 

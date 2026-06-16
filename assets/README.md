@@ -1,60 +1,99 @@
 # Assets
 
-Source-of-truth for tour media, organised **per client**. Synced to
+Source-of-truth for tour media, organised **per client and tour**. Synced to
 `public/assets/` via `npm run sync-assets` (runs before `dev` and `build`).
 
 ## Structure
 
 ```
 assets/
-    ├── favicon.ico              # Platform default → synced to public/favicon.ico
-    ├── brand/
-│   ├── logo_ishare.png      # iShare product logo (platform-wide)
-│   ├── logo_fmi.png         # Funding Matters logo (Help → Contact tour support)
-│   ├── symbol_ishare.png    # iShare symbol mark
-│   └── tour-guide.png       # iShare Guide avatar (platform-wide)
+├── favicon.ico              # Platform default → synced to public/favicon.ico
+├── brand/                   # Platform-wide (iShare product, immersive playlist, …)
 └── {clientId}/              # id = website hostname without TLD
-    ├── favicon.ico          # Client tab icon → /assets/{clientId}/favicon.ico
-    ├── panoramas/           # 360° equirectangular images
-    │   ├── overview.jpg
-    │   ├── main-entrance.jpg   # gphospitalfoundation
-    │   ├── reception.jpg           # cancerresearchsociety, gphospitalfoundation
-    └── brand/
-        └── logo.png
+    └── {tourId}/            # matches tour JSON `id` (e.g. ken-sargent-house)
+        ├── favicon.ico      # Tour tab icon → auto via resolveClientFavicon()
+        ├── panoramas/       # 360° equirectangular images (WebP in repo — see below)
+        ├── maps/            # Floor plans (optional)
+        ├── brand/
+        │   ├── logo.png
+        │   └── tour-guide.png   # Optional AI guide avatar override
+        └── audio/           # Optional tour-specific audio
 ```
 
-### Current clients
+### Current clients & tours
 
-| id                      | website                           | assets folder                   |
-| ----------------------- | --------------------------------- | ------------------------------- |
-| `gphospitalfoundation`  | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/`  |
-| `cancerresearchsociety` | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/` |
+| clientId                | tourId              | website                           | assets folder                                    |
+| ----------------------- | ------------------- | --------------------------------- | ------------------------------------------------ |
+| `gphospitalfoundation`  | `ken-sargent-house` | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/ken-sargent-house/` |
+| `cancerresearchsociety` | `cancer-research`   | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/cancer-research/`  |
+| `holodomor`             | `holodomor-museum`  | https://holodomor.ca/             | `assets/holodomor/holodomor-museum/`             |
 
 ## Client id convention
 
-The `id` matches the tour JSON `id` field and the `?tour=` URL parameter.
+`clientId` matches the client website hostname without `www` and without TLD.
+`tourId` matches the tour JSON `id` field and the first URL path segment
+(`/{tourId}/{sceneId}`).
 
-Derive from the client website URL — hostname without `www` and without TLD:
-
-| URL                                 | id                      |
+| URL                                 | clientId                |
 | ----------------------------------- | ----------------------- |
 | `https://gphospitalfoundation.ca/`  | `gphospitalfoundation`  |
 | `https://cancerresearchsociety.ca/` | `cancerresearchsociety` |
-| `https://www.example.com/`          | `example`               |
+| `https://holodomor.ca/`             | `holodomor`             |
 
 Use `clientIdFromUrl()` in `src/utils/clientId.ts` when adding new clients.
 
-## Adding a new client
+## Panoramas — JPG → WebP (required)
 
-1. Create `assets/{clientId}/panoramas/` and `assets/{clientId}/brand/`
-2. Add `tours/{clientId}.json` and `tours/{clientId}-knowledge.json`
-3. Register in `src/data/loadTour.ts`
-4. Run `npm run sync-assets`
+**Every `.jpg` (or `.jpeg`) dropped into a `panoramas/` folder must be converted
+to WebP before the tour references it.** Tour JSON uses `.webp` paths only.
 
-### Path examples
+1. Place the source JPG under `assets/{clientId}/{tourId}/panoramas/` (e.g.
+   `overview.jpg`).
+2. Convert in place with the project script (writes `{name}.webp` next to the
+   JPG):
 
-| File type | Location                                      | JSON reference                                        |
-| --------- | --------------------------------------------- | ----------------------------------------------------- |
-| Panorama  | `gphospitalfoundation/panoramas/overview.jpg` | `/assets/gphospitalfoundation/panoramas/overview.jpg` |
-| Logo      | `gphospitalfoundation/brand/logo.png`         | `/assets/gphospitalfoundation/brand/logo.png`         |
-| Favicon   | `gphospitalfoundation/favicon.ico`            | `/assets/gphospitalfoundation/favicon.ico` (auto)     |
+   ```bash
+   node scripts/convert-jpg-to-webp.mjs gphospitalfoundation/ken-sargent-house/panoramas/overview.jpg
+   ```
+
+   Multiple files in one run:
+
+   ```bash
+   node scripts/convert-jpg-to-webp.mjs \
+     gphospitalfoundation/ken-sargent-house/panoramas/overview.jpg \
+     gphospitalfoundation/ken-sargent-house/panoramas/reception.jpg
+   ```
+
+   Optional quality (default `82`):
+   `WEBP_QUALITY=85 node scripts/convert-jpg-to-webp.mjs …`
+
+3. Point the scene `panorama` (and any popup `image` under `panoramas/`) at the
+   `.webp` file in `tours/{tourId}.json`.
+4. Delete the source `.jpg` from `panoramas/` — do not commit JPG panoramas to
+   the repo.
+5. Run `npm run sync-assets` (or `npm run dev` / `npm run build`, which sync
+   automatically).
+
+Target size after conversion: roughly **800 KB–1.2 MB** per scene at acceptable
+quality. Re-export or lower `WEBP_QUALITY` if a WebP is still too large.
+
+## Adding a new tour
+
+1. Create `assets/{clientId}/{tourId}/panoramas/` and `…/brand/`
+2. Add panorama JPGs, **convert each to WebP** (see above), reference `.webp` in
+   JSON
+3. Add `tours/{tourId}.json` and `tours/{tourId}-knowledge.json`
+4. Register in `src/data/loadTour.ts` and `tours/catalog.json`
+5. Run `npm run sync-assets`
+
+### Path examples (Ken Sargent House)
+
+| File type | Location                                                         | JSON reference                                                           |
+| --------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Panorama  | `gphospitalfoundation/ken-sargent-house/panoramas/overview.webp` | `/assets/gphospitalfoundation/ken-sargent-house/panoramas/overview.webp` |
+| Logo      | `gphospitalfoundation/ken-sargent-house/brand/logo.png`          | `/assets/gphospitalfoundation/ken-sargent-house/brand/logo.png`          |
+| Favicon   | `gphospitalfoundation/ken-sargent-house/favicon.ico`             | `/assets/gphospitalfoundation/ken-sargent-house/favicon.ico` (auto)      |
+| Guide     | `gphospitalfoundation/ken-sargent-house/brand/tour-guide.png`    | auto via `resolveGuideAvatarUrl()`                                       |
+
+Use `tourAssetPath()` in `src/utils/tourAssetPath.ts` when building paths in
+code.

@@ -1,0 +1,65 @@
+.tour-product-branding {
+  --tour-product-branding-accent: var(--ishare-primary);
+  --tour-product-branding-icon-size: 26px;
+  --tour-product-branding-logo-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  font-family: var(--ishare-display-font);
+  line-height: 1.2;
+}
+
+.tour-product-branding--platform {
+  --tour-product-branding-accent: var(--ishare-platform-product-gold);
+}
+
+.tour-product-branding__logo {
+  flex-shrink: 0;
+  display: block;
+  width: auto;
+  height: var(--tour-product-branding-logo-height);
+  object-fit: contain;
+}
+
+.tour-product-branding__icon {
+  flex-shrink: 0;
+  width: var(--tour-product-branding-icon-size);
+  height: var(--tour-product-branding-icon-size);
+  color: var(--tour-product-branding-accent);
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.12));
+}
+
+.tour-product-branding__text {
+  min-width: 0;
+  font-size: var(--ishare-font-size-xl);
+  letter-spacing: -0.02em;
+}
+
+.tour-product-branding__client {
+  font-weight: 600;
+  color: var(--ishare-text);
+}
+
+.tour-product-branding__suffix {
+  font-weight: 700;
+  color: var(--tour-product-branding-accent);
+}
+
+.tour-product-branding--platform .tour-product-branding__suffix {
+  font-weight: 800;
+}
+
+.tour-product-branding__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

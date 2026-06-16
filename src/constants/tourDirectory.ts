@@ -17,3 +17,16 @@ export const TOUR_DIRECTORY_TABS: { id: TourDirectoryTab; label: string }[] = [
 
 export const TOUR_DIRECTORY_SEARCH_PLACEHOLDER =
   'Search locations and naming opportunities…';
+
+export const TOUR_DIRECTORY_EMPTY_LOCATIONS = 'No locations in this tour.';
+
+export const TOUR_DIRECTORY_EMPTY_NAMING =
+  'No naming opportunities in this tour.';
+
+export const TOUR_DIRECTORY_EMPTY_NAMING_PRICE =
+  'No naming opportunities match this price range.';
+
+export const TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL = 'Price range';
+
+export const TOUR_DIRECTORY_EMPTY_SEARCH =
+  'No locations or naming opportunities match your search.';

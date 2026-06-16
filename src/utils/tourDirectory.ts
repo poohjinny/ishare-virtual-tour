@@ -1,12 +1,17 @@
-import type { Scene } from '../types/tour';
+import type { Scene, Tour, ViewPosition } from '../types/tour';
+import { parseNamingPrice } from './namingPrice';
 import { buildNavPreviewNamingItems } from './navPreview';
+import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
 
 export interface TourDirectoryNamingItem {
   sceneId: string;
   sceneTitle: string;
   hotspotId: string;
   name: string;
+  price: string;
+  priceAmount: number | null;
   statusLabel: string;
+  statusShortLabel: string;
   statusModifier: string;
 }
 
@@ -22,13 +27,57 @@ export function buildTourNamingDirectory(
         sceneTitle: scene.title,
         hotspotId: naming.hotspotId,
         name: naming.name,
+        price: naming.price,
+        priceAmount: parseNamingPrice(naming.price),
         statusLabel: naming.statusLabel,
+        statusShortLabel: naming.statusShortLabel,
         statusModifier: naming.statusModifier,
       });
     }
   }
 
   return items;
+}
+
+/** Scene containing a naming-opportunity info hotspot, if any. */
+export function findNamingHotspotInTour(
+  tour: Tour,
+  hotspotId: string,
+): { sceneId: string } | null {
+  for (const scene of Object.values(tour.scenes)) {
+    const hotspot = scene.hotspots.find(
+      (h) =>
+        h.id === hotspotId && h.type === 'info' && h.popup?.namingOpportunity,
+    );
+    if (hotspot) {
+      return { sceneId: scene.id };
+    }
+  }
+  return null;
+}
+
+/** Landing end pose — `defaultView`, or the NO hotspot view when `?no=` matches this scene. */
+export function resolveSceneLandingView(
+  tour: Tour,
+  sceneId: string,
+  namingHotspotId: string | null | undefined,
+): ViewPosition | undefined {
+  const scene = tour.scenes[sceneId];
+  if (!scene) return undefined;
+
+  if (!namingHotspotId) {
+    return scene.defaultView;
+  }
+
+  const loc = findNamingHotspotInTour(tour, namingHotspotId);
+  if (!loc || loc.sceneId !== sceneId) {
+    return scene.defaultView;
+  }
+
+  return (
+    resolveNamingOpportunityView(tour, sceneId, namingHotspotId) ??
+    scene.defaultView
+  );
 }
 
 export function filterTourScenes(scenes: Scene[], query: string): Scene[] {
@@ -53,6 +102,7 @@ export function filterTourNamingDirectory(
     (item) =>
       item.name.toLowerCase().includes(q) ||
       item.sceneTitle.toLowerCase().includes(q) ||
-      item.statusLabel.toLowerCase().includes(q),
+      item.statusLabel.toLowerCase().includes(q) ||
+      item.statusShortLabel.toLowerCase().includes(q),
   );
 }

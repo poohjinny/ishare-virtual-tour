@@ -1,0 +1,46 @@
+{
+  "categories": [
+    "Healthcare",
+    "Education",
+    "Culture",
+    "Sporting Venues",
+    "International Aid",
+    "Social Services",
+    "Tourism"
+  ],
+  "clients": [
+    {
+      "id": "gphospitalfoundation",
+      "name": "Grande Prairie Regional Hospital Foundation",
+      "tours": [
+        {
+          "id": "ken-sargent-house",
+          "category": "Healthcare",
+          "name": "Ken Sargent House"
+        }
+      ]
+    },
+    {
+      "id": "cancerresearchsociety",
+      "name": "Cancer Research Society",
+      "tours": [
+        {
+          "id": "cancer-research",
+          "category": "Healthcare",
+          "name": "Cancer Research"
+        }
+      ]
+    },
+    {
+      "id": "holodomor",
+      "name": "Holodomor Research and Education Consortium",
+      "tours": [
+        {
+          "id": "holodomor-museum",
+          "category": "Culture",
+          "name": "Holodomor Museum"
+        }
+      ]
+    }
+  ]
+}

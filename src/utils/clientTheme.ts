@@ -1,5 +1,8 @@
 const DEFAULT_PRIMARY = '#007b8b';
 
+/** Minimum contrast for white label text on filled primary surfaces. */
+const MIN_PRIMARY_ON_WHITE_CONTRAST = 3;
+
 const THEME_VARS = [
   '--ishare-primary',
   '--ishare-primary-dark',
@@ -53,6 +56,29 @@ function mixRgb(
   ];
 }
 
+function srgbChannel(value: number): number {
+  const channel = value / 255;
+  return channel <= 0.03928 ?
+      channel / 12.92
+    : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function relativeLuminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex);
+  const rs = srgbChannel(r);
+  const gs = srgbChannel(g);
+  const bs = srgbChannel(b);
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function contrastWithWhite(hex: string): number {
+  const primary = relativeLuminance(hex);
+  const white = 1;
+  const lighter = Math.max(primary, white);
+  const darker = Math.min(primary, white);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 function darken(hex: string, amount: number): string {
   return rgbToHex(...mixRgb(hexToRgb(hex), [0, 0, 0], amount));
 }
@@ -61,8 +87,30 @@ function lighten(hex: string, amount: number): string {
   return rgbToHex(...mixRgb(hexToRgb(hex), [255, 255, 255], amount));
 }
 
+/**
+ * Darkens overly bright brand primaries so they work on buttons, badges, and text
+ * accents. Tour JSON keeps the official brand hex; this runs at theme apply time.
+ */
+export function resolveUiPrimaryColor(primaryColor: string): string {
+  const brand = normalizeHexColor(primaryColor) ?? DEFAULT_PRIMARY;
+
+  if (contrastWithWhite(brand) >= MIN_PRIMARY_ON_WHITE_CONTRAST) {
+    return brand;
+  }
+
+  let adjusted = brand;
+  for (let step = 0; step < 16; step += 1) {
+    adjusted = darken(brand, (step + 1) * 0.045);
+    if (contrastWithWhite(adjusted) >= MIN_PRIMARY_ON_WHITE_CONTRAST) {
+      return adjusted;
+    }
+  }
+
+  return adjusted;
+}
+
 export function buildClientTheme(primaryColor: string) {
-  const primary = normalizeHexColor(primaryColor) ?? DEFAULT_PRIMARY;
+  const primary = resolveUiPrimaryColor(primaryColor);
   const [r, g, b] = hexToRgb(primary);
 
   return {
