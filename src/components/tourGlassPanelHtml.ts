@@ -33,6 +33,7 @@ import {
   namingStatusBadgeIconHtml,
 } from './namingStatusBadgeIcons';
 import { BADGE_CLASS } from './ui/badgeClasses';
+import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 import {
   initPopupVideoPlayers,
   popupVideoPlayIconHtml,
@@ -917,7 +918,7 @@ export function buildAnchoredNavPreviewHtml(
   const heroHtml =
     preview.panorama ?
       `<div class="nav-preview-panel__hero nav-preview-panel__hero--loading" style="height:${heroHeight}px" aria-busy="true">
-        <div class="nav-preview-panel__hero-skeleton" aria-hidden="true"></div>
+        <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
         <div class="nav-preview-panel__hero-viewer"></div>
         ${
           preview.image ?

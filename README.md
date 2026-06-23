@@ -88,7 +88,8 @@ src/
     ui/              Shared primitives (Badge, Accordion, …)
   hooks/             Tour state, embed mode, assistant
   services/          Mock AI assistant
-docs/MVP_PLAN.md     Full specification
+docs/ROADMAP.md       Backlog and phasing
+docs/PRODUCT_SPEC.md  URL, embed, catalog, schemas
 docs/COMPONENTS.md   Shared component reuse (React + HTML)
 ```
 
@@ -136,11 +137,12 @@ MVP uses mock responses from `tours/{tourId}-knowledge.json`. Replace
 
 ## Documentation
 
-| Document                                                 | Description                                           |
-| -------------------------------------------------------- | ----------------------------------------------------- |
-| [`docs/README.md`](docs/README.md)                       | Documentation index                                   |
-| [`docs/CODING_GUIDELINES.md`](docs/CODING_GUIDELINES.md) | Engineering conventions & doc map                     |
-| [`docs/GIT_WORKFLOW.md`](docs/GIT_WORKFLOW.md)           | Commit/push — one task per commit                     |
-| [`docs/PLANNING.md`](docs/PLANNING.md)                   | Project goals, SeekBeak context, phases, demo script  |
-| [`docs/TECH_STACK.md`](docs/TECH_STACK.md)               | Technology choices, library comparison, deployment    |
-| [`docs/MVP_PLAN.md`](docs/MVP_PLAN.md)                   | Feature specs, data schemas, implementation checklist |
+| Document                                                 | Description                                        |
+| -------------------------------------------------------- | -------------------------------------------------- |
+| [`docs/README.md`](docs/README.md)                       | Documentation index                                |
+| [`docs/CODING_GUIDELINES.md`](docs/CODING_GUIDELINES.md) | Engineering conventions & doc map                  |
+| [`docs/GIT_WORKFLOW.md`](docs/GIT_WORKFLOW.md)           | Commit/push — one task per commit                  |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md)                     | Backlog, sprints, Phase 0–3 phasing                |
+| [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md)           | URL contract, catalog visibility, JSON schemas     |
+| [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md)     | SeekBeak context, stakeholder demo script          |
+| [`docs/TECH_STACK.md`](docs/TECH_STACK.md)               | Technology choices, library comparison, deployment |

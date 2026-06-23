@@ -43,6 +43,8 @@ import {
   computeNamingPriceBounds,
   filterTourNamingByPriceRange,
 } from '../utils/namingPrice';
+import { SegmentedTabs } from './ui/SegmentedTabs';
+import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
 import { Badge, type NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import { TourHelpPanel } from './TourHelpPanel';
@@ -713,27 +715,19 @@ export function TourNavFloat({
   };
 
   const renderDirectoryTabs = () => (
-    <div
+    <SegmentedTabs
       className='tour-nav-actions__directory-tabs'
-      role='tablist'
       aria-label='Tour directory filters'
-    >
-      {TOUR_DIRECTORY_TABS.map((tab) => (
-        <button
-          key={tab.id}
-          type='button'
-          role='tab'
-          id={`tour-nav-directory-tab-${tab.id}`}
-          aria-selected={directoryTab === tab.id}
-          aria-controls={`tour-nav-directory-panel-${tab.id}`}
-          className={`tour-nav-actions__directory-tab${directoryTab === tab.id ? ' tour-nav-actions__directory-tab--active' : ''}`}
-          disabled={disabled}
-          onClick={() => setDirectoryTab(tab.id)}
-        >
-          {tab.label}
-        </button>
-      ))}
-    </div>
+      tabs={TOUR_DIRECTORY_TABS.map((tab) => ({
+        id: tab.id,
+        label: tab.label,
+        htmlId: `tour-nav-directory-tab-${tab.id}`,
+        ariaControls: `tour-nav-directory-panel-${tab.id}`,
+      }))}
+      value={directoryTab}
+      onChange={setDirectoryTab}
+      disabled={disabled}
+    />
   );
 
   const renderLocationsList = (
@@ -903,11 +897,12 @@ export function TourNavFloat({
     const showSectionTitles = directoryTab === 'all';
 
     return (
-      <div
+      <SegmentedTabPanel
+        panelKey={directoryTab}
         id={`tour-nav-directory-panel-${directoryTab}`}
-        role='tabpanel'
         aria-labelledby={`tour-nav-directory-tab-${directoryTab}`}
         className='tour-nav-actions__directory-panel'
+        scrollRef={exploreScrollRef}
       >
         {showLocations &&
           renderLocationsList(scenes, {
@@ -924,7 +919,7 @@ export function TourNavFloat({
                 TOUR_DIRECTORY_EMPTY_NAMING
               : TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
           })}
-      </div>
+      </SegmentedTabPanel>
     );
   };
 
@@ -1196,7 +1191,7 @@ export function TourNavFloat({
 
           <button
             type='button'
-            className='tour-nav-actions__circle-btn'
+            className={`tour-nav-actions__circle-btn${controlsVisible ? ' tour-nav-actions__circle-btn--active' : ''}`}
             onClick={handleTuneClick}
             aria-pressed={controlsVisible}
             {...tourNavIconButtonA11y(

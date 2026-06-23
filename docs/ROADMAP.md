@@ -1,54 +1,134 @@
 # iShare Virtual Tour — Roadmap
 
-> Future work after the current MVP. For completed scope and demo goals, see
-> [PLANNING.md](./PLANNING.md) and [MVP_PLAN.md](./MVP_PLAN.md).
+> **Single source of truth** for what to build next — Phase 1 checklists through
+> long-term platform work.  
+> Product contracts (URL, catalog, schemas):
+> [PRODUCT_SPEC.md](./PRODUCT_SPEC.md).  
+> Project context and demo narrative:
+> [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 ---
 
 ## Overview
 
-The MVP proves in-house navigation, transitions, hotspot UX, naming
+Phase 0 proved in-house navigation, transitions, hotspot UX, naming
 opportunities, multi-client branding, and scene-aware AI over the SeekBeak
-embed. The roadmap below turns that prototype into a **scalable product**
-integrated with iShare, Giftabulator®, and Power Donor Platform.
+embed. **Phase 1** ships an iframe-ready **Production v1** on iShare. Later
+phases turn the static JSON prototype into a **scalable product** integrated
+with Giftabulator®, Power Donor Platform, and a central content API.
+
+| Phase | Name                            | Status         |
+| ----- | ------------------------------- | -------------- |
+| **0** | Proof / stakeholder demo        | ✅ Complete    |
+| **1** | Production v1 — iShare embed    | 🟡 In progress |
+| **2** | Platform integration            | Planned        |
+| **3** | Scale — VR/XR, analytics, depth | Planned        |
+
+Work **top-down** within each phase. **Checklists live here only.** When work
+feels slow on device, apply [PERFORMANCE.md](./PERFORMANCE.md) (playbook, not a
+second task list).
 
 ---
 
-## Priority themes
+## Phase 0 — Proof demo ✅
 
-### 1. VR / XR support
+Delivered scope (reference only — do not reopen unless regressing):
 
-Extend the tour for **immersive viewing** on supported devices (VR headsets,
-future AR / spatial experiences).
+- Vite + React + TS, PSV virtual tour + markers
+- Nav / info / nav-preview hotspots, TourNavFloat, breadcrumb + history
+- Zoom + fade transitions, landing animation, InfoPopup, NO panels
+- Mock AI assistant, client intro + multi-tour catalog
+- Floor plan minimap, immersive bg, share tour, naming directory
+- Embed / dev URL params, panorama error UI, WebP workflow
+- Catalog `visibility` filter (`public` on `/`, routable `public` + `unlisted`)
 
-**Goals**
-
-- Reuse existing panoramas, hotspots, and naming opportunity data — no duplicate
-  content per format
-- Support high-impact use cases: donor events, facility previews, campaign
-  launches
-- Evaluate WebXR / device-native paths based on audience and hardware
-
-**Open questions**
-
-- Which headsets and browsers are in scope for v1?
-- Full VR walk mode vs. seated 360° — same tour or simplified mobile VR subset?
+Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 ---
 
-### 2. Database & platform integration
+## Phase 1 — Production v1 (ishare embed)
 
-Move tour content from local JSON files into a **central database** and API.
+**Goal:** Replace the SeekBeak embed on ishare.ca with a safe, polished
+`?embed=1` experience and deploy to `tour.ishare.ca` (or chosen host).
 
-**Goals**
+### Success criteria
+
+- [x] Complete tour navigation without confusion (scene panel, history,
+      transitions)
+- [x] Naming directory and `?no=` deep links work
+- [x] AI answers scene-relevant FAQs (mock)
+- [x] `npm run dev` and `npm run build` succeed
+- [ ] Embed mode ready for iShare iframe (`?embed=1` chrome trim +
+      `postMessage`)
+- [x] Invalid tour id shows dedicated “Tour not found” (no silent default
+      fallback)
+- [ ] Deployed to production host
+
+### Sprint A — Embed & demo safety
+
+- [ ] **`?embed=1` chrome trim** — reduce FAB dock (e.g. hide Share/Help or
+      collapse to essentials); optional lighter splash for iframe
+- [x] **Unknown tour URL** — dedicated “Tour not found” view
+- [ ] **Explore scene thumbnails** — small equirect preview per location in
+      Explore list (intro gallery already has tour-level preview). Asset
+      approach:
+      [PERFORMANCE P0 — thumbnails](./PERFORMANCE.md#p0--panorama-assets-highest-impact).
+
+### Sprint B — Orientation & content sync
+
+- [ ] **Hotspot coordinate fine-tuning** — `?dev=1` on real panoramas
+- [ ] **Floor plan coverage** — `map` coordinates for all Ken Sargent scenes on
+      `floorplan.svg` (kitchen, comfort-corner, base-level entrance)
+- [ ] **Holodomor / Cancer Research** — scene and NO content pass
+- [ ] **Mobile layout pass** — FAB dock vs minimap vs guide FAB on ≤480px;
+      safe-area padding audit. If load or jank on device:
+      [PERFORMANCE P0–P1](./PERFORMANCE.md#when-to-start).
+- [ ] **Scene transition feedback** — short loading or dim during slow panorama
+      swaps (optional per tour). Tuning:
+      [PERFORMANCE P1 — preload](./PERFORMANCE.md#p1--preload-strategy).
+
+### Sprint C — Discovery & share polish
+
+- [ ] **First-visit hint** — one-time “drag to look around · tap hotspots” coach
+      mark or prominent Help entry
+- [ ] **Visit progress** — optional “N / M locations” in Explore or breadcrumb
+- [ ] **Share link OG meta** — `og:title`, `og:image` per tour/scene
+- [ ] **Guide voice button** — hide or clearly disable “coming soon” mic in chat
+
+### Platform (Phase 1 exit)
+
+- [x] Catalog `visibility` + intro gallery filter
+- [ ] **iShare iframe integration** — `postMessage` to parent (analytics,
+      resize)
+- [ ] **Deploy** — `tour.ishare.ca` (or chosen host), SPA fallback, env config
+
+---
+
+## Phase 2 — Platform integration
+
+Turn JSON files into a maintainable product tied to iShare systems.
+
+### Live AI assistant
+
+Replace `askMockAssistant()` in `src/services/mockAssistant.ts`:
+
+```typescript
+POST /api/tour/chat
+{
+  tourId, sceneId, sceneTitle, messages[]
+}
+```
+
+Server loads tour knowledge, builds system prompt, calls Azure OpenAI / OpenAI.
+API keys stay server-side.
+
+### Database & API
 
 - Single source of truth for clients, scenes, hotspots, naming opportunities,
-  pricing, and status (`on_sale` | `sold` | `reserved`)
+  pricing, status (`on_sale` | `sold` | `reserved`)
 - Sync availability and CTAs with **Giftabulator** and donor workflows
-- Serve tours to the **iShare website**, embed mode, and future admin tools
-- Enable non-developer updates without redeploying static JSON
-
-**Integration targets**
+- Serve tours to iShare website, embed mode, and admin tools
+- Non-developer updates without redeploying static JSON
 
 | System               | Purpose                                   |
 | -------------------- | ----------------------------------------- |
@@ -56,82 +136,56 @@ Move tour content from local JSON files into a **central database** and API.
 | Giftabulator®        | CTA URLs, calc context, giving flows      |
 | Power Donor Platform | Donor / opportunity data where applicable |
 
-**Notes**
+JSON schema in `tours/*.json` remains the reference model for DB design. Client
+id convention (`gphospitalfoundation`, etc.) stays stable across URLs and
+assets.
 
-- Current JSON schema (`tours/*.json`, `*-knowledge.json`) is the reference
-  model for DB design
-- Client id convention (`gphospitalfoundation`, `cancerresearchsociety`) should
-  stay stable across URL paths and assets
+### Content admin (CMS)
 
----
+Admin UI for scenes, hotspot positions, copy, video URLs, pricing, and status —
+reducing JSON edits and redeploys.
 
-### 3. Mobile optimization
+### Analytics & insights
 
-The tour runs on phones and tablets today; this phase is **mobile-first
-polish**.
+Scene views, hotspot clicks, popup opens, Giftabulator CTA clicks.
 
-**Goals**
+### Client rollout (until CMS exists)
 
-- Touch-friendly navigation (FABs, panels, hotspots, popups)
-- Performance on cellular networks (panorama size, preload strategy, progress
-  UX)
-- Layout tuning for small screens (breadcrumb, panels, anchored popups)
-- Optional: device orientation / gyro where it improves exploration
-
-**Success criteria**
-
-- Comfortable first-load and scene change on mid-range mobile devices
-- Naming opportunity popups readable and tappable without horizontal scroll
-- Embed mode usable inside mobile web views
-
----
-
-## Additional roadmap items
-
-### 4. Content admin (CMS)
-
-Simple admin UI to edit scenes, hotspot positions, copy, video URLs, pricing,
-and status — reducing dependency on JSON edits and redeploys.
-
-### 5. Live AI assistant
-
-Upgrade Ask Guide from mock / knowledge-base rules to a **live LLM** backed by
-per-client knowledge, with answers that stay current when DB content changes.
-
-### 6. Analytics & insights
-
-Track scene views, hotspot clicks, popup opens, and Giftabulator CTA clicks to
-inform fundraising and content decisions.
-
-### 7. Client rollout
-
-Onboard new clients using the established pattern:
+Onboard new clients:
 
 - `assets/{clientId}/` — panoramas, brand
-- `tours/{clientId}.json` — tour config
-- `tours/{clientId}-knowledge.json` — AI knowledge
-- Register in `src/data/loadTour.ts`
+- `tours/{tourId}.json` — tour config
+- `tours/{tourId}-knowledge.json` — AI knowledge
+- Register in `src/data/loadTour.ts` and `tours/catalog.json`
 
-### 8. Accessibility & performance
+### Accessibility & performance (ongoing)
 
-- Keyboard navigation (partially done — extend coverage and docs)
-- Screen reader labels for nav and panels where practical
-- CDN or asset pipeline for large panoramas
-- Error recovery and offline / slow-network messaging
-- Detailed optimization backlog: [PERFORMANCE.md](./PERFORMANCE.md)
+- Extend keyboard navigation and screen reader labels
+- CDN or asset pipeline for large panoramas —
+  [PERFORMANCE P0 — CDN / cache](./PERFORMANCE.md#p0--panorama-assets-highest-impact)
+- Error recovery and slow-network messaging
+- Full playbook: [PERFORMANCE.md](./PERFORMANCE.md)
+
+**Phasing note:** Database integration may move earlier if multiple clients and
+live pricing updates become urgent.
 
 ---
 
-## Suggested phasing
+## Phase 3 — Scale
 
-| Phase         | Focus                                                                        |
-| ------------- | ---------------------------------------------------------------------------- |
-| **Near term** | Mobile polish, more client tours, hotspot/content tuning workflow (`?dev=1`) |
-| **Mid term**  | Database + API, Giftabulator / iShare integration, content admin MVP         |
-| **Long term** | VR/XR modes, live AI assistant, analytics, deeper platform tie-ins           |
+### VR / XR support
 
-Phasing is flexible — **database integration** may move earlier if multiple
-clients and live pricing updates become urgent.
+Immersive viewing on supported headsets; reuse panoramas, hotspots, and naming
+data — no duplicate content per format.
+
+**Open questions:** Which headsets/browsers for v1? Full walk mode vs seated
+360°?
+
+### Deeper platform
+
+- Hotspot drag editor / placement admin
+- Viewport zone detection (L2 gaze — “what you’re looking at”)
+- Native apps only if VR/XR or audience requires (web-first default)
 
 ---
 
@@ -139,23 +193,37 @@ clients and live pricing updates become urgent.
 
 - Replacing professional 360° capture / photography workflow
 - Full SeekBeak feature parity where it does not serve iShare fundraising UX
-- Native iOS/Android apps (web-first unless VR/XR requires otherwise)
+- Native iOS/Android apps (unless VR/XR requires otherwise)
+
+---
+
+## Risks (active)
+
+| Risk                             | Mitigation                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Hotspot coordinates off          | `?dev=1` click logger                                                                                              |
+| overview → entrance disorienting | Tune `targetView` in JSON                                                                                          |
+| Mock AI limited until Phase 2    | Rich FAQs + suggested chips                                                                                        |
+| Large panorama load on mobile    | [PERFORMANCE P0](./PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./PERFORMANCE.md#p1--preload-strategy) |
 
 ---
 
 ## Related documents
 
-| Document                                | Relevance                             |
-| --------------------------------------- | ------------------------------------- |
-| [PLANNING.md](./PLANNING.md)            | MVP goals, SeekBeak context           |
-| [MVP_PLAN.md](./MVP_PLAN.md)            | Current feature spec and schemas      |
-| [TECH_STACK.md](./TECH_STACK.md)        | Stack choices; note DB/API when added |
-| [assets/README.md](../assets/README.md) | Per-client asset layout               |
+| Document                                       | Relevance                                           |
+| ---------------------------------------------- | --------------------------------------------------- |
+| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)           | URL contract, catalog visibility, schemas           |
+| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)     | SeekBeak context, stakeholder demo script           |
+| [TECH_STACK.md](./TECH_STACK.md)               | Stack; note DB/API when added                       |
+| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md) | Engineering conventions                             |
+| [PERFORMANCE.md](./PERFORMANCE.md)             | Performance playbook (how to tune; not a task list) |
+| [assets/README.md](../assets/README.md)        | Per-client asset layout                             |
 
 ---
 
 ## Changelog
 
-| Date       | Note                                                         |
-| ---------- | ------------------------------------------------------------ |
-| 2026-06-11 | Initial roadmap — VR/XR, database, mobile + supporting items |
+| Date       | Note                                                                |
+| ---------- | ------------------------------------------------------------------- |
+| 2026-06-11 | Initial roadmap — VR/XR, database, mobile themes                    |
+| 2026-06-11 | PERFORMANCE.md → playbook (no checkboxes); ROADMAP = sole task list |

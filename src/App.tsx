@@ -4,16 +4,19 @@ import { TourPage } from './pages/TourPage';
 import { resolveTourRoute } from './utils/tourPaths';
 
 function TourRoute() {
-  const { tourOrScene, tourId } = useParams<{
+  const { tourOrScene, tourId, sceneId } = useParams<{
     tourOrScene?: string;
     tourId?: string;
     sceneId?: string;
   }>();
 
-  const routeKey = useMemo(
-    () => resolveTourRoute(tourOrScene ?? tourId, undefined).tourId,
-    [tourId, tourOrScene],
-  );
+  const routeKey = useMemo(() => {
+    const route = resolveTourRoute(tourOrScene ?? tourId, sceneId);
+    if (route.routeError === 'unknown_tour') {
+      return `missing:${route.requestedTourId ?? tourOrScene ?? tourId}:${sceneId ?? ''}`;
+    }
+    return `${route.tourId}:${route.sceneId ?? ''}`;
+  }, [sceneId, tourId, tourOrScene]);
 
   return <TourPage key={routeKey} />;
 }

@@ -209,6 +209,7 @@ When adding panel UI, check whether it belongs **inside** an existing shell with
 
 ## Related docs
 
-- [MVP_PLAN.md](./MVP_PLAN.md) — feature specs and UI layout
+- [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) — UI layout, product contracts
+- [ROADMAP.md](./ROADMAP.md) — backlog and phasing
 - [TECH_STACK.md](./TECH_STACK.md) — React, PSV, styling approach
 - [`assets/README.md`](../assets/README.md) — per-client media

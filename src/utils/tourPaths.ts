@@ -1,4 +1,9 @@
-import { DEFAULT_TOUR_ID, listTourIds, loadTour } from '../data/loadTour';
+import {
+  DEFAULT_TOUR_ID,
+  listPublicTourIds,
+  listTourIds,
+  loadTour,
+} from '../data/loadTour';
 
 /** Old paths that used client id as the first segment → canonical tour id. */
 const LEGACY_TOUR_PATH_ALIASES: Record<string, string> = {
@@ -35,15 +40,20 @@ export function needsClientIntroPick(
   if (options?.intro === false || options?.embed) return false;
 
   if (options?.intro === true) {
-    return listTourIds().length >= 1;
+    return listPublicTourIds().length >= 1;
   }
 
-  return listTourIds().length > 1;
+  return listPublicTourIds().length > 1;
 }
+
+export type TourRouteError = 'none' | 'unknown_tour';
 
 export interface ResolvedTourRoute {
   tourId: string;
   sceneId: string | null;
+  routeError: TourRouteError;
+  /** Raw tour segment from the URL when `routeError` is set. */
+  requestedTourId?: string;
 }
 
 /** Map `/:segment` and `/:tourId/:sceneId` params to tour + optional scene. */
@@ -54,25 +64,44 @@ export function resolveTourRoute(
   if (!tourOrScene) {
     const ids = listTourIds();
     if (ids.length === 1) {
-      return { tourId: ids[0]!, sceneId: null };
+      return { tourId: ids[0]!, sceneId: null, routeError: 'none' };
     }
-    return { tourId: DEFAULT_TOUR_ID, sceneId: null };
+    return { tourId: DEFAULT_TOUR_ID, sceneId: null, routeError: 'none' };
   }
 
   if (sceneId !== undefined) {
     const tourId = normalizeTourPathId(tourOrScene);
-    return {
-      tourId: isKnownTourId(tourId) ? tourId : DEFAULT_TOUR_ID,
-      sceneId,
-    };
+    if (!isKnownTourId(tourId)) {
+      return {
+        tourId,
+        sceneId,
+        routeError: 'unknown_tour',
+        requestedTourId: tourOrScene,
+      };
+    }
+    return { tourId, sceneId, routeError: 'none' };
   }
 
   const tourId = normalizeTourPathId(tourOrScene);
   if (isKnownTourId(tourId)) {
-    return { tourId, sceneId: null };
+    return { tourId, sceneId: null, routeError: 'none' };
   }
 
-  return { tourId: DEFAULT_TOUR_ID, sceneId: tourOrScene };
+  const defaultTour = loadTour(DEFAULT_TOUR_ID);
+  if (defaultTour.scenes[tourOrScene]) {
+    return {
+      tourId: DEFAULT_TOUR_ID,
+      sceneId: tourOrScene,
+      routeError: 'none',
+    };
+  }
+
+  return {
+    tourId,
+    sceneId: null,
+    routeError: 'unknown_tour',
+    requestedTourId: tourOrScene,
+  };
 }
 
 export function resolveSceneId(tourId: string, sceneId: string | null): string {

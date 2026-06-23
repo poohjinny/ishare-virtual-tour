@@ -758,47 +758,7 @@
 }
 
 .tour-nav-actions__directory-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid var(--ishare-border);
-}
-
-.tour-nav-actions__directory-tab {
-  flex: 1;
-  min-width: 0;
-  padding: 8px 10px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ishare-text-muted);
-  font-family: inherit;
-  font-size: var(--ishare-font-size-sm);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s,
-    box-shadow 0.15s;
-}
-
-.tour-nav-actions__directory-tab:hover:not(:disabled):not(.tour-nav-actions__directory-tab--active) {
-  color: var(--ishare-text);
-  background: rgba(255, 255, 255, 0.65);
-}
-
-.tour-nav-actions__directory-tab--active {
-  background: rgba(255, 255, 255, 0.95);
-  color: var(--ishare-text);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
-}
-
-.tour-nav-actions__directory-tab:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  margin-top: 0;
 }
 
 .tour-nav-actions__directory-panel {

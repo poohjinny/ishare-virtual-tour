@@ -1,4 +1,4 @@
-.panorama-load-error {
+.tour-error-state {
   position: absolute;
   inset: 0;
   z-index: 120;
@@ -8,10 +8,10 @@
   padding: 1.5rem;
   background: rgba(0, 0, 0, 0.58);
   pointer-events: auto;
-  animation: panorama-load-error-backdrop-in 0.3s ease-out forwards;
+  animation: tour-error-state-backdrop-in 0.3s ease-out forwards;
 }
 
-.panorama-load-error__card {
+.tour-error-state__card {
   max-width: 22rem;
   width: 100%;
   padding: 1.375rem 1.5rem 1.5rem;
@@ -22,10 +22,10 @@
     0 16px 48px rgba(0, 0, 0, 0.35),
     0 4px 16px rgba(0, 0, 0, 0.2);
   text-align: center;
-  animation: panorama-load-error-card-in 0.34s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both;
+  animation: tour-error-state-card-in 0.34s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both;
 }
 
-@keyframes panorama-load-error-backdrop-in {
+@keyframes tour-error-state-backdrop-in {
   from {
     opacity: 0;
   }
@@ -35,7 +35,7 @@
   }
 }
 
-@keyframes panorama-load-error-card-in {
+@keyframes tour-error-state-card-in {
   from {
     opacity: 0;
     transform: translateY(10px) scale(0.97);
@@ -47,7 +47,7 @@
   }
 }
 
-.panorama-load-error__icon-wrap {
+.tour-error-state__icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -55,12 +55,12 @@
   color: var(--ishare-danger);
 }
 
-.panorama-load-error__icon {
+.tour-error-state__icon {
   width: 2.25rem;
   height: 2.25rem;
 }
 
-.panorama-load-error__title {
+.tour-error-state__title {
   font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-2xl);
   font-weight: 600;
@@ -68,26 +68,26 @@
   line-height: 1.35;
 }
 
-.panorama-load-error__body {
+.tour-error-state__body {
   margin-top: 0.875rem;
   font-size: var(--ishare-font-size-lg);
   line-height: 1.5;
   color: var(--ishare-text-muted);
 }
 
-.panorama-load-error__scene {
+.tour-error-state__emphasis {
   font-weight: 600;
   color: var(--ishare-text-body);
 }
 
-.panorama-load-error__actions {
+.tour-error-state__actions {
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
   margin-top: 2rem;
 }
 
-.panorama-load-error__cta {
+.tour-error-state__cta {
   width: 100%;
   padding: 0.625rem 1rem;
   border: none;
@@ -100,28 +100,25 @@
     background 0.2s ease,
     color 0.2s ease,
     transform 0.15s ease;
-}
-
-.panorama-load-error__cta {
   background: var(--ishare-primary);
   color: #fff;
 }
 
-.panorama-load-error__cta:hover {
+.tour-error-state__cta:hover {
   background: var(--ishare-primary-dark);
 }
 
-.panorama-load-error__cta:active {
+.tour-error-state__cta:active {
   transform: scale(0.98);
 }
 
-.panorama-load-error__cta--secondary {
+.tour-error-state__cta--secondary {
   background: transparent;
   color: var(--ishare-text-body);
   border: 1px solid var(--ishare-border);
 }
 
-.panorama-load-error__cta--secondary:hover {
+.tour-error-state__cta--secondary:hover {
   background: var(--ishare-surface-elevated);
   color: var(--ishare-text);
 }

@@ -16,7 +16,9 @@
         {
           "id": "ken-sargent-house",
           "category": "Healthcare",
-          "name": "Ken Sargent House"
+          "name": "Ken Sargent House",
+          "visibility": "public",
+          "featured": true
         }
       ]
     },
@@ -27,7 +29,9 @@
         {
           "id": "cancer-research",
           "category": "Healthcare",
-          "name": "Cancer Research"
+          "name": "Cancer Research",
+          "visibility": "public",
+          "featured": true
         }
       ]
     },
@@ -38,7 +42,9 @@
         {
           "id": "holodomor-museum",
           "category": "Culture",
-          "name": "Holodomor Museum"
+          "name": "Holodomor Museum",
+          "visibility": "public",
+          "featured": true
         }
       ]
     }

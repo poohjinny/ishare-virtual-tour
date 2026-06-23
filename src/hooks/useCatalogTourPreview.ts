@@ -7,6 +7,8 @@ const previewCache = new Map<string, string>();
 export function useCatalogTourPreview(tourId: string) {
   const [src, setSrc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const hasPreviewSource = getCatalogTourPreviewSource(tourId) !== null;
+  const loading = hasPreviewSource && src === null && !failed;
 
   useEffect(() => {
     let cancelled = false;
@@ -49,5 +51,5 @@ export function useCatalogTourPreview(tourId: string) {
     };
   }, [tourId]);
 
-  return { src, failed };
+  return { src, failed, loading };
 }

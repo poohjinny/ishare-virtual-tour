@@ -9,10 +9,13 @@ import { withBaseUrl } from '../utils/assetUrl';
 import { getTourProductFullName } from '../utils/tourProductName';
 import type { TourCategory } from '../constants/tourCategories';
 import { GLOBAL_IMMERSIVE_BACKGROUND } from '../constants/immersiveBackground';
-import { listCatalogTours } from './tourCatalog';
+import { listRoutableCatalogTours } from './tourCatalog';
 export {
   listCatalogTours,
   listCatalogToursByCategory,
+  listPublicTourIds,
+  listRoutableCatalogTours,
+  listRoutableTourIds,
   listTourCategories,
 } from './tourCatalog';
 export { getTourClientId } from '../utils/tourClientId';
@@ -49,18 +52,12 @@ const KNOWLEDGE: Record<string, TourKnowledge> = {
 function normalizeHotspot(hotspot: Hotspot): Hotspot {
   const preview =
     hotspot.preview?.image ?
-      {
-        ...hotspot.preview,
-        image: withBaseUrl(hotspot.preview.image),
-      }
+      { ...hotspot.preview, image: withBaseUrl(hotspot.preview.image) }
     : hotspot.preview;
 
   const popup =
     hotspot.popup?.image ?
-      {
-        ...hotspot.popup,
-        image: withBaseUrl(hotspot.popup.image),
-      }
+      { ...hotspot.popup, image: withBaseUrl(hotspot.popup.image) }
     : hotspot.popup;
 
   if (preview === hotspot.preview && popup === hotspot.popup) return hotspot;
@@ -131,11 +128,11 @@ export interface TourListItem {
 }
 
 export function listTourIds(): string[] {
-  return listCatalogTours().map((entry) => entry.tourId);
+  return listRoutableCatalogTours().map((entry) => entry.tourId);
 }
 
 export function listTours(): TourListItem[] {
-  return listCatalogTours().map((entry) => {
+  return listRoutableCatalogTours().map((entry) => {
     const tour = TOURS[entry.tourId];
     if (!tour) {
       throw new Error(

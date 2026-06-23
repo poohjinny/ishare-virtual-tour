@@ -44,17 +44,20 @@
   border-top-right-radius: calc(var(--ishare-radius-lg) - 1px);
 }
 
-.nav-preview-panel__hero-skeleton {
+.nav-preview-panel__hero .preview-hero-skeleton {
   position: absolute;
   inset: -1px;
   z-index: 0;
-  background: linear-gradient(110deg,
-      #e2e8f0 8%,
-      #f1f5f9 18%,
-      #e2e8f0 33%);
-  background-size: 200% 100%;
-  animation: nav-preview-hero-shimmer 1.4s ease-in-out infinite;
-  transition: opacity 0.22s ease;
+}
+
+.nav-preview-panel__hero:not(.nav-preview-panel__hero--loading) .preview-hero-skeleton {
+  opacity: 0;
+}
+
+.nav-preview-panel__hero--error .preview-hero-skeleton {
+  animation: none;
+  opacity: 1;
+  background: #e2e8f0;
 }
 
 .nav-preview-panel__hero-image {
@@ -130,35 +133,11 @@
   opacity: 1;
 }
 
-.nav-preview-panel__hero:not(.nav-preview-panel__hero--loading) .nav-preview-panel__hero-skeleton {
-  opacity: 0;
-}
-
 .nav-preview-panel__hero--error {
   background: #e2e8f0;
 }
 
-.nav-preview-panel__hero--error .nav-preview-panel__hero-skeleton {
-  animation: none;
-  opacity: 1;
-  background: #e2e8f0;
-}
-
-@keyframes nav-preview-hero-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-
-  100% {
-    background-position: -100% 0;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .nav-preview-panel__hero-skeleton {
-    animation: none;
-    background: #e2e8f0;
-  }
 
   .nav-preview-panel__hero-image,
   .nav-preview-panel__hero-fallback {

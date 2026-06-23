@@ -12,6 +12,9 @@ import type { TourCategory } from '../constants/tourCategories';
 import { listCatalogTours, listTourCategories } from '../data/tourCatalog';
 import { loadTour } from '../data/loadTour';
 import { buildTourLocation } from '../utils/tourPaths';
+import { SegmentedTabs } from './ui/SegmentedTabs';
+import { SegmentedTabPanelContent } from './ui/SegmentedTabPanel';
+import { useSegmentedTabPanelScroll } from '../hooks/useSegmentedTabPanelScroll';
 import { ClientIntroGalleryCard } from './ClientIntroGalleryCard';
 import { TourGlassPanel } from './TourGlassPanel';
 import './ClientIntroPicker.css';
@@ -24,17 +27,39 @@ const CLIENT_INTRO_TITLE_ID = 'client-intro-title';
 
 type CategoryFilter = 'all' | TourCategory;
 
+function categoryFilterId(category: CategoryFilter): string {
+  if (category === 'all') return 'client-intro-filter-all';
+  return `client-intro-filter-${category.replace(/\s+/g, '-').toLowerCase()}`;
+}
+
 export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
   const allTours = useMemo(() => listCatalogTours(), []);
-
-  const filterCategories = useMemo(() => {
-    const used = new Set(allTours.map((entry) => entry.category));
-    return listTourCategories().filter((category) => used.has(category));
-  }, [allTours]);
+  const filterCategories = useMemo(() => listTourCategories(), []);
 
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+
+  useSegmentedTabPanelScroll(categoryFilter, galleryRef);
+
+  const filterTabs = useMemo(
+    () => [
+      {
+        id: 'all' as const,
+        label: 'All',
+        htmlId: 'client-intro-filter-all',
+        ariaControls: 'client-intro-gallery',
+      },
+      ...filterCategories.map((category) => ({
+        id: category,
+        label: category,
+        htmlId: categoryFilterId(category),
+        ariaControls: 'client-intro-gallery',
+      })),
+    ],
+    [filterCategories],
+  );
 
   const activeTours = useMemo(() => {
     if (categoryFilter === 'all') return allTours;
@@ -113,51 +138,43 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
           <p className='client-intro__lead'>{CLIENT_INTRO_LEAD}</p>
         </div>
 
-        {filterCategories.length > 1 && (
-          <div
+        {filterCategories.length > 0 && (
+          <SegmentedTabs
             className='client-intro__filters'
-            role='group'
             aria-label='Filter tours by category'
-          >
-            <button
-              type='button'
-              className={`client-intro__filter${categoryFilter === 'all' ? ' client-intro__filter--active' : ''}`}
-              aria-pressed={categoryFilter === 'all'}
-              onClick={() => setCategoryFilter('all')}
-            >
-              All
-            </button>
-            {filterCategories.map((category) => (
-              <button
-                key={category}
-                type='button'
-                className={`client-intro__filter${categoryFilter === category ? ' client-intro__filter--active' : ''}`}
-                aria-pressed={categoryFilter === category}
-                onClick={() => setCategoryFilter(category)}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+            tabs={filterTabs}
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            scrollable
+            scrollToStartKey='all'
+          />
         )}
 
-        <div className='client-intro__gallery ishare-scrollbar'>
-          {activeTours.length > 0 ?
-            <ul className='client-intro__grid'>
-              {activeTours.map((entry) => (
-                <ClientIntroGalleryCard
-                  key={entry.tourId}
-                  entry={entry}
-                  onSelect={() => handleSelect(entry.tourId)}
-                />
-              ))}
-            </ul>
-          : <p className='client-intro__empty'>
-              {categoryFilter === 'all' ?
-                'No tours available yet.'
-              : 'No tours in this category yet.'}
-            </p>
-          }
+        <div
+          ref={galleryRef}
+          id='client-intro-gallery'
+          className='client-intro__gallery ishare-scrollbar'
+          role='tabpanel'
+          aria-labelledby={categoryFilterId(categoryFilter)}
+        >
+          <SegmentedTabPanelContent panelKey={categoryFilter}>
+            {activeTours.length > 0 ?
+              <ul className='client-intro__grid'>
+                {activeTours.map((entry) => (
+                  <ClientIntroGalleryCard
+                    key={entry.tourId}
+                    entry={entry}
+                    onSelect={() => handleSelect(entry.tourId)}
+                  />
+                ))}
+              </ul>
+            : <p className='client-intro__empty'>
+                {categoryFilter === 'all' ?
+                  'No tours available yet.'
+                : 'No tours in this category yet.'}
+              </p>
+            }
+          </SegmentedTabPanelContent>
         </div>
       </TourGlassPanel>
     </div>

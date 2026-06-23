@@ -12,6 +12,7 @@ import { DevViewPanel } from '../components/DevViewPanel';
 import { InfoPopup } from '../components/InfoPopup';
 import { LoadProgressBar } from '../components/LoadProgressBar';
 import { PanoramaLoadError } from '../components/PanoramaLoadError';
+import { TourNotFound } from '../components/TourNotFound';
 import { TourLoadSplash } from '../components/TourLoadSplash';
 import { FloorPlanMinimap } from '../components/FloorPlanMinimap';
 import { TourNavFloat } from '../components/TourNavFloat';
@@ -20,7 +21,7 @@ import {
   getTourWebsite,
   loadKnowledge,
   loadTour,
-  listTourIds,
+  listPublicTourIds,
   DEFAULT_TOUR_ID,
 } from '../data/loadTour';
 import { getTourProductFullName } from '../utils/tourProductName';
@@ -67,11 +68,16 @@ export function TourPage() {
   const location = useLocation();
   const [urlSearchParams] = useSearchParams();
   const searchParams = useAppSearchParams();
-  const { tourOrScene, tourId } = useParams<{
-    tourOrScene?: string;
-    tourId?: string;
-    sceneId?: string;
-  }>();
+  const {
+    tourOrScene,
+    tourId,
+    sceneId: sceneParam,
+  } = useParams<{ tourOrScene?: string; tourId?: string; sceneId?: string }>();
+
+  const route = useMemo(
+    () => resolveTourRoute(tourOrScene ?? tourId, sceneParam),
+    [sceneParam, tourId, tourOrScene],
+  );
 
   const showClientIntro = useMemo(
     () =>
@@ -96,7 +102,7 @@ export function TourPage() {
       return;
     }
 
-    const ids = listTourIds();
+    const ids = listPublicTourIds();
     if (ids.length === 1 && searchParams.intro !== true) {
       const onlyTour = loadTour(ids[0]!);
       navigate(
@@ -136,6 +142,15 @@ export function TourPage() {
 
   if (showClientIntro) {
     return <ClientIntroPicker searchParams={urlSearchParams} />;
+  }
+
+  if (route.routeError === 'unknown_tour' && route.requestedTourId) {
+    return (
+      <TourNotFound
+        requestedTourId={route.requestedTourId}
+        searchParams={urlSearchParams}
+      />
+    );
   }
 
   return <TourExperience />;

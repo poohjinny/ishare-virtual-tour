@@ -38,8 +38,26 @@
 .client-intro__panel.tour-glass-panel {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
   width: min(640px, calc(100vw - 48px));
+  height: min(88vh, 760px);
   max-height: min(88vh, 760px);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.client-intro__panel .tour-glass-panel__shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+
+.client-intro__panel .tour-glass-panel__header {
+  flex-shrink: 0;
 }
 
 .client-intro__header {
@@ -62,14 +80,17 @@
 
 .client-intro__body.tour-glass-panel__body {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+  min-width: 0;
   padding: 12px 0 20px;
   overflow: hidden;
 }
 
 .client-intro__intro {
+  flex-shrink: 0;
   padding: 14px 20px 18px;
   text-align: center;
 }
@@ -93,45 +114,25 @@
 }
 
 .client-intro__filters {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 20px;
+  flex-shrink: 0;
+  margin-inline: 20px;
+  margin-bottom: 8px;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: calc(32px + 8px + 2px);
 }
 
-.client-intro__filter {
+.client-intro__filters.ishare-segmented-tabs--scroll {
+  overflow-y: hidden;
+}
+
+.client-intro__filters .ishare-segmented-tab {
   flex: 0 0 auto;
-  padding: 6px 12px;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55);
-  font-family: var(--ishare-display-font);
-  font-size: var(--ishare-font-size-xs);
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--ishare-text-body);
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
-}
-
-.client-intro__filter:hover,
-.client-intro__filter:focus-visible {
-  background: rgba(255, 255, 255, 0.82);
-  border-color: rgba(15, 23, 42, 0.16);
-}
-
-.client-intro__filter--active {
-  background: rgba(var(--ishare-primary-rgb), 0.1);
-  border-color: rgba(var(--ishare-primary-rgb), 0.22);
-  color: var(--ishare-primary-dark);
+  min-width: 8.75rem;
 }
 
 .client-intro__gallery {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   padding: 0 20px 4px;
@@ -170,12 +171,16 @@
 
   .client-intro__panel.tour-glass-panel {
     width: min(100%, calc(100vw - 32px));
+    height: min(88vh, 760px);
   }
 
   .client-intro__intro,
-  .client-intro__filters,
   .client-intro__gallery {
     padding-inline: 16px;
+  }
+
+  .client-intro__filters {
+    margin-inline: 16px;
   }
 }
 

@@ -7,16 +7,17 @@ linked specs.
 
 ## Document map
 
-| Topic                        | Document                                             | When to read                     |
-| ---------------------------- | ---------------------------------------------------- | -------------------------------- |
-| **Git commit / push**        | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                 | Before every push                |
-| **Shared UI (React + HTML)** | [COMPONENTS.md](./COMPONENTS.md)                     | Badges, accordions, glass panels |
-| **Naming opportunity CTAs**  | [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) | NO popups, status, Giftabulator  |
-| **Product / copy names**     | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)             | Tab title, Help, Guide, splash   |
-| **Tech stack & deploy**      | [TECH_STACK.md](./TECH_STACK.md)                     | PSV, Vite, iframe embed          |
-| **Performance backlog**      | [PERFORMANCE.md](./PERFORMANCE.md)                   | Bundle size, panoramas, preload  |
-| **Client assets**            | [`assets/README.md`](../assets/README.md)            | Panoramas, logos, new client     |
-| **Feature specs**            | [MVP_PLAN.md](./MVP_PLAN.md)                         | Schemas, layout, checklist       |
+| Topic                        | Document                                             | When to read                                |
+| ---------------------------- | ---------------------------------------------------- | ------------------------------------------- |
+| **Git commit / push**        | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                 | Before every push                           |
+| **Shared UI (React + HTML)** | [COMPONENTS.md](./COMPONENTS.md)                     | Badges, accordions, glass panels            |
+| **Naming opportunity CTAs**  | [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) | NO popups, status, Giftabulator             |
+| **Product / copy names**     | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)             | Tab title, Help, Guide, splash              |
+| **Tech stack & deploy**      | [TECH_STACK.md](./TECH_STACK.md)                     | PSV, Vite, iframe embed                     |
+| **Performance playbook**     | [PERFORMANCE.md](./PERFORMANCE.md)                   | When embed/mobile feels slow (no task list) |
+| **Client assets**            | [`assets/README.md`](../assets/README.md)            | Panoramas, logos, new client                |
+| **Backlog & phasing**        | [ROADMAP.md](./ROADMAP.md)                           | What to build next                          |
+| **Product contracts**        | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                 | URL, embed, catalog, schemas                |
 
 ---
 

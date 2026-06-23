@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { CLIENT_INTRO_CTA } from '../constants/clientIntro';
 import type { CatalogTourListItem } from '../data/tourCatalog';
 import { loadTour } from '../data/loadTour';
 import { useCatalogTourPreview } from '../hooks/useCatalogTourPreview';
+import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 import { TourCategoryBadge } from './TourCategoryBadge';
 import './ClientIntroGalleryCard.css';
 
@@ -15,11 +17,25 @@ export function ClientIntroGalleryCard({
   onSelect,
 }: ClientIntroGalleryCardProps) {
   const tour = loadTour(entry.tourId);
-  const { src: previewSrc, failed: previewFailed } = useCatalogTourPreview(
-    entry.tourId,
-  );
+  const {
+    src: previewSrc,
+    failed: previewFailed,
+    loading: previewLoading,
+  } = useCatalogTourPreview(entry.tourId);
+  const [previewLoaded, setPreviewLoaded] = useState(false);
   const logo = tour.branding?.logo;
-  const showPreview = previewSrc && !previewFailed;
+
+  useEffect(() => {
+    setPreviewLoaded(false);
+  }, [previewSrc]);
+
+  const mediaClassName = [
+    'client-intro-gallery__media',
+    previewLoading ? 'client-intro-gallery__media--loading' : '',
+    previewFailed ? 'client-intro-gallery__media--error' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <li className='client-intro-gallery__item'>
@@ -29,20 +45,29 @@ export function ClientIntroGalleryCard({
         onClick={onSelect}
         aria-label={`${entry.tourName}, ${entry.clientName}. ${CLIENT_INTRO_CTA}.`}
       >
-        <span className='client-intro-gallery__media'>
-          {showPreview ?
+        <span
+          className={mediaClassName}
+          aria-busy={previewLoading || undefined}
+        >
+          {previewLoading ?
+            <span className={PREVIEW_HERO_SKELETON_CLASS} aria-hidden='true' />
+          : null}
+          {previewSrc && !previewFailed ?
             <img
-              className='client-intro-gallery__preview'
+              className={`client-intro-gallery__preview${previewLoaded ? ' client-intro-gallery__preview--loaded' : ''}`}
               src={previewSrc}
               alt=''
               aria-hidden='true'
               draggable={false}
+              onLoad={() => setPreviewLoaded(true)}
             />
-          : <span
+          : null}
+          {previewFailed ?
+            <span
               className='client-intro-gallery__preview-fallback'
               aria-hidden='true'
             />
-          }
+          : null}
           <span className='client-intro-gallery__scrim' aria-hidden='true' />
           <TourCategoryBadge
             category={entry.category}
