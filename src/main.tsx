@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles/tokens.css';
+import './styles/tailwind.css';
 import './styles/layout.css';
 import './styles/hotspots.css';
 import './components/TourGlassPanel.css';

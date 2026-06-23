@@ -20,6 +20,7 @@ Project documentation for the iShare virtual tour platform.
 | [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)           | SeekBeak context, stakeholder demo script                            |
 | [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)       | Engineering reference — structure, PSV, styling, tour content        |
 | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                 | Git commit/push guidelines — one task per commit                     |
+| [STYLING.md](./STYLING.md)                           | Tailwind + custom CSS hybrid — migration rules                       |
 | [TECH_STACK.md](./TECH_STACK.md)                     | Technology choices, library comparison, dependencies, deployment     |
 | [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md)       | Scene transition UX, zoom semantics, tuning                          |
 | [COMPONENTS.md](./COMPONENTS.md)                     | Shared UI components — React and HTML marker popups                  |
