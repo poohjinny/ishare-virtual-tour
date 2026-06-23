@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { cn } from '../lib/cn';
 import {
   TOUR_SHARE_COPIED_LABEL,
   TOUR_SHARE_COPY_FAILED,
@@ -6,7 +7,6 @@ import {
 import type { ShareMessage } from '../utils/buildShareUrl';
 import { shareTourView, type ShareTourResult } from '../utils/shareTour';
 import { PopupCtaArrowIcon } from './popupContentUi';
-import './ShareTourButton.css';
 
 interface ShareTourButtonProps {
   shareUrl: string;
@@ -45,7 +45,11 @@ export function ShareTourButton({
   return (
     <button
       type='button'
-      className={`tour-glass-panel__cta share-tour-button${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}${feedback ? ' share-tour-button--feedback' : ''}`}
+      className={cn(
+        'tour-glass-panel__cta cursor-pointer',
+        isSecondary && 'tour-glass-panel__cta--secondary',
+        feedback && 'opacity-92',
+      )}
       aria-label={ariaLabel}
       disabled={feedback !== null}
       onClick={() => void handleClick()}

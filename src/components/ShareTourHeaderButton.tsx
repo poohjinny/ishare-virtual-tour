@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { cn } from '../lib/cn';
 import {
   TOUR_SHARE_COPIED_LABEL,
   TOUR_SHARE_COPY_FAILED,
@@ -36,7 +37,7 @@ export function ShareTourHeaderButton({
   return (
     <button
       type='button'
-      className={`tour-glass-panel__header-btn share-tour-header-button${feedback ? ' share-tour-header-button--feedback' : ''}`}
+      className={cn('tour-glass-panel__header-btn', feedback && 'opacity-92')}
       aria-label={label}
       title={label}
       disabled={feedback !== null}

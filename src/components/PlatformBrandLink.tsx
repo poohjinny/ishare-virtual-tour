@@ -1,10 +1,15 @@
+import { cn } from '../lib/cn';
 import {
-  PLATFORM_BRAND_LINK_CLASS,
   getPlatformBrand,
   platformBrandAriaLabel,
   type PlatformBrandId,
 } from '../data/platformBrands';
-import './PlatformBrandLink.css';
+
+/** Tailwind classes for React — HTML markers use PLATFORM_BRAND_LINK_CLASS in components-layer.css */
+export const platformBrandLinkClassName = cn(
+  'font-[inherit] text-inherit underline decoration-current/35 underline-offset-[0.14em] transition-[color,text-decoration-color] duration-150',
+  'hover:text-primary hover:decoration-primary/55 focus-visible:text-primary focus-visible:decoration-primary/55 focus-visible:outline-none',
+);
 
 type PlatformBrandLinkProps = {
   brandId: PlatformBrandId;
@@ -47,9 +52,7 @@ export function PlatformBrandLink({
 
   return (
     <a
-      className={[PLATFORM_BRAND_LINK_CLASS, className]
-        .filter(Boolean)
-        .join(' ')}
+      className={cn(platformBrandLinkClassName, className)}
       href={brand.url}
       target='_blank'
       rel='noopener noreferrer'

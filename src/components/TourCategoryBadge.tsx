@@ -1,7 +1,14 @@
-import { type TourCategory, tourCategorySlug } from '../constants/tourCategories';
+import {
+  type TourCategory,
+  tourCategorySlug,
+} from '../constants/tourCategories';
+import { cn } from '../lib/cn';
 import { TourCategoryIcon } from './icons/TourCategoryIcon';
 import { Badge } from './ui/Badge';
-import './TourCategoryBadge.css';
+import {
+  tourCategoryBadgeVariants,
+  type TourCategoryBadgeSlug,
+} from './tourCategoryBadgeVariants';
 
 interface TourCategoryBadgeProps {
   category: TourCategory;
@@ -19,13 +26,15 @@ export function TourCategoryBadge({
       variant='fill'
       size='sm'
       tone='none'
-      className={`tour-category-badge tour-category-badge--${slug}${className ? ` ${className}` : ''}`}
+      className={cn(
+        tourCategoryBadgeVariants({ category: slug as TourCategoryBadgeSlug }),
+        className,
+      )}
     >
-      <TourCategoryIcon
-        category={category}
-        className='tour-category-badge__icon'
-      />
-      <span className='tour-category-badge__label'>{category}</span>
+      <TourCategoryIcon category={category} className='size-3 shrink-0' />
+      <span className='min-w-0 overflow-hidden text-ellipsis whitespace-nowrap'>
+        {category}
+      </span>
     </Badge>
   );
 }

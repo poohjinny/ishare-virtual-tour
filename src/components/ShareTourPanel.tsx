@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { cn } from '../lib/cn';
 import {
   TOUR_SHARE_APPS_HEADING,
   TOUR_SHARE_COPY_FAILED,
@@ -34,7 +35,21 @@ import {
   WhatsAppBrandIcon,
   XBrandIcon,
 } from './icons/ShareBrandIcons';
-import './ShareTourPanel.css';
+import {
+  shareTourAppIconVariants,
+  shareTourAppLabelClassName,
+  shareTourAppTileClassName,
+  shareTourCopyButtonVariants,
+  shareTourPanelDividerClassName,
+  shareTourPanelDividerLabelClassName,
+  shareTourPanelDividerLineClassName,
+  shareTourPanelLeadClassName,
+  shareTourPanelRootClassName,
+  shareTourPanelUrlFieldClassName,
+  shareTourPanelUrlInputClassName,
+  shareTourPanelUrlLabelClassName,
+  shareTourPanelUrlRowClassName,
+} from './shareTourPanelVariants';
 
 interface ShareTourPanelProps {
   contextLabel: string;
@@ -44,11 +59,20 @@ interface ShareTourPanelProps {
 
 type CopyState = 'idle' | 'copied' | 'failed';
 
+type ShareAppIconVariant =
+  | 'native'
+  | 'email'
+  | 'instagram'
+  | 'whatsapp'
+  | 'facebook'
+  | 'x'
+  | 'linkedin';
+
 interface ShareAppChannel {
   id: string;
   label: string;
   ariaLabel?: string;
-  iconClass: string;
+  iconVariant: ShareAppIconVariant;
   icon: ReactNode;
   href?: string;
   external?: boolean;
@@ -110,8 +134,10 @@ export function ShareTourPanel({
       channels.push({
         id: 'native',
         label: TOUR_SHARE_NATIVE_LABEL,
-        iconClass: 'share-tour-panel__app-icon--native',
-        icon: <ShareIcon className='share-tour-panel__share-icon' />,
+        iconVariant: 'native',
+        icon: (
+          <ShareIcon className='share-tour-panel__share-icon size-[18px]' />
+        ),
         onClick: () => void handleNativeShare(),
       });
     }
@@ -120,14 +146,14 @@ export function ShareTourPanel({
       {
         id: 'email',
         label: TOUR_SHARE_EMAIL_LABEL,
-        iconClass: 'share-tour-panel__app-icon--email',
+        iconVariant: 'email',
         icon: <EmailBrandIcon />,
         href: buildShareMailtoUrl(shareUrl, message),
       },
       {
         id: 'whatsapp',
         label: TOUR_SHARE_WHATSAPP_LABEL,
-        iconClass: 'share-tour-panel__app-icon--whatsapp',
+        iconVariant: 'whatsapp',
         icon: <WhatsAppBrandIcon />,
         href: buildShareWhatsAppUrl(shareUrl, message),
         external: true,
@@ -136,14 +162,14 @@ export function ShareTourPanel({
         id: 'instagram',
         label: TOUR_SHARE_INSTAGRAM_LABEL,
         ariaLabel: TOUR_SHARE_INSTAGRAM_ARIA,
-        iconClass: 'share-tour-panel__app-icon--instagram',
+        iconVariant: 'instagram',
         icon: <InstagramBrandIcon />,
         onClick: () => void handleInstagramShare(),
       },
       {
         id: 'facebook',
         label: TOUR_SHARE_FACEBOOK_LABEL,
-        iconClass: 'share-tour-panel__app-icon--facebook',
+        iconVariant: 'facebook',
         icon: <FacebookBrandIcon />,
         href: buildShareFacebookUrl(shareUrl),
         external: true,
@@ -151,7 +177,7 @@ export function ShareTourPanel({
       {
         id: 'x',
         label: TOUR_SHARE_X_LABEL,
-        iconClass: 'share-tour-panel__app-icon--x',
+        iconVariant: 'x',
         icon: <XBrandIcon />,
         href: buildShareXUrl(shareUrl, message),
         external: true,
@@ -159,7 +185,7 @@ export function ShareTourPanel({
       {
         id: 'linkedin',
         label: TOUR_SHARE_LINKEDIN_LABEL,
-        iconClass: 'share-tour-panel__app-icon--linkedin',
+        iconVariant: 'linkedin',
         icon: <LinkedInBrandIcon />,
         href: buildShareLinkedInUrl(shareUrl),
         external: true,
@@ -176,18 +202,18 @@ export function ShareTourPanel({
   ]);
 
   return (
-    <div className='share-tour-panel'>
-      <p className='share-tour-panel__lead'>
+    <div className={shareTourPanelRootClassName}>
+      <p className={shareTourPanelLeadClassName}>
         {TOUR_SHARE_LEAD}: <strong>{contextLabel}</strong>.
       </p>
 
-      <label className='share-tour-panel__url-field'>
-        <span className='share-tour-panel__url-label'>
+      <label className={shareTourPanelUrlFieldClassName}>
+        <span className={shareTourPanelUrlLabelClassName}>
           {TOUR_SHARE_URL_LABEL}
         </span>
-        <div className='share-tour-panel__url-row'>
+        <div className={shareTourPanelUrlRowClassName}>
           <input
-            className='share-tour-panel__url-input'
+            className={shareTourPanelUrlInputClassName}
             type='url'
             readOnly
             value={shareUrl}
@@ -196,7 +222,7 @@ export function ShareTourPanel({
           />
           <button
             type='button'
-            className={`share-tour-panel__copy-icon${copyState === 'copied' ? ' share-tour-panel__copy-icon--copied' : ''}${copyState === 'failed' ? ' share-tour-panel__copy-icon--failed' : ''}`}
+            className={shareTourCopyButtonVariants({ state: copyState })}
             onClick={() => void handleCopy()}
             aria-label={copyLabel}
             title={copyLabel}
@@ -208,15 +234,24 @@ export function ShareTourPanel({
         </div>
       </label>
 
-      <div className='share-tour-panel__divider' role='presentation'>
-        <span className='share-tour-panel__divider-line' aria-hidden='true' />
-        <h3 className='share-tour-panel__divider-label'>
+      <div className={shareTourPanelDividerClassName} role='presentation'>
+        <span
+          className={shareTourPanelDividerLineClassName}
+          aria-hidden='true'
+        />
+        <h3 className={shareTourPanelDividerLabelClassName}>
           {TOUR_SHARE_APPS_HEADING}
         </h3>
-        <span className='share-tour-panel__divider-line' aria-hidden='true' />
+        <span
+          className={shareTourPanelDividerLineClassName}
+          aria-hidden='true'
+        />
       </div>
 
-      <ul className='share-tour-panel__apps' role='list'>
+      <ul
+        className='m-0 flex list-none flex-wrap gap-x-3.5 gap-y-3 p-0'
+        role='list'
+      >
         {shareChannels.map((channel) => (
           <li key={channel.id}>
             <ShareAppTile
@@ -246,11 +281,16 @@ function ShareAppTile({
 
   const content = (
     <>
-      <span className={`share-tour-panel__app-icon ${channel.iconClass}`}>
+      <span
+        className={shareTourAppIconVariants({ channel: channel.iconVariant })}
+      >
         {channel.icon}
       </span>
       <span
-        className={`share-tour-panel__app-label${feedbackLabel ? ' share-tour-panel__app-label--feedback' : ''}`}
+        className={cn(
+          shareTourAppLabelClassName,
+          feedbackLabel && 'text-primary',
+        )}
       >
         {displayLabel}
       </span>
@@ -260,7 +300,7 @@ function ShareAppTile({
   if (channel.href) {
     return (
       <a
-        className='share-tour-panel__app-tile'
+        className={shareTourAppTileClassName}
         href={channel.href}
         aria-label={ariaLabel}
         {...(channel.external ?
@@ -275,7 +315,7 @@ function ShareAppTile({
   return (
     <button
       type='button'
-      className='share-tour-panel__app-tile'
+      className={shareTourAppTileClassName}
       onClick={channel.onClick}
       aria-label={ariaLabel}
       disabled={feedbackLabel !== null}

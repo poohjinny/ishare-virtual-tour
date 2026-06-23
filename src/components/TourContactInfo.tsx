@@ -1,11 +1,24 @@
 import type { ReactNode } from 'react';
 import type { TourOrganization } from '../types/tour';
+import { cn } from '../lib/cn';
 import {
   addressToGoogleMapsHref,
   getOrganizationPhones,
   hasOrganizationContact,
   phoneToTelHref,
 } from '../utils/tourOrganizationContact';
+import {
+  tourNavContactBrandVariants,
+  tourNavContactItemClassName,
+  tourNavContactLabelClassName,
+  tourNavContactLinkClassName,
+  tourNavContactListClassName,
+  tourNavContactNameClassName,
+  tourNavContactValueAddressClassName,
+  tourNavContactValueClassName,
+  tourNavHelpDividerClassName,
+  tourNavPanelLogoClassName,
+} from './tourNavFloatVariants';
 
 interface TourContactInfoProps {
   organization?: TourOrganization;
@@ -35,32 +48,25 @@ export function TourContactInfo({
   return (
     <>
       {!embedded && (
-        <hr className='tour-nav-actions__help-divider' aria-hidden='true' />
+        <hr className={tourNavHelpDividerClassName} aria-hidden='true' />
       )}
 
-      <div
-        className={[
-          'tour-nav-actions__contact-brand',
-          logo && 'tour-nav-actions__contact-brand--has-logo',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
+      <div className={tourNavContactBrandVariants({ hasLogo: Boolean(logo) })}>
         {logo ?
-          <div className='tour-nav-actions__panel-logo'>{logo}</div>
+          <div className={tourNavPanelLogoClassName}>{logo}</div>
         : null}
         {!logo ?
-          <p className='tour-nav-actions__contact-name'>{organization.name}</p>
+          <p className={tourNavContactNameClassName}>{organization.name}</p>
         : null}
       </div>
 
-      <dl className='tour-nav-actions__contact-list'>
+      <dl className={tourNavContactListClassName}>
         {organization.website ?
-          <div className='tour-nav-actions__contact-item'>
-            <dt className='tour-nav-actions__contact-label'>Website</dt>
-            <dd className='tour-nav-actions__contact-value'>
+          <div className={tourNavContactItemClassName}>
+            <dt className={tourNavContactLabelClassName}>Website</dt>
+            <dd className={tourNavContactValueClassName}>
               <a
-                className='tour-nav-actions__contact-link'
+                className={tourNavContactLinkClassName}
                 href={organization.website}
                 target='_blank'
                 rel='noopener noreferrer'
@@ -72,11 +78,11 @@ export function TourContactInfo({
         : null}
 
         {organization.email ?
-          <div className='tour-nav-actions__contact-item'>
-            <dt className='tour-nav-actions__contact-label'>Email</dt>
-            <dd className='tour-nav-actions__contact-value'>
+          <div className={tourNavContactItemClassName}>
+            <dt className={tourNavContactLabelClassName}>Email</dt>
+            <dd className={tourNavContactValueClassName}>
               <a
-                className='tour-nav-actions__contact-link'
+                className={tourNavContactLinkClassName}
                 href={`mailto:${organization.email}`}
               >
                 {organization.email}
@@ -88,13 +94,13 @@ export function TourContactInfo({
         {phones.map((phone) => (
           <div
             key={`${phone.label}-${phone.number}`}
-            className='tour-nav-actions__contact-item'
+            className={tourNavContactItemClassName}
           >
-            <dt className='tour-nav-actions__contact-label'>{phone.label}</dt>
-            <dd className='tour-nav-actions__contact-value'>
+            <dt className={tourNavContactLabelClassName}>{phone.label}</dt>
+            <dd className={tourNavContactValueClassName}>
               {phone.telHref ?
                 <a
-                  className='tour-nav-actions__contact-link'
+                  className={tourNavContactLinkClassName}
                   href={phone.telHref}
                 >
                   {phone.number}
@@ -105,13 +111,13 @@ export function TourContactInfo({
         ))}
 
         {organization.fax ?
-          <div className='tour-nav-actions__contact-item'>
-            <dt className='tour-nav-actions__contact-label'>
+          <div className={tourNavContactItemClassName}>
+            <dt className={tourNavContactLabelClassName}>
               {organization.faxLabel ?? 'Fax'}
             </dt>
-            <dd className='tour-nav-actions__contact-value'>
+            <dd className={tourNavContactValueClassName}>
               {faxHref ?
-                <a className='tour-nav-actions__contact-link' href={faxHref}>
+                <a className={tourNavContactLinkClassName} href={faxHref}>
                   {organization.fax}
                 </a>
               : organization.fax}
@@ -120,11 +126,16 @@ export function TourContactInfo({
         : null}
 
         {organization.address ?
-          <div className='tour-nav-actions__contact-item'>
-            <dt className='tour-nav-actions__contact-label'>Address</dt>
-            <dd className='tour-nav-actions__contact-value tour-nav-actions__contact-value--address'>
+          <div className={tourNavContactItemClassName}>
+            <dt className={tourNavContactLabelClassName}>Address</dt>
+            <dd
+              className={cn(
+                tourNavContactValueClassName,
+                tourNavContactValueAddressClassName,
+              )}
+            >
               <a
-                className='tour-nav-actions__contact-link'
+                className={tourNavContactLinkClassName}
                 href={addressToGoogleMapsHref(
                   organization.address,
                   organization.name,
