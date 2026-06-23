@@ -11,7 +11,6 @@ import {
   buildTourLocation,
   preservedSearchStringFrom,
 } from '../utils/tourPaths';
-import './TourNotFound.css';
 
 interface TourNotFoundProps {
   requestedTourId: string;
@@ -20,7 +19,7 @@ interface TourNotFoundProps {
 
 const NOT_FOUND_ICON = (
   <svg
-    className='tour-not-found__icon'
+    className='size-[3.25rem]'
     viewBox='0 0 24 24'
     fill='none'
     aria-hidden='true'
@@ -79,35 +78,46 @@ export function TourNotFound({
     publicTourIds.length > 1 ? handleBrowseTours : handleOpenFallbackTour;
 
   return (
-    <div className='app tour-not-found' role='alert' aria-live='assertive'>
-      <header className='tour-not-found__header'>
+    <div
+      className='app relative flex min-h-full items-center justify-center bg-ishare-bg px-6 py-8 text-ishare-text-body max-md:px-6 max-md:py-8'
+      role='alert'
+      aria-live='assertive'
+    >
+      <header className='absolute inset-x-0 top-0 flex justify-center px-6 pt-7 max-md:pt-5'>
         <a
-          className='tour-not-found__logo-link'
+          className='inline-flex rounded-md leading-none transition-opacity hover:opacity-[0.85] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ishare-primary'
           href={ISHARE_PLATFORM.url}
           target='_blank'
           rel='noopener noreferrer'
           aria-label='iShare — opens in a new tab'
         >
           <img
-            className='tour-not-found__logo'
+            className='block h-[46px] w-auto max-w-[min(220px,calc(100vw-48px))] object-contain'
             src={PLATFORM_PRODUCT_LOGO}
             alt=''
             draggable={false}
           />
         </a>
       </header>
-      <div className='tour-not-found__content'>
-        <div className='tour-not-found__icon-wrap'>{NOT_FOUND_ICON}</div>
-        <h1 className='tour-not-found__title'>Tour not found</h1>
-        <p className='tour-not-found__body'>
+      <div className='mt-6 flex w-full max-w-sm flex-col items-center text-center max-md:mt-4'>
+        <div className='mb-1.5 flex items-center justify-center text-ishare-danger'>
+          {NOT_FOUND_ICON}
+        </div>
+        <h1 className='m-0 font-display text-ishare-2xl font-semibold leading-[1.35] text-ishare-text'>
+          Tour not found
+        </h1>
+        <p className='mt-3.5 mb-0 text-ishare-lg leading-[1.55] text-ishare-text-muted'>
           No tour matches{' '}
-          <span className='tour-not-found__emphasis'>{requestedTourId}</span>.
+          <span className='font-semibold text-ishare-text-body'>
+            {requestedTourId}
+          </span>
+          .
           <br />
           The link may be outdated or the tour is no longer available.
         </p>
         <button
           type='button'
-          className='tour-not-found__cta'
+          className='mt-8 min-w-48 cursor-pointer rounded-full border-none bg-ishare-primary px-6 py-2.5 font-display text-ishare-lg font-semibold text-white transition-[background,transform] duration-150 hover:bg-ishare-primary-dark active:scale-[0.98]'
           onClick={handlePrimary}
         >
           {primaryLabel}
