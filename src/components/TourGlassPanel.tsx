@@ -1,6 +1,17 @@
 import type { ReactNode } from 'react';
 import { BADGE_CLASS } from './ui/badgeClasses';
-import './TourGlassPanel.css';
+import {
+  tourGlassPanelBodyClassNameWith,
+  tourGlassPanelCloseClassName,
+  tourGlassPanelCloseIconClassName,
+  tourGlassPanelHeaderClassName,
+  tourGlassPanelHeaderLeadingClassName,
+  tourGlassPanelRootClassName,
+  tourGlassPanelShellClassName,
+  tourGlassPanelTitleActionsClassName,
+  tourGlassPanelTitleClassName,
+  tourGlassPanelTitleRowClassName,
+} from './tourGlassPanelVariants';
 
 export type TourGlassPanelVariant = 'anchored' | 'dock';
 export type TourGlassPanelAnimation = 'enter' | 'exit' | 'none';
@@ -8,7 +19,7 @@ export type TourGlassPanelAnimation = 'enter' | 'exit' | 'none';
 export function GlassPanelCloseIcon() {
   return (
     <svg
-      className='tour-glass-panel__close-icon'
+      className={tourGlassPanelCloseIconClassName}
       viewBox='0 0 20 20'
       fill='none'
       aria-hidden='true'
@@ -61,12 +72,6 @@ interface TourGlassPanelProps {
   role?: 'dialog';
 }
 
-function shellAnimationClass(animation: TourGlassPanelAnimation): string {
-  if (animation === 'enter') return ' tour-glass-panel__shell--enter';
-  if (animation === 'exit') return ' tour-glass-panel__shell--exit';
-  return '';
-}
-
 export function TourGlassPanel({
   title,
   titleId,
@@ -81,37 +86,30 @@ export function TourGlassPanel({
   children,
   role = 'dialog',
 }: TourGlassPanelProps) {
-  const variantClass =
-    variant === 'anchored' ?
-      'tour-glass-panel tour-glass-panel--anchored'
-    : 'tour-glass-panel tour-glass-panel--dock';
-
   return (
     <article
-      className={`${variantClass}${className ? ` ${className}` : ''}`}
+      className={tourGlassPanelRootClassName(variant, className)}
       role={role}
       aria-labelledby={titleId}
     >
-      <div
-        className={`tour-glass-panel__shell${shellAnimationClass(animation)}`}
-      >
-        <header className='tour-glass-panel__header'>
+      <div className={tourGlassPanelShellClassName(animation)}>
+        <header className={tourGlassPanelHeaderClassName}>
           {header ?? (
             <>
-              <div className='tour-glass-panel__title-row'>
-                <div className='tour-glass-panel__header-leading'>
+              <div className={tourGlassPanelTitleRowClassName}>
+                <div className={tourGlassPanelHeaderLeadingClassName}>
                   {title ?
-                    <h2 id={titleId} className='tour-glass-panel__title'>
+                    <h2 id={titleId} className={tourGlassPanelTitleClassName}>
                       {title}
                     </h2>
                   : null}
                   {badge}
                 </div>
                 {onClose && (
-                  <div className='tour-glass-panel__title-actions'>
+                  <div className={tourGlassPanelTitleActionsClassName}>
                     <button
                       type='button'
-                      className='tour-glass-panel__close'
+                      className={tourGlassPanelCloseClassName}
                       onClick={onClose}
                       aria-label='Close'
                     >
@@ -123,9 +121,7 @@ export function TourGlassPanel({
             </>
           )}
         </header>
-        <div
-          className={`tour-glass-panel__body ishare-scrollbar${bodyClassName ? ` ${bodyClassName}` : ''}`}
-        >
+        <div className={tourGlassPanelBodyClassNameWith(bodyClassName)}>
           {children}
         </div>
         {footer}

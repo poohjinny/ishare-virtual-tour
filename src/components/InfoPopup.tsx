@@ -20,8 +20,22 @@ import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
 import { GlassPanelHeaderActions } from './GlassPanelHeaderActions';
 import { resolveGlassPanelWidth } from './tourGlassPanelHtml';
 import { GlassPanelCloseIcon } from './TourGlassPanel';
-import './TourGlassPanel.css';
-import './InfoPopup.css';
+import {
+  infoPopupBackdropVariants,
+  infoPopupImageClassName,
+  infoPopupPanelVariants,
+  infoPopupPriceLabelClassName,
+  infoPopupTitleBlockClassName,
+  infoPopupTitleClassName,
+  infoPopupTitleLineClassName,
+  infoPopupTitleRowClassName,
+  tourGlassPanelBodyClassName,
+  tourGlassPanelCloseClassName,
+  tourGlassPanelHeaderClassName,
+  tourGlassPanelHeaderLeadingClassName,
+  tourGlassPanelShellVariants,
+  tourGlassPanelTitleActionsClassName,
+} from './infoPopupVariants';
 
 const POPUP_EXIT_MS = 280;
 
@@ -130,28 +144,32 @@ export function InfoPopup({
 
   return (
     <div
-      className={`info-popup-backdrop${isExiting ? ' info-popup-backdrop--exit' : ''}`}
+      className={infoPopupBackdropVariants({
+        phase: isExiting ? 'exit' : 'idle',
+      })}
       onClick={(e) => {
         if (e.target === e.currentTarget) handleDismiss();
       }}
     >
       <article
-        className={`info-popup tour-glass-panel tour-glass-panel--dock tour-glass-panel--modal${isExiting ? ' info-popup--exit' : ''}`}
+        className={infoPopupPanelVariants({
+          phase: isExiting ? 'exit' : 'idle',
+        })}
         role='dialog'
         aria-modal='true'
         aria-labelledby='info-popup-title'
         style={{ maxWidth: resolveGlassPanelWidth(shown, tour) }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className='tour-glass-panel__shell'>
-          <header className='tour-glass-panel__header'>
-            <div className='tour-glass-panel__title-row info-popup__title-row'>
-              <div className='tour-glass-panel__header-leading'>
-                <div className='tour-glass-panel__title-block'>
-                  <div className='tour-glass-panel__title-line'>
+        <div className={tourGlassPanelShellVariants({ animation: 'none' })}>
+          <header className={tourGlassPanelHeaderClassName}>
+            <div className={infoPopupTitleRowClassName}>
+              <div className={tourGlassPanelHeaderLeadingClassName}>
+                <div className={infoPopupTitleBlockClassName}>
+                  <div className={infoPopupTitleLineClassName}>
                     <h2
                       id='info-popup-title'
-                      className='tour-glass-panel__title info-popup__title'
+                      className={infoPopupTitleClassName}
                     >
                       {shown.title}
                     </h2>
@@ -162,13 +180,13 @@ export function InfoPopup({
                     )}
                   </div>
                   {shown.namingOpportunity?.priceLabel && (
-                    <p className='tour-glass-panel__price-label'>
+                    <p className={infoPopupPriceLabelClassName}>
                       {shown.namingOpportunity.priceLabel}
                     </p>
                   )}
                 </div>
               </div>
-              <div className='tour-glass-panel__title-actions'>
+              <div className={tourGlassPanelTitleActionsClassName}>
                 <GlassPanelHeaderActions
                   headerCtas={headerCtas}
                   share={
@@ -184,7 +202,7 @@ export function InfoPopup({
                 <button
                   ref={closeRef}
                   type='button'
-                  className='tour-glass-panel__close'
+                  className={tourGlassPanelCloseClassName}
                   onClick={handleDismiss}
                   aria-label='Close'
                 >
@@ -195,9 +213,13 @@ export function InfoPopup({
             <PopupHeaderMeta popup={shown} />
           </header>
 
-          <div className='tour-glass-panel__body ishare-scrollbar'>
+          <div className={tourGlassPanelBodyClassName}>
             {shown.image && (
-              <img src={shown.image} alt='' className='info-popup__image' />
+              <img
+                src={shown.image}
+                alt=''
+                className={infoPopupImageClassName}
+              />
             )}
             <PopupBodyCopy body={shown.body} />
             {shown.videoUrl && (
