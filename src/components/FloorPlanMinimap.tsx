@@ -5,7 +5,16 @@ import {
   mapBearing,
   tourZoomToHFov,
 } from '../utils/minimap';
-import './FloorPlanMinimap.css';
+import {
+  floorPlanMinimapDotVariants,
+  floorPlanMinimapFrameClassName,
+  floorPlanMinimapFovClassName,
+  floorPlanMinimapImageClassName,
+  floorPlanMinimapMapClassName,
+  floorPlanMinimapOverlayClassName,
+  floorPlanMinimapPulseClassName,
+  floorPlanMinimapRootClassName,
+} from './floorPlanMinimapVariants';
 
 interface FloorPlanMinimapProps {
   floorPlan: FloorPlan;
@@ -45,11 +54,14 @@ export function FloorPlanMinimap({
     : null;
 
   return (
-    <div className='floor-plan-minimap' aria-label='Floor plan mini-map'>
-      <div className='floor-plan-minimap__frame'>
-        <div className='floor-plan-minimap__map'>
+    <div
+      className={floorPlanMinimapRootClassName}
+      aria-label='Floor plan mini-map'
+    >
+      <div className={floorPlanMinimapFrameClassName}>
+        <div className={floorPlanMinimapMapClassName}>
           <img
-            className='floor-plan-minimap__image'
+            className={floorPlanMinimapImageClassName}
             src={floorPlan.image}
             alt=''
             width={width}
@@ -58,12 +70,12 @@ export function FloorPlanMinimap({
           />
 
           <svg
-            className='floor-plan-minimap__overlay'
+            className={floorPlanMinimapOverlayClassName}
             viewBox={`0 0 ${width} ${height}`}
             aria-hidden='true'
           >
             {wedgePath && (
-              <path className='floor-plan-minimap__fov' d={wedgePath} />
+              <path className={floorPlanMinimapFovClassName} d={wedgePath} />
             )}
 
             {mapPoints.map((point) => {
@@ -75,14 +87,16 @@ export function FloorPlanMinimap({
                 <g key={point.sceneId}>
                   {isCurrent && (
                     <circle
-                      className='floor-plan-minimap__pulse'
+                      className={floorPlanMinimapPulseClassName}
                       cx={px}
                       cy={py}
                       r={22}
                     />
                   )}
                   <circle
-                    className={`floor-plan-minimap__dot${isCurrent ? ' floor-plan-minimap__dot--current' : ''}`}
+                    className={floorPlanMinimapDotVariants({
+                      current: isCurrent,
+                    })}
                     cx={px}
                     cy={py}
                     r={isCurrent ? 14 : 10}

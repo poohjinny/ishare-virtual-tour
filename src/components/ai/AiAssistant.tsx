@@ -5,6 +5,7 @@ import type { Tour } from '../../types/tour';
 import { AiAssistantFab } from './AiAssistantFab';
 import { AiChatPanelFallback } from './AiChatPanelFallback';
 import { AiChatPanelLazy, preloadAiChatPanel } from './aiChatPanelLazy';
+import { aiAssistantStackClassName } from './aiAssistantVariants';
 
 const FAB_ANIM_MS = 140;
 const PANEL_REVEAL_MS = 70;
@@ -89,10 +90,9 @@ export function AiAssistant({
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const idleId = window.requestIdleCallback?.(
-      () => preloadAiChatPanel(),
-      { timeout: 4000 },
-    );
+    const idleId = window.requestIdleCallback?.(() => preloadAiChatPanel(), {
+      timeout: 4000,
+    });
 
     return () => {
       if (idleId !== undefined) {
@@ -115,7 +115,7 @@ export function AiAssistant({
   };
 
   return (
-    <div className='ai-assistant-stack'>
+    <div className={aiAssistantStackClassName}>
       {fabShown && (
         <AiAssistantFab
           phase={fabPhase}

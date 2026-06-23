@@ -1,4 +1,6 @@
 import { Badge } from '../ui/Badge';
+import { cn } from '../../lib/cn';
+import { aiPanelLocationBadgeClassName } from './aiAssistantVariants';
 
 interface LocationBadgeProps {
   title: string;
@@ -10,7 +12,7 @@ export function LocationBadge({ title }: LocationBadgeProps) {
       variant='outline'
       tone='muted'
       dot
-      className='ai-panel__location-badge ishare-badge--dot-primary'
+      className={cn(aiPanelLocationBadgeClassName, 'ishare-badge--dot-primary')}
       aria-label={`Current location: ${title}`}
     >
       {`You're on ${title}`}

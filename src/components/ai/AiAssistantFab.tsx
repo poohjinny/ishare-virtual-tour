@@ -1,6 +1,12 @@
 import { VIRTUAL_TOUR_GUIDE_NAME } from '../../constants/branding';
 import { GuideAvatarImage } from './GuideAvatarImage';
-import './AiAssistant.css';
+import {
+  aiFabAvatarClassName,
+  aiFabIconClassName,
+  aiFabLabelAccentClassName,
+  aiFabLabelClassName,
+  aiFabVariants,
+} from './aiAssistantVariants';
 
 interface AiAssistantFabProps {
   phase: 'idle' | 'enter' | 'exit';
@@ -15,26 +21,25 @@ export function AiAssistantFab({
   onClick,
   onWarmup,
 }: AiAssistantFabProps) {
-  const phaseClass =
-    phase === 'exit' ? ' ai-fab--exit'
-    : phase === 'enter' ? ' ai-fab--enter'
-    : '';
-
   return (
     <button
       type='button'
-      className={`ai-fab${phaseClass}`}
+      className={aiFabVariants({ phase })}
       onClick={onClick}
       onPointerEnter={onWarmup}
       onFocus={onWarmup}
       aria-label={`Open ${VIRTUAL_TOUR_GUIDE_NAME}`}
       aria-expanded={false}
     >
-      <span className='ai-fab__avatar'>
-        <GuideAvatarImage className='ai-fab__icon' src={guideAvatarUrl} alt='' />
+      <span className={aiFabAvatarClassName}>
+        <GuideAvatarImage
+          className={aiFabIconClassName}
+          src={guideAvatarUrl}
+          alt=''
+        />
       </span>
-      <span className='ai-fab__label'>
-        Ask <span className='ai-fab__label-accent'>Guide</span>
+      <span className={aiFabLabelClassName}>
+        Ask <span className={aiFabLabelAccentClassName}>Guide</span>
       </span>
     </button>
   );

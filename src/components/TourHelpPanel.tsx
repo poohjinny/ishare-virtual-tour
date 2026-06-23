@@ -28,6 +28,19 @@ import { hasOrganizationContact } from '../utils/tourOrganizationContact';
 import { Accordion, AccordionItem } from './ui/Accordion';
 
 import { TourContactInfo } from './TourContactInfo';
+import {
+  tourNavContactSectionLeadClassName,
+  tourNavControlsListClassName,
+  tourNavHelpDividerClassName,
+  tourNavHelpFaqAnswerClassName,
+  tourNavHelpFaqItemClassName,
+  tourNavHelpFaqListClassName,
+  tourNavHelpFaqQuestionClassName,
+  tourNavHelpLeadClassName,
+  tourNavHelpListClassName,
+  tourNavLogoClassName,
+  tourNavLogoLinkClassName,
+} from './tourNavFloatVariants';
 
 interface TourHelpPanelProps {
   tourTitle: string;
@@ -50,13 +63,13 @@ export function TourHelpPanel({
 
   const tourSupportLogo = (
     <a
-      className='tour-nav-actions__logo-link'
+      className={tourNavLogoLinkClassName}
       href={FUNDING_MATTERS.url}
       target='_blank'
       rel='noopener noreferrer'
     >
       <img
-        className='tour-nav-actions__logo'
+        className={tourNavLogoClassName}
         src={PLATFORM_FMI_LOGO}
         alt={platformBrandMarkedName(FUNDING_MATTERS, { legalSuffix: true })}
       />
@@ -65,7 +78,7 @@ export function TourHelpPanel({
 
   return (
     <>
-      <p className='tour-nav-actions__help-lead'>
+      <p className={tourNavHelpLeadClassName}>
         Welcome to {tourTitle}. Explore each location in 360°, move between
         scenes with hotspots, and use the sections below to find your way
         around.
@@ -73,7 +86,7 @@ export function TourHelpPanel({
 
       <Accordion gap='default'>
         <AccordionItem title={TOUR_HELP_SECTION_USING} iconPosition='right'>
-          <ul className='tour-nav-actions__help-list'>
+          <ul className={tourNavHelpListClassName}>
             <li>
               The breadcrumb shows where you are in the tour — tap an earlier
               stop to move up. Use the arrows beside it to retrace your recent
@@ -102,7 +115,7 @@ export function TourHelpPanel({
         </AccordionItem>
 
         <AccordionItem title={TOUR_HELP_SECTION_CONTROLS} iconPosition='right'>
-          <ul className='tour-nav-actions__controls-list'>
+          <ul className={tourNavControlsListClassName}>
             {TOUR_HELP_VIEWER_CONTROLS.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -110,14 +123,14 @@ export function TourHelpPanel({
         </AccordionItem>
 
         <AccordionItem title={TOUR_HELP_SECTION_FAQ} iconPosition='right'>
-          <dl className='tour-nav-actions__help-faq-list'>
+          <dl className={tourNavHelpFaqListClassName}>
             {TOUR_HELP_FAQ.map((item) => (
-              <div key={item.id} className='tour-nav-actions__help-faq-item'>
-                <dt className='tour-nav-actions__help-faq-question'>
+              <div key={item.id} className={tourNavHelpFaqItemClassName}>
+                <dt className={tourNavHelpFaqQuestionClassName}>
                   {item.question}
                 </dt>
 
-                <dd className='tour-nav-actions__help-faq-answer'>
+                <dd className={tourNavHelpFaqAnswerClassName}>
                   {item.answer}
                 </dd>
               </div>
@@ -137,14 +150,14 @@ export function TourHelpPanel({
 
             {showClientContact && showTourSupport ?
               <hr
-                className='tour-nav-actions__help-divider'
+                className={tourNavHelpDividerClassName}
                 aria-hidden='true'
               />
             : null}
 
             {showTourSupport ?
               <>
-                <p className='tour-nav-actions__contact-section-lead'>
+                <p className={tourNavContactSectionLeadClassName}>
                   {TOUR_HELP_TOUR_SUPPORT_LEAD}
                 </p>
                 <TourContactInfo

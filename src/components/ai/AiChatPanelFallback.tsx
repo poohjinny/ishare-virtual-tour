@@ -1,9 +1,9 @@
-import './AiAssistant.css';
+import { aiPanelFallbackClassName } from './aiAssistantVariants';
 
 export function AiChatPanelFallback() {
   return (
     <div
-      className='ai-panel-fallback tour-glass-panel--ai'
+      className={aiPanelFallbackClassName}
       role='status'
       aria-live='polite'
       aria-label='Loading Virtual Tour Guide'

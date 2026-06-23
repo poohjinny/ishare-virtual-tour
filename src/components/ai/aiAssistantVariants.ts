@@ -1,0 +1,164 @@
+import { cva } from 'class-variance-authority';
+import { cn } from '../../lib/cn';
+
+export const aiAssistantStackClassName = cn(
+  'pointer-events-none absolute right-6 bottom-6 z-[95] flex flex-col items-end gap-2.5 max-sm:inset-x-3 max-sm:bottom-6 max-sm:items-stretch',
+  '[&>*]:pointer-events-auto',
+);
+
+const aiFabHoverClassName = cn(
+  'hover:max-w-[168px] hover:scale-105 hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'focus-visible:max-w-[168px] focus-visible:scale-105 focus-visible:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+);
+
+export const aiFabVariants = cva(
+  cn(
+    'group/fab relative box-border inline-flex h-[76px] min-h-[76px] w-[76px] min-w-[76px] max-w-[76px] cursor-pointer flex-row items-center justify-start overflow-hidden rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-2 shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%]',
+    'transition-[max-width,background,box-shadow,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+  ),
+  {
+    variants: {
+      phase: {
+        idle: aiFabHoverClassName,
+        enter: 'animate-ai-fab-in',
+        exit: 'pointer-events-none animate-ai-fab-out',
+      },
+    },
+    defaultVariants: { phase: 'idle' },
+  },
+);
+
+export const aiFabAvatarClassName = cn(
+  'inline-flex size-[60px] shrink-0 items-center justify-center overflow-visible leading-none',
+);
+
+export const aiFabIconClassName = cn(
+  'block size-full object-contain object-center',
+);
+
+export const aiFabLabelClassName = cn(
+  'shrink-0 whitespace-nowrap pr-[11px] pl-[13px] font-display text-lg font-medium text-foreground opacity-0 transition-opacity duration-150',
+  'group-hover/fab:opacity-100 group-hover/fab:delay-100 group-hover/fab:duration-200',
+  'group-focus-visible/fab:opacity-100 group-focus-visible/fab:delay-100 group-focus-visible/fab:duration-200',
+);
+
+export const aiFabLabelAccentClassName = cn('font-semibold text-primary');
+
+export const aiPanelVariants = cva(
+  cn(
+    'tour-glass-panel--ai h-[min(560px,calc(100vh-112px))] max-h-[560px] w-[380px] [transform-origin:bottom_right]',
+    '[--ai-panel-avatar-size:48px] [--ai-panel-header-gap:14px] [--ai-panel-inline-padding:20px]',
+    '[&_.tour-glass-panel__shell]:h-full [&_.tour-glass-panel__shell]:max-h-none',
+    '[&_.tour-glass-panel__header]:flex-row [&_.tour-glass-panel__header]:items-center [&_.tour-glass-panel__header]:justify-between [&_.tour-glass-panel__header]:gap-3 [&_.tour-glass-panel__header]:px-[var(--ai-panel-inline-padding)]',
+    'max-sm:h-[min(520px,calc(100vh-72px))] max-sm:max-h-[520px] max-sm:w-full',
+  ),
+  {
+    variants: {
+      phase: {
+        idle: '',
+        enter: 'animate-ai-panel-in',
+        exit: 'animate-ai-panel-out',
+      },
+    },
+    defaultVariants: { phase: 'idle' },
+  },
+);
+
+export const aiPanelFallbackClassName = cn(
+  'tour-glass-panel--ai box-border h-[min(560px,calc(100vh-112px))] max-h-[560px] w-[380px] animate-ai-panel-in rounded-xl bg-white/72 shadow-[var(--ishare-glass-dock-shadow)] backdrop-blur-[8px] backdrop-saturate-[120%] [transform-origin:bottom_right]',
+);
+
+export const aiPanelHeaderMainClassName = cn(
+  'flex min-w-0 items-center gap-[var(--ai-panel-header-gap)]',
+);
+
+export const aiPanelSymbolClassName = cn(
+  'size-[var(--ai-panel-avatar-size)] shrink-0 object-contain object-center',
+);
+
+export const aiPanelHeaderTextClassName = cn('flex min-w-0 flex-col gap-1.5');
+
+export const aiPanelTitleClassName = cn(
+  'm-0 font-display text-xl font-semibold leading-[1.2] text-foreground',
+);
+
+export const aiPanelLocationBadgeClassName = cn(
+  'self-start [&_.ishare-badge__dot]:size-1.5 [&_.ishare-badge__dot]:animate-hotspot-nav-dot-glow motion-reduce:[&_.ishare-badge__dot]:animate-none',
+);
+
+export const aiPanelHeaderActionsClassName = cn(
+  'flex shrink-0 items-center gap-1',
+);
+
+export const aiPanelHeaderBtnClassName = cn(
+  'flex size-8 shrink-0 cursor-pointer items-center justify-center p-0 transition-[background,color,opacity] duration-150',
+);
+
+export const aiPanelHeaderIconClassName = cn('size-4');
+
+export const aiPanelFooterClassName = cn(
+  'px-[var(--ai-panel-inline-padding)] pt-2.5 pb-3',
+);
+
+export const aiPanelPoweredByClassName = cn(
+  'm-0 text-center text-2xs leading-[1.4] text-muted',
+);
+
+export const aiPanelMessagesClassName = cn(
+  'ishare-scrollbar flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto p-[var(--ai-panel-inline-padding)] pb-[88px]',
+);
+
+export const aiPanelIntroClassName = cn('flex flex-col gap-3.5 self-stretch');
+
+export const aiPanelNoticeClassName = cn(
+  'max-w-full self-stretch rounded-lg border border-[#e8c878] bg-[#fdf4e3] px-3.5 py-2.5 text-sm leading-normal text-muted',
+);
+
+export const aiMessageVariants = cva(
+  'max-w-[90%] rounded-lg px-[15px] py-[11px] text-lg leading-[1.55] shadow-none',
+  {
+    variants: {
+      role: {
+        user: 'self-end border border-[#e7eaef] bg-white text-body',
+        assistant:
+          'self-start border border-[color-mix(in_srgb,var(--color-primary)_10%,#e2e8f0)] bg-[color-mix(in_srgb,var(--color-primary)_4%,#ffffff)] text-body',
+      },
+    },
+  },
+);
+
+export const aiPanelSuggestionsClassName = cn(
+  'flex max-w-full flex-wrap gap-1.5 self-start',
+);
+
+export const aiSuggestionClassName = cn(
+  'cursor-pointer rounded-[20px] border border-[rgba(15,23,42,0.12)] bg-white/55 px-3 py-[7px] text-sm text-muted transition-[background,color,border-color] duration-200 hover:border-primary hover:bg-primary hover:text-white',
+);
+
+export const aiComposerClassName = cn(
+  'pointer-events-none absolute right-[var(--ai-panel-inline-padding)] bottom-3.5 left-[var(--ai-panel-inline-padding)] z-[2] flex justify-center border-none bg-transparent p-0',
+);
+
+export const aiComposerPillClassName = cn(
+  'group/composer pointer-events-auto flex w-[60%] max-w-full min-h-[46px] items-center gap-0.5 rounded-full border-[1.5px] border-[rgba(15,23,42,0.12)] bg-white/72 px-2.5 py-2 pl-5 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-[8px] backdrop-saturate-[120%] transition-[width,border-color,box-shadow,background] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.18)] focus-within:w-full focus-within:border-primary',
+);
+
+export const aiComposerInputClassName = cn(
+  'min-w-0 flex-1 border-none bg-transparent py-2 font-display text-lg leading-normal text-body outline-none placeholder:font-display placeholder:text-muted',
+);
+
+export const aiComposerActionsClassName = cn(
+  'flex shrink-0 items-center gap-1 pr-0.5',
+);
+
+export const aiComposerVoiceClassName = cn(
+  'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-muted transition-[background,color,transform] duration-200 hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground',
+);
+
+export const aiComposerSendClassName = cn(
+  'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform] duration-200 hover:bg-primary-dark active:scale-95',
+);
+
+export const aiComposerIconClassName = cn('size-4');
+
+export const aiComposerSendIconClassName = cn('size-3.5');

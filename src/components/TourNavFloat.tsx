@@ -55,7 +55,54 @@ import {
   type TourGlassPanelAnimation,
 } from './TourGlassPanel';
 import { ShareIcon } from './icons/ShareIcon';
-import './TourNavFloat.css';
+import { cn } from '../lib/cn';
+import {
+  tourNavActionsDockClassName,
+  tourNavActionsRootClassName,
+  tourNavBreadcrumbBarClassName,
+  tourNavBreadcrumbClassName,
+  tourNavBreadcrumbCurrentClassName,
+  tourNavBreadcrumbCurrentLabelClassName,
+  tourNavBreadcrumbItemClassName,
+  tourNavBreadcrumbLinkClassName,
+  tourNavBreadcrumbListClassName,
+  tourNavBreadcrumbPulseDotClassName,
+  tourNavBreadcrumbRootIconClassName,
+  tourNavBreadcrumbRowVariants,
+  tourNavBreadcrumbSepClassName,
+  tourNavCircleBtnVariants,
+  tourNavCircleIconClassName,
+  tourNavCircleIconHelpClassName,
+  tourNavDirectoryActiveSelector,
+  tourNavDirectoryItemVariants,
+  tourNavDirectoryPanelClassName,
+  tourNavDirectorySectionClassName,
+  tourNavDirectoryTabsClassName,
+  tourNavEmptyClassName,
+  tourNavHistoryBtnClassName,
+  tourNavHistoryBtnIconClassName,
+  tourNavItemBadgeClassName,
+  tourNavItemDotClassName,
+  tourNavItemIconNamingVariants,
+  tourNavItemLabelClassName,
+  tourNavItemLeadingClassName,
+  tourNavItemMetaClassName,
+  tourNavItemTextClassName,
+  tourNavListClassName,
+  tourNavLogoClassName,
+  tourNavLogoLinkClassName,
+  tourNavPanelScrollClassName,
+  tourNavPanelScrollInnerClassName,
+  tourNavPanelSlotVariants,
+  tourNavSearchDropdownClassName,
+  tourNavSearchIconClassName,
+  tourNavSearchInputClassName,
+  tourNavSearchPillCloseClassName,
+  tourNavSearchPillTriggerClassName,
+  tourNavSearchPillVariants,
+  tourNavSearchSlotVariants,
+  tourNavSectionTitleClassName,
+} from './tourNavFloatVariants';
 
 interface TourNavFloatProps {
   scenes: Scene[];
@@ -90,7 +137,7 @@ type PanelAnimPhase = 'enter' | 'exit' | 'idle';
 const PANEL_ENTER_MS = 150;
 const PANEL_EXIT_MS = 140;
 const SEARCH_PILL_EXPAND_MS = 220;
-/** Match `.tour-nav-breadcrumb__row` transform duration in TourNavFloat.css */
+/** Match `tourNavBreadcrumbRowVariants` transform duration */
 const BREADCRUMB_EXIT_MS = 280;
 
 function panelAnimation(phase: PanelAnimPhase): TourGlassPanelAnimation {
@@ -108,7 +155,8 @@ interface BreadcrumbItem {
 function NamingHeartIcon({ active }: { active: boolean }) {
   return (
     <svg
-      className={`tour-nav-actions__item-icon tour-nav-actions__item-icon--naming${active ? ' tour-nav-actions__item-icon--naming-active' : ''}`}
+      className={tourNavItemIconNamingVariants({ active })}
+      data-tour-nav-naming-icon
       viewBox='0 0 24 24'
       fill='currentColor'
       aria-hidden='true'
@@ -149,13 +197,13 @@ function TourLayersIcon({ className }: { className: string }) {
 }
 
 function ExploreTourIcon() {
-  return <TourLayersIcon className='tour-nav-actions__circle-icon' />;
+  return <TourLayersIcon className={tourNavCircleIconClassName} />;
 }
 
 function SearchIcon() {
   return (
     <svg
-      className='tour-nav-actions__circle-icon'
+      className={tourNavCircleIconClassName}
       viewBox='0 0 20 20'
       fill='none'
       aria-hidden='true'
@@ -180,7 +228,7 @@ function SearchIcon() {
 function ControlsIcon() {
   return (
     <svg
-      className='tour-nav-actions__circle-icon'
+      className={tourNavCircleIconClassName}
       viewBox='0 0 24 24'
       fill='currentColor'
       aria-hidden='true'
@@ -193,7 +241,7 @@ function ControlsIcon() {
 function HelpIcon() {
   return (
     <svg
-      className='tour-nav-actions__circle-icon tour-nav-actions__circle-icon--help'
+      className={cn(tourNavCircleIconClassName, tourNavCircleIconHelpClassName)}
       viewBox='0 0 20 20'
       fill='none'
       aria-hidden='true'
@@ -218,13 +266,13 @@ function HelpIcon() {
 }
 
 function ShareIconButton() {
-  return <ShareIcon className='tour-nav-actions__circle-icon' />;
+  return <ShareIcon className={tourNavCircleIconClassName} />;
 }
 
 function PanelSearchIcon() {
   return (
     <svg
-      className='tour-nav-actions__search-icon'
+      className={tourNavSearchIconClassName}
       viewBox='0 0 20 20'
       fill='none'
       aria-hidden='true'
@@ -249,7 +297,7 @@ function PanelSearchIcon() {
 function HistoryBackIcon() {
   return (
     <svg
-      className='tour-nav-history-btn__icon'
+      className={tourNavHistoryBtnIconClassName}
       viewBox='0 0 20 20'
       fill='none'
       aria-hidden='true'
@@ -268,7 +316,7 @@ function HistoryBackIcon() {
 function HistoryForwardIcon() {
   return (
     <svg
-      className='tour-nav-history-btn__icon'
+      className={tourNavHistoryBtnIconClassName}
       viewBox='0 0 20 20'
       fill='none'
       aria-hidden='true'
@@ -287,7 +335,7 @@ function HistoryForwardIcon() {
 function BreadcrumbRootIcon() {
   return (
     <svg
-      className='tour-nav-breadcrumb__root-icon'
+      className={tourNavBreadcrumbRootIconClassName}
       viewBox='0 0 24 24'
       fill='none'
       aria-hidden='true'
@@ -597,7 +645,7 @@ export function TourNavFloat({
     if (!scrollRoot) return;
 
     const activeItem = scrollRoot.querySelector<HTMLElement>(
-      '.tour-nav-actions__item--active, .tour-nav-actions__item--naming-active',
+      tourNavDirectoryActiveSelector,
     );
     activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [activeNamingHotspotId, currentSceneId, directoryTab, panelMode]);
@@ -609,7 +657,7 @@ export function TourNavFloat({
     if (!scrollRoot) return;
 
     const activeItem = scrollRoot.querySelector<HTMLElement>(
-      '.tour-nav-actions__item--active, .tour-nav-actions__item--naming-active',
+      tourNavDirectoryActiveSelector,
     );
     activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [
@@ -685,7 +733,7 @@ export function TourNavFloat({
 
   const logoImage = clientLogo && (
     <img
-      className='tour-nav-actions__logo'
+      className={tourNavLogoClassName}
       src={clientLogo}
       alt={logoAlt ?? ''}
     />
@@ -695,7 +743,7 @@ export function TourNavFloat({
     clientLogo ?
       websiteUrl ?
         <a
-          className='tour-nav-actions__logo-link'
+          className={tourNavLogoLinkClassName}
           href={websiteUrl}
           target='_blank'
           rel='noopener noreferrer'
@@ -703,7 +751,7 @@ export function TourNavFloat({
         >
           {logoImage}
         </a>
-      : <div className='tour-nav-actions__logo-link'>{logoImage}</div>
+      : <div className={tourNavLogoLinkClassName}>{logoImage}</div>
     : null;
 
   const handleSelectNaming = (sceneId: string, hotspotId: string) => {
@@ -716,7 +764,7 @@ export function TourNavFloat({
 
   const renderDirectoryTabs = () => (
     <SegmentedTabs
-      className='tour-nav-actions__directory-tabs'
+      className={tourNavDirectoryTabsClassName}
       aria-label='Tour directory filters'
       tabs={TOUR_DIRECTORY_TABS.map((tab) => ({
         id: tab.id,
@@ -735,7 +783,7 @@ export function TourNavFloat({
     options?: { showSectionTitle?: boolean; emptyMessage?: string },
   ) => (
     <section
-      className='tour-nav-actions__directory-section'
+      className={tourNavDirectorySectionClassName}
       aria-labelledby={
         options?.showSectionTitle ?
           'tour-nav-directory-locations-heading'
@@ -745,7 +793,7 @@ export function TourNavFloat({
       {options?.showSectionTitle && (
         <h3
           id='tour-nav-directory-locations-heading'
-          className='tour-nav-actions__section-title'
+          className={tourNavSectionTitleClassName}
         >
           {TOUR_DIRECTORY_SECTION_LOCATIONS}
         </h3>
@@ -753,7 +801,7 @@ export function TourNavFloat({
 
       {items.length > 0 ?
         <ul
-          className='tour-nav-actions__list'
+          className={tourNavListClassName}
           role='listbox'
           aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
         >
@@ -765,17 +813,18 @@ export function TourNavFloat({
                   type='button'
                   role='option'
                   aria-selected={isActive}
-                  className={`tour-nav-actions__item${isActive ? ' tour-nav-actions__item--active' : ''}`}
+                  className={tourNavDirectoryItemVariants({ kind: 'location' })}
                   disabled={disabled}
                   onClick={() => handleSelect(scene.id)}
                 >
-                  <span className='tour-nav-actions__item-leading'>
+                  <span className={tourNavItemLeadingClassName}>
                     <span
-                      className='tour-nav-actions__item-dot'
+                      className={tourNavItemDotClassName}
+                      data-tour-nav-dot
                       aria-hidden='true'
                     />
                   </span>
-                  <span className='tour-nav-actions__item-label'>
+                  <span className={tourNavItemLabelClassName}>
                     {scene.title}
                   </span>
                   {isActive && (
@@ -789,7 +838,7 @@ export function TourNavFloat({
           })}
         </ul>
       : options?.emptyMessage ?
-        <p className='tour-nav-actions__empty'>{options.emptyMessage}</p>
+        <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
       : null}
     </section>
   );
@@ -803,7 +852,7 @@ export function TourNavFloat({
     },
   ) => (
     <section
-      className='tour-nav-actions__directory-section'
+      className={tourNavDirectorySectionClassName}
       aria-labelledby={
         options?.showSectionTitle ?
           'tour-nav-directory-naming-heading'
@@ -813,7 +862,7 @@ export function TourNavFloat({
       {options?.showSectionTitle && (
         <h3
           id='tour-nav-directory-naming-heading'
-          className='tour-nav-actions__section-title'
+          className={tourNavSectionTitleClassName}
         >
           {TOUR_DIRECTORY_SECTION_NAMING}
         </h3>
@@ -837,7 +886,7 @@ export function TourNavFloat({
 
       {items.length > 0 ?
         <ul
-          className='tour-nav-actions__list'
+          className={tourNavListClassName}
           role='listbox'
           aria-label={TOUR_DIRECTORY_SECTION_NAMING}
         >
@@ -852,20 +901,20 @@ export function TourNavFloat({
                   type='button'
                   role='option'
                   aria-selected={isActive}
-                  className={`tour-nav-actions__item tour-nav-actions__item--naming${isActive ? ' tour-nav-actions__item--naming-active' : ''}`}
+                  className={tourNavDirectoryItemVariants({ kind: 'naming' })}
                   disabled={disabled}
                   onClick={() =>
                     handleSelectNaming(item.sceneId, item.hotspotId)
                   }
                 >
-                  <span className='tour-nav-actions__item-leading'>
+                  <span className={tourNavItemLeadingClassName}>
                     <NamingHeartIcon active={isActive} />
                   </span>
-                  <span className='tour-nav-actions__item-text'>
-                    <span className='tour-nav-actions__item-label'>
+                  <span className={tourNavItemTextClassName}>
+                    <span className={tourNavItemLabelClassName}>
                       {item.name}
                     </span>
-                    <span className='tour-nav-actions__item-meta'>
+                    <span className={tourNavItemMetaClassName}>
                       {item.sceneTitle}
                     </span>
                   </span>
@@ -873,7 +922,7 @@ export function TourNavFloat({
                     statusModifier={item.statusModifier as NamingStatusModifier}
                     label={item.statusShortLabel}
                     ariaLabel={item.statusLabel}
-                    className='tour-nav-actions__item-badge'
+                    className={tourNavItemBadgeClassName}
                   />
                 </button>
               </li>
@@ -881,7 +930,7 @@ export function TourNavFloat({
           })}
         </ul>
       : options?.emptyMessage ?
-        <p className='tour-nav-actions__empty'>{options.emptyMessage}</p>
+        <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
       : null}
     </section>
   );
@@ -901,7 +950,7 @@ export function TourNavFloat({
         panelKey={directoryTab}
         id={`tour-nav-directory-panel-${directoryTab}`}
         aria-labelledby={`tour-nav-directory-tab-${directoryTab}`}
-        className='tour-nav-actions__directory-panel'
+        className={tourNavDirectoryPanelClassName}
         scrollRef={exploreScrollRef}
       >
         {showLocations &&
@@ -929,12 +978,12 @@ export function TourNavFloat({
 
     if (!hasScenes && !hasNaming) {
       return (
-        <p className='tour-nav-actions__empty'>{TOUR_DIRECTORY_EMPTY_SEARCH}</p>
+        <p className={tourNavEmptyClassName}>{TOUR_DIRECTORY_EMPTY_SEARCH}</p>
       );
     }
 
     return (
-      <div className='tour-nav-actions__directory-panel'>
+      <div className={tourNavDirectoryPanelClassName}>
         {hasScenes &&
           renderLocationsList(filteredScenes, { showSectionTitle: true })}
         {hasNaming &&
@@ -944,7 +993,7 @@ export function TourNavFloat({
   };
 
   const renderExplorePanel = () => (
-    <div id='tour-nav-explore-panel' className='tour-nav-actions__panel-slot'>
+    <div id='tour-nav-explore-panel' className={tourNavPanelSlotVariants({ panel: 'explore' })}>
       <TourGlassPanel
         title={TOUR_DIRECTORY_PANEL_TITLE}
         titleId='tour-nav-explore-title'
@@ -956,9 +1005,9 @@ export function TourNavFloat({
 
         <div
           ref={exploreScrollRef}
-          className='tour-nav-actions__panel-scroll ishare-scrollbar'
+          className={tourNavPanelScrollClassName}
         >
-          <div className='tour-nav-actions__panel-scroll-inner'>
+          <div className={tourNavPanelScrollInnerClassName}>
             {renderDirectoryBody()}
           </div>
         </div>
@@ -968,15 +1017,15 @@ export function TourNavFloat({
 
   const renderSearchSlot = () => (
     <div
-      className={`tour-nav-actions__search-slot${searchOpen ? ' tour-nav-actions__search-slot--open' : ''}${isSearchActive ? ' tour-nav-actions__search-slot--results' : ''}`}
+      className={tourNavSearchSlotVariants({ results: isSearchActive })}
     >
       <div
-        className={`tour-nav-actions__search-pill${searchOpen ? ' tour-nav-actions__search-pill--open' : ''}`}
+        className={tourNavSearchPillVariants({ open: searchOpen })}
       >
         {!searchOpen ?
           <button
             type='button'
-            className='tour-nav-actions__search-pill-trigger'
+            className={tourNavSearchPillTriggerClassName}
             onClick={openSearch}
             aria-expanded={false}
             aria-controls='tour-scene-search'
@@ -990,7 +1039,7 @@ export function TourNavFloat({
               ref={searchRef}
               id='tour-scene-search'
               type='search'
-              className='tour-nav-actions__search'
+              className={tourNavSearchInputClassName}
               placeholder={TOUR_DIRECTORY_SEARCH_PLACEHOLDER}
               value={search}
               disabled={disabled}
@@ -1002,7 +1051,7 @@ export function TourNavFloat({
             />
             <button
               type='button'
-              className='tour-nav-actions__search-pill-close'
+              className={tourNavSearchPillCloseClassName}
               onClick={closeSearch}
               {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SEARCH_CLOSE)}
             >
@@ -1016,7 +1065,7 @@ export function TourNavFloat({
         <div
           id='tour-nav-search-dropdown'
           ref={searchScrollRef}
-          className='tour-nav-actions__search-dropdown ishare-scrollbar'
+          className={tourNavSearchDropdownClassName}
           role='region'
           aria-label='Search results'
         >
@@ -1030,14 +1079,14 @@ export function TourNavFloat({
 
   return (
     <>
-      <nav className='tour-nav-breadcrumb' aria-label='Tour location'>
+      <nav className={tourNavBreadcrumbClassName} aria-label='Tour location'>
         <div
-          className={`tour-nav-breadcrumb__row${breadcrumbHidden ? ' tour-nav-breadcrumb__row--hidden' : ''}`}
+          className={tourNavBreadcrumbRowVariants({ hidden: breadcrumbHidden })}
         >
           {displayShowHistoryBack && (
             <button
               type='button'
-              className='tour-nav-history-btn'
+              className={tourNavHistoryBtnClassName}
               aria-label='Previous view'
               disabled={disabled}
               onClick={onHistoryBack}
@@ -1046,13 +1095,13 @@ export function TourNavFloat({
             </button>
           )}
 
-          <div className='tour-nav-breadcrumb__bar'>
-            <ol className='tour-nav-breadcrumb__list'>
+          <div className={tourNavBreadcrumbBarClassName}>
+            <ol className={tourNavBreadcrumbListClassName}>
               {breadcrumbItems.map((item, index) => (
-                <li key={item.id} className='tour-nav-breadcrumb__item'>
+                <li key={item.id} className={tourNavBreadcrumbItemClassName}>
                   {index > 0 && (
                     <span
-                      className='tour-nav-breadcrumb__sep'
+                      className={tourNavBreadcrumbSepClassName}
                       aria-hidden='true'
                     >
                       ›
@@ -1060,23 +1109,23 @@ export function TourNavFloat({
                   )}
                   {item.isCurrent ?
                     <span
-                      className='tour-nav-breadcrumb__current'
+                      className={tourNavBreadcrumbCurrentClassName}
                       aria-current='location'
                     >
                       {index === 0 && showBreadcrumbRootIcon && (
                         <BreadcrumbRootIcon />
                       )}
-                      <span className='tour-nav-breadcrumb__current-label'>
+                      <span className={tourNavBreadcrumbCurrentLabelClassName}>
                         {item.title}
                       </span>
                       <span
-                        className='tour-nav-breadcrumb__pulse-dot'
+                        className={tourNavBreadcrumbPulseDotClassName}
                         aria-hidden='true'
                       />
                     </span>
                   : <button
                       type='button'
-                      className='tour-nav-breadcrumb__link'
+                      className={tourNavBreadcrumbLinkClassName}
                       disabled={disabled}
                       onClick={() => onBreadcrumbNavigate(item.id)}
                     >
@@ -1094,7 +1143,7 @@ export function TourNavFloat({
           {displayShowHistoryForward && (
             <button
               type='button'
-              className='tour-nav-history-btn'
+              className={tourNavHistoryBtnClassName}
               aria-label='Next view'
               disabled={disabled}
               onClick={onHistoryForward}
@@ -1105,22 +1154,13 @@ export function TourNavFloat({
         </div>
       </nav>
 
-      <div
-        className={[
-          'tour-nav-actions',
-          displayPanel && `tour-nav-actions--${displayPanel}-open`,
-          searchOpen && 'tour-nav-actions--search-pill-open',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        ref={actionsRef}
-      >
+      <div className={tourNavActionsRootClassName} ref={actionsRef}>
         {displayPanel === 'explore' && renderExplorePanel()}
 
         {displayPanel === 'help' && (
           <div
             id='tour-nav-help-panel'
-            className='tour-nav-actions__panel-slot tour-nav-actions__panel-slot--help'
+            className={tourNavPanelSlotVariants({ panel: 'help' })}
           >
             <TourGlassPanel
               title={TOUR_HELP_PANEL_TITLE}
@@ -1142,7 +1182,7 @@ export function TourNavFloat({
         {displayPanel === 'share' && (
           <div
             id='tour-nav-share-panel'
-            className='tour-nav-actions__panel-slot tour-nav-actions__panel-slot--share'
+            className={tourNavPanelSlotVariants({ panel: 'share' })}
           >
             <TourGlassPanel
               title={TOUR_SHARE_PANEL_TITLE}
@@ -1160,10 +1200,10 @@ export function TourNavFloat({
           </div>
         )}
 
-        <div className='tour-nav-actions__dock'>
+        <div className={tourNavActionsDockClassName}>
           <button
             type='button'
-            className={`tour-nav-actions__circle-btn${panelMode === 'explore' ? ' tour-nav-actions__circle-btn--active' : ''}`}
+            className={tourNavCircleBtnVariants({ active: panelMode === 'explore' })}
             onClick={handleExploreClick}
             aria-expanded={panelMode === 'explore'}
             aria-controls='tour-nav-explore-panel'
@@ -1178,7 +1218,7 @@ export function TourNavFloat({
 
           <button
             type='button'
-            className={`tour-nav-actions__circle-btn${panelMode === 'share' ? ' tour-nav-actions__circle-btn--active' : ''}`}
+            className={tourNavCircleBtnVariants({ active: panelMode === 'share' })}
             onClick={handleShareClick}
             aria-expanded={panelMode === 'share'}
             aria-controls='tour-nav-share-panel'
@@ -1191,7 +1231,7 @@ export function TourNavFloat({
 
           <button
             type='button'
-            className={`tour-nav-actions__circle-btn${controlsVisible ? ' tour-nav-actions__circle-btn--active' : ''}`}
+            className={tourNavCircleBtnVariants({ active: controlsVisible })}
             onClick={handleTuneClick}
             aria-pressed={controlsVisible}
             {...tourNavIconButtonA11y(
@@ -1203,7 +1243,7 @@ export function TourNavFloat({
 
           <button
             type='button'
-            className={`tour-nav-actions__circle-btn${panelMode === 'help' ? ' tour-nav-actions__circle-btn--active' : ''}`}
+            className={tourNavCircleBtnVariants({ active: panelMode === 'help' })}
             onClick={handleHelpClick}
             aria-expanded={panelMode === 'help'}
             aria-controls='tour-nav-help-panel'

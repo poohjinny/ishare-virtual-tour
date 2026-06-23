@@ -1,4 +1,7 @@
-import './AiAssistant.css';
+import {
+  aiSuggestionClassName,
+  aiPanelSuggestionsClassName,
+} from './aiAssistantVariants';
 
 interface SuggestedQuestionsProps {
   questions: string[];
@@ -11,12 +14,12 @@ export function SuggestedQuestions({
 }: SuggestedQuestionsProps) {
   if (questions.length === 0) return null;
   return (
-    <div className='ai-panel__suggestions'>
+    <div className={aiPanelSuggestionsClassName}>
       {questions.map((q) => (
         <button
           key={q}
           type='button'
-          className='ai-suggestion'
+          className={aiSuggestionClassName}
           onClick={() => onSelect(q)}
         >
           {q}

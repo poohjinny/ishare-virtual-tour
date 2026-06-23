@@ -10,7 +10,30 @@ import { PlatformBrandLink } from '../PlatformBrandLink';
 import { LocationBadge } from './LocationBadge';
 import { GuideAvatarImage } from './GuideAvatarImage';
 import { SuggestedQuestions } from './SuggestedQuestions';
-import './AiAssistant.css';
+import {
+  aiComposerActionsClassName,
+  aiComposerClassName,
+  aiComposerIconClassName,
+  aiComposerInputClassName,
+  aiComposerPillClassName,
+  aiComposerSendClassName,
+  aiComposerSendIconClassName,
+  aiComposerVoiceClassName,
+  aiMessageVariants,
+  aiPanelFooterClassName,
+  aiPanelHeaderActionsClassName,
+  aiPanelHeaderBtnClassName,
+  aiPanelHeaderIconClassName,
+  aiPanelHeaderMainClassName,
+  aiPanelHeaderTextClassName,
+  aiPanelIntroClassName,
+  aiPanelMessagesClassName,
+  aiPanelNoticeClassName,
+  aiPanelPoweredByClassName,
+  aiPanelSymbolClassName,
+  aiPanelTitleClassName,
+  aiPanelVariants,
+} from './aiAssistantVariants';
 
 interface AiChatPanelProps {
   panelPhase: 'idle' | 'enter' | 'exit';
@@ -27,7 +50,7 @@ interface AiChatPanelProps {
 function ResetIcon() {
   return (
     <svg
-      className='ai-panel__header-icon'
+      className={aiPanelHeaderIconClassName}
       viewBox='0 0 24 24'
       fill='none'
       stroke='currentColor'
@@ -47,7 +70,7 @@ function ResetIcon() {
 function MicIcon() {
   return (
     <svg
-      className='ai-composer__icon'
+      className={aiComposerIconClassName}
       viewBox='0 0 24 24'
       fill='none'
       stroke='currentColor'
@@ -67,7 +90,7 @@ function MicIcon() {
 function ArrowUpIcon() {
   return (
     <svg
-      className='ai-composer__icon ai-composer__icon--send'
+      className={`${aiComposerIconClassName} ${aiComposerSendIconClassName}`}
       viewBox='0 0 24 24'
       fill='none'
       stroke='currentColor'
@@ -120,10 +143,7 @@ export function AiChatPanel({
     });
   }, [displayMessages]);
 
-  const panelClass =
-    panelPhase === 'exit' ? ' ai-panel--exit'
-    : panelPhase === 'enter' ? ' ai-panel--enter'
-    : '';
+  const panelClass = aiPanelVariants({ phase: panelPhase });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,31 +161,31 @@ export function AiChatPanel({
   return (
     <TourGlassPanel
       variant='dock'
-      className={`tour-glass-panel--ai${panelClass}`}
+      className={panelClass}
       titleId='ai-guide-panel-title'
       animation='none'
       bodyClassName='tour-glass-panel__body--ai'
       header={
         <>
-          <div className='ai-panel__header-main'>
+          <div className={aiPanelHeaderMainClassName}>
             <GuideAvatarImage
-              className='ai-panel__symbol'
+              className={aiPanelSymbolClassName}
               src={guideAvatarUrl}
               alt=''
               draggable={false}
             />
-            <div className='ai-panel__header-text'>
-              <p id='ai-guide-panel-title' className='ai-panel__title'>
+            <div className={aiPanelHeaderTextClassName}>
+              <p id='ai-guide-panel-title' className={aiPanelTitleClassName}>
                 Virtual Tour Guide
               </p>
               <LocationBadge title={locationTitle} />
             </div>
           </div>
-          <div className='ai-panel__header-actions'>
+          <div className={aiPanelHeaderActionsClassName}>
             {canReset && (
               <button
                 type='button'
-                className='tour-glass-panel__close ai-panel__header-btn ai-panel__reset'
+                className={`tour-glass-panel__close ${aiPanelHeaderBtnClassName}`}
                 onClick={handleReset}
                 aria-label='Reset conversation'
                 title='Reset conversation'
@@ -175,7 +195,7 @@ export function AiChatPanel({
             )}
             <button
               type='button'
-              className='tour-glass-panel__close ai-panel__header-btn ai-panel__close'
+              className={`tour-glass-panel__close ${aiPanelHeaderBtnClassName}`}
               onClick={onClose}
               aria-label='Close'
             >
@@ -185,20 +205,24 @@ export function AiChatPanel({
         </>
       }
       footer={
-        <footer className='tour-glass-panel__footer ai-panel__footer'>
-          <p className='ai-panel__powered-by'>
+        <footer
+          className={`tour-glass-panel__footer ${aiPanelFooterClassName}`}
+        >
+          <p className={aiPanelPoweredByClassName}>
             Powered by <PlatformBrandLink brandId='fundingMattersAiSuite' />
           </p>
         </footer>
       }
     >
-      <div className='ai-panel__messages ishare-scrollbar' ref={messagesRef}>
+      <div className={aiPanelMessagesClassName} ref={messagesRef}>
         {!chatTest && (
-          <div className='ai-panel__intro'>
-            <p className='ai-panel__notice' role='note'>
+          <div className={aiPanelIntroClassName}>
+            <p className={aiPanelNoticeClassName} role='note'>
               {VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE}
             </p>
-            <p className='ai-message ai-message--assistant'>{greeting}</p>
+            <p className={aiMessageVariants({ role: 'assistant' })}>
+              {greeting}
+            </p>
             <SuggestedQuestions
               questions={suggestedQuestions}
               onSelect={onSend}
@@ -206,26 +230,26 @@ export function AiChatPanel({
           </div>
         )}
         {displayMessages.map((msg) => (
-          <div key={msg.id} className={`ai-message ai-message--${msg.role}`}>
+          <div key={msg.id} className={aiMessageVariants({ role: msg.role })}>
             {msg.content}
           </div>
         ))}
       </div>
 
-      <form className='ai-composer' onSubmit={handleSubmit}>
-        <div className='ai-composer__pill'>
+      <form className={aiComposerClassName} onSubmit={handleSubmit}>
+        <div className={aiComposerPillClassName}>
           <input
-            className='ai-composer__input'
+            className={aiComposerInputClassName}
             type='text'
             placeholder={`Ask ${VIRTUAL_TOUR_GUIDE_NAME}...`}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             aria-label='Your question'
           />
-          <div className='ai-composer__actions'>
+          <div className={aiComposerActionsClassName}>
             <button
               type='button'
-              className='ai-composer__voice'
+              className={aiComposerVoiceClassName}
               aria-label='Voice input (coming soon)'
               title='Voice input (coming soon)'
             >
@@ -234,7 +258,7 @@ export function AiChatPanel({
             {hasInput && (
               <button
                 type='submit'
-                className='ai-composer__send'
+                className={aiComposerSendClassName}
                 aria-label='Send message'
               >
                 <ArrowUpIcon />
