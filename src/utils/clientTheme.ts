@@ -3,11 +3,12 @@ const DEFAULT_PRIMARY = '#007b8b';
 /** Minimum contrast for white label text on filled primary surfaces. */
 const MIN_PRIMARY_ON_WHITE_CONTRAST = 3;
 
-const THEME_VARS = [
-  '--ishare-primary',
-  '--ishare-primary-dark',
-  '--ishare-primary-light',
-  '--ishare-primary-rgb',
+/** Runtime brand overrides — consumed by @theme in globals.css. */
+const BRAND_VARS = [
+  '--brand-primary',
+  '--brand-primary-dark',
+  '--brand-primary-light',
+  '--brand-primary-rgb',
 ] as const;
 
 export function normalizeHexColor(color: string): string | null {
@@ -125,15 +126,15 @@ export function applyClientTheme(primaryColor?: string): void {
   const theme = buildClientTheme(primaryColor ?? DEFAULT_PRIMARY);
   const root = document.documentElement;
 
-  root.style.setProperty('--ishare-primary', theme.primary);
-  root.style.setProperty('--ishare-primary-dark', theme.primaryDark);
-  root.style.setProperty('--ishare-primary-light', theme.primaryLight);
-  root.style.setProperty('--ishare-primary-rgb', theme.primaryRgb);
+  root.style.setProperty('--brand-primary', theme.primary);
+  root.style.setProperty('--brand-primary-dark', theme.primaryDark);
+  root.style.setProperty('--brand-primary-light', theme.primaryLight);
+  root.style.setProperty('--brand-primary-rgb', theme.primaryRgb);
 }
 
 export function resetClientTheme(): void {
   const root = document.documentElement;
-  for (const name of THEME_VARS) {
+  for (const name of BRAND_VARS) {
     root.style.removeProperty(name);
   }
 }

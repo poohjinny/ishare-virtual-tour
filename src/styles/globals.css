@@ -1,0 +1,412 @@
+@import 'tailwindcss';
+
+/*
+ * Tailwind-first design system — @theme is the single source of hex/rgb values.
+ * Legacy --ishare-* shims in @layer base keep existing CSS working during migration.
+ * Runtime per-tour brand colors: --brand-* (see clientTheme.ts).
+ */
+
+@theme {
+  /* Brand — overridden at runtime via --brand-* */
+  --color-primary: var(--brand-primary, #007b8b);
+  --color-primary-dark: var(--brand-primary-dark, #006270);
+  --color-primary-light: var(--brand-primary-light, #1a9aab);
+
+  --color-accent: #e8a838;
+  --color-accent-dark: #9a6b12;
+  --color-gold: #e8a838;
+  --color-gold-dark: #9a6b12;
+
+  --color-page: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f1f5f9;
+
+  --color-foreground: #0f172a;
+  --color-body: #1e293b;
+  --color-muted: #64748b;
+  --color-danger: #ef4444;
+
+  /* Naming status */
+  --color-status-on-sale: #15803d;
+  --color-status-coming-soon: #0284c7;
+
+  /* Tour category */
+  --color-category-healthcare: var(--color-primary-dark);
+  --color-category-education: #1d4ed8;
+  --color-category-culture: #7e22ce;
+  --color-category-sporting: #15803d;
+  --color-category-aid: #c2410c;
+  --color-category-social: #4338ca;
+  --color-category-tourism: #0369a1;
+
+  --color-category-healthcare-bg: #e0eff1;
+  --color-category-education-bg: #e4eefe;
+  --color-category-culture-bg: #f3e7fe;
+  --color-category-sporting-bg: #e0f7e8;
+  --color-category-aid-bg: #feebde;
+  --color-category-social-bg: #e9eafd;
+  --color-category-tourism-bg: #ddf2fc;
+
+  /* Fonts — resolved on .tour-page when --client-font is set (layout.css) */
+  --font-display: var(--ishare-display-font);
+  --font-body: var(--ishare-body-font);
+
+  /*
+   * iShare compact type scale — overrides Tailwind defaults project-wide.
+   * lg = 14px, 2xl = 18px (not Tailwind's 18px / 24px).
+   */
+  --text-2xs: 0.625rem;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.75rem;
+  --text-md: 0.8125rem;
+  --text-lg: 0.875rem;
+  --text-xl: 1.0625rem;
+  --text-2xl: 1.125rem;
+  --text-3xl: 1.25rem;
+  --text-icon: 1.625rem;
+
+  --radius-sm: 6px;
+  --radius-DEFAULT: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  --shadow-default: 0 4px 20px rgba(15, 23, 42, 0.1);
+
+  --animate-segmented-tab-panel-in: segmented-tab-panel-in 0.24s cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-error-backdrop-in: error-backdrop-in 0.3s ease-out forwards;
+  --animate-error-card-in: error-card-in 0.34s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both;
+  --animate-load-splash-out: load-splash-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  --animate-floor-plan-pulse: floor-plan-pulse 2.4s ease-out infinite;
+  --animate-ai-fab-in: ai-fab-in 0.14s ease-out forwards;
+  --animate-ai-fab-out: ai-fab-out 0.14s ease-in forwards;
+  --animate-ai-panel-in: ai-panel-in 0.17s ease-out forwards;
+  --animate-ai-panel-out: ai-panel-out 0.14s ease-in forwards;
+  --animate-hotspot-nav-dot-glow: hotspot-nav-dot-glow 2.8s ease-out infinite;
+  --animate-tour-nav-dot-glow: tour-nav-dot-glow 2.2s ease-out infinite;
+  --animate-tour-nav-dot-pulse: tour-nav-dot-pulse 2.2s ease-out infinite;
+  --animate-tour-nav-search-dropdown-in: tour-nav-search-dropdown-in 0.16s ease-out;
+}
+
+@keyframes segmented-tab-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes error-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes error-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes load-splash-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes floor-plan-pulse {
+
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes ai-fab-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ai-fab-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+
+@keyframes ai-panel-in {
+  from {
+    opacity: 0;
+    transform: translate(20px, 20px) scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes ai-panel-out {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes tour-nav-dot-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.55);
+  }
+
+  45% {
+    box-shadow: 0 0 0 7px rgba(var(--ishare-primary-rgb), 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0);
+  }
+}
+
+@keyframes tour-nav-dot-pulse {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.95;
+  }
+
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@keyframes tour-nav-search-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hotspot-nav-dot-glow {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 0 3px rgba(var(--ishare-primary-rgb), 0.38),
+      0 0 0 0 rgba(var(--ishare-primary-rgb), 0.52);
+  }
+
+  45% {
+    transform: scale(1.1);
+    box-shadow:
+      0 0 4px rgba(var(--ishare-primary-rgb), 0.28),
+      0 0 0 7px rgba(var(--ishare-primary-rgb), 0);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 3px rgba(var(--ishare-primary-rgb), 0.2),
+      0 0 0 0 rgba(var(--ishare-primary-rgb), 0);
+  }
+}
+
+@keyframes hotspot-info-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes hotspot-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@layer base {
+  :root {
+    /* Platform font sources — never overridden directly */
+    --ishare-font: 'Roboto', Arial, sans-serif;
+    --ishare-font-display: 'Google Sans', system-ui, sans-serif;
+    --ishare-body-font: var(--ishare-font);
+    --ishare-display-font: var(--ishare-font-display);
+
+    /* Legacy color shims → @theme tokens */
+    --ishare-primary: var(--color-primary);
+    --ishare-primary-dark: var(--color-primary-dark);
+    --ishare-primary-light: var(--color-primary-light);
+    --ishare-primary-rgb: var(--brand-primary-rgb, 0, 123, 139);
+
+    --ishare-accent: var(--color-accent);
+    --ishare-platform-product-gold: var(--color-gold);
+    --ishare-platform-product-gold-dark: var(--color-gold-dark);
+
+    --ishare-bg: var(--color-page);
+    --ishare-surface: var(--color-surface);
+    --ishare-surface-elevated: var(--color-surface-elevated);
+    --ishare-border: rgba(15, 23, 42, 0.12);
+
+    --ishare-text: var(--color-foreground);
+    --ishare-text-body: var(--color-body);
+    --ishare-text-muted: var(--color-muted);
+    --ishare-danger: var(--color-danger);
+
+    /* Computed — depend on primary */
+    --ishare-active-item-bg: color-mix(in srgb, var(--color-primary) 8%, #ffffff);
+    --ishare-active-item-border: rgba(var(--ishare-primary-rgb), 0.2);
+    --ishare-active-item-sold-bg: color-mix(in srgb, #475569 10%, #ffffff);
+    --ishare-active-item-sold-border: rgba(71, 85, 105, 0.22);
+
+    --ishare-hotspot-active-glow:
+      0 8px 24px rgba(15, 23, 42, 0.12),
+      0 0 16px rgba(var(--ishare-primary-rgb), 0.28),
+      0 0 32px rgba(var(--ishare-primary-rgb), 0.12);
+    --ishare-hotspot-active-glow-strong:
+      0 10px 28px rgba(15, 23, 42, 0.14),
+      0 0 20px rgba(var(--ishare-primary-rgb), 0.36),
+      0 0 40px rgba(var(--ishare-primary-rgb), 0.16);
+    --ishare-hotspot-active-glow-sold:
+      0 8px 24px rgba(15, 23, 42, 0.12),
+      0 0 16px rgba(71, 85, 105, 0.22),
+      0 0 32px rgba(71, 85, 105, 0.1);
+    --ishare-hotspot-active-glow-sold-strong:
+      0 10px 28px rgba(15, 23, 42, 0.14),
+      0 0 20px rgba(71, 85, 105, 0.3),
+      0 0 40px rgba(71, 85, 105, 0.12);
+
+    --ishare-active-icon-leading-sold-bg: rgba(71, 85, 105, 0.1);
+    --ishare-active-icon-leading-sold-ring: 0 0 0 2px rgba(71, 85, 105, 0.12);
+    --ishare-active-icon-dot-ring: 0 0 0 4px rgba(var(--ishare-primary-rgb), 0.15);
+    --ishare-active-icon-leading-bg: rgba(var(--ishare-primary-rgb), 0.1);
+    --ishare-active-icon-leading-ring: 0 0 0 2px rgba(var(--ishare-primary-rgb), 0.12);
+
+    --ishare-radius: var(--radius-DEFAULT);
+    --ishare-radius-md: var(--radius-md);
+    --ishare-radius-lg: var(--radius-lg);
+    --ishare-radius-xl: var(--radius-xl);
+    --ishare-shadow: var(--shadow-default);
+
+    /* Glass / float chrome */
+    --ishare-glass-blur: blur(8px) saturate(120%);
+    --ishare-glass-dock-shadow:
+      0 10px 28px rgba(15, 23, 42, 0.14),
+      0 4px 12px rgba(15, 23, 42, 0.08);
+    --ishare-float-glass-bg: rgba(255, 255, 255, 0.38);
+    --ishare-float-glass-blur: blur(4px) saturate(110%);
+    --ishare-float-glass-shadow: var(--ishare-glass-dock-shadow);
+    --ishare-glass-anchored-shadow:
+      0 12px 28px rgba(15, 23, 42, 0.16),
+      0 4px 10px rgba(15, 23, 42, 0.08);
+    --ishare-glass-anchored-border: 1px solid rgba(15, 23, 42, 0.11);
+    --ishare-glass-body-bg: rgba(255, 255, 255, 0.78);
+    --ishare-glass-header-bg: rgba(255, 255, 255, 0.92);
+    --ishare-glass-footer-bg: rgba(255, 255, 255, 0.84);
+    --ishare-glass-divider: 1px solid rgba(15, 23, 42, 0.08);
+    --ishare-glass-body-text: color-mix(in srgb,
+        var(--color-body) 42%,
+        var(--color-muted));
+
+    /* Type scale shims */
+    --ishare-font-size-base: 16px;
+    --ishare-font-size-2xs: var(--text-2xs);
+    --ishare-font-size-xs: var(--text-xs);
+    --ishare-font-size-sm: var(--text-sm);
+    --ishare-font-size-md: var(--text-md);
+    --ishare-font-size-lg: var(--text-lg);
+    --ishare-font-size-xl: var(--text-xl);
+    --ishare-font-size-2xl: var(--text-2xl);
+    --ishare-font-size-3xl: var(--text-3xl);
+    --ishare-font-size-icon: var(--text-icon);
+
+    /* Naming status badges */
+    --ishare-naming-status-on-sale-bg: rgba(34, 197, 94, 0.14);
+    --ishare-naming-status-on-sale-color: var(--color-status-on-sale);
+    --ishare-naming-status-sold-bg: rgba(15, 23, 42, 0.08);
+    --ishare-naming-status-sold-color: var(--color-muted);
+    --ishare-naming-status-reserved-bg: var(--ishare-badge-accent-bg);
+    --ishare-naming-status-reserved-color: var(--ishare-badge-accent-color);
+    --ishare-naming-status-coming-soon-bg: rgba(56, 189, 248, 0.14);
+    --ishare-naming-status-coming-soon-color: var(--color-status-coming-soon);
+
+    /* Tour category badges */
+    --ishare-tour-category-healthcare-bg: var(--color-category-healthcare-bg);
+    --ishare-tour-category-healthcare-color: var(--color-category-healthcare);
+    --ishare-tour-category-education-bg: var(--color-category-education-bg);
+    --ishare-tour-category-education-color: var(--color-category-education);
+    --ishare-tour-category-culture-bg: var(--color-category-culture-bg);
+    --ishare-tour-category-culture-color: var(--color-category-culture);
+    --ishare-tour-category-sporting-venues-bg: var(--color-category-sporting-bg);
+    --ishare-tour-category-sporting-venues-color: var(--color-category-sporting);
+    --ishare-tour-category-international-aid-bg: var(--color-category-aid-bg);
+    --ishare-tour-category-international-aid-color: var(--color-category-aid);
+    --ishare-tour-category-social-services-bg: var(--color-category-social-bg);
+    --ishare-tour-category-social-services-color: var(--color-category-social);
+    --ishare-tour-category-tourism-bg: var(--color-category-tourism-bg);
+    --ishare-tour-category-tourism-color: var(--color-category-tourism);
+
+    /* Badge layout tokens */
+    --ishare-badge-outline-gap: 7px;
+    --ishare-badge-outline-pad: 6px 11px 6px 10px;
+    --ishare-badge-outline-border: rgba(15, 23, 42, 0.1);
+    --ishare-badge-fill-sm-pad: 3px 8px;
+    --ishare-badge-fill-lg-gap: 6px;
+    --ishare-badge-fill-lg-pad: 5px 12px;
+    --ishare-badge-fill-lg-pad-icon: 5px 12px 5px 8px;
+    --ishare-badge-accent-bg: rgba(232, 168, 56, 0.14);
+    --ishare-badge-accent-color: var(--color-accent-dark);
+  }
+}
