@@ -6,8 +6,8 @@ import {
   useState,
 } from 'react';
 import {
-  SEGMENTED_TAB_ACTIVE_CLASS,
-  SEGMENTED_TAB_CLASS,
+  segmentedTabActiveSelector,
+  segmentedTabSelector,
 } from '../components/ui/segmentedTabsClasses';
 
 export interface SegmentedTabIndicatorRect {
@@ -47,7 +47,7 @@ export function useSegmentedTabIndicator(
     if (!tablist) return;
 
     const activeTab = tablist.querySelector<HTMLElement>(
-      `.${SEGMENTED_TAB_ACTIVE_CLASS}`,
+      segmentedTabActiveSelector,
     );
     if (!activeTab) return;
 
@@ -71,7 +71,7 @@ export function useSegmentedTabIndicator(
     });
     observer.observe(tablist);
 
-    tablist.querySelectorAll(`.${SEGMENTED_TAB_CLASS}`).forEach((tab) => {
+    tablist.querySelectorAll(segmentedTabSelector).forEach((tab) => {
       observer.observe(tab);
     });
 
@@ -92,7 +92,7 @@ export function useSegmentedTabIndicator(
     }
 
     const activeTab = tablist.querySelector<HTMLElement>(
-      `.${SEGMENTED_TAB_ACTIVE_CLASS}`,
+      segmentedTabActiveSelector,
     );
     activeTab?.scrollIntoView({
       block: 'nearest',

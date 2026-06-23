@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type ReactNode } from 'react';
-import './Accordion.css';
+import { cn } from '../../lib/cn';
 import {
   ACCORDION_CLASS,
   accordionItemClass,
@@ -53,9 +53,7 @@ function accordionRootClass(
     : gap === 'md' ? ACCORDION_CLASS.rootGapMd
     : '';
   const modeClass = expandMode === 'single' ? ACCORDION_CLASS.rootSingle : '';
-  return [ACCORDION_CLASS.root, gapClass, modeClass, className]
-    .filter(Boolean)
-    .join(' ');
+  return cn(ACCORDION_CLASS.root, gapClass, modeClass, className);
 }
 
 export function Accordion({
@@ -105,14 +103,12 @@ export function AccordionItem({
   const icon = <AccordionChevron className={ACCORDION_CLASS.icon} />;
   const label = <span className={ACCORDION_CLASS.label}>{title}</span>;
 
-  const itemClass = [
+  const itemClass = cn(
     accordionItemClass({ nested, iconPosition, animated: true }),
-    open ? ACCORDION_CLASS.itemOpen : '',
-    panelMounted ? ACCORDION_CLASS.itemPanelMounted : '',
+    open && ACCORDION_CLASS.itemOpen,
+    panelMounted && ACCORDION_CLASS.itemPanelMounted,
     className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  );
 
   return (
     <div className={itemClass}>

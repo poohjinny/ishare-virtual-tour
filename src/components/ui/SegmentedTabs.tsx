@@ -1,10 +1,15 @@
 import type { ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 import { useSegmentedTabIndicator } from '../../hooks/useSegmentedTabIndicator';
 import {
-  SEGMENTED_TABS_LIST_CLASS,
-  segmentedTabClassName,
+  SEGMENTED_TAB_ACTIVE_ATTR,
+  SEGMENTED_TAB_ATTR,
+  segmentedTabButtonClassName,
+  segmentedTabsIndicatorClassName,
+  segmentedTabsIndicatorReadyClassName,
+  segmentedTabsListClassName,
+  segmentedTabsScrollableClassName,
 } from './segmentedTabsClasses';
-import './SegmentedTabs.css';
 
 export interface SegmentedTabItem<T extends string> {
   id: T;
@@ -43,41 +48,45 @@ export function SegmentedTabs<T extends string>({
   return (
     <div
       ref={tablistRef}
-      className={[
-        SEGMENTED_TABS_LIST_CLASS,
-        'ishare-segmented-tabs--animated',
-        scrollable ? 'ishare-segmented-tabs--scroll' : '',
-        indicatorReady ? 'ishare-segmented-tabs--indicator-ready' : '',
+      className={cn(
+        segmentedTabsListClassName,
+        scrollable && segmentedTabsScrollableClassName,
         className,
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      )}
       role='tablist'
       aria-label={ariaLabel}
     >
       <span
-        className='ishare-segmented-tabs__indicator'
+        className={cn(
+          segmentedTabsIndicatorClassName,
+          indicatorReady && segmentedTabsIndicatorReadyClassName,
+        )}
         aria-hidden='true'
         style={{
           width: `${indicator.width}px`,
           transform: `translateX(${indicator.left}px)`,
         }}
       />
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          type='button'
-          role='tab'
-          id={tab.htmlId}
-          aria-selected={value === tab.id}
-          aria-controls={tab.ariaControls}
-          className={segmentedTabClassName(value === tab.id)}
-          disabled={disabled || tab.disabled}
-          onClick={() => onChange(tab.id)}
-        >
-          {tab.label}
-        </button>
-      ))}
+      {tabs.map((tab) => {
+        const active = value === tab.id;
+        return (
+          <button
+            key={tab.id}
+            type='button'
+            role='tab'
+            id={tab.htmlId}
+            aria-selected={active}
+            aria-controls={tab.ariaControls}
+            {...{ [SEGMENTED_TAB_ATTR]: '' }}
+            {...{ [SEGMENTED_TAB_ACTIVE_ATTR]: active ? 'true' : 'false' }}
+            className={segmentedTabButtonClassName(active)}
+            disabled={disabled || tab.disabled}
+            onClick={() => onChange(tab.id)}
+          >
+            {tab.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

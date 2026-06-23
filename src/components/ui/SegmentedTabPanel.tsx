@@ -1,7 +1,7 @@
 import { useRef, type ReactNode, type RefObject } from 'react';
+import { cn } from '../../lib/cn';
 import { useSegmentedTabPanelScroll } from '../../hooks/useSegmentedTabPanelScroll';
-import { SEGMENTED_TAB_PANEL_CONTENT_CLASS } from './segmentedTabPanelClasses';
-import './SegmentedTabs.css';
+import { segmentedTabPanelContentClassName } from './segmentedTabsClasses';
 
 interface SegmentedTabPanelContentProps {
   panelKey: string;
@@ -17,9 +17,7 @@ export function SegmentedTabPanelContent({
   return (
     <div
       key={panelKey}
-      className={[SEGMENTED_TAB_PANEL_CONTENT_CLASS, className]
-        .filter(Boolean)
-        .join(' ')}
+      className={cn(segmentedTabPanelContentClassName, className)}
     >
       {children}
     </div>
