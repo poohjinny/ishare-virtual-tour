@@ -1,4 +1,4 @@
-import { TourErrorState } from './TourErrorState';
+import { TourErrorState, tourErrorEmphasisClassName } from './TourErrorState';
 
 interface PanoramaLoadErrorProps {
   sceneTitle?: string;
@@ -19,7 +19,7 @@ export function PanoramaLoadError({
       body={
         sceneTitle ?
           <>
-            <span className='tour-error-state__emphasis'>{sceneTitle}</span>
+            <span className={tourErrorEmphasisClassName}>{sceneTitle}</span>
             {" didn't load. Check your connection and try again."}
           </>
         : "The panorama didn't load. Check your connection and try again."

@@ -1,5 +1,5 @@
+import { cn } from '../lib/cn';
 import { PLATFORM_PRODUCT_LOGO } from '../constants/branding';
-import './TourLoadSplash.css';
 
 interface TourLoadSplashProps {
   exiting?: boolean;
@@ -20,19 +20,20 @@ export function TourLoadSplash({
 
   return (
     <div
-      className={`tour-load-splash${exiting ? ' tour-load-splash--exit' : ''}`}
+      className={cn(
+        'pointer-events-none absolute inset-0 z-[105] flex items-center justify-center bg-white',
+        exiting && 'animate-load-splash-out',
+      )}
       role='status'
       aria-live='polite'
       aria-label={`Loading ${productName ?? 'virtual tour'}`}
     >
-      <div className='tour-load-splash__card'>
-        <img
-          className='tour-load-splash__logo'
-          src={splashLogo}
-          alt={splashAlt}
-          draggable={false}
-        />
-      </div>
+      <img
+        className='block h-14 w-auto'
+        src={splashLogo}
+        alt={splashAlt}
+        draggable={false}
+      />
     </div>
   );
 }
