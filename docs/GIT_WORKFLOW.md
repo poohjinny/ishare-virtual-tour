@@ -125,11 +125,11 @@ Each commit should **build** (`npm run build`) at that point when possible.
 
 | Task                       | Files                                                                                           |
 | -------------------------- | ----------------------------------------------------------------------------------------------- |
-| Anchored NO panel sizing   | `TourGlassPanel.css`, `tourGlassPanelHtml.ts`, `anchoredPanelPosition.ts`, `infoPanelMarker.ts` |
-| Fullscreen overlay         | `tourFullscreenNavbarButton.ts`, `PanoramaViewer.tsx`, `TourPage.tsx`, `layout.css`             |
+| Anchored NO panel sizing   | `glass-panels-layer.css`, `tourGlassPanelHtml.ts`, `anchoredPanelPosition.ts`, `infoPanelMarker.ts` |
+| Fullscreen overlay         | `tourFullscreenNavbarButton.ts`, `PanoramaViewer.tsx`, `TourPage.tsx`, `psv-layer.css`             |
 | Viewer controls preference | `useViewerControlsVisible.ts`, `viewerControlsPreference.ts`, `TourPage.tsx`                    |
-| Explore directory UX       | `TourNavFloat.tsx`, `TourNavFloat.css`, `tourNavActions.ts`                                     |
-| Shared UI primitive        | `ui/Badge.*`, `Badge.css`, `badgeClasses.ts` + consumers in same task only                      |
+| Explore directory UX       | `TourNavFloat.tsx`, `tourNavFloatVariants.ts`, `tourNavActions.ts`                              |
+| Shared UI primitive        | `ui/Badge.*`, `badgeVariants.ts`, `badgeClasses.ts` + consumers in same task only                  |
 
 ---
 

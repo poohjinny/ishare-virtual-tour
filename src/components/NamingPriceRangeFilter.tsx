@@ -1,6 +1,18 @@
 import { useMemo } from 'react';
+import { cn } from '../lib/cn';
 import { formatNamingPriceAmount } from '../utils/namingPrice';
-import './NamingPriceRangeFilter.css';
+import {
+  namingPriceFilterFillClassName,
+  namingPriceFilterHeaderClassName,
+  namingPriceFilterInputMaxClassName,
+  namingPriceFilterInputMinClassName,
+  namingPriceFilterLabelClassName,
+  namingPriceFilterRailClassName,
+  namingPriceFilterRootClassName,
+  namingPriceFilterTrackClassName,
+  namingPriceFilterValuesClassName,
+  namingPriceFilterVariants,
+} from './namingPriceRangeFilterVariants';
 
 interface NamingPriceRangeFilterProps {
   label: string;
@@ -50,24 +62,27 @@ export function NamingPriceRangeFilter({
 
   return (
     <div
-      className={`naming-price-filter${isActive ? ' naming-price-filter--active' : ''}`}
+      className={cn(
+        namingPriceFilterRootClassName,
+        namingPriceFilterVariants({ active: isActive }),
+      )}
     >
-      <div className='naming-price-filter__header'>
-        <span className='naming-price-filter__label'>{label}</span>
-        <span className='naming-price-filter__values' aria-live='polite'>
+      <div className={namingPriceFilterHeaderClassName}>
+        <span className={namingPriceFilterLabelClassName}>{label}</span>
+        <span className={namingPriceFilterValuesClassName} aria-live='polite'>
           {formatNamingPriceAmount(valueMin)} –{' '}
           {formatNamingPriceAmount(valueMax)}
         </span>
       </div>
 
-      <div className='naming-price-filter__track'>
-        <div className='naming-price-filter__rail' aria-hidden='true'>
-          <div className='naming-price-filter__fill' style={fillStyle} />
+      <div className={namingPriceFilterTrackClassName}>
+        <div className={namingPriceFilterRailClassName} aria-hidden='true'>
+          <div className={namingPriceFilterFillClassName} style={fillStyle} />
         </div>
 
         <input
           type='range'
-          className='naming-price-filter__input naming-price-filter__input--min'
+          className={namingPriceFilterInputMinClassName}
           min={min}
           max={max}
           step={step}
@@ -82,7 +97,7 @@ export function NamingPriceRangeFilter({
         />
         <input
           type='range'
-          className='naming-price-filter__input naming-price-filter__input--max'
+          className={namingPriceFilterInputMaxClassName}
           min={min}
           max={max}
           step={step}

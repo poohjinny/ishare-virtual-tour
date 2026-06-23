@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import './components-layer.css';
 @import './glass-panels-layer.css';
+@import './psv-layer.css';
 
 /*
  * Tailwind-first design system — @theme is the single source of hex/rgb values.

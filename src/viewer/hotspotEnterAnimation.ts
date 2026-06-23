@@ -1,7 +1,7 @@
 /** Delay after scene transition before hotspot enter animation starts. */
 export const HOTSPOT_ENTER_DELAY_MS = 200;
 
-/** CSS animation duration — keep in sync with `hotspot-enter` keyframes in hotspots.css. */
+/** CSS animation duration — keep in sync with `hotspot-enter` keyframes in globals.css. */
 export const HOTSPOT_ENTER_DURATION_MS = 320;
 
 const HOLD_CLASS = 'viewer-container--hotspots-hold';

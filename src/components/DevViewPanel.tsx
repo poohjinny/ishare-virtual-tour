@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { cn } from '../lib/cn';
 import type { ViewPosition } from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import {
@@ -13,7 +14,23 @@ import {
   slugifyHotspotName,
   type DevSceneRef,
 } from '../utils/devHotspotLogger';
-import './DevViewPanel.css';
+import {
+  devViewPanelActionsClassName,
+  devViewPanelBtnVariants,
+  devViewPanelCoordsClassName,
+  devViewPanelFieldClassName,
+  devViewPanelFieldLabelClassName,
+  devViewPanelInputClassName,
+  devViewPanelAboveMinimapClassName,
+  devViewPanelRootClassName,
+  devViewPanelSceneIdClassName,
+  devViewPanelSectionHintClassName,
+  devViewPanelSectionLeadClassName,
+  devViewPanelSectionTitleVariants,
+  devViewPanelSectionVariants,
+  devViewPanelSlugPreviewClassName,
+  devViewPanelTitleClassName,
+} from './devViewPanelVariants';
 
 interface DevViewPanelProps {
   scene: DevSceneRef;
@@ -99,31 +116,36 @@ export function DevViewPanel({
 
   return (
     <div
-      className={`dev-panel${aboveMinimap ? ' dev-panel--above-minimap' : ''}`}
+      className={cn(
+        devViewPanelRootClassName,
+        aboveMinimap && devViewPanelAboveMinimapClassName,
+      )}
     >
-      <p className='dev-panel__title'>
+      <p className={devViewPanelTitleClassName}>
         DEV — {scene.tourId ?? scene.id}
         {scene.clientId && scene.clientId !== (scene.tourId ?? scene.id) ?
           ` · ${scene.clientId}`
         : ''}{' '}
         / {scene.title ?? scene.id}
         {scene.title && (
-          <span className='dev-panel__scene-id'> ({scene.id})</span>
+          <span className={devViewPanelSceneIdClassName}> ({scene.id})</span>
         )}
       </p>
 
-      <section className='dev-panel__section dev-panel__section--landing'>
-        <h3 className='dev-panel__section-title'>Landing view</h3>
-        <p className='dev-panel__section-lead'>
+      <section className={devViewPanelSectionVariants({ kind: 'landing' })}>
+        <h3 className={devViewPanelSectionTitleVariants({ kind: 'landing' })}>
+          Landing view
+        </h3>
+        <p className={devViewPanelSectionLeadClassName}>
           Pan the scene — updates <code>defaultView</code>
         </p>
-        <p className='dev-panel__coords'>
+        <p className={devViewPanelCoordsClassName}>
           {view ? formatViewPosition(view) : '—'}
         </p>
-        <div className='dev-panel__actions'>
+        <div className={devViewPanelActionsClassName}>
           <button
             type='button'
-            className='dev-panel__btn'
+            className={devViewPanelBtnVariants({ tone: 'primary' })}
             onClick={() => void copyLanding()}
             disabled={!view}
           >
@@ -132,19 +154,21 @@ export function DevViewPanel({
         </div>
       </section>
 
-      <section className='dev-panel__section dev-panel__section--hotspot'>
-        <h3 className='dev-panel__section-title'>Hotspot</h3>
-        <p className='dev-panel__section-lead'>
+      <section className={devViewPanelSectionVariants({ kind: 'hotspot' })}>
+        <h3 className={devViewPanelSectionTitleVariants({ kind: 'hotspot' })}>
+          Hotspot
+        </h3>
+        <p className={devViewPanelSectionLeadClassName}>
           Click the panorama for marker position
         </p>
-        <p className='dev-panel__coords'>
+        <p className={devViewPanelCoordsClassName}>
           {clickCoords ? formatViewPosition({ ...clickCoords, zoom: 0 }) : '—'}
         </p>
 
-        <label className='dev-panel__field'>
-          <span className='dev-panel__field-label'>Hotspot name</span>
+        <label className={devViewPanelFieldClassName}>
+          <span className={devViewPanelFieldLabelClassName}>Hotspot name</span>
           <input
-            className='dev-panel__input'
+            className={devViewPanelInputClassName}
             type='text'
             value={hotspotName}
             onChange={(e) => setHotspotName(e.target.value)}
@@ -155,16 +179,16 @@ export function DevViewPanel({
         </label>
 
         {hotspotSlug ?
-          <p className='dev-panel__slug-preview'>
+          <p className={devViewPanelSlugPreviewClassName}>
             nav <code>nav-to-{hotspotSlug}</code> · NO{' '}
             <code>info-{hotspotSlug}</code>
           </p>
         : null}
 
-        <div className='dev-panel__actions'>
+        <div className={devViewPanelActionsClassName}>
           <button
             type='button'
-            className='dev-panel__btn dev-panel__btn--secondary'
+            className={devViewPanelBtnVariants({ tone: 'secondary' })}
             onClick={() => void copyNavHotspot()}
             disabled={!clickCoords}
           >
@@ -172,14 +196,14 @@ export function DevViewPanel({
           </button>
           <button
             type='button'
-            className='dev-panel__btn dev-panel__btn--secondary'
+            className={devViewPanelBtnVariants({ tone: 'secondary' })}
             onClick={() => void copyNamingHotspot()}
             disabled={!clickCoords}
           >
             {copied === 'naming' ? 'Copied!' : 'Copy NO JSON'}
           </button>
         </div>
-        <p className='dev-panel__section-hint'>
+        <p className={devViewPanelSectionHintClassName}>
           <strong>nav</strong> = scene preview marker · <strong>NO</strong> =
           naming opportunity on target scene
         </p>

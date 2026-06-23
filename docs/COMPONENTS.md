@@ -16,8 +16,8 @@ are fine; duplicating whole patterns is not.
 
 ### 1. One visual language
 
-- Design tokens live in [`src/styles/tokens.css`](../src/styles/tokens.css)
-  (`--ishare-*`).
+- Design tokens live in [`src/styles/globals.css`](../src/styles/globals.css)
+  `@theme` (`--color-*`; legacy `--ishare-*` shims during migration).
 - Shared primitives use an `ishare-` class prefix (e.g. `ishare-badge`,
   `ishare-accordion`).
 - When a pattern appears twice (Help accordion + nav preview NO accordion),
@@ -30,7 +30,7 @@ therefore has **three layers**:
 
 | Layer                       | Purpose                                       | Example                                            |
 | --------------------------- | --------------------------------------------- | -------------------------------------------------- |
-| **CSS**                     | Single source of look & behaviour             | `Badge.css`, `Accordion.css`                       |
+| **CSS**                     | Single source of look & behaviour             | `components-layer.css`, `*Variants.ts`             |
 | **Class constants**         | Same class strings in React and HTML builders | `badgeClasses.ts`, `accordionClasses.ts`           |
 | **React component**         | Ergonomic JSX where we control the tree       | `Badge.tsx`, `Accordion.tsx`                       |
 | **HTML helpers** (optional) | String builders for marker popups             | `accordionChevronHtml.ts`, `tourGlassPanelHtml.ts` |
@@ -74,12 +74,10 @@ variants locally.
 ```
 src/components/ui/
   Badge.tsx              React badge
-  Badge.css              Shared badge styles
+  badgeVariants.ts       cva variants (React)
   badgeClasses.ts        Class strings for HTML popups
-  NamingStatusBadge.tsx  Domain wrapper (naming opportunity status)
 
   Accordion.tsx          React accordion (details/summary)
-  Accordion.css          Shared accordion styles (nav preview baseline)
   AccordionChevron.tsx   React chevron icon
   accordionClasses.ts    Class strings + helpers
   accordionChevronHtml.ts  HTML trigger/chevron builders
@@ -158,7 +156,7 @@ import { Accordion, AccordionItem } from './ui/Accordion';
 **HTML (button + JS toggle)**
 
 Nav preview naming uses dedicated `nav-preview-panel__naming-*` classes — see
-`tourGlassPanelHtml.ts`, `NavPreviewPanel.css`, and
+`tourGlassPanelHtml.ts`, `glass-panels-layer.css`, and
 `navPreviewNamingAccordion.ts` (`data-nav-naming-toggle` /
 `data-nav-naming-accordion`).
 
@@ -178,7 +176,7 @@ before inventing new panel chrome:
 | ----------------- | -------------------- | ---------------------------------- | ------------------------------ |
 | Glass panel       | `TourGlassPanel.tsx` | `tourGlassPanelHtml.ts`            | Header, body, footer, CTA row  |
 | Nav dock          | `TourNavFloat.tsx`   | —                                  | Explore / Search / Help        |
-| Nav preview panel | —                    | `NavPreviewPanel.css` + glass HTML | Hero, naming section overrides |
+| Nav preview panel | —                    | `glass-panels-layer.css` + glass HTML | Hero, naming section overrides |
 
 When adding panel UI, check whether it belongs **inside** an existing shell with
 `ui/*` primitives, rather than new panel-specific accordion/badge styles.
@@ -189,11 +187,11 @@ When adding panel UI, check whether it belongs **inside** an existing shell with
 
 1. **Confirm reuse** — Will it appear in React and HTML, or at least twice in
    the app?
-2. **Create `ui/ComponentName.css`** with `ishare-*` BEM classes.
+2. **Add styles** — Tailwind + `cva()` in React; `@layer components` in
+   `components-layer.css` or a feature layer file for HTML marker shells.
 3. **Add `componentClasses.ts`** if HTML builders need the same strings.
 4. **Add `ComponentName.tsx`** for React trees; keep it thin.
-5. **Import CSS in `main.tsx`** (and in the React file if colocated import is
-   the pattern).
+5. **Import only via `globals.css`** — no per-component CSS in `main.tsx`.
 6. **Document** props, modifiers, and HTML usage in this file.
 7. **Migrate** existing duplicates rather than leaving parallel styles.
 

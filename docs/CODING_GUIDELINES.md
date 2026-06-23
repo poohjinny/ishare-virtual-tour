@@ -29,7 +29,8 @@ linked specs.
   (including **End-of-session push** and **Agent checklist**). Never mix
   unrelated routing, shared UI, and docs in one commit.
 - **Config over literals** — tour data in `tours/*.json`, labels in
-  `src/constants/*`, tokens in `tokens.css`, not scattered in components.
+  `src/constants/*`, tokens in `globals.css` `@theme`, not scattered in
+  components.
 - **Reuse** — `ui/*`, existing hooks/utils; extract on third duplication.
 - **Readable over clever** — straightforward logic; avoid unnecessary
   abstractions.
@@ -85,7 +86,7 @@ ishare-virtual-tour/
 │   ├── data/            Tour load, naming status, platform contact
 │   ├── hooks/           Route sync, controls preference, assistant, …
 │   ├── pages/           TourPage (main shell)
-│   ├── styles/          tokens.css, layout, hotspots
+│   ├── styles/          globals.css (@theme), layout, hotspots
 │   ├── types/           tour.ts — canonical tour schema
 │   ├── utils/           Paths, directory, popup layout, preferences
 │   └── viewer/          PSV, markers, transitions, panel markers
@@ -123,8 +124,9 @@ ishare-virtual-tour/
 
 ### Tokens
 
-[`src/styles/tokens.css`](../src/styles/tokens.css) — `--ishare-*` only. No
-hard-coded hex in feature CSS unless adding a token.
+[`src/styles/globals.css`](../src/styles/globals.css) — `@theme` tokens and
+legacy `--ishare-*` shims. No hard-coded hex in feature CSS unless adding a
+token.
 
 ### Class prefixes
 
@@ -135,11 +137,11 @@ hard-coded hex in feature CSS unless adding a token.
 | `tour-nav-actions__*`                | Top-right dock, explore directory                                          |
 | `nav-preview-panel__*`               | Nav hotspot preview marker HTML                                            |
 | `hotspot-nav__*` / `hotspot-info__*` | PSV hotspot pills                                                          |
-| `viewer-container` / `psv-*`         | PSV chrome in `layout.css`                                                 |
+| `viewer-container` / `psv-*`         | PSV chrome in `psv-layer.css`                                              |
 
 Generic patterns → `src/components/ui/` with `ishare-` prefix.
 
-### Explore directory hover (`TourNavFloat.css`)
+### Explore directory hover (`tourNavFloatVariants.ts`)
 
 - Hover **text** → `var(--ishare-text)`; hover **icons** →
   `var(--ishare-primary)`.

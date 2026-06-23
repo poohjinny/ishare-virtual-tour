@@ -32,7 +32,7 @@ React components         ← className + cn() + cva()
 | **Runtime brand**  | `--brand-*` on `:root` via `clientTheme.ts` → `--color-primary`   |
 | **React UI**       | Tailwind utilities + `cn()` + `class-variance-authority`          |
 | **HTML markers**   | `@layer components` with `@apply` — stable class names in strings |
-| **PSV / hotspots** | `layout.css`, `hotspots.css` — trimmed over time, never 0         |
+| **PSV / hotspots** | `psv-layer.css` — PSV chrome + HTML hotspot markers              |
 
 ---
 

@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import './LoadProgressBar.css';
+import {
+  loadProgressBarClassName,
+  loadProgressVariants,
+} from './loadProgressBarVariants';
 
 interface LoadProgressBarProps {
   progress: number;
@@ -34,14 +37,17 @@ export function LoadProgressBar({ progress, visible }: LoadProgressBarProps) {
 
   return (
     <div
-      className={`load-progress${exiting ? ' load-progress--exit' : ''}`}
+      className={loadProgressVariants({ phase: exiting ? 'exit' : 'idle' })}
       role='progressbar'
       aria-valuenow={Math.round(clamped)}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label='Loading panorama'
     >
-      <div className='load-progress__bar' style={{ width: `${clamped}%` }} />
+      <div
+        className={loadProgressBarClassName}
+        style={{ width: `${clamped}%` }}
+      />
     </div>
   );
 }

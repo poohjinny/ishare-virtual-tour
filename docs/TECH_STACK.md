@@ -155,9 +155,10 @@ ishare-virtual-tour/
 │   ├── services/
 │   │   └── mockAssistant.ts
 │   ├── styles/
-│   │   ├── tokens.css           # iShare brand tokens
-│   │   ├── layout.css
-│   │   └── hotspots.css
+│   │   ├── globals.css          # @theme + layer imports
+│   │   ├── components-layer.css # badge, accordion, skeleton shells
+│   │   ├── glass-panels-layer.css
+│   │   └── psv-layer.css        # PSV navbar + hotspot markers
 │   └── utils/
 │       ├── devHotspotLogger.ts
 │       ├── urlParams.ts
@@ -193,12 +194,13 @@ useTourState
 
 ## Styling
 
-- **Design tokens:** `src/styles/tokens.css` — iShare brand colours (placeholder
-  until brand hex provided)
-- **Hotspot styles:** `src/styles/hotspots.css` — nav pulse ring, info icon
-- **Component styles:** colocated `.css` files per component
+- **Design tokens:** `src/styles/globals.css` `@theme` — iShare brand colours
+  (runtime override via `clientTheme.ts`)
+- **Layer CSS:** `components-layer.css`, `glass-panels-layer.css`,
+  `psv-layer.css` — HTML marker shells and PSV chrome
+- **React UI:** Tailwind utilities + `cn()` + `cva()` (`*Variants.ts`)
 
-No CSS framework in MVP — keeps bundle small and embed-friendly.
+See [STYLING.md](./STYLING.md) for migration conventions.
 
 ---
 

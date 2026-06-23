@@ -4,9 +4,18 @@ import {
   PLATFORM_PRODUCT_LOGO,
   PLATFORM_PRODUCT_NAME_PREFIX,
 } from '../constants/branding';
+import { cn } from '../lib/cn';
 import { TOUR_PRODUCT_SUFFIX } from '../utils/tourProductName';
 import { TourMarkerIcon } from './icons/TourMarkerIcon';
-import './TourProductBranding.css';
+import {
+  tourProductBrandingClientClassName,
+  tourProductBrandingIconClassName,
+  tourProductBrandingLogoClassName,
+  tourProductBrandingSrOnlyClassName,
+  tourProductBrandingSuffixClassName,
+  tourProductBrandingTextClassName,
+  tourProductBrandingVariants,
+} from './tourProductBrandingVariants';
 
 export interface TourProductBrandingProps {
   /** Client organization full name — omit for platform-level branding. */
@@ -34,7 +43,12 @@ export function TourProductBranding({
 
   return (
     <p
-      className={`tour-product-branding${isPlatform ? ' tour-product-branding--platform' : ' tour-product-branding--client'}${className ? ` ${className}` : ''}`}
+      className={cn(
+        tourProductBrandingVariants({
+          scope: isPlatform ? 'platform' : 'client',
+        }),
+        className,
+      )}
       style={
         accentColor ?
           ({
@@ -46,31 +60,43 @@ export function TourProductBranding({
       {isPlatform ?
         <>
           <img
-            className='tour-product-branding__logo'
+            className={tourProductBrandingLogoClassName}
             src={PLATFORM_PRODUCT_LOGO}
             alt=''
             aria-hidden='true'
             draggable={false}
           />
-          <span className='tour-product-branding__text'>
-            <span className='tour-product-branding__suffix'>
+          <span className={tourProductBrandingTextClassName}>
+            <span
+              className={cn(
+                tourProductBrandingSuffixClassName,
+                isPlatform && 'font-extrabold',
+              )}
+            >
               {TOUR_PRODUCT_SUFFIX}
             </span>
           </span>
         </>
       : <>
-          <TourMarkerIcon className='tour-product-branding__icon' />
-          <span className='tour-product-branding__text'>
-            <span className='tour-product-branding__client'>
+          <TourMarkerIcon className={tourProductBrandingIconClassName} />
+          <span className={tourProductBrandingTextClassName}>
+            <span className={tourProductBrandingClientClassName}>
               {displayPrefix}
             </span>{' '}
-            <span className='tour-product-branding__suffix'>
+            <span
+              className={cn(
+                tourProductBrandingSuffixClassName,
+                isPlatform && 'font-extrabold',
+              )}
+            >
               {TOUR_PRODUCT_SUFFIX}
             </span>
           </span>
         </>
       }
-      <span className='tour-product-branding__sr-only'>{accessibleLabel}</span>
+      <span className={tourProductBrandingSrOnlyClassName}>
+        {accessibleLabel}
+      </span>
     </p>
   );
 }
