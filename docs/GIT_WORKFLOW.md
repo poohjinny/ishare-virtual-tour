@@ -143,6 +143,94 @@ Each commit should **build** (`npm run build`) at that point when possible.
 
 ---
 
+## End-of-session push (still split commits)
+
+When you finish a long session — or say **“push everything”** — **do not**
+squash into one commit. Push **multiple task commits**, then one `git push`.
+
+### Workflow
+
+1. `git status` — list changed files.
+2. **Group by task** (see table below). If a group needs two PR bullets, split
+   further.
+3. For each group: `git add <only those files>` → `git commit -m "…"` → repeat.
+4. `git log --oneline -10` — confirm each line is one task.
+5. `npm run build` once (after last commit, or after each commit when risky).
+6. `git push origin HEAD`.
+
+**Never** use `git add -A` / `git add .` for a multi-task session unless every
+staged file truly belongs to the **same** task.
+
+### Suggested split order
+
+Commit in this order when a session touched several areas (dependencies first,
+docs last):
+
+1. **Routing / data contracts** — `tourPaths.ts`, loaders, catalog JSON
+2. **Feature UI** — page or panel for one user-visible outcome
+3. **Shared primitives** — new `ui/*`, hooks used by multiple features (same
+   task if introduced together)
+4. **Feature consumers** — wire shared UI into intro, explore, etc. (one commit
+   per surface if large)
+5. **Polish / UX** — CSS-only follow-ups for one surface
+6. **Docs only** — `docs/*`, README (no src changes mixed in)
+
+---
+
+## Anti-pattern: mixed mega-commit
+
+**Bad** (real example — do not repeat):
+
+```
+Add tour-not-found routing, shared tab UI, and docs consolidation.
+```
+
+One commit mixed:
+
+- Unknown tour URL → 404 page
+- `SegmentedTabs` / `SegmentedTabPanel` shared components
+- Intro gallery preview loader + category tabs
+- Catalog visibility rules
+- Docs: delete MVP_PLAN, add PRODUCT_SPEC
+- Asset renames
+
+**Better** — six commits, same session:
+
+```
+Add unknown tour routing and TourNotFound page.
+Add shared preview hero skeleton for gallery and nav preview.
+Add SegmentedTabs with sliding indicator and panel transition.
+Polish client intro category filters and gallery layout.
+Update tour catalog visibility and public listing rules.
+Docs: split PRODUCT_SPEC and PROJECT_CONTEXT; trim ROADMAP overlap.
+```
+
+Reviewers and `git bisect` can target one change. `git log` stays a task list.
+
+---
+
+## Agent & AI assistant checklist
+
+**Read this section before any `git commit` or `git push`**, even when the user
+only says “push” or “commit”.
+
+| Step | Action                                                                    |
+| ---- | ------------------------------------------------------------------------- |
+| 1    | Read [GIT_WORKFLOW.md](./GIT_WORKFLOW.md) golden rule                     |
+| 2    | Run `git status` and `git diff --stat`                                    |
+| 3    | Propose **commit groups** (file list per group) in chat before committing |
+| 4    | Stage **per group** — never default to `git add -A` for multi-topic work  |
+| 5    | One imperative sentence per commit message; build after risky groups      |
+| 6    | Show `git log --oneline` for new commits, then push                       |
+
+If the user insists on a **single** commit, warn once that it breaks repo
+guidelines, then follow their explicit instruction.
+
+Linked from [CODING_GUIDELINES.md](./CODING_GUIDELINES.md) — **Before every
+push**.
+
+---
+
 ## PRs (optional)
 
 When opening a PR, list commits or summarize by task:

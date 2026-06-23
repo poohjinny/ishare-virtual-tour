@@ -24,6 +24,9 @@ linked specs.
 ## Engineering habits (this repo)
 
 - **Minimal diff** — one task at a time; match surrounding code style.
+- **Git** — one task per commit; see [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
+  (including **End-of-session push** and **Agent checklist**). Never mix
+  unrelated routing, shared UI, and docs in one commit.
 - **Config over literals** — tour data in `tours/*.json`, labels in
   `src/constants/*`, tokens in `tokens.css`, not scattered in components.
 - **Reuse** — `ui/*`, existing hooks/utils; extract on third duplication.
