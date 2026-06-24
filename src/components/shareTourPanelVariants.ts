@@ -9,13 +9,7 @@ export const shareTourPanelLeadClassName = cn(
   'm-0 font-body text-md leading-[1.55] text-[var(--ishare-glass-body-text)] [&_strong]:font-semibold [&_strong]:text-foreground',
 );
 
-export const shareTourPanelUrlFieldClassName = cn(
-  'mt-2.5 flex flex-col gap-1.5',
-);
-
-export const shareTourPanelUrlLabelClassName = cn(
-  'font-display text-sm font-semibold text-foreground',
-);
+export const shareTourPanelUrlFieldClassName = cn('mt-2.5 block');
 
 export const shareTourPanelUrlRowClassName = cn(
   'flex items-center gap-1.5 rounded-full border border-[color:var(--ishare-border)] bg-white/72 py-1 pr-1 pl-3.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary-light focus-within:shadow-[0_0_0_3px_rgba(var(--ishare-primary-rgb),0.12)]',

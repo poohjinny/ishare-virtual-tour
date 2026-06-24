@@ -27,6 +27,7 @@ import {
 } from '../utils/buildShareUrl';
 import { copyToClipboard } from '../utils/clipboard';
 import { ShareIcon } from './icons/ShareIcon';
+import { IconTooltip } from './ui/IconTooltip';
 import {
   EmailBrandIcon,
   FacebookBrandIcon,
@@ -47,7 +48,6 @@ import {
   shareTourPanelRootClassName,
   shareTourPanelUrlFieldClassName,
   shareTourPanelUrlInputClassName,
-  shareTourPanelUrlLabelClassName,
   shareTourPanelUrlRowClassName,
 } from './shareTourPanelVariants';
 
@@ -208,9 +208,6 @@ export function ShareTourPanel({
       </p>
 
       <label className={shareTourPanelUrlFieldClassName}>
-        <span className={shareTourPanelUrlLabelClassName}>
-          {TOUR_SHARE_URL_LABEL}
-        </span>
         <div className={shareTourPanelUrlRowClassName}>
           <input
             className={shareTourPanelUrlInputClassName}
@@ -220,17 +217,18 @@ export function ShareTourPanel({
             onFocus={(event) => event.currentTarget.select()}
             aria-label={TOUR_SHARE_URL_LABEL}
           />
-          <button
-            type='button'
-            className={shareTourCopyButtonVariants({ state: copyState })}
-            onClick={() => void handleCopy()}
-            aria-label={copyLabel}
-            title={copyLabel}
-          >
-            {copyState === 'copied' ?
-              <CopyCheckIcon />
-            : <CopyIcon />}
-          </button>
+          <IconTooltip label={copyLabel} placement='top'>
+            <button
+              type='button'
+              className={shareTourCopyButtonVariants({ state: copyState })}
+              onClick={() => void handleCopy()}
+              aria-label={copyLabel}
+            >
+              {copyState === 'copied' ?
+                <CopyCheckIcon />
+              : <CopyIcon />}
+            </button>
+          </IconTooltip>
         </div>
       </label>
 

@@ -5,6 +5,7 @@ import {
 } from '../constants/tourShare';
 import type { ShareMessage } from './buildShareUrl';
 import { copyToClipboard } from './clipboard';
+import { setIshareTooltipLabel } from './ishareTooltipDom';
 
 export type ShareTourResult = 'shared' | 'copied' | 'failed' | 'cancelled';
 
@@ -73,12 +74,12 @@ export function applyShareButtonFeedback(
 
   const previousLabel = button.getAttribute('aria-label') ?? defaultLabel;
   button.setAttribute('aria-label', label);
-  button.setAttribute('title', label);
+  setIshareTooltipLabel(button, label);
   button.disabled = true;
 
   window.setTimeout(() => {
     button.setAttribute('aria-label', previousLabel);
-    button.setAttribute('title', previousLabel);
+    setIshareTooltipLabel(button, previousLabel);
     button.disabled = false;
   }, 2400);
 }

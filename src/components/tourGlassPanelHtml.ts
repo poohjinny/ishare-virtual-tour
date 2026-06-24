@@ -24,6 +24,7 @@ import {
 } from '../data/namingOpportunityStatus';
 import {
   TOUR_SHARE_LOCATION_ARIA,
+  TOUR_SHARE_LOCATION_LABEL,
   TOUR_SHARE_OPPORTUNITY_ARIA,
 } from '../constants/tourShare';
 import {
@@ -300,10 +301,11 @@ function buildShareHeaderButtonHtml(
 ): string {
   return `<button
         type="button"
-        class="${className}"
+        class="${className} ishare-tooltip-host"
         data-${dataAttr}="true"
         aria-label="${escapeHtml(ariaLabel)}"
-        title="${escapeHtml(ariaLabel)}"
+        data-ishare-tooltip="${escapeHtml(ariaLabel)}"
+        data-ishare-tooltip-placement="bottom"
       >${glassPanelShareIconHtml()}</button>`;
 }
 
@@ -315,12 +317,13 @@ function buildPopupHeaderActionHtml(cta: PopupCta): string {
     : glassPanelExternalLinkIconHtml();
 
   return `<a
-        class="${GLASS_PANEL.headerBtn}"
+        class="${GLASS_PANEL.headerBtn} ishare-tooltip-host"
         href="${escapeHtml(resolved.url)}"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="${escapeHtml(resolved.ariaLabel)}"
-        title="${escapeHtml(resolved.label)}"
+        data-ishare-tooltip="${escapeHtml(resolved.label)}"
+        data-ishare-tooltip-placement="bottom"
       >${iconHtml}</a>`;
 }
 
@@ -938,10 +941,11 @@ export function buildAnchoredNavPreviewHtml(
         <div class="nav-preview-panel__hero-actions">
           <button
             type="button"
-            class="nav-preview-panel__header-btn"
+            class="nav-preview-panel__header-btn ishare-tooltip-host"
             data-nav-panel-share="true"
             aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
-            title="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
+            data-ishare-tooltip="${escapeHtml(TOUR_SHARE_LOCATION_LABEL)}"
+            data-ishare-tooltip-placement="left"
           >${navPreviewShareIconHtml()}</button>
           <button
             type="button"
@@ -959,10 +963,11 @@ export function buildAnchoredNavPreviewHtml(
         <div class="nav-preview-panel__toolbar-actions">
           <button
             type="button"
-            class="nav-preview-panel__header-btn nav-preview-panel__header-btn--inline"
+            class="nav-preview-panel__header-btn nav-preview-panel__header-btn--inline ishare-tooltip-host"
             data-nav-panel-share="true"
             aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
-            title="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
+            data-ishare-tooltip="${escapeHtml(TOUR_SHARE_LOCATION_LABEL)}"
+            data-ishare-tooltip-placement="left"
           >${navPreviewShareIconHtml()}</button>
           <button
             type="button"

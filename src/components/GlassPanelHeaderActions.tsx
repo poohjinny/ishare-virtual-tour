@@ -2,6 +2,7 @@ import type { PopupCta } from '../types/tour';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import { ShareTourHeaderButton } from './ShareTourHeaderButton';
+import { IconTooltip } from './ui/IconTooltip';
 
 function MailIcon() {
   return (
@@ -44,18 +45,19 @@ export function PopupCtaHeaderLink({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
 
   return (
-    <a
-      className='tour-glass-panel__header-btn'
-      href={resolved.url}
-      target='_blank'
-      rel='noopener noreferrer'
-      aria-label={resolved.ariaLabel}
-      title={resolved.label}
-    >
-      {isMailtoCtaUrl(resolved.url) ?
-        <MailIcon />
-      : <ExternalLinkIcon />}
-    </a>
+    <IconTooltip label={resolved.label} placement='bottom'>
+      <a
+        className='tour-glass-panel__header-btn'
+        href={resolved.url}
+        target='_blank'
+        rel='noopener noreferrer'
+        aria-label={resolved.ariaLabel}
+      >
+        {isMailtoCtaUrl(resolved.url) ?
+          <MailIcon />
+        : <ExternalLinkIcon />}
+      </a>
+    </IconTooltip>
   );
 }
 

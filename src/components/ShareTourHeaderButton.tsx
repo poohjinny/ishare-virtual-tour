@@ -7,6 +7,7 @@ import {
 import type { ShareMessage } from '../utils/buildShareUrl';
 import { shareTourView, type ShareTourResult } from '../utils/shareTour';
 import { ShareIcon } from './icons/ShareIcon';
+import { IconTooltip } from './ui/IconTooltip';
 
 interface ShareTourHeaderButtonProps {
   shareUrl: string;
@@ -35,16 +36,17 @@ export function ShareTourHeaderButton({
   const label = feedback ?? ariaLabel;
 
   return (
-    <button
-      type='button'
-      className={cn('tour-glass-panel__header-btn', feedback && 'opacity-92')}
-      aria-label={label}
-      title={label}
-      disabled={feedback !== null}
-      onClick={() => void handleClick()}
-    >
-      <ShareIcon className='tour-glass-panel__header-btn-icon' />
-    </button>
+    <IconTooltip label={label} placement='bottom'>
+      <button
+        type='button'
+        className={cn('tour-glass-panel__header-btn', feedback && 'opacity-92')}
+        aria-label={label}
+        disabled={feedback !== null}
+        onClick={() => void handleClick()}
+      >
+        <ShareIcon className='tour-glass-panel__header-btn-icon' />
+      </button>
+    </IconTooltip>
   );
 }
 

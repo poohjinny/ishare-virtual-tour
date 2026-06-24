@@ -6,6 +6,7 @@ import {
 } from '../../constants/branding';
 import type { ChatMessage } from '../../types/tour';
 import { GlassPanelCloseIcon, TourGlassPanel } from '../TourGlassPanel';
+import { IconTooltip } from '../ui/IconTooltip';
 import { PlatformBrandLink } from '../PlatformBrandLink';
 import { LocationBadge } from './LocationBadge';
 import { GuideAvatarImage } from './GuideAvatarImage';
@@ -183,15 +184,16 @@ export function AiChatPanel({
           </div>
           <div className={aiPanelHeaderActionsClassName}>
             {canReset && (
-              <button
-                type='button'
-                className={`tour-glass-panel__close ${aiPanelHeaderBtnClassName}`}
-                onClick={handleReset}
-                aria-label='Reset conversation'
-                title='Reset conversation'
-              >
-                <ResetIcon />
-              </button>
+              <IconTooltip label='Reset conversation' placement='bottom'>
+                <button
+                  type='button'
+                  className={`tour-glass-panel__close ${aiPanelHeaderBtnClassName}`}
+                  onClick={handleReset}
+                  aria-label='Reset conversation'
+                >
+                  <ResetIcon />
+                </button>
+              </IconTooltip>
             )}
             <button
               type='button'
@@ -247,14 +249,15 @@ export function AiChatPanel({
             aria-label='Your question'
           />
           <div className={aiComposerActionsClassName}>
-            <button
-              type='button'
-              className={aiComposerVoiceClassName}
-              aria-label='Voice input (coming soon)'
-              title='Voice input (coming soon)'
-            >
+            <IconTooltip label='Voice input (coming soon)' placement='top'>
+              <button
+                type='button'
+                className={aiComposerVoiceClassName}
+                aria-label='Voice input (coming soon)'
+              >
               <MicIcon />
-            </button>
+              </button>
+            </IconTooltip>
             {hasInput && (
               <button
                 type='submit'

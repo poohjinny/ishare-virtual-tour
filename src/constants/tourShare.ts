@@ -42,9 +42,7 @@ export const TOUR_SHARE_LOCATION_ARIA = 'Share a link to this tour location';
 export const TOUR_SHARE_OPPORTUNITY_ARIA =
   'Share a link to this naming opportunity';
 
-export function tourNavShareActionLabel(isOpen: boolean): string {
-  return isOpen ? 'Close share' : 'Share';
-}
+export const TOUR_NAV_ACTION_SHARE = 'Share';
 
 export function canUseNativeShare(): boolean {
   return (
