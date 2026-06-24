@@ -1,13 +1,16 @@
 /*
- * Glass panel shells ù PSV HTML markers, nav preview, info popup, dock panels.
+ * Glass panel shells ÔøΩ PSV HTML markers, nav preview, info popup, dock panels.
  * React TourGlassPanel / InfoPopup use stable BEM class names from tourGlassPanelVariants / infoPopupVariants.
  */
 @layer components {
-  /* ?? Shared glass panel ù nav menus + panorama anchored popups ?? */
+  /* ?? Shared glass panel ÔøΩ nav menus + panorama anchored popups ?? */
 
   .tour-glass-panel {
     --ishare-panel-header-btn-size: 36px;
     --ishare-panel-header-icon-size: 18px;
+    --ishare-panel-cta-icon-size: 0.9em;
+    --ishare-panel-cta-icon-opsz: 20;
+    --ishare-panel-cta-gap: 8px;
     display: flex;
     flex-direction: column;
     width: min(320px, calc(100vw - 48px));
@@ -25,13 +28,13 @@
     cursor: default;
   }
 
-  /* Off-screen content measurement ù natural height without viewport cap */
+  /* Off-screen content measurement ÔøΩ natural height without viewport cap */
   .tour-glass-panel--measure,
   .tour-glass-panel--measure .tour-glass-panel__shell {
     max-height: none;
   }
 
-  /* PSV HTML marker: fixed size on .psv-marker ù panel fills box and body scrolls */
+  /* PSV HTML marker: fixed size on .psv-marker ÔøΩ panel fills box and body scrolls */
   .viewer-container .psv-marker .tour-glass-panel--anchored {
     width: 100%;
     height: 100%;
@@ -58,7 +61,7 @@
     transform-origin: bottom center;
   }
 
-  /* Info anchored panels ù same dock glass shell as AI / Help */
+  /* Info anchored panels ÔøΩ same dock glass shell as AI / Help */
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] {
     border-radius: var(--ishare-radius-lg);
     box-shadow: var(--ishare-glass-dock-shadow);
@@ -100,7 +103,7 @@
     cursor: text;
   }
 
-  /* NO / info ù content height when short; body scrolls when marker hits max-height */
+  /* NO / info ÔøΩ content height when short; body scrolls when marker hits max-height */
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__body {
     flex: 1 1 auto;
     min-height: 0;
@@ -507,6 +510,7 @@
 
   .tour-glass-panel__footer .tour-glass-panel__cta {
     display: flex;
+    align-items: center;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -514,7 +518,7 @@
   }
 
   .tour-glass-panel__footer .tour-glass-panel__cta-text {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -522,7 +526,7 @@
     text-align: center;
   }
 
-  /* Shared footer CTA ù nav preview, anchored info/NO, modal info */
+  /* Shared footer CTA ÔøΩ nav preview, anchored info/NO, modal info */
   .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer,
   .tour-glass-panel--nav-preview .tour-glass-panel__footer {
     padding: var(--ishare-panel-footer-padding-y) var(--ishare-panel-inline-padding);
@@ -568,9 +572,10 @@
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta,
   .tour-glass-panel--modal .tour-glass-panel__footer .tour-glass-panel__cta {
     display: flex;
+    align-items: center;
     padding: 12px 14px;
     font-size: var(--ishare-font-size-lg);
-    line-height: 1.4;
+    line-height: 1.25;
     min-height: 0;
     flex: none;
     width: 100%;
@@ -578,11 +583,12 @@
     min-width: 0;
     box-sizing: border-box;
     justify-content: center;
+    gap: var(--ishare-panel-cta-gap, 8px);
   }
 
   .tour-glass-panel--anchored .tour-glass-panel__footer .tour-glass-panel__cta-text,
   .tour-glass-panel--modal .tour-glass-panel__footer .tour-glass-panel__cta-text {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     min-width: 0;
     text-align: center;
   }
@@ -590,7 +596,7 @@
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary),
   .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary),
   .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) {
-    gap: 8px;
+    gap: var(--ishare-panel-cta-gap, 8px);
   }
 
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta-text {
@@ -639,20 +645,36 @@
     max-width: 100%;
   }
 
-  /* Footer primary CTA hover ù nav preview + info/NO panels */
-  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,
-  .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,
-  .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
+  /* Footer primary CTA hover ÔøΩ nav preview + info/NO panels */
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
     transition: transform 0.22s ease;
   }
 
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon,
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon {
+    transform: translateX(4px);
+  }
+
+  /* NO panel primary CTA icon ‚Äî Material Symbols fill on hover */
+  .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,
+  .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' var(--ishare-panel-cta-icon-opsz, 20);
+    transition: font-variation-settings 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
   .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
   .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon,
   .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
   .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon {
-    transform: translateX(4px);
+    font-variation-settings:
+      'FILL' 1,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' var(--ishare-panel-cta-icon-opsz, 20);
   }
 
   .tour-glass-panel__copy {
@@ -803,13 +825,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: var(--ishare-panel-cta-gap, 8px);
     box-sizing: border-box;
     width: auto;
     max-width: 100%;
     min-height: 36px;
     height: auto;
-    padding: 7px 14px 7px 16px;
+    padding: 7px 14px;
     border: none;
     border-radius: 999px;
     background: var(--ishare-primary);
@@ -817,7 +839,7 @@
     font-family: var(--ishare-display-font);
     font-size: var(--ishare-font-size-md);
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.25;
     text-decoration: none;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -834,8 +856,42 @@
 
   .tour-glass-panel__cta-text {
     flex: 0 1 auto;
+    align-self: center;
     min-width: 0;
     text-align: center;
+    line-height: inherit;
+  }
+
+  .material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .tour-glass-panel__cta .tour-glass-panel__cta-icon {
+    flex: none;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    font-family: 'Material Symbols Rounded';
+    font-size: var(--ishare-panel-cta-icon-size, 0.9em);
+    line-height: 1;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' var(--ishare-panel-cta-icon-opsz, 20);
   }
 
   .tour-glass-panel__reg {
@@ -846,7 +902,7 @@
     letter-spacing: 0;
   }
 
-  /* GIFTABULATORù ù reg mark must not clip inside footer ellipsis/overflow chains */
+  /* GIFTABULATORÔøΩ ÔøΩ reg mark must not clip inside footer ellipsis/overflow chains */
   .tour-glass-panel__footer .tour-glass-panel__cta:has(.tour-glass-panel__reg),
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:has(.tour-glass-panel__reg),
   .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:has(.tour-glass-panel__reg),
@@ -863,12 +919,6 @@
     text-overflow: clip;
     white-space: normal;
     overflow-wrap: anywhere;
-  }
-
-  .tour-glass-panel__cta-icon {
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
   }
 
   .tour-glass-panel__cta:hover,
@@ -1052,6 +1102,26 @@
     margin-right: 20px;
   }
 
+  /* Explore directory ‚Äî content-height min; caps at max-height then scrolls inside body */
+  .tour-glass-panel--directory {
+    height: auto;
+    min-height: auto;
+    max-height: min(90vh, 840px);
+    overflow: hidden;
+  }
+
+  .tour-glass-panel--directory .tour-glass-panel__shell {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: auto;
+    max-height: min(90vh, 840px);
+  }
+
+  .tour-glass-panel--directory .tour-glass-panel__body--directory {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
   .tour-glass-panel__body--help {
     gap: 24px;
     padding: 20px;
@@ -1061,12 +1131,16 @@
     padding: 16px 14px;
   }
 
+  .tour-glass-panel__body--help .tour-nav-help-list li::marker {
+    color: color-mix(in srgb, var(--color-body) 30%, var(--color-muted));
+  }
+
   .tour-glass-panel__body--share {
     gap: 0;
     padding: 20px 0 0;
   }
 
-  /* Client intro picker ù fixed panel height; gallery flexes when a category tab is empty */
+  /* Client intro picker ÔøΩ fixed panel height; gallery flexes when a category tab is empty */
   .tour-glass-panel--intro {
     width: min(640px, calc(100vw - 48px));
     height: min(88vh, 760px);
@@ -1092,12 +1166,16 @@
   .tour-glass-panel--intro .client-intro__gallery {
     flex: 1 1 auto;
     min-height: 0;
+    padding-inline: 0;
+    overflow-x: clip;
   }
 
   .tour-glass-panel--intro .client-intro__tab-panel {
     display: flex;
     flex-direction: column;
     min-height: 100%;
+    box-sizing: border-box;
+    overflow: visible;
   }
 
   @media (max-width: 480px) {
@@ -1204,7 +1282,7 @@
     }
   }
 
-  /* ?? Nav hotspot preview ù hero + scrollable body + footer ?? */
+  /* ?? Nav hotspot preview ÔøΩ hero + scrollable body + footer ?? */
 
   #glass-panel-measure-host .tour-glass-panel--nav-preview {
     width: 100%;
@@ -1237,6 +1315,10 @@
     border: var(--ishare-panel-border);
     box-shadow: var(--ishare-panel-shadow);
     transform-origin: bottom center;
+  }
+
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero .ishare-tooltip-host::after {
+    z-index: 20;
   }
 
   .nav-preview-panel__hero {
@@ -1386,10 +1468,11 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    z-index: 2;
+    z-index: 12;
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    overflow: visible;
   }
 
   .nav-preview-panel__header-btn {
@@ -1958,19 +2041,23 @@
       transition: none;
     }
 
-    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,
-    .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,
-    .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
+    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
       transition: none;
     }
 
     .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon,
-    .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-    .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon,
-    .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-    .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon {
+    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon {
       transform: none;
+    }
+
+    .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,
+    .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
+      font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' var(--ishare-panel-cta-icon-opsz, 20);
+      transition: none;
     }
   }
 
