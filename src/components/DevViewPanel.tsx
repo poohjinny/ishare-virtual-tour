@@ -306,6 +306,13 @@ export function DevViewPanel({
   const [editTourCategory, setEditTourCategory] =
     useState<TourCategory>('Healthcare');
   const [editTourWebsite, setEditTourWebsite] = useState('');
+  const [editOrgName, setEditOrgName] = useState('');
+  const [editOrgEmail, setEditOrgEmail] = useState('');
+  const [editOrgPhone, setEditOrgPhone] = useState('');
+  const [editOrgPhoneLabel, setEditOrgPhoneLabel] = useState('');
+  const [editOrgFax, setEditOrgFax] = useState('');
+  const [editOrgFaxLabel, setEditOrgFaxLabel] = useState('');
+  const [editOrgAddress, setEditOrgAddress] = useState('');
   const [editTourVisibility, setEditTourVisibility] =
     useState<DevCatalogTourVisibility>('unlisted');
   const [editTourFeatured, setEditTourFeatured] = useState(false);
@@ -313,6 +320,8 @@ export function DevViewPanel({
     DEFAULT_NEW_TOUR_PRIMARY_COLOR,
   );
   const [editTourLogoAlt, setEditTourLogoAlt] = useState('');
+  const [editTourFontFamily, setEditTourFontFamily] = useState('');
+  const [editTourFontSourceUrl, setEditTourFontSourceUrl] = useState('');
   const [editTourLogoFile, setEditTourLogoFile] = useState<File | null>(null);
   const [editTourFaviconFile, setEditTourFaviconFile] = useState<File | null>(
     null,
@@ -622,10 +631,19 @@ export function DevViewPanel({
     setEditTourTitle(tour.title);
     setEditTourCategory((tour.category as TourCategory) ?? 'Healthcare');
     setEditTourWebsite(tour.url ?? tour.organization?.website ?? '');
+    setEditOrgName(tour.organization?.name ?? '');
+    setEditOrgEmail(tour.organization?.email ?? '');
+    setEditOrgPhone(tour.organization?.phone ?? '');
+    setEditOrgPhoneLabel(tour.organization?.phoneLabel ?? '');
+    setEditOrgFax(tour.organization?.fax ?? '');
+    setEditOrgFaxLabel(tour.organization?.faxLabel ?? '');
+    setEditOrgAddress(tour.organization?.address ?? '');
     setEditTourPrimaryColor(
       tour.branding?.primaryColor ?? DEFAULT_NEW_TOUR_PRIMARY_COLOR,
     );
     setEditTourLogoAlt(tour.branding?.logoAlt ?? '');
+    setEditTourFontFamily(tour.branding?.fontFamily ?? '');
+    setEditTourFontSourceUrl(tour.branding?.fontSourceUrl ?? '');
     setEditTourLogoFile(null);
     setEditTourFaviconFile(null);
     setEditTourSuggestNotes([]);
@@ -638,12 +656,21 @@ export function DevViewPanel({
     setFloorPlanStatus('idle');
     setFloorPlanError(null);
   }, [
+    tour.branding?.fontFamily,
+    tour.branding?.fontSourceUrl,
     tour.branding?.logoAlt,
     tour.branding?.primaryColor,
     tour.category,
     tour.floorPlan?.height,
     tour.floorPlan?.width,
     tour.id,
+    tour.organization?.address,
+    tour.organization?.email,
+    tour.organization?.fax,
+    tour.organization?.faxLabel,
+    tour.organization?.name,
+    tour.organization?.phone,
+    tour.organization?.phoneLabel,
     tour.organization?.website,
     tour.title,
     tour.url,
@@ -971,8 +998,17 @@ export function DevViewPanel({
         tourTitle: editTourTitle.trim(),
         category: editTourCategory,
         websiteUrl: editTourWebsite.trim() || undefined,
+        organizationName: editOrgName,
+        organizationEmail: editOrgEmail,
+        organizationPhone: editOrgPhone,
+        organizationPhoneLabel: editOrgPhoneLabel,
+        organizationFax: editOrgFax,
+        organizationFaxLabel: editOrgFaxLabel,
+        organizationAddress: editOrgAddress,
         primaryColor: normalizeHexColorInput(editTourPrimaryColor),
         logoAlt: editTourLogoAlt.trim() || undefined,
+        fontFamily: editTourFontFamily,
+        fontSourceUrl: editTourFontSourceUrl,
         logoFile: editTourLogoFile,
         faviconFile: editTourFaviconFile,
         visibility: editTourVisibility,
@@ -992,9 +1028,18 @@ export function DevViewPanel({
     }
   }, [
     canSaveEditTour,
+    editOrgAddress,
+    editOrgEmail,
+    editOrgFax,
+    editOrgFaxLabel,
+    editOrgName,
+    editOrgPhone,
+    editOrgPhoneLabel,
     editTourCategory,
     editTourFeatured,
     editTourFaviconFile,
+    editTourFontFamily,
+    editTourFontSourceUrl,
     editTourLogoAlt,
     editTourLogoFile,
     editTourPrimaryColor,
@@ -2732,6 +2777,107 @@ export function DevViewPanel({
               />
             </label>
 
+            <p className={devViewPanelSectionLeadClassName}>Organization</p>
+            <p className={devViewPanelSectionHintClassName}>
+              Shown in tour chrome, share panel, and footer contact blocks.
+            </p>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Organization name
+              </span>
+              <input
+                className={devViewPanelInputClassName}
+                type='text'
+                value={editOrgName}
+                onChange={(e) => setEditOrgName(e.target.value)}
+                placeholder='e.g. Grande Prairie Regional Hospital Foundation'
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>Email</span>
+              <input
+                className={devViewPanelInputClassName}
+                type='email'
+                value={editOrgEmail}
+                onChange={(e) => setEditOrgEmail(e.target.value)}
+                placeholder='info@example.org'
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+
+            <div className='grid grid-cols-2 gap-2'>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>Phone</span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={editOrgPhone}
+                  onChange={(e) => setEditOrgPhone(e.target.value)}
+                  placeholder='825-412-4130'
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+              </label>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Phone label
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={editOrgPhoneLabel}
+                  onChange={(e) => setEditOrgPhoneLabel(e.target.value)}
+                  placeholder='Telephone'
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+              </label>
+            </div>
+
+            <div className='grid grid-cols-2 gap-2'>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>Fax</span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={editOrgFax}
+                  onChange={(e) => setEditOrgFax(e.target.value)}
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+              </label>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Fax label
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={editOrgFaxLabel}
+                  onChange={(e) => setEditOrgFaxLabel(e.target.value)}
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+              </label>
+            </div>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>Address</span>
+              <textarea
+                className={devViewPanelInputClassName}
+                rows={2}
+                value={editOrgAddress}
+                onChange={(e) => setEditOrgAddress(e.target.value)}
+                placeholder='Street, city, province, postal code'
+                spellCheck={false}
+              />
+            </label>
+
             <p className={devViewPanelSectionLeadClassName}>Branding</p>
             <div className={devViewPanelActionsClassName}>
               <button
@@ -2801,6 +2947,40 @@ export function DevViewPanel({
                 autoComplete='off'
               />
             </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Font family (CSS stack)
+              </span>
+              <input
+                className={devViewPanelInputClassName}
+                type='text'
+                value={editTourFontFamily}
+                onChange={(e) => setEditTourFontFamily(e.target.value)}
+                placeholder="'Montserrat', sans-serif"
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Google Fonts URL
+              </span>
+              <input
+                className={devViewPanelInputClassName}
+                type='url'
+                value={editTourFontSourceUrl}
+                onChange={(e) => setEditTourFontSourceUrl(e.target.value)}
+                placeholder='https://fonts.googleapis.com/css2?family=…'
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+            <p className={devViewPanelSectionHintClassName}>
+              Must be <code>https://fonts.googleapis.com/…</code>. Clear both
+              font fields to revert to platform defaults.
+            </p>
 
             <label className={devViewPanelFieldClassName}>
               <span className={devViewPanelFieldLabelClassName}>

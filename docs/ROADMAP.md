@@ -145,8 +145,8 @@ until Admin app exists; then port endpoints and retire duplicate UI.
 
 **Tour settings** (`/tours/[tourId]`)
 
-- [ ] Organization — name, email, phone(s), fax, address
-- [ ] Branding — `fontFamily`, `fontSourceUrl` (Google Fonts)
+- [x] Organization — name, email, phone(s), fax, address
+- [x] Branding — `fontFamily`, `fontSourceUrl` (Google Fonts)
 - [ ] Product copy — `productFullName`
 - [ ] Scene transitions — `defaultTransition` (fade/black, speed)
 - [ ] Immersive background — audio / playlist / volume
@@ -283,7 +283,7 @@ admin `users` / roles.
 | `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                            |
 | `/`                                | dashboard — clients, tours, draft/published status   | partial — create tour, catalog visibility     |
 | `/clients/[clientId]`              | tour list, visibility, featured                    | partial — featured/visibility on tour update  |
-| `/tours/[tourId]`                  | tour settings — branding, org, floor plan          | partial — tour tab, floor plan; org/fonts TBD |
+| `/tours/[tourId]`                  | tour settings — branding, org, floor plan          | partial — tour tab, org, fonts, floor plan  |
 | `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                      |
 | `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move                  |
 | `/tours/[tourId]/preview`          | iframe preview with token URL                      | — (viewer `?dev=1` is the preview today)      |
@@ -452,6 +452,7 @@ data — no duplicate content per format.
 
 | Date       | Note                                                                                    |
 | ---------- | --------------------------------------------------------------------------------------- |
+| 2026-06-11 | Dev panel — organization + Google Fonts branding on tour update                         |
 | 2026-06-11 | Dev panel v1 — full tour/scene/hotspot/floor-plan/knowledge CRUD; Admin migration table |
 | 2026-06-11 | Scene transition feedback done — progress bar only (no dim overlay)                     |
 | 2026-06-11 | Phase 2 platform architecture (sections 1–9) + Sprint 2A checklist                      |

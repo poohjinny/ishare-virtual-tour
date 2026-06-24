@@ -205,6 +205,17 @@ export interface DevUpdateTourPayload {
   faviconFile?: File | null;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
+  organizationName?: string;
+  organizationEmail?: string;
+  organizationPhone?: string;
+  organizationPhoneLabel?: string;
+  organizationFax?: string;
+  organizationFaxLabel?: string;
+  organizationAddress?: string;
+  fontFamily?: string;
+  fontSourceUrl?: string;
+  clearFontFamily?: boolean;
+  clearFontSourceUrl?: boolean;
 }
 
 export interface DevSuggestBrandingResult {

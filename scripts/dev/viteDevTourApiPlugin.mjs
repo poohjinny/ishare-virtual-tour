@@ -499,6 +499,17 @@ function validateUpdateTourPayload(body) {
     faviconFileBase64,
     visibility,
     featured,
+    organizationName,
+    organizationEmail,
+    organizationPhone,
+    organizationPhoneLabel,
+    organizationFax,
+    organizationFaxLabel,
+    organizationAddress,
+    fontFamily,
+    fontSourceUrl,
+    clearFontFamily,
+    clearFontSourceUrl,
   } = body ?? {};
 
   if (!tourId?.trim()) {
@@ -526,6 +537,25 @@ function validateUpdateTourPayload(body) {
     normalizedVisibility = value;
   }
 
+  if (fontSourceUrl?.trim()) {
+    try {
+      const parsed = new URL(fontSourceUrl.trim());
+      if (
+        parsed.protocol !== 'https:' ||
+        parsed.hostname !== 'fonts.googleapis.com'
+      ) {
+        throw new Error(
+          'fontSourceUrl must be an https://fonts.googleapis.com/ URL',
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('fontSourceUrl')) {
+        throw error;
+      }
+      throw new Error('fontSourceUrl must be a valid URL');
+    }
+  }
+
   return {
     tourId: tourId.trim(),
     tourTitle,
@@ -540,6 +570,26 @@ function validateUpdateTourPayload(body) {
     ),
     visibility: normalizedVisibility,
     featured: typeof featured === 'boolean' ? featured : undefined,
+    organizationName:
+      typeof organizationName === 'string' ? organizationName : undefined,
+    organizationEmail:
+      typeof organizationEmail === 'string' ? organizationEmail : undefined,
+    organizationPhone:
+      typeof organizationPhone === 'string' ? organizationPhone : undefined,
+    organizationPhoneLabel:
+      typeof organizationPhoneLabel === 'string' ?
+        organizationPhoneLabel
+      : undefined,
+    organizationFax:
+      typeof organizationFax === 'string' ? organizationFax : undefined,
+    organizationFaxLabel:
+      typeof organizationFaxLabel === 'string' ? organizationFaxLabel : undefined,
+    organizationAddress:
+      typeof organizationAddress === 'string' ? organizationAddress : undefined,
+    fontFamily: typeof fontFamily === 'string' ? fontFamily : undefined,
+    fontSourceUrl: typeof fontSourceUrl === 'string' ? fontSourceUrl : undefined,
+    clearFontFamily: clearFontFamily === true,
+    clearFontSourceUrl: clearFontSourceUrl === true,
   };
 }
 

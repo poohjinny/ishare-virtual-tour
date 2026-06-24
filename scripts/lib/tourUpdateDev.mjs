@@ -71,20 +71,31 @@ export function assertCatalogVisibility(value) {
   return visibility;
 }
 
-function updateKnowledgeFile({ toursDir, tourId, tourTitle, websiteUrl }) {
+function updateKnowledgeFile({
+  toursDir,
+  tourId,
+  tourTitle,
+  websiteUrl,
+  organizationName,
+}) {
   const knowledgePath = join(toursDir, `${tourId}-knowledge.json`);
   if (!existsSync(knowledgePath)) return;
 
   const knowledge = JSON.parse(readFileSync(knowledgePath, 'utf8'));
   const nextWebsite = websiteUrl?.trim();
   const nextTitle = tourTitle?.trim();
+  const nextOrgName = organizationName?.trim();
 
   if (nextWebsite) {
     knowledge.url = nextWebsite;
   }
-  if (nextTitle) {
+  if (nextOrgName || nextTitle) {
     knowledge.global = knowledge.global ?? {};
-    knowledge.global.facilityName = nextTitle;
+    if (nextOrgName) {
+      knowledge.global.facilityName = nextOrgName;
+    } else if (nextTitle) {
+      knowledge.global.facilityName = nextTitle;
+    }
   }
 
   writeFileSync(
@@ -92,6 +103,37 @@ function updateKnowledgeFile({ toursDir, tourId, tourTitle, websiteUrl }) {
     `${JSON.stringify(knowledge, null, 2)}\n`,
     'utf8',
   );
+}
+
+function assertGoogleFontSourceUrl(url) {
+  if (!url?.trim()) return undefined;
+  try {
+    const parsed = new URL(url.trim());
+    if (
+      parsed.protocol !== 'https:' ||
+      parsed.hostname !== 'fonts.googleapis.com'
+    ) {
+      throw new Error(
+        'fontSourceUrl must be an https://fonts.googleapis.com/ URL',
+      );
+    }
+    return url.trim();
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('fontSourceUrl')) {
+      throw error;
+    }
+    throw new Error('fontSourceUrl must be a valid URL');
+  }
+}
+
+function applyOptionalOrganizationField(organization, key, value) {
+  if (value === undefined) return;
+  const trimmed = value.trim();
+  if (trimmed) {
+    organization[key] = trimmed;
+  } else {
+    delete organization[key];
+  }
 }
 
 export async function updateTour({
@@ -108,6 +150,17 @@ export async function updateTour({
   faviconFileBuffer,
   visibility,
   featured,
+  organizationName,
+  organizationEmail,
+  organizationPhone,
+  organizationPhoneLabel,
+  organizationFax,
+  organizationFaxLabel,
+  organizationAddress,
+  fontFamily,
+  fontSourceUrl,
+  clearFontFamily,
+  clearFontSourceUrl,
 }) {
   const resolvedTourId = tourId?.trim();
   if (!resolvedTourId) {
@@ -141,6 +194,63 @@ export async function updateTour({
     tour.organization.website = nextWebsite;
   }
 
+  const hasOrganizationFields =
+    organizationName !== undefined ||
+    organizationEmail !== undefined ||
+    organizationPhone !== undefined ||
+    organizationPhoneLabel !== undefined ||
+    organizationFax !== undefined ||
+    organizationFaxLabel !== undefined ||
+    organizationAddress !== undefined;
+
+  if (hasOrganizationFields) {
+    tour.organization = tour.organization ?? {
+      name: organizationName?.trim() || nextTitle,
+      website: nextWebsite || tour.url || '',
+    };
+    applyOptionalOrganizationField(
+      tour.organization,
+      'name',
+      organizationName ?? '',
+    );
+    applyOptionalOrganizationField(
+      tour.organization,
+      'email',
+      organizationEmail ?? '',
+    );
+    applyOptionalOrganizationField(
+      tour.organization,
+      'phone',
+      organizationPhone ?? '',
+    );
+    applyOptionalOrganizationField(
+      tour.organization,
+      'phoneLabel',
+      organizationPhoneLabel ?? '',
+    );
+    applyOptionalOrganizationField(
+      tour.organization,
+      'fax',
+      organizationFax ?? '',
+    );
+    applyOptionalOrganizationField(
+      tour.organization,
+      'faxLabel',
+      organizationFaxLabel ?? '',
+    );
+    applyOptionalOrganizationField(
+      tour.organization,
+      'address',
+      organizationAddress ?? '',
+    );
+    if (!tour.organization.name?.trim()) {
+      tour.organization.name = nextTitle;
+    }
+    if (!tour.organization.website?.trim() && nextWebsite) {
+      tour.organization.website = nextWebsite;
+    }
+  }
+
   const normalizedColor =
     primaryColor?.trim() ? normalizePrimaryColor(primaryColor) : undefined;
   if (primaryColor?.trim() && !normalizedColor) {
@@ -155,6 +265,30 @@ export async function updateTour({
   const nextLogoAlt = logoAlt?.trim();
   if (nextLogoAlt) {
     tour.branding.logoAlt = nextLogoAlt;
+  }
+
+  const normalizedFontSourceUrl =
+    fontSourceUrl !== undefined ?
+      assertGoogleFontSourceUrl(fontSourceUrl)
+    : undefined;
+  if (clearFontFamily === true) {
+    delete tour.branding.fontFamily;
+  } else if (fontFamily !== undefined) {
+    const nextFontFamily = fontFamily.trim();
+    if (nextFontFamily) {
+      tour.branding.fontFamily = nextFontFamily;
+    } else {
+      delete tour.branding.fontFamily;
+    }
+  }
+  if (clearFontSourceUrl === true) {
+    delete tour.branding.fontSourceUrl;
+  } else if (fontSourceUrl !== undefined) {
+    if (normalizedFontSourceUrl) {
+      tour.branding.fontSourceUrl = normalizedFontSourceUrl;
+    } else {
+      delete tour.branding.fontSourceUrl;
+    }
   }
 
   const brandAssets = await saveTourBrandAssets({
@@ -199,6 +333,7 @@ export async function updateTour({
     tourId: tour.id,
     tourTitle: nextTitle,
     websiteUrl: nextWebsite,
+    organizationName: tour.organization?.name,
   });
 
   return { tourPath, tour };
