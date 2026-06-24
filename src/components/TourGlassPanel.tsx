@@ -63,6 +63,7 @@ interface TourGlassPanelProps {
   titleId: string;
   onClose?: () => void;
   badge?: ReactNode;
+  headerActions?: ReactNode;
   header?: ReactNode;
   footer?: ReactNode;
   variant?: TourGlassPanelVariant;
@@ -78,6 +79,7 @@ export function TourGlassPanel({
   titleId,
   onClose,
   badge,
+  headerActions,
   header,
   footer,
   variant = 'dock',
@@ -106,16 +108,19 @@ export function TourGlassPanel({
                   : null}
                   {badge}
                 </div>
-                {onClose && (
+                {(headerActions || onClose) && (
                   <div className={tourGlassPanelTitleActionsClassName}>
-                    <button
-                      type='button'
-                      className={tourGlassPanelCloseClassName}
-                      onClick={onClose}
-                      aria-label='Close'
-                    >
-                      <GlassPanelCloseIcon />
-                    </button>
+                    {headerActions}
+                    {onClose && (
+                      <button
+                        type='button'
+                        className={tourGlassPanelCloseClassName}
+                        onClick={onClose}
+                        aria-label='Close'
+                      >
+                        <GlassPanelCloseIcon />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

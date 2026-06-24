@@ -1,5 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
+import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 
 const tourNavGlassShadow = cn(
   'shadow-[0_10px_28px_rgba(15,23,42,0.14),0_4px_12px_rgba(15,23,42,0.08)]',
@@ -7,7 +8,7 @@ const tourNavGlassShadow = cn(
 
 const tourNavGlassBackdrop = cn('backdrop-blur-[6px] backdrop-saturate-[120%]');
 
-/** Shared idle glass surface for nav dock circle + search FAB. */
+/** Shared idle glass surface for nav dock circle buttons. */
 const tourNavDockBtnSurfaceClassName = cn(
   'bg-white/[0.52] text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
   tourNavGlassBackdrop,
@@ -18,13 +19,6 @@ const tourNavDockBtnSurfaceClassName = cn(
 const tourNavDockBtnHoverClassName = cn(
   'hover:bg-white/[0.78] hover:text-foreground hover:[&_svg]:text-foreground',
   'focus-visible:bg-white/[0.78] focus-visible:text-foreground focus-visible:[&_svg]:text-foreground',
-);
-
-/** Hover/focus when the hit target is a nested trigger (search pill). */
-const tourNavDockBtnNestedFocusClassName = cn(
-  'has-[.tour-nav-search-pill-trigger:focus-visible]:bg-white/[0.78]',
-  'has-[.tour-nav-search-pill-trigger:focus-visible]:text-foreground',
-  'has-[.tour-nav-search-pill-trigger:focus-visible]:[&_svg]:text-foreground',
 );
 
 /** Scroll-into-view target for active directory items */
@@ -132,27 +126,11 @@ export const tourNavBreadcrumbPulseDotClassName = cn(
 
 export const tourNavActionsRootClassName = cn(
   'absolute top-6 right-6 z-[90] flex flex-col-reverse items-end',
-  '[--tour-directory-space:16px] [--tour-directory-divider-space:18px]',
+  '[--tour-directory-space:16px] [--tour-directory-divider-space:24px]',
   'max-[480px]:top-4 max-[480px]:right-4',
 );
 
 export const tourNavActionsDockClassName = cn('flex items-center gap-2');
-
-export const tourNavSearchSlotVariants = cva('relative shrink-0', {
-  variants: { results: { true: 'z-[2]', false: '' } },
-  defaultVariants: { results: false },
-});
-
-export const tourNavSearchDropdownClassName = cn(
-  'ishare-scrollbar absolute top-[calc(100%+6px)] right-0',
-  'max-h-[min(50vh,360px)] w-[min(280px,calc(100vw-160px))] overflow-y-auto',
-  'rounded-lg border border-[color:var(--ishare-border)] bg-white/[0.92] p-3.5 pb-4',
-  'backdrop-blur-[10px] backdrop-saturate-[120%]',
-  tourNavGlassShadow,
-  'animate-tour-nav-search-dropdown-in motion-reduce:animate-none',
-  '[&_h3]:px-1 [&_ul]:px-1',
-  '[&_p]:px-1 [&_p]:py-2 [&_p]:leading-[1.6]',
-);
 
 export const tourNavCircleBtnVariants = cva(
   cn(
@@ -162,10 +140,7 @@ export const tourNavCircleBtnVariants = cva(
   {
     variants: {
       active: {
-        false: cn(
-          tourNavDockBtnSurfaceClassName,
-          tourNavDockBtnHoverClassName,
-        ),
+        false: cn(tourNavDockBtnSurfaceClassName, tourNavDockBtnHoverClassName),
         true: cn(
           'scale-[1.03] bg-primary text-white backdrop-blur-none backdrop-saturate-100',
           'shadow-[0_10px_28px_rgba(var(--ishare-primary-rgb),0.32),0_4px_12px_rgba(var(--ishare-primary-rgb),0.2)]',
@@ -187,28 +162,28 @@ export const tourNavCircleIconHelpClassName = cn(
   'size-[19px] max-[480px]:size-[17px]',
 );
 
-export const tourNavSearchPillVariants = cva(
+/** Explore panel search pill close — 14px icon; smaller than panel header close (18px). */
+export const tourNavSearchCloseIconClassName = cn('!size-[14px]');
+
+/** Explore panel header — search pill + layout toggle */
+export const tourNavExploreHeaderActionsClassName = cn(
+  'flex shrink-0 items-center justify-end gap-1',
+);
+
+export const tourNavExploreSearchPillVariants = cva(
   cn(
-    'tour-nav-search-pill flex h-[46px] shrink-0 items-center overflow-hidden rounded-full border',
+    'flex items-center overflow-hidden',
+    'transition-[max-width,width,border-color,padding-bottom] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none',
   ),
   {
     variants: {
       open: {
-        false: cn(
-          'w-[46px] border-transparent',
-          tourNavDockBtnSurfaceClassName,
-          tourNavDockBtnHoverClassName,
-          tourNavDockBtnNestedFocusClassName,
-        ),
+        false:
+          'h-[var(--ishare-panel-header-btn-size)] w-[var(--ishare-panel-header-btn-size)] max-w-[var(--ishare-panel-header-btn-size)] shrink-0 border-b border-transparent pb-0',
         true: cn(
-          'tour-nav-search-pill--open w-[min(280px,calc(100vw-160px))] border-[color:var(--ishare-border)] bg-white/[0.92] text-body',
-          tourNavGlassBackdrop,
-          tourNavGlassShadow,
-          '[&_.tour-nav-search-icon]:static [&_.tour-nav-search-icon]:ml-3.5 [&_.tour-nav-search-icon]:shrink-0 [&_.tour-nav-search-icon]:translate-none',
-          '[&_.tour-nav-search-input]:min-h-[46px] [&_.tour-nav-search-input]:min-w-0 [&_.tour-nav-search-input]:flex-1',
-          '[&_.tour-nav-search-input]:border-none [&_.tour-nav-search-input]:bg-transparent [&_.tour-nav-search-input]:px-2.5 [&_.tour-nav-search-input]:pl-2.5 [&_.tour-nav-search-input]:shadow-none',
-          '[&_.tour-nav-search-input]:hover:enabled:border-none [&_.tour-nav-search-input]:hover:enabled:bg-transparent [&_.tour-nav-search-input]:hover:enabled:shadow-none',
-          '[&_.tour-nav-search-input]:focus:border-none [&_.tour-nav-search-input]:focus:bg-transparent [&_.tour-nav-search-input]:focus:shadow-none [&_.tour-nav-search-input]:focus:outline-none',
+          'h-[var(--ishare-panel-header-btn-size)] w-[min(240px,calc(100vw-176px))] max-w-[min(240px,calc(100vw-176px))] shrink-0 gap-1.5',
+          'border-b border-[color:var(--ishare-border)] pb-1',
+          'focus-within:border-primary-light',
         ),
       },
     },
@@ -216,31 +191,49 @@ export const tourNavSearchPillVariants = cva(
   },
 );
 
-export const tourNavSearchPillTriggerClassName = cn(
-  'tour-nav-search-pill-trigger flex size-[46px] cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0 text-inherit',
-  'focus-visible:outline-none',
+export const tourNavExploreSearchTriggerClassName = cn(
+  'flex size-[var(--ishare-panel-header-btn-size)] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0 text-muted',
+  'transition-[background,color] duration-150',
+  'hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground',
+  'focus-visible:bg-[rgba(15,23,42,0.06)] focus-visible:text-foreground focus-visible:outline-none',
 );
 
-export const tourNavSearchPillCloseClassName = cn(
-  'mr-[7px] flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
-  'bg-transparent p-0 text-muted transition-[background,color] duration-150',
-  'hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground focus-visible:bg-[rgba(15,23,42,0.06)] focus-visible:text-foreground focus-visible:outline-none',
+export const tourNavExploreSearchIconClassName = cn(
+  'size-[var(--ishare-panel-header-icon-size)] shrink-0',
 );
 
-/** Search pill close — 14px icon; smaller than panel header close (18px). */
-export const tourNavSearchCloseIconClassName = cn('!size-[14px]');
+export const tourNavExploreSearchInputWrapClassName = cn('min-w-0 flex-1');
+
+export const tourNavExploreSearchInputClassName = cn(
+  'block w-full appearance-none rounded-none border-none bg-transparent px-1.5 py-0.5',
+  'font-display text-lg leading-normal text-body outline-none',
+  'placeholder:font-display placeholder:text-muted',
+);
+
+export const tourNavExploreSearchCloseClassName = cn(
+  'flex size-6 shrink-0 cursor-pointer items-center justify-center border-none',
+  'bg-transparent p-0 text-muted transition-colors duration-150',
+  'hover:text-foreground focus-visible:text-foreground focus-visible:outline-none',
+);
 
 export const tourNavPanelSlotVariants = cva(
   cn(
     'mt-2.5 origin-top-right',
     '[&_.tour-glass-panel__header]:py-3.5',
     '[&_.tour-glass-panel__title-row]:items-center',
+    '[&_.tour-glass-panel__title-actions]:min-w-0',
+    '[&_.tour-glass-panel__title-actions]:overflow-visible',
+    '[&_[data-explore-search-pill]]:overflow-visible',
     '[&_.tour-glass-panel__close]:mt-0',
   ),
   {
     variants: {
       panel: {
-        explore: '',
+        explore: cn(
+          '[&_.tour-glass-panel]:w-[min(520px,calc(100vw-48px))]',
+          'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
+          '[&_.tour-glass-panel__title-actions]:shrink-0',
+        ),
         help: cn(
           '[&_.tour-glass-panel]:w-[min(420px,calc(100vw-48px))]',
           'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
@@ -271,28 +264,153 @@ export const tourNavLogoClassName = cn(
   'block h-11 w-full object-contain object-center max-[480px]:h-9',
 );
 
-export const tourNavSearchIconClassName = cn(
-  'tour-nav-search-icon pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted',
-);
-
-export const tourNavSearchInputClassName = cn(
-  'tour-nav-search-input w-full min-h-10 rounded-full border border-[color:var(--ishare-border)]',
-  'bg-white/[0.85] py-2.5 pr-4 pl-9 font-display text-lg text-body outline-none',
-  'transition-[border-color,background,box-shadow] duration-200 ease-in-out',
-  'placeholder:font-display placeholder:text-muted',
-  'hover:enabled:not(:focus):bg-[rgba(241,245,249,0.92)]',
-  'focus:border-primary-light focus:shadow-[0_0_0_3px_rgba(var(--ishare-primary-rgb),0.12)]',
-  'disabled:cursor-not-allowed disabled:opacity-50',
-  '[&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden',
-  '[&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden',
-  '[&::-ms-clear]:hidden [&::-moz-search-clear-button]:hidden',
-);
-
 export const tourNavListClassName = cn('m-0 flex list-none flex-col gap-1 p-0');
+
+export const tourNavLocationGalleryListClassName = cn(
+  'm-0 grid list-none grid-cols-2 items-stretch gap-3 p-0 max-[480px]:grid-cols-1',
+);
+
+export const tourNavLocationGalleryCardClassName = cva(
+  cn(
+    'group/card flex w-full flex-col overflow-hidden rounded-lg border p-0 text-left font-[inherit]',
+    'disabled:cursor-not-allowed disabled:opacity-50',
+  ),
+  {
+    variants: {
+      active: {
+        false: cn(
+          'cursor-pointer',
+          'border-2 border-[rgba(15,23,42,0.08)] bg-white/72',
+        ),
+        true: cn(
+          'cursor-default',
+          'border-2 border-primary bg-[var(--ishare-active-item-bg)]',
+        ),
+      },
+    },
+    defaultVariants: { active: false },
+  },
+);
+
+export const tourNavLocationGalleryCardHeroClassName = cn(
+  'tour-nav-gallery-card-hero relative block aspect-[16/10] overflow-hidden bg-[#0f172a]',
+);
+
+export const tourNavLocationGalleryCardHeroSkeletonClassName = cn(
+  PREVIEW_HERO_SKELETON_CLASS,
+  'absolute inset-0 z-0 bg-[linear-gradient(110deg,#1e293b_8%,#334155_18%,#1e293b_33%)] bg-size-[200%_100%] motion-reduce:animate-none motion-reduce:bg-[#1e293b]',
+);
+
+export const tourNavLocationGalleryCardHeroImageClassName = cva(
+  cn(
+    'tour-nav-gallery-card-hero-media relative z-[1] block h-full w-full object-cover object-center opacity-0',
+  ),
+  {
+    variants: {
+      active: { false: 'tour-nav-gallery-card-hero-media--zoomable', true: '' },
+    },
+    defaultVariants: { active: false },
+  },
+);
+
+export const tourNavLocationGalleryCardFooterClassName = cn(
+  'flex items-center gap-2 px-3 pt-2.5 pb-3 max-[480px]:items-center max-[480px]:gap-3 max-[480px]:px-3.5 max-[480px]:pt-3 max-[480px]:pb-3.5',
+);
+
+export const tourNavLocationGalleryCardTitleClassName = cn(
+  'font-display text-sm font-bold leading-[1.3] tracking-tight text-foreground max-[480px]:text-md',
+);
+
+export const tourNavLocationGalleryCardMetaClassName = cn(
+  'text-xs leading-[1.35] text-muted',
+);
+
+/** Hero badge placement — shared by location + naming gallery cards. */
+export const tourNavLocationGalleryHeroBadgePlacementClassName = cn(
+  'absolute top-2 right-2 z-[2] max-w-[calc(100%-16px)]',
+);
+
+/** Inline row for current + status chips on naming gallery heroes. */
+export const tourNavLocationGalleryHeroBadgeGroupClassName = cn(
+  tourNavLocationGalleryHeroBadgePlacementClassName,
+  'flex flex-row flex-wrap items-center justify-end gap-1.5',
+);
+
+/** Slightly translucent chips on gallery hero previews. */
+export const tourNavLocationGalleryHeroBadgeClassName = cn(
+  'shadow-[0_2px_8px_rgba(15,23,42,0.1)] backdrop-blur-[3px]',
+);
+
+export const tourNavLocationGalleryCurrentBadgeClassName = cn(
+  tourNavLocationGalleryHeroBadgeClassName,
+  'bg-primary/60 text-white',
+);
+
+export const tourNavLocationGalleryStatusBadgeVariants = cva(
+  cn(tourNavLocationGalleryHeroBadgeClassName, 'text-white'),
+  {
+    variants: {
+      status: {
+        'on-sale': 'bg-[var(--color-status-on-sale)]/60',
+        sold: 'bg-[#475569]/60',
+        reserved: 'bg-[var(--color-accent-dark)]/60',
+        'coming-soon': 'bg-[var(--color-status-coming-soon)]/60',
+      },
+    },
+  },
+);
+
+export const tourNavLocationGalleryHeroBottomOverlayClassName = cn(
+  'pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2.5 pt-10 pb-1.5',
+  'bg-gradient-to-t from-[rgba(15,23,42,0.82)] via-[rgba(15,23,42,0.45)] to-transparent',
+);
+
+export const tourNavLocationGalleryHeroCtaOverlayClassName = cn(
+  'pointer-events-none absolute inset-0 z-[3] flex items-center justify-center',
+);
+
+export const tourNavLocationGalleryHeroTitleOverlayClassName = cn(
+  'min-w-0 flex-1 font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
+  'drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)] drop-shadow-[0_2px_8px_rgba(0,0,0,0.38)]',
+);
+
+export const tourNavLocationGalleryHeroNamingLabelClassName = cn(
+  tourNavLocationGalleryHeroTitleOverlayClassName,
+  'flex min-w-0 items-baseline gap-x-1.5',
+);
+
+export const tourNavLocationGalleryHeroNamingNameClassName =
+  cn('min-w-0 truncate');
+
+export const tourNavLocationGalleryHeroNamingSeparatorClassName = cn(
+  'shrink-0 font-normal text-white/55',
+);
+
+export const tourNavLocationGalleryHeroMetaOverlayClassName = cn(
+  'text-2xs leading-[1.2] text-white/85',
+  'drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]',
+);
+
+export const tourNavLocationGalleryHeroNamingLocationClassName = cn(
+  tourNavLocationGalleryHeroMetaOverlayClassName,
+  'min-w-0 shrink truncate font-normal',
+);
+
+export const tourNavLocationGalleryCtaClassName = cn(
+  'inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-white max-[480px]:size-11',
+  'shadow-[0_6px_16px_rgba(var(--ishare-primary-rgb),0.28),0_2px_8px_rgba(var(--ishare-primary-rgb),0.16)]',
+  'pointer-events-none scale-95 opacity-0 transition-[opacity,transform,box-shadow] duration-200',
+  'group-hover/card:pointer-events-auto group-hover/card:scale-100 group-hover/card:opacity-100',
+  'group-focus-visible/card:pointer-events-auto group-focus-visible/card:scale-100 group-focus-visible/card:opacity-100',
+  'group-hover/card:shadow-[0_8px_22px_rgba(var(--ishare-primary-rgb),0.36),0_3px_10px_rgba(var(--ishare-primary-rgb),0.2)]',
+  'group-focus-visible/card:shadow-[0_8px_22px_rgba(var(--ishare-primary-rgb),0.36),0_3px_10px_rgba(var(--ishare-primary-rgb),0.2)]',
+  'group-hover/card:[&_svg]:translate-x-px group-focus-visible/card:[&_svg]:translate-x-px',
+  'motion-reduce:scale-100 motion-reduce:opacity-100 motion-reduce:transition-none',
+);
 
 export const tourNavDirectoryItemVariants = cva(
   cn(
-    'flex w-full cursor-pointer items-center gap-2.5 border',
+    'flex w-full items-center gap-2.5 border',
     'rounded-lg px-3 py-2.5 text-left font-[inherit] text-md text-body',
     'transition-[background,border-color,color,box-shadow] duration-150',
     'disabled:cursor-not-allowed disabled:opacity-50',
@@ -303,10 +421,11 @@ export const tourNavDirectoryItemVariants = cva(
       statusTone: { default: '', sold: '' },
       active: {
         false: cn(
+          'cursor-pointer',
           'border-transparent bg-transparent',
           'hover:enabled:bg-white/[0.3] focus-visible:enabled:bg-white/[0.3]',
         ),
-        true: '',
+        true: 'cursor-default',
       },
     },
     compoundVariants: [
@@ -392,10 +511,14 @@ export const tourNavEmptyClassName = cn(
 );
 
 export const tourNavSectionTitleClassName = cn(
-  'm-0 mb-[var(--tour-directory-space)] font-display text-lg font-semibold text-foreground',
+  'm-0 mb-[var(--tour-directory-space)] font-display text-lg-plus font-semibold text-foreground',
 );
 
-export const tourNavDirectoryTabsClassName = cn('mx-5 mb-2 mt-0');
+export const tourNavDirectoryTabsClassName = cn(
+  'mx-5 mb-2 mt-0 box-border min-h-[42px] min-w-0 shrink-0 overflow-y-hidden',
+  '[&_[data-segmented-tab]]:flex-none [&_[data-segmented-tab]]:min-w-[8.75rem]',
+  '[&_#tour-nav-directory-tab-naming]:min-w-[11.75rem]',
+);
 
 export const tourNavDirectoryPanelClassName = cn('flex flex-col gap-0');
 
@@ -472,14 +595,14 @@ export const tourNavHelpFaqAnswerClassName = cn(
 );
 
 export const tourNavHelpListClassName = cn(
-  'mt-0 flex flex-col gap-2.5 p-0 pl-[18px] font-body text-md leading-[1.55]',
+  'tour-nav-help-list mt-0 flex list-disc list-outside flex-col gap-2.5 p-0 pl-[1.125rem] font-body text-md leading-[1.55]',
   'text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
   '[&_li]:pl-0.5 [&_strong]:font-semibold [&_strong]:text-foreground',
   '[.ishare-accordion__panel-inner_&]:mt-0',
 );
 
 export const tourNavControlsListClassName = cn(
-  'mt-0 flex flex-col gap-2.5 p-0 pl-[18px] font-body text-md leading-[1.55]',
+  'tour-nav-help-list mt-0 flex list-disc list-outside flex-col gap-2.5 p-0 pl-[1.125rem] font-body text-md leading-[1.55]',
   'text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
   '[&_li]:pl-0.5',
   '[.ishare-accordion__panel-inner_&]:mt-0',

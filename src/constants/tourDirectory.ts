@@ -12,11 +12,13 @@ export type TourDirectoryTab = 'all' | 'locations' | 'naming';
 export const TOUR_DIRECTORY_TABS: { id: TourDirectoryTab; label: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'locations', label: 'Locations' },
-  { id: 'naming', label: 'Naming' },
+  { id: 'naming', label: 'Naming opportunities' },
 ];
 
-export const TOUR_DIRECTORY_SEARCH_PLACEHOLDER =
-  'Search locations and naming opportunities…';
+export const TOUR_DIRECTORY_TAB_ORDER: TourDirectoryTab[] =
+  TOUR_DIRECTORY_TABS.map((tab) => tab.id);
+
+export const TOUR_DIRECTORY_SEARCH_PLACEHOLDER = 'Explore by name…';
 
 export const TOUR_DIRECTORY_EMPTY_LOCATIONS = 'No locations in this tour.';
 

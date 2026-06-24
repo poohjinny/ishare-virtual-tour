@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   TOUR_DIRECTORY_PANEL_TITLE,
-  TOUR_DIRECTORY_SEARCH_PLACEHOLDER,
   TOUR_DIRECTORY_SECTION_LOCATIONS,
   TOUR_DIRECTORY_SECTION_NAMING,
   TOUR_DIRECTORY_TABS,
+  TOUR_DIRECTORY_TAB_ORDER,
   TOUR_DIRECTORY_EMPTY_LOCATIONS,
   TOUR_DIRECTORY_EMPTY_NAMING,
   TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
@@ -12,19 +12,23 @@ import {
   TOUR_DIRECTORY_EMPTY_SEARCH,
   type TourDirectoryTab,
 } from '../constants/tourDirectory';
+import { ExploreDirectoryTabLabel } from './icons/ExploreDirectoryTabIcons';
+import { ExploreNamingGalleryCard } from './ExploreNamingGalleryCard';
+import { ExplorePanelSearch } from './ExplorePanelSearch';
+import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
 import { NamingPriceRangeFilter } from './NamingPriceRangeFilter';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
+  TOUR_NAV_ACTION_SHARE,
   TOUR_SHARE_PANEL_TITLE,
-  tourNavShareActionLabel,
 } from '../constants/tourShare';
 import {
-  TOUR_NAV_ACTION_SEARCH_CLOSE,
-  TOUR_NAV_ACTION_SEARCH_OPEN,
-  tourNavControlsActionLabel,
-  tourNavExploreActionLabel,
-  tourNavHelpActionLabel,
+  TOUR_NAV_ACTION_CONTROLS,
+  TOUR_NAV_ACTION_EXPLORE,
+  TOUR_NAV_ACTION_HELP,
+  tourNavExploreLayoutActionLabel,
   tourNavIconButtonA11y,
+  type ExploreDirectoryLayout,
 } from '../constants/tourNavActions';
 import {
   buildAbsoluteShareUrl,
@@ -45,15 +49,17 @@ import {
 } from '../utils/namingPrice';
 import { SegmentedTabs } from './ui/SegmentedTabs';
 import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
+import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
+import { IconTooltip } from './ui/IconTooltip';
 import { Badge, type NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import { TourHelpPanel } from './TourHelpPanel';
 import { TourHelpFooter } from './TourHelpFooter';
+import { TourGlassPanel, type TourGlassPanelAnimation } from './TourGlassPanel';
 import {
-  TourGlassPanel,
-  GlassPanelCloseIcon,
-  type TourGlassPanelAnimation,
-} from './TourGlassPanel';
+  tourGlassPanelCloseClassName,
+  tourGlassPanelCloseIconClassName,
+} from './tourGlassPanelVariants';
 import { ShareIcon } from './icons/ShareIcon';
 import { cn } from '../lib/cn';
 import {
@@ -79,6 +85,7 @@ import {
   tourNavDirectorySectionClassName,
   tourNavDirectoryTabsClassName,
   tourNavEmptyClassName,
+  tourNavExploreHeaderActionsClassName,
   tourNavHistoryBtnClassName,
   tourNavHistoryBtnIconClassName,
   tourNavItemBadgeClassName,
@@ -89,19 +96,12 @@ import {
   tourNavItemMetaClassName,
   tourNavItemTextClassName,
   tourNavListClassName,
+  tourNavLocationGalleryListClassName,
   tourNavLogoClassName,
   tourNavLogoLinkClassName,
   tourNavPanelScrollClassName,
   tourNavPanelScrollInnerClassName,
   tourNavPanelSlotVariants,
-  tourNavSearchDropdownClassName,
-  tourNavSearchIconClassName,
-  tourNavSearchInputClassName,
-  tourNavSearchCloseIconClassName,
-  tourNavSearchPillCloseClassName,
-  tourNavSearchPillTriggerClassName,
-  tourNavSearchPillVariants,
-  tourNavSearchSlotVariants,
   tourNavSectionTitleClassName,
 } from './tourNavFloatVariants';
 
@@ -153,26 +153,6 @@ interface BreadcrumbItem {
   isCurrent: boolean;
 }
 
-function NamingHeartIcon({
-  active,
-  sold = false,
-}: {
-  active: boolean;
-  sold?: boolean;
-}) {
-  return (
-    <svg
-      className={tourNavItemIconNamingVariants({ active, sold })}
-      data-tour-nav-naming-icon
-      viewBox='0 0 24 24'
-      fill='currentColor'
-      aria-hidden='true'
-    >
-      <path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' />
-    </svg>
-  );
-}
-
 function TourLayersIcon({ className }: { className: string }) {
   return (
     <svg
@@ -205,31 +185,6 @@ function TourLayersIcon({ className }: { className: string }) {
 
 function ExploreTourIcon() {
   return <TourLayersIcon className={tourNavCircleIconClassName} />;
-}
-
-function SearchIcon() {
-  return (
-    <svg
-      className={tourNavCircleIconClassName}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <circle
-        cx='8.5'
-        cy='8.5'
-        r='5.5'
-        stroke='currentColor'
-        strokeWidth='1.5'
-      />
-      <path
-        d='M13 13L17 17'
-        stroke='currentColor'
-        strokeWidth='1.5'
-        strokeLinecap='round'
-      />
-    </svg>
-  );
 }
 
 function ControlsIcon() {
@@ -276,31 +231,6 @@ function ShareIconButton() {
   return <ShareIcon className={tourNavCircleIconClassName} />;
 }
 
-function PanelSearchIcon() {
-  return (
-    <svg
-      className={tourNavSearchIconClassName}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <circle
-        cx='8.5'
-        cy='8.5'
-        r='5.5'
-        stroke='currentColor'
-        strokeWidth='1.5'
-      />
-      <path
-        d='M13 13L17 17'
-        stroke='currentColor'
-        strokeWidth='1.5'
-        strokeLinecap='round'
-      />
-    </svg>
-  );
-}
-
 function HistoryBackIcon() {
   return (
     <svg
@@ -335,6 +265,92 @@ function HistoryForwardIcon() {
         strokeLinecap='round'
         strokeLinejoin='round'
       />
+    </svg>
+  );
+}
+
+function ExploreListLayoutIcon() {
+  return (
+    <svg
+      className={tourGlassPanelCloseIconClassName}
+      viewBox='0 0 20 20'
+      fill='none'
+      aria-hidden='true'
+    >
+      <path
+        d='M4 6h12M4 10h12M4 14h8'
+        stroke='currentColor'
+        strokeWidth='1.75'
+        strokeLinecap='round'
+      />
+    </svg>
+  );
+}
+
+function ExploreGalleryLayoutIcon() {
+  return (
+    <svg
+      className={tourGlassPanelCloseIconClassName}
+      viewBox='0 0 20 20'
+      fill='none'
+      aria-hidden='true'
+    >
+      <rect
+        x='4'
+        y='4'
+        width='5'
+        height='5'
+        rx='1'
+        stroke='currentColor'
+        strokeWidth='1.5'
+      />
+      <rect
+        x='11'
+        y='4'
+        width='5'
+        height='5'
+        rx='1'
+        stroke='currentColor'
+        strokeWidth='1.5'
+      />
+      <rect
+        x='4'
+        y='11'
+        width='5'
+        height='5'
+        rx='1'
+        stroke='currentColor'
+        strokeWidth='1.5'
+      />
+      <rect
+        x='11'
+        y='11'
+        width='5'
+        height='5'
+        rx='1'
+        stroke='currentColor'
+        strokeWidth='1.5'
+      />
+    </svg>
+  );
+}
+
+function NamingHeartIcon({
+  active,
+  sold = false,
+}: {
+  active: boolean;
+  sold?: boolean;
+}) {
+  return (
+    <svg
+      className={tourNavItemIconNamingVariants({ active, sold })}
+      data-tour-nav-naming-icon
+      viewBox='0 0 24 24'
+      fill='currentColor'
+      aria-hidden='true'
+    >
+      <path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' />
     </svg>
   );
 }
@@ -404,14 +420,16 @@ export function TourNavFloat({
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [displayPanel, setDisplayPanel] = useState<DisplayPanel>(null);
   const [panelPhase, setPanelPhase] = useState<PanelAnimPhase>('idle');
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [exploreSearchOpen, setExploreSearchOpen] = useState(false);
   const [directoryTab, setDirectoryTab] = useState<TourDirectoryTab>('all');
-  const [search, setSearch] = useState('');
-  const [searchFocusRequest, setSearchFocusRequest] = useState(0);
+  const [exploreLayout, setExploreLayout] =
+    useState<ExploreDirectoryLayout>('gallery');
+  const [exploreSearch, setExploreSearch] = useState('');
+  const [exploreSearchFocusRequest, setExploreSearchFocusRequest] = useState(0);
   const actionsRef = useRef<HTMLDivElement>(null);
   const exploreScrollRef = useRef<HTMLDivElement>(null);
-  const searchScrollRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const exploreSearchScrollRef = useRef<HTMLDivElement>(null);
+  const exploreSearchRef = useRef<HTMLInputElement>(null);
   const targetPanelRef = useRef<DisplayPanel>(null);
   const [displaySceneId, setDisplaySceneId] = useState(currentSceneId);
   const [displayShowHistoryBack, setDisplayShowHistoryBack] =
@@ -525,29 +543,29 @@ export function TourNavFloat({
     [],
   );
 
-  const filteredScenes = useMemo(
-    () => filterTourScenes(scenes, search),
-    [scenes, search],
+  const exploreFilteredScenes = useMemo(
+    () => filterTourScenes(scenes, exploreSearch),
+    [exploreSearch, scenes],
   );
 
-  const filteredNamingItems = useMemo(
-    () => filterTourNamingDirectory(namingItems, search),
-    [namingItems, search],
+  const exploreFilteredNamingItems = useMemo(
+    () => filterTourNamingDirectory(namingItems, exploreSearch),
+    [exploreSearch, namingItems],
   );
 
-  const isSearchActive = search.trim().length > 0;
+  const isExploreSearchActive = exploreSearch.trim().length > 0;
 
   const targetPanel = panelMode;
 
   targetPanelRef.current = targetPanel;
 
-  const requestSearchFocus = () => {
-    setSearchFocusRequest((count) => count + 1);
+  const requestExploreSearchFocus = () => {
+    setExploreSearchFocusRequest((count) => count + 1);
   };
 
-  const closeSearch = useCallback(() => {
-    searchRef.current?.blur();
-    setSearchOpen(false);
+  const closeExploreSearch = useCallback(() => {
+    exploreSearchRef.current?.blur();
+    setExploreSearchOpen(false);
   }, []);
 
   const closePanel = useCallback(() => {
@@ -599,41 +617,38 @@ export function TourNavFloat({
   }, [panelPhase]);
 
   useEffect(() => {
-    if (!searchOpen || searchFocusRequest === 0) {
+    if (!exploreSearchOpen || exploreSearchFocusRequest === 0) {
       return;
     }
 
     const focusTimer = window.setTimeout(() => {
-      searchRef.current?.focus();
+      exploreSearchRef.current?.focus();
     }, SEARCH_PILL_EXPAND_MS);
 
     return () => window.clearTimeout(focusTimer);
-  }, [searchOpen, searchFocusRequest]);
+  }, [exploreSearchOpen, exploreSearchFocusRequest]);
 
   useEffect(() => {
-    if (!searchOpen) return;
+    if (!exploreSearchOpen) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        closeSearch();
+        closeExploreSearch();
       }
     };
 
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [searchOpen, closeSearch]);
+  }, [exploreSearchOpen, closeExploreSearch]);
 
   useEffect(() => {
-    if (!searchOpen && panelMode !== 'help' && panelMode !== 'share') return;
+    if (panelMode !== 'help' && panelMode !== 'share') return;
 
     const handleClickOutside = (e: MouseEvent) => {
       if (
         actionsRef.current &&
         !actionsRef.current.contains(e.target as Node)
       ) {
-        if (searchOpen) {
-          closeSearch();
-        }
         if (panelMode === 'help' || panelMode === 'share') {
           setPanelMode(null);
         }
@@ -642,7 +657,7 @@ export function TourNavFloat({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [panelMode, searchOpen, closeSearch]);
+  }, [panelMode]);
 
   useEffect(() => {
     if (panelMode !== 'explore') return;
@@ -655,12 +670,18 @@ export function TourNavFloat({
       tourNavDirectoryActiveSelector,
     );
     activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }, [activeNamingHotspotId, currentSceneId, directoryTab, panelMode]);
+  }, [
+    activeNamingHotspotId,
+    currentSceneId,
+    directoryTab,
+    exploreLayout,
+    panelMode,
+  ]);
 
   useEffect(() => {
-    if (!searchOpen || !isSearchActive) return;
+    if (!isExploreSearchActive) return;
 
-    const scrollRoot = searchScrollRef.current;
+    const scrollRoot = exploreSearchScrollRef.current;
     if (!scrollRoot) return;
 
     const activeItem = scrollRoot.querySelector<HTMLElement>(
@@ -670,17 +691,22 @@ export function TourNavFloat({
   }, [
     activeNamingHotspotId,
     currentSceneId,
-    isSearchActive,
-    searchOpen,
-    filteredScenes,
-    filteredNamingItems,
+    isExploreSearchActive,
+    exploreFilteredScenes,
+    exploreFilteredNamingItems,
   ]);
 
   useEffect(() => {
-    if (searchOpen) return;
+    if (exploreSearchOpen) return;
 
-    setSearch('');
-  }, [searchOpen]);
+    setExploreSearch('');
+  }, [exploreSearchOpen]);
+
+  useEffect(() => {
+    if (panelMode === 'explore') return;
+
+    closeExploreSearch();
+  }, [closeExploreSearch, panelMode]);
 
   useEffect(() => {
     if (panelMode !== null) return;
@@ -693,8 +719,8 @@ export function TourNavFloat({
       onSelectScene(sceneId);
     }
 
-    if (searchOpen) {
-      closeSearch();
+    if (exploreSearchOpen) {
+      closeExploreSearch();
     }
   };
 
@@ -704,14 +730,7 @@ export function TourNavFloat({
       return;
     }
 
-    closeSearch();
     setPanelMode('explore');
-  };
-
-  const openSearch = () => {
-    closePanel();
-    setSearchOpen(true);
-    requestSearchFocus();
   };
 
   const handleHelpClick = () => {
@@ -720,7 +739,6 @@ export function TourNavFloat({
       return;
     }
 
-    closeSearch();
     setPanelMode('help');
   };
 
@@ -730,7 +748,6 @@ export function TourNavFloat({
       return;
     }
 
-    closeSearch();
     setPanelMode('share');
   };
 
@@ -764,10 +781,19 @@ export function TourNavFloat({
   const handleSelectNaming = (sceneId: string, hotspotId: string) => {
     onSelectNamingOpportunity(sceneId, hotspotId);
 
-    if (searchOpen) {
-      closeSearch();
+    if (exploreSearchOpen) {
+      closeExploreSearch();
     }
   };
+
+  const openExploreSearch = useCallback(() => {
+    setExploreSearchOpen(true);
+    requestExploreSearchFocus();
+  }, []);
+
+  const toggleExploreLayout = useCallback(() => {
+    setExploreLayout((layout) => (layout === 'gallery' ? 'list' : 'gallery'));
+  }, []);
 
   const renderDirectoryTabs = () => (
     <SegmentedTabs
@@ -775,83 +801,118 @@ export function TourNavFloat({
       aria-label='Tour directory filters'
       tabs={TOUR_DIRECTORY_TABS.map((tab) => ({
         id: tab.id,
-        label: tab.label,
+        label: <ExploreDirectoryTabLabel tab={tab.id} label={tab.label} />,
         htmlId: `tour-nav-directory-tab-${tab.id}`,
         ariaControls: `tour-nav-directory-panel-${tab.id}`,
       }))}
       value={directoryTab}
       onChange={setDirectoryTab}
       disabled={disabled}
+      scrollable
+      scrollToStartKey='all'
     />
   );
 
   const renderLocationsList = (
     items: Scene[],
-    options?: { showSectionTitle?: boolean; emptyMessage?: string },
-  ) => (
-    <section
-      className={tourNavDirectorySectionClassName}
-      aria-labelledby={
-        options?.showSectionTitle ?
-          'tour-nav-directory-locations-heading'
-        : undefined
-      }
-    >
-      {options?.showSectionTitle && (
-        <h3
-          id='tour-nav-directory-locations-heading'
-          className={tourNavSectionTitleClassName}
-        >
-          {TOUR_DIRECTORY_SECTION_LOCATIONS}
-        </h3>
-      )}
-
-      {items.length > 0 ?
-        <ul
-          className={tourNavListClassName}
-          role='listbox'
-          aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
-        >
-          {items.map((scene) => {
-            const isActive = scene.id === currentSceneId;
-            return (
-              <li key={scene.id} role='presentation'>
-                <button
-                  type='button'
-                  role='option'
-                  aria-selected={isActive}
-                  className={tourNavDirectoryItemVariants({
-                    kind: 'location',
-                    active: isActive,
-                  })}
-                  disabled={disabled}
-                  onClick={() => handleSelect(scene.id)}
-                >
-                  <span className={tourNavItemLeadingClassName}>
-                    <span
-                      className={tourNavItemDotClassName}
-                      data-tour-nav-dot
-                      aria-hidden='true'
-                    />
-                  </span>
-                  <span className={tourNavItemLabelClassName}>
-                    {scene.title}
-                  </span>
-                  {isActive && (
-                    <Badge variant='fill' size='sm' tone='primary' uppercase>
-                      Current
-                    </Badge>
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+    options?: {
+      showSectionTitle?: boolean;
+      emptyMessage?: string;
+      listBodyOnly?: boolean;
+    },
+  ) => {
+    const listBody =
+      items.length > 0 ?
+        <>
+          <ul
+            hidden={exploreLayout !== 'gallery'}
+            className={tourNavLocationGalleryListClassName}
+            role='listbox'
+            aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
+          >
+            {items.map((scene) => (
+              <ExploreSceneGalleryCard
+                key={scene.id}
+                tourId={tourId}
+                scene={scene}
+                active={scene.id === currentSceneId}
+                disabled={disabled}
+                onSelect={() => handleSelect(scene.id)}
+              />
+            ))}
+          </ul>
+          <ul
+            hidden={exploreLayout !== 'list'}
+            className={tourNavListClassName}
+            role='listbox'
+            aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
+          >
+            {items.map((scene) => {
+              const isActive = scene.id === currentSceneId;
+              return (
+                <li key={scene.id} role='presentation'>
+                  <button
+                    type='button'
+                    role='option'
+                    aria-selected={isActive}
+                    className={tourNavDirectoryItemVariants({
+                      kind: 'location',
+                      active: isActive,
+                    })}
+                    disabled={disabled}
+                    onClick={() => handleSelect(scene.id)}
+                  >
+                    <span className={tourNavItemLeadingClassName}>
+                      <span
+                        className={tourNavItemDotClassName}
+                        data-tour-nav-dot
+                        aria-hidden='true'
+                      />
+                    </span>
+                    <span className={tourNavItemLabelClassName}>
+                      {scene.title}
+                    </span>
+                    {isActive && (
+                      <Badge variant='fill' size='sm' tone='primary' uppercase>
+                        Current
+                      </Badge>
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       : options?.emptyMessage ?
         <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
-      : null}
-    </section>
-  );
+      : null;
+
+    if (options?.listBodyOnly) {
+      return listBody;
+    }
+
+    return (
+      <section
+        className={tourNavDirectorySectionClassName}
+        aria-labelledby={
+          options?.showSectionTitle ?
+            'tour-nav-directory-locations-heading'
+          : undefined
+        }
+      >
+        {options?.showSectionTitle && (
+          <h3
+            id='tour-nav-directory-locations-heading'
+            className={tourNavSectionTitleClassName}
+          >
+            {TOUR_DIRECTORY_SECTION_LOCATIONS}
+          </h3>
+        )}
+
+        {listBody}
+      </section>
+    );
+  };
 
   const renderNamingList = (
     items: TourDirectoryNamingItem[],
@@ -859,96 +920,136 @@ export function TourNavFloat({
       showSectionTitle?: boolean;
       showPriceFilter?: boolean;
       emptyMessage?: string;
+      listBodyOnly?: boolean;
     },
-  ) => (
-    <section
-      className={tourNavDirectorySectionClassName}
-      aria-labelledby={
-        options?.showSectionTitle ?
-          'tour-nav-directory-naming-heading'
-        : undefined
-      }
-    >
-      {options?.showSectionTitle && (
-        <h3
-          id='tour-nav-directory-naming-heading'
-          className={tourNavSectionTitleClassName}
-        >
-          {TOUR_DIRECTORY_SECTION_NAMING}
-        </h3>
-      )}
+  ) => {
+    const listBody =
+      items.length > 0 ?
+        <>
+          <ul
+            hidden={exploreLayout !== 'gallery'}
+            className={tourNavLocationGalleryListClassName}
+            role='listbox'
+            aria-label={TOUR_DIRECTORY_SECTION_NAMING}
+          >
+            {items.map((item) => (
+              <ExploreNamingGalleryCard
+                key={`${item.sceneId}:${item.hotspotId}`}
+                tourId={tourId}
+                scenes={scenes}
+                item={item}
+                active={
+                  activeNamingHotspotId === item.hotspotId &&
+                  currentSceneId === item.sceneId
+                }
+                disabled={disabled}
+                onSelect={() =>
+                  handleSelectNaming(item.sceneId, item.hotspotId)
+                }
+              />
+            ))}
+          </ul>
+          <ul
+            hidden={exploreLayout !== 'list'}
+            className={tourNavListClassName}
+            role='listbox'
+            aria-label={TOUR_DIRECTORY_SECTION_NAMING}
+          >
+            {items.map((item) => {
+              const isActive =
+                activeNamingHotspotId === item.hotspotId &&
+                currentSceneId === item.sceneId;
+              const isSold = item.statusModifier === 'sold';
 
-      {options?.showPriceFilter &&
-        namingPriceBounds &&
-        namingPriceMin != null &&
-        namingPriceMax != null && (
-          <NamingPriceRangeFilter
-            label={TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL}
-            min={namingPriceBounds.min}
-            max={namingPriceBounds.max}
-            step={namingPriceBounds.step}
-            valueMin={namingPriceMin}
-            valueMax={namingPriceMax}
-            disabled={disabled}
-            onChange={handleNamingPriceRangeChange}
-          />
-        )}
-
-      {items.length > 0 ?
-        <ul
-          className={tourNavListClassName}
-          role='listbox'
-          aria-label={TOUR_DIRECTORY_SECTION_NAMING}
-        >
-          {items.map((item) => {
-            const isActive =
-              activeNamingHotspotId === item.hotspotId &&
-              currentSceneId === item.sceneId;
-            const isSold = item.statusModifier === 'sold';
-
-            return (
-              <li key={`${item.sceneId}:${item.hotspotId}`} role='presentation'>
-                <button
-                  type='button'
-                  role='option'
-                  aria-selected={isActive}
-                  className={tourNavDirectoryItemVariants({
-                    kind: 'naming',
-                    active: isActive,
-                    statusTone: isSold ? 'sold' : 'default',
-                  })}
-                  disabled={disabled}
-                  onClick={() =>
-                    handleSelectNaming(item.sceneId, item.hotspotId)
-                  }
+              return (
+                <li
+                  key={`${item.sceneId}:${item.hotspotId}`}
+                  role='presentation'
                 >
-                  <span className={tourNavItemLeadingClassName}>
-                    <NamingHeartIcon active={isActive} sold={isSold} />
-                  </span>
-                  <span className={tourNavItemTextClassName}>
-                    <span className={tourNavItemLabelClassName}>
-                      {item.name}
+                  <button
+                    type='button'
+                    role='option'
+                    aria-selected={isActive}
+                    className={tourNavDirectoryItemVariants({
+                      kind: 'naming',
+                      active: isActive,
+                      statusTone: isSold ? 'sold' : 'default',
+                    })}
+                    disabled={disabled}
+                    onClick={() =>
+                      handleSelectNaming(item.sceneId, item.hotspotId)
+                    }
+                  >
+                    <span className={tourNavItemLeadingClassName}>
+                      <NamingHeartIcon active={isActive} sold={isSold} />
                     </span>
-                    <span className={tourNavItemMetaClassName}>
-                      {item.sceneTitle}
+                    <span className={tourNavItemTextClassName}>
+                      <span className={tourNavItemLabelClassName}>
+                        {item.name}
+                      </span>
+                      <span className={tourNavItemMetaClassName}>
+                        {item.sceneTitle}
+                      </span>
                     </span>
-                  </span>
-                  <NamingStatusBadge
-                    statusModifier={item.statusModifier as NamingStatusModifier}
-                    label={item.statusShortLabel}
-                    ariaLabel={item.statusLabel}
-                    className={tourNavItemBadgeClassName}
-                  />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                    <NamingStatusBadge
+                      statusModifier={
+                        item.statusModifier as NamingStatusModifier
+                      }
+                      label={item.statusLabel}
+                      className={tourNavItemBadgeClassName}
+                    />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       : options?.emptyMessage ?
         <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
-      : null}
-    </section>
-  );
+      : null;
+
+    if (options?.listBodyOnly) {
+      return listBody;
+    }
+
+    return (
+      <section
+        className={tourNavDirectorySectionClassName}
+        aria-labelledby={
+          options?.showSectionTitle ?
+            'tour-nav-directory-naming-heading'
+          : undefined
+        }
+      >
+        {options?.showSectionTitle && (
+          <h3
+            id='tour-nav-directory-naming-heading'
+            className={tourNavSectionTitleClassName}
+          >
+            {TOUR_DIRECTORY_SECTION_NAMING}
+          </h3>
+        )}
+
+        {options?.showPriceFilter &&
+          namingPriceBounds &&
+          namingPriceMin != null &&
+          namingPriceMax != null && (
+            <NamingPriceRangeFilter
+              label={TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL}
+              min={namingPriceBounds.min}
+              max={namingPriceBounds.max}
+              step={namingPriceBounds.step}
+              valueMin={namingPriceMin}
+              valueMax={namingPriceMax}
+              disabled={disabled}
+              onChange={handleNamingPriceRangeChange}
+            />
+          )}
+
+        {listBody}
+      </section>
+    );
+  };
 
   const renderDirectoryBody = () => {
     return renderExploreDirectory();
@@ -963,33 +1064,92 @@ export function TourNavFloat({
     return (
       <SegmentedTabPanel
         panelKey={directoryTab}
+        tabOrder={TOUR_DIRECTORY_TAB_ORDER}
         id={`tour-nav-directory-panel-${directoryTab}`}
         aria-labelledby={`tour-nav-directory-tab-${directoryTab}`}
         className={tourNavDirectoryPanelClassName}
         scrollRef={exploreScrollRef}
       >
-        {showLocations &&
-          renderLocationsList(scenes, {
-            showSectionTitle: showSectionTitles,
-            emptyMessage: TOUR_DIRECTORY_EMPTY_LOCATIONS,
-          })}
+        {showLocations && (
+          <section
+            className={tourNavDirectorySectionClassName}
+            aria-labelledby={
+              showSectionTitles ?
+                'tour-nav-directory-locations-heading'
+              : undefined
+            }
+          >
+            {showSectionTitles && (
+              <h3
+                id='tour-nav-directory-locations-heading'
+                className={tourNavSectionTitleClassName}
+              >
+                {TOUR_DIRECTORY_SECTION_LOCATIONS}
+              </h3>
+            )}
+            <ExploreLayoutPanel layout={exploreLayout}>
+              {renderLocationsList(scenes, {
+                listBodyOnly: true,
+                emptyMessage: TOUR_DIRECTORY_EMPTY_LOCATIONS,
+              })}
+            </ExploreLayoutPanel>
+          </section>
+        )}
 
-        {showNaming &&
-          renderNamingList(exploreNamingItems, {
-            showSectionTitle: showSectionTitles,
-            showPriceFilter: true,
-            emptyMessage:
-              namingItems.length === 0 ?
-                TOUR_DIRECTORY_EMPTY_NAMING
-              : TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
-          })}
+        {showNaming && (
+          <section
+            className={tourNavDirectorySectionClassName}
+            aria-labelledby={
+              showSectionTitles ?
+                'tour-nav-directory-naming-heading'
+              : undefined
+            }
+          >
+            {showSectionTitles && (
+              <h3
+                id='tour-nav-directory-naming-heading'
+                className={tourNavSectionTitleClassName}
+              >
+                {TOUR_DIRECTORY_SECTION_NAMING}
+              </h3>
+            )}
+
+            {namingPriceBounds &&
+              namingPriceMin != null &&
+              namingPriceMax != null && (
+                <NamingPriceRangeFilter
+                  label={TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL}
+                  min={namingPriceBounds.min}
+                  max={namingPriceBounds.max}
+                  step={namingPriceBounds.step}
+                  valueMin={namingPriceMin}
+                  valueMax={namingPriceMax}
+                  disabled={disabled}
+                  onChange={handleNamingPriceRangeChange}
+                />
+              )}
+
+            <ExploreLayoutPanel layout={exploreLayout}>
+              {renderNamingList(exploreNamingItems, {
+                listBodyOnly: true,
+                emptyMessage:
+                  namingItems.length === 0 ?
+                    TOUR_DIRECTORY_EMPTY_NAMING
+                  : TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
+              })}
+            </ExploreLayoutPanel>
+          </section>
+        )}
       </SegmentedTabPanel>
     );
   };
 
-  const renderSearchResults = () => {
-    const hasScenes = filteredScenes.length > 0;
-    const hasNaming = filteredNamingItems.length > 0;
+  const renderDirectorySearchResults = (
+    sceneResults: Scene[],
+    namingResults: TourDirectoryNamingItem[],
+  ) => {
+    const hasScenes = sceneResults.length > 0;
+    const hasNaming = namingResults.length > 0;
 
     if (!hasScenes && !hasNaming) {
       return (
@@ -999,10 +1159,39 @@ export function TourNavFloat({
 
     return (
       <div className={tourNavDirectoryPanelClassName}>
-        {hasScenes &&
-          renderLocationsList(filteredScenes, { showSectionTitle: true })}
-        {hasNaming &&
-          renderNamingList(filteredNamingItems, { showSectionTitle: true })}
+        {hasScenes && (
+          <section
+            className={tourNavDirectorySectionClassName}
+            aria-labelledby='tour-nav-search-locations-heading'
+          >
+            <h3
+              id='tour-nav-search-locations-heading'
+              className={tourNavSectionTitleClassName}
+            >
+              {TOUR_DIRECTORY_SECTION_LOCATIONS}
+            </h3>
+            <ExploreLayoutPanel layout={exploreLayout}>
+              {renderLocationsList(sceneResults, { listBodyOnly: true })}
+            </ExploreLayoutPanel>
+          </section>
+        )}
+
+        {hasNaming && (
+          <section
+            className={tourNavDirectorySectionClassName}
+            aria-labelledby='tour-nav-search-naming-heading'
+          >
+            <h3
+              id='tour-nav-search-naming-heading'
+              className={tourNavSectionTitleClassName}
+            >
+              {TOUR_DIRECTORY_SECTION_NAMING}
+            </h3>
+            <ExploreLayoutPanel layout={exploreLayout}>
+              {renderNamingList(namingResults, { listBodyOnly: true })}
+            </ExploreLayoutPanel>
+          </section>
+        )}
       </div>
     );
   };
@@ -1013,78 +1202,70 @@ export function TourNavFloat({
       className={tourNavPanelSlotVariants({ panel: 'explore' })}
     >
       <TourGlassPanel
+        className='tour-glass-panel--directory'
         title={TOUR_DIRECTORY_PANEL_TITLE}
         titleId='tour-nav-explore-title'
         onClose={closePanel}
+        headerActions={
+          <div className={tourNavExploreHeaderActionsClassName}>
+            <ExplorePanelSearch
+              open={exploreSearchOpen}
+              value={exploreSearch}
+              disabled={disabled}
+              inputRef={exploreSearchRef}
+              onOpen={openExploreSearch}
+              onClose={closeExploreSearch}
+              onChange={setExploreSearch}
+            />
+            <IconTooltip
+              label={tourNavExploreLayoutActionLabel(exploreLayout)}
+              placement='bottom'
+            >
+              <button
+                type='button'
+                className={tourGlassPanelCloseClassName}
+                onClick={toggleExploreLayout}
+                aria-pressed={exploreLayout === 'list'}
+                {...tourNavIconButtonA11y(
+                  tourNavExploreLayoutActionLabel(exploreLayout),
+                )}
+              >
+                {exploreLayout === 'gallery' ?
+                  <ExploreListLayoutIcon />
+                : <ExploreGalleryLayoutIcon />}
+              </button>
+            </IconTooltip>
+          </div>
+        }
         animation={panelAnimation(panelPhase)}
         bodyClassName='tour-glass-panel__body--directory'
       >
-        {renderDirectoryTabs()}
-
-        <div ref={exploreScrollRef} className={tourNavPanelScrollClassName}>
-          <div className={tourNavPanelScrollInnerClassName}>
-            {renderDirectoryBody()}
-          </div>
-        </div>
-      </TourGlassPanel>
-    </div>
-  );
-
-  const renderSearchSlot = () => (
-    <div className={tourNavSearchSlotVariants({ results: isSearchActive })}>
-      <div className={tourNavSearchPillVariants({ open: searchOpen })}>
-        {!searchOpen ?
-          <button
-            type='button'
-            className={tourNavSearchPillTriggerClassName}
-            onClick={openSearch}
-            aria-expanded={false}
-            aria-controls='tour-scene-search'
-            {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SEARCH_OPEN)}
+        {isExploreSearchActive ?
+          <div
+            id='tour-nav-explore-search-results'
+            ref={exploreSearchScrollRef}
+            className={tourNavPanelScrollClassName}
+            role='region'
+            aria-label='Search results'
           >
-            <SearchIcon />
-          </button>
+            <div className={tourNavPanelScrollInnerClassName}>
+              {renderDirectorySearchResults(
+                exploreFilteredScenes,
+                exploreFilteredNamingItems,
+              )}
+            </div>
+          </div>
         : <>
-            <PanelSearchIcon />
-            <input
-              ref={searchRef}
-              id='tour-scene-search'
-              type='search'
-              className={tourNavSearchInputClassName}
-              placeholder={TOUR_DIRECTORY_SEARCH_PLACEHOLDER}
-              value={search}
-              disabled={disabled}
-              onChange={(e) => setSearch(e.target.value)}
-              autoComplete='off'
-              aria-label={TOUR_DIRECTORY_SEARCH_PLACEHOLDER}
-              aria-controls='tour-nav-search-dropdown'
-              aria-expanded={isSearchActive}
-            />
-            <button
-              type='button'
-              className={tourNavSearchPillCloseClassName}
-              onClick={closeSearch}
-              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SEARCH_CLOSE)}
-            >
-              <GlassPanelCloseIcon
-                className={tourNavSearchCloseIconClassName}
-              />
-            </button>
+            {renderDirectoryTabs()}
+
+            <div ref={exploreScrollRef} className={tourNavPanelScrollClassName}>
+              <div className={tourNavPanelScrollInnerClassName}>
+                {renderDirectoryBody()}
+              </div>
+            </div>
           </>
         }
-      </div>
-
-      {searchOpen && isSearchActive && (
-        <div
-          id='tour-nav-search-dropdown'
-          ref={searchScrollRef}
-          className={tourNavSearchDropdownClassName}
-          role='region'
-          aria-label='Search results'
-        >
-          {renderSearchResults()}
-        </div>
-      )}
+      </TourGlassPanel>
     </div>
   );
 
@@ -1214,64 +1395,62 @@ export function TourNavFloat({
         )}
 
         <div className={tourNavActionsDockClassName}>
-          <button
-            type='button'
-            className={tourNavCircleBtnVariants({
-              active: panelMode === 'explore',
-            })}
-            onClick={handleExploreClick}
-            aria-expanded={panelMode === 'explore'}
-            aria-controls='tour-nav-explore-panel'
-            {...tourNavIconButtonA11y(
-              tourNavExploreActionLabel(panelMode === 'explore'),
-            )}
-          >
-            <ExploreTourIcon />
-          </button>
+          <IconTooltip label={TOUR_NAV_ACTION_EXPLORE} placement='left'>
+            <button
+              type='button'
+              className={tourNavCircleBtnVariants({
+                active: panelMode === 'explore',
+              })}
+              onClick={handleExploreClick}
+              aria-expanded={panelMode === 'explore'}
+              aria-controls='tour-nav-explore-panel'
+              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_EXPLORE)}
+            >
+              <ExploreTourIcon />
+            </button>
+          </IconTooltip>
 
-          {renderSearchSlot()}
+          <IconTooltip label={TOUR_NAV_ACTION_SHARE} placement='left'>
+            <button
+              type='button'
+              className={tourNavCircleBtnVariants({
+                active: panelMode === 'share',
+              })}
+              onClick={handleShareClick}
+              aria-expanded={panelMode === 'share'}
+              aria-controls='tour-nav-share-panel'
+              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SHARE)}
+            >
+              <ShareIconButton />
+            </button>
+          </IconTooltip>
 
-          <button
-            type='button'
-            className={tourNavCircleBtnVariants({
-              active: panelMode === 'share',
-            })}
-            onClick={handleShareClick}
-            aria-expanded={panelMode === 'share'}
-            aria-controls='tour-nav-share-panel'
-            {...tourNavIconButtonA11y(
-              tourNavShareActionLabel(panelMode === 'share'),
-            )}
-          >
-            <ShareIconButton />
-          </button>
+          <IconTooltip label={TOUR_NAV_ACTION_CONTROLS} placement='left'>
+            <button
+              type='button'
+              className={tourNavCircleBtnVariants({ active: controlsVisible })}
+              onClick={handleTuneClick}
+              aria-pressed={controlsVisible}
+              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_CONTROLS)}
+            >
+              <ControlsIcon />
+            </button>
+          </IconTooltip>
 
-          <button
-            type='button'
-            className={tourNavCircleBtnVariants({ active: controlsVisible })}
-            onClick={handleTuneClick}
-            aria-pressed={controlsVisible}
-            {...tourNavIconButtonA11y(
-              tourNavControlsActionLabel(controlsVisible),
-            )}
-          >
-            <ControlsIcon />
-          </button>
-
-          <button
-            type='button'
-            className={tourNavCircleBtnVariants({
-              active: panelMode === 'help',
-            })}
-            onClick={handleHelpClick}
-            aria-expanded={panelMode === 'help'}
-            aria-controls='tour-nav-help-panel'
-            {...tourNavIconButtonA11y(
-              tourNavHelpActionLabel(panelMode === 'help'),
-            )}
-          >
-            <HelpIcon />
-          </button>
+          <IconTooltip label={TOUR_NAV_ACTION_HELP} placement='left'>
+            <button
+              type='button'
+              className={tourNavCircleBtnVariants({
+                active: panelMode === 'help',
+              })}
+              onClick={handleHelpClick}
+              aria-expanded={panelMode === 'help'}
+              aria-controls='tour-nav-help-panel'
+              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_HELP)}
+            >
+              <HelpIcon />
+            </button>
+          </IconTooltip>
         </div>
       </div>
     </>

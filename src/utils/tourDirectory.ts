@@ -106,3 +106,22 @@ export function filterTourNamingDirectory(
       item.statusShortLabel.toLowerCase().includes(q),
   );
 }
+
+/** Preview pose for a naming-opportunity card hero. */
+export function resolveNamingDirectoryPreviewView(
+  scenes: Scene[],
+  sceneId: string,
+  hotspotId: string,
+): ViewPosition | undefined {
+  const scene = scenes.find((entry) => entry.id === sceneId);
+  if (!scene) return undefined;
+
+  const hotspot = scene.hotspots.find((entry) => entry.id === hotspotId);
+  if (!hotspot?.popup) return scene.defaultView;
+
+  return {
+    yaw: hotspot.position.yaw,
+    pitch: hotspot.position.pitch,
+    zoom: hotspot.position.zoom ?? scene.defaultView?.zoom,
+  };
+}
