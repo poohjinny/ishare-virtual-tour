@@ -7,7 +7,7 @@ export const FUNDING_MATTERS = {
   mark: '®',
   legalSuffix: ' Inc.',
   url: 'https://fundingmatters.com',
-  description: 'FUNDING matters® Inc.',
+  description: 'one of the largest and most successful philanthropic advisory firms with a strong track record of client success.',
 } as const;
 
 export const FUNDING_MATTERS_AI_SUITE = {
@@ -33,7 +33,7 @@ export const ISHARE = {
   name: 'iShare',
   mark: '®',
   url: 'https://ishare.ca',
-  description: 'iShare platform',
+  description: 'a platform for creating and sharing virtual tours of real estate properties.',
 } as const;
 
 export const PLATFORM_BRANDS = {

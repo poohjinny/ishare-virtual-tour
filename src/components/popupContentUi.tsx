@@ -5,6 +5,7 @@ import {
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
 import { PlatformBrandLink } from './PlatformBrandLink';
+import { cn } from '../lib/cn';
 import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
@@ -25,6 +26,11 @@ import type { NamingStatusModifier } from './ui/Badge';
 import { applyCtaTextOverflowTitle } from '../utils/glassPanelCtaOverflow';
 import { PopupCtaIcon } from './glassPanelCtaIcons';
 import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import {
+  MATERIAL_SYMBOL_SIZE_18,
+  materialSymbolBadgeClassName,
+} from './ui/materialSymbolClasses';
 
 export function splitPopupBody(body: string): string[] {
   return body
@@ -34,19 +40,11 @@ export function splitPopupBody(body: string): string[] {
 }
 
 const NAMING_BADGE_ICON = (
-  <svg
-    className={BADGE_CLASS.icon}
-    viewBox='0 0 24 24'
-    fill='none'
-    aria-hidden='true'
-  >
-    <path
-      d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'
-      stroke='currentColor'
-      strokeWidth='1.75'
-      strokeLinejoin='round'
-    />
-  </svg>
+  <MaterialSymbol
+    name='favorite'
+    className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
+    sizePx={MATERIAL_SYMBOL_SIZE_18}
+  />
 );
 
 function StatusBadgeIcon({ modifier }: { modifier: string }) {
@@ -125,21 +123,11 @@ export function PopupHeaderMeta({ popup }: { popup: PopupContent }) {
 
   return (
     <span className={BADGE_CLASS.fillLgAccentIcon}>
-      <svg
-        className={BADGE_CLASS.icon}
-        viewBox='0 0 24 24'
-        fill='none'
-        aria-hidden='true'
-      >
-        <circle cx='12' cy='12' r='9' stroke='currentColor' strokeWidth='2' />
-        <path
-          d='M12 11v5'
-          stroke='currentColor'
-          strokeWidth='2'
-          strokeLinecap='round'
-        />
-        <circle cx='12' cy='8' r='1.25' fill='currentColor' />
-      </svg>
+      <MaterialSymbol
+        name='info'
+        className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
+        sizePx={MATERIAL_SYMBOL_SIZE_18}
+      />
       <span className={BADGE_CLASS.label}>Info</span>
     </span>
   );
@@ -343,9 +331,7 @@ export function PopupCtaButton({ cta }: { cta: PopupCta }) {
       <GlassPanelCtaText label={resolved.label}>
         <PopupCtaLabel cta={cta} />
       </GlassPanelCtaText>
-      {!isSecondary && (
-        <PopupCtaIcon kind={resolvePopupCtaIconKind(cta)} />
-      )}
+      {!isSecondary && <PopupCtaIcon kind={resolvePopupCtaIconKind(cta)} />}
     </a>
   );
 }

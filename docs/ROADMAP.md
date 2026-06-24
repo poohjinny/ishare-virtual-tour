@@ -83,9 +83,8 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 - [ ] **Mobile layout pass** — FAB dock vs minimap vs guide FAB on ≤480px;
       safe-area padding audit. If load or jank on device:
       [PERFORMANCE P0–P1](./PERFORMANCE.md#when-to-start).
-- [ ] **Scene transition feedback** — short loading or dim during slow panorama
-      swaps (optional per tour). Tuning:
-      [PERFORMANCE P1 — preload](./PERFORMANCE.md#p1--preload-strategy).
+- [x] **Scene transition feedback** — load progress bar on scene navigation (dim
+      overlay not needed; sufficient on slow panoramas)
 
 ### Sprint C — Discovery & share polish
 
@@ -116,15 +115,15 @@ Turn JSON files into a maintainable product tied to iShare systems.
 
 ### 1 — Layer stack
 
-| Layer | Choice | Why |
-| ----- | ------ | --- |
-| **360 embed viewer** | Vite SPA (this repo) | iframe + WebGL; no SSR benefit |
-| **Admin / CMS** | Next.js (separate app) | auth, forms, preview iframe, API routes |
-| **Public API** | Hono/Fastify or Next API | embed, iShare, future VR clients |
-| **DB** | PostgreSQL | client → tour → scene → hotspot relations |
-| **Assets** | Azure Blob + CDN | large panoramas; draft/publish separation |
-| **AI** | Azure OpenAI (server) | keys server-side; see Live AI below |
-| **360 engine** | PSV + optional Three.js module | PSV = tour UX; Three = custom 3D / VR later |
+| Layer                | Choice                         | Why                                         |
+| -------------------- | ------------------------------ | ------------------------------------------- |
+| **360 embed viewer** | Vite SPA (this repo)           | iframe + WebGL; no SSR benefit              |
+| **Admin / CMS**      | Next.js (separate app)         | auth, forms, preview iframe, API routes     |
+| **Public API**       | Hono/Fastify or Next API       | embed, iShare, future VR clients            |
+| **DB**               | PostgreSQL                     | client → tour → scene → hotspot relations   |
+| **Assets**           | Azure Blob + CDN               | large panoramas; draft/publish separation   |
+| **AI**               | Azure OpenAI (server)          | keys server-side; see Live AI below         |
+| **360 engine**       | PSV + optional Three.js module | PSV = tour UX; Three = custom 3D / VR later |
 
 ### 2 — Monorepo layout (target)
 
@@ -153,27 +152,28 @@ Draft (DB)  →  Preview URL (?preview=token)
 ```
 
 - `tours/*.json` schema remains the **DB design reference**
-- `PublishedTourBundle` (`src/types/publishedTour.ts`) is the viewer/API contract
+- `PublishedTourBundle` (`src/types/publishedTour.ts`) is the viewer/API
+  contract
 - Giftabulator sync: **status / price / CTA URL** in DB → included on publish
 
 ### 4 — Deploy domains (target)
 
-| Service | URL |
-| ------- | --- |
-| Viewer | `tour.ishare.ca` |
-| Admin | `admin.ishare.ca` |
-| API | `api.ishare.ca` |
-| Assets | CDN / Blob in front of panoramas |
+| Service | URL                              |
+| ------- | -------------------------------- |
+| Viewer  | `tour.ishare.ca`                 |
+| Admin   | `admin.ishare.ca`                |
+| API     | `api.ishare.ca`                  |
+| Assets  | CDN / Blob in front of panoramas |
 
 ### 5 — Public API (MVP)
 
-| Method | Path | Purpose |
-| ------ | ---- | ------- |
-| `GET` | `/v1/catalog` | intro gallery, client list |
-| `GET` | `/v1/tours/:tourId` | `PublishedTourBundle` (viewer) |
-| `GET` | `/v1/tours/:tourId/knowledge` | AI knowledge (or in bundle) |
-| `POST` | `/v1/tour/chat` | live assistant |
-| `POST` | `/v1/analytics/events` | scene view, hotspot click (batch) |
+| Method | Path                          | Purpose                           |
+| ------ | ----------------------------- | --------------------------------- |
+| `GET`  | `/v1/catalog`                 | intro gallery, client list        |
+| `GET`  | `/v1/tours/:tourId`           | `PublishedTourBundle` (viewer)    |
+| `GET`  | `/v1/tours/:tourId/knowledge` | AI knowledge (or in bundle)       |
+| `POST` | `/v1/tour/chat`               | live assistant                    |
+| `POST` | `/v1/analytics/events`        | scene view, hotspot click (batch) |
 
 Admin (auth required): CRUD clients/tours/scenes, asset upload URLs, publish,
 preview tokens.
@@ -188,47 +188,47 @@ admin `users` / roles.
 
 ### 7 — Admin MVP pages
 
-| Route | Purpose |
-| ----- | ------- |
-| `/login` | Entra ID / Auth.js |
-| `/` | dashboard — clients, tours, draft/published status |
-| `/clients/[clientId]` | tour list, visibility, featured |
-| `/tours/[tourId]` | tour settings — branding, org, floor plan |
-| `/tours/[tourId]/scenes` | scene list, firstScene, panoramas |
-| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form) |
-| `/tours/[tourId]/preview` | iframe preview with token URL |
+| Route                              | Purpose                                            |
+| ---------------------------------- | -------------------------------------------------- |
+| `/login`                           | Entra ID / Auth.js                                 |
+| `/`                                | dashboard — clients, tours, draft/published status |
+| `/clients/[clientId]`              | tour list, visibility, featured                    |
+| `/tours/[tourId]`                  | tour settings — branding, org, floor plan          |
+| `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  |
+| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       |
+| `/tours/[tourId]/preview`          | iframe preview with token URL                      |
 
 Follow-ups: `/tours/[tourId]/knowledge`, `/tours/[tourId]/naming` (NO + CTA).
 
 ### 8 — Three.js placement
 
-| Use | Approach |
-| --- | -------- |
-| 360 panorama tour | **PSV** (current) |
-| Custom 3D / floor plan depth | `packages/viewer-3d` or `viewer/extensions/` |
-| VR / XR (Phase 3) | WebXR + Three **or** PSV plugin — decide at Phase 3 |
+| Use                          | Approach                                            |
+| ---------------------------- | --------------------------------------------------- |
+| 360 panorama tour            | **PSV** (current)                                   |
+| Custom 3D / floor plan depth | `packages/viewer-3d` or `viewer/extensions/`        |
+| VR / XR (Phase 3)            | WebXR + Three **or** PSV plugin — decide at Phase 3 |
 
 Do not replace PSV wholesale unless product requires walk mode beyond 360°.
 
 ### 9 — What to avoid
 
-| Anti-pattern | Why |
-| ------------ | --- |
-| Everything in one Next.js app | embed bundle + admin + API blast radius |
-| Move viewer to Next now | Phase 1 embed risk; little SSR gain for WebGL |
-| NoSQL-only for tour graph | scene/hotspot relations fit SQL |
-| Bundle tour JSON in viewer build | admin publish useless; redeploy per edit |
+| Anti-pattern                     | Why                                           |
+| -------------------------------- | --------------------------------------------- |
+| Everything in one Next.js app    | embed bundle + admin + API blast radius       |
+| Move viewer to Next now          | Phase 1 embed risk; little SSR gain for WebGL |
+| NoSQL-only for tour graph        | scene/hotspot relations fit SQL               |
+| Bundle tour JSON in viewer build | admin publish useless; redeploy per edit      |
 
 ### Phase 2 sprints (engineering)
 
-| Sprint | Viewer (Vite) | Platform |
-| ------ | ------------- | -------- |
-| **2A** | `TourRepository` + `JsonTourRepository` | `PublishedTourBundle` type; extract `tour-schema` package |
-| **2B** | `ApiTourRepository` behind `VITE_TOUR_API_URL` | Postgres + `GET /v1/tours/:id` mirroring JSON |
-| **2C** | embed QA unchanged | Admin: login + dashboard + tour settings |
-| **2D** | preview URL support in viewer | Admin: scenes + hotspots + publish |
-| **2E** | — | `POST /v1/tour/chat`, analytics ingest |
-| **2F** | optional JSON fallback removal | Giftabulator status sync job |
+| Sprint | Viewer (Vite)                                  | Platform                                                  |
+| ------ | ---------------------------------------------- | --------------------------------------------------------- |
+| **2A** | `TourRepository` + `JsonTourRepository`        | `PublishedTourBundle` type; extract `tour-schema` package |
+| **2B** | `ApiTourRepository` behind `VITE_TOUR_API_URL` | Postgres + `GET /v1/tours/:id` mirroring JSON             |
+| **2C** | embed QA unchanged                             | Admin: login + dashboard + tour settings                  |
+| **2D** | preview URL support in viewer                  | Admin: scenes + hotspots + publish                        |
+| **2E** | —                                              | `POST /v1/tour/chat`, analytics ingest                    |
+| **2F** | optional JSON fallback removal                 | Giftabulator status sync job                              |
 
 #### Sprint 2A checklist
 
@@ -357,6 +357,7 @@ data — no duplicate content per format.
 
 | Date       | Note                                                                |
 | ---------- | ------------------------------------------------------------------- |
+| 2026-06-11 | Scene transition feedback done — progress bar only (no dim overlay) |
 | 2026-06-11 | Phase 2 platform architecture (sections 1–9) + Sprint 2A checklist  |
 | 2026-06-11 | Initial roadmap — VR/XR, database, mobile themes                    |
 | 2026-06-11 | PERFORMANCE.md → playbook (no checkboxes); ROADMAP = sole task list |

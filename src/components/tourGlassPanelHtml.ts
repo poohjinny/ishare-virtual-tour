@@ -15,7 +15,14 @@ import {
   popupCtaLabelLength,
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
-import { glassPanelCtaIconHtml } from './glassPanelCtaIcons';
+import {
+  glassPanelCtaIconHtml,
+  materialSymbolHtml,
+} from './glassPanelCtaIcons';
+import {
+  MATERIAL_SYMBOL_SIZE_16,
+  MATERIAL_SYMBOL_SIZE_22,
+} from './ui/materialSymbolClasses';
 import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
@@ -256,42 +263,38 @@ function escapeHtml(text: string): string {
 }
 
 export function glassPanelCloseIconHtml(): string {
-  return `<svg class="${GLASS_PANEL.closeIcon}" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-  <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-</svg>`;
+  return materialSymbolHtml('close', {
+    className: GLASS_PANEL.closeIcon,
+    sizePx: MATERIAL_SYMBOL_SIZE_22,
+  });
 }
 
 function glassPanelShareIconHtml(): string {
-  return `<svg class="${GLASS_PANEL.headerBtnIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <circle cx="18" cy="5" r="2.25" stroke="currentColor" stroke-width="1.75"/>
-  <circle cx="6" cy="12" r="2.25" stroke="currentColor" stroke-width="1.75"/>
-  <circle cx="18" cy="19" r="2.25" stroke="currentColor" stroke-width="1.75"/>
-  <path d="M8.1 10.9 15.9 6.6M8.1 13.1l7.8 4.3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+  return materialSymbolHtml('share', {
+    className: GLASS_PANEL.headerBtnIcon,
+    sizePx: MATERIAL_SYMBOL_SIZE_22,
+  });
 }
 
 function navPreviewShareIconHtml(): string {
-  return `<svg class="nav-preview-panel__header-btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <circle cx="18" cy="5" r="2.25" stroke="currentColor" stroke-width="1.75"/>
-  <circle cx="6" cy="12" r="2.25" stroke="currentColor" stroke-width="1.75"/>
-  <circle cx="18" cy="19" r="2.25" stroke="currentColor" stroke-width="1.75"/>
-  <path d="M8.1 10.9 15.9 6.6M8.1 13.1l7.8 4.3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+  return materialSymbolHtml('share', {
+    className: 'nav-preview-panel__header-btn-icon',
+    sizePx: MATERIAL_SYMBOL_SIZE_22,
+  });
 }
 
 function glassPanelMailIconHtml(): string {
-  return `<svg class="${GLASS_PANEL.headerBtnIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-  <path d="m4 7 8 6 8-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+  return materialSymbolHtml('mail', {
+    className: GLASS_PANEL.headerBtnIcon,
+    sizePx: MATERIAL_SYMBOL_SIZE_22,
+  });
 }
 
 function glassPanelExternalLinkIconHtml(): string {
-  return `<svg class="${GLASS_PANEL.headerBtnIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M14 5h5v5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M10 14 19 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M19 14v5H5V5h5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+  return materialSymbolHtml('open_in_new', {
+    className: GLASS_PANEL.headerBtnIcon,
+    sizePx: MATERIAL_SYMBOL_SIZE_22,
+  });
 }
 
 function buildShareHeaderButtonHtml(
@@ -361,9 +364,10 @@ function buildPopupPrimaryFooterInnerHtml(primary: PopupCta): string {
 }
 
 function navPreviewCloseIconHtml(): string {
-  return `<svg class="nav-preview-panel__close-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-  <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-</svg>`;
+  return materialSymbolHtml('close', {
+    className: 'nav-preview-panel__close-icon',
+    sizePx: MATERIAL_SYMBOL_SIZE_22,
+  });
 }
 
 export function glassPanelCtaArrowIconHtml(): string {
@@ -371,17 +375,17 @@ export function glassPanelCtaArrowIconHtml(): string {
 }
 
 export function glassPanelInfoBadgeIconHtml(): string {
-  return `<svg class="${GLASS_PANEL.badgeIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
-  <path d="M12 11v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="12" cy="8" r="1.25" fill="currentColor"/>
-</svg>`;
+  return materialSymbolHtml('info', {
+    className: GLASS_PANEL.badgeIcon,
+    sizePx: MATERIAL_SYMBOL_SIZE_16,
+  });
 }
 
 export function glassPanelNamingBadgeIconHtml(): string {
-  return `<svg class="${GLASS_PANEL.badgeIcon}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-</svg>`;
+  return materialSymbolHtml('favorite', {
+    className: GLASS_PANEL.badgeIcon,
+    sizePx: MATERIAL_SYMBOL_SIZE_16,
+  });
 }
 
 export function buildPopupImageHtml(popup: PopupContent): string {

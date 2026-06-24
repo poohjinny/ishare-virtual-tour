@@ -348,9 +348,7 @@ export const PanoramaViewer = forwardRef<
       deferredErrorRef.current = null;
       transitioningRef.current = true;
       hotspotEnterRef.current?.hold();
-      if (!initialLoadNotifiedRef.current) {
-        onLoadStartRef.current?.();
-      }
+      onLoadStartRef.current?.();
       onTransitionStartRef.current();
 
       let navOk = false;
@@ -626,12 +624,12 @@ export const PanoramaViewer = forwardRef<
     markersRef.current = markers;
 
     viewer.addEventListener('panorama-load', () => {
-      if (landingSuppressLoadProgress || initialLoadNotifiedRef.current) return;
+      if (landingSuppressLoadProgress) return;
       onLoadStartRef.current?.();
     });
 
     viewer.addEventListener('load-progress', (e) => {
-      if (landingSuppressLoadProgress || initialLoadNotifiedRef.current) return;
+      if (landingSuppressLoadProgress) return;
       onLoadProgressRef.current?.(e.progress);
     });
 

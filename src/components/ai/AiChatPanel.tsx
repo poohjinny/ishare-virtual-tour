@@ -5,8 +5,11 @@ import {
   VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE,
 } from '../../constants/branding';
 import type { ChatMessage } from '../../types/tour';
+import { cn } from '../../lib/cn';
 import { GlassPanelCloseIcon, TourGlassPanel } from '../TourGlassPanel';
 import { IconTooltip } from '../ui/IconTooltip';
+import { MaterialSymbol } from '../ui/MaterialSymbol';
+import { MATERIAL_SYMBOL_SIZE_22 } from '../ui/materialSymbolClasses';
 import { PlatformBrandLink } from '../PlatformBrandLink';
 import { LocationBadge } from './LocationBadge';
 import { GuideAvatarImage } from './GuideAvatarImage';
@@ -50,59 +53,31 @@ interface AiChatPanelProps {
 
 function ResetIcon() {
   return (
-    <svg
+    <MaterialSymbol
+      name='refresh'
       className={aiPanelHeaderIconClassName}
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden
-    >
-      <polyline points='23 4 23 10 17 10' />
-      <polyline points='1 20 1 14 7 14' />
-      <path d='M3.51 9a9 9 0 0 1 14.85-3.36L23 10' />
-      <path d='M20.49 15a9 9 0 0 1-14.85 3.36L1 14' />
-    </svg>
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
 function MicIcon() {
   return (
-    <svg
+    <MaterialSymbol
+      name='mic'
       className={aiComposerIconClassName}
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden
-    >
-      <path d='M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z' />
-      <path d='M19 10v2a7 7 0 0 1-14 0v-2' />
-      <line x1='12' y1='19' x2='12' y2='23' />
-      <line x1='8' y1='23' x2='16' y2='23' />
-    </svg>
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
 function ArrowUpIcon() {
   return (
-    <svg
-      className={`${aiComposerIconClassName} ${aiComposerSendIconClassName}`}
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden
-    >
-      <line x1='12' y1='19' x2='12' y2='5' />
-      <polyline points='5 12 12 5 19 12' />
-    </svg>
+    <MaterialSymbol
+      name='arrow_upward'
+      className={cn(aiComposerIconClassName, aiComposerSendIconClassName)}
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
@@ -255,7 +230,7 @@ export function AiChatPanel({
                 className={aiComposerVoiceClassName}
                 aria-label='Voice input (coming soon)'
               >
-              <MicIcon />
+                <MicIcon />
               </button>
             </IconTooltip>
             {hasInput && (

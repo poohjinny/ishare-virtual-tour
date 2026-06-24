@@ -1,10 +1,17 @@
 import type { NamingStatusModifier } from './ui/Badge';
-
-const ICON_PROPS = {
-  className: 'ishare-badge__icon',
-  viewBox: '0 0 24 24',
-  fill: 'none' as const,
-  'aria-hidden': true as const,
+import { BADGE_CLASS } from './ui/badgeClasses';
+import { materialSymbolHtml } from './glassPanelCtaIcons';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import {
+  materialSymbolBadgeClassName,
+  MATERIAL_SYMBOL_SIZE_18,
+} from './ui/materialSymbolClasses';
+import { cn } from '../lib/cn';
+const NAMING_STATUS_MATERIAL_ICONS: Record<NamingStatusModifier, string> = {
+  'on-sale': 'sell',
+  reserved: 'lock',
+  'coming-soon': 'schedule',
+  sold: 'check_circle',
 };
 
 export function NamingStatusBadgeIcon({
@@ -12,66 +19,13 @@ export function NamingStatusBadgeIcon({
 }: {
   modifier: NamingStatusModifier;
 }) {
-  switch (modifier) {
-    case 'on-sale':
-      return (
-        <svg {...ICON_PROPS}>
-          <path
-            d='M9 5H5v4l9 9 4-4-9-9z'
-            stroke='currentColor'
-            strokeWidth='1.75'
-            strokeLinejoin='round'
-          />
-          <circle cx='8' cy='8' r='1.25' fill='currentColor' />
-        </svg>
-      );
-    case 'reserved':
-      return (
-        <svg {...ICON_PROPS}>
-          <rect
-            x='6'
-            y='11'
-            width='12'
-            height='9'
-            rx='2'
-            stroke='currentColor'
-            strokeWidth='1.75'
-          />
-          <path
-            d='M8 11V8a4 4 0 0 1 8 0v3'
-            stroke='currentColor'
-            strokeWidth='1.75'
-            strokeLinecap='round'
-          />
-        </svg>
-      );
-    case 'coming-soon':
-      return (
-        <svg {...ICON_PROPS}>
-          <circle cx='12' cy='12' r='8' stroke='currentColor' strokeWidth='1.75' />
-          <path
-            d='M12 8v5l3 2'
-            stroke='currentColor'
-            strokeWidth='1.75'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-          />
-        </svg>
-      );
-    case 'sold':
-      return (
-        <svg {...ICON_PROPS}>
-          <circle cx='12' cy='12' r='8' stroke='currentColor' strokeWidth='1.75' />
-          <path
-            d='M9 12l2 2 4-4'
-            stroke='currentColor'
-            strokeWidth='1.75'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-          />
-        </svg>
-      );
-  }
+  return (
+    <MaterialSymbol
+      name={NAMING_STATUS_MATERIAL_ICONS[modifier]}
+      className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
+      sizePx={MATERIAL_SYMBOL_SIZE_18}
+    />
+  );
 }
 
 /** HTML popups (anchored glass panel). */
@@ -79,28 +33,10 @@ export function namingStatusBadgeIconHtml(
   modifier: NamingStatusModifier,
   iconClass: string,
 ): string {
-  switch (modifier) {
-    case 'on-sale':
-      return `<svg class="${iconClass}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M9 5H5v4l9 9 4-4-9-9z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
-  <circle cx="8" cy="8" r="1.25" fill="currentColor"/>
-</svg>`;
-    case 'reserved':
-      return `<svg class="${iconClass}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <rect x="6" y="11" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.75"/>
-  <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-</svg>`;
-    case 'coming-soon':
-      return `<svg class="${iconClass}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.75"/>
-  <path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-    case 'sold':
-      return `<svg class="${iconClass}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.75"/>
-  <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-  }
+  return materialSymbolHtml(NAMING_STATUS_MATERIAL_ICONS[modifier], {
+    className: `${BADGE_CLASS.icon} ${iconClass}`.trim(),
+    sizePx: MATERIAL_SYMBOL_SIZE_18,
+  });
 }
 
 export function isNamingStatusIconModifier(

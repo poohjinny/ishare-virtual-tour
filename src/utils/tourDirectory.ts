@@ -1,3 +1,4 @@
+import type { ExploreDirectorySort } from '../constants/tourDirectorySort';
 import type { Scene, Tour, ViewPosition } from '../types/tour';
 import { parseNamingPrice } from './namingPrice';
 import { buildNavPreviewNamingItems } from './navPreview';
@@ -105,6 +106,73 @@ export function filterTourNamingDirectory(
       item.statusLabel.toLowerCase().includes(q) ||
       item.statusShortLabel.toLowerCase().includes(q),
   );
+}
+
+function compareLocaleStrings(a: string, b: string, direction: 1 | -1): number {
+  return a.localeCompare(b) * direction;
+}
+
+function compareNamingPrices(
+  a: TourDirectoryNamingItem,
+  b: TourDirectoryNamingItem,
+  direction: 1 | -1,
+): number {
+  const aPrice = a.priceAmount;
+  const bPrice = b.priceAmount;
+
+  if (aPrice == null && bPrice == null) {
+    return a.name.localeCompare(b.name);
+  }
+  if (aPrice == null) return 1;
+  if (bPrice == null) return -1;
+
+  const diff = (aPrice - bPrice) * direction;
+  if (diff !== 0) return diff;
+
+  return a.name.localeCompare(b.name);
+}
+
+export function sortTourScenes(
+  scenes: Scene[],
+  sort: ExploreDirectorySort,
+): Scene[] {
+  if (sort === 'tour-order') return scenes;
+
+  const sorted = [...scenes];
+
+  if (sort === 'name-asc' || sort === 'price-asc') {
+    sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, 1));
+  } else if (sort === 'name-desc' || sort === 'price-desc') {
+    sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, -1));
+  }
+
+  return sorted;
+}
+
+export function sortTourNamingDirectory(
+  items: TourDirectoryNamingItem[],
+  sort: ExploreDirectorySort,
+): TourDirectoryNamingItem[] {
+  if (sort === 'tour-order') return items;
+
+  const sorted = [...items];
+
+  switch (sort) {
+    case 'name-asc':
+      sorted.sort((a, b) => compareLocaleStrings(a.name, b.name, 1));
+      break;
+    case 'name-desc':
+      sorted.sort((a, b) => compareLocaleStrings(a.name, b.name, -1));
+      break;
+    case 'price-asc':
+      sorted.sort((a, b) => compareNamingPrices(a, b, 1));
+      break;
+    case 'price-desc':
+      sorted.sort((a, b) => compareNamingPrices(a, b, -1));
+      break;
+  }
+
+  return sorted;
 }
 
 /** Preview pose for a naming-opportunity card hero. */

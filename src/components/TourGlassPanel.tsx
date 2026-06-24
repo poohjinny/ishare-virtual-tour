@@ -1,6 +1,12 @@
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { BADGE_CLASS } from './ui/badgeClasses';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import {
+  MATERIAL_SYMBOL_SIZE_18,
+  MATERIAL_SYMBOL_SIZE_22,
+  materialSymbolBadgeClassName,
+} from './ui/materialSymbolClasses';
 import {
   tourGlassPanelBodyClassNameWith,
   tourGlassPanelCloseClassName,
@@ -17,42 +23,30 @@ import {
 export type TourGlassPanelVariant = 'anchored' | 'dock';
 export type TourGlassPanelAnimation = 'enter' | 'exit' | 'none';
 
-export function GlassPanelCloseIcon({ className }: { className?: string }) {
+export function GlassPanelCloseIcon({
+  className,
+  sizePx = MATERIAL_SYMBOL_SIZE_22,
+}: {
+  className?: string;
+  sizePx?: number;
+}) {
   return (
-    <svg
+    <MaterialSymbol
+      name='close'
       className={cn(tourGlassPanelCloseIconClassName, className)}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <path
-        d='M5 5L15 15M15 5L5 15'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-      />
-    </svg>
+      sizePx={sizePx}
+    />
   );
 }
 
 export function GlassPanelInfoBadge() {
   return (
     <span className={BADGE_CLASS.fillLgAccentIcon}>
-      <svg
-        className={BADGE_CLASS.icon}
-        viewBox='0 0 24 24'
-        fill='none'
-        aria-hidden='true'
-      >
-        <circle cx='12' cy='12' r='9' stroke='currentColor' strokeWidth='2' />
-        <path
-          d='M12 11v5'
-          stroke='currentColor'
-          strokeWidth='2'
-          strokeLinecap='round'
-        />
-        <circle cx='12' cy='8' r='1.25' fill='currentColor' />
-      </svg>
+      <MaterialSymbol
+        name='info'
+        className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
+        sizePx={MATERIAL_SYMBOL_SIZE_18}
+      />
       <span className={BADGE_CLASS.label}>Info</span>
     </span>
   );

@@ -89,6 +89,8 @@
   --animate-hotspot-nav-dot-glow: hotspot-nav-dot-glow 2.8s ease-out infinite;
   --animate-tour-nav-dot-glow: tour-nav-dot-glow 2.2s ease-out infinite;
   --animate-tour-nav-dot-pulse: tour-nav-dot-pulse 2.2s ease-out infinite;
+  --animate-explore-sort-menu-in: explore-sort-menu-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-explore-sort-menu-out: explore-sort-menu-out 0.14s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 @keyframes segmented-tab-panel-in {
@@ -225,6 +227,30 @@
   to {
     opacity: 0;
     transform: translate(20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes explore-sort-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes explore-sort-menu-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
   }
 }
 
@@ -467,7 +493,13 @@
       transform 0.2s ease-in-out;
   }
 
-  /* Explore gallery hero — scale hover must transition `scale`, not legacy `transform` (Tailwind v4) */
+  /* Explore gallery hero — same skeleton as nav preview (see glass-panels-layer.css) */
+  .tour-nav-gallery-card-hero .preview-hero-skeleton {
+    position: absolute;
+    inset: -1px;
+    z-index: 0;
+  }
+
   .tour-nav-gallery-card-hero-media {
     transform-origin: center;
     scale: 1;

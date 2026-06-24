@@ -11,6 +11,7 @@ import {
   buildTourLocation,
   preservedSearchStringFrom,
 } from '../utils/tourPaths';
+import { MaterialSymbol } from './ui/MaterialSymbol';
 
 interface TourNotFoundProps {
   requestedTourId: string;
@@ -18,21 +19,11 @@ interface TourNotFoundProps {
 }
 
 const NOT_FOUND_ICON = (
-  <svg
-    className='size-[3.25rem]'
-    viewBox='0 0 24 24'
-    fill='none'
-    aria-hidden='true'
-  >
-    <circle cx='12' cy='12' r='9' stroke='currentColor' strokeWidth='1.75' />
-    <path
-      d='M12 8v5'
-      stroke='currentColor'
-      strokeWidth='1.75'
-      strokeLinecap='round'
-    />
-    <circle cx='12' cy='16.25' r='1' fill='currentColor' />
-  </svg>
+  <MaterialSymbol
+    name='wrong_location'
+    className='leading-none text-muted'
+    sizePx={52}
+  />
 );
 
 export function TourNotFound({

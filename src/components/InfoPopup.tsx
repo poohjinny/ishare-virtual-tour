@@ -20,6 +20,7 @@ import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
 import { GlassPanelHeaderActions } from './GlassPanelHeaderActions';
 import { resolveGlassPanelWidth } from './tourGlassPanelHtml';
 import { GlassPanelCloseIcon } from './TourGlassPanel';
+import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
 import {
   infoPopupBackdropVariants,
   infoPopupImageClassName,
@@ -158,9 +159,7 @@ export function InfoPopup({
         role='dialog'
         aria-modal='true'
         aria-labelledby='info-popup-title'
-        data-info-panel-naming={
-          shown.namingOpportunity ? 'true' : undefined
-        }
+        data-info-panel-naming={shown.namingOpportunity ? 'true' : undefined}
         style={{ maxWidth: resolveGlassPanelWidth(shown, tour) }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -209,7 +208,7 @@ export function InfoPopup({
                   onClick={handleDismiss}
                   aria-label='Close'
                 >
-                  <GlassPanelCloseIcon />
+                  <GlassPanelCloseIcon sizePx={MATERIAL_SYMBOL_SIZE_16} />
                 </button>
               </div>
             </div>

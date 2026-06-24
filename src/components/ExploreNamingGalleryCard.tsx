@@ -11,6 +11,7 @@ import {
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
+  tourNavLocationGalleryCardHeroSkeletonClassName,
   tourNavLocationGalleryCtaClassName,
   tourNavLocationGalleryCurrentBadgeClassName,
   tourNavLocationGalleryHeroBadgeGroupClassName,
@@ -22,7 +23,6 @@ import {
   tourNavLocationGalleryHeroNamingSeparatorClassName,
   tourNavLocationGalleryStatusBadgeVariants,
 } from './tourNavFloatVariants';
-import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 import {
   resolveNamingDirectoryPreviewView,
   type TourDirectoryNamingItem,
@@ -98,14 +98,15 @@ export function ExploreNamingGalleryCard({
         <span
           className={cn(
             tourNavLocationGalleryCardHeroClassName,
-            previewLoading &&
-              '[&_.preview-hero-skeleton]:absolute [&_.preview-hero-skeleton]:inset-0 [&_.preview-hero-skeleton]:z-0',
             previewFailed && 'bg-[#e2e8f0]',
           )}
           aria-busy={previewLoading || undefined}
         >
           {previewLoading ?
-            <span className={PREVIEW_HERO_SKELETON_CLASS} aria-hidden='true' />
+            <span
+              className={tourNavLocationGalleryCardHeroSkeletonClassName}
+              aria-hidden='true'
+            />
           : null}
           {previewSrc && !previewFailed ?
             <img

@@ -148,9 +148,8 @@
   }
 
   .ishare-badge__icon {
-    width: 16px;
-    height: 16px;
     flex-shrink: 0;
+    line-height: 1;
   }
 
   .ishare-badge__label {
@@ -399,9 +398,8 @@
   }
 
   .ishare-accordion__icon svg {
-    display: block;
-    width: 16px;
-    height: 16px;
+    font-size: 16px;
+    line-height: 1;
   }
 
   .ishare-accordion__item--panel-mounted .ishare-accordion__icon {

@@ -78,7 +78,7 @@ export function TourProductBranding({
           </span>
         </>
       : <>
-          <TourMarkerIcon className={tourProductBrandingIconClassName} />
+          <TourMarkerIcon className={tourProductBrandingIconClassName} filled />
           <span className={tourProductBrandingTextClassName}>
             <span className={tourProductBrandingClientClassName}>
               {displayPrefix}

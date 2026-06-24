@@ -23,6 +23,7 @@ export const devViewPanelSectionVariants = cva(
     variants: {
       kind: {
         landing: 'border-[rgba(74,222,128,0.28)]',
+        flags: 'border-[rgba(250,204,21,0.28)]',
         nav: 'border-[rgba(56,189,248,0.28)]',
         naming: 'border-[rgba(244,114,182,0.28)]',
       },
@@ -36,6 +37,8 @@ export const devViewPanelSectionTitleVariants = cva(
     variants: {
       kind: {
         landing: 'text-[#86efac]',
+        flags: 'text-[#fde047]',
+        hotspot: 'text-[#94a3b8]',
         nav: 'text-[#7dd3fc]',
         naming: 'text-[#f9a8d4]',
       },
@@ -105,7 +108,10 @@ export const devViewPanelTabVariants = cva(
   {
     variants: {
       kind: { nav: '', naming: '' },
-      active: { true: '', false: 'bg-transparent text-[#94a3b8] hover:text-[#e2e8f0]' },
+      active: {
+        true: '',
+        false: 'bg-transparent text-[#94a3b8] hover:text-[#e2e8f0]',
+      },
     },
     compoundVariants: [
       {
@@ -122,3 +128,21 @@ export const devViewPanelTabVariants = cva(
     defaultVariants: { active: false },
   },
 );
+
+export const devViewPanelToggleListClassName = cn(
+  'm-0 flex flex-col gap-1 p-0',
+);
+
+export const devViewPanelToggleLabelClassName = cn(
+  'flex cursor-pointer items-start gap-2 rounded px-0.5 py-0.5 text-2xs leading-[1.35] text-[#cbd5e1] hover:text-[#f0fdf4]',
+);
+
+export const devViewPanelToggleInputClassName = cn(
+  'mt-0.5 size-3 shrink-0 cursor-pointer accent-[#4ade80]',
+);
+
+export const devViewPanelToggleNameClassName = cn(
+  'font-semibold text-[#fde047] [&_code]:text-[#fde047]',
+);
+
+export const devViewPanelToggleHintClassName = cn('text-[#64748b]');

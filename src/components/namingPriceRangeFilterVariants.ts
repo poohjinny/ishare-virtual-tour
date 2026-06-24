@@ -1,13 +1,32 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
+import { materialSymbolCompactClassName } from './ui/materialSymbolClasses';
 
 export const namingPriceFilterVariants = cva('naming-price-filter', {
-  variants: { active: { true: 'naming-price-filter--active', false: '' } },
+  variants: {
+    active: {
+      true: cn(
+        'naming-price-filter--active',
+        '[&_.naming-price-filter__icon]:text-primary',
+      ),
+      false: '',
+    },
+  },
   defaultVariants: { active: false },
 });
 
 export const namingPriceFilterHeaderClassName = cn(
-  'naming-price-filter__header flex items-baseline justify-between gap-3',
+  'naming-price-filter__header flex items-center justify-between gap-3',
+);
+
+export const namingPriceFilterLabelRowClassName = cn(
+  'naming-price-filter__label-row flex min-w-0 items-center gap-1.5',
+);
+
+export const namingPriceFilterIconClassName = cn(
+  'naming-price-filter__icon',
+  materialSymbolCompactClassName,
+  'text-muted transition-colors duration-200',
 );
 
 export const namingPriceFilterLabelClassName = cn(

@@ -41,7 +41,7 @@ export const tourGlassPanelTitleActionsClassName = cn(
 export const tourGlassPanelCloseClassName = cn('tour-glass-panel__close');
 
 export const tourGlassPanelCloseIconClassName = cn(
-  'tour-glass-panel__close-icon',
+  'tour-glass-panel__close-icon shrink-0',
 );
 
 export const tourGlassPanelBodyClassName = cn(

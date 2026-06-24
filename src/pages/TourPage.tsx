@@ -7,7 +7,7 @@ import {
 } from 'react-router-dom';
 import { AiAssistant } from '../components/ai/AiAssistant';
 import { ClientIntroPicker } from '../components/ClientIntroPicker';
-import { ClientSelector } from '../components/ClientSelector';
+import { DEV_NOT_FOUND_SAMPLE_TOUR_ID } from '../constants/devUrlFlags';
 import { DevViewPanel } from '../components/DevViewPanel';
 import { InfoPopup } from '../components/InfoPopup';
 import { LoadProgressBar } from '../components/LoadProgressBar';
@@ -144,6 +144,20 @@ export function TourPage() {
     urlSearchParams,
   ]);
 
+  if (searchParams.notFoundTest) {
+    const requestedTourId =
+      route.routeError === 'unknown_tour' && route.requestedTourId ?
+        route.requestedTourId
+      : DEV_NOT_FOUND_SAMPLE_TOUR_ID;
+
+    return (
+      <TourNotFound
+        requestedTourId={requestedTourId}
+        searchParams={urlSearchParams}
+      />
+    );
+  }
+
   if (showClientIntro) {
     return <ClientIntroPicker searchParams={urlSearchParams} />;
   }
@@ -237,14 +251,14 @@ function TourExperience() {
     setSplashRevealReady(false);
     setSplashOverlayFade(false);
     resetLandingTransitionState();
-    if (!searchParams.errorTest) {
+    if (!searchParams.panoramaErrorTest) {
       setPanoramaError(null);
     }
     if (hideSplashTimerRef.current) {
       clearTimeout(hideSplashTimerRef.current);
       hideSplashTimerRef.current = null;
     }
-  }, [tour.id, searchParams.errorTest]);
+  }, [tour.id, searchParams.panoramaErrorTest]);
 
   const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
   const [viewerOrientation, setViewerOrientation] =
@@ -253,7 +267,6 @@ function TourExperience() {
     useState<PanoramaLoadErrorInfo | null>(null);
 
   const handleLoadStart = useCallback(() => {
-    if (hasInitiallyLoadedRef.current) return;
     if (hideBarTimerRef.current) {
       clearTimeout(hideBarTimerRef.current);
       hideBarTimerRef.current = null;
@@ -263,7 +276,6 @@ function TourExperience() {
   }, []);
 
   const handleLoadProgress = useCallback((progress: number) => {
-    if (hasInitiallyLoadedRef.current) return;
     setLoadBarVisible(true);
     setLoadProgress(progress);
   }, []);
@@ -478,7 +490,8 @@ function TourExperience() {
   }, []);
 
   const loadErrorSceneId = panoramaError?.sceneId ?? currentSceneId;
-  const showLoadError = panoramaError !== null || searchParams.errorTest;
+  const showLoadError =
+    panoramaError !== null || searchParams.panoramaErrorTest;
 
   const handlePanoramaError = useCallback(
     (info: PanoramaLoadErrorInfo) => {
@@ -490,18 +503,18 @@ function TourExperience() {
   );
 
   const handlePanoramaRecovered = useCallback(() => {
-    if (searchParams.errorTest) return;
+    if (searchParams.panoramaErrorTest) return;
     setPanoramaError(null);
-  }, [searchParams.errorTest]);
+  }, [searchParams.panoramaErrorTest]);
 
   const handleRetryPanorama = useCallback(async () => {
     const sceneId = panoramaError?.sceneId ?? currentSceneId;
     const ok = await viewerRef.current?.retryScene(sceneId);
-    if (!ok && !searchParams.errorTest) return;
-    if (!searchParams.errorTest) {
+    if (!ok && !searchParams.panoramaErrorTest) return;
+    if (!searchParams.panoramaErrorTest) {
       setPanoramaError(null);
     }
-  }, [currentSceneId, panoramaError?.sceneId, searchParams.errorTest]);
+  }, [currentSceneId, panoramaError?.sceneId, searchParams.panoramaErrorTest]);
 
   const handlePanoramaGoHome = useCallback(async () => {
     const scene = tour.scenes[tour.firstScene];
@@ -560,14 +573,6 @@ function TourExperience() {
             canGoHome={currentSceneId !== tour.firstScene}
             onRetry={handleRetryPanorama}
             onGoHome={handlePanoramaGoHome}
-          />
-        )}
-
-        {searchParams.clientSelector && (
-          <ClientSelector
-            currentTourId={tour.id}
-            currentSceneId={currentSceneId}
-            disabled={isTransitioning}
           />
         )}
 
@@ -633,6 +638,7 @@ function TourExperience() {
               clientId: tour.clientId ?? tour.id,
               tourId: tour.id,
             }}
+            currentSceneId={currentSceneId}
             sceneOptions={devSceneOptions}
             view={devViewCoords}
             clickCoords={devClickCoords}

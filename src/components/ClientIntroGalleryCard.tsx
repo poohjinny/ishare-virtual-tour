@@ -5,15 +5,15 @@ import { loadTour } from '../data/loadTour';
 import { useCatalogTourPreview } from '../hooks/useCatalogTourPreview';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import {
-  tourNavLocationGalleryCardClassName,
+  clientIntroGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
+  tourNavLocationGalleryCardHeroSkeletonClassName,
   tourNavLocationGalleryCtaClassName,
   tourNavLocationGalleryHeroBadgePlacementClassName,
   tourNavLocationGalleryHeroCtaOverlayClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
-import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 import { TourCategoryBadge } from './TourCategoryBadge';
 
 interface ClientIntroGalleryCardProps {
@@ -42,21 +42,22 @@ export function ClientIntroGalleryCard({
     <li className='m-0 flex min-h-0 list-none p-0'>
       <button
         type='button'
-        className={tourNavLocationGalleryCardClassName({ active: false })}
+        className={clientIntroGalleryCardClassName}
         onClick={onSelect}
         aria-label={`${entry.tourName}, ${entry.clientName}. ${CLIENT_INTRO_CTA}.`}
       >
         <span
           className={cn(
             tourNavLocationGalleryCardHeroClassName,
-            previewLoading &&
-              '[&_.preview-hero-skeleton]:absolute [&_.preview-hero-skeleton]:inset-0 [&_.preview-hero-skeleton]:z-0',
             previewFailed && 'bg-[#e2e8f0]',
           )}
           aria-busy={previewLoading || undefined}
         >
           {previewLoading ?
-            <span className={PREVIEW_HERO_SKELETON_CLASS} aria-hidden='true' />
+            <span
+              className={tourNavLocationGalleryCardHeroSkeletonClassName}
+              aria-hidden='true'
+            />
           : null}
           {previewSrc && !previewFailed ?
             <img
@@ -96,7 +97,7 @@ export function ClientIntroGalleryCard({
             <span className='text-xs leading-[1.4] text-muted'>
               {entry.clientName}
             </span>
-            <span className='mt-auto flex min-h-[30px] items-end pt-3'>
+            <span className='mt-auto flex min-h-[30px] items-end pt-5'>
               {logo ?
                 <img
                   className='h-[30px] max-w-[140px] w-auto object-contain object-left'

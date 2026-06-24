@@ -10,8 +10,7 @@ export function TourHelpFooter() {
   return (
     <footer className={tourHelpFooterClassName}>
       <p className={tourHelpFooterCopyrightClassName}>
-        © {year} <PlatformBrandLink brandId='fundingMatters' legalSuffix />. All
-        rights reserved.
+        © {year} <PlatformBrandLink brandId='ishare' /> All rights reserved.
       </p>
     </footer>
   );

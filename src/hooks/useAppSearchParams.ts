@@ -11,34 +11,35 @@ export interface AppSearchParams {
   /** Dev panel — hotspot coords, landing JSON copy. */
   dev: boolean;
   chatTest: boolean;
-  errorTest: boolean;
+  /** Force tour not-found (404) screen — `?notFoundTest=1`. */
+  notFoundTest: boolean;
+  /** Force panorama load-error overlay — `?panoramaErrorTest=1`. */
+  panoramaErrorTest: boolean;
   /** Nav preview mini PSV hero — false when `navPreview=0` (debug). */
   navPreview: boolean;
   /** Skip landing zoom animation — start at scene `defaultView`. */
   skipLanding: boolean;
   /** Hold splash longer for loader UX testing. */
   splashHold: boolean;
-  /** Top-left client switcher — true when `clientSelector=1`. */
-  clientSelector: boolean;
 }
 
 export function useAppSearchParams(): AppSearchParams {
   const [searchParams] = useSearchParams();
 
-  return useMemo(
-    () => ({
-      embed: searchParams.get('embed') === '1',
+  return useMemo(() => {
+    const embed = searchParams.get('embed') === '1';
+    return {
+      embed,
       intro: parseTriStateFlag(searchParams.get('intro')),
       dev: searchParams.get('dev') === '1',
       chatTest: searchParams.get('chatTest') === '1',
-      errorTest: searchParams.get('errorTest') === '1',
+      notFoundTest: searchParams.get('notFoundTest') === '1',
+      panoramaErrorTest: searchParams.get('panoramaErrorTest') === '1',
       navPreview: searchParams.get('navPreview') !== '0',
       skipLanding: searchParams.get('skipLanding') === '1',
       splashHold: searchParams.get('splashHold') === '1',
-      clientSelector: searchParams.get('clientSelector') === '1',
-    }),
-    [searchParams],
-  );
+    };
+  }, [searchParams]);
 }
 
 function parseTriStateFlag(raw: string | null): boolean | null {

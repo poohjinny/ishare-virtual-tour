@@ -1,5 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/cn';
+import {
+  DEV_URL_FLAG_TOGGLES,
+  type DevUrlFlagToggle,
+} from '../constants/devUrlFlags';
+import { useAppSearchParams } from '../hooks/useAppSearchParams';
+import { listTours, loadTour } from '../data/loadTour';
+import {
+  buildTourLocation,
+  preservedSearchStringFrom,
+  resolveSceneId,
+} from '../utils/tourPaths';
 import {
   DEV_HOTSPOT_TABS,
   DEV_NAMING_DEFAULT_BODY,
@@ -43,6 +55,11 @@ import {
   devViewPanelTabVariants,
   devViewPanelTabsClassName,
   devViewPanelTextareaClassName,
+  devViewPanelToggleHintClassName,
+  devViewPanelToggleInputClassName,
+  devViewPanelToggleLabelClassName,
+  devViewPanelToggleListClassName,
+  devViewPanelToggleNameClassName,
   devViewPanelHotspotSectionClassName,
   devViewPanelTitleClassName,
 } from './devViewPanelVariants';
@@ -54,6 +71,7 @@ export interface DevSceneOption {
 
 interface DevViewPanelProps {
   scene: DevSceneRef;
+  currentSceneId: string;
   sceneOptions: DevSceneOption[];
   view: ViewPosition | null;
   clickCoords: ClickCoords | null;
@@ -77,11 +95,18 @@ function writeSessionValue(key: string, value: string): void {
 
 export function DevViewPanel({
   scene,
+  currentSceneId,
   sceneOptions,
   view,
   clickCoords,
   aboveMinimap = false,
 }: DevViewPanelProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const appSearchParams = useAppSearchParams();
+  const tourOptions = listTours();
+  const currentTourId = scene.tourId ?? '';
   const [landingStatus, setLandingStatus] = useState<ActionStatus>('idle');
   const [landingError, setLandingError] = useState<string | null>(null);
   const [navStatus, setNavStatus] = useState<ActionStatus>('idle');
@@ -302,6 +327,16 @@ export function DevViewPanel({
   const markerCoords =
     clickCoords ? formatViewPosition({ ...clickCoords, zoom: 0 }) : '—';
 
+  const setDevUrlFlag = useCallback(
+    (toggle: DevUrlFlagToggle, enabled: boolean) => {
+      navigate(
+        `${location.pathname}${preservedSearchStringFrom(searchParams, toggle.urlPatch(enabled))}`,
+        { replace: true },
+      );
+    },
+    [location.pathname, navigate, searchParams],
+  );
+
   return (
     <div
       className={cn(
@@ -319,6 +354,75 @@ export function DevViewPanel({
           <span className={devViewPanelSceneIdClassName}> ({scene.id})</span>
         )}
       </p>
+
+      {tourOptions.length > 1 ?
+        <label className={devViewPanelFieldClassName}>
+          <span className={devViewPanelFieldLabelClassName}>Switch tour</span>
+          <select
+            className={devViewPanelSelectClassName}
+            value={currentTourId}
+            aria-label='Switch tour'
+            onChange={(event) => {
+              const nextTourId = event.target.value;
+              if (!nextTourId || nextTourId === currentTourId) return;
+
+              const nextTour = loadTour(nextTourId);
+              const nextSceneId = resolveSceneId(nextTourId, currentSceneId);
+
+              navigate(
+                buildTourLocation(
+                  nextTourId,
+                  nextSceneId,
+                  nextTour.firstScene,
+                  searchParams,
+                ),
+                { replace: true },
+              );
+            }}
+          >
+            {tourOptions.map((tour) => (
+              <option key={tour.id} value={tour.id}>
+                {tour.facilityTitle} | {tour.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      : null}
+
+      <section className={devViewPanelSectionVariants({ kind: 'flags' })}>
+        <h3 className={devViewPanelSectionTitleVariants({ kind: 'flags' })}>
+          URL flags
+        </h3>
+        <ul className={devViewPanelToggleListClassName}>
+          {DEV_URL_FLAG_TOGGLES.map((toggle) => {
+            const checked = toggle.isOn(appSearchParams);
+
+            return (
+              <li key={toggle.key}>
+                <label className={devViewPanelToggleLabelClassName}>
+                  <input
+                    type='checkbox'
+                    className={devViewPanelToggleInputClassName}
+                    checked={checked}
+                    onChange={(event) =>
+                      setDevUrlFlag(toggle, event.currentTarget.checked)
+                    }
+                  />
+                  <span>
+                    <span className={devViewPanelToggleNameClassName}>
+                      <code>{toggle.label}</code>
+                    </span>
+                    <span className={devViewPanelToggleHintClassName}>
+                      {' '}
+                      — {toggle.hint}
+                    </span>
+                  </span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       <section className={devViewPanelSectionVariants({ kind: 'landing' })}>
         <h3 className={devViewPanelSectionTitleVariants({ kind: 'landing' })}>
@@ -351,6 +455,9 @@ export function DevViewPanel({
       </section>
 
       <section className={devViewPanelHotspotSectionClassName}>
+        <h3 className={devViewPanelSectionTitleVariants({ kind: 'hotspot' })}>
+          Hotspots
+        </h3>
         <div
           className={devViewPanelTabsClassName}
           role='tablist'
@@ -514,7 +621,8 @@ export function DevViewPanel({
 
             {noSlug ?
               <p className={devViewPanelSlugPreviewClassName}>
-                id <code>info-{noSlug}</code> · deep link <code>?no={noSlug}</code>
+                id <code>info-{noSlug}</code> · deep link{' '}
+                <code>?no={noSlug}</code>
               </p>
             : null}
 

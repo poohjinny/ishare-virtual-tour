@@ -8,6 +8,7 @@ import {
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
+  tourNavLocationGalleryCardHeroSkeletonClassName,
   tourNavLocationGalleryCurrentBadgeClassName,
   tourNavLocationGalleryCtaClassName,
   tourNavLocationGalleryHeroBadgePlacementClassName,
@@ -15,7 +16,6 @@ import {
   tourNavLocationGalleryHeroCtaOverlayClassName,
   tourNavLocationGalleryHeroTitleOverlayClassName,
 } from './tourNavFloatVariants';
-import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 
 interface ExploreSceneGalleryCardProps {
@@ -44,6 +44,8 @@ export function ExploreSceneGalleryCard({
     revealed: previewLoaded,
     onLoad: onPreviewLoad,
   } = usePreviewHeroReveal(previewSrc);
+  const heroLoading =
+    previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
 
   return (
     <li
@@ -65,14 +67,15 @@ export function ExploreSceneGalleryCard({
         <span
           className={cn(
             tourNavLocationGalleryCardHeroClassName,
-            previewLoading &&
-              '[&_.preview-hero-skeleton]:absolute [&_.preview-hero-skeleton]:inset-0 [&_.preview-hero-skeleton]:z-0',
             previewFailed && 'bg-[#e2e8f0]',
           )}
-          aria-busy={previewLoading || undefined}
+          aria-busy={heroLoading || undefined}
         >
-          {previewLoading ?
-            <span className={PREVIEW_HERO_SKELETON_CLASS} aria-hidden='true' />
+          {heroLoading ?
+            <span
+              className={tourNavLocationGalleryCardHeroSkeletonClassName}
+              aria-hidden='true'
+            />
           : null}
           {previewSrc && !previewFailed ?
             <img

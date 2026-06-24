@@ -1,4 +1,5 @@
 import { cn } from '../../lib/cn';
+import { materialSymbolTabClassName } from './materialSymbolClasses';
 
 /** Tablist/tab hooks query these attributes (not Tailwind class strings). */
 export const SEGMENTED_TAB_ATTR = 'data-segmented-tab';
@@ -35,14 +36,14 @@ export const segmentedTabsIndicatorClassName = cn(
 
 export function segmentedTabButtonClassName(active: boolean): string {
   return cn(
-    'relative z-[1] inline-flex min-h-8 min-w-0 flex-1 cursor-pointer appearance-none items-center justify-center gap-1.5 overflow-hidden rounded-full border-none bg-transparent px-3 text-center font-[inherit] text-sm font-semibold leading-none whitespace-nowrap text-muted transition-[background,color,box-shadow] duration-150 [-webkit-tap-highlight-color:transparent]',
+    'relative z-[1] inline-flex min-h-8 min-w-0 flex-1 cursor-pointer appearance-none items-center justify-center gap-1.5 rounded-full border-none bg-transparent px-3 text-center font-[inherit] text-sm font-semibold leading-[1.2] whitespace-nowrap text-muted transition-[background,color,box-shadow] duration-150 [-webkit-tap-highlight-color:transparent]',
     'data-[active=false]:hover:text-foreground data-[active=false]:hover:bg-white/45',
     'disabled:cursor-not-allowed disabled:opacity-50',
     active && 'text-foreground',
   );
 }
 
-export const segmentedTabIconClassName = cn('size-4 shrink-0');
+export const segmentedTabIconClassName = materialSymbolTabClassName;
 
 export const segmentedTabsScrollableClassName = cn(
   'flex-nowrap overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-segmented-tab]]:min-w-20 [&_[data-segmented-tab]]:flex-none',

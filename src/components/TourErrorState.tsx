@@ -1,6 +1,7 @@
 import { cva } from 'class-variance-authority';
 import type { ReactNode } from 'react';
 import { cn } from '../lib/cn';
+import { MaterialSymbol } from './ui/MaterialSymbol';
 
 export interface TourErrorAction {
   label: string;
@@ -32,16 +33,11 @@ const errorCtaVariants = cva(
 );
 
 const ERROR_ICON = (
-  <svg className='size-9' viewBox='0 0 24 24' fill='none' aria-hidden='true'>
-    <circle cx='12' cy='12' r='9' stroke='currentColor' strokeWidth='1.75' />
-    <path
-      d='M12 8v5'
-      stroke='currentColor'
-      strokeWidth='1.75'
-      strokeLinecap='round'
-    />
-    <circle cx='12' cy='16.25' r='1' fill='currentColor' />
-  </svg>
+  <MaterialSymbol
+    name='error'
+    className='leading-none text-muted'
+    sizePx={36}
+  />
 );
 
 export function TourErrorState({

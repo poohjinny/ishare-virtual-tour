@@ -24,3 +24,13 @@ const TOUR_CATEGORY_SLUG: Record<TourCategory, string> = {
 export function tourCategorySlug(category: TourCategory): string {
   return TOUR_CATEGORY_SLUG[category];
 }
+
+export const TOUR_CATEGORY_MATERIAL_ICONS: Record<TourCategory, string> = {
+  Healthcare: 'health_and_safety',
+  Education: 'school',
+  Culture: 'museum',
+  'Sporting Venues': 'stadium',
+  'International Aid': 'public',
+  'Social Services': 'groups',
+  Tourism: 'luggage',
+};

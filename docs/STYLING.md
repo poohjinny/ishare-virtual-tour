@@ -32,7 +32,7 @@ React components         ← className + cn() + cva()
 | **Runtime brand**  | `--brand-*` on `:root` via `clientTheme.ts` → `--color-primary`   |
 | **React UI**       | Tailwind utilities + `cn()` + `class-variance-authority`          |
 | **HTML markers**   | `@layer components` with `@apply` — stable class names in strings |
-| **PSV / hotspots** | `psv-layer.css` — PSV chrome + HTML hotspot markers              |
+| **PSV / hotspots** | `psv-layer.css` — PSV chrome + HTML hotspot markers               |
 
 ---
 
@@ -77,6 +77,45 @@ duplicate hex elsewhere.
 
 ---
 
+## Icons
+
+**Default: Material Symbols Rounded** (ligature font). The font is loaded in
+[`index.html`](../index.html); base styles live in
+[`glass-panels-layer.css`](../src/styles/glass-panels-layer.css)
+(`.material-symbols-rounded`).
+
+| When                                             | Approach                                                                                                |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| **New UI icon** (buttons, menus, CTAs, tooltips) | Material glyph in a `<span>` — see [`glassPanelCtaIcons.tsx`](../src/components/glassPanelCtaIcons.tsx) |
+| **Custom SVG**                                   | Only when explicitly requested (brand mark, one-off art direction, animation the font cannot do)        |
+
+**React pattern (preferred):** use
+[`MaterialSymbol.tsx`](../src/components/ui/MaterialSymbol.tsx) with size tokens
+from
+[`materialSymbolClasses.ts`](../src/components/ui/materialSymbolClasses.ts).
+
+```tsx
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import { materialSymbolPanelHeaderClassName } from './ui/materialSymbolClasses';
+
+<MaterialSymbol name='sort' className={materialSymbolPanelHeaderClassName} />;
+```
+
+Size icons with **`font-size` only** (`text-[18px]`,
+`tour-glass-panel__close-icon`, etc.). Let the **parent**
+(`flex items-center justify-center`) center the glyph — do not set fixed
+`width`/`height` on the ligature span or use `translate` offsets.
+
+**Do not** add new hand-drawn SVG icon files for routine UI (sort, layout
+toggle, tabs, chevrons, etc.) unless the task or design spec asks for custom
+artwork. Pick the closest [Material Symbols](https://fonts.google.com/icons)
+name instead.
+
+**Existing custom SVG** (e.g. explore tab icons, tour nav chevrons) may stay
+until touched — prefer Material when refactoring those surfaces.
+
+---
+
 ## Migrating one React component
 
 1. Add any missing `@theme` tokens in `globals.css`.
@@ -95,7 +134,7 @@ duplicate hex elsewhere.
 | ----- | --------------------------------------------------------- | ------ |
 | **0** | `@theme` + `cn`/`cva` + `globals.css`                     | done   |
 | **1** | `ui/*` — Badge, Accordion, SegmentedTabs, PreviewSkeleton | done   |
-| **2** | Leaf pages — TourErrorState, LoadSplash, ClientSelector   | done   |
+| **2** | Leaf pages — TourErrorState, LoadSplash                   | done   |
 | **3** | Intro — ClientIntro*, ShareTour*, PlatformBrandLink       | done   |
 | **4** | Tour chrome — TourNavFloat, AiAssistant, FloorPlanMinimap | done   |
 | **5** | Glass / markers — `@layer components` + shrink CSS files  | done   |
@@ -110,6 +149,8 @@ duplicate hex elsewhere.
   `@layer components`.
 - Reintroduce `tokens.css` or `tailwind.config.js` (v4 CSS-first).
 - Mix unrelated component migrations in one commit.
+- Add bespoke SVG icons for standard UI chrome without an explicit custom-icon
+  request.
 
 ---
 

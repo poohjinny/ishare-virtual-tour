@@ -6,8 +6,9 @@ import {
   tourNavIconButtonA11y,
 } from '../constants/tourNavActions';
 import { cn } from '../lib/cn';
-import { GlassPanelCloseIcon } from './TourGlassPanel';
 import { IconTooltip } from './ui/IconTooltip';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import { MATERIAL_SYMBOL_SIZE_18, MATERIAL_SYMBOL_SIZE_22 } from './ui/materialSymbolClasses';
 import {
   tourNavExploreSearchCloseClassName,
   tourNavExploreSearchIconClassName,
@@ -17,31 +18,6 @@ import {
   tourNavExploreSearchTriggerClassName,
   tourNavSearchCloseIconClassName,
 } from './tourNavFloatVariants';
-
-function ExplorePanelSearchIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <circle
-        cx='8.5'
-        cy='8.5'
-        r='5.5'
-        stroke='currentColor'
-        strokeWidth='1.5'
-      />
-      <path
-        d='M13 13L17 17'
-        stroke='currentColor'
-        strokeWidth='1.5'
-        strokeLinecap='round'
-      />
-    </svg>
-  );
-}
 
 interface ExplorePanelSearchProps {
   open: boolean;
@@ -85,10 +61,7 @@ export function ExplorePanelSearch({
       <IconTooltip label={TOUR_NAV_ACTION_SEARCH_OPEN} placement='bottom'>
         <button
           type='button'
-          className={cn(
-            tourNavExploreSearchTriggerClassName,
-            open && 'hidden',
-          )}
+          className={cn(tourNavExploreSearchTriggerClassName, open && 'hidden')}
           onClick={onOpen}
           disabled={disabled}
           aria-expanded={open}
@@ -96,7 +69,11 @@ export function ExplorePanelSearch({
           tabIndex={open ? -1 : 0}
           {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SEARCH_OPEN)}
         >
-          <ExplorePanelSearchIcon className={tourNavExploreSearchIconClassName} />
+          <MaterialSymbol
+            name='search'
+            className={tourNavExploreSearchIconClassName}
+            sizePx={MATERIAL_SYMBOL_SIZE_22}
+          />
         </button>
       </IconTooltip>
 
@@ -107,8 +84,10 @@ export function ExplorePanelSearch({
         )}
         aria-hidden={!open}
       >
-        <ExplorePanelSearchIcon
+        <MaterialSymbol
+          name='search'
           className={cn(tourNavExploreSearchIconClassName, 'text-muted')}
+          sizePx={MATERIAL_SYMBOL_SIZE_22}
         />
         <div className={tourNavExploreSearchInputWrapClassName}>
           <input
@@ -140,7 +119,11 @@ export function ExplorePanelSearch({
             tabIndex={open ? 0 : -1}
             {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SEARCH_CLOSE)}
           >
-            <GlassPanelCloseIcon className={tourNavSearchCloseIconClassName} />
+            <MaterialSymbol
+              name='close'
+              className={tourNavSearchCloseIconClassName}
+              sizePx={MATERIAL_SYMBOL_SIZE_18}
+            />
           </button>
         </IconTooltip>
       </div>

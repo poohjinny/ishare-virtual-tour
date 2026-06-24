@@ -33,12 +33,12 @@ export function buildSharePath({
       embed: null,
       dev: null,
       chatTest: null,
-      errorTest: null,
+      notFoundTest: null,
+      panoramaErrorTest: null,
       intro: null,
       navPreview: null,
       skipLanding: null,
       splashHold: null,
-      clientSelector: null,
     },
   );
 }

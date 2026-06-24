@@ -2,17 +2,17 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
 
 export const shareTourPanelRootClassName = cn(
-  'flex flex-col gap-3.5 px-5 pb-5',
+  'flex min-w-0 flex-col gap-3.5 px-5 pb-5',
 );
 
 export const shareTourPanelLeadClassName = cn(
   'm-0 font-body text-md leading-[1.55] text-[var(--ishare-glass-body-text)] [&_strong]:font-semibold [&_strong]:text-foreground',
 );
 
-export const shareTourPanelUrlFieldClassName = cn('mt-2.5 block');
+export const shareTourPanelUrlFieldClassName = cn('mt-2.5 block min-w-0');
 
 export const shareTourPanelUrlRowClassName = cn(
-  'flex items-center gap-1.5 rounded-full border border-[color:var(--ishare-border)] bg-white/72 py-1 pr-1 pl-3.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary-light focus-within:shadow-[0_0_0_3px_rgba(var(--ishare-primary-rgb),0.12)]',
+  'flex min-w-0 items-center gap-1.5 rounded-full border border-[color:var(--ishare-border)] bg-white/72 py-1 pr-1 pl-3.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary-light focus-within:shadow-[inset_0_0_0_3px_rgba(var(--ishare-primary-rgb),0.12)]',
 );
 
 export const shareTourPanelUrlInputClassName = cn(
@@ -20,7 +20,7 @@ export const shareTourPanelUrlInputClassName = cn(
 );
 
 export const shareTourCopyButtonVariants = cva(
-  'inline-flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary p-0 text-white transition-[background,transform] duration-150 hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light [&_svg]:size-3.5',
+  'inline-flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary p-0 text-white transition-[background,transform] duration-150 hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/90',
   {
     variants: {
       state: { idle: '', copied: 'bg-primary/82', failed: 'bg-muted' },
@@ -54,7 +54,7 @@ export const shareTourAppIconVariants = cva(
   {
     variants: {
       channel: {
-        native: 'bg-primary [&_.share-tour-panel__share-icon]:size-[18px]',
+        native: 'bg-primary',
         email: 'bg-[#0078d4]',
         instagram:
           'bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285aeb_90%)] [&_svg]:size-[21px] [&_svg]:drop-shadow-[0_1px_1px_rgba(15,23,42,0.22)]',

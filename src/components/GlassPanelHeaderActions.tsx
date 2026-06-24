@@ -3,43 +3,10 @@ import { resolvePopupCta } from '../data/giftabulatorBrand';
 import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import { ShareTourHeaderButton } from './ShareTourHeaderButton';
 import { IconTooltip } from './ui/IconTooltip';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
 
-function MailIcon() {
-  return (
-    <svg
-      className='tour-glass-panel__header-btn-icon'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='1.75'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden='true'
-    >
-      <path d='M4 6h16v12H4z' />
-      <path d='m4 7 8 6 8-6' />
-    </svg>
-  );
-}
-
-function ExternalLinkIcon() {
-  return (
-    <svg
-      className='tour-glass-panel__header-btn-icon'
-      viewBox='0 0 24 24'
-      fill='none'
-      stroke='currentColor'
-      strokeWidth='1.75'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      aria-hidden='true'
-    >
-      <path d='M14 5h5v5' />
-      <path d='M10 14 19 5' />
-      <path d='M19 14v5H5V5h5' />
-    </svg>
-  );
-}
+const HEADER_BTN_ICON_CLASS = 'tour-glass-panel__header-btn-icon';
 
 export function PopupCtaHeaderLink({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
@@ -53,9 +20,11 @@ export function PopupCtaHeaderLink({ cta }: { cta: PopupCta }) {
         rel='noopener noreferrer'
         aria-label={resolved.ariaLabel}
       >
-        {isMailtoCtaUrl(resolved.url) ?
-          <MailIcon />
-        : <ExternalLinkIcon />}
+        <MaterialSymbol
+          name={isMailtoCtaUrl(resolved.url) ? 'mail' : 'open_in_new'}
+          className={HEADER_BTN_ICON_CLASS}
+          sizePx={MATERIAL_SYMBOL_SIZE_16}
+        />
       </a>
     </IconTooltip>
   );

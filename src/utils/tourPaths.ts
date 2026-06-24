@@ -144,11 +144,11 @@ export const PRESERVED_SEARCH_KEYS = [
   'intro',
   'dev',
   'chatTest',
-  'errorTest',
+  'notFoundTest',
+  'panoramaErrorTest',
   'navPreview',
   'skipLanding',
   'splashHold',
-  'clientSelector',
   NAMING_OPPORTUNITY_SEARCH_KEY,
 ] as const;
 

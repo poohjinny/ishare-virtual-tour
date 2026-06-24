@@ -28,6 +28,11 @@ import {
 import { copyToClipboard } from '../utils/clipboard';
 import { ShareIcon } from './icons/ShareIcon';
 import { IconTooltip } from './ui/IconTooltip';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import {
+  MATERIAL_SYMBOL_SIZE_16,
+  MATERIAL_SYMBOL_SIZE_22,
+} from './ui/materialSymbolClasses';
 import {
   EmailBrandIcon,
   FacebookBrandIcon,
@@ -136,7 +141,10 @@ export function ShareTourPanel({
         label: TOUR_SHARE_NATIVE_LABEL,
         iconVariant: 'native',
         icon: (
-          <ShareIcon className='share-tour-panel__share-icon size-[18px]' />
+          <ShareIcon
+            className='share-tour-panel__share-icon'
+            sizePx={MATERIAL_SYMBOL_SIZE_22}
+          />
         ),
         onClick: () => void handleNativeShare(),
       });
@@ -225,8 +233,17 @@ export function ShareTourPanel({
               aria-label={copyLabel}
             >
               {copyState === 'copied' ?
-                <CopyCheckIcon />
-              : <CopyIcon />}
+                <MaterialSymbol
+                  name='check'
+                  className='leading-none'
+                  sizePx={MATERIAL_SYMBOL_SIZE_16}
+                />
+              : <MaterialSymbol
+                  name='content_copy'
+                  className='leading-none'
+                  sizePx={MATERIAL_SYMBOL_SIZE_16}
+                />
+              }
             </button>
           </IconTooltip>
         </div>
@@ -320,42 +337,5 @@ function ShareAppTile({
     >
       {content}
     </button>
-  );
-}
-
-function CopyIcon() {
-  return (
-    <svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
-      <rect
-        x='9'
-        y='9'
-        width='11'
-        height='11'
-        rx='2'
-        stroke='currentColor'
-        strokeWidth='1.75'
-      />
-      <path
-        d='M7 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-    </svg>
-  );
-}
-
-function CopyCheckIcon() {
-  return (
-    <svg viewBox='0 0 24 24' fill='none' aria-hidden='true'>
-      <path
-        d='M7 12.5 10.5 16 17 9'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-    </svg>
   );
 }

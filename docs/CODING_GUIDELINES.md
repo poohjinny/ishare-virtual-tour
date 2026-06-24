@@ -174,7 +174,8 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 - Preload → `setCurrentNode()` — [`transition.ts`](../src/viewer/transition.ts)
 - URL sync — `useTourRouteSync` + [`tourPaths.ts`](../src/utils/tourPaths.ts)
 - Paths: `/`, `/{sceneId}`, `/{tourId}`, `/{tourId}/{sceneId}`
-- Preserved query: `embed`, `dev`, `chatTest`, `errorTest`, `navPreview`
+- Preserved query: `embed`, `dev`, `chatTest`, `notFoundTest`,
+  `panoramaErrorTest`, `navPreview`
 - Legacy `?tour=` / `?scene=` → path redirect
 
 ### Fullscreen

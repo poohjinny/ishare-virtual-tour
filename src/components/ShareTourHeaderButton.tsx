@@ -8,6 +8,7 @@ import type { ShareMessage } from '../utils/buildShareUrl';
 import { shareTourView, type ShareTourResult } from '../utils/shareTour';
 import { ShareIcon } from './icons/ShareIcon';
 import { IconTooltip } from './ui/IconTooltip';
+import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
 
 interface ShareTourHeaderButtonProps {
   shareUrl: string;
@@ -44,7 +45,10 @@ export function ShareTourHeaderButton({
         disabled={feedback !== null}
         onClick={() => void handleClick()}
       >
-        <ShareIcon className='tour-glass-panel__header-btn-icon' />
+        <ShareIcon
+          className='tour-glass-panel__header-btn-icon'
+          sizePx={MATERIAL_SYMBOL_SIZE_16}
+        />
       </button>
     </IconTooltip>
   );

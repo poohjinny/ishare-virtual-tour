@@ -1,12 +1,16 @@
 import { useMemo } from 'react';
 import { cn } from '../lib/cn';
 import { formatNamingPriceAmount } from '../utils/namingPrice';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
 import {
   namingPriceFilterFillClassName,
   namingPriceFilterHeaderClassName,
+  namingPriceFilterIconClassName,
   namingPriceFilterInputMaxClassName,
   namingPriceFilterInputMinClassName,
   namingPriceFilterLabelClassName,
+  namingPriceFilterLabelRowClassName,
   namingPriceFilterRailClassName,
   namingPriceFilterRootClassName,
   namingPriceFilterTrackClassName,
@@ -68,7 +72,14 @@ export function NamingPriceRangeFilter({
       )}
     >
       <div className={namingPriceFilterHeaderClassName}>
-        <span className={namingPriceFilterLabelClassName}>{label}</span>
+        <span className={namingPriceFilterLabelRowClassName}>
+          <MaterialSymbol
+            name='filter_list'
+            className={namingPriceFilterIconClassName}
+            sizePx={MATERIAL_SYMBOL_SIZE_16}
+          />
+          <span className={namingPriceFilterLabelClassName}>{label}</span>
+        </span>
         <span className={namingPriceFilterValuesClassName} aria-live='polite'>
           {formatNamingPriceAmount(valueMin)} –{' '}
           {formatNamingPriceAmount(valueMax)}

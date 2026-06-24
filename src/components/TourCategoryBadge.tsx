@@ -5,6 +5,11 @@ import {
 import { cn } from '../lib/cn';
 import { TourCategoryIcon } from './icons/TourCategoryIcon';
 import { Badge } from './ui/Badge';
+import { BADGE_CLASS } from './ui/badgeClasses';
+import {
+  materialSymbolBadgeClassName,
+  MATERIAL_SYMBOL_SIZE_16,
+} from './ui/materialSymbolClasses';
 import {
   tourCategoryBadgeVariants,
   type TourCategoryBadgeSlug,
@@ -31,7 +36,11 @@ export function TourCategoryBadge({
         className,
       )}
     >
-      <TourCategoryIcon category={category} className='size-3.5 shrink-0' />
+      <TourCategoryIcon
+        category={category}
+        className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
+        sizePx={MATERIAL_SYMBOL_SIZE_16}
+      />
       <span className='min-w-0 overflow-hidden text-ellipsis whitespace-nowrap'>
         {category}
       </span>

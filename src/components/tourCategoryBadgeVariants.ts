@@ -10,7 +10,7 @@ export type TourCategoryBadgeSlug =
   | 'tourism';
 
 export const tourCategoryBadgeVariants = cva(
-  'max-w-[120px] gap-1 px-2 py-[3px] pr-2.5 pl-2 font-display font-semibold tracking-tight',
+  'max-w-[120px] gap-0.5 border-none px-1.5 py-[2px] pr-2 pl-1.5 font-display font-semibold tracking-tight',
   {
     variants: {
       category: {

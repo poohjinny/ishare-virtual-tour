@@ -1,5 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../../lib/cn';
+import { materialSymbolCompactClassName } from '../ui/materialSymbolClasses';
 
 export const aiAssistantStackClassName = cn(
   'pointer-events-none absolute right-6 bottom-6 z-[95] flex flex-col items-end gap-2.5 max-sm:inset-x-3 max-sm:bottom-6 max-sm:items-stretch',
@@ -93,7 +94,7 @@ export const aiPanelHeaderBtnClassName = cn(
   'flex size-8 shrink-0 cursor-pointer items-center justify-center p-0 transition-[background,color,opacity] duration-150',
 );
 
-export const aiPanelHeaderIconClassName = cn('size-4');
+export const aiPanelHeaderIconClassName = materialSymbolCompactClassName;
 
 export const aiPanelFooterClassName = cn(
   'px-[var(--ai-panel-inline-padding)] pt-2.5 pb-3',
@@ -158,6 +159,6 @@ export const aiComposerSendClassName = cn(
   'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform] duration-200 hover:bg-primary-dark active:scale-95',
 );
 
-export const aiComposerIconClassName = cn('size-4');
+export const aiComposerIconClassName = materialSymbolCompactClassName;
 
-export const aiComposerSendIconClassName = cn('size-3.5');
+export const aiComposerSendIconClassName = materialSymbolCompactClassName;

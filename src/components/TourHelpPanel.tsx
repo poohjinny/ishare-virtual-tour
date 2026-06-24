@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import {
-  PLATFORM_FMI_LOGO,
+  PLATFORM_PRODUCT_LOGO,
   VIRTUAL_TOUR_GUIDE_NAME,
 } from '../constants/branding';
 
@@ -18,10 +18,7 @@ import {
 } from '../constants/tourHelp';
 
 import { PLATFORM_TOUR_SUPPORT } from '../data/platformContact';
-import {
-  FUNDING_MATTERS,
-  platformBrandMarkedName,
-} from '../data/platformBrands';
+import { ISHARE, platformBrandMarkedName } from '../data/platformBrands';
 
 import { hasOrganizationContact } from '../utils/tourOrganizationContact';
 
@@ -64,14 +61,14 @@ export function TourHelpPanel({
   const tourSupportLogo = (
     <a
       className={tourNavLogoLinkClassName}
-      href={FUNDING_MATTERS.url}
+      href={ISHARE.url}
       target='_blank'
       rel='noopener noreferrer'
     >
       <img
         className={tourNavLogoClassName}
-        src={PLATFORM_FMI_LOGO}
-        alt={platformBrandMarkedName(FUNDING_MATTERS, { legalSuffix: true })}
+        src={PLATFORM_PRODUCT_LOGO}
+        alt={platformBrandMarkedName(ISHARE)}
       />
     </a>
   );
@@ -130,9 +127,7 @@ export function TourHelpPanel({
                   {item.question}
                 </dt>
 
-                <dd className={tourNavHelpFaqAnswerClassName}>
-                  {item.answer}
-                </dd>
+                <dd className={tourNavHelpFaqAnswerClassName}>{item.answer}</dd>
               </div>
             ))}
           </dl>
@@ -149,10 +144,7 @@ export function TourHelpPanel({
             : null}
 
             {showClientContact && showTourSupport ?
-              <hr
-                className={tourNavHelpDividerClassName}
-                aria-hidden='true'
-              />
+              <hr className={tourNavHelpDividerClassName} aria-hidden='true' />
             : null}
 
             {showTourSupport ?

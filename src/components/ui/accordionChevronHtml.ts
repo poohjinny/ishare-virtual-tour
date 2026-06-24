@@ -2,11 +2,10 @@ import {
   ACCORDION_CLASS,
   type AccordionIconPosition,
 } from './accordionClasses';
+import { CTA_MATERIAL_SYMBOL_CLASS } from '../glassPanelCtaIcons';
 
 export function accordionChevronHtml(): string {
-  return `<svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
-  <path d="M5 8l5 5 5-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+  return `<span class="${CTA_MATERIAL_SYMBOL_CLASS}" style="font-size:16px;line-height:1" aria-hidden="true">expand_more</span>`;
 }
 
 export function buildAccordionIconHtml(): string {

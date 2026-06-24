@@ -12,9 +12,16 @@ import {
   TOUR_DIRECTORY_EMPTY_SEARCH,
   type TourDirectoryTab,
 } from '../constants/tourDirectory';
+import {
+  EXPLORE_DIRECTORY_SORT_DEFAULT,
+  exploreDirectorySortOptionsForContext,
+  type ExploreDirectorySort,
+} from '../constants/tourDirectorySort';
 import { ExploreDirectoryTabLabel } from './icons/ExploreDirectoryTabIcons';
+import { TourMarkerIcon } from './icons/TourMarkerIcon';
 import { ExploreNamingGalleryCard } from './ExploreNamingGalleryCard';
 import { ExplorePanelSearch } from './ExplorePanelSearch';
+import { ExplorePanelSort } from './ExplorePanelSort';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
 import { NamingPriceRangeFilter } from './NamingPriceRangeFilter';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
@@ -41,6 +48,8 @@ import {
   buildTourNamingDirectory,
   filterTourNamingDirectory,
   filterTourScenes,
+  sortTourNamingDirectory,
+  sortTourScenes,
   type TourDirectoryNamingItem,
 } from '../utils/tourDirectory';
 import {
@@ -51,6 +60,11 @@ import { SegmentedTabs } from './ui/SegmentedTabs';
 import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
 import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
 import { IconTooltip } from './ui/IconTooltip';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import {  
+  MATERIAL_SYMBOL_SIZE_20,
+  MATERIAL_SYMBOL_SIZE_22,
+} from './ui/materialSymbolClasses';
 import { Badge, type NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import { TourHelpPanel } from './TourHelpPanel';
@@ -61,7 +75,6 @@ import {
   tourGlassPanelCloseIconClassName,
 } from './tourGlassPanelVariants';
 import { ShareIcon } from './icons/ShareIcon';
-import { cn } from '../lib/cn';
 import {
   tourNavActionsDockClassName,
   tourNavActionsRootClassName,
@@ -78,7 +91,6 @@ import {
   tourNavBreadcrumbSepClassName,
   tourNavCircleBtnVariants,
   tourNavCircleIconClassName,
-  tourNavCircleIconHelpClassName,
   tourNavDirectoryActiveSelector,
   tourNavDirectoryItemVariants,
   tourNavDirectoryPanelClassName,
@@ -89,12 +101,14 @@ import {
   tourNavHistoryBtnClassName,
   tourNavHistoryBtnIconClassName,
   tourNavItemBadgeClassName,
-  tourNavItemDotClassName,
   tourNavItemIconNamingVariants,
+  tourNavItemLocationIconClassName,
   tourNavItemLabelClassName,
   tourNavItemLeadingClassName,
-  tourNavItemMetaClassName,
-  tourNavItemTextClassName,
+  tourNavItemNamingLabelClassName,
+  tourNavItemNamingLocationClassName,
+  tourNavItemNamingNameClassName,
+  tourNavItemNamingSeparatorClassName,
   tourNavListClassName,
   tourNavLocationGalleryListClassName,
   tourNavLogoClassName,
@@ -137,7 +151,7 @@ type PanelAnimPhase = 'enter' | 'exit' | 'idle';
 
 const PANEL_ENTER_MS = 150;
 const PANEL_EXIT_MS = 140;
-const SEARCH_PILL_EXPAND_MS = 220;
+const SEARCH_PILL_EXPAND_MS = 180;
 /** Match `tourNavBreadcrumbRowVariants` transform duration */
 const BREADCRUMB_EXIT_MS = 280;
 
@@ -153,185 +167,62 @@ interface BreadcrumbItem {
   isCurrent: boolean;
 }
 
-function TourLayersIcon({ className }: { className: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox='0 0 24 24'
-      fill='none'
-      aria-hidden='true'
-    >
-      <path
-        d='M12 2L2 7l10 5 10-5-10-5z'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinejoin='round'
-      />
-      <path
-        d='M2 12l10 5 10-5'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinejoin='round'
-      />
-      <path
-        d='M2 17l10 5 10-5'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinejoin='round'
-      />
-    </svg>
-  );
-}
-
 function ExploreTourIcon() {
-  return <TourLayersIcon className={tourNavCircleIconClassName} />;
+  return (
+    <MaterialSymbol
+      name='map_search'
+      className={tourNavCircleIconClassName}
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
+  );
 }
 
 function ControlsIcon() {
   return (
-    <svg
+    <MaterialSymbol
+      name='tune'
       className={tourNavCircleIconClassName}
-      viewBox='0 0 24 24'
-      fill='currentColor'
-      aria-hidden='true'
-    >
-      <path d='M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z' />
-    </svg>
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
 function HelpIcon() {
   return (
-    <svg
-      className={cn(tourNavCircleIconClassName, tourNavCircleIconHelpClassName)}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <circle
-        cx='10'
-        cy='10'
-        r='8.25'
-        stroke='currentColor'
-        strokeWidth='1.75'
-      />
-      <path
-        d='M7.5 7.35C7.85 5.95 9.05 5.15 10.45 5.15C12.05 5.15 13.25 6.35 13.25 7.95C13.25 9.35 12.2 10.15 11.05 10.8C10.35 11.15 9.95 11.7 9.95 12.35'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-      <circle cx='10' cy='15.1' r='1' fill='currentColor' />
-    </svg>
+    <MaterialSymbol
+      name='help'
+      className={tourNavCircleIconClassName}
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
 function ShareIconButton() {
-  return <ShareIcon className={tourNavCircleIconClassName} />;
+  return (
+    <ShareIcon
+      className={tourNavCircleIconClassName}
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
+  );
 }
 
 function HistoryBackIcon() {
   return (
-    <svg
+    <MaterialSymbol
+      name='chevron_left'
       className={tourNavHistoryBtnIconClassName}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <path
-        d='M12.5 15L7.5 10L12.5 5'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-    </svg>
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
 function HistoryForwardIcon() {
   return (
-    <svg
+    <MaterialSymbol
+      name='chevron_right'
       className={tourNavHistoryBtnIconClassName}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <path
-        d='M7.5 5L12.5 10L7.5 15'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-    </svg>
-  );
-}
-
-function ExploreListLayoutIcon() {
-  return (
-    <svg
-      className={tourGlassPanelCloseIconClassName}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <path
-        d='M4 6h12M4 10h12M4 14h8'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-      />
-    </svg>
-  );
-}
-
-function ExploreGalleryLayoutIcon() {
-  return (
-    <svg
-      className={tourGlassPanelCloseIconClassName}
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <rect
-        x='4'
-        y='4'
-        width='5'
-        height='5'
-        rx='1'
-        stroke='currentColor'
-        strokeWidth='1.5'
-      />
-      <rect
-        x='11'
-        y='4'
-        width='5'
-        height='5'
-        rx='1'
-        stroke='currentColor'
-        strokeWidth='1.5'
-      />
-      <rect
-        x='4'
-        y='11'
-        width='5'
-        height='5'
-        rx='1'
-        stroke='currentColor'
-        strokeWidth='1.5'
-      />
-      <rect
-        x='11'
-        y='11'
-        width='5'
-        height='5'
-        rx='1'
-        stroke='currentColor'
-        strokeWidth='1.5'
-      />
-    </svg>
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
@@ -343,33 +234,34 @@ function NamingHeartIcon({
   sold?: boolean;
 }) {
   return (
-    <svg
-      className={tourNavItemIconNamingVariants({ active, sold })}
+    <MaterialSymbol
+      name='favorite'
+      filled={active}
       data-tour-nav-naming-icon
-      viewBox='0 0 24 24'
-      fill='currentColor'
-      aria-hidden='true'
-    >
-      <path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' />
-    </svg>
+      className={tourNavItemIconNamingVariants({ active, sold })}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
+    />
+  );
+}
+
+function TourLocationItemIcon({ active }: { active: boolean }) {
+  return (
+    <TourMarkerIcon
+      filled={active}
+      data-tour-nav-location-icon
+      className={tourNavItemLocationIconClassName}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
+    />
   );
 }
 
 function BreadcrumbRootIcon() {
   return (
-    <svg
+    <MaterialSymbol
+      name='home'
       className={tourNavBreadcrumbRootIconClassName}
-      viewBox='0 0 24 24'
-      fill='none'
-      aria-hidden='true'
-    >
-      <path
-        d='M4 10.75 12 4.5l8 6.25V19a1.25 1.25 0 0 1-1.25 1.25H15v-5.75H9V20.25H5.25A1.25 1.25 0 0 1 4 19V10.75Z'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinejoin='round'
-      />
-    </svg>
+      sizePx={MATERIAL_SYMBOL_SIZE_22}
+    />
   );
 }
 
@@ -424,6 +316,9 @@ export function TourNavFloat({
   const [directoryTab, setDirectoryTab] = useState<TourDirectoryTab>('all');
   const [exploreLayout, setExploreLayout] =
     useState<ExploreDirectoryLayout>('gallery');
+  const [exploreSort, setExploreSort] = useState<ExploreDirectorySort>(
+    EXPLORE_DIRECTORY_SORT_DEFAULT,
+  );
   const [exploreSearch, setExploreSearch] = useState('');
   const [exploreSearchFocusRequest, setExploreSearchFocusRequest] = useState(0);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -554,6 +449,43 @@ export function TourNavFloat({
   );
 
   const isExploreSearchActive = exploreSearch.trim().length > 0;
+
+  const exploreSortContext = useMemo(() => {
+    if (isExploreSearchActive) return 'mixed' as const;
+    if (directoryTab === 'locations') return 'locations' as const;
+    if (directoryTab === 'naming') return 'naming' as const;
+    return 'mixed' as const;
+  }, [directoryTab, isExploreSearchActive]);
+
+  const exploreSortOptions = useMemo(
+    () => exploreDirectorySortOptionsForContext(exploreSortContext),
+    [exploreSortContext],
+  );
+
+  useEffect(() => {
+    if (exploreSortOptions.some((option) => option.id === exploreSort)) return;
+    setExploreSort(EXPLORE_DIRECTORY_SORT_DEFAULT);
+  }, [exploreSort, exploreSortOptions]);
+
+  const exploreSortedScenes = useMemo(
+    () => sortTourScenes(scenes, exploreSort),
+    [exploreSort, scenes],
+  );
+
+  const exploreSortedNamingItems = useMemo(
+    () => sortTourNamingDirectory(exploreNamingItems, exploreSort),
+    [exploreNamingItems, exploreSort],
+  );
+
+  const exploreSortedFilteredScenes = useMemo(
+    () => sortTourScenes(exploreFilteredScenes, exploreSort),
+    [exploreFilteredScenes, exploreSort],
+  );
+
+  const exploreSortedFilteredNamingItems = useMemo(
+    () => sortTourNamingDirectory(exploreFilteredNamingItems, exploreSort),
+    [exploreFilteredNamingItems, exploreSort],
+  );
 
   const targetPanel = panelMode;
 
@@ -863,11 +795,7 @@ export function TourNavFloat({
                     onClick={() => handleSelect(scene.id)}
                   >
                     <span className={tourNavItemLeadingClassName}>
-                      <span
-                        className={tourNavItemDotClassName}
-                        data-tour-nav-dot
-                        aria-hidden='true'
-                      />
+                      <TourLocationItemIcon active={isActive} />
                     </span>
                     <span className={tourNavItemLabelClassName}>
                       {scene.title}
@@ -983,11 +911,17 @@ export function TourNavFloat({
                     <span className={tourNavItemLeadingClassName}>
                       <NamingHeartIcon active={isActive} sold={isSold} />
                     </span>
-                    <span className={tourNavItemTextClassName}>
-                      <span className={tourNavItemLabelClassName}>
+                    <span className={tourNavItemNamingLabelClassName}>
+                      <span className={tourNavItemNamingNameClassName}>
                         {item.name}
                       </span>
-                      <span className={tourNavItemMetaClassName}>
+                      <span
+                        className={tourNavItemNamingSeparatorClassName}
+                        aria-hidden='true'
+                      >
+                        |
+                      </span>
+                      <span className={tourNavItemNamingLocationClassName}>
                         {item.sceneTitle}
                       </span>
                     </span>
@@ -1088,7 +1022,7 @@ export function TourNavFloat({
               </h3>
             )}
             <ExploreLayoutPanel layout={exploreLayout}>
-              {renderLocationsList(scenes, {
+              {renderLocationsList(exploreSortedScenes, {
                 listBodyOnly: true,
                 emptyMessage: TOUR_DIRECTORY_EMPTY_LOCATIONS,
               })}
@@ -1130,7 +1064,7 @@ export function TourNavFloat({
               )}
 
             <ExploreLayoutPanel layout={exploreLayout}>
-              {renderNamingList(exploreNamingItems, {
+              {renderNamingList(exploreSortedNamingItems, {
                 listBodyOnly: true,
                 emptyMessage:
                   namingItems.length === 0 ?
@@ -1217,6 +1151,12 @@ export function TourNavFloat({
               onClose={closeExploreSearch}
               onChange={setExploreSearch}
             />
+            <ExplorePanelSort
+              value={exploreSort}
+              options={exploreSortOptions}
+              disabled={disabled}
+              onChange={setExploreSort}
+            />
             <IconTooltip
               label={tourNavExploreLayoutActionLabel(exploreLayout)}
               placement='bottom'
@@ -1231,8 +1171,17 @@ export function TourNavFloat({
                 )}
               >
                 {exploreLayout === 'gallery' ?
-                  <ExploreListLayoutIcon />
-                : <ExploreGalleryLayoutIcon />}
+                  <MaterialSymbol
+                    name='view_list'
+                    className={tourGlassPanelCloseIconClassName}
+                    sizePx={MATERIAL_SYMBOL_SIZE_22}
+                  />
+                : <MaterialSymbol
+                    name='grid_view'
+                    className={tourGlassPanelCloseIconClassName}
+                    sizePx={MATERIAL_SYMBOL_SIZE_22}
+                  />
+                }
               </button>
             </IconTooltip>
           </div>
@@ -1250,8 +1199,8 @@ export function TourNavFloat({
           >
             <div className={tourNavPanelScrollInnerClassName}>
               {renderDirectorySearchResults(
-                exploreFilteredScenes,
-                exploreFilteredNamingItems,
+                exploreSortedFilteredScenes,
+                exploreSortedFilteredNamingItems,
               )}
             </div>
           </div>
