@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import { cn } from '../lib/cn';
 import { BADGE_CLASS } from './ui/badgeClasses';
 import { MaterialSymbol } from './ui/MaterialSymbol';
@@ -47,7 +48,7 @@ export function GlassPanelInfoBadge() {
         className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
         sizePx={MATERIAL_SYMBOL_SIZE_18}
       />
-      <span className={BADGE_CLASS.label}>Info</span>
+      <span className={BADGE_CLASS.label}>{GENERAL_INFO_BADGE_LABEL}</span>
     </span>
   );
 }

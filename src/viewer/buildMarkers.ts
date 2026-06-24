@@ -1,3 +1,5 @@
+import { materialSymbolHtml } from '../components/glassPanelCtaIcons';
+import { isGeneralInfoHotspot } from '../data/generalInfoHotspot';
 import type { Hotspot } from '../types/tour';
 import {
   namingOpportunityStatusConfig,
@@ -18,6 +20,26 @@ function buildNavHtml(label: string): string {
       <span class="hotspot-nav__pill">
         <span class="hotspot-nav__dot" aria-hidden="true"></span>
         <span class="hotspot-nav__label">${escapeHtml(label)}</span>
+      </span>
+    </button>
+  `;
+}
+
+const HOTSPOT_NAV_INFO_ICON_HTML = materialSymbolHtml('info', {
+  className: 'hotspot-nav__icon-symbol',
+  sizePx: 18,
+});
+
+function buildGeneralInfoHtml(hotspot: Hotspot): string {
+  const title = hotspot.popup?.title?.trim() ?? hotspot.label?.trim();
+  const pillLabel = title ?? 'Learn more';
+  const ariaLabel = title ?? 'Information';
+
+  return `
+    <button type="button" class="hotspot-nav" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}">
+      <span class="hotspot-nav__pill">
+        <span class="hotspot-nav__icon" aria-hidden="true">${HOTSPOT_NAV_INFO_ICON_HTML}</span>
+        <span class="hotspot-nav__label">${escapeHtml(pillLabel)}</span>
       </span>
     </button>
   `;
@@ -58,8 +80,8 @@ function buildInfoHtml(hotspot: Hotspot): string {
 
 export function hotspotToMarkerConfig(hotspot: Hotspot) {
   const html =
-    hotspot.type === 'nav' ?
-      buildNavHtml(hotspot.label ?? 'Go')
+    hotspot.type === 'nav' ? buildNavHtml(hotspot.label ?? 'Go')
+    : isGeneralInfoHotspot(hotspot) ? buildGeneralInfoHtml(hotspot)
     : buildInfoHtml(hotspot);
 
   return {
