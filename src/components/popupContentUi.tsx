@@ -7,6 +7,7 @@ import {
 import { PlatformBrandLink } from './PlatformBrandLink';
 import { cn } from '../lib/cn';
 import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
+import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
@@ -128,7 +129,7 @@ export function PopupHeaderMeta({ popup }: { popup: PopupContent }) {
         className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
         sizePx={MATERIAL_SYMBOL_SIZE_18}
       />
-      <span className={BADGE_CLASS.label}>Info</span>
+      <span className={BADGE_CLASS.label}>{GENERAL_INFO_BADGE_LABEL}</span>
     </span>
   );
 }

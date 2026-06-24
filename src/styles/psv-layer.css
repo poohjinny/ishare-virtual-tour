@@ -751,6 +751,22 @@ input::placeholder {
     transform 0.22s ease;
 }
 
+.hotspot-nav__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ishare-primary);
+  transition:
+    color 0.22s ease,
+    transform 0.22s ease;
+}
+
+.hotspot-nav__icon-symbol {
+  display: block;
+  line-height: 1;
+}
+
 .hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__pill {
   transition:
     transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
@@ -804,6 +820,12 @@ input::placeholder {
   box-shadow: var(--ishare-active-icon-dot-ring);
   animation: none;
   transform: none;
+}
+
+.hotspot-nav--active .hotspot-nav__icon,
+.hotspot-nav--active:hover .hotspot-nav__icon,
+.hotspot-nav--active:focus-visible .hotspot-nav__icon {
+  color: var(--ishare-primary);
 }
 
 /* ?? Info hotspot ? naming opportunity pill (primary + heart) ?? */
@@ -1048,7 +1070,7 @@ input::placeholder {
 
 .viewer-container--hotspots-enter .psv-marker:has(.hotspot-nav).psv-marker--visible .hotspot-nav,
 .viewer-container--hotspots-enter .psv-marker:has(.hotspot-info).psv-marker--visible .hotspot-info {
-  animation: hotspot-enter 320ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: hotspot-enter 420ms cubic-bezier(0.34, 1.25, 0.64, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

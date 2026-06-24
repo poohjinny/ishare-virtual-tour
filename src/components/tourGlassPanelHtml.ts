@@ -24,6 +24,7 @@ import {
   MATERIAL_SYMBOL_SIZE_22,
 } from './ui/materialSymbolClasses';
 import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
+import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
@@ -489,7 +490,7 @@ export function buildPopupBadgeHtml(popup: PopupContent): string {
 
   return `<span class="${GLASS_PANEL.badge}">
     ${glassPanelInfoBadgeIconHtml()}
-    <span class="${GLASS_PANEL.badgeText}">Info</span>
+    <span class="${GLASS_PANEL.badgeText}">${escapeHtml(GENERAL_INFO_BADGE_LABEL)}</span>
   </span>`;
 }
 
