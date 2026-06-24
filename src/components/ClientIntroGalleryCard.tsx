@@ -10,11 +10,13 @@ import {
   tourNavLocationGalleryCardHeroImageClassName,
   tourNavLocationGalleryCardHeroSkeletonClassName,
   tourNavLocationGalleryCtaClassName,
-  tourNavLocationGalleryHeroBadgePlacementClassName,
+  tourNavLocationGalleryCurrentBadgeClassName,
+  tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryHeroCtaOverlayClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { TourCategoryBadge } from './TourCategoryBadge';
+import { Badge } from './ui/Badge';
 
 interface ClientIntroGalleryCardProps {
   entry: CatalogTourListItem;
@@ -44,7 +46,7 @@ export function ClientIntroGalleryCard({
         type='button'
         className={clientIntroGalleryCardClassName}
         onClick={onSelect}
-        aria-label={`${entry.tourName}, ${entry.clientName}. ${CLIENT_INTRO_CTA}.`}
+        aria-label={`${entry.tourName}, ${entry.clientName}${entry.featured ? ', featured' : ''}. ${CLIENT_INTRO_CTA}.`}
       >
         <span
           className={cn(
@@ -84,10 +86,19 @@ export function ClientIntroGalleryCard({
               <ExploreGalleryCtaArrowIcon />
             </span>
           </span>
-          <TourCategoryBadge
-            category={entry.category}
-            className={tourNavLocationGalleryHeroBadgePlacementClassName}
-          />
+          <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
+            {entry.featured ?
+              <Badge
+                variant='fill'
+                size='sm'
+                tone='primary'
+                className={tourNavLocationGalleryCurrentBadgeClassName}
+              >
+                Featured
+              </Badge>
+            : null}
+            <TourCategoryBadge category={entry.category} />
+          </span>
         </span>
         <span className='flex flex-1 items-stretch px-3.5 pt-3 pb-3.5'>
           <span className='flex min-h-0 min-w-0 flex-1 flex-col gap-0.5'>
