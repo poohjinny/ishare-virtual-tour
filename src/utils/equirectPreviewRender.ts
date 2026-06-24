@@ -1,8 +1,15 @@
 import type { ViewPosition } from '../types/tour';
 import { viewPositionToVerticalFov } from './psvZoom';
 
-const PREVIEW_WIDTH = 640;
 const PREVIEW_ASPECT = 10 / 16;
+
+/** Full-width intro gallery cards (retina-friendly). */
+export const CATALOG_PREVIEW_WIDTH = 640;
+/** Explore panel gallery cards (~260px wide in 2-col layout). */
+export const EXPLORE_PREVIEW_WIDTH = 320;
+
+/** Cap decode size for preview sampling — avoids 8K getImageData on main thread. */
+const PREVIEW_SOURCE_MAX_WIDTH = 2048;
 
 interface Vec3 {
   x: number;
@@ -50,6 +57,37 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
+const panoramaImageDataCache = new Map<string, Promise<ImageData>>();
+
+/** Load and downscale a panorama once; reused across preview views for the same URL. */
+export async function loadPanoramaImageData(
+  panoramaUrl: string,
+): Promise<ImageData> {
+  const existing = panoramaImageDataCache.get(panoramaUrl);
+  if (existing) return existing;
+
+  const promise = (async () => {
+    const img = await loadImage(panoramaUrl);
+    const scale = Math.min(1, PREVIEW_SOURCE_MAX_WIDTH / img.naturalWidth);
+    const width = Math.max(1, Math.round(img.naturalWidth * scale));
+    const height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas not supported');
+    ctx.drawImage(img, 0, 0, width, height);
+    return ctx.getImageData(0, 0, width, height);
+  })();
+
+  panoramaImageDataCache.set(panoramaUrl, promise);
+  void promise.catch(() => {
+    panoramaImageDataCache.delete(panoramaUrl);
+  });
+
+  return promise;
+}
+
 function sampleBilinear(
   data: ImageData,
   u: number,
@@ -91,22 +129,12 @@ function directionToEquirectUv(dir: Vec3): { u: number; v: number } {
   return { u: lon / (2 * Math.PI) + 0.5, v: 0.5 - lat / Math.PI };
 }
 
-/** Render a rectilinear preview from an equirectangular panorama at a tour view. */
-export async function renderEquirectPreview(
-  panoramaUrl: string,
+function renderRectilinearPreview(
+  srcData: ImageData,
   view: ViewPosition,
-  width = PREVIEW_WIDTH,
-  height = Math.round(PREVIEW_WIDTH * PREVIEW_ASPECT),
-): Promise<string> {
-  const img = await loadImage(panoramaUrl);
-  const srcCanvas = document.createElement('canvas');
-  srcCanvas.width = img.naturalWidth;
-  srcCanvas.height = img.naturalHeight;
-  const srcCtx = srcCanvas.getContext('2d');
-  if (!srcCtx) throw new Error('Canvas not supported');
-  srcCtx.drawImage(img, 0, 0);
-  const srcData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-
+  width: number,
+  height: number,
+): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -141,16 +169,35 @@ export async function renderEquirectPreview(
   }
 
   ctx.putImageData(out, 0, 0);
-  const blob = await new Promise<Blob>((resolve, reject) => {
+  return canvas;
+}
+
+function encodeCanvasToObjectUrl(canvas: HTMLCanvasElement): Promise<string> {
+  return new Promise((resolve, reject) => {
     canvas.toBlob(
       (result) => {
-        if (result) resolve(result);
+        if (result) resolve(URL.createObjectURL(result));
         else reject(new Error('Preview encode failed'));
       },
       'image/jpeg',
-      0.88,
+      0.85,
     );
   });
+}
 
-  return URL.createObjectURL(blob);
+export interface RenderEquirectPreviewOptions {
+  width?: number;
+  height?: number;
+}
+
+/** Render a rectilinear preview from an equirectangular panorama at a tour view. */
+export async function renderEquirectPreview(
+  panoramaUrl: string,
+  view: ViewPosition,
+  width = CATALOG_PREVIEW_WIDTH,
+  height = Math.round(width * PREVIEW_ASPECT),
+): Promise<string> {
+  const srcData = await loadPanoramaImageData(panoramaUrl);
+  const canvas = renderRectilinearPreview(srcData, view, width, height);
+  return encodeCanvasToObjectUrl(canvas);
 }

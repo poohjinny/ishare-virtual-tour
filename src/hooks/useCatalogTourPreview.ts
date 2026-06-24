@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { getCatalogTourPreviewSource } from '../data/loadTour';
-import { renderEquirectPreview } from '../utils/equirectPreviewRender';
-
-const previewCache = new Map<string, string>();
+import { CATALOG_PREVIEW_WIDTH } from '../utils/equirectPreviewRender';
+import {
+  getCachedEquirectPreview,
+  requestEquirectPreview,
+} from '../utils/equirectPreviewQueue';
 
 export function useCatalogTourPreview(tourId: string) {
   const [src, setSrc] = useState<string | null>(null);
@@ -23,19 +25,31 @@ export function useCatalogTourPreview(tourId: string) {
       return;
     }
 
-    const cached = previewCache.get(tourId);
+    if (source.thumbnail) {
+      setSrc(source.thumbnail);
+      return;
+    }
+
+    const cacheKey = `catalog:${tourId}`;
+    const cached = getCachedEquirectPreview(cacheKey);
     if (cached) {
       setSrc(cached);
       return;
     }
 
-    void renderEquirectPreview(source.panorama, source.view)
+    void requestEquirectPreview({
+      cacheKey,
+      panoramaUrl: source.panorama,
+      view: source.view,
+      width: CATALOG_PREVIEW_WIDTH,
+    })
       .then((objectUrl) => {
         if (cancelled) {
-          URL.revokeObjectURL(objectUrl);
+          if (!getCachedEquirectPreview(cacheKey)) {
+            URL.revokeObjectURL(objectUrl);
+          }
           return;
         }
-        previewCache.set(tourId, objectUrl);
         createdUrl = objectUrl;
         setSrc(objectUrl);
       })
@@ -45,7 +59,7 @@ export function useCatalogTourPreview(tourId: string) {
 
     return () => {
       cancelled = true;
-      if (createdUrl && !previewCache.has(tourId)) {
+      if (createdUrl && !getCachedEquirectPreview(cacheKey)) {
         URL.revokeObjectURL(createdUrl);
       }
     };
