@@ -13,7 +13,10 @@ import { InfoPopup } from '../components/InfoPopup';
 import { LoadProgressBar } from '../components/LoadProgressBar';
 import { PanoramaLoadError } from '../components/PanoramaLoadError';
 import { TourNotFound } from '../components/TourNotFound';
-import { TourLoadSplash } from '../components/TourLoadSplash';
+import {
+  TourLoadSplash,
+  TOUR_LOAD_SPLASH_FADE_MS,
+} from '../components/TourLoadSplash';
 import { FloorPlanMinimap } from '../components/FloorPlanMinimap';
 import { TourNavFloat } from '../components/TourNavFloat';
 import {
@@ -59,7 +62,8 @@ import {
 } from '../viewer/PanoramaViewer';
 import { resetLandingTransitionState } from '../viewer/landingTransition';
 
-const SPLASH_FADE_MS = 350;
+/** Fallback if transitionend does not fire (e.g. reduced motion). */
+const SPLASH_UNMOUNT_FALLBACK_MS = TOUR_LOAD_SPLASH_FADE_MS + 150;
 /** Extra splash hold for loader UX testing — only when `?splashHold=1` */
 const DEV_SPLASH_HOLD_MS = 2000;
 
@@ -174,6 +178,10 @@ function TourExperience() {
   const productFullName = useMemo(() => getTourProductFullName(tour), [tour]);
   const knowledge = useMemo(() => loadKnowledge(route.tourId), [route.tourId]);
   const scenes = useMemo(() => getSceneList(tour), [tour]);
+  const devSceneOptions = useMemo(
+    () => scenes.map((scene) => ({ id: scene.id, title: scene.title })),
+    [scenes],
+  );
   const tourRootRef = useRef<HTMLDivElement>(null);
 
   useClientTheme(tour);
@@ -217,6 +225,8 @@ function TourExperience() {
   const [splashPhase, setSplashPhase] = useState<'active' | 'exit' | 'done'>(
     'active',
   );
+  const [splashRevealReady, setSplashRevealReady] = useState(false);
+  const [splashOverlayFade, setSplashOverlayFade] = useState(false);
   const hideBarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideSplashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInitiallyLoadedRef = useRef(false);
@@ -224,6 +234,8 @@ function TourExperience() {
   useEffect(() => {
     hasInitiallyLoadedRef.current = false;
     setSplashPhase('active');
+    setSplashRevealReady(false);
+    setSplashOverlayFade(false);
     resetLandingTransitionState();
     if (!searchParams.errorTest) {
       setPanoramaError(null);
@@ -256,12 +268,29 @@ function TourExperience() {
     setLoadProgress(progress);
   }, []);
 
+  const handleLandingStart = useCallback(() => {
+    setSplashOverlayFade(true);
+  }, []);
+
+  const handleSplashExitComplete = useCallback(() => {
+    if (hideSplashTimerRef.current) {
+      clearTimeout(hideSplashTimerRef.current);
+      hideSplashTimerRef.current = null;
+    }
+    setSplashPhase('done');
+  }, []);
+
   const handleLoadComplete = useCallback(() => {
     const finishSplash = () => {
       setSplashPhase('exit');
+      setSplashRevealReady(true);
       hideSplashTimerRef.current = setTimeout(() => {
-        setSplashPhase('done');
-      }, SPLASH_FADE_MS);
+        setSplashPhase((phase) => (phase === 'exit' ? 'done' : phase));
+      }, SPLASH_UNMOUNT_FALLBACK_MS);
+
+      if (searchParams.skipLanding) {
+        requestAnimationFrame(() => setSplashOverlayFade(true));
+      }
     };
 
     if (hasInitiallyLoadedRef.current) {
@@ -286,7 +315,7 @@ function TourExperience() {
     } else {
       finishSplash();
     }
-  }, [searchParams.splashHold]);
+  }, [searchParams.skipLanding, searchParams.splashHold]);
 
   const {
     currentSceneId,
@@ -502,7 +531,7 @@ function TourExperience() {
           controlsVisible={controlsVisible}
           skipLanding={searchParams.skipLanding}
           landingTargetView={landingTargetView}
-          splashDone={splashPhase === 'done'}
+          splashDone={splashRevealReady}
           immersiveBackgroundController={immersiveBackgroundController}
           activeNamingHotspotId={activeNamingHotspotId}
           disabled={isTransitioning}
@@ -520,6 +549,7 @@ function TourExperience() {
           onLoadStart={handleLoadStart}
           onLoadProgress={handleLoadProgress}
           onLoadComplete={handleLoadComplete}
+          onLandingStart={handleLandingStart}
           onPanoramaError={handlePanoramaError}
           onPanoramaRecovered={handlePanoramaRecovered}
         />
@@ -579,6 +609,8 @@ function TourExperience() {
         {splashPhase !== 'done' && (
           <TourLoadSplash
             exiting={splashPhase === 'exit'}
+            fadeOverlay={splashOverlayFade}
+            onExitComplete={handleSplashExitComplete}
             logo={tour.branding?.logo}
             logoAlt={tour.branding?.logoAlt}
             productName={productFullName}
@@ -601,6 +633,7 @@ function TourExperience() {
               clientId: tour.clientId ?? tour.id,
               tourId: tour.id,
             }}
+            sceneOptions={devSceneOptions}
             view={devViewCoords}
             clickCoords={devClickCoords}
             aboveMinimap={Boolean(tour.floorPlan)}
