@@ -28,6 +28,7 @@ assets/
 | `gphospitalfoundation`  | `ken-sargent-house` | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/ken-sargent-house/` |
 | `cancerresearchsociety` | `cancer-research`   | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/cancer-research/`  |
 | `holodomor`             | `holodomor-museum`  | https://holodomor.ca/             | `assets/holodomor/holodomor-museum/`             |
+| `qchfoundation`         | `qch-hospital`      | https://qchfoundation.ca/         | `assets/qchfoundation/qch-hospital/`             |
 
 ## Client id convention
 
@@ -40,6 +41,7 @@ assets/
 | `https://gphospitalfoundation.ca/`  | `gphospitalfoundation`  |
 | `https://cancerresearchsociety.ca/` | `cancerresearchsociety` |
 | `https://holodomor.ca/`             | `holodomor`             |
+| `https://qchfoundation.ca/`         | `qchfoundation`         |
 
 Use `clientIdFromUrl()` in `src/utils/clientId.ts` when adding new clients.
 

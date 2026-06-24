@@ -23,7 +23,7 @@ import type {
   ViewPosition,
   ViewerOrientation,
 } from '../types/tour';
-import { buildNavPreview } from '../utils/navPreview';
+import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
 import {
   buildAbsoluteShareUrl,
   buildShareMessage,
@@ -776,7 +776,7 @@ export const PanoramaViewer = forwardRef<
           event.stopPropagation();
           const navTarget = getNavPanelNavigateTarget(markers);
           closeAnchoredNavPreviewPanel(markers, false);
-          if (navTarget) {
+          if (navTarget?.canNavigate) {
             onNavigateToSceneRef.current?.(
               navTarget.sceneId,
               navTarget.targetView,
@@ -947,17 +947,25 @@ export const PanoramaViewer = forwardRef<
       setActiveInfoHotspot(markers, null);
 
       if (hotspot.type === 'nav' && hotspot.targetScene) {
+        const currentSceneId =
+          virtualTour.getCurrentNode()?.id ?? tourRef.current.firstScene;
         const targetView =
           hotspot.targetView ??
           tourRef.current.scenes[hotspot.targetScene]?.defaultView;
 
         if (hotspot.instant) {
           closeAnchoredNavPreviewPanel(markers, false);
-          onNavigateToSceneRef.current?.(hotspot.targetScene, targetView);
+          if (navPreviewCanNavigate(hotspot, currentSceneId)) {
+            onNavigateToSceneRef.current?.(hotspot.targetScene, targetView);
+          }
           return;
         }
 
-        const preview = buildNavPreview(hotspot, tourRef.current);
+        const preview = buildNavPreview(
+          hotspot,
+          tourRef.current,
+          currentSceneId,
+        );
         if (preview) {
           onDismissModalPopupsRef.current?.();
           setActiveInfoHotspot(markers, null);
@@ -972,7 +980,9 @@ export const PanoramaViewer = forwardRef<
         }
 
         closeAnchoredNavPreviewPanel(markers, false);
-        onNavigateToSceneRef.current?.(hotspot.targetScene, targetView);
+        if (navPreviewCanNavigate(hotspot, currentSceneId)) {
+          onNavigateToSceneRef.current?.(hotspot.targetScene, targetView);
+        }
       }
     };
 

@@ -1,0 +1,130 @@
+{
+  "id": "qch-hospital",
+  "clientId": "qchfoundation",
+  "category": "Healthcare",
+  "url": "https://qchfoundation.ca",
+  "title": "Queensway Carleton Hospital",
+  "organization": {
+    "name": "Queensway Carleton Hospital Foundation",
+    "website": "https://qchfoundation.ca",
+    "email": "info@qchfoundation.ca",
+    "phones": [{ "number": "613-721-4731", "label": "Telephone" }],
+    "address": "3045 Baseline Road, Ottawa, ON K2H 8P4"
+  },
+  "branding": {
+    "logo": "/assets/qchfoundation/qch-hospital/brand/logo.png",
+    "logoAlt": "Queensway Carleton Hospital Foundation",
+    "primaryColor": "#007078",
+    "favicon": "/assets/qchfoundation/qch-hospital/favicon.png"
+  },
+  "firstScene": "overview",
+  "defaultTransition": { "speed": "500ms", "effect": "fade" },
+  "scenes": {
+    "overview": {
+      "id": "overview",
+      "title": "Overview",
+      "description": "Take in an aerial view of Queensway Carleton Hospital and the surrounding community. QCH provides care to half of Ottawa's population — and community support through the Foundation helps purchase critical medical equipment and fund hospital priorities.",
+      "panorama": "/assets/qchfoundation/qch-hospital/panoramas/overview.webp",
+      "defaultView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 },
+      "hotspots": [
+        {
+          "id": "nav-to-ambulance-garage",
+          "type": "nav",
+          "label": "Ambulance Garage",
+          "position": { "yaw": 157.5, "pitch": -31.2 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-satellite-imaging",
+          "type": "nav",
+          "label": "Satellite Imaging",
+          "position": { "yaw": 132.5, "pitch": -61.1 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-ambulatory-care-shelled-in-expansion-area",
+          "type": "nav",
+          "label": "Ambulatory Care Shelled-in Expansion Area",
+          "position": { "yaw": 332.6, "pitch": -57.3 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone-1-walk-in-entrance",
+          "type": "nav",
+          "label": "Zone 1: Walk-in Entrance",
+          "position": { "yaw": 157, "pitch": -46.6 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone-2-trauma-resuscitation",
+          "type": "nav",
+          "label": "Zone 2: Trauma / Resuscitation",
+          "position": { "yaw": 135.8, "pitch": -33.5 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone-3-acute-care-pod-d",
+          "type": "nav",
+          "label": "Zone 3: Acute Care, Pod D",
+          "position": { "yaw": 86.2, "pitch": -54.5 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone-4-ambulatory-care",
+          "type": "nav",
+          "label": "Zone 4: Ambulatory Care",
+          "position": { "yaw": 9.1, "pitch": -47.1 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone-5-mhesu",
+          "type": "nav",
+          "label": "Zone 5: MHESU",
+          "position": { "yaw": 81.4, "pitch": -36.9 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone6-1-admin-education",
+          "type": "nav",
+          "label": "Zone 6-1: Admin & Education",
+          "position": { "yaw": 43.8, "pitch": -38.2 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone-6-2-administration-educational-areas",
+          "type": "nav",
+          "label": "Zone 6-2: Administration & Educational Areas",
+          "position": { "yaw": 109.2, "pitch": -36.5 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone1-walk-in-entrance",
+          "type": "nav",
+          "label": "Zone 1: Walk-in Entrance",
+          "position": { "yaw": 171.4, "pitch": -63.6 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        },
+        {
+          "id": "nav-to-zone-3-acute-care-pod-a",
+          "type": "nav",
+          "label": "Zone 3: Acute Care, Pod A",
+          "position": { "yaw": 108.9, "pitch": -51.2 },
+          "targetScene": "overview",
+          "targetView": { "yaw": 75.9, "pitch": -77.5, "zoom": 1 }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/qch-hospital/thumbnails/overview.webp"
+    }
+  }
+}

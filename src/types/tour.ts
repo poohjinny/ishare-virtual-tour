@@ -105,6 +105,8 @@ export interface NavPreviewContent {
   targetView?: ViewPosition;
   /** Hotspot label — used for CTA copy when present */
   ctaLabel?: string;
+  /** False when the destination scene is not ready (e.g. same scene as current). */
+  canNavigate: boolean;
 }
 
 export interface SceneMapPosition {

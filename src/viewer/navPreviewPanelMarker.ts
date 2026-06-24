@@ -142,7 +142,12 @@ export function getOpenNavPreviewHostId(markers: MarkersPlugin): string | null {
 
 export function getNavPanelNavigateTarget(
   markers: MarkersPlugin,
-): { sceneId: string; targetView?: ViewPosition; tourId?: string } | null {
+): {
+  sceneId: string;
+  targetView?: ViewPosition;
+  tourId?: string;
+  canNavigate: boolean;
+} | null {
   for (const marker of markers.getMarkers()) {
     if (!marker.data?.navPanel) continue;
 
@@ -150,6 +155,7 @@ export function getNavPanelNavigateTarget(
       sceneId: marker.data.targetSceneId as string,
       targetView: marker.data.targetView as ViewPosition | undefined,
       tourId: marker.data.tourId as string | undefined,
+      canNavigate: marker.data.canNavigate !== false,
     };
   }
   return null;
@@ -184,6 +190,7 @@ export function openAnchoredNavPreviewPanel(
       targetSceneId: preview.targetSceneId,
       targetView: preview.targetView,
       tourId,
+      canNavigate: preview.canNavigate,
     },
   });
 

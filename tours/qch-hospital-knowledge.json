@@ -1,0 +1,38 @@
+{
+  "id": "qch-hospital",
+  "url": "https://qchfoundation.ca",
+  "global": {
+    "facilityName": "Queensway Carleton Hospital",
+    "summary": "Queensway Carleton Hospital Foundation raises community support for Queensway Carleton Hospital — funding medical equipment, building improvements, and priority campaigns that help deliver world-class care in west Ottawa."
+  },
+  "scenes": {
+    "overview": {
+      "title": "Overview",
+      "description": "Take in an aerial view of Queensway Carleton Hospital and the surrounding community. QCH provides care to half of Ottawa's population — and community support through the Foundation helps purchase critical medical equipment and fund hospital priorities.",
+      "facts": [
+        "QCH opened in 1976 and today serves roughly half of Ottawa's population.",
+        "The Emergency Department is one of the busiest in Ontario, with more than 80,000 visits each year.",
+        "QCH Foundation is accredited under Imagine Canada's National Standards Program."
+      ],
+      "faqs": [
+        {
+          "q": "What does QCH Foundation support?",
+          "a": "Donations fund medical equipment, building improvements, and priority campaigns such as surgical suite upgrades, MRI replacement, and new patient care spaces at Queensway Carleton Hospital."
+        },
+        {
+          "q": "How can I contact the Foundation?",
+          "a": "Call 613-721-4731, email info@qchfoundation.ca, or visit qchfoundation.ca. The office is at 3045 Baseline Road, Ottawa, ON K2H 8P4."
+        },
+        {
+          "q": "How can I donate?",
+          "a": "Visit qchfoundation.ca to give online, become a monthly donor, explore Giftabulator®, or learn about gifts in your will and other ways to give."
+        }
+      ],
+      "suggestedQuestions": [
+        "What does QCH Foundation support?",
+        "How can I contact the Foundation?",
+        "How can I donate?"
+      ]
+    }
+  }
+}

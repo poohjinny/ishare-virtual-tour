@@ -13,17 +13,21 @@ import cancerResearchTour from '../../tours/cancer-research.json';
 import cancerResearchKnowledge from '../../tours/cancer-research-knowledge.json';
 import holodomorMuseumTour from '../../tours/holodomor-museum.json';
 import holodomorMuseumKnowledge from '../../tours/holodomor-museum-knowledge.json';
+import qchHospitalTour from '../../tours/qch-hospital.json';
+import qchHospitalKnowledge from '../../tours/qch-hospital-knowledge.json';
 
 const TOURS: Record<string, Tour> = {
   'ken-sargent-house': kenSargentHouseTour as Tour,
   'cancer-research': cancerResearchTour as Tour,
   'holodomor-museum': holodomorMuseumTour as Tour,
+  'qch-hospital': qchHospitalTour as Tour,
 };
 
 const KNOWLEDGE: Record<string, TourKnowledge> = {
   'ken-sargent-house': kenSargentHouseKnowledge as TourKnowledge,
   'cancer-research': cancerResearchKnowledge as TourKnowledge,
   'holodomor-museum': holodomorMuseumKnowledge as TourKnowledge,
+  'qch-hospital': qchHospitalKnowledge as TourKnowledge,
 };
 
 /** Static bundle revision — bump when shipped tour JSON changes materially. */

@@ -996,7 +996,9 @@ export function buildAnchoredNavPreviewHtml(
 
   const ctaLabel = navPreviewCtaLabel(preview);
   const visitAriaLabel = navPreviewVisitAriaLabel(preview);
-  const footerHtml = `<footer class="${GLASS_PANEL.footer}">
+  const footerHtml =
+    preview.canNavigate ?
+      `<footer class="${GLASS_PANEL.footer}">
     <div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
       <button
         type="button"
@@ -1005,7 +1007,8 @@ export function buildAnchoredNavPreviewHtml(
         aria-label="${escapeHtml(visitAriaLabel)}"
       >${buildGlassPanelCtaTextHtml(ctaLabel)}${glassPanelCtaArrowIconHtml()}</button>
     </div>
-  </footer>`;
+  </footer>`
+    : '';
 
   const bodyHtml = `<div class="${GLASS_PANEL.body} nav-preview-panel__body ishare-scrollbar">
     ${closeInBodyHtml}

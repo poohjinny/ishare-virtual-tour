@@ -47,6 +47,19 @@
           "featured": true
         }
       ]
+    },
+    {
+      "id": "qchfoundation",
+      "name": "Queensway Carleton Hospital Foundation",
+      "tours": [
+        {
+          "id": "qch-hospital",
+          "category": "Healthcare",
+          "name": "Queensway Carleton Hospital",
+          "visibility": "public",
+          "featured": true
+        }
+      ]
     }
   ]
 }

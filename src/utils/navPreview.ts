@@ -54,9 +54,18 @@ export function buildNavPreviewNamingItems(
   return items;
 }
 
+export function navPreviewCanNavigate(
+  hotspot: Hotspot,
+  currentSceneId: string,
+): boolean {
+  if (hotspot.type !== 'nav' || !hotspot.targetScene) return false;
+  return hotspot.targetScene !== currentSceneId;
+}
+
 export function buildNavPreview(
   hotspot: Hotspot,
   tour: Tour,
+  currentSceneId: string,
 ): NavPreviewContent | null {
   if (hotspot.type !== 'nav' || !hotspot.targetScene) return null;
 
@@ -64,16 +73,19 @@ export function buildNavPreview(
   if (!scene) return null;
 
   const image = hotspot.preview?.image ?? scene.panorama ?? undefined;
+  const canNavigate = navPreviewCanNavigate(hotspot, currentSceneId);
+  const hotspotLabel = hotspot.label?.trim();
 
   return {
     targetSceneId: hotspot.targetScene,
-    title: scene.title,
+    title: canNavigate ? scene.title : hotspotLabel || scene.title,
     panorama: scene.panorama,
     image,
     description: scene.description?.trim() || undefined,
     namingItems: buildNavPreviewNamingItems(scene),
     targetView: hotspot.targetView ?? scene.defaultView,
-    ctaLabel: hotspot.label?.trim() || undefined,
+    ctaLabel: hotspotLabel || undefined,
+    canNavigate,
   };
 }
 
@@ -82,9 +94,11 @@ export function navPreviewVisitDestination(preview: NavPreviewContent): string {
 }
 
 export function navPreviewCtaLabel(preview: NavPreviewContent): string {
+  if (!preview.canNavigate) return '';
   return `Visit ${navPreviewVisitDestination(preview)}`;
 }
 
 export function navPreviewVisitAriaLabel(preview: NavPreviewContent): string {
+  if (!preview.canNavigate) return '';
   return navPreviewCtaLabel(preview);
 }
