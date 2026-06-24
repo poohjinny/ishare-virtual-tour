@@ -8,7 +8,7 @@ import {
 import { AiAssistant } from '../components/ai/AiAssistant';
 import { ClientIntroPicker } from '../components/ClientIntroPicker';
 import { DEV_NOT_FOUND_SAMPLE_TOUR_ID } from '../constants/devUrlFlags';
-import { DevViewPanel } from '../components/DevViewPanel';
+import { DevTools } from '../components/DevTools';
 import { InfoPopup } from '../components/InfoPopup';
 import { LoadProgressBar } from '../components/LoadProgressBar';
 import { PanoramaLoadError } from '../components/PanoramaLoadError';
@@ -19,6 +19,7 @@ import {
 } from '../components/TourLoadSplash';
 import { FloorPlanMinimap } from '../components/FloorPlanMinimap';
 import { TourNavFloat } from '../components/TourNavFloat';
+import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
 import {
   getSceneList,
   getTourWebsite,
@@ -37,12 +38,22 @@ import { useClientTheme } from '../hooks/useClientTheme';
 import { useClientFavicon } from '../hooks/useClientFavicon';
 import { useClientFont } from '../hooks/useClientFont';
 import { useImmersiveBackground } from '../hooks/useImmersiveBackground';
+import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
 import type {
   PopupContent,
+  Tour,
+  TourKnowledge,
   ViewPosition,
   ViewerOrientation,
 } from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
+import {
+  devFetchKnowledge,
+  devFetchTour,
+  type DevTourMutateOptions,
+} from '../utils/devTourApi';
+import { setDevTourCache } from '../services/devTourCache';
+import { normalizeTourAssets } from '../services/normalizeTourAssets';
 import {
   resolveSceneId,
   resolveTourRoute,
@@ -162,7 +173,11 @@ export function TourPage() {
     return <ClientIntroPicker searchParams={urlSearchParams} />;
   }
 
-  if (route.routeError === 'unknown_tour' && route.requestedTourId) {
+  if (
+    route.routeError === 'unknown_tour' &&
+    route.requestedTourId &&
+    !searchParams.dev
+  ) {
     return (
       <TourNotFound
         requestedTourId={route.requestedTourId}
@@ -188,31 +203,102 @@ function TourExperience() {
     [sceneParam, tourId, tourOrScene],
   );
 
-  const tour = useMemo(() => loadTour(route.tourId), [route.tourId]);
-  const productFullName = useMemo(() => getTourProductFullName(tour), [tour]);
-  const knowledge = useMemo(() => loadKnowledge(route.tourId), [route.tourId]);
-  const scenes = useMemo(() => getSceneList(tour), [tour]);
+  const staticTour = useMemo(() => {
+    try {
+      return loadTour(route.tourId);
+    } catch {
+      return null;
+    }
+  }, [route.tourId]);
+  const [devTourSnapshot, setDevTourSnapshot] = useState<Tour | null>(null);
+  const [devTourBootstrapStatus, setDevTourBootstrapStatus] = useState<
+    'idle' | 'loading' | 'error'
+  >('idle');
+  const staticKnowledge = useMemo(() => {
+    try {
+      return loadKnowledge(route.tourId);
+    } catch {
+      return null;
+    }
+  }, [route.tourId]);
+  const [devKnowledgeSnapshot, setDevKnowledgeSnapshot] =
+    useState<TourKnowledge | null>(null);
+
+  useEffect(() => {
+    setDevTourSnapshot(null);
+    setDevKnowledgeSnapshot(null);
+    setDevTourBootstrapStatus('idle');
+  }, [route.tourId]);
+
+  useEffect(() => {
+    if (staticTour || devTourSnapshot || !searchParams.dev) return;
+
+    setDevTourBootstrapStatus('loading');
+    void devFetchTour(route.tourId)
+      .then((freshTour) => {
+        const normalized = normalizeTourAssets(freshTour);
+        setDevTourSnapshot(normalized);
+        setDevTourCache(normalized);
+        setDevTourBootstrapStatus('idle');
+      })
+      .catch(() => {
+        setDevTourBootstrapStatus('error');
+      });
+  }, [devTourSnapshot, route.tourId, searchParams.dev, staticTour]);
+
+  useEffect(() => {
+    if (staticKnowledge || devKnowledgeSnapshot || !searchParams.dev) return;
+    if (!devTourSnapshot && !staticTour) return;
+
+    void devFetchKnowledge(route.tourId)
+      .then(({ knowledge }) => {
+        setDevKnowledgeSnapshot(knowledge);
+      })
+      .catch(() => {
+        /* knowledge may not exist yet */
+      });
+  }, [
+    devKnowledgeSnapshot,
+    devTourSnapshot,
+    route.tourId,
+    searchParams.dev,
+    staticKnowledge,
+    staticTour,
+  ]);
+
+  const tour = devTourSnapshot ?? staticTour;
+  const knowledge = devKnowledgeSnapshot ?? staticKnowledge;
+  const bootstrapTour = tour ?? loadTour(DEFAULT_TOUR_ID);
+  const bootstrapKnowledge = knowledge ?? loadKnowledge(DEFAULT_TOUR_ID);
+  const productFullName = useMemo(
+    () => (tour ? getTourProductFullName(tour) : ''),
+    [tour],
+  );
+  const scenes = useMemo(() => (tour ? getSceneList(tour) : []), [tour]);
   const devSceneOptions = useMemo(
     () => scenes.map((scene) => ({ id: scene.id, title: scene.title })),
     [scenes],
   );
   const tourRootRef = useRef<HTMLDivElement>(null);
 
-  useClientTheme(tour);
-  useClientFavicon(tour);
-  useClientFont(tour, tourRootRef);
-  const immersiveBackgroundController = useImmersiveBackground(tour);
+  useClientTheme(bootstrapTour);
+  useClientFavicon(bootstrapTour);
+  useClientFont(bootstrapTour, tourRootRef);
+  const immersiveBackgroundController = useImmersiveBackground(bootstrapTour);
 
   useEffect(() => {
     document.title = productFullName;
   }, [productFullName]);
 
-  const initialScene = useMemo(
-    () => resolveSceneId(route.tourId, route.sceneId),
-    [route.sceneId, route.tourId],
-  );
+  const initialScene = useMemo(() => {
+    if (tour) {
+      return resolveSceneId(route.tourId, route.sceneId);
+    }
+    return route.sceneId ?? bootstrapTour.firstScene;
+  }, [bootstrapTour.firstScene, route.sceneId, route.tourId, tour]);
 
   const landingTargetView = useMemo(() => {
+    if (!tour) return undefined;
     const noSearchValue = urlSearchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
     if (!noSearchValue) return undefined;
     const resolved = resolveNamingOpportunityFromSearch(tour, noSearchValue);
@@ -258,9 +344,15 @@ function TourExperience() {
       clearTimeout(hideSplashTimerRef.current);
       hideSplashTimerRef.current = null;
     }
-  }, [tour.id, searchParams.panoramaErrorTest]);
+  }, [route.tourId, searchParams.panoramaErrorTest, searchParams.skipLanding]);
 
   const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
+  const { hintVisible, onInitialTourReveal, onFirstPanoramaInteract } =
+    useTourFirstVisitHint({
+      embed: searchParams.embed,
+      dev: searchParams.dev,
+      firstVisitHint: searchParams.firstVisitHint,
+    });
   const [viewerOrientation, setViewerOrientation] =
     useState<ViewerOrientation | null>(null);
   const [panoramaError, setPanoramaError] =
@@ -353,7 +445,7 @@ function TourExperience() {
   const { showBack, showForward, goBack, goForward } = useHistoryNavControls();
 
   const { syncSceneToUrl } = useTourRouteSync({
-    tour,
+    tour: bootstrapTour,
     currentSceneId,
     isTransitioning,
     viewerRef,
@@ -367,7 +459,7 @@ function TourExperience() {
     syncNamingOpportunityToUrl,
     clearNamingOpportunityFromUrl,
   } = useNamingOpportunityUrlSync({
-    tour,
+    tour: bootstrapTour,
     currentSceneId,
     isTransitioning,
     splashDone: splashPhase === 'done',
@@ -376,6 +468,37 @@ function TourExperience() {
     setActiveNamingHotspotId,
   });
 
+  const handleDevTourMutated = useCallback(
+    async (options?: DevTourMutateOptions) => {
+      const fresh = normalizeTourAssets(await devFetchTour(route.tourId));
+      setDevTourSnapshot(fresh);
+      setDevTourCache(fresh);
+
+      const targetSceneId =
+        options?.navigateToScene ??
+        (fresh.scenes[currentSceneId] ? currentSceneId : fresh.firstScene);
+
+      if (targetSceneId !== currentSceneId) {
+        syncSceneToUrl(targetSceneId, { clearNamingOpportunity: true });
+        prepareSceneNavigate(targetSceneId);
+      }
+
+      await viewerRef.current?.applyTourUpdate(fresh);
+
+      if (targetSceneId !== currentSceneId) {
+        await viewerRef.current?.navigateToScene(targetSceneId);
+      }
+
+      if (options?.refreshKnowledge) {
+        const { knowledge: freshKnowledge } = await devFetchKnowledge(
+          route.tourId,
+        );
+        setDevKnowledgeSnapshot(freshKnowledge);
+      }
+    },
+    [currentSceneId, prepareSceneNavigate, route.tourId, syncSceneToUrl],
+  );
+
   const handleSceneChange = useCallback(
     (sceneId: string) => {
       onSceneChange(sceneId);
@@ -383,17 +506,17 @@ function TourExperience() {
     [onSceneChange],
   );
 
-  const assistant = useTourAssistant(knowledge, currentSceneId);
+  const assistant = useTourAssistant(bootstrapKnowledge, currentSceneId);
 
   const handleSelectNamingOpportunity = useCallback(
     (sceneId: string, hotspotId: string) => {
-      const scene = tour.scenes[sceneId];
+      const scene = bootstrapTour.scenes[sceneId];
       const hotspot = scene?.hotspots.find((item) => item.id === hotspotId);
       if (!hotspot?.popup?.namingOpportunity) return;
 
       openNamingOpportunity(sceneId, hotspotId);
     },
-    [openNamingOpportunity, tour.scenes],
+    [bootstrapTour.scenes, openNamingOpportunity],
   );
 
   const handleNavigate = useCallback(
@@ -408,7 +531,7 @@ function TourExperience() {
         viewerRef.current?.clearActiveInfoHotspot();
       }
 
-      const scene = tour.scenes[sceneId];
+      const scene = bootstrapTour.scenes[sceneId];
       if (!scene || sceneId === currentSceneId) return;
 
       prepareSceneNavigate(sceneId);
@@ -422,7 +545,12 @@ function TourExperience() {
         targetView ?? scene.defaultView,
       );
     },
-    [currentSceneId, prepareSceneNavigate, syncSceneToUrl, tour.scenes],
+    [
+      bootstrapTour.scenes,
+      currentSceneId,
+      prepareSceneNavigate,
+      syncSceneToUrl,
+    ],
   );
 
   const handleDismissModalPopups = useCallback(() => {
@@ -439,7 +567,7 @@ function TourExperience() {
         pendingNamingSelectionRef.current = null;
         setActiveNamingHotspotId(hotspotId);
 
-        const scene = tour.scenes[currentSceneId];
+        const scene = bootstrapTour.scenes[currentSceneId];
         const hotspot = scene?.hotspots.find((item) => item.id === hotspotId);
         if (hotspot?.popup?.namingOpportunity) {
           syncNamingOpportunityToUrl(hotspotId, currentSceneId);
@@ -457,10 +585,10 @@ function TourExperience() {
       clearNamingOpportunityFromUrl();
     },
     [
+      bootstrapTour.scenes,
       clearNamingOpportunityFromUrl,
       currentSceneId,
       syncNamingOpportunityToUrl,
-      tour.scenes,
     ],
   );
 
@@ -475,12 +603,17 @@ function TourExperience() {
       prepareSceneNavigate(sceneId);
       syncSceneToUrl(sceneId, { clearNamingOpportunity: true });
 
-      const scene = tour.scenes[sceneId];
+      const scene = bootstrapTour.scenes[sceneId];
       if (!scene) return;
 
       await viewerRef.current?.navigateToScene(sceneId, scene.defaultView);
     },
-    [currentSceneId, prepareSceneNavigate, syncSceneToUrl, tour.scenes],
+    [
+      bootstrapTour.scenes,
+      currentSceneId,
+      prepareSceneNavigate,
+      syncSceneToUrl,
+    ],
   );
 
   const handleTransitionStart = useCallback(() => setIsTransitioning(true), []);
@@ -517,20 +650,38 @@ function TourExperience() {
   }, [currentSceneId, panoramaError?.sceneId, searchParams.panoramaErrorTest]);
 
   const handlePanoramaGoHome = useCallback(async () => {
-    const scene = tour.scenes[tour.firstScene];
+    const scene = bootstrapTour.scenes[bootstrapTour.firstScene];
     if (!scene) return;
     setPanoramaError(null);
-    prepareSceneNavigate(tour.firstScene);
-    syncSceneToUrl(tour.firstScene, { clearNamingOpportunity: true });
+    prepareSceneNavigate(bootstrapTour.firstScene);
+    syncSceneToUrl(bootstrapTour.firstScene, { clearNamingOpportunity: true });
     await viewerRef.current?.navigateToScene(
-      tour.firstScene,
+      bootstrapTour.firstScene,
       scene.defaultView,
     );
-  }, [prepareSceneNavigate, syncSceneToUrl, tour.firstScene, tour.scenes]);
+  }, [
+    bootstrapTour.firstScene,
+    bootstrapTour.scenes,
+    prepareSceneNavigate,
+    syncSceneToUrl,
+  ]);
 
   const handleViewUpdate = useCallback((view: ViewerOrientation) => {
     setViewerOrientation(view);
   }, []);
+
+  if (!tour) {
+    if (devTourBootstrapStatus === 'loading') {
+      return null;
+    }
+
+    return (
+      <TourNotFound
+        requestedTourId={route.requestedTourId ?? route.tourId}
+        searchParams={urlSearchParams}
+      />
+    );
+  }
 
   return (
     <div ref={tourRootRef} className='app tour-page'>
@@ -563,6 +714,8 @@ function TourExperience() {
           onLoadProgress={handleLoadProgress}
           onLoadComplete={handleLoadComplete}
           onLandingStart={handleLandingStart}
+          onInitialTourReveal={onInitialTourReveal}
+          onFirstPanoramaInteract={onFirstPanoramaInteract}
           onPanoramaError={handlePanoramaError}
           onPanoramaRecovered={handlePanoramaRecovered}
         />
@@ -624,6 +777,8 @@ function TourExperience() {
 
         <LoadProgressBar progress={loadProgress} visible={loadBarVisible} />
 
+        <TourFirstVisitHint visible={hintVisible} />
+
         <AiAssistant
           tour={tour}
           assistant={assistant}
@@ -631,7 +786,9 @@ function TourExperience() {
         />
 
         {searchParams.dev && (
-          <DevViewPanel
+          <DevTools
+            tour={tour}
+            onTourMutated={handleDevTourMutated}
             scene={{
               id: currentSceneId,
               title: tour.scenes[currentSceneId]?.title,
@@ -642,7 +799,6 @@ function TourExperience() {
             sceneOptions={devSceneOptions}
             view={devViewCoords}
             clickCoords={devClickCoords}
-            aboveMinimap={Boolean(tour.floorPlan)}
           />
         )}
       </div>

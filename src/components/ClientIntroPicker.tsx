@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/cn';
+import { subscribeDevCatalogSnapshot } from '../data/devCatalogSnapshot';
 import {
   CLIENT_INTRO_HERO_VIDEO,
   PLATFORM_PRODUCT_LOGO,
@@ -10,7 +11,12 @@ import {
   CLIENT_INTRO_TITLE,
 } from '../constants/clientIntro';
 import type { TourCategory } from '../constants/tourCategories';
-import { listCatalogTours, listTourCategories } from '../data/tourCatalog';
+import {
+  isFeaturedGalleryMode,
+  listCatalogTours,
+  listTourCategories,
+  sortCatalogToursForGallery,
+} from '../data/tourCatalog';
 import { loadTour } from '../data/loadTour';
 import { buildTourLocation } from '../utils/tourPaths';
 import { SegmentedTabs } from './ui/SegmentedTabs';
@@ -55,8 +61,16 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
-  const allTours = useMemo(() => listCatalogTours(), []);
-  const filterCategories = useMemo(() => listTourCategories(), []);
+  const [catalogTick, setCatalogTick] = useState(0);
+
+  useEffect(
+    () => subscribeDevCatalogSnapshot(() => setCatalogTick((tick) => tick + 1)),
+    [],
+  );
+
+  const allTours = useMemo(() => listCatalogTours(), [catalogTick]);
+  const filterCategories = useMemo(() => listTourCategories(), [catalogTick]);
+  const featuredOnly = isFeaturedGalleryMode(searchParams);
 
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
 
@@ -86,9 +100,14 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
   );
 
   const activeTours = useMemo(() => {
-    if (categoryFilter === 'all') return allTours;
-    return allTours.filter((entry) => entry.category === categoryFilter);
-  }, [allTours, categoryFilter]);
+    const scoped =
+      categoryFilter === 'all' ? allTours : (
+        allTours.filter((entry) => entry.category === categoryFilter)
+      );
+    const filtered =
+      featuredOnly ? scoped.filter((entry) => entry.featured) : scoped;
+    return sortCatalogToursForGallery(filtered);
+  }, [allTours, categoryFilter, featuredOnly]);
 
   useEffect(() => {
     document.title = CLIENT_INTRO_TITLE;
@@ -169,7 +188,9 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
             {CLIENT_INTRO_TITLE}
           </h2>
           <p className='m-0 font-body text-md leading-[1.55] text-muted'>
-            {CLIENT_INTRO_LEAD}
+            {featuredOnly ?
+              'Featured virtual tours from our partner organizations.'
+            : CLIENT_INTRO_LEAD}
           </p>
         </div>
 
@@ -215,7 +236,11 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
                   ))}
                 </ul>
               : <p className='m-0 pt-3 pb-1 text-center text-md leading-[1.55] text-muted'>
-                  {categoryFilter === 'all' ?
+                  {featuredOnly ?
+                    categoryFilter === 'all' ?
+                      'No featured tours yet.'
+                    : 'No featured tours in this category yet.'
+                  : categoryFilter === 'all' ?
                     'No tours available yet.'
                   : 'No tours in this category yet.'}
                 </p>
