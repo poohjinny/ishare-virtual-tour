@@ -76,7 +76,8 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 ### Sprint B — Orientation & content sync
 
-- [ ] **Hotspot coordinate fine-tuning** — `?dev=1` on real panoramas
+- [x] **Hotspot coordinate fine-tuning** — `?dev=1` dev panel: click-to-place,
+      move, nav/info/NO create & edit, `targetView` / `instant` / `preview.image`
 - [ ] **Floor plan coverage** — `map` coordinates for all Ken Sargent scenes on
       `floorplan.svg` (kitchen, comfort-corner, base-level entrance)
 - [ ] **Holodomor / Cancer Research** — scene and NO content pass
@@ -86,9 +87,98 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 - [x] **Scene transition feedback** — load progress bar on scene navigation (dim
       overlay not needed; sufficient on slow panoramas)
 
+### Sprint B½ — Dev panel authoring (`?dev=1`)
+
+Local JSON authoring in the Vite dev server — **precursor to Phase 2 Admin
+CMS**. The panel writes `tours/*.json`, `tours/*-knowledge.json`,
+`tours/catalog.json`, and `assets/{clientId}/{tourId}/` without redeploy.
+Admin will reuse the same schemas and API shapes; viewer stays iframe-only.
+
+**Evolution:** `DevViewPanel` → `apps/admin` (Next.js) + authenticated dev API.
+Do not embed PSV in admin — preview via iframe to this viewer.
+
+#### Delivered — dev panel v1
+
+**Tour & catalog**
+
+- [x] Create tour (new client or existing) — first scene, logo/favicon, branding
+- [x] Update tour — title, category, website, primary color, logo/favicon alt
+- [x] Catalog visibility (`public` / `unlisted` / `internal`) and featured flag
+- [x] Delete tour — JSON, knowledge, catalog entry, asset folder (danger zone)
+- [x] Live catalog snapshot — intro gallery updates without page reload
+- [x] Dev tour cache — create/edit/delete reflects in viewer without reload
+- [x] Bootstrap unknown tour in dev mode (`devFetchTour` when not in static repo)
+
+**Scenes**
+
+- [x] Create scene — panorama upload, title, description, defaultView
+- [x] Update scene — title, description, firstScene, floor-plan pin (`map` x/y/heading)
+- [x] Delete scene (non-`firstScene`)
+- [x] Apply landing view (`defaultView` + thumbnail)
+- [x] Replace panorama
+
+**Hotspots**
+
+- [x] Create nav / naming (NO) / general info hotspots — click-to-place
+- [x] Move hotspot — reposition from panorama click
+- [x] Edit nav — label, target scene, `targetView`, `instant`, `preview.image`
+- [x] Create nav — `instant`, `preview.image`
+- [x] Edit naming — title, price, status, body
+- [x] Edit info — title, body, display, video URL, image
+- [x] Delete hotspot
+
+**Floor plan & knowledge**
+
+- [x] Floor plan CRUD — upload SVG/PNG/JPG/WebP, width/height, remove
+- [x] Knowledge JSON editor — global + per-scene facts, FAQs, suggested questions
+
+**Viewer integration**
+
+- [x] General info hotspots — full badge label “Information”, nav-style pill + info icon
+- [x] DevTools FAB — collapsible panel shell
+- [x] Dev URL flags — preserved across in-app navigation
+
+#### Backlog — dev panel → Admin CMS
+
+Maps to [Admin MVP pages](#7--admin-mvp-pages) below. Keep building in dev panel
+until Admin app exists; then port endpoints and retire duplicate UI.
+
+**Tour settings** (`/tours/[tourId]`)
+
+- [ ] Organization — name, email, phone(s), fax, address
+- [ ] Branding — `fontFamily`, `fontSourceUrl` (Google Fonts)
+- [ ] Product copy — `productFullName`
+- [ ] Scene transitions — `defaultTransition` (fade/black, speed)
+- [ ] Immersive background — audio / playlist / volume
+
+**Scenes & assets**
+
+- [ ] Nav create — custom `targetView` (edit-only today)
+- [ ] Scene thumbnail — trigger `generate-thumbnails` or upload
+- [ ] Bulk floor-plan pin placement — visual editor on plan image
+
+**Hotspots & naming**
+
+- [ ] Info popup advanced — `cta` / `ctas`, `sponsor`, `width`, `videoPoster`
+- [ ] Naming advanced — `namingOpportunity.name`, `priceLabel`
+- [ ] Hotspot drag on panorama (Phase 3 admin; dev uses click-to-place)
+
+**Platform**
+
+- [ ] Auth + multi-user (Admin only)
+- [ ] Draft vs publish separation (Admin + API)
+- [ ] Client CRUD — not just tour-level client pick on create
+- [ ] Asset browser — list/replace/delete beyond single-file upload
+
+**Docs & QA**
+
+- [ ] Dev API reference in `docs/` (endpoint list mirrors `viteDevTourApiPlugin`)
+- [ ] Smoke-test checklist for new tours (qch-hospital, ken-sargent-house)
+
+
 ### Sprint C — Discovery & share polish
 
-- [ ] **First-visit hint** — one-time “drag to look around · tap hotspots” coach
+- [x] **First-visit hint** — one-time “drag to look around · tap hotspots” coach
       mark or prominent Help entry
 - [ ] **Visit progress** — optional “N / M locations” in Explore or breadcrumb
 - [ ] **Share link OG meta** — `og:title`, `og:image` per tour/scene
@@ -188,17 +278,21 @@ admin `users` / roles.
 
 ### 7 — Admin MVP pages
 
-| Route                              | Purpose                                            |
-| ---------------------------------- | -------------------------------------------------- |
-| `/login`                           | Entra ID / Auth.js                                 |
-| `/`                                | dashboard — clients, tours, draft/published status |
-| `/clients/[clientId]`              | tour list, visibility, featured                    |
-| `/tours/[tourId]`                  | tour settings — branding, org, floor plan          |
-| `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  |
-| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       |
-| `/tours/[tourId]/preview`          | iframe preview with token URL                      |
+| Route                              | Purpose                                            | Dev panel today (`?dev=1`)                    |
+| ---------------------------------- | -------------------------------------------------- | --------------------------------------------- |
+| `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                            |
+| `/`                                | dashboard — clients, tours, draft/published status   | partial — create tour, catalog visibility     |
+| `/clients/[clientId]`              | tour list, visibility, featured                    | partial — featured/visibility on tour update  |
+| `/tours/[tourId]`                  | tour settings — branding, org, floor plan          | partial — tour tab, floor plan; org/fonts TBD |
+| `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                      |
+| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move                  |
+| `/tours/[tourId]/preview`          | iframe preview with token URL                      | — (viewer `?dev=1` is the preview today)      |
 
-Follow-ups: `/tours/[tourId]/knowledge`, `/tours/[tourId]/naming` (NO + CTA).
+Follow-ups: `/tours/[tourId]/knowledge` (dev panel ✅), `/tours/[tourId]/naming`
+(NO + CTA — partial via NO hotspot forms).
+
+**Migration rule:** new authoring features land in dev panel first (JSON + dev
+API), then move to Admin when auth and publish exist — same payload shapes.
 
 ### 8 — Three.js placement
 
@@ -333,10 +427,11 @@ data — no duplicate content per format.
 
 | Risk                             | Mitigation                                                                                                         |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Hotspot coordinates off          | `?dev=1` click logger                                                                                              |
-| overview → entrance disorienting | Tune `targetView` in JSON                                                                                          |
-| Mock AI limited until Phase 2    | Rich FAQs + suggested chips                                                                                        |
+| Hotspot coordinates off          | `?dev=1` dev panel — click logger + CRUD                                                                           |
+| overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                             |
+| Mock AI limited until Phase 2    | Rich FAQs + suggested chips; dev knowledge editor                                                                  |
 | Large panorama load on mobile    | [PERFORMANCE P0](./PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./PERFORMANCE.md#p1--preload-strategy) |
+| JSON edits bypass admin audit    | Dev panel local-only; Admin + publish for production                                                               |
 
 ---
 
@@ -355,9 +450,10 @@ data — no duplicate content per format.
 
 ## Changelog
 
-| Date       | Note                                                                |
-| ---------- | ------------------------------------------------------------------- |
-| 2026-06-11 | Scene transition feedback done — progress bar only (no dim overlay) |
-| 2026-06-11 | Phase 2 platform architecture (sections 1–9) + Sprint 2A checklist  |
-| 2026-06-11 | Initial roadmap — VR/XR, database, mobile themes                    |
-| 2026-06-11 | PERFORMANCE.md → playbook (no checkboxes); ROADMAP = sole task list |
+| Date       | Note                                                                                    |
+| ---------- | --------------------------------------------------------------------------------------- |
+| 2026-06-11 | Dev panel v1 — full tour/scene/hotspot/floor-plan/knowledge CRUD; Admin migration table |
+| 2026-06-11 | Scene transition feedback done — progress bar only (no dim overlay)                     |
+| 2026-06-11 | Phase 2 platform architecture (sections 1–9) + Sprint 2A checklist                      |
+| 2026-06-11 | Initial roadmap — VR/XR, database, mobile themes                                        |
+| 2026-06-11 | PERFORMANCE.md → playbook (no checkboxes); ROADMAP = sole task list                     |
