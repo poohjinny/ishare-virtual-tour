@@ -13,11 +13,8 @@ export {
 export { getTourClientId } from '../utils/tourClientId';
 export type { CatalogTourListItem } from './tourCatalog';
 
-import {
-  getJsonTourRepository,
-  loadKnowledgeSync,
-  loadTourSync,
-} from '../services/tourRepository';
+import { loadKnowledgeSync, loadTourSync } from '../services/tourRepository';
+import { getDevTourCache } from '../services/devTourCache';
 import { getCatalogTourPreviewSourceFromTour } from '../services/jsonTourRepository';
 
 export const DEFAULT_TOUR_ID = 'ken-sargent-house';
@@ -38,10 +35,8 @@ export function listTourIds(): string[] {
 }
 
 export function listTours(): TourListItem[] {
-  const jsonRepo = getJsonTourRepository();
-
   return listRoutableCatalogTours().map((entry) => {
-    const tour = jsonRepo.loadTour(entry.tourId);
+    const tour = loadTour(entry.tourId);
 
     return {
       id: entry.tourId,
@@ -55,8 +50,16 @@ export function listTours(): TourListItem[] {
 }
 
 export function loadTour(tourId = DEFAULT_TOUR_ID): Tour {
+  const cached = getDevTourCache(tourId);
+  if (cached) return cached;
   return loadTourSync(tourId);
 }
+
+export {
+  setDevTourCache,
+  getDevTourCache,
+  removeDevTourCache,
+} from '../services/devTourCache';
 
 export function loadKnowledge(tourId = DEFAULT_TOUR_ID): TourKnowledge {
   return loadKnowledgeSync(tourId);

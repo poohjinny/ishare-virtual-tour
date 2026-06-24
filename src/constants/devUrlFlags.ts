@@ -58,4 +58,11 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     isOn: (params) => params.splashHold,
     urlPatch: (enabled) => ({ splashHold: enabled ? '1' : null }),
   },
+  {
+    key: 'firstVisitHint',
+    label: 'firstVisitHint',
+    hint: 'Show first-visit coach pill (ignores seen flag)',
+    isOn: (params) => params.firstVisitHint,
+    urlPatch: (enabled) => ({ firstVisitHint: enabled ? '1' : null }),
+  },
 ];

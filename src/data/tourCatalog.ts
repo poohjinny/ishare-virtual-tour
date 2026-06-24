@@ -3,6 +3,7 @@ import {
   TOUR_CATEGORIES,
   type TourCategory,
 } from '../constants/tourCategories';
+import { getDevCatalogSnapshot } from './devCatalogSnapshot';
 
 export type CatalogTourVisibility = 'public' | 'unlisted' | 'internal';
 
@@ -27,6 +28,10 @@ interface TourCatalogFile {
 
 const catalog = catalogJson as TourCatalogFile;
 
+function getCatalogData(): TourCatalogFile {
+  return getDevCatalogSnapshot() ?? catalog;
+}
+
 const ROUTABLE_VISIBILITIES: ReadonlySet<CatalogTourVisibility> = new Set([
   'public',
   'unlisted',
@@ -39,11 +44,12 @@ export function resolveCatalogTourVisibility(
 }
 
 export function listTourCategories(): readonly TourCategory[] {
-  return catalog.categories.length > 0 ? catalog.categories : TOUR_CATEGORIES;
+  const data = getCatalogData();
+  return data.categories.length > 0 ? data.categories : TOUR_CATEGORIES;
 }
 
 export function listCatalogClients(): CatalogClient[] {
-  return catalog.clients;
+  return getCatalogData().clients;
 }
 
 export interface CatalogTourListItem {
@@ -59,7 +65,7 @@ export interface CatalogTourListItem {
 function flattenCatalogTours(
   visibilityFilter?: ReadonlySet<CatalogTourVisibility>,
 ): CatalogTourListItem[] {
-  return catalog.clients.flatMap((client) =>
+  return getCatalogData().clients.flatMap((client) =>
     client.tours
       .filter((tour) => {
         const visibility = resolveCatalogTourVisibility(tour);
@@ -80,6 +86,22 @@ function flattenCatalogTours(
 /** Tours shown on the public client intro gallery at `/`. */
 export function listCatalogTours(): CatalogTourListItem[] {
   return flattenCatalogTours(new Set(['public']));
+}
+
+export function isFeaturedGalleryMode(searchParams: URLSearchParams): boolean {
+  return searchParams.get('featured') === '1';
+}
+
+/** Featured tours first, then alphabetical by display name. */
+export function sortCatalogToursForGallery(
+  tours: CatalogTourListItem[],
+): CatalogTourListItem[] {
+  return [...tours].sort((a, b) => {
+    if (a.featured !== b.featured) {
+      return a.featured ? -1 : 1;
+    }
+    return a.tourName.localeCompare(b.tourName);
+  });
 }
 
 /** Tours reachable via direct URL / embed (`public` + `unlisted`). */
