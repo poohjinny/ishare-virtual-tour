@@ -21,6 +21,8 @@ export interface AppSearchParams {
   skipLanding: boolean;
   /** Hold splash longer for loader UX testing. */
   splashHold: boolean;
+  /** Force first-visit coach pill (dev QA — overrides embed/dev off). */
+  firstVisitHint: boolean;
 }
 
 export function useAppSearchParams(): AppSearchParams {
@@ -38,6 +40,7 @@ export function useAppSearchParams(): AppSearchParams {
       navPreview: searchParams.get('navPreview') !== '0',
       skipLanding: searchParams.get('skipLanding') === '1',
       splashHold: searchParams.get('splashHold') === '1',
+      firstVisitHint: searchParams.get('firstVisitHint') === '1',
     };
   }, [searchParams]);
 }

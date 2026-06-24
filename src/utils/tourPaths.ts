@@ -30,14 +30,12 @@ const LEGACY_TOUR_PATH_ALIASES: Record<string, string> = {
   holodomor: 'holodomor-museum',
 };
 
-const KNOWN_TOUR_IDS = new Set(listTourIds());
-
 export function normalizeTourPathId(segment: string): string {
   return LEGACY_TOUR_PATH_ALIASES[segment] ?? segment;
 }
 
 export function isKnownTourId(id: string): boolean {
-  return KNOWN_TOUR_IDS.has(normalizeTourPathId(id));
+  return listTourIds().includes(normalizeTourPathId(id));
 }
 
 export function isRootPathWithoutTour(pathname: string): boolean {
@@ -149,6 +147,7 @@ export const PRESERVED_SEARCH_KEYS = [
   'navPreview',
   'skipLanding',
   'splashHold',
+  'firstVisitHint',
   NAMING_OPPORTUNITY_SEARCH_KEY,
 ] as const;
 

@@ -39,6 +39,7 @@ export function buildSharePath({
       navPreview: null,
       skipLanding: null,
       splashHold: null,
+      firstVisitHint: null,
     },
   );
 }
