@@ -31,7 +31,7 @@ export function TourCategoryBadge({
         className,
       )}
     >
-      <TourCategoryIcon category={category} className='size-3 shrink-0' />
+      <TourCategoryIcon category={category} className='size-3.5 shrink-0' />
       <span className='min-w-0 overflow-hidden text-ellipsis whitespace-nowrap'>
         {category}
       </span>

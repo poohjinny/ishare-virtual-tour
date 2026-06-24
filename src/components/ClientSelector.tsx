@@ -58,7 +58,9 @@ export function ClientSelector({
   return (
     <label
       ref={rootRef}
-      className={cn(SELECTOR_SHELL, clientLogo && 'relative')}
+      className={cn(SELECTOR_SHELL, clientLogo && 'relative', 'ishare-tooltip-host')}
+      data-ishare-tooltip={currentLabel}
+      data-ishare-tooltip-placement='bottom'
     >
       {clientLogo ?
         <span
@@ -96,7 +98,6 @@ export function ClientSelector({
         value={currentTourId}
         disabled={disabled}
         aria-label={`Select client, current: ${clientLogoAlt}`}
-        title={currentLabel}
         onChange={(event) => {
           const nextTourId = event.target.value;
           event.currentTarget.blur();

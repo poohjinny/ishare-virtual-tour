@@ -141,19 +141,24 @@ export function TourCategoryIcon({ category, className }: TourCategoryIconProps)
     case 'Tourism':
       return (
         <IconShell className={className}>
-          <circle cx='12' cy='13' r='7' stroke='currentColor' strokeWidth='1.75' />
           <path
-            d='M12 9.5V13l2.5 1.5'
+            d='M10 8V6.75a2 2 0 0 1 4 0V8'
             stroke='currentColor'
             strokeWidth='1.75'
             strokeLinecap='round'
             strokeLinejoin='round'
           />
           <path
-            d='M9 4.5h6l-.5 2h-5l-.5-2z'
+            d='M7.25 8.5h9.5a1.75 1.75 0 0 1 1.75 1.75V18a1.75 1.75 0 0 1-1.75 1.75H7.25A1.75 1.75 0 0 1 5.5 18V10.25a1.75 1.75 0 0 1 1.75-1.75z'
             stroke='currentColor'
             strokeWidth='1.75'
             strokeLinejoin='round'
+          />
+          <path
+            d='M5.5 13h13'
+            stroke='currentColor'
+            strokeWidth='1.75'
+            strokeLinecap='round'
           />
         </IconShell>
       );

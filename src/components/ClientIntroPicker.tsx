@@ -16,8 +16,13 @@ import { buildTourLocation } from '../utils/tourPaths';
 import { SegmentedTabs } from './ui/SegmentedTabs';
 import { SegmentedTabPanelContent } from './ui/SegmentedTabPanel';
 import { useSegmentedTabPanelScroll } from '../hooks/useSegmentedTabPanelScroll';
+import { ClientIntroTabLabel } from './icons/ClientIntroTabIcons';
 import { ClientIntroGalleryCard } from './ClientIntroGalleryCard';
 import { TourGlassPanel } from './TourGlassPanel';
+import {
+  tourNavPanelScrollClassName,
+  tourNavPanelScrollInnerClassName,
+} from './tourNavFloatVariants';
 
 interface ClientIntroPickerProps {
   searchParams: URLSearchParams;
@@ -73,6 +78,11 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
       })),
     ],
     [filterCategories],
+  );
+
+  const filterTabOrder = useMemo(
+    () => filterTabs.map((tab) => tab.id),
+    [filterTabs],
   );
 
   const activeTours = useMemo(() => {
@@ -167,7 +177,10 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
           <SegmentedTabs
             className={INTRO_FILTERS_CLASS}
             aria-label='Filter tours by category'
-            tabs={filterTabs}
+            tabs={filterTabs.map((tab) => ({
+              ...tab,
+              label: <ClientIntroTabLabel filter={tab.id} label={tab.label} />,
+            }))}
             value={categoryFilter}
             onChange={setCategoryFilter}
             scrollable
@@ -178,31 +191,37 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
         <div
           ref={galleryRef}
           id='client-intro-gallery'
-          className='client-intro__gallery ishare-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-1 [-webkit-overflow-scrolling:touch] max-[480px]:px-4'
+          className={cn(
+            'client-intro__gallery flex flex-col overflow-x-clip',
+            tourNavPanelScrollClassName,
+          )}
           role='tabpanel'
           aria-labelledby={categoryFilterId(categoryFilter)}
         >
-          <SegmentedTabPanelContent
-            panelKey={categoryFilter}
-            className='client-intro__tab-panel'
-          >
-            {activeTours.length > 0 ?
-              <ul className='m-0 grid grid-cols-1 items-stretch gap-3 p-0 min-[560px]:grid-cols-2'>
-                {activeTours.map((entry) => (
-                  <ClientIntroGalleryCard
-                    key={entry.tourId}
-                    entry={entry}
-                    onSelect={() => handleSelect(entry.tourId)}
-                  />
-                ))}
-              </ul>
-            : <p className='m-0 px-1 pt-3 pb-1 text-center text-md leading-[1.55] text-muted'>
-                {categoryFilter === 'all' ?
-                  'No tours available yet.'
-                : 'No tours in this category yet.'}
-              </p>
-            }
-          </SegmentedTabPanelContent>
+          <div className={tourNavPanelScrollInnerClassName}>
+            <SegmentedTabPanelContent
+              panelKey={categoryFilter}
+              tabOrder={filterTabOrder}
+              className='client-intro__tab-panel'
+            >
+              {activeTours.length > 0 ?
+                <ul className='m-0 grid grid-cols-1 items-stretch gap-4 p-0 min-[560px]:grid-cols-2'>
+                  {activeTours.map((entry) => (
+                    <ClientIntroGalleryCard
+                      key={entry.tourId}
+                      entry={entry}
+                      onSelect={() => handleSelect(entry.tourId)}
+                    />
+                  ))}
+                </ul>
+              : <p className='m-0 pt-3 pb-1 text-center text-md leading-[1.55] text-muted'>
+                  {categoryFilter === 'all' ?
+                    'No tours available yet.'
+                  : 'No tours in this category yet.'}
+                </p>
+              }
+            </SegmentedTabPanelContent>
+          </div>
         </div>
       </TourGlassPanel>
     </div>
