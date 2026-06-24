@@ -19,6 +19,7 @@ import {
 } from '../components/TourLoadSplash';
 import { FloorPlanMinimap } from '../components/FloorPlanMinimap';
 import { TourNavFloat } from '../components/TourNavFloat';
+import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
 import {
   getSceneList,
   getTourWebsite,
@@ -37,6 +38,7 @@ import { useClientTheme } from '../hooks/useClientTheme';
 import { useClientFavicon } from '../hooks/useClientFavicon';
 import { useClientFont } from '../hooks/useClientFont';
 import { useImmersiveBackground } from '../hooks/useImmersiveBackground';
+import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
 import type {
   PopupContent,
   ViewPosition,
@@ -261,6 +263,12 @@ function TourExperience() {
   }, [tour.id, searchParams.panoramaErrorTest]);
 
   const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
+  const { hintVisible, onInitialTourReveal, onFirstPanoramaInteract } =
+    useTourFirstVisitHint({
+      embed: searchParams.embed,
+      dev: searchParams.dev,
+      firstVisitHint: searchParams.firstVisitHint,
+    });
   const [viewerOrientation, setViewerOrientation] =
     useState<ViewerOrientation | null>(null);
   const [panoramaError, setPanoramaError] =
@@ -563,6 +571,8 @@ function TourExperience() {
           onLoadProgress={handleLoadProgress}
           onLoadComplete={handleLoadComplete}
           onLandingStart={handleLandingStart}
+          onInitialTourReveal={onInitialTourReveal}
+          onFirstPanoramaInteract={onFirstPanoramaInteract}
           onPanoramaError={handlePanoramaError}
           onPanoramaRecovered={handlePanoramaRecovered}
         />
@@ -623,6 +633,8 @@ function TourExperience() {
         )}
 
         <LoadProgressBar progress={loadProgress} visible={loadBarVisible} />
+
+        <TourFirstVisitHint visible={hintVisible} />
 
         <AiAssistant
           tour={tour}
