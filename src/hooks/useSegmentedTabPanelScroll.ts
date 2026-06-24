@@ -1,9 +1,5 @@
 import { useEffect, type RefObject } from 'react';
 
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
 export function useSegmentedTabPanelScroll(
   panelKey: string,
   scrollRef: RefObject<HTMLElement | null>,
@@ -12,9 +8,6 @@ export function useSegmentedTabPanelScroll(
     const scrollRoot = scrollRef.current;
     if (!scrollRoot) return;
 
-    scrollRoot.scrollTo({
-      top: 0,
-      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
-    });
+    scrollRoot.scrollTo({ top: 0, behavior: 'auto' });
   }, [panelKey, scrollRef]);
 }

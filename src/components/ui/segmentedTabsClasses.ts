@@ -35,12 +35,14 @@ export const segmentedTabsIndicatorClassName = cn(
 
 export function segmentedTabButtonClassName(active: boolean): string {
   return cn(
-    'relative z-[1] inline-flex min-h-8 min-w-0 flex-1 cursor-pointer appearance-none items-center justify-center rounded-full border-none bg-transparent px-3.5 text-center font-[inherit] text-sm font-semibold leading-none whitespace-nowrap text-muted transition-[background,color,box-shadow] duration-150 [-webkit-tap-highlight-color:transparent]',
+    'relative z-[1] inline-flex min-h-8 min-w-0 flex-1 cursor-pointer appearance-none items-center justify-center gap-1.5 overflow-hidden rounded-full border-none bg-transparent px-3 text-center font-[inherit] text-sm font-semibold leading-none whitespace-nowrap text-muted transition-[background,color,box-shadow] duration-150 [-webkit-tap-highlight-color:transparent]',
     'data-[active=false]:hover:text-foreground data-[active=false]:hover:bg-white/45',
     'disabled:cursor-not-allowed disabled:opacity-50',
     active && 'text-foreground',
   );
 }
+
+export const segmentedTabIconClassName = cn('size-4 shrink-0');
 
 export const segmentedTabsScrollableClassName = cn(
   'flex-nowrap overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-segmented-tab]]:min-w-20 [&_[data-segmented-tab]]:flex-none',
@@ -49,6 +51,23 @@ export const segmentedTabsScrollableClassName = cn(
 export const segmentedTabsIndicatorReadyClassName =
   'transition-[transform,width] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none';
 
-export const segmentedTabPanelContentClassName = cn(
-  'animate-segmented-tab-panel-in motion-reduce:animate-none',
+/** Clip enter animations; avoid overflow-x-only (forces overflow-y: auto → scrollbar flash). */
+export const segmentedTabPanelContentClassName = cn('overflow-hidden');
+
+/** Single token — safe for `classList.add` / `classList.remove` retrigger. */
+export const segmentedTabPanelAnimateInClassName =
+  'animate-segmented-tab-panel-in';
+
+export const segmentedTabPanelAnimateClassName = cn(
+  segmentedTabPanelAnimateInClassName,
+  'motion-reduce:animate-none',
+);
+
+/** Gallery ↔ list layout switch — soft vertical settle (direction via --layout-enter-y). */
+export const segmentedTabLayoutPanelAnimateInClassName =
+  'animate-segmented-tab-layout-in';
+
+export const segmentedTabLayoutPanelAnimateClassName = cn(
+  segmentedTabLayoutPanelAnimateInClassName,
+  'motion-reduce:animate-none',
 );

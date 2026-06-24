@@ -56,13 +56,14 @@
 
   /*
    * iShare compact type scale — overrides Tailwind defaults project-wide.
-   * lg = 14px, 2xl = 18px (not Tailwind's 18px / 24px).
+   * lg = 14px, lg-plus = 15px, xl = 17px (not Tailwind's 18px / 24px).
    */
   --text-2xs: 0.625rem;
   --text-xs: 0.6875rem;
   --text-sm: 0.75rem;
   --text-md: 0.8125rem;
   --text-lg: 0.875rem;
+  --text-lg-plus: 0.9375rem;
   --text-xl: 1.0625rem;
   --text-2xl: 1.125rem;
   --text-3xl: 1.25rem;
@@ -77,9 +78,9 @@
   --shadow-default: 0 4px 20px rgba(15, 23, 42, 0.1);
 
   --animate-segmented-tab-panel-in: segmented-tab-panel-in 0.24s cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-segmented-tab-layout-in: segmented-tab-layout-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-error-backdrop-in: error-backdrop-in 0.3s ease-out forwards;
   --animate-error-card-in: error-card-in 0.34s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both;
-  --animate-load-splash-out: load-splash-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   --animate-floor-plan-pulse: floor-plan-pulse 2.4s ease-out infinite;
   --animate-ai-fab-in: ai-fab-in 0.14s ease-out forwards;
   --animate-ai-fab-out: ai-fab-out 0.14s ease-in forwards;
@@ -88,17 +89,24 @@
   --animate-hotspot-nav-dot-glow: hotspot-nav-dot-glow 2.8s ease-out infinite;
   --animate-tour-nav-dot-glow: tour-nav-dot-glow 2.2s ease-out infinite;
   --animate-tour-nav-dot-pulse: tour-nav-dot-pulse 2.2s ease-out infinite;
-  --animate-tour-nav-search-dropdown-in: tour-nav-search-dropdown-in 0.16s ease-out;
 }
 
 @keyframes segmented-tab-panel-in {
   from {
-    opacity: 0;
-    transform: translateY(8px);
+    transform: translateX(var(--tab-enter-x, 16px));
   }
 
   to {
-    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes segmented-tab-layout-in {
+  from {
+    transform: translateY(var(--layout-enter-y, 8px));
+  }
+
+  to {
     transform: translateY(0);
   }
 }
@@ -125,14 +133,39 @@
   }
 }
 
-@keyframes load-splash-out {
-  from {
+/* First-load splash — curtain fade (duration via --tour-load-splash-fade-ms on root). */
+.tour-load-splash {
+  opacity: 1;
+}
+
+.tour-load-splash--out {
+  animation: tour-load-splash-curtain var(--tour-load-splash-fade-ms, 3200ms) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: opacity;
+}
+
+@keyframes tour-load-splash-curtain {
+
+  0%,
+  10% {
     opacity: 1;
   }
 
-  to {
+  100% {
     opacity: 0;
   }
+}
+
+.tour-load-splash__logo {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.55s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.55s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.tour-load-splash__logo--out {
+  opacity: 0;
+  transform: scale(0.97);
 }
 
 @keyframes floor-plan-pulse {
@@ -218,18 +251,6 @@
   100% {
     transform: scale(2.6);
     opacity: 0;
-  }
-}
-
-@keyframes tour-nav-search-dropdown-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -370,6 +391,7 @@
     --ishare-font-size-sm: var(--text-sm);
     --ishare-font-size-md: var(--text-md);
     --ishare-font-size-lg: var(--text-lg);
+    --ishare-font-size-lg-plus: var(--text-lg-plus);
     --ishare-font-size-xl: var(--text-xl);
     --ishare-font-size-2xl: var(--text-2xl);
     --ishare-font-size-3xl: var(--text-3xl);
@@ -429,6 +451,7 @@
   }
 
   @media (hover: hover) {
+
     .ai-fab:hover:not(.animate-ai-fab-out):not(.animate-ai-fab-in),
     .ai-fab:focus-visible:not(.animate-ai-fab-out):not(.animate-ai-fab-in) {
       transform: scale(1.03);
@@ -444,11 +467,26 @@
       transform 0.2s ease-in-out;
   }
 
-  /* Search FAB — width expand + same idle hover timing as nav dock circles */
-  .tour-nav-search-pill {
+  /* Explore gallery hero — scale hover must transition `scale`, not legacy `transform` (Tailwind v4) */
+  .tour-nav-gallery-card-hero-media {
+    transform-origin: center;
+    scale: 1;
     transition:
-      width 220ms cubic-bezier(0.22, 1, 0.36, 1),
-      background 0.2s ease-in-out,
-      color 0.2s ease-in-out;
+      opacity 0.28s ease-out,
+      scale 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @media (hover: hover) {
+
+    .group\/card:hover .tour-nav-gallery-card-hero-media--zoomable,
+    .group\/card:focus-visible .tour-nav-gallery-card-hero-media--zoomable {
+      scale: 1.2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tour-nav-gallery-card-hero-media {
+      transition: opacity 0.28s ease-out;
+    }
   }
 }
