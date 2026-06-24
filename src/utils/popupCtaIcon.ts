@@ -1,0 +1,24 @@
+import type { PopupCta } from '../types/tour';
+import { resolvePopupCta } from '../data/giftabulatorBrand';
+
+export type PopupCtaIconKind = 'arrow' | 'mail' | 'bell' | 'external' | 'heart';
+
+/** Primary footer CTA icon — derived from label + destination URL. */
+export function resolvePopupCtaIconKind(cta: PopupCta): PopupCtaIconKind {
+  const resolved = resolvePopupCta(cta);
+  const label = resolved.label.toLowerCase();
+  const url = cta.url.trim().toLowerCase();
+
+  if (resolved.kind === 'giftabulator') return 'external';
+
+  if (url.startsWith('mailto:')) {
+    if (label.includes('notify')) return 'bell';
+    return 'mail';
+  }
+
+  if (label.includes('support') || label.includes('mission')) return 'heart';
+
+  if (url.startsWith('http://') || url.startsWith('https://')) return 'external';
+
+  return 'arrow';
+}

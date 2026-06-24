@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { cn } from '../lib/cn';
 import { BADGE_CLASS } from './ui/badgeClasses';
 import {
   tourGlassPanelBodyClassNameWith,
@@ -16,10 +17,10 @@ import {
 export type TourGlassPanelVariant = 'anchored' | 'dock';
 export type TourGlassPanelAnimation = 'enter' | 'exit' | 'none';
 
-export function GlassPanelCloseIcon() {
+export function GlassPanelCloseIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={tourGlassPanelCloseIconClassName}
+      className={cn(tourGlassPanelCloseIconClassName, className)}
       viewBox='0 0 20 20'
       fill='none'
       aria-hidden='true'

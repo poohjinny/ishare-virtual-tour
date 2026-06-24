@@ -181,7 +181,7 @@ export function DevViewPanel({
         {hotspotSlug ?
           <p className={devViewPanelSlugPreviewClassName}>
             nav <code>nav-to-{hotspotSlug}</code> · NO{' '}
-            <code>info-{hotspotSlug}</code>
+            <code>?no={hotspotSlug}</code>
           </p>
         : null}
 

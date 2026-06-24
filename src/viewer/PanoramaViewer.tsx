@@ -34,11 +34,7 @@ import {
 } from '../constants/tourShare';
 import { applyShareButtonFeedback, shareTourView } from '../utils/shareTour';
 import { mountPopupVideoPlayer } from '../utils/popupVideo';
-import {
-  registerImmersiveBackgroundController,
-  releaseAllTourMedia,
-  unregisterImmersiveBackgroundController,
-} from '../utils/tourMediaCoordinator';
+import { releaseAllTourMedia } from '../utils/tourMediaCoordinator';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import { logHotspotClick, toViewPosition } from '../utils/devHotspotLogger';
 import { fromPsvZoom, toPsvZoom } from '../utils/psvZoom';
@@ -64,6 +60,7 @@ import {
   isNamingHotspotInViewport,
   scheduleOpenPendingNamingInfoHotspot,
   resolveNamingOpportunityView,
+  resolveSceneRecenterView,
 } from './pendingNamingInfoHotspot';
 import {
   setActiveInfoHotspot,
@@ -79,10 +76,12 @@ import {
   bindImmersiveBackgroundNavbarButton,
   createImmersiveBackgroundNavbarButton,
 } from './immersiveBackgroundNavbarButton';
-import { createImmersiveBackgroundController } from './immersiveBackgroundController';
+import type { ImmersiveBackgroundController } from './immersiveBackgroundController';
 import { patchZoomSliderSmoothZoom } from './patchZoomSlider';
 import {
   LANDING_ZOOM_OUT,
+  hasLandingTransitionPlayed,
+  markLandingTransitionPlayed,
   pickRandomLandingView,
   playLandingTransition,
 } from './landingTransition';
@@ -123,8 +122,12 @@ interface PanoramaViewerProps {
   skipLanding?: boolean;
   /** Override landing end pose (e.g. `?no=` on the initial scene). */
   landingTargetView?: ViewPosition;
-  /** True once first-load splash begins dismissing — gates landing transition. */
+  /** True once first-load splash finishes — gates landing transition. */
   splashDone?: boolean;
+  /** Tour-scoped controller — owned by TourPage so scene nav does not reset audio. */
+  immersiveBackgroundController?: ImmersiveBackgroundController | null;
+  /** Open naming-opportunity panel on the current scene (for default-view recenter). */
+  activeNamingHotspotId?: string | null;
   disabled?: boolean;
   suppressKeyboard?: boolean;
   onSceneChange: (sceneId: string) => void;
@@ -184,6 +187,8 @@ export const PanoramaViewer = forwardRef<
     skipLanding = false,
     landingTargetView,
     splashDone = false,
+    immersiveBackgroundController = null,
+    activeNamingHotspotId = null,
     disabled = false,
     suppressKeyboard = false,
     onSceneChange,
@@ -255,6 +260,9 @@ export const PanoramaViewer = forwardRef<
   const onPanoramaErrorRef = useLatestRef(onPanoramaError);
   const onPanoramaRecoveredRef = useLatestRef(onPanoramaRecovered);
   const splashDoneRef = useLatestRef(splashDone);
+  const immersiveControllerRef = useLatestRef(immersiveBackgroundController);
+  const activeNamingHotspotIdRef = useLatestRef(activeNamingHotspotId);
+  const initialLoadNotifiedRef = useRef(false);
   const tryStartLandingRef = useRef<(() => void) | null>(null);
   const hotspotEnterRef = useRef<ReturnType<
     typeof createHotspotEnterController
@@ -311,6 +319,13 @@ export const PanoramaViewer = forwardRef<
     if (viewer) syncKeyboardControl(viewer);
   }, [suppressKeyboard, disabled]);
 
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    const controller = immersiveBackgroundController;
+    if (!viewer || !controller) return;
+    return bindImmersiveBackgroundNavbarButton(viewer, controller);
+  }, [immersiveBackgroundController, tour.id, skipLanding]);
+
   useImperativeHandle(ref, () => ({
     navigateToScene: async (sceneId, targetView) => {
       const viewer = viewerRef.current;
@@ -328,7 +343,9 @@ export const PanoramaViewer = forwardRef<
       deferredErrorRef.current = null;
       transitioningRef.current = true;
       hotspotEnterRef.current?.hold();
-      onLoadStartRef.current?.();
+      if (!initialLoadNotifiedRef.current) {
+        onLoadStartRef.current?.();
+      }
       onTransitionStartRef.current();
 
       let navOk = false;
@@ -464,11 +481,10 @@ export const PanoramaViewer = forwardRef<
     let landingStarted = false;
     let landingSuppressLoadProgress = false;
     let viewerReady = false;
-    let initialLoadNotified = false;
 
     const notifyInitialLoadComplete = () => {
-      if (initialLoadNotified) return;
-      initialLoadNotified = true;
+      if (initialLoadNotifiedRef.current) return;
+      initialLoadNotifiedRef.current = true;
       onLoadCompleteRef.current?.();
     };
 
@@ -476,7 +492,12 @@ export const PanoramaViewer = forwardRef<
       () => {
         const sceneId = virtualTourRef.current?.getCurrentNode()?.id;
         if (!sceneId) return null;
-        return tourRef.current.scenes[sceneId]?.defaultView ?? null;
+        return resolveSceneRecenterView(
+          tourRef.current,
+          sceneId,
+          markersRef.current,
+          activeNamingHotspotIdRef.current,
+        );
       },
       () => disabledRef.current || transitioningRef.current,
     );
@@ -485,23 +506,18 @@ export const PanoramaViewer = forwardRef<
       () => fullscreenRootRefLatest.current?.current ?? null,
     );
 
-    const immersiveConfig = tourData.immersiveBackground;
-    const immersiveController =
-      immersiveConfig ?
-        createImmersiveBackgroundController(immersiveConfig)
-      : null;
-
-    const immersiveBgButton =
-      immersiveController ?
-        createImmersiveBackgroundNavbarButton(() => immersiveController)
-      : null;
+    const immersiveBgButton = createImmersiveBackgroundNavbarButton(
+      () => immersiveControllerRef.current,
+    );
 
     const navbarButtons: Array<string | NavbarCustomButton> = [
       'zoom',
       'move',
       recenterViewButton,
     ];
-    if (immersiveBgButton) navbarButtons.push(immersiveBgButton);
+    if (tourData.immersiveBackground) {
+      navbarButtons.push(immersiveBgButton);
+    }
     navbarButtons.push(fullscreenButton);
 
     const viewer = new Viewer({
@@ -559,28 +575,23 @@ export const PanoramaViewer = forwardRef<
       viewer,
       () => fullscreenRootRefLatest.current?.current ?? null,
     );
-    let unbindImmersiveBg = () => {};
-    if (immersiveController) {
-      registerImmersiveBackgroundController(immersiveController);
-      unbindImmersiveBg = bindImmersiveBackgroundNavbarButton(
-        viewer,
-        immersiveController,
-      );
-    }
     patchZoomSliderSmoothZoom(viewer);
     const virtualTour = viewer.getPlugin<VirtualTourPlugin>(VirtualTourPlugin);
     virtualTourRef.current = virtualTour;
 
     const tryStartLanding = () => {
+      const tourId = tourRef.current.id;
       if (
         skipLanding ||
         landingStarted ||
+        hasLandingTransitionPlayed(tourId) ||
         !viewerReady ||
         !splashDoneRef.current
       ) {
         return;
       }
       landingStarted = true;
+      markLandingTransitionPlayed(tourId);
 
       void (async () => {
         landingSuppressLoadProgress = true;
@@ -608,12 +619,12 @@ export const PanoramaViewer = forwardRef<
     markersRef.current = markers;
 
     viewer.addEventListener('panorama-load', () => {
-      if (landingSuppressLoadProgress) return;
+      if (landingSuppressLoadProgress || initialLoadNotifiedRef.current) return;
       onLoadStartRef.current?.();
     });
 
     viewer.addEventListener('load-progress', (e) => {
-      if (landingSuppressLoadProgress) return;
+      if (landingSuppressLoadProgress || initialLoadNotifiedRef.current) return;
       onLoadProgressRef.current?.(e.progress);
     });
 
@@ -651,7 +662,7 @@ export const PanoramaViewer = forwardRef<
         );
       }
 
-      if (!initialLoadNotified) {
+      if (!initialLoadNotifiedRef.current) {
         notifyInitialLoadComplete();
         const currentId = virtualTour.getCurrentNode()?.id ?? startSceneId;
         preloadOtherScenes(viewer, virtualTour, tourRef.current, currentId);
@@ -1046,10 +1057,7 @@ export const PanoramaViewer = forwardRef<
       document.removeEventListener('focusin', onFocusChange);
       document.removeEventListener('focusout', onFocusChange);
       unbindTourFullscreen();
-      unbindImmersiveBg();
-      unregisterImmersiveBackgroundController();
       releaseAllTourMedia();
-      immersiveController?.destroy();
       viewer.destroy();
       viewerRef.current = null;
       virtualTourRef.current = null;

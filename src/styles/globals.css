@@ -309,9 +309,9 @@
     --ishare-danger: var(--color-danger);
 
     /* Computed — depend on primary */
-    --ishare-active-item-bg: color-mix(in srgb, var(--color-primary) 8%, #ffffff);
+    --ishare-active-item-bg: rgba(var(--ishare-primary-rgb), 0.08);
     --ishare-active-item-border: rgba(var(--ishare-primary-rgb), 0.2);
-    --ishare-active-item-sold-bg: color-mix(in srgb, #475569 10%, #ffffff);
+    --ishare-active-item-sold-bg: rgba(71, 85, 105, 0.1);
     --ishare-active-item-sold-border: rgba(71, 85, 105, 0.22);
 
     --ishare-hotspot-active-glow:
@@ -411,5 +411,44 @@
     --ishare-badge-fill-lg-pad-icon: 5px 12px 5px 8px;
     --ishare-badge-accent-bg: rgba(232, 168, 56, 0.14);
     --ishare-badge-accent-color: var(--color-accent-dark);
+
+    /* Ask Guide FAB hover — max-width must live in CSS (Tailwind arbitrary multi-prop transition is not emitted) */
+    --ai-fab-expand-duration: 300ms;
+  }
+}
+
+@layer components {
+  .ai-fab {
+    transform-origin: bottom right;
+    backface-visibility: hidden;
+    transition:
+      max-width var(--ai-fab-expand-duration) cubic-bezier(0.4, 0, 0.2, 1),
+      background 220ms ease,
+      box-shadow 220ms ease,
+      transform var(--ai-fab-expand-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (hover: hover) {
+    .ai-fab:hover:not(.animate-ai-fab-out):not(.animate-ai-fab-in),
+    .ai-fab:focus-visible:not(.animate-ai-fab-out):not(.animate-ai-fab-in) {
+      transform: scale(1.03);
+    }
+  }
+
+  /* Nav dock controls — shared idle hover timing (Tailwind multi-prop transition is not emitted) */
+  .tour-nav-dock-btn {
+    transition:
+      background 0.2s ease-in-out,
+      color 0.2s ease-in-out,
+      box-shadow 0.2s ease-in-out,
+      transform 0.2s ease-in-out;
+  }
+
+  /* Search FAB — width expand + same idle hover timing as nav dock circles */
+  .tour-nav-search-pill {
+    transition:
+      width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      background 0.2s ease-in-out,
+      color 0.2s ease-in-out;
   }
 }

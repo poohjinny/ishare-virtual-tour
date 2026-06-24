@@ -23,6 +23,8 @@ import {
 import { BADGE_CLASS } from './ui/badgeClasses';
 import type { NamingStatusModifier } from './ui/Badge';
 import { applyCtaTextOverflowTitle } from '../utils/glassPanelCtaOverflow';
+import { PopupCtaIcon } from './glassPanelCtaIcons';
+import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
 
 export function splitPopupBody(body: string): string[] {
   return body
@@ -263,22 +265,7 @@ export function PopupVideoEmbed({
 }
 
 export function PopupCtaArrowIcon() {
-  return (
-    <svg
-      className='tour-glass-panel__cta-icon'
-      viewBox='0 0 20 20'
-      fill='none'
-      aria-hidden='true'
-    >
-      <path
-        d='M4 10h12M11 5l5 5-5 5'
-        stroke='currentColor'
-        strokeWidth='1.75'
-        strokeLinecap='round'
-        strokeLinejoin='round'
-      />
-    </svg>
-  );
+  return <PopupCtaIcon kind='arrow' />;
 }
 
 export function PopupCtaLabel({ cta }: { cta: PopupCta }) {
@@ -356,7 +343,9 @@ export function PopupCtaButton({ cta }: { cta: PopupCta }) {
       <GlassPanelCtaText label={resolved.label}>
         <PopupCtaLabel cta={cta} />
       </GlassPanelCtaText>
-      {!isSecondary && <PopupCtaArrowIcon />}
+      {!isSecondary && (
+        <PopupCtaIcon kind={resolvePopupCtaIconKind(cta)} />
+      )}
     </a>
   );
 }

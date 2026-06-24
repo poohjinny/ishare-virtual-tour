@@ -33,6 +33,7 @@ import { useTourState } from '../hooks/useTourState';
 import { useClientTheme } from '../hooks/useClientTheme';
 import { useClientFavicon } from '../hooks/useClientFavicon';
 import { useClientFont } from '../hooks/useClientFont';
+import { useImmersiveBackground } from '../hooks/useImmersiveBackground';
 import type {
   PopupContent,
   ViewPosition,
@@ -46,11 +47,9 @@ import {
   needsClientIntroPick,
   isRootPathWithoutTour,
   NAMING_OPPORTUNITY_SEARCH_KEY,
+  resolveNamingOpportunityFromSearch,
 } from '../utils/tourPaths';
-import {
-  resolveSceneLandingView,
-  findNamingHotspotInTour,
-} from '../utils/tourDirectory';
+import { resolveSceneLandingView } from '../utils/tourDirectory';
 import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
 import { useViewerControlsVisible } from '../hooks/useViewerControlsVisible';
 import {
@@ -58,6 +57,7 @@ import {
   type PanoramaLoadErrorInfo,
   type PanoramaViewerHandle,
 } from '../viewer/PanoramaViewer';
+import { resetLandingTransitionState } from '../viewer/landingTransition';
 
 const SPLASH_FADE_MS = 350;
 /** Extra splash hold for loader UX testing — only when `?splashHold=1` */
@@ -179,6 +179,7 @@ function TourExperience() {
   useClientTheme(tour);
   useClientFavicon(tour);
   useClientFont(tour, tourRootRef);
+  const immersiveBackgroundController = useImmersiveBackground(tour);
 
   useEffect(() => {
     document.title = productFullName;
@@ -190,11 +191,11 @@ function TourExperience() {
   );
 
   const landingTargetView = useMemo(() => {
-    const noHotspotId = urlSearchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
-    if (!noHotspotId) return undefined;
-    const loc = findNamingHotspotInTour(tour, noHotspotId);
-    if (!loc || loc.sceneId !== initialScene) return undefined;
-    return resolveSceneLandingView(tour, initialScene, noHotspotId);
+    const noSearchValue = urlSearchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
+    if (!noSearchValue) return undefined;
+    const resolved = resolveNamingOpportunityFromSearch(tour, noSearchValue);
+    if (!resolved || resolved.sceneId !== initialScene) return undefined;
+    return resolveSceneLandingView(tour, initialScene, resolved.hotspotId);
   }, [initialScene, tour, urlSearchParams]);
 
   const viewerRef = useRef<PanoramaViewerHandle>(null);
@@ -223,6 +224,7 @@ function TourExperience() {
   useEffect(() => {
     hasInitiallyLoadedRef.current = false;
     setSplashPhase('active');
+    resetLandingTransitionState();
     if (!searchParams.errorTest) {
       setPanoramaError(null);
     }
@@ -239,6 +241,7 @@ function TourExperience() {
     useState<PanoramaLoadErrorInfo | null>(null);
 
   const handleLoadStart = useCallback(() => {
+    if (hasInitiallyLoadedRef.current) return;
     if (hideBarTimerRef.current) {
       clearTimeout(hideBarTimerRef.current);
       hideBarTimerRef.current = null;
@@ -248,6 +251,7 @@ function TourExperience() {
   }, []);
 
   const handleLoadProgress = useCallback((progress: number) => {
+    if (hasInitiallyLoadedRef.current) return;
     setLoadBarVisible(true);
     setLoadProgress(progress);
   }, []);
@@ -367,7 +371,6 @@ function TourExperience() {
       if (!scene || sceneId === currentSceneId) return;
 
       prepareSceneNavigate(sceneId);
-      handleLoadStart();
 
       if (!navigatingToPendingNaming) {
         syncSceneToUrl(sceneId, { clearNamingOpportunity: true });
@@ -378,13 +381,7 @@ function TourExperience() {
         targetView ?? scene.defaultView,
       );
     },
-    [
-      currentSceneId,
-      handleLoadStart,
-      prepareSceneNavigate,
-      syncSceneToUrl,
-      tour.scenes,
-    ],
+    [currentSceneId, prepareSceneNavigate, syncSceneToUrl, tour.scenes],
   );
 
   const handleDismissModalPopups = useCallback(() => {
@@ -435,7 +432,6 @@ function TourExperience() {
       viewerRef.current?.clearActiveInfoHotspot();
 
       prepareSceneNavigate(sceneId);
-      handleLoadStart();
       syncSceneToUrl(sceneId, { clearNamingOpportunity: true });
 
       const scene = tour.scenes[sceneId];
@@ -443,13 +439,7 @@ function TourExperience() {
 
       await viewerRef.current?.navigateToScene(sceneId, scene.defaultView);
     },
-    [
-      currentSceneId,
-      handleLoadStart,
-      prepareSceneNavigate,
-      syncSceneToUrl,
-      tour.scenes,
-    ],
+    [currentSceneId, prepareSceneNavigate, syncSceneToUrl, tour.scenes],
   );
 
   const handleTransitionStart = useCallback(() => setIsTransitioning(true), []);
@@ -512,7 +502,9 @@ function TourExperience() {
           controlsVisible={controlsVisible}
           skipLanding={searchParams.skipLanding}
           landingTargetView={landingTargetView}
-          splashDone={splashPhase !== 'active'}
+          splashDone={splashPhase === 'done'}
+          immersiveBackgroundController={immersiveBackgroundController}
+          activeNamingHotspotId={activeNamingHotspotId}
           disabled={isTransitioning}
           suppressKeyboard={assistant.isOpen}
           onSceneChange={handleSceneChange}

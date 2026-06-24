@@ -5,8 +5,26 @@ const tourNavGlassShadow = cn(
   'shadow-[0_10px_28px_rgba(15,23,42,0.14),0_4px_12px_rgba(15,23,42,0.08)]',
 );
 
-const tourNavGlassBackdrop = cn(
-  'backdrop-blur-[6px] backdrop-saturate-[120%]',
+const tourNavGlassBackdrop = cn('backdrop-blur-[6px] backdrop-saturate-[120%]');
+
+/** Shared idle glass surface for nav dock circle + search FAB. */
+const tourNavDockBtnSurfaceClassName = cn(
+  'bg-white/[0.52] text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
+  tourNavGlassBackdrop,
+  tourNavGlassShadow,
+);
+
+/** Hover/focus on the control itself (circle buttons). */
+const tourNavDockBtnHoverClassName = cn(
+  'hover:bg-white/[0.78] hover:text-foreground hover:[&_svg]:text-foreground',
+  'focus-visible:bg-white/[0.78] focus-visible:text-foreground focus-visible:[&_svg]:text-foreground',
+);
+
+/** Hover/focus when the hit target is a nested trigger (search pill). */
+const tourNavDockBtnNestedFocusClassName = cn(
+  'has-[.tour-nav-search-pill-trigger:focus-visible]:bg-white/[0.78]',
+  'has-[.tour-nav-search-pill-trigger:focus-visible]:text-foreground',
+  'has-[.tour-nav-search-pill-trigger:focus-visible]:[&_svg]:text-foreground',
 );
 
 /** Scroll-into-view target for active directory items */
@@ -121,12 +139,7 @@ export const tourNavActionsRootClassName = cn(
 export const tourNavActionsDockClassName = cn('flex items-center gap-2');
 
 export const tourNavSearchSlotVariants = cva('relative shrink-0', {
-  variants: {
-    results: {
-      true: 'z-[2]',
-      false: '',
-    },
-  },
+  variants: { results: { true: 'z-[2]', false: '' } },
   defaultVariants: { results: false },
 });
 
@@ -143,18 +156,16 @@ export const tourNavSearchDropdownClassName = cn(
 
 export const tourNavCircleBtnVariants = cva(
   cn(
-    'flex size-[46px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
-    'bg-white/[0.52] text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
-    tourNavGlassBackdrop,
-    tourNavGlassShadow,
-    'transition-[background,color,box-shadow,transform] duration-200 ease-in-out',
-    'hover:bg-white/[0.78] hover:text-foreground hover:[&_svg]:text-foreground',
-    'focus-visible:bg-white/[0.78] focus-visible:text-foreground focus-visible:[&_svg]:text-foreground',
+    'tour-nav-dock-btn flex size-[46px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
     'max-[480px]:size-11',
   ),
   {
     variants: {
       active: {
+        false: cn(
+          tourNavDockBtnSurfaceClassName,
+          tourNavDockBtnHoverClassName,
+        ),
         true: cn(
           'scale-[1.03] bg-primary text-white backdrop-blur-none backdrop-saturate-100',
           'shadow-[0_10px_28px_rgba(var(--ishare-primary-rgb),0.32),0_4px_12px_rgba(var(--ishare-primary-rgb),0.2)]',
@@ -162,7 +173,6 @@ export const tourNavCircleBtnVariants = cva(
           'hover:bg-white/[0.78] hover:text-foreground hover:shadow-[0_10px_28px_rgba(15,23,42,0.14),0_4px_12px_rgba(15,23,42,0.08)] hover:[&_svg]:scale-[1.04] hover:[&_svg]:text-foreground',
           'focus-visible:bg-white/[0.78] focus-visible:text-foreground focus-visible:shadow-[0_10px_28px_rgba(15,23,42,0.14),0_4px_12px_rgba(15,23,42,0.08)] focus-visible:[&_svg]:scale-[1.04] focus-visible:[&_svg]:text-foreground',
         ),
-        false: '',
       },
     },
     defaultVariants: { active: false },
@@ -179,29 +189,26 @@ export const tourNavCircleIconHelpClassName = cn(
 
 export const tourNavSearchPillVariants = cva(
   cn(
-    'flex h-[46px] w-[46px] shrink-0 items-center overflow-hidden rounded-full',
-    'border border-transparent bg-white/[0.52]',
-    'text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
-    tourNavGlassBackdrop,
-    tourNavGlassShadow,
-    'transition-[width,background,box-shadow,border-color,color] duration-200 ease-in-out',
-    '[transition-duration:220ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]',
+    'tour-nav-search-pill flex h-[46px] shrink-0 items-center overflow-hidden rounded-full border',
   ),
   {
     variants: {
       open: {
+        false: cn(
+          'w-[46px] border-transparent',
+          tourNavDockBtnSurfaceClassName,
+          tourNavDockBtnHoverClassName,
+          tourNavDockBtnNestedFocusClassName,
+        ),
         true: cn(
-          'w-[min(280px,calc(100vw-160px))] border-[color:var(--ishare-border)] bg-white/[0.92] text-body',
+          'tour-nav-search-pill--open w-[min(280px,calc(100vw-160px))] border-[color:var(--ishare-border)] bg-white/[0.92] text-body',
+          tourNavGlassBackdrop,
+          tourNavGlassShadow,
           '[&_.tour-nav-search-icon]:static [&_.tour-nav-search-icon]:ml-3.5 [&_.tour-nav-search-icon]:shrink-0 [&_.tour-nav-search-icon]:translate-none',
           '[&_.tour-nav-search-input]:min-h-[46px] [&_.tour-nav-search-input]:min-w-0 [&_.tour-nav-search-input]:flex-1',
           '[&_.tour-nav-search-input]:border-none [&_.tour-nav-search-input]:bg-transparent [&_.tour-nav-search-input]:px-2.5 [&_.tour-nav-search-input]:pl-2.5 [&_.tour-nav-search-input]:shadow-none',
           '[&_.tour-nav-search-input]:hover:enabled:border-none [&_.tour-nav-search-input]:hover:enabled:bg-transparent [&_.tour-nav-search-input]:hover:enabled:shadow-none',
           '[&_.tour-nav-search-input]:focus:border-none [&_.tour-nav-search-input]:focus:bg-transparent [&_.tour-nav-search-input]:focus:shadow-none [&_.tour-nav-search-input]:focus:outline-none',
-        ),
-        false: cn(
-          'hover:enabled:bg-white/[0.78] hover:enabled:text-foreground',
-          'has-[button:focus-visible]:bg-white/[0.78] has-[button:focus-visible]:text-foreground',
-          'hover:enabled:[&_svg]:text-foreground has-[button:focus-visible]:[&_svg]:text-foreground',
         ),
       },
     },
@@ -210,7 +217,7 @@ export const tourNavSearchPillVariants = cva(
 );
 
 export const tourNavSearchPillTriggerClassName = cn(
-  'flex size-[46px] cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0 text-inherit',
+  'tour-nav-search-pill-trigger flex size-[46px] cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0 text-inherit',
   'focus-visible:outline-none',
 );
 
@@ -218,8 +225,10 @@ export const tourNavSearchPillCloseClassName = cn(
   'mr-[7px] flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
   'bg-transparent p-0 text-muted transition-[background,color] duration-150',
   'hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground focus-visible:bg-[rgba(15,23,42,0.06)] focus-visible:text-foreground focus-visible:outline-none',
-  '[&_.tour-glass-panel__close-icon]:size-3.5',
 );
+
+/** Search pill close — 14px icon; smaller than panel header close (18px). */
+export const tourNavSearchCloseIconClassName = cn('!size-[14px]');
 
 export const tourNavPanelSlotVariants = cva(
   cn(
@@ -235,7 +244,6 @@ export const tourNavPanelSlotVariants = cva(
         help: cn(
           '[&_.tour-glass-panel]:w-[min(420px,calc(100vw-48px))]',
           'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
-          '[&_.ishare-accordion__trigger]:py-4',
         ),
         share: '',
       },
@@ -280,48 +288,82 @@ export const tourNavSearchInputClassName = cn(
   '[&::-ms-clear]:hidden [&::-moz-search-clear-button]:hidden',
 );
 
-export const tourNavListClassName = cn(
-  'm-0 flex list-none flex-col gap-1 p-0',
-);
+export const tourNavListClassName = cn('m-0 flex list-none flex-col gap-1 p-0');
 
 export const tourNavDirectoryItemVariants = cva(
   cn(
-    'flex w-full cursor-pointer items-center gap-2.5 border border-transparent bg-transparent',
+    'flex w-full cursor-pointer items-center gap-2.5 border',
     'rounded-lg px-3 py-2.5 text-left font-[inherit] text-md text-body',
-    'transition-[background,border-color,color] duration-150',
-    'hover:enabled:not([aria-selected="true"]):bg-white/30',
-    'focus-visible:enabled:not([aria-selected="true"]):bg-white/30',
+    'transition-[background,border-color,color,box-shadow] duration-150',
     'disabled:cursor-not-allowed disabled:opacity-50',
   ),
   {
     variants: {
-      kind: {
-        location: cn(
-          'hover:enabled:not([aria-selected="true"]):text-foreground',
-          'focus-visible:enabled:not([aria-selected="true"]):text-foreground',
-          'hover:enabled:not([aria-selected="true"])_[data-tour-nav-dot]:bg-primary hover:enabled:not([aria-selected="true"])_[data-tour-nav-dot]:shadow-none',
-          'focus-visible:enabled:not([aria-selected="true"])_[data-tour-nav-dot]:bg-primary focus-visible:enabled:not([aria-selected="true"])_[data-tour-nav-dot]:shadow-none',
-          '[&[aria-selected="true"]]:border-[rgba(var(--ishare-primary-rgb),0.2)]',
-          '[&[aria-selected="true"]]:bg-[rgba(var(--ishare-primary-rgb),0.08)]',
-          '[&[aria-selected="true"]]:font-semibold [&[aria-selected="true"]]:text-foreground',
-          '[&[aria-selected="true"]_[data-tour-nav-dot]]:bg-primary',
-          '[&[aria-selected="true"]_[data-tour-nav-dot]]:shadow-[0_0_0_3px_rgba(var(--ishare-primary-rgb),0.15)]',
+      kind: { location: '', naming: 'items-center gap-3 px-3.5 py-3' },
+      statusTone: { default: '', sold: '' },
+      active: {
+        false: cn(
+          'border-transparent bg-transparent',
+          'hover:enabled:bg-white/[0.3] focus-visible:enabled:bg-white/[0.3]',
         ),
-        naming: cn(
-          'items-center gap-3 px-3.5 py-3',
-          'hover:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
-          'focus-visible:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
-          'hover:enabled:[&_[data-tour-nav-item-label]]:text-foreground',
-          'focus-visible:enabled:[&_[data-tour-nav-item-label]]:text-foreground',
-          '[&[aria-selected="true"]]:text-foreground',
-          '[&[aria-selected="true"]_[data-tour-nav-item-label]]:font-semibold',
-          '[&[aria-selected="true"]_.tour-nav-item-leading]:rounded-full',
-          '[&[aria-selected="true"]_.tour-nav-item-leading]:bg-[var(--ishare-active-icon-leading-bg)]',
-          '[&[aria-selected="true"]_.tour-nav-item-leading]:shadow-[var(--ishare-active-icon-leading-ring)]',
-        ),
+        true: '',
       },
     },
-    defaultVariants: { kind: 'location' },
+    compoundVariants: [
+      {
+        kind: 'location',
+        active: false,
+        class: cn(
+          'hover:enabled:text-foreground focus-visible:enabled:text-foreground',
+          'hover:enabled:[&_[data-tour-nav-dot]]:bg-primary',
+          'hover:enabled:[&_[data-tour-nav-dot]]:shadow-none',
+          'focus-visible:enabled:[&_[data-tour-nav-dot]]:bg-primary',
+          'focus-visible:enabled:[&_[data-tour-nav-dot]]:shadow-none',
+        ),
+      },
+      {
+        kind: 'location',
+        active: true,
+        class: cn(
+          'bg-[var(--ishare-active-item-bg)]',
+          'border-[color:var(--ishare-active-item-border)]',
+          'font-semibold text-foreground',
+          '[&_[data-tour-nav-dot]]:bg-primary',
+          '[&_[data-tour-nav-dot]]:shadow-[var(--ishare-active-icon-dot-ring)]',
+        ),
+      },
+      {
+        kind: 'naming',
+        active: false,
+        class: cn(
+          'hover:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
+          'focus-visible:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
+          'hover:enabled:[&_.tour-nav-item-label]:text-foreground',
+          'focus-visible:enabled:[&_.tour-nav-item-label]:text-foreground',
+        ),
+      },
+      {
+        kind: 'naming',
+        active: true,
+        class: cn(
+          'bg-[var(--ishare-active-item-bg)]',
+          'border-[color:var(--ishare-active-item-border)]',
+          'text-foreground',
+          'hover:enabled:bg-white/[0.3] focus-visible:enabled:bg-white/[0.3]',
+          '[&_.tour-nav-item-label]:font-semibold',
+          '[&_.tour-nav-item-meta]:font-normal',
+          '[&_.tour-nav-item-leading]:size-[22px]',
+          '[&_.tour-nav-item-leading]:rounded-full',
+          '[&_.tour-nav-item-leading]:bg-[var(--ishare-active-icon-leading-bg)]',
+          '[&_.tour-nav-item-leading]:[box-shadow:var(--ishare-active-icon-leading-ring)]',
+          'hover:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
+          'focus-visible:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
+          'hover:enabled:[&_.tour-nav-item-label]:text-foreground',
+          'focus-visible:enabled:[&_.tour-nav-item-label]:text-foreground',
+        ),
+      },
+    ],
+    defaultVariants: { kind: 'location', active: false, statusTone: 'default' },
   },
 );
 
@@ -342,7 +384,7 @@ export const tourNavItemTextClassName = cn(
 );
 
 export const tourNavItemMetaClassName = cn(
-  'text-xs leading-[1.3] text-muted',
+  'tour-nav-item-meta text-xs leading-[1.3] text-muted',
 );
 
 export const tourNavEmptyClassName = cn(
@@ -353,11 +395,9 @@ export const tourNavSectionTitleClassName = cn(
   'm-0 mb-[var(--tour-directory-space)] font-display text-lg font-semibold text-foreground',
 );
 
-export const tourNavDirectoryTabsClassName = cn('mt-0');
+export const tourNavDirectoryTabsClassName = cn('mx-5 mb-2 mt-0');
 
-export const tourNavDirectoryPanelClassName = cn(
-  'flex flex-col gap-0',
-);
+export const tourNavDirectoryPanelClassName = cn('flex flex-col gap-0');
 
 export const tourNavDirectorySectionClassName = cn(
   '[&+&]:mt-[var(--tour-directory-divider-space)] [&+&]:border-t [&+&]:border-[rgba(15,23,42,0.08)] [&+&]:pt-[var(--tour-directory-divider-space)]',
@@ -368,15 +408,13 @@ export const tourNavItemBadgeClassName = cn(
 );
 
 export const tourNavItemIconNamingVariants = cva(
-  'size-3.5 text-[rgba(100,116,139,0.42)] transition-colors duration-150 ease-in-out',
+  'size-3.5 transition-colors duration-150 ease-in-out',
   {
     variants: {
-      active: {
-        true: 'text-primary',
-        false: '',
-      },
+      active: { true: 'text-primary', false: 'text-[rgba(100,116,139,0.42)]' },
+      sold: { true: '', false: '' },
     },
-    defaultVariants: { active: false },
+    defaultVariants: { active: false, sold: false },
   },
 );
 
@@ -447,9 +485,7 @@ export const tourNavControlsListClassName = cn(
   '[.ishare-accordion__panel-inner_&]:mt-0',
 );
 
-export const tourNavContactListClassName = cn(
-  'm-0 flex flex-col gap-3',
-);
+export const tourNavContactListClassName = cn('m-0 flex flex-col gap-3');
 
 export const tourNavContactItemClassName = cn('m-0 grid gap-0.5');
 

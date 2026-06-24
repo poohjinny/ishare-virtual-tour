@@ -15,6 +15,8 @@ import {
   popupCtaLabelLength,
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
+import { glassPanelCtaIconHtml } from './glassPanelCtaIcons';
+import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
@@ -362,9 +364,7 @@ function navPreviewCloseIconHtml(): string {
 }
 
 export function glassPanelCtaArrowIconHtml(): string {
-  return `<svg class="${GLASS_PANEL.ctaIcon}" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-  <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+  return glassPanelCtaIconHtml('arrow', GLASS_PANEL.ctaIcon);
 }
 
 export function glassPanelInfoBadgeIconHtml(): string {
@@ -512,7 +512,10 @@ export function buildPopupCtaButtonHtml(cta: PopupCta): string {
   const labelHtml = buildPopupCtaTextHtml(cta);
   const isSecondary = cta.variant === 'secondary';
   const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}`;
-  const arrowHtml = isSecondary ? '' : glassPanelCtaArrowIconHtml();
+  const arrowHtml =
+    isSecondary ? '' : (
+      glassPanelCtaIconHtml(resolvePopupCtaIconKind(cta), GLASS_PANEL.ctaIcon)
+    );
 
   return `<a
         class="${className}"

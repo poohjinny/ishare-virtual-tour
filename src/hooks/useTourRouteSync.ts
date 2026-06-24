@@ -14,6 +14,7 @@ import {
   legacyTourPathRedirect,
   resolveSceneId,
   resolveTourRoute,
+  toNamingOpportunitySearchValue,
 } from '../utils/tourPaths';
 
 export interface SyncSceneToUrlOptions {
@@ -92,7 +93,7 @@ export function useTourRouteSync({
     if (
       pendingNaming?.sceneId === routeSceneId &&
       searchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY) ===
-        pendingNaming.hotspotId
+        toNamingOpportunitySearchValue(tour, pendingNaming.hotspotId)
     ) {
       return;
     }

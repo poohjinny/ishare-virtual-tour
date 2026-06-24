@@ -5,6 +5,24 @@ import {
   loadTour,
 } from '../data/loadTour';
 
+import {
+  NAMING_OPPORTUNITY_HOTSPOT_PREFIX,
+  NAMING_OPPORTUNITY_SEARCH_KEY,
+  namingOpportunityNameToCamelCase,
+  namingOpportunityNameToKebabCase,
+  resolveNamingOpportunityFromSearch,
+  toNamingOpportunitySearchValue,
+} from './namingOpportunityUrl';
+
+export {
+  NAMING_OPPORTUNITY_HOTSPOT_PREFIX,
+  NAMING_OPPORTUNITY_SEARCH_KEY,
+  namingOpportunityNameToCamelCase,
+  namingOpportunityNameToKebabCase,
+  resolveNamingOpportunityFromSearch,
+  toNamingOpportunitySearchValue,
+};
+
 /** Old paths that used client id as the first segment → canonical tour id. */
 const LEGACY_TOUR_PATH_ALIASES: Record<string, string> = {
   gphospitalfoundation: 'ken-sargent-house',
@@ -119,9 +137,6 @@ export function buildTourPath(
 ): string {
   return `/${tourId}/${sceneId}`;
 }
-
-/** Deep link — open naming opportunity panel (`?no={hotspotId}`). */
-export const NAMING_OPPORTUNITY_SEARCH_KEY = 'no';
 
 /** Query flags preserved across in-app navigation (not tour/scene). */
 export const PRESERVED_SEARCH_KEYS = [

@@ -7,20 +7,19 @@ export const aiAssistantStackClassName = cn(
 );
 
 const aiFabHoverClassName = cn(
-  'hover:max-w-[168px] hover:scale-105 hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
-  'focus-visible:max-w-[168px] focus-visible:scale-105 focus-visible:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'hover:max-w-[168px] hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'focus-visible:max-w-[168px] focus-visible:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
 );
 
 export const aiFabVariants = cva(
   cn(
-    'group/fab relative box-border inline-flex h-[76px] min-h-[76px] w-[76px] min-w-[76px] max-w-[76px] cursor-pointer flex-row items-center justify-start overflow-hidden rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-2 shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%]',
-    'transition-[max-width,background,box-shadow,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+    'ai-fab group/fab relative box-border inline-flex h-[76px] min-h-[76px] min-w-[76px] w-auto max-w-[76px] cursor-pointer flex-row items-center justify-start overflow-hidden rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-2 shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%]',
   ),
   {
     variants: {
       phase: {
         idle: aiFabHoverClassName,
-        enter: 'animate-ai-fab-in',
+        enter: cn(aiFabHoverClassName, 'animate-ai-fab-in'),
         exit: 'pointer-events-none animate-ai-fab-out',
       },
     },
@@ -37,9 +36,9 @@ export const aiFabIconClassName = cn(
 );
 
 export const aiFabLabelClassName = cn(
-  'shrink-0 whitespace-nowrap pr-[11px] pl-[13px] font-display text-lg font-medium text-foreground opacity-0 transition-opacity duration-150',
-  'group-hover/fab:opacity-100 group-hover/fab:delay-100 group-hover/fab:duration-200',
-  'group-focus-visible/fab:opacity-100 group-focus-visible/fab:delay-100 group-focus-visible/fab:duration-200',
+  'ai-fab__label shrink-0 whitespace-nowrap pl-[13px] pr-[11px] font-display text-lg font-medium text-foreground opacity-0 transition-opacity duration-[240ms] ease-out',
+  'group-hover/fab:opacity-100 group-hover/fab:duration-[320ms] group-hover/fab:delay-150 group-hover/fab:ease-out',
+  'group-focus-visible/fab:opacity-100 group-focus-visible/fab:duration-[320ms] group-focus-visible/fab:delay-150 group-focus-visible/fab:ease-out',
 );
 
 export const aiFabLabelAccentClassName = cn('font-semibold text-primary');

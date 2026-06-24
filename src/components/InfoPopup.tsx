@@ -158,6 +158,9 @@ export function InfoPopup({
         role='dialog'
         aria-modal='true'
         aria-labelledby='info-popup-title'
+        data-info-panel-naming={
+          shown.namingOpportunity ? 'true' : undefined
+        }
         style={{ maxWidth: resolveGlassPanelWidth(shown, tour) }}
         onClick={(e) => e.stopPropagation()}
       >

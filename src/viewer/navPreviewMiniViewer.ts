@@ -149,7 +149,7 @@ function mountPanoramaViewer(
     panorama: preview.panorama!,
     navbar: false,
     mousewheel: false,
-    mousemove: true,
+    mousemove: false,
     touchmoveTwoFingers: false,
     keyboard: false,
     loadingTxt: '',

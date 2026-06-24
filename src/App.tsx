@@ -10,12 +10,13 @@ function TourRoute() {
     sceneId?: string;
   }>();
 
+  // Key by tour only — scene changes sync inside TourPage (splash + BGM must persist).
   const routeKey = useMemo(() => {
     const route = resolveTourRoute(tourOrScene ?? tourId, sceneId);
     if (route.routeError === 'unknown_tour') {
-      return `missing:${route.requestedTourId ?? tourOrScene ?? tourId}:${sceneId ?? ''}`;
+      return `missing:${route.requestedTourId ?? tourOrScene ?? tourId}`;
     }
-    return `${route.tourId}:${route.sceneId ?? ''}`;
+    return route.tourId;
   }, [sceneId, tourId, tourOrScene]);
 
   return <TourPage key={routeKey} />;

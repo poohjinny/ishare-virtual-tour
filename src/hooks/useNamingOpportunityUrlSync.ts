@@ -2,10 +2,11 @@ import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Tour } from '../types/tour';
 import type { PanoramaViewerHandle } from '../viewer/PanoramaViewer';
-import { findNamingHotspotInTour } from '../utils/tourDirectory';
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
+  resolveNamingOpportunityFromSearch,
+  toNamingOpportunitySearchValue,
 } from '../utils/tourPaths';
 
 interface UseNamingOpportunityUrlSyncOptions {
@@ -37,14 +38,15 @@ export function useNamingOpportunityUrlSync({
 
   const syncNamingOpportunityToUrl = useCallback(
     (hotspotId: string | null, sceneId: string = currentSceneId) => {
-      lastAppliedNoRef.current = hotspotId;
+      const searchValue = hotspotId ? toNamingOpportunitySearchValue(tour, hotspotId) : null;
+      lastAppliedNoRef.current = searchValue;
 
       const target = buildTourLocation(
         tour.id,
         sceneId,
         tour.firstScene,
         searchParams,
-        { [NAMING_OPPORTUNITY_SEARCH_KEY]: hotspotId },
+        { [NAMING_OPPORTUNITY_SEARCH_KEY]: searchValue },
       );
 
       if (location.pathname + location.search === target) {
@@ -73,7 +75,7 @@ export function useNamingOpportunityUrlSync({
     (sceneId: string, hotspotId: string) => {
       pendingNamingSelectionRef.current = { sceneId, hotspotId };
       setActiveNamingHotspotId(hotspotId);
-      lastAppliedNoRef.current = hotspotId;
+      lastAppliedNoRef.current = toNamingOpportunitySearchValue(tour, hotspotId);
       viewerRef.current?.goToNamingOpportunity(sceneId, hotspotId);
       syncNamingOpportunityToUrl(hotspotId, sceneId);
     },
@@ -85,7 +87,7 @@ export function useNamingOpportunityUrlSync({
     ],
   );
 
-  const noHotspotId = searchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
+  const noSearchValue = searchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
 
   useEffect(() => {
     lastAppliedNoRef.current = null;
@@ -96,33 +98,32 @@ export function useNamingOpportunityUrlSync({
       return;
     }
 
-    if (!noHotspotId) {
+    if (!noSearchValue) {
       lastAppliedNoRef.current = null;
       return;
     }
 
-    const loc = findNamingHotspotInTour(tour, noHotspotId);
-    if (!loc) {
+    const resolved = resolveNamingOpportunityFromSearch(tour, noSearchValue);
+    if (!resolved) {
       clearNamingOpportunityFromUrl();
       return;
     }
 
-    if (lastAppliedNoRef.current === noHotspotId) {
+    const { hotspotId, sceneId } = resolved;
+
+    if (lastAppliedNoRef.current === noSearchValue) {
       return;
     }
 
-    lastAppliedNoRef.current = noHotspotId;
-    pendingNamingSelectionRef.current = {
-      sceneId: loc.sceneId,
-      hotspotId: noHotspotId,
-    };
-    setActiveNamingHotspotId(noHotspotId);
-    viewerRef.current?.goToNamingOpportunity(loc.sceneId, noHotspotId);
-    syncNamingOpportunityToUrl(noHotspotId, loc.sceneId);
+    lastAppliedNoRef.current = noSearchValue;
+    pendingNamingSelectionRef.current = { sceneId, hotspotId };
+    setActiveNamingHotspotId(hotspotId);
+    viewerRef.current?.goToNamingOpportunity(sceneId, hotspotId);
+    syncNamingOpportunityToUrl(hotspotId, sceneId);
   }, [
     clearNamingOpportunityFromUrl,
     isTransitioning,
-    noHotspotId,
+    noSearchValue,
     pendingNamingSelectionRef,
     setActiveNamingHotspotId,
     splashDone,

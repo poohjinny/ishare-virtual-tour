@@ -1,4 +1,9 @@
-import { NAMING_OPPORTUNITY_SEARCH_KEY, buildTourLocation } from './tourPaths';
+import { loadTour } from '../data/loadTour';
+import {
+  NAMING_OPPORTUNITY_SEARCH_KEY,
+  buildTourLocation,
+  toNamingOpportunitySearchValue,
+} from './tourPaths';
 
 export interface BuildShareUrlOptions {
   tourId: string;
@@ -14,13 +19,17 @@ export function buildSharePath({
   firstSceneId,
   namingHotspotId,
 }: BuildShareUrlOptions): string {
+  const tour = loadTour(tourId);
   return buildTourLocation(
     tourId,
     sceneId,
     firstSceneId,
     new URLSearchParams(),
     {
-      [NAMING_OPPORTUNITY_SEARCH_KEY]: namingHotspotId ?? null,
+      [NAMING_OPPORTUNITY_SEARCH_KEY]:
+        namingHotspotId ?
+          toNamingOpportunitySearchValue(tour, namingHotspotId)
+        : null,
       embed: null,
       dev: null,
       chatTest: null,

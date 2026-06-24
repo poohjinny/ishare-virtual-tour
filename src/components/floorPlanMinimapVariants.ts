@@ -30,12 +30,13 @@ export const floorPlanMinimapPulseClassName = cn(
 );
 
 export const floorPlanMinimapDotVariants = cva(
-  'pointer-events-auto cursor-default fill-white stroke-[#64748b] [stroke-width:2.5] transition-[fill,stroke] duration-150',
+  'pointer-events-auto [stroke-width:2.5] transition-[fill,stroke] duration-150',
   {
     variants: {
       current: {
         true: 'cursor-default fill-primary stroke-white [stroke-width:3.5]',
-        false: 'cursor-pointer hover:fill-page hover:stroke-primary',
+        false:
+          'cursor-pointer fill-white stroke-[#64748b] hover:fill-page hover:stroke-primary',
       },
     },
     defaultVariants: { current: false },

@@ -1,34 +1,38 @@
 /*
  * Photo Sphere Viewer chrome + HTML hotspot markers.
- * Imported via globals.css ÔøΩ do not import from main.tsx.
+ * Imported via globals.css ù do not import from main.tsx.
  */
 /* -- App shell + PSV navbar -- */
+/* Universal reset must live in @layer base so Tailwind spacing utilities win. */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@layer base {
 
-html,
-body,
-#root {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-html {
-  font-size: var(--ishare-font-size-base);
-}
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
 
-body {
-  font-family: var(--ishare-font);
-  background: var(--ishare-bg);
-  color: var(--ishare-text-body);
-  -webkit-font-smoothing: antialiased;
+  html {
+    font-size: var(--ishare-font-size-base);
+  }
+
+  body {
+    font-family: var(--ishare-font);
+    background: var(--ishare-bg);
+    color: var(--ishare-text-body);
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
 .app {
@@ -42,7 +46,7 @@ body {
   --ishare-display-font: var(--client-font, var(--ishare-font-display));
 }
 
-/* Thin scrollbar ‚Äî shared across panels (AI chat, nav lists, help, etc.) */
+/* Thin scrollbar ù shared across panels (AI chat, nav lists, help, etc.) */
 .ishare-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
@@ -65,7 +69,7 @@ body {
   background: rgba(15, 23, 42, 0.32);
 }
 
-/* Text inputs ‚Äî pill shape + Google Sans (placeholders included) */
+/* Text inputs ù pill shape + Google Sans (placeholders included) */
 input[type='search'],
 input[type='text'] {
   font-family: var(--ishare-display-font);
@@ -101,13 +105,13 @@ input::placeholder {
   background: #000;
 }
 
-/* Hotspot HTML markers ‚Äî allow pulse rings to extend outside the pill box */
+/* Hotspot HTML markers ù allow pulse rings to extend outside the pill box */
 .viewer-container .psv-marker:has(.hotspot-info),
 .viewer-container .psv-marker:has(.hotspot-nav) {
   overflow: visible;
 }
 
-/* Anchored popup ‚Äî override PSV marker pointer / panorama drag cursor */
+/* Anchored popup ù override PSV marker pointer / panorama drag cursor */
 .viewer-container .psv-marker:has([data-info-panel='true']),
 .viewer-container .psv-marker:has([data-nav-panel='true']) {
   cursor: default;
@@ -121,6 +125,85 @@ input::placeholder {
 .viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__header-btn,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .tour-glass-panel__cta {
   cursor: pointer;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero-viewer,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero-fallback {
+  cursor: default;
+}
+
+/* Nav preview ù cap button row width to marker (unlayered; beats @layer components fit-content) */
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__main,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__body,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-accordion,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-card,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-panel-inner,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-actions,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .tour-glass-panel__footer,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta-wrap {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-trigger {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-cta,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta-wrap--full .tour-glass-panel__cta {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-trigger-badges .ishare-badge {
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+
+/* Info / NO panel ù cap footer CTA width to marker (unlayered; beats @layer components fit-content) */
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'],
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__shell,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__body,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-primary-group,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-row {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap--full .tour-glass-panel__cta,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap > .tour-glass-panel__cta,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-row .tour-glass-panel__cta {
+  box-sizing: border-box;
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta:has(.tour-glass-panel__reg),
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-text:has(.tour-glass-panel__reg) {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
 }
 
 .viewer-area--fullscreen {
@@ -149,7 +232,7 @@ input::placeholder {
   font-size: var(--ishare-font-size-sm) !important;
 }
 
-/* PSV navbar ‚Äî horizontal glass pill (bottom center) */
+/* PSV navbar ù horizontal glass pill (bottom center) */
 .viewer-container .psv-navbar {
   top: auto;
   left: 50%;
@@ -215,7 +298,7 @@ input::placeholder {
     0 5px 14px rgba(15, 23, 42, 0.09);
 }
 
-/* Icon buttons ‚Äî keep zoom slider separate */
+/* Icon buttons ù keep zoom slider separate */
 .viewer-container {
   --psv-nav-icon-size: 16px;
 }
@@ -304,6 +387,46 @@ input::placeholder {
   overflow: visible;
 }
 
+.viewer-container .psv-immersive-bg-icon-stack {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+}
+
+.viewer-container .psv-immersive-bg-icon-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+
+.viewer-container .psv-immersive-bg-icon-layer--hover {
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  .viewer-container .psv-immersive-bg-button:hover .psv-immersive-bg-icon-layer--idle,
+  .viewer-container .psv-immersive-bg-button:focus-visible .psv-immersive-bg-icon-layer--idle {
+    opacity: 0;
+  }
+
+  .viewer-container .psv-immersive-bg-button:hover .psv-immersive-bg-icon-layer--hover,
+  .viewer-container .psv-immersive-bg-button:focus-visible .psv-immersive-bg-icon-layer--hover {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewer-container .psv-immersive-bg-icon-layer {
+    transition: none;
+  }
+}
+
 .viewer-container .psv-immersive-bg-bar {
   transform-box: fill-box;
   transform-origin: center bottom;
@@ -369,10 +492,6 @@ input::placeholder {
   }
 }
 
-.viewer-container .psv-immersive-bg-button--muted .psv-immersive-bg-mute-slash {
-  opacity: 0.95;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .viewer-container .psv-immersive-bg-bar {
     animation: none;
@@ -399,39 +518,39 @@ input::placeholder {
   color: #fff;
 }
 
-/* Toggle-on ‚Äî fullscreen (exit) + immersive bg (playing) */
+/* Toggle-on ù fullscreen (exit); immersive bg highlighted while enabled */
 .viewer-container .psv-fullscreen-button.psv-button--active,
-.viewer-container .psv-immersive-bg-button.psv-button--active {
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
   background: var(--ishare-primary);
   color: #fff;
 }
 
 .viewer-container .psv-fullscreen-button.psv-button--active:hover,
 .viewer-container .psv-fullscreen-button.psv-button--active:focus-visible,
-.viewer-container .psv-immersive-bg-button.psv-button--active:hover,
-.viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible {
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible {
   color: var(--ishare-text);
   background: rgba(15, 23, 42, 0.06);
 }
 
-.viewer-container .psv-immersive-bg-button.psv-button--active .psv-button-svg,
-.viewer-container .psv-immersive-bg-button.psv-button--active .psv-immersive-bg-bar {
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-button-svg,
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-immersive-bg-bar {
   color: #fff;
   fill: #fff;
 }
 
-.viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-button-svg,
-.viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-immersive-bg-bar,
-.viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-button-svg,
-.viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-immersive-bg-bar {
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-button-svg,
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-immersive-bg-bar,
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-button-svg,
+.viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-immersive-bg-bar {
   color: var(--ishare-text);
   fill: var(--ishare-text);
 }
 
 .viewer-area:fullscreen .viewer-container .psv-fullscreen-button,
 .viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button,
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active {
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
   color: #fff;
   background: var(--ishare-primary);
 }
@@ -440,35 +559,35 @@ input::placeholder {
 .viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:hover,
 .viewer-area:fullscreen .viewer-container .psv-fullscreen-button:focus-visible,
 .viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:focus-visible,
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:hover,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:hover,
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible {
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible {
   color: var(--ishare-text);
   background: rgba(15, 23, 42, 0.06);
 }
 
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-button-svg,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-button-svg,
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-immersive-bg-bar,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active .psv-immersive-bg-bar {
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-button-svg,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-button-svg,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-immersive-bg-bar,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-immersive-bg-bar {
   color: #fff;
   fill: #fff;
 }
 
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-button-svg,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-button-svg,
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-immersive-bg-bar,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:hover .psv-immersive-bg-bar,
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-button-svg,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-button-svg,
-.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-immersive-bg-bar,
-.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-button--active:focus-visible .psv-immersive-bg-bar {
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-button-svg,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-button-svg,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-immersive-bg-bar,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-immersive-bg-bar,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-button-svg,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-button-svg,
+.viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-immersive-bg-bar,
+.viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-immersive-bg-bar {
   color: var(--ishare-text);
   fill: var(--ishare-text);
 }
 
-/* Move arrows ‚Äî thin stroke chevrons */
+/* Move arrows ù thin stroke chevrons */
 .viewer-container .psv-move-button .psv-button-svg {
   display: none;
 }
@@ -519,7 +638,7 @@ input::placeholder {
   transform: rotate(90deg) scale(1.2);
 }
 
-/* Zoom, default view, fullscreen ‚Äî scale icon on hover (move uses ::before above) */
+/* Zoom, default view, fullscreen ù scale icon on hover (move uses ::before above) */
 .viewer-container .psv-button:not(.psv-zoom-range):not(.psv-move-button) .psv-button-svg {
   transform: scale(1);
   transition: transform 0.2s ease;
@@ -564,7 +683,7 @@ input::placeholder {
 
 /* -- Hotspot markers -- */
 
-/* ‚îÄ‚îÄ Nav hotspot ‚Äî scene transition (pill label) ‚îÄ‚îÄ */
+/* ?? Nav hotspot ù scene transition (pill label) ?? */
 
 .hotspot-nav {
   position: relative;
@@ -646,7 +765,7 @@ input::placeholder {
   outline: none;
 }
 
-/* Active ‚Äî panel open: glass pill, theme label, dot pulse, theme glow */
+/* Active ù panel open: glass pill, theme label, dot pulse, theme glow */
 .hotspot-nav--active .hotspot-nav__pill,
 .hotspot-nav--active:hover .hotspot-nav__pill,
 .hotspot-nav--active:focus-visible .hotspot-nav__pill {
@@ -673,7 +792,7 @@ input::placeholder {
   transform: none;
 }
 
-/* ‚îÄ‚îÄ Info hotspot ‚Äî naming opportunity pill (primary + heart) ‚îÄ‚îÄ */
+/* ?? Info hotspot ù naming opportunity pill (primary + heart) ?? */
 
 .hotspot-info {
   position: relative;
@@ -799,7 +918,7 @@ input::placeholder {
   outline-offset: 2px;
 }
 
-/* Active ‚Äî popup open: glass pill, theme label/icon + glow (no pulse ‚Äî already engaged) */
+/* Active ù popup open: glass pill, theme label/icon + glow (no pulse ù already engaged) */
 .hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__pill {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px) saturate(120%);
@@ -818,7 +937,7 @@ input::placeholder {
   opacity: 0;
 }
 
-/* Sold ‚Äî muted pill, no pulse (status detail lives in popup / directory) */
+/* Sold ù muted pill, no pulse (status detail lives in popup / directory) */
 .hotspot-info--status-sold .hotspot-info__pulse {
   animation: none;
   opacity: 0;
@@ -906,7 +1025,7 @@ input::placeholder {
   }
 }
 
-/* ‚îÄ‚îÄ Post‚Äìscene-change enter (delay + fade + scale) ‚îÄ‚îÄ */
+/* ?? Postùscene-change enter (delay + fade + scale) ?? */
 
 .viewer-container--hotspots-hold .psv-marker:has(.hotspot-nav).psv-marker--visible,
 .viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible {

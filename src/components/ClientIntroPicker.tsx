@@ -33,14 +33,12 @@ function categoryFilterId(category: CategoryFilter): string {
 }
 
 const INTRO_PANEL_CLASS = cn(
-  'relative z-[1] flex h-[min(88vh,760px)] max-h-[min(88vh,760px)] w-[min(640px,calc(100vw-48px))] min-w-0 flex-col overflow-hidden',
-  '[&_.tour-glass-panel__shell]:flex [&_.tour-glass-panel__shell]:h-full [&_.tour-glass-panel__shell]:max-h-none [&_.tour-glass-panel__shell]:min-h-0 [&_.tour-glass-panel__shell]:flex-1 [&_.tour-glass-panel__shell]:flex-col',
+  'tour-glass-panel--intro relative z-[1] flex flex-col',
   '[&_.tour-glass-panel__header]:shrink-0',
-  'max-[480px]:h-[min(88vh,760px)] max-[480px]:w-[min(100%,calc(100vw-32px))]',
 );
 
 const INTRO_BODY_CLASS = cn(
-  'flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-hidden pt-3 pb-5',
+  'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
 );
 
 const INTRO_FILTERS_CLASS = cn(
@@ -180,11 +178,14 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
         <div
           ref={galleryRef}
           id='client-intro-gallery'
-          className='ishare-scrollbar min-h-0 flex-1 overflow-y-auto px-5 pb-1 [-webkit-overflow-scrolling:touch] max-[480px]:px-4'
+          className='client-intro__gallery ishare-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-1 [-webkit-overflow-scrolling:touch] max-[480px]:px-4'
           role='tabpanel'
           aria-labelledby={categoryFilterId(categoryFilter)}
         >
-          <SegmentedTabPanelContent panelKey={categoryFilter}>
+          <SegmentedTabPanelContent
+            panelKey={categoryFilter}
+            className='client-intro__tab-panel'
+          >
             {activeTours.length > 0 ?
               <ul className='m-0 grid grid-cols-1 items-stretch gap-3 p-0 min-[560px]:grid-cols-2'>
                 {activeTours.map((entry) => (

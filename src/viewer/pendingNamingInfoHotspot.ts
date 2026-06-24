@@ -1,8 +1,12 @@
-import type { Viewer } from '@photo-sphere-viewer/core';
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
+import type { Viewer } from '@photo-sphere-viewer/core';
 import type { PopupContent, Tour, ViewPosition } from '../types/tour';
 import { toPsvZoom } from '../utils/psvZoom';
-import { isAnchoredPopup, openAnchoredInfoPanel } from './infoPanelMarker';
+import {
+  getOpenAnchoredPanelHostId,
+  isAnchoredPopup,
+  openAnchoredInfoPanel,
+} from './infoPanelMarker';
 import { setActiveInfoHotspot } from './infoHotspotActive';
 
 const NAMING_VIEW_ANIMATION_MS = 800;
@@ -111,6 +115,62 @@ export function resolveNamingOpportunityView(
     pitch: infoHotspot.position.pitch,
     zoom: infoHotspot.position.zoom ?? scene.defaultView?.zoom,
   };
+}
+
+/** Naming hotspot with an open panel on this scene, if any. */
+export function resolveOpenNamingHotspotOnScene(
+  tour: Tour,
+  sceneId: string,
+  markers: MarkersPlugin | null,
+  activeNamingHotspotId?: string | null,
+): string | null {
+  const scene = tour.scenes[sceneId];
+  if (!scene) return null;
+
+  const isNamingHotspot = (hotspotId: string) => {
+    const hotspot = scene.hotspots.find((item) => item.id === hotspotId);
+    return Boolean(hotspot?.popup?.namingOpportunity);
+  };
+
+  if (markers) {
+    const openHostId = getOpenAnchoredPanelHostId(markers);
+    if (openHostId && isNamingHotspot(openHostId)) {
+      return openHostId;
+    }
+  }
+
+  if (activeNamingHotspotId && isNamingHotspot(activeNamingHotspotId)) {
+    return activeNamingHotspotId;
+  }
+
+  return null;
+}
+
+/** Default view — scene pose, or the open NO panel view when one is active on this scene. */
+export function resolveSceneRecenterView(
+  tour: Tour,
+  sceneId: string,
+  markers: MarkersPlugin | null,
+  activeNamingHotspotId?: string | null,
+): ViewPosition | null {
+  const scene = tour.scenes[sceneId];
+  if (!scene) return null;
+
+  const namingHotspotId = resolveOpenNamingHotspotOnScene(
+    tour,
+    sceneId,
+    markers,
+    activeNamingHotspotId,
+  );
+
+  if (namingHotspotId) {
+    return (
+      resolveNamingOpportunityView(tour, sceneId, namingHotspotId) ??
+      scene.defaultView
+    );
+  }
+
+  return scene.defaultView;
 }
 
 export interface PendingNamingInfoTarget {

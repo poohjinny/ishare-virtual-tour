@@ -6,11 +6,22 @@ import type {
 
 export const IMMERSIVE_BG_NAVBAR_BUTTON_ID = 'immersive-bg';
 
-/** Ambience off — music note. */
+/** Ambience off / paused — music note (play on hover). */
 const IMMERSIVE_BG_OFF_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
   <path d="M14.5 4.5v11.8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
   <path d="M14.5 4.5c2.8-.9 5.2-1.4 6.5-1.8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
   <circle cx="11" cy="18.5" r="2.75" fill="currentColor" stroke="currentColor" stroke-width="1.75"/>
+</svg>`;
+
+/** Shown on hover while off — play (click to start). */
+const IMMERSIVE_BG_PLAY_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path d="M8 5.5v13l11-6.5L8 5.5z" fill="currentColor"/>
+</svg>`;
+
+/** Ambience playing — pause (shown on hover while playing). */
+const IMMERSIVE_BG_PAUSE_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <rect x="7" y="5" width="3.5" height="14" rx="1" fill="currentColor"/>
+  <rect x="13.5" y="5" width="3.5" height="14" rx="1" fill="currentColor"/>
 </svg>`;
 
 const IMMERSIVE_BG_VOLUME_BARS = `<rect class="psv-immersive-bg-bar psv-immersive-bg-bar--1" x="5" y="9" width="2.75" height="6" rx="1.375" fill="currentColor"/>
@@ -23,15 +34,9 @@ const IMMERSIVE_BG_ON_ICON = `<svg class="psv-button-svg psv-immersive-bg-volume
   ${IMMERSIVE_BG_VOLUME_BARS}
 </svg>`;
 
-/** Loading — pulsing volume bars. */
+/** Ambience loading — pulsing volume bars (click to stop). */
 const IMMERSIVE_BG_LOADING_ICON = `<svg class="psv-button-svg psv-immersive-bg-volume psv-immersive-bg-volume--loading" viewBox="0 0 24 24" fill="none" aria-hidden="true">
   ${IMMERSIVE_BG_VOLUME_BARS}
-</svg>`;
-
-/** Muted for foreground video — static bars + slash. */
-const IMMERSIVE_BG_MUTED_ICON = `<svg class="psv-button-svg psv-immersive-bg-volume psv-immersive-bg-volume--muted" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  ${IMMERSIVE_BG_VOLUME_BARS}
-  <path class="psv-immersive-bg-mute-slash" d="M4.5 5.5 19.5 18.5" stroke="currentColor" stroke-width="1.85" stroke-linecap="round"/>
 </svg>`;
 
 interface NavbarButtonWithContainer {
@@ -44,30 +49,41 @@ function resolveImmersiveButtonRoot(container: HTMLElement): HTMLElement {
   return root instanceof HTMLElement ? root : container;
 }
 
+function wrapIconStack(idleIcon: string, hoverIcon: string): string {
+  return `<span class="psv-immersive-bg-icon-stack" aria-hidden="true">
+    <span class="psv-immersive-bg-icon-layer psv-immersive-bg-icon-layer--idle">${idleIcon}</span>
+    <span class="psv-immersive-bg-icon-layer psv-immersive-bg-icon-layer--hover">${hoverIcon}</span>
+  </span>`;
+}
+
 function resolveIcon(state: ImmersiveBgButtonState): string {
   switch (state) {
     case 'loading':
-      return IMMERSIVE_BG_LOADING_ICON;
+      return wrapIconStack(IMMERSIVE_BG_LOADING_ICON, IMMERSIVE_BG_PAUSE_ICON);
     case 'muted':
-      return IMMERSIVE_BG_MUTED_ICON;
+      return IMMERSIVE_BG_PAUSE_ICON;
     case 'playing':
-      return IMMERSIVE_BG_ON_ICON;
+      return wrapIconStack(IMMERSIVE_BG_ON_ICON, IMMERSIVE_BG_PAUSE_ICON);
     default:
-      return IMMERSIVE_BG_OFF_ICON;
+      return wrapIconStack(IMMERSIVE_BG_OFF_ICON, IMMERSIVE_BG_PLAY_ICON);
   }
 }
 
 function resolveTitle(state: ImmersiveBgButtonState): string {
   switch (state) {
     case 'loading':
-      return 'Loading immersive ambience';
+      return 'Pause immersive ambience';
     case 'muted':
-      return 'Immersive ambience muted for video';
+      return 'Pause immersive ambience';
     case 'playing':
-      return 'Stop immersive ambience';
+      return 'Pause immersive ambience';
     default:
       return 'Play immersive ambience';
   }
+}
+
+function resolveAriaLabel(state: ImmersiveBgButtonState): string {
+  return resolveTitle(state);
 }
 
 function syncButton(
@@ -83,15 +99,19 @@ function syncButton(
 
   const state = controller.getButtonState();
   const root = resolveImmersiveButtonRoot(button.container);
-  const active = state !== 'off';
+  const showEnabledTheme = controller.isEnabled() && state !== 'muted';
 
-  button.toggleActive(active);
-  root.classList.toggle('psv-button--active', active);
-  root.classList.toggle('psv-immersive-bg-button--loading', state === 'loading');
-  root.classList.toggle('psv-immersive-bg-button--muted', state === 'muted');
+  button.toggleActive(false);
+  root.classList.remove('psv-button--active');
+  root.classList.toggle('psv-immersive-bg-button--enabled', showEnabledTheme);
+  root.classList.toggle(
+    'psv-immersive-bg-button--loading',
+    state === 'loading',
+  );
   button.container.innerHTML = resolveIcon(state);
-  root.setAttribute('aria-pressed', active ? 'true' : 'false');
+  root.setAttribute('aria-pressed', 'false');
   root.setAttribute('aria-busy', state === 'loading' ? 'true' : 'false');
+  root.setAttribute('aria-label', resolveAriaLabel(state));
   root.setAttribute('title', resolveTitle(state));
 }
 
@@ -107,6 +127,12 @@ export function createImmersiveBackgroundNavbarButton(
     onClick(viewer: Viewer) {
       const controller = getController();
       if (!controller) return;
+
+      if (controller.isEnabled()) {
+        controller.pause();
+        syncButton(viewer, controller);
+        return;
+      }
 
       void controller.toggle().then(() => syncButton(viewer, controller));
     },

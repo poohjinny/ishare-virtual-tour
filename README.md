@@ -53,7 +53,7 @@ canonical `/{tourId}/{sceneId}` form.
 | ----------- | -------------------- | -------------------------------------------------- |
 | `embed`     | `?embed=1`           | Minimal chrome for iShare iframe embed             |
 | `dev`       | `?dev=1`             | Click panorama to log yaw/pitch for hotspot tuning |
-| `no`        | `?no=info-reception` | Open a naming-opportunity panel (survives refresh) |
+| `no`        | `?no=reception-desk` | Open a naming-opportunity panel (kebab-case NO name; survives refresh) |
 | `errorTest` | `?errorTest=1`       | Show panorama load-error UI for layout debugging   |
 
 **Examples:**
@@ -62,7 +62,7 @@ canonical `/{tourId}/{sceneId}` form.
 - Embed: `http://localhost:5173/?embed=1`
 - Direct tour link: `http://localhost:5173/cancer-research/reception`
 - Naming opportunity deep link:
-  `http://localhost:5173/ken-sargent-house/reception?no=info-reception`
+  `http://localhost:5173/ken-sargent-house/reception?no=reception-desk`
 
 ## iShare Embed
 
