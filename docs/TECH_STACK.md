@@ -250,18 +250,18 @@ Parsed in [`useAppSearchParams()`](../src/hooks/useAppSearchParams.ts).
 Preserved across in-app navigation — see `PRESERVED_SEARCH_KEYS` in
 [`tourPaths.ts`](../src/utils/tourPaths.ts).
 
-| Param               | Purpose                                                                |
-| ------------------- | ---------------------------------------------------------------------- |
-| `?embed=1`          | Embed mode — skip client intro (default tour), layout tuned for iframe |
-| `?intro=1`          | Force client intro gallery at `/` (non-embed; incl. single-tour QA)    |
-| `?intro=0`          | Skip client intro at `/` — load default tour directly                  |
-| `?dev=1`            | Dev panel — hotspot click coords (yaw/pitch), landing JSON copy        |
-| `?chatTest=1`       | AI chat panel — pre-fill test messages for scroll/layout QA            |
-| `?errorTest=1`      | Force panorama load-error UI for QA                                    |
-| `?navPreview=0`     | Disable nav-preview mini viewer on naming hotspots (default: on)       |
-| `?skipLanding=1`    | Skip landing zoom animation — start at scene `defaultView`             |
-| `?splashHold=1`     | Hold load splash longer for loader UX testing                          |
-| `?clientSelector=1` | Show top-left client/tour switcher FAB (default: hidden)               |
+| Param               | Purpose                                                                  |
+| ------------------- | ------------------------------------------------------------------------ |
+| `?embed=1`          | Embed mode — skip client intro (default tour), layout tuned for iframe   |
+| `?intro=1`          | Force client intro gallery at `/` (non-embed; incl. single-tour QA)      |
+| `?intro=0`          | Skip client intro at `/` — load default tour directly                    |
+| `?dev=1`            | Dev panel — apply `defaultView` + thumbnail, create nav/NO hotspots |
+| `?chatTest=1`       | AI chat panel — pre-fill test messages for scroll/layout QA              |
+| `?errorTest=1`      | Force panorama load-error UI for QA                                      |
+| `?navPreview=0`     | Disable nav-preview mini viewer on naming hotspots (default: on)         |
+| `?skipLanding=1`    | Skip landing zoom animation — start at scene `defaultView`               |
+| `?splashHold=1`     | Hold load splash longer for loader UX testing                            |
+| `?clientSelector=1` | Show top-left client/tour switcher FAB (default: hidden)                 |
 
 Combine flags as needed, e.g. `?embed=1&skipLanding=1`.
 

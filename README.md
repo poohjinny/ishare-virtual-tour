@@ -49,12 +49,12 @@ canonical `/{tourId}/{sceneId}` form.
 
 ## Query flags
 
-| Parameter   | Example              | Description                                        |
-| ----------- | -------------------- | -------------------------------------------------- |
-| `embed`     | `?embed=1`           | Minimal chrome for iShare iframe embed             |
-| `dev`       | `?dev=1`             | Click panorama to log yaw/pitch for hotspot tuning |
+| Parameter   | Example              | Description                                                            |
+| ----------- | -------------------- | ---------------------------------------------------------------------- |
+| `embed`     | `?embed=1`           | Minimal chrome for iShare iframe embed                                 |
+| `dev`       | `?dev=1`             | Click panorama to log yaw/pitch for hotspot tuning                     |
 | `no`        | `?no=reception-desk` | Open a naming-opportunity panel (kebab-case NO name; survives refresh) |
-| `errorTest` | `?errorTest=1`       | Show panorama load-error UI for layout debugging   |
+| `errorTest` | `?errorTest=1`       | Show panorama load-error UI for layout debugging                       |
 
 **Examples:**
 
@@ -116,12 +116,11 @@ Open dev mode (works in Cursor Simple Browser too):
 http://localhost:5173/ken-sargent-house/overview?dev=1
 ```
 
-| Goal                             | Action                                                          |
-| -------------------------------- | --------------------------------------------------------------- |
-| **Landing view** (`defaultView`) | Pan/zoom to the desired start angle → **Copy landing JSON (L)** |
-| **Hotspot** (`position`)         | Click the panorama → **Copy hotspot JSON**                      |
-
-Paste into the relevant scene in `tours/{tourId}.json`.
+| Goal                             | Action                                                                                         |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Landing view** (`defaultView`) | Pan/zoom to the desired start angle → **Apply defaultView (L)** (saves JSON + bakes thumbnail) |
+| **Nav hotspot**                  | Click panorama → name + target scene → **Create nav**                                          |
+| **Naming opportunity**           | Click panorama → name, price, status, body → **Create NO**                                     |
 
 ## AI Assistant
 

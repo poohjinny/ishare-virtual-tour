@@ -13,6 +13,7 @@ assets/
     └── {tourId}/            # matches tour JSON `id` (e.g. ken-sargent-house)
         ├── favicon.ico      # Tour tab icon → auto via resolveClientFavicon()
         ├── panoramas/       # 360° equirectangular images (WebP in repo — see below)
+        ├── thumbnails/      # Baked scene previews at defaultView (see below)
         ├── maps/            # Floor plans (optional)
         ├── brand/
         │   ├── logo.png
@@ -76,6 +77,28 @@ to WebP before the tour references it.** Tour JSON uses `.webp` paths only.
 
 Target size after conversion: roughly **800 KB–1.2 MB** per scene at acceptable
 quality. Re-export or lower `WEBP_QUALITY` if a WebP is still too large.
+
+## Scene thumbnails (defaultView)
+
+Explore / intro gallery cards use baked rectilinear previews when
+`scene.thumbnail` is set in tour JSON. Generate from each scene's `defaultView`:
+
+```bash
+npm run generate-thumbnails
+```
+
+Options:
+
+```bash
+node scripts/generate-scene-thumbnails.mjs --tour ken-sargent-house
+node scripts/generate-scene-thumbnails.mjs --dry-run
+THUMBNAIL_WIDTH=640 THUMBNAIL_QUALITY=85 npm run generate-thumbnails
+```
+
+Writes `assets/{clientId}/{tourId}/thumbnails/{sceneId}.webp` and updates
+`tours/{tourId}.json` with `scene.thumbnail` paths. Re-run after changing
+`defaultView` or swapping a panorama. Naming-opportunity cards still use runtime
+preview until per-NO thumbnails exist.
 
 ## Adding a new tour
 
