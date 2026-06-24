@@ -71,6 +71,7 @@ export function getTourWebsite(tour: Tour): string {
 }
 
 export interface CatalogTourPreviewSource {
+  thumbnail?: string;
   panorama: string;
   view: ViewPosition;
 }

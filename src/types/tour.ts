@@ -130,6 +130,8 @@ export interface Scene {
   title: string;
   description?: string;
   panorama: string;
+  /** Baked rectilinear preview at defaultView — generated via `npm run generate-thumbnails`. */
+  thumbnail?: string;
   defaultView: ViewPosition;
   hotspots: Hotspot[];
   map?: SceneMapPosition;

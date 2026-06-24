@@ -57,6 +57,7 @@ export function normalizeTourAssets(tour: Tour): Tour {
         {
           ...scene,
           panorama: withBaseUrl(scene.panorama),
+          thumbnail: scene.thumbnail ? withBaseUrl(scene.thumbnail) : undefined,
           hotspots: scene.hotspots.map(normalizeHotspot),
         },
       ]),

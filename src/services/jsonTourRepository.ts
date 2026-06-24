@@ -95,6 +95,7 @@ export class JsonTourRepository {
 }
 
 export interface CatalogTourPreviewSource {
+  thumbnail?: string;
   panorama: string;
   view: ViewPosition;
 }
@@ -104,5 +105,9 @@ export function getCatalogTourPreviewSourceFromTour(
 ): CatalogTourPreviewSource | null {
   const scene = tour.scenes[tour.firstScene];
   if (!scene?.panorama) return null;
-  return { panorama: scene.panorama, view: scene.defaultView };
+  return {
+    thumbnail: scene.thumbnail,
+    panorama: scene.panorama,
+    view: scene.defaultView,
+  };
 }
