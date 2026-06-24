@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "sync-assets": "node scripts/sync-assets.mjs",
+    "generate-thumbnails": "node scripts/generate-scene-thumbnails.mjs",
     "dev": "npm run sync-assets && vite",
     "build": "npm run sync-assets && tsgo -b && vite build",
     "build:ghpages": "npm run sync-assets && tsgo -b && vite build --mode ghpages",

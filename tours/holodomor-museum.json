@@ -8,7 +8,12 @@
     "name": "Holodomor Research and Education Consortium",
     "website": "https://holodomor.ca",
     "email": "hrec@ualberta.ca",
-    "phones": [{ "number": "416-923-4732", "label": "Telephone" }],
+    "phones": [
+      {
+        "number": "416-923-4732",
+        "label": "Telephone"
+      }
+    ],
     "address": "620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4"
   },
   "branding": {
@@ -19,15 +24,23 @@
     "fontSourceUrl": "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
   },
   "firstScene": "reception",
-  "defaultTransition": { "speed": "500ms", "effect": "fade" },
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
   "scenes": {
     "reception": {
       "id": "reception",
       "title": "Reception",
       "description": "Welcome to the Holodomor Museum virtual tour. This reception area introduces visitors to the Holodomor Research and Education Consortium (HREC) — a project of the Canadian Institute of Ukrainian Studies at the University of Alberta — and the research, education, and remembrance work that preserves the memory of the 1932–33 famine-genocide in Ukraine.",
       "panorama": "/assets/holodomor/holodomor-museum/panoramas/reception.webp",
-      "defaultView": { "yaw": 113.3, "pitch": 4.7, "zoom": 5 },
-      "hotspots": []
+      "defaultView": {
+        "yaw": 113.3,
+        "pitch": 4.7,
+        "zoom": 5
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/holodomor/holodomor-museum/thumbnails/reception.webp"
     }
   }
 }
