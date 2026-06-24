@@ -1,6 +1,6 @@
 /*
  * Photo Sphere Viewer chrome + HTML hotspot markers.
- * Imported via globals.css ù do not import from main.tsx.
+ * Imported via globals.css ? do not import from main.tsx.
  */
 /* -- App shell + PSV navbar -- */
 /* Universal reset must live in @layer base so Tailwind spacing utilities win. */
@@ -46,7 +46,7 @@
   --ishare-display-font: var(--client-font, var(--ishare-font-display));
 }
 
-/* Thin scrollbar ù shared across panels (AI chat, nav lists, help, etc.) */
+/* Thin scrollbar ? shared across panels (AI chat, nav lists, help, etc.) */
 .ishare-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
@@ -69,7 +69,7 @@
   background: rgba(15, 23, 42, 0.32);
 }
 
-/* Text inputs ù pill shape + Google Sans (placeholders included) */
+/* Text inputs ? pill shape + Google Sans (placeholders included) */
 input[type='search'],
 input[type='text'] {
   font-family: var(--ishare-display-font);
@@ -105,13 +105,13 @@ input::placeholder {
   background: #000;
 }
 
-/* Hotspot HTML markers ù allow pulse rings to extend outside the pill box */
+/* Hotspot HTML markers ? allow pulse rings to extend outside the pill box */
 .viewer-container .psv-marker:has(.hotspot-info),
 .viewer-container .psv-marker:has(.hotspot-nav) {
   overflow: visible;
 }
 
-/* Anchored popup ù override PSV marker pointer / panorama drag cursor */
+/* Anchored popup ? override PSV marker pointer / panorama drag cursor */
 .viewer-container .psv-marker:has([data-info-panel='true']),
 .viewer-container .psv-marker:has([data-nav-panel='true']) {
   cursor: default;
@@ -133,7 +133,7 @@ input::placeholder {
   cursor: default;
 }
 
-/* Nav preview ù cap button row width to marker (unlayered; beats @layer components fit-content) */
+/* Nav preview ? cap button row width to marker (unlayered; beats @layer components fit-content) */
 .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__main,
 .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__body,
 .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming,
@@ -174,7 +174,7 @@ input::placeholder {
   overflow: hidden;
 }
 
-/* Info / NO panel ù cap footer CTA width to marker (unlayered; beats @layer components fit-content) */
+/* Info / NO panel ? cap footer CTA width to marker (unlayered; beats @layer components fit-content) */
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'],
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__shell,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__body,
@@ -189,7 +189,7 @@ input::placeholder {
 }
 
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap--full .tour-glass-panel__cta,
-.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap > .tour-glass-panel__cta,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap>.tour-glass-panel__cta,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-row .tour-glass-panel__cta {
   box-sizing: border-box;
   display: flex;
@@ -232,7 +232,7 @@ input::placeholder {
   font-size: var(--ishare-font-size-sm) !important;
 }
 
-/* PSV navbar ù horizontal glass pill (bottom center) */
+/* PSV navbar ? horizontal glass pill (bottom center) */
 .viewer-container .psv-navbar {
   top: auto;
   left: 50%;
@@ -298,7 +298,7 @@ input::placeholder {
     0 5px 14px rgba(15, 23, 42, 0.09);
 }
 
-/* Icon buttons ù keep zoom slider separate */
+/* Icon buttons ? keep zoom slider separate */
 .viewer-container {
   --psv-nav-icon-size: 16px;
 }
@@ -410,6 +410,7 @@ input::placeholder {
 }
 
 @media (hover: hover) {
+
   .viewer-container .psv-immersive-bg-button:hover .psv-immersive-bg-icon-layer--idle,
   .viewer-container .psv-immersive-bg-button:focus-visible .psv-immersive-bg-icon-layer--idle {
     opacity: 0;
@@ -518,7 +519,7 @@ input::placeholder {
   color: #fff;
 }
 
-/* Toggle-on ù fullscreen (exit); immersive bg highlighted while enabled */
+/* Toggle-on ? fullscreen (exit); immersive bg highlighted while enabled */
 .viewer-container .psv-fullscreen-button.psv-button--active,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
   background: var(--ishare-primary);
@@ -587,7 +588,7 @@ input::placeholder {
   fill: var(--ishare-text);
 }
 
-/* Move arrows ù thin stroke chevrons */
+/* Move arrows ? thin stroke chevrons (::before icon; native title tooltips) */
 .viewer-container .psv-move-button .psv-button-svg {
   display: none;
 }
@@ -610,35 +611,48 @@ input::placeholder {
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button:not(.psv-button--disabled):hover::before {
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button:not(.psv-button--disabled):hover::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button:not(.psv-button--disabled):focus-visible::before {
   transform: scale(1.2);
 }
 
-.viewer-container .psv-move-button[title='Move left']::before {
+.viewer-container .psv-move-button[title='Move left']::before,
+.viewer-container .psv-move-button[data-ishare-tooltip='Move left']::before {
   transform: rotate(180deg) scale(1);
 }
 
-.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move left']:not(.psv-button--disabled):hover::before {
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move left']:not(.psv-button--disabled):hover::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[data-ishare-tooltip='Move left']:not(.psv-button--disabled):hover::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move left']:not(.psv-button--disabled):focus-visible::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[data-ishare-tooltip='Move left']:not(.psv-button--disabled):focus-visible::before {
   transform: rotate(180deg) scale(1.2);
 }
 
-.viewer-container .psv-move-button[title='Move up']::before {
+.viewer-container .psv-move-button[title='Move up']::before,
+.viewer-container .psv-move-button[data-ishare-tooltip='Move up']::before {
   transform: rotate(-90deg) scale(1);
 }
 
-.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move up']:not(.psv-button--disabled):hover::before {
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move up']:not(.psv-button--disabled):hover::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[data-ishare-tooltip='Move up']:not(.psv-button--disabled):hover::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move up']:not(.psv-button--disabled):focus-visible::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[data-ishare-tooltip='Move up']:not(.psv-button--disabled):focus-visible::before {
   transform: rotate(-90deg) scale(1.2);
 }
 
-.viewer-container .psv-move-button[title='Move down']::before {
+.viewer-container .psv-move-button[title='Move down']::before,
+.viewer-container .psv-move-button[data-ishare-tooltip='Move down']::before {
   transform: rotate(90deg) scale(1);
 }
 
-.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move down']:not(.psv-button--disabled):hover::before {
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move down']:not(.psv-button--disabled):hover::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[data-ishare-tooltip='Move down']:not(.psv-button--disabled):hover::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[title='Move down']:not(.psv-button--disabled):focus-visible::before,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-move-button[data-ishare-tooltip='Move down']:not(.psv-button--disabled):focus-visible::before {
   transform: rotate(90deg) scale(1.2);
 }
 
-/* Zoom, default view, fullscreen ù scale icon on hover (move uses ::before above) */
+/* Zoom, default view, fullscreen ? scale icon on hover (move uses ::before above) */
 .viewer-container .psv-button:not(.psv-zoom-range):not(.psv-move-button) .psv-button-svg {
   transform: scale(1);
   transition: transform 0.2s ease;
@@ -683,7 +697,7 @@ input::placeholder {
 
 /* -- Hotspot markers -- */
 
-/* ?? Nav hotspot ù scene transition (pill label) ?? */
+/* ?? Nav hotspot ? scene transition (pill label) ?? */
 
 .hotspot-nav {
   position: relative;
@@ -765,7 +779,7 @@ input::placeholder {
   outline: none;
 }
 
-/* Active ù panel open: glass pill, theme label, dot pulse, theme glow */
+/* Active ? panel open: glass pill, theme label, dot pulse, theme glow */
 .hotspot-nav--active .hotspot-nav__pill,
 .hotspot-nav--active:hover .hotspot-nav__pill,
 .hotspot-nav--active:focus-visible .hotspot-nav__pill {
@@ -792,7 +806,7 @@ input::placeholder {
   transform: none;
 }
 
-/* ?? Info hotspot ù naming opportunity pill (primary + heart) ?? */
+/* ?? Info hotspot ? naming opportunity pill (primary + heart) ?? */
 
 .hotspot-info {
   position: relative;
@@ -918,7 +932,7 @@ input::placeholder {
   outline-offset: 2px;
 }
 
-/* Active ù popup open: glass pill, theme label/icon + glow (no pulse ù already engaged) */
+/* Active ? popup open: glass pill, theme label/icon + glow (no pulse ? already engaged) */
 .hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__pill {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px) saturate(120%);
@@ -937,7 +951,7 @@ input::placeholder {
   opacity: 0;
 }
 
-/* Sold ù muted pill, no pulse (status detail lives in popup / directory) */
+/* Sold ? muted pill, no pulse (status detail lives in popup / directory) */
 .hotspot-info--status-sold .hotspot-info__pulse {
   animation: none;
   opacity: 0;
@@ -1025,7 +1039,7 @@ input::placeholder {
   }
 }
 
-/* ?? Postùscene-change enter (delay + fade + scale) ?? */
+/* ?? Post?scene-change enter (delay + fade + scale) ?? */
 
 .viewer-container--hotspots-hold .psv-marker:has(.hotspot-nav).psv-marker--visible,
 .viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible {

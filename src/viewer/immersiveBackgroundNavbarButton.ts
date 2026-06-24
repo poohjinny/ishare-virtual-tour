@@ -3,6 +3,7 @@ import type {
   ImmersiveBackgroundController,
   ImmersiveBgButtonState,
 } from './immersiveBackgroundController';
+import { applyIshareTooltipDom } from '../utils/ishareTooltipDom';
 
 export const IMMERSIVE_BG_NAVBAR_BUTTON_ID = 'immersive-bg';
 
@@ -112,7 +113,7 @@ function syncButton(
   root.setAttribute('aria-pressed', 'false');
   root.setAttribute('aria-busy', state === 'loading' ? 'true' : 'false');
   root.setAttribute('aria-label', resolveAriaLabel(state));
-  root.setAttribute('title', resolveTitle(state));
+  applyIshareTooltipDom(root, resolveTitle(state), 'top');
 }
 
 export function createImmersiveBackgroundNavbarButton(
