@@ -86,6 +86,7 @@ import {
   playLandingTransition,
 } from './landingTransition';
 import { createHotspotEnterController } from './hotspotEnterAnimation';
+import { upgradePsvNavbarTooltips } from './upgradePsvNavbarTooltips';
 
 function toPsvPosition(view: ViewPosition) {
   return { yaw: deg(view.yaw), pitch: deg(view.pitch) };
@@ -122,7 +123,7 @@ interface PanoramaViewerProps {
   skipLanding?: boolean;
   /** Override landing end pose (e.g. `?no=` on the initial scene). */
   landingTargetView?: ViewPosition;
-  /** True once first-load splash finishes — gates landing transition. */
+  /** True once landing may start (splash exit) — gates first-load camera motion. */
   splashDone?: boolean;
   /** Tour-scoped controller — owned by TourPage so scene nav does not reset audio. */
   immersiveBackgroundController?: ImmersiveBackgroundController | null;
@@ -146,6 +147,8 @@ interface PanoramaViewerProps {
   onLoadStart?: () => void;
   onLoadProgress?: (progress: number) => void;
   onLoadComplete?: () => void;
+  /** Fires when the first-load landing camera animation begins. */
+  onLandingStart?: () => void;
   onPanoramaError?: (info: PanoramaLoadErrorInfo) => void;
   onPanoramaRecovered?: () => void;
 }
@@ -204,6 +207,7 @@ export const PanoramaViewer = forwardRef<
     onLoadStart,
     onLoadProgress,
     onLoadComplete,
+    onLandingStart,
     onPanoramaError,
     onPanoramaRecovered,
   },
@@ -257,6 +261,7 @@ export const PanoramaViewer = forwardRef<
   const onLoadStartRef = useLatestRef(onLoadStart);
   const onLoadProgressRef = useLatestRef(onLoadProgress);
   const onLoadCompleteRef = useLatestRef(onLoadComplete);
+  const onLandingStartRef = useLatestRef(onLandingStart);
   const onPanoramaErrorRef = useLatestRef(onPanoramaError);
   const onPanoramaRecoveredRef = useLatestRef(onPanoramaRecovered);
   const splashDoneRef = useLatestRef(splashDone);
@@ -571,6 +576,7 @@ export const PanoramaViewer = forwardRef<
     });
 
     viewerRef.current = viewer;
+    upgradePsvNavbarTooltips(viewer);
     const unbindTourFullscreen = bindTourFullscreenNavbarButton(
       viewer,
       () => fullscreenRootRefLatest.current?.current ?? null,
@@ -598,6 +604,7 @@ export const PanoramaViewer = forwardRef<
         transitioningRef.current = true;
         onTransitionStartRef.current();
         try {
+          onLandingStartRef.current?.();
           await playLandingTransition(viewer, randomStart, landingView);
         } finally {
           landingSuppressLoadProgress = false;
