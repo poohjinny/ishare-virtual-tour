@@ -3,12 +3,11 @@ import { join } from 'node:path';
 import {
   bakeSceneThumbnail,
   buildSceneRecord,
-  readTourJson,
-  resolveTourJsonPath,
   saveUploadedPanoramaWebp,
   slugifyHotspotName,
   writeTourJson,
 } from './tourSceneDev.mjs';
+import { syncKnowledgeFromTour } from './devContentPlaceholders.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
 
 const DEFAULT_TRANSITION = { speed: '500ms', effect: 'fade' };
@@ -34,33 +33,6 @@ function assertSlug(value, label) {
     throw new Error(`${label} must contain letters or numbers`);
   }
   return slug;
-}
-
-function buildKnowledgeRecord({
-  tourId,
-  websiteUrl,
-  tourTitle,
-  sceneId,
-  sceneTitle,
-  sceneDescription,
-}) {
-  const url = websiteUrl?.trim() || 'https://example.com';
-  const description =
-    sceneDescription?.trim() || `Welcome to the ${tourTitle} virtual tour.`;
-
-  return {
-    id: tourId,
-    url,
-    global: { facilityName: tourTitle, summary: description },
-    scenes: {
-      [sceneId]: {
-        title: sceneTitle,
-        description,
-        facts: [`${tourTitle} — add facts in tours/${tourId}-knowledge.json.`],
-        faqs: [{ q: `What is ${tourTitle}?`, a: description }],
-      },
-    },
-  };
 }
 
 function buildTourRecord({
@@ -206,7 +178,8 @@ export async function createTour({
   const tourTitleValue = tourTitle.trim();
   const sceneTitleValue = firstSceneTitle.trim();
 
-  if (existsSync(resolveTourJsonPath(toursDir, tourId))) {
+  const tourJsonCandidate = join(toursDir, `${tourId}.json`);
+  if (existsSync(tourJsonCandidate)) {
     throw new Error(`Tour already exists: ${tourId}`);
   }
 
@@ -238,7 +211,7 @@ export async function createTour({
     sceneId,
     panorama: panoramaWebPath,
     defaultView: defaultView ?? DEFAULT_VIEW,
-    description: `Welcome to ${tourTitleValue}.`,
+    tourTitle: tourTitleValue,
   });
 
   mkdirSync(join(assetsRoot, clientId, tourId, 'brand'), { recursive: true });
@@ -271,15 +244,6 @@ export async function createTour({
     hasFavicon: brandAssets.savedFavicon,
   });
 
-  const knowledge = buildKnowledgeRecord({
-    tourId,
-    websiteUrl,
-    tourTitle: tourTitleValue,
-    sceneId: scene.id,
-    sceneTitle: sceneTitleValue,
-    sceneDescription: scene.description,
-  });
-
   await bakeSceneThumbnail({
     root,
     assetsRoot,
@@ -294,7 +258,7 @@ export async function createTour({
   writeTourJson(tourPath, tour);
   writeFileSync(
     knowledgePath,
-    `${JSON.stringify(knowledge, null, 2)}\n`,
+    `${JSON.stringify(syncKnowledgeFromTour(tour, null), null, 2)}\n`,
     'utf8',
   );
   writeCatalogJson(toursDir, catalog);

@@ -25,8 +25,10 @@ import type {
 } from '../types/tour';
 import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
 import { resolveTourSceneTransitionEffect } from '../utils/tourTransition';
-import { buildVirtualTourNodes } from './buildTourNodes';
-import { hotspotToMarkerConfig } from './buildMarkers';
+import {
+  buildVirtualTourNodePatch,
+  buildVirtualTourNodes,
+} from './buildTourNodes';
 import {
   buildAbsoluteShareUrl,
   buildShareMessage,
@@ -411,41 +413,70 @@ export const PanoramaViewer = forwardRef<
     },
     applyTourUpdate: async (nextTour) => {
       const virtualTour = virtualTourRef.current;
-      const markers = markersRef.current;
       if (!virtualTour) return;
 
       const previousTour = tourRef.current;
       const currentId =
         virtualTour.getCurrentNode()?.id ?? previousTour.firstScene;
 
-      virtualTour.setNodes(buildVirtualTourNodes(nextTour));
+      const nodeConfigs = buildVirtualTourNodes(nextTour);
+      const prevSceneIds = new Set(Object.keys(previousTour.scenes));
+      const hasStructuralSceneChange =
+        nodeConfigs.some((node) => !prevSceneIds.has(node.id)) ||
+        [...prevSceneIds].some((id) => !nextTour.scenes[id]);
 
       const nextScene = nextTour.scenes[currentId];
       if (!nextScene) {
-        await virtualTour.setCurrentNode(nextTour.firstScene, {
-          forceUpdate: true,
-          effect: resolveTourSceneTransitionEffect(nextTour),
-        });
+        virtualTour.setNodes(nodeConfigs, nextTour.firstScene);
         onSceneChangeRef.current(nextTour.firstScene);
         hotspotEnterRef.current?.schedule();
         return;
       }
 
-      const panoramaChanged =
-        previousTour.scenes[currentId]?.panorama !== nextScene.panorama;
-      const markerConfigs = nextScene.hotspots.map(hotspotToMarkerConfig);
-
-      if (panoramaChanged) {
-        await virtualTour.setCurrentNode(currentId, {
-          forceUpdate: true,
-          effect: resolveTourSceneTransitionEffect(nextTour),
-        });
-      } else {
-        virtualTour.updateNode({ id: currentId, markers: markerConfigs });
-        markers?.setMarkers(markerConfigs, true);
+      // setNodes resets currentNode and re-navigates — skip for hotspot/metadata edits.
+      if (hasStructuralSceneChange) {
+        virtualTour.setNodes(nodeConfigs, currentId);
+        hotspotEnterRef.current?.schedule();
+        return;
       }
 
-      hotspotEnterRef.current?.schedule();
+      let needsHotspotEnter = false;
+      let reloadPromise: Promise<boolean> | undefined;
+
+      for (const scene of Object.values(nextTour.scenes)) {
+        const patch = buildVirtualTourNodePatch(
+          previousTour.scenes[scene.id],
+          scene,
+        );
+        if (!patch) continue;
+
+        // Passing panorama to updateNode always force-reloads the scene (async).
+        // Only include changed VT fields — defaultView/thumbnail saves are no-ops here.
+        if (patch.panorama && patch.id === currentId) {
+          const { panorama: _panorama, ...metaPatch } = patch;
+          if (Object.keys(metaPatch).length > 1) {
+            virtualTour.updateNode(metaPatch);
+          }
+          reloadPromise = virtualTour.setCurrentNode(patch.id, {
+            forceUpdate: true,
+            effect: resolveTourSceneTransitionEffect(nextTour),
+          });
+          needsHotspotEnter = true;
+        } else {
+          virtualTour.updateNode(patch);
+          if (patch.markers && patch.id === currentId) {
+            needsHotspotEnter = true;
+          }
+        }
+      }
+
+      if (reloadPromise) {
+        await reloadPromise;
+      }
+
+      if (needsHotspotEnter) {
+        hotspotEnterRef.current?.schedule();
+      }
     },
   }));
 
@@ -605,11 +636,7 @@ export const PanoramaViewer = forwardRef<
             transitionOptions: (_node: unknown, fromNode?: unknown) => {
               const effect = resolveTourSceneTransitionEffect(tourRef.current);
               return fromNode ?
-                  {
-                    showLoader: false,
-                    effect,
-                    rotation: false,
-                  }
+                  { showLoader: false, effect, rotation: false }
                 : {
                     showLoader: false,
                     speed: '0ms',

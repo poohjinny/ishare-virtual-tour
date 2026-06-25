@@ -304,13 +304,22 @@ function validateNamingHotspotUpdatePayload(body) {
     price,
     status,
     body: copy,
+    videoUrl,
+    image,
   } = body ?? {};
   if (!tourId || !sceneId || !hotspotId?.trim()) {
     throw new Error('tourId, sceneId, and hotspotId are required');
   }
-  if (!title?.trim() && !price?.trim() && !status?.trim() && !copy?.trim()) {
+  if (
+    !title?.trim() &&
+    !price?.trim() &&
+    !status?.trim() &&
+    !copy?.trim() &&
+    videoUrl === undefined &&
+    image === undefined
+  ) {
     throw new Error(
-      'At least one of title, price, status, or body is required',
+      'At least one of title, price, status, body, videoUrl, or image is required',
     );
   }
   return {
@@ -321,6 +330,8 @@ function validateNamingHotspotUpdatePayload(body) {
     price,
     status,
     body: copy,
+    videoUrl,
+    image,
   };
 }
 
@@ -456,13 +467,36 @@ function validateInfoHotspotUpdatePayload(body) {
   };
 }
 
+function validateCreateNamingHotspotPayload(body) {
+  const { tourId, sceneId, name, position } = validateHotspotPayload(body);
+  const price = body?.price;
+  const status = body?.status;
+  const copy = body?.body;
+  const videoUrl = body?.videoUrl;
+  const image = body?.image;
+  if (!price?.trim()) {
+    throw new Error('price is required');
+  }
+  if (!status?.trim()) {
+    throw new Error('status is required');
+  }
+  return {
+    tourId,
+    sceneId,
+    name,
+    position,
+    price,
+    status,
+    body: copy,
+    videoUrl,
+    image,
+  };
+}
+
 function validateCreateInfoHotspotPayload(body) {
   const { tourId, sceneId, name, position, title, display, videoUrl, image } =
     validateHotspotPayload(body);
   const copy = body?.body;
-  if (!copy?.trim()) {
-    throw new Error('body is required');
-  }
   if (display?.trim() && !['modal', 'anchored'].includes(display.trim())) {
     throw new Error('display must be modal or anchored');
   }
@@ -606,11 +640,14 @@ function validateUpdateTourPayload(body) {
     organizationFax:
       typeof organizationFax === 'string' ? organizationFax : undefined,
     organizationFaxLabel:
-      typeof organizationFaxLabel === 'string' ? organizationFaxLabel : undefined,
+      typeof organizationFaxLabel === 'string' ? organizationFaxLabel : (
+        undefined
+      ),
     organizationAddress:
       typeof organizationAddress === 'string' ? organizationAddress : undefined,
     fontFamily: typeof fontFamily === 'string' ? fontFamily : undefined,
-    fontSourceUrl: typeof fontSourceUrl === 'string' ? fontSourceUrl : undefined,
+    fontSourceUrl:
+      typeof fontSourceUrl === 'string' ? fontSourceUrl : undefined,
     clearFontFamily: clearFontFamily === true,
     clearFontSourceUrl: clearFontSourceUrl === true,
     productFullName:
@@ -965,6 +1002,8 @@ export function viteDevTourApiPlugin() {
               price,
               status,
               body: copy,
+              videoUrl,
+              image,
             } = validateNamingHotspotUpdatePayload(body);
             const result = updateNamingHotspot({
               toursDir,
@@ -975,6 +1014,8 @@ export function viteDevTourApiPlugin() {
               price,
               status,
               body: copy,
+              videoUrl,
+              image,
             });
             sendJson(res, 200, {
               ok: true,
@@ -1091,12 +1132,17 @@ export function viteDevTourApiPlugin() {
           }
 
           if (req.url === '/__dev/api/hotspot/naming') {
-            const { tourId, sceneId, name, position, price, status, body } = {
-              ...validateHotspotPayload(body),
-              price: body.price,
-              status: body.status,
-              body: body.body,
-            };
+            const {
+              tourId,
+              sceneId,
+              name,
+              position,
+              price,
+              status,
+              body: copy,
+              videoUrl,
+              image,
+            } = validateCreateNamingHotspotPayload(body);
             const result = await createNamingHotspot({
               toursDir,
               tourId,
@@ -1105,7 +1151,9 @@ export function viteDevTourApiPlugin() {
               position,
               price,
               status,
-              body,
+              body: copy,
+              videoUrl,
+              image,
             });
             sendJson(res, 200, {
               ok: true,

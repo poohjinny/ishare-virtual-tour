@@ -17,13 +17,18 @@ import {
   popupVideoYoutubeEmbedUrl,
   resolvePopupVideo,
 } from '../utils/popupVideo';
-import { bindHtmlVideoForegroundMedia } from '../utils/tourMediaCoordinator';
+import {
+  bindHtmlVideoForegroundMedia,
+  claimTourMedia,
+  releaseTourMedia,
+} from '../utils/tourMediaCoordinator';
 import {
   isNamingStatusIconModifier,
   NamingStatusBadgeIcon,
 } from './namingStatusBadgeIcons';
 import { BADGE_CLASS } from './ui/badgeClasses';
 import type { NamingStatusModifier } from './ui/Badge';
+import { formatNamingPriceDisplay } from '../utils/namingPrice';
 import { applyCtaTextOverflowTitle } from '../utils/glassPanelCtaOverflow';
 import { PopupCtaIcon } from './glassPanelCtaIcons';
 import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
@@ -73,7 +78,9 @@ export function NamingOpportunityPrice({
       <span className='tour-glass-panel__price-sep' aria-hidden='true'>
         |
       </span>
-      <span className='tour-glass-panel__price-value'>{opportunity.price}</span>
+      <span className='tour-glass-panel__price-value'>
+        {formatNamingPriceDisplay(opportunity.price)}
+      </span>
     </p>
   );
 }
@@ -199,6 +206,11 @@ export function PopupVideoEmbed({
       return bindYoutubeIframeForegroundMedia(iframe, mediaId);
     }
 
+    if (resolved.kind === 'embed') {
+      claimTourMedia(mediaId);
+      return () => releaseTourMedia(mediaId);
+    }
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -216,6 +228,15 @@ export function PopupVideoEmbed({
             src={popupVideoYoutubeEmbedUrl(resolved.sourceUrl)}
             title={`${title} video`}
             allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+            allowFullScreen
+            referrerPolicy='strict-origin-when-cross-origin'
+          />
+        : resolved.kind === 'embed' ?
+          <iframe
+            ref={iframeRef}
+            src={resolved.sourceUrl}
+            title={`${title} video`}
+            allow='autoplay; fullscreen; encrypted-media; picture-in-picture'
             allowFullScreen
             referrerPolicy='strict-origin-when-cross-origin'
           />

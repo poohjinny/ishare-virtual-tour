@@ -1,36 +1,19 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import {
+  buildKnowledgeSceneEntry,
+  syncKnowledgeFromTour,
+} from './devContentPlaceholders.mjs';
 import { readTourJson, resolveTourJsonPath } from './tourSceneDev.mjs';
 
 export function resolveKnowledgeJsonPath(toursDir, tourId) {
   return join(toursDir, `${tourId}-knowledge.json`);
 }
 
-function emptySceneKnowledge(sceneId, sceneTitle) {
-  return {
-    title: sceneTitle ?? sceneId,
-    description: '',
-    facts: [],
-    faqs: [],
-    suggestedQuestions: [],
-  };
-}
-
 export function buildKnowledgeStub(toursDir, tourId) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
-  const scenes = {};
-
-  for (const [sceneId, scene] of Object.entries(tour.scenes ?? {})) {
-    scenes[sceneId] = emptySceneKnowledge(sceneId, scene.title);
-  }
-
-  return {
-    id: tourId,
-    url: tour.url ?? tour.organization?.website ?? 'https://example.com',
-    global: { facilityName: tour.title, summary: '' },
-    scenes,
-  };
+  return syncKnowledgeFromTour(tour, null);
 }
 
 export function readKnowledgeJson(toursDir, tourId) {
@@ -146,7 +129,11 @@ export function updateKnowledge({
 }) {
   const knowledgePath = resolveKnowledgeJsonPath(toursDir, tourId);
   const existing = readKnowledgeJson(toursDir, tourId);
-  const knowledge = existing.knowledge ?? buildKnowledgeStub(toursDir, tourId);
+  const tour = readTourJson(resolveTourJsonPath(toursDir, tourId));
+  const knowledge = syncKnowledgeFromTour(
+    tour,
+    existing.knowledge ?? buildKnowledgeStub(toursDir, tourId),
+  );
 
   if (url !== undefined) {
     knowledge.url = url.trim();
@@ -164,7 +151,14 @@ export function updateKnowledge({
 
   if (sceneId && scenePatch) {
     knowledge.scenes = knowledge.scenes ?? {};
-    const current = knowledge.scenes[sceneId] ?? emptySceneKnowledge(sceneId);
+    const tourScene = tour.scenes?.[sceneId];
+    const current =
+      knowledge.scenes[sceneId] ??
+      buildKnowledgeSceneEntry(
+        tour.title,
+        tourScene?.title ?? sceneId,
+        tourScene?.description,
+      );
 
     if (scenePatch.title !== undefined) {
       current.title = scenePatch.title.trim();

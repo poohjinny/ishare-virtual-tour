@@ -53,7 +53,9 @@
           "a": "Yes. The kitchen is a shared space for guests and families to prepare meals and store food during their stay at Ken Sargent House."
         }
       ],
-      "suggestedQuestions": ["Can guests use the kitchen?"]
+      "suggestedQuestions": [
+        "Can guests use the kitchen?"
+      ]
     },
     "entrance-to-the-base-level": {
       "title": "Entrance to the Base Level",
@@ -68,7 +70,9 @@
           "a": "The base-level entrance is a lower entry to Ken Sargent House, accessible from the landscaped grounds. Use the Overview scene to see how it fits within the campus layout."
         }
       ],
-      "suggestedQuestions": ["What is the base-level entrance?"]
+      "suggestedQuestions": [
+        "What is the base-level entrance?"
+      ]
     },
     "comfort-corner": {
       "title": "Comfort Corner",
@@ -82,7 +86,9 @@
           "a": "Comfort Corner is a welcoming space at Ken Sargent House where guests can pause, connect, and find a moment of calm during their stay."
         }
       ],
-      "suggestedQuestions": ["What is the Comfort Corner?"]
+      "suggestedQuestions": [
+        "What is the Comfort Corner?"
+      ]
     },
     "main-entrance": {
       "title": "Main Entrance",

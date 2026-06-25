@@ -1,6 +1,6 @@
 import type { TourDirectoryNamingItem } from './tourDirectory';
 
-/** Parse display prices such as "$75,000" into a numeric amount. */
+/** Parse display prices such as "$75,000" or "75000" into a numeric amount. */
 export function parseNamingPrice(price: string): number | null {
   const cleaned = price.replace(/[^0-9.]/g, '');
   if (!cleaned) return null;
@@ -9,10 +9,32 @@ export function parseNamingPrice(price: string): number | null {
   return Number.isFinite(value) ? value : null;
 }
 
+/** Persist numeric amounts only (no currency symbols or grouping). */
+export function normalizeNamingPriceStorage(price: string): string {
+  const trimmed = price.trim();
+  if (!trimmed) return trimmed;
+
+  const amount = parseNamingPrice(trimmed);
+  if (amount == null) return trimmed;
+
+  return String(Math.round(amount));
+}
+
 export function formatNamingPriceAmount(amount: number): string {
   return `$${new Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
   }).format(amount)}`;
+}
+
+/** Format stored price for UI — numeric storage → currency display. */
+export function formatNamingPriceDisplay(price: string): string {
+  const trimmed = price.trim();
+  if (!trimmed) return trimmed;
+
+  const amount = parseNamingPrice(trimmed);
+  if (amount == null) return trimmed;
+
+  return formatNamingPriceAmount(amount);
 }
 
 export interface NamingPriceBounds {

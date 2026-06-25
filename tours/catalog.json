@@ -58,6 +58,13 @@
           "name": "Queensway Carleton Hospital",
           "visibility": "public",
           "featured": true
+        },
+        {
+          "id": "med-surg-inpatient",
+          "category": "Healthcare",
+          "name": "Med/Surg Inpatient",
+          "visibility": "public",
+          "featured": false
         }
       ]
     }

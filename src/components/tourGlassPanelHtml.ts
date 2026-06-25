@@ -6,6 +6,7 @@ import type {
   NavPreviewNamingItem,
   Tour,
 } from '../types/tour';
+import { formatNamingPriceDisplay } from '../utils/namingPrice';
 import {
   navPreviewCtaLabel,
   navPreviewVisitAriaLabel,
@@ -438,10 +439,11 @@ export function buildGlassPanelParagraphsHtml(body: string): string {
 function buildNamingPriceInlineHtml(price: string, sold: boolean): string {
   const priceClass =
     sold ? GLASS_PANEL.priceInlineSold : GLASS_PANEL.priceInline;
+  const displayPrice = formatNamingPriceDisplay(price);
 
   return `<span class="${priceClass}">
     <span class="${GLASS_PANEL.priceSep}" aria-hidden="true">|</span>
-    <span class="${GLASS_PANEL.priceValue}">${escapeHtml(price)}</span>
+    <span class="${GLASS_PANEL.priceValue}">${escapeHtml(displayPrice)}</span>
   </span>`;
 }
 
@@ -451,10 +453,11 @@ export function buildNamingPriceUnderTitleHtml(
 ): string {
   const priceClass =
     sold ? GLASS_PANEL.priceUnderTitleSold : GLASS_PANEL.priceUnderTitle;
+  const displayPrice = formatNamingPriceDisplay(price);
 
   return `<p class="${priceClass}">
     <span class="${GLASS_PANEL.priceSep}" aria-hidden="true">|</span>
-    <span class="${GLASS_PANEL.priceValue}">${escapeHtml(price)}</span>
+    <span class="${GLASS_PANEL.priceValue}">${escapeHtml(displayPrice)}</span>
   </p>`;
 }
 

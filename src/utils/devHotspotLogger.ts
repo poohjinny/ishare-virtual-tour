@@ -59,6 +59,27 @@ export function slugifyHotspotName(name: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+/** Append `-2`, `-3`, … when `baseId` is already used in the scene. */
+export function resolveUniqueHotspotId(
+  existingIds: Iterable<string>,
+  baseId: string,
+): string {
+  const ids = existingIds instanceof Set ? existingIds : new Set(existingIds);
+  if (!ids.has(baseId)) return baseId;
+  let index = 2;
+  while (ids.has(`${baseId}-${index}`)) {
+    index += 1;
+  }
+  return `${baseId}-${index}`;
+}
+
+export function previewHotspotId(
+  existingIds: Iterable<string>,
+  baseId: string,
+): string {
+  return resolveUniqueHotspotId(existingIds, baseId);
+}
+
 export interface DevHotspotNameOptions {
   /** Display name — e.g. "Parking Lot", "Comfort Corner". */
   name?: string;

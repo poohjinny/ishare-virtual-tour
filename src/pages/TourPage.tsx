@@ -231,42 +231,54 @@ function TourExperience() {
   }, [route.tourId]);
 
   useEffect(() => {
-    if (staticTour || devTourSnapshot || !searchParams.dev) return;
+    if (!searchParams.dev) return;
 
+    let cancelled = false;
     setDevTourBootstrapStatus('loading');
     void devFetchTour(route.tourId)
       .then((freshTour) => {
+        if (cancelled) return;
         const normalized = normalizeTourAssets(freshTour);
         setDevTourSnapshot(normalized);
         setDevTourCache(normalized);
         setDevTourBootstrapStatus('idle');
       })
       .catch(() => {
+        if (cancelled) return;
         setDevTourBootstrapStatus('error');
       });
-  }, [devTourSnapshot, route.tourId, searchParams.dev, staticTour]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [route.tourId, searchParams.dev]);
 
   useEffect(() => {
-    if (staticKnowledge || devKnowledgeSnapshot || !searchParams.dev) return;
-    if (!devTourSnapshot && !staticTour) return;
+    if (!searchParams.dev) return;
 
+    let cancelled = false;
     void devFetchKnowledge(route.tourId)
       .then(({ knowledge }) => {
+        if (cancelled) return;
         setDevKnowledgeSnapshot(knowledge);
       })
       .catch(() => {
         /* knowledge may not exist yet */
       });
-  }, [
-    devKnowledgeSnapshot,
-    devTourSnapshot,
-    route.tourId,
-    searchParams.dev,
-    staticKnowledge,
-    staticTour,
-  ]);
 
-  const tour = devTourSnapshot ?? staticTour;
+    return () => {
+      cancelled = true;
+    };
+  }, [route.tourId, searchParams.dev]);
+
+  const tour = useMemo(() => {
+    if (searchParams.dev) {
+      if (devTourSnapshot) return devTourSnapshot;
+      if (devTourBootstrapStatus === 'loading') return null;
+      return staticTour;
+    }
+    return devTourSnapshot ?? staticTour;
+  }, [devTourBootstrapStatus, devTourSnapshot, searchParams.dev, staticTour]);
   const knowledge = devKnowledgeSnapshot ?? staticKnowledge;
   const bootstrapTour = tour ?? loadTour(DEFAULT_TOUR_ID);
   const bootstrapKnowledge = knowledge ?? loadKnowledge(DEFAULT_TOUR_ID);

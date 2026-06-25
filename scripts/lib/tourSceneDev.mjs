@@ -12,6 +12,13 @@ import {
   resolveThumbnailFilePath,
   resolveThumbnailWebPath,
 } from './equirectPreviewNode.mjs';
+import {
+  defaultInfoBody,
+  defaultNamingBody,
+  defaultSceneDescription,
+} from './devContentPlaceholders.mjs';
+import { normalizeNamingPriceStorage } from './namingPrice.mjs';
+import { persistTourContentPlaceholders } from './tourContentSync.mjs';
 
 const THUMBNAIL_WIDTH = Number(process.env.THUMBNAIL_WIDTH ?? 640);
 const THUMBNAIL_QUALITY = Number(process.env.THUMBNAIL_QUALITY ?? 85);
@@ -85,6 +92,17 @@ export function slugifyHotspotName(name) {
     .replace(/^-+|-+$/g, '');
 }
 
+/** Append `-2`, `-3`, … when `baseId` is already used in the scene. */
+export function resolveUniqueHotspotId(existingIds, baseId) {
+  const ids = existingIds instanceof Set ? existingIds : new Set(existingIds);
+  if (!ids.has(baseId)) return baseId;
+  let index = 2;
+  while (ids.has(`${baseId}-${index}`)) {
+    index += 1;
+  }
+  return `${baseId}-${index}`;
+}
+
 export function buildNavHotspotRecord({
   name,
   position,
@@ -126,18 +144,28 @@ export function buildNavHotspotRecord({
 
 const NAMING_STATUSES = new Set(['on_sale', 'sold', 'reserved', 'coming_soon']);
 
+function applyPopupMediaFields(popup, { videoUrl, image }) {
+  const nextVideoUrl = videoUrl?.trim();
+  const nextImage = image?.trim();
+  if (nextVideoUrl) popup.videoUrl = nextVideoUrl;
+  if (nextImage) popup.image = nextImage;
+}
+
 export function buildNamingHotspotRecord({
   name,
   position,
   price,
   status,
   body,
+  videoUrl,
+  image,
+  tourTitle,
 }) {
   const title = name.trim();
   const slug = slugifyHotspotName(title);
-  const priceValue = price?.trim();
+  const priceValue = normalizeNamingPriceStorage(price);
   const statusValue = status?.trim() || 'coming_soon';
-  const bodyValue = body?.trim();
+  const bodyValue = body?.trim() || defaultNamingBody(title, tourTitle);
 
   if (!title) throw new Error('Hotspot name is required');
   if (!slug) throw new Error('Hotspot name must contain letters or numbers');
@@ -145,22 +173,24 @@ export function buildNamingHotspotRecord({
   if (!NAMING_STATUSES.has(statusValue)) {
     throw new Error(`Invalid naming status: ${statusValue}`);
   }
-  if (!bodyValue) throw new Error('Body copy is required');
+
+  const popup = {
+    display: 'anchored',
+    title,
+    namingOpportunity: {
+      name: `${title} Naming Opportunity`,
+      price: priceValue,
+      status: statusValue,
+    },
+    body: bodyValue,
+  };
+  applyPopupMediaFields(popup, { videoUrl, image });
 
   return {
     id: `info-${slug}`,
     type: 'info',
     position: normalizeHotspotPosition(position),
-    popup: {
-      display: 'anchored',
-      title,
-      namingOpportunity: {
-        name: `${title} Naming Opportunity`,
-        price: priceValue,
-        status: statusValue,
-      },
-      body: bodyValue,
-    },
+    popup,
   };
 }
 
@@ -174,24 +204,21 @@ export function buildInfoHotspotRecord({
   display,
   videoUrl,
   image,
+  tourTitle,
 }) {
   const titleValue = (title ?? name)?.trim();
   const slug = slugifyHotspotName(titleValue);
-  const bodyValue = body?.trim();
+  const bodyValue = body?.trim() || defaultInfoBody(titleValue, tourTitle);
   const displayValue = display?.trim() || 'anchored';
 
   if (!titleValue) throw new Error('Hotspot name is required');
   if (!slug) throw new Error('Hotspot name must contain letters or numbers');
-  if (!bodyValue) throw new Error('Body copy is required');
   if (!INFO_DISPLAYS.has(displayValue)) {
     throw new Error('display must be modal or anchored');
   }
 
   const popup = { display: displayValue, title: titleValue, body: bodyValue };
-  const nextVideoUrl = videoUrl?.trim();
-  const nextImage = image?.trim();
-  if (nextVideoUrl) popup.videoUrl = nextVideoUrl;
-  if (nextImage) popup.image = nextImage;
+  applyPopupMediaFields(popup, { videoUrl, image });
 
   return {
     id: `info-${slug}`,
@@ -209,11 +236,12 @@ function appendSceneHotspot(tour, sceneId, hotspot) {
   if (!Array.isArray(scene.hotspots)) {
     scene.hotspots = [];
   }
-  if (scene.hotspots.some((entry) => entry.id === hotspot.id)) {
-    throw new Error(`Hotspot id already exists: ${hotspot.id}`);
-  }
-  scene.hotspots.push(hotspot);
-  return hotspot;
+  const ids = new Set(scene.hotspots.map((entry) => entry.id));
+  const uniqueId = resolveUniqueHotspotId(ids, hotspot.id);
+  const record =
+    uniqueId === hotspot.id ? hotspot : { ...hotspot, id: uniqueId };
+  scene.hotspots.push(record);
+  return record;
 }
 
 function findSceneHotspot(tour, sceneId, hotspotId) {
@@ -328,10 +356,12 @@ export function buildSceneRecord({
   panorama,
   defaultView,
   description,
+  tourTitle,
 }) {
   const label = title.trim();
   const id = sceneId?.trim() || slugifyHotspotName(label);
   const panoramaPath = panorama?.trim();
+  const tour = tourTitle?.trim() || 'this facility';
 
   if (!label) throw new Error('Scene title is required');
   if (!id) throw new Error('Scene title must contain letters or numbers');
@@ -340,7 +370,7 @@ export function buildSceneRecord({
   return {
     id,
     title: label,
-    ...(description?.trim() ? { description: description.trim() } : {}),
+    description: description?.trim() || defaultSceneDescription(tour, label),
     panorama: panoramaPath,
     defaultView: normalizeDefaultView(
       defaultView ?? { yaw: 0, pitch: 0, zoom: 17 },
@@ -430,6 +460,7 @@ export async function createScene({
     panorama: panoramaWebPath,
     defaultView,
     description,
+    tourTitle: tour.title,
   });
 
   if (!tour.scenes) {
@@ -446,6 +477,7 @@ export async function createScene({
   });
 
   writeTourJson(tourPath, tour);
+  persistTourContentPlaceholders(toursDir, tourId);
   return { tourPath, scene: record };
 }
 
@@ -485,6 +517,8 @@ export async function createNamingHotspot({
   price,
   status,
   body,
+  videoUrl,
+  image,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
@@ -494,6 +528,9 @@ export async function createNamingHotspot({
     price,
     status,
     body,
+    videoUrl,
+    image,
+    tourTitle: tour.title,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
   writeTourJson(tourPath, tour);
@@ -522,6 +559,7 @@ export async function createInfoHotspot({
     display,
     videoUrl,
     image,
+    tourTitle: tour.title,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
   writeTourJson(tourPath, tour);
@@ -635,6 +673,8 @@ export function updateNamingHotspot({
   price,
   status,
   body,
+  videoUrl,
+  image,
 }) {
   const resolvedHotspotId = hotspotId?.trim();
   if (!resolvedHotspotId) {
@@ -655,13 +695,16 @@ export function updateNamingHotspot({
   const nextPrice = price?.trim();
   const nextStatus = status?.trim();
   const nextBody = body?.trim();
+  const hasVideoUrl = videoUrl !== undefined;
+  const hasImage = image !== undefined;
 
   if (nextTitle) {
     hotspot.popup.title = nextTitle;
     hotspot.popup.namingOpportunity.name = `${nextTitle} Naming Opportunity`;
   }
   if (nextPrice) {
-    hotspot.popup.namingOpportunity.price = nextPrice;
+    hotspot.popup.namingOpportunity.price =
+      normalizeNamingPriceStorage(nextPrice);
   }
   if (nextStatus) {
     if (!NAMING_STATUSES.has(nextStatus)) {
@@ -669,13 +712,38 @@ export function updateNamingHotspot({
     }
     hotspot.popup.namingOpportunity.status = nextStatus;
   }
-  if (nextBody) {
-    hotspot.popup.body = nextBody;
+  if (body !== undefined) {
+    const opportunityTitle = nextTitle || hotspot.popup.title;
+    hotspot.popup.body =
+      nextBody || defaultNamingBody(opportunityTitle, tour.title);
+  }
+  if (hasVideoUrl) {
+    const nextVideoUrl = videoUrl?.trim();
+    if (nextVideoUrl) {
+      hotspot.popup.videoUrl = nextVideoUrl;
+    } else {
+      delete hotspot.popup.videoUrl;
+    }
+  }
+  if (hasImage) {
+    const nextImage = image?.trim();
+    if (nextImage) {
+      hotspot.popup.image = nextImage;
+    } else {
+      delete hotspot.popup.image;
+    }
   }
 
-  if (!nextTitle && !nextPrice && !nextStatus && !nextBody) {
+  if (
+    !nextTitle &&
+    !nextPrice &&
+    !nextStatus &&
+    body === undefined &&
+    !hasVideoUrl &&
+    !hasImage
+  ) {
     throw new Error(
-      'At least one of title, price, status, or body is required',
+      'At least one of title, price, status, body, videoUrl, or image is required',
     );
   }
 
@@ -721,8 +789,9 @@ export function updateInfoHotspot({
   if (nextTitle) {
     hotspot.popup.title = nextTitle;
   }
-  if (nextBody) {
-    hotspot.popup.body = nextBody;
+  if (body !== undefined) {
+    const infoTitle = nextTitle || hotspot.popup.title;
+    hotspot.popup.body = nextBody || defaultInfoBody(infoTitle, tour.title);
   }
   if (nextDisplay) {
     if (!INFO_DISPLAYS.has(nextDisplay)) {
@@ -747,7 +816,13 @@ export function updateInfoHotspot({
     }
   }
 
-  if (!nextTitle && !nextBody && !nextDisplay && !hasVideoUrl && !hasImage) {
+  if (
+    !nextTitle &&
+    body === undefined &&
+    !nextDisplay &&
+    !hasVideoUrl &&
+    !hasImage
+  ) {
     throw new Error(
       'At least one of title, body, display, videoUrl, or image is required',
     );
@@ -803,11 +878,9 @@ export function updateScene({
   }
 
   if (hasDescription) {
-    if (nextDescription) {
-      scene.description = nextDescription;
-    } else {
-      delete scene.description;
-    }
+    scene.description =
+      nextDescription ||
+      defaultSceneDescription(tour.title, scene.title ?? resolvedSceneId);
   }
 
   if (wantsFirstScene) {
@@ -821,6 +894,7 @@ export function updateScene({
   }
 
   writeTourJson(tourPath, tour);
+  persistTourContentPlaceholders(toursDir, tourId);
   return { tourPath, scene, firstScene: tour.firstScene };
 }
 

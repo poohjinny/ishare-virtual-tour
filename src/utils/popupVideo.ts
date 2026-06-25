@@ -4,7 +4,7 @@ import {
   releaseTourMedia,
 } from './tourMediaCoordinator';
 
-export type PopupVideoKind = 'youtube' | 'file';
+export type PopupVideoKind = 'youtube' | 'file' | 'embed';
 
 export interface ResolvedPopupVideo {
   kind: PopupVideoKind;
@@ -48,6 +48,24 @@ export function youtubeThumbnailUrl(url: string): string | null {
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 }
 
+export function synthesiaEmbedUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url.trim());
+    const host = parsed.hostname.replace(/^www\./, '');
+
+    if (
+      host === 'share.synthesia.io' &&
+      parsed.pathname.startsWith('/embeds/')
+    ) {
+      return parsed.toString();
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 function isFileVideoUrl(url: string): boolean {
   try {
     const path = new URL(url, 'https://local.invalid').pathname;
@@ -64,13 +82,18 @@ export function resolvePopupVideo(
   const trimmed = videoUrl.trim();
   if (!trimmed) return null;
 
-  const embedUrl = youtubeEmbedUrl(trimmed);
-  if (embedUrl) {
+  const youtubeEmbed = youtubeEmbedUrl(trimmed);
+  if (youtubeEmbed) {
     return {
       kind: 'youtube',
-      sourceUrl: embedUrl,
+      sourceUrl: youtubeEmbed,
       thumbnailUrl: youtubeThumbnailUrl(trimmed),
     };
+  }
+
+  const synthesiaEmbed = synthesiaEmbedUrl(trimmed);
+  if (synthesiaEmbed) {
+    return { kind: 'embed', sourceUrl: synthesiaEmbed, thumbnailUrl: null };
   }
 
   if (isFileVideoUrl(trimmed)) {
@@ -208,6 +231,11 @@ export function bindPopupVideoForegroundMedia(
     return () => releaseTourMedia(mediaId);
   }
 
+  if (kind === 'embed') {
+    claimTourMedia(mediaId);
+    return () => releaseTourMedia(mediaId);
+  }
+
   const video = shell.querySelector('video');
   if (!(video instanceof HTMLVideoElement)) {
     claimTourMedia(mediaId);
@@ -240,6 +268,21 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
     iframe.setAttribute(
       'allow',
       'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+    );
+    iframe.allowFullscreen = true;
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    shell.appendChild(iframe);
+    bindPopupVideoForegroundMedia(shell, kind);
+    return;
+  }
+
+  if (kind === 'embed') {
+    const iframe = document.createElement('iframe');
+    iframe.src = src;
+    iframe.title = `${title} video`;
+    iframe.setAttribute(
+      'allow',
+      'autoplay; fullscreen; encrypted-media; picture-in-picture',
     );
     iframe.allowFullscreen = true;
     iframe.referrerPolicy = 'strict-origin-when-cross-origin';

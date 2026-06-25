@@ -53,6 +53,7 @@ import {
   DEV_SCENE_TITLE_STORAGE_KEY,
   formatViewPosition,
   logLandingView,
+  previewHotspotId,
   slugifyHotspotName,
   toViewPosition,
   type DevSceneRef,
@@ -250,6 +251,8 @@ export function DevViewPanel({
     NamingOpportunityStatus | ''
   >('');
   const [editNoBody, setEditNoBody] = useState('');
+  const [editNoVideoUrl, setEditNoVideoUrl] = useState('');
+  const [editNoImage, setEditNoImage] = useState('');
   const [editInfoTitle, setEditInfoTitle] = useState('');
   const [editInfoBody, setEditInfoBody] = useState('');
   const [editInfoDisplay, setEditInfoDisplay] =
@@ -461,6 +464,8 @@ export function DevViewPanel({
   const [noPrice, setNoPrice] = useState('');
   const [noStatus, setNoStatus] = useState<NamingOpportunityStatus | ''>('');
   const [noBody, setNoBody] = useState('');
+  const [noVideoUrl, setNoVideoUrl] = useState('');
+  const [noImage, setNoImage] = useState('');
   const [infoName, setInfoName] = useState('');
   const [infoBody, setInfoBody] = useState('');
   const [infoDisplay, setInfoDisplay] = useState<PopupDisplay>('anchored');
@@ -486,6 +491,25 @@ export function DevViewPanel({
   const infoSlug = useMemo(
     () => (trimmedInfoName ? slugifyHotspotName(trimmedInfoName) : ''),
     [trimmedInfoName],
+  );
+  const existingHotspotIds = useMemo(
+    () => currentSceneHotspots.map((hotspot) => hotspot.id),
+    [currentSceneHotspots],
+  );
+  const navHotspotIdPreview = useMemo(
+    () =>
+      navSlug ? previewHotspotId(existingHotspotIds, `nav-to-${navSlug}`) : '',
+    [existingHotspotIds, navSlug],
+  );
+  const noHotspotIdPreview = useMemo(
+    () =>
+      noSlug ? previewHotspotId(existingHotspotIds, `info-${noSlug}`) : '',
+    [existingHotspotIds, noSlug],
+  );
+  const infoHotspotIdPreview = useMemo(
+    () =>
+      infoSlug ? previewHotspotId(existingHotspotIds, `info-${infoSlug}`) : '',
+    [existingHotspotIds, infoSlug],
   );
   const trimmedSceneTitle = sceneTitle.trim();
   const sceneSlug = useMemo(
@@ -516,16 +540,9 @@ export function DevViewPanel({
     scene.tourId && clickCoords && trimmedNavName && navTargetSceneId,
   );
   const canCreateNaming = Boolean(
-    scene.tourId &&
-    clickCoords &&
-    trimmedNoName &&
-    noPrice.trim() &&
-    noStatus &&
-    noBody.trim(),
+    scene.tourId && clickCoords && trimmedNoName && noPrice.trim() && noStatus,
   );
-  const canCreateInfo = Boolean(
-    scene.tourId && clickCoords && trimmedInfoName && infoBody.trim(),
-  );
+  const canCreateInfo = Boolean(scene.tourId && clickCoords && trimmedInfoName);
   const canCreateScene = Boolean(
     scene.tourId && trimmedSceneTitle && scenePanoramaFile,
   );
@@ -546,7 +563,10 @@ export function DevViewPanel({
         productFullName: editTourProductFullName.trim() || undefined,
         organization:
           tour.organization ?
-            { ...tour.organization, name: editOrgName.trim() || tour.organization.name }
+            {
+              ...tour.organization,
+              name: editOrgName.trim() || tour.organization.name,
+            }
           : undefined,
       }),
     [editOrgName, editTourProductFullName, editTourTitle, tour],
@@ -809,6 +829,24 @@ export function DevViewPanel({
   }, [noName]);
 
   useEffect(() => {
+    setNavName('');
+    setNavTargetSceneId('');
+    setNavTargetTouched(false);
+    setNavInstant(false);
+    setNavPreviewImage('');
+    setNoName('');
+    setNoPrice('');
+    setNoStatus('');
+    setNoBody('');
+    setNoVideoUrl('');
+    setNoImage('');
+    setInfoName('');
+    setInfoBody('');
+    setInfoVideoUrl('');
+    setInfoImage('');
+  }, [scene.id]);
+
+  useEffect(() => {
     if (navTargetTouched || !navSlug) return;
     const matchedScene = sortedSceneOptions.find(
       (entry) => entry.id === navSlug,
@@ -874,6 +912,11 @@ export function DevViewPanel({
       });
       await onTourMutated?.();
       setNavStatus('done');
+      setNavName('');
+      setNavTargetSceneId('');
+      setNavTargetTouched(false);
+      setNavInstant(false);
+      setNavPreviewImage('');
     } catch (error) {
       setNavStatus('error');
       setNavError(
@@ -900,8 +943,7 @@ export function DevViewPanel({
       !position ||
       !trimmedNoName ||
       !noPrice.trim() ||
-      !noStatus ||
-      !noBody.trim()
+      !noStatus
     ) {
       return;
     }
@@ -917,7 +959,9 @@ export function DevViewPanel({
         position,
         price: noPrice.trim(),
         status: noStatus,
-        body: noBody.trim(),
+        body: noBody.trim() || undefined,
+        videoUrl: noVideoUrl.trim() || undefined,
+        image: noImage.trim() || undefined,
       });
       await onTourMutated?.();
       setNamingStatus('done');
@@ -932,8 +976,10 @@ export function DevViewPanel({
   }, [
     buildHotspotPosition,
     noBody,
+    noImage,
     noPrice,
     noStatus,
+    noVideoUrl,
     scene.id,
     scene.tourId,
     trimmedNoName,
@@ -942,7 +988,7 @@ export function DevViewPanel({
 
   const createInfoHotspotHandler = useCallback(async () => {
     const position = buildHotspotPosition();
-    if (!scene.tourId || !position || !trimmedInfoName || !infoBody.trim()) {
+    if (!scene.tourId || !position || !trimmedInfoName) {
       return;
     }
 
@@ -955,7 +1001,7 @@ export function DevViewPanel({
         sceneId: scene.id,
         name: trimmedInfoName,
         position,
-        body: infoBody.trim(),
+        body: infoBody.trim() || undefined,
         display: infoDisplay,
         videoUrl: infoVideoUrl.trim() || undefined,
         image: infoImage.trim() || undefined,
@@ -1491,6 +1537,8 @@ export function DevViewPanel({
       setEditNoPrice(hotspot.popup?.namingOpportunity?.price ?? '');
       setEditNoStatus(hotspot.popup?.namingOpportunity?.status ?? '');
       setEditNoBody(hotspot.popup?.body ?? '');
+      setEditNoVideoUrl(hotspot.popup?.videoUrl ?? '');
+      setEditNoImage(hotspot.popup?.image ?? '');
       return;
     }
     setEditInfoTitle(hotspot.popup?.title ?? '');
@@ -1552,6 +1600,8 @@ export function DevViewPanel({
           price: editNoPrice.trim() || undefined,
           status: editNoStatus || undefined,
           body: editNoBody.trim() || undefined,
+          videoUrl: editNoVideoUrl,
+          image: editNoImage,
         });
       } else {
         await devUpdateInfoHotspot({
@@ -1591,9 +1641,11 @@ export function DevViewPanel({
     editNavTargetViewYaw,
     editNavTargetViewZoom,
     editNoBody,
+    editNoImage,
     editNoPrice,
     editNoStatus,
     editNoTitle,
+    editNoVideoUrl,
     editingHotspotId,
     onTourMutated,
     scene.id,
@@ -2261,6 +2313,38 @@ export function DevViewPanel({
                                   rows={3}
                                 />
                               </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Video URL (optional)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='url'
+                                  value={editNoVideoUrl}
+                                  onChange={(e) =>
+                                    setEditNoVideoUrl(e.target.value)
+                                  }
+                                  placeholder='https://youtube.com/… or Synthesia embed'
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Image path (optional)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={editNoImage}
+                                  onChange={(e) =>
+                                    setEditNoImage(e.target.value)
+                                  }
+                                  placeholder='/assets/…/photo.webp'
+                                />
+                              </label>
                               <div className={devViewPanelActionsClassName}>
                                 <button
                                   type='button'
@@ -2273,7 +2357,9 @@ export function DevViewPanel({
                                     (!editNoTitle.trim() &&
                                       !editNoPrice.trim() &&
                                       !editNoStatus &&
-                                      !editNoBody.trim())
+                                      !editNoBody.trim() &&
+                                      !editNoVideoUrl.trim() &&
+                                      !editNoImage.trim())
                                   }
                                 >
                                   Save NO
@@ -2483,7 +2569,14 @@ export function DevViewPanel({
                     value={navTargetSceneId}
                     onChange={(e) => {
                       setNavTargetTouched(true);
-                      setNavTargetSceneId(e.target.value);
+                      const nextId = e.target.value;
+                      setNavTargetSceneId(nextId);
+                      const matchedScene = sortedSceneOptions.find(
+                        (entry) => entry.id === nextId,
+                      );
+                      if (matchedScene) {
+                        setNavName(matchedScene.title);
+                      }
                     }}
                   >
                     <option value=''>Select scene…</option>
@@ -2495,10 +2588,16 @@ export function DevViewPanel({
                   </select>
                 </label>
 
-                {navSlug ?
+                {navHotspotIdPreview ?
                   <p className={devViewPanelSlugPreviewClassName}>
-                    id <code>nav-to-{navSlug}</code> · uses target{' '}
-                    <code>defaultView</code>
+                    id <code>{navHotspotIdPreview}</code>
+                    {navHotspotIdPreview !== `nav-to-${navSlug}` ?
+                      <>
+                        {' '}
+                        · suffix added — name slug already used on this scene
+                      </>
+                    : null}{' '}
+                    · uses target <code>defaultView</code>
                   </p>
                 : null}
 
@@ -2584,7 +2683,7 @@ export function DevViewPanel({
                     type='text'
                     value={noPrice}
                     onChange={(e) => setNoPrice(e.target.value)}
-                    placeholder='e.g. $75,000'
+                    placeholder='e.g. 75000'
                     spellCheck={false}
                     autoComplete='off'
                   />
@@ -2613,21 +2712,63 @@ export function DevViewPanel({
                 </label>
 
                 <label className={devViewPanelFieldClassName}>
-                  <span className={devViewPanelFieldLabelClassName}>Body</span>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Body (optional)
+                  </span>
                   <textarea
                     className={devViewPanelTextareaClassName}
                     value={noBody}
                     onChange={(e) => setNoBody(e.target.value)}
-                    placeholder='First paragraph describing the naming opportunity…'
+                    placeholder='Leave empty for placeholder copy from the title…'
                     rows={3}
                     spellCheck={true}
                   />
                 </label>
 
-                {noSlug ?
+                <label className={devViewPanelFieldClassName}>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Video URL (optional)
+                  </span>
+                  <input
+                    className={devViewPanelInputClassName}
+                    type='url'
+                    value={noVideoUrl}
+                    onChange={(e) => setNoVideoUrl(e.target.value)}
+                    placeholder='https://youtube.com/… or Synthesia embed'
+                    spellCheck={false}
+                    autoComplete='off'
+                  />
+                </label>
+
+                <label className={devViewPanelFieldClassName}>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Image path (optional)
+                  </span>
+                  <input
+                    className={devViewPanelInputClassName}
+                    type='text'
+                    value={noImage}
+                    onChange={(e) => setNoImage(e.target.value)}
+                    placeholder='/assets/…/photo.webp'
+                    spellCheck={false}
+                    autoComplete='off'
+                  />
+                </label>
+
+                {noHotspotIdPreview ?
                   <p className={devViewPanelSlugPreviewClassName}>
-                    id <code>info-{noSlug}</code> · deep link{' '}
-                    <code>?no={noSlug}</code>
+                    id <code>{noHotspotIdPreview}</code>
+                    {noHotspotIdPreview !== `info-${noSlug}` ?
+                      <>
+                        {' '}
+                        · suffix added — name slug already used on this scene
+                      </>
+                    : null}{' '}
+                    · deep link{' '}
+                    <code>
+                      ?no=
+                      {noHotspotIdPreview.replace(/^info-/, '')}
+                    </code>
                   </p>
                 : null}
 
@@ -2697,12 +2838,14 @@ export function DevViewPanel({
                 </label>
 
                 <label className={devViewPanelFieldClassName}>
-                  <span className={devViewPanelFieldLabelClassName}>Body</span>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Body (optional)
+                  </span>
                   <textarea
                     className={devViewPanelTextareaClassName}
                     value={infoBody}
                     onChange={(e) => setInfoBody(e.target.value)}
-                    placeholder='Popup copy…'
+                    placeholder='Leave empty for placeholder copy from the title…'
                     rows={3}
                     spellCheck={true}
                   />
@@ -2738,9 +2881,15 @@ export function DevViewPanel({
                   />
                 </label>
 
-                {infoSlug ?
+                {infoHotspotIdPreview ?
                   <p className={devViewPanelSlugPreviewClassName}>
-                    id <code>info-{infoSlug}</code>
+                    id <code>{infoHotspotIdPreview}</code>
+                    {infoHotspotIdPreview !== `info-${infoSlug}` ?
+                      <>
+                        {' '}
+                        · suffix added — name slug already used on this scene
+                      </>
+                    : null}
                   </p>
                 : null}
 
@@ -2949,7 +3098,9 @@ export function DevViewPanel({
                 <option value='platform'>Platform default playlist</option>
                 <option value='manifest'>Playlist manifest JSON</option>
                 <option value='audio'>Single audio track</option>
-                <option value='playlist'>Inline playlist (one URL per line)</option>
+                <option value='playlist'>
+                  Inline playlist (one URL per line)
+                </option>
               </select>
             </label>
 

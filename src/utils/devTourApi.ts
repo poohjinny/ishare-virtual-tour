@@ -44,11 +44,13 @@ export interface DevNavHotspotPayload extends DevHotspotBasePayload {
 export interface DevNamingHotspotPayload extends DevHotspotBasePayload {
   price: string;
   status: NamingOpportunityStatus;
-  body: string;
+  body?: string;
+  videoUrl?: string;
+  image?: string;
 }
 
 export interface DevInfoHotspotPayload extends DevHotspotBasePayload {
-  body: string;
+  body?: string;
   title?: string;
   display?: PopupDisplay;
   videoUrl?: string;
@@ -480,6 +482,8 @@ export interface DevUpdateNamingHotspotPayload extends DevHotspotIdPayload {
   price?: string;
   status?: NamingOpportunityStatus;
   body?: string;
+  videoUrl?: string;
+  image?: string;
 }
 
 export interface DevUpdateInfoHotspotPayload extends DevHotspotIdPayload {

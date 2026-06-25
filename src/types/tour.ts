@@ -31,6 +31,7 @@ export type NamingOpportunityStatus =
 export interface NamingOpportunity {
   /** Full naming opportunity title (e.g. "Reception Desk Naming Opportunity") */
   name: string;
+  /** Numeric amount only in tour JSON (e.g. "75000") — formatted at display time. */
   price: string;
   priceLabel?: string;
   /** Availability — defaults to `on_sale` when omitted */
