@@ -10,14 +10,18 @@ export const DEV_NAMING_STATUS_OPTIONS: {
   { value: 'sold', label: 'Sold' },
 ];
 
-export const DEV_NAMING_DEFAULT_PRICE = '$75,000';
+export type DevHotspotTab = 'nav' | 'naming' | 'info';
 
-export const DEV_NAMING_DEFAULT_BODY =
-  'First paragraph describing the naming opportunity…';
-
-export type DevHotspotTab = 'nav' | 'naming';
+export const DEV_INFO_DISPLAY_OPTIONS: {
+  value: 'modal' | 'anchored';
+  label: string;
+}[] = [
+  { value: 'anchored', label: 'Anchored panel on panorama' },
+  { value: 'modal', label: 'Modal overlay' },
+];
 
 export const DEV_HOTSPOT_TABS: { id: DevHotspotTab; label: string }[] = [
   { id: 'nav', label: 'Nav' },
   { id: 'naming', label: 'NO' },
+  { id: 'info', label: 'Info' },
 ];

@@ -47,6 +47,7 @@ function devSceneContext(scene?: DevSceneRef) {
 export const DEV_HOTSPOT_NAME_STORAGE_KEY = 'ishare-dev-hotspot-name';
 export const DEV_NAV_NAME_STORAGE_KEY = 'ishare-dev-nav-name';
 export const DEV_NO_NAME_STORAGE_KEY = 'ishare-dev-no-name';
+export const DEV_SCENE_TITLE_STORAGE_KEY = 'ishare-dev-scene-title';
 
 /** "Parking Lot" → `parking-lot` (matches tour scene / hotspot id convention). */
 export function slugifyHotspotName(name: string): string {

@@ -6,6 +6,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
+import sharp from 'sharp';
 import {
   renderEquirectPreviewToFile,
   resolveThumbnailFilePath,
@@ -14,6 +15,9 @@ import {
 
 const THUMBNAIL_WIDTH = Number(process.env.THUMBNAIL_WIDTH ?? 640);
 const THUMBNAIL_QUALITY = Number(process.env.THUMBNAIL_QUALITY ?? 85);
+const MAX_PANORAMA_UPLOAD_BYTES = 50 * 1024 * 1024;
+
+const PANORAMA_UPLOAD_EXTENSIONS = new Set(['webp', 'jpg', 'jpeg', 'png']);
 
 function roundCoord(value) {
   return +Number(value).toFixed(1);
@@ -25,6 +29,46 @@ export function normalizeDefaultView(view) {
     pitch: roundCoord(view.pitch),
     zoom: view.zoom ?? 0,
   };
+}
+
+function roundMapCoord(value) {
+  return +Number(value).toFixed(3);
+}
+
+export function normalizeMapPosition(map) {
+  if (
+    typeof map?.x !== 'number' ||
+    typeof map?.y !== 'number' ||
+    typeof map?.heading !== 'number'
+  ) {
+    throw new Error('map.x, map.y, and map.heading must be numbers');
+  }
+
+  const x = Number(map.x);
+  const y = Number(map.y);
+  if (x < 0 || x > 1 || y < 0 || y > 1) {
+    throw new Error('map.x and map.y must be between 0 and 1');
+  }
+
+  return {
+    x: roundMapCoord(x),
+    y: roundMapCoord(y),
+    heading: roundCoord(map.heading),
+  };
+}
+
+function validateOptionalViewPosition(view, label) {
+  if (view === undefined || view === null) return undefined;
+  if (typeof view !== 'object') {
+    throw new Error(`${label} must be an object`);
+  }
+  if (typeof view.yaw !== 'number' || typeof view.pitch !== 'number') {
+    throw new Error(`${label}.yaw and ${label}.pitch must be numbers`);
+  }
+  if (view.zoom !== undefined && typeof view.zoom !== 'number') {
+    throw new Error(`${label}.zoom must be a number`);
+  }
+  return normalizeDefaultView(view);
 }
 
 export function normalizeHotspotPosition(position) {
@@ -46,6 +90,8 @@ export function buildNavHotspotRecord({
   position,
   targetSceneId,
   targetView,
+  instant,
+  previewImage,
 }) {
   const label = name.trim();
   const slug = slugifyHotspotName(label);
@@ -55,7 +101,7 @@ export function buildNavHotspotRecord({
   if (!slug) throw new Error('Hotspot name must contain letters or numbers');
   if (!targetScene) throw new Error('Target scene is required');
 
-  return {
+  const record = {
     id: `nav-to-${slug}`,
     type: 'nav',
     label,
@@ -65,6 +111,17 @@ export function buildNavHotspotRecord({
       targetView ?? { yaw: 0, pitch: 0, zoom: 17 },
     ),
   };
+
+  if (instant) {
+    record.instant = true;
+  }
+
+  const previewPath = previewImage?.trim();
+  if (previewPath) {
+    record.preview = { image: previewPath };
+  }
+
+  return record;
 }
 
 const NAMING_STATUSES = new Set(['on_sale', 'sold', 'reserved', 'coming_soon']);
@@ -107,6 +164,43 @@ export function buildNamingHotspotRecord({
   };
 }
 
+const INFO_DISPLAYS = new Set(['modal', 'anchored']);
+
+export function buildInfoHotspotRecord({
+  name,
+  position,
+  title,
+  body,
+  display,
+  videoUrl,
+  image,
+}) {
+  const titleValue = (title ?? name)?.trim();
+  const slug = slugifyHotspotName(titleValue);
+  const bodyValue = body?.trim();
+  const displayValue = display?.trim() || 'anchored';
+
+  if (!titleValue) throw new Error('Hotspot name is required');
+  if (!slug) throw new Error('Hotspot name must contain letters or numbers');
+  if (!bodyValue) throw new Error('Body copy is required');
+  if (!INFO_DISPLAYS.has(displayValue)) {
+    throw new Error('display must be modal or anchored');
+  }
+
+  const popup = { display: displayValue, title: titleValue, body: bodyValue };
+  const nextVideoUrl = videoUrl?.trim();
+  const nextImage = image?.trim();
+  if (nextVideoUrl) popup.videoUrl = nextVideoUrl;
+  if (nextImage) popup.image = nextImage;
+
+  return {
+    id: `info-${slug}`,
+    type: 'info',
+    position: normalizeHotspotPosition(position),
+    popup,
+  };
+}
+
 function appendSceneHotspot(tour, sceneId, hotspot) {
   const scene = tour.scenes?.[sceneId];
   if (!scene) {
@@ -122,10 +216,237 @@ function appendSceneHotspot(tour, sceneId, hotspot) {
   return hotspot;
 }
 
+function findSceneHotspot(tour, sceneId, hotspotId) {
+  const scene = tour.scenes?.[sceneId];
+  if (!scene) {
+    throw new Error(`Scene not found: ${sceneId}`);
+  }
+  const hotspot = scene.hotspots?.find((entry) => entry.id === hotspotId);
+  if (!hotspot) {
+    throw new Error(`Hotspot not found: ${hotspotId}`);
+  }
+  return { scene, hotspot };
+}
+
+export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
+  const resolvedHotspotId = hotspotId?.trim();
+  if (!resolvedHotspotId) {
+    throw new Error('hotspotId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const { scene, hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+  scene.hotspots = scene.hotspots.filter(
+    (entry) => entry.id !== resolvedHotspotId,
+  );
+  writeTourJson(tourPath, tour);
+  return { tourPath, hotspot };
+}
+
+export function updateHotspotPosition({
+  toursDir,
+  tourId,
+  sceneId,
+  hotspotId,
+  position,
+}) {
+  const resolvedHotspotId = hotspotId?.trim();
+  if (!resolvedHotspotId) {
+    throw new Error('hotspotId is required');
+  }
+  if (
+    !position ||
+    typeof position.yaw !== 'number' ||
+    typeof position.pitch !== 'number'
+  ) {
+    throw new Error('position.yaw and position.pitch must be numbers');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+  hotspot.position = normalizeHotspotPosition(position);
+  writeTourJson(tourPath, tour);
+  return { tourPath, hotspot };
+}
+
+export async function replaceScenePanorama({
+  root,
+  toursDir,
+  assetsRoot,
+  tourId,
+  sceneId,
+  panoramaFileBuffer,
+}) {
+  if (!panoramaFileBuffer?.length) {
+    throw new Error('panoramaFile is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const scene = tour.scenes?.[sceneId];
+  if (!scene) {
+    throw new Error(`Scene not found: ${sceneId}`);
+  }
+
+  const panoramaWebPath = await saveUploadedPanoramaWebp({
+    assetsRoot,
+    root,
+    tour,
+    sceneId,
+    fileBuffer: panoramaFileBuffer,
+  });
+  scene.panorama = panoramaWebPath;
+
+  const { thumbnail } = await bakeSceneThumbnail({
+    root,
+    assetsRoot,
+    tour,
+    sceneId,
+    view: scene.defaultView,
+  });
+
+  writeTourJson(tourPath, tour);
+  return { tourPath, sceneId, panorama: panoramaWebPath, thumbnail };
+}
+
 function assertTargetSceneExists(tour, targetSceneId) {
   if (!tour.scenes?.[targetSceneId]) {
     throw new Error(`Target scene not found: ${targetSceneId}`);
   }
+}
+
+export function buildDefaultPanoramaWebPath(tour, sceneId) {
+  const clientId = tour.clientId ?? tour.id;
+  return `/assets/${clientId}/${tour.id}/panoramas/${sceneId}.webp`;
+}
+
+export function buildSceneRecord({
+  title,
+  sceneId,
+  panorama,
+  defaultView,
+  description,
+}) {
+  const label = title.trim();
+  const id = sceneId?.trim() || slugifyHotspotName(label);
+  const panoramaPath = panorama?.trim();
+
+  if (!label) throw new Error('Scene title is required');
+  if (!id) throw new Error('Scene title must contain letters or numbers');
+  if (!panoramaPath) throw new Error('Panorama path is required');
+
+  return {
+    id,
+    title: label,
+    ...(description?.trim() ? { description: description.trim() } : {}),
+    panorama: panoramaPath,
+    defaultView: normalizeDefaultView(
+      defaultView ?? { yaw: 0, pitch: 0, zoom: 17 },
+    ),
+    hotspots: [],
+  };
+}
+
+function syncAssetToPublic(root, assetsFilePath, webPath) {
+  const relative = webPath.replace(/^\/assets\//, '');
+  const publicPath = join(root, 'public', 'assets', relative);
+  mkdirSync(dirname(publicPath), { recursive: true });
+  copyFileSync(assetsFilePath, publicPath);
+}
+
+export function assertPanoramaUploadFileName(fileName) {
+  const trimmed = fileName?.trim();
+  if (!trimmed) throw new Error('Panorama file is required');
+  const ext = trimmed.toLowerCase().split('.').pop();
+  if (!ext || !PANORAMA_UPLOAD_EXTENSIONS.has(ext)) {
+    throw new Error('Panorama must be .webp, .jpg, .jpeg, or .png');
+  }
+  return trimmed;
+}
+
+export async function saveUploadedPanoramaWebp({
+  assetsRoot,
+  root,
+  tour,
+  sceneId,
+  fileBuffer,
+}) {
+  if (!fileBuffer?.length) {
+    throw new Error('Panorama file is empty');
+  }
+  if (fileBuffer.length > MAX_PANORAMA_UPLOAD_BYTES) {
+    throw new Error('Panorama file is too large (max 50 MB)');
+  }
+
+  const webPath = buildDefaultPanoramaWebPath(tour, sceneId);
+  const filePath = resolvePanoramaFilePath(assetsRoot, webPath);
+  mkdirSync(dirname(filePath), { recursive: true });
+
+  await sharp(fileBuffer).webp({ quality: 90 }).toFile(filePath);
+  syncAssetToPublic(root, filePath, webPath);
+
+  return webPath;
+}
+
+export async function createScene({
+  root,
+  toursDir,
+  assetsRoot,
+  tourId,
+  title,
+  sceneId,
+  panoramaFileBuffer,
+  defaultView,
+  description,
+}) {
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const resolvedSceneId = sceneId?.trim() || slugifyHotspotName(title.trim());
+
+  if (!title.trim()) throw new Error('Scene title is required');
+  if (!resolvedSceneId) {
+    throw new Error('Scene title must contain letters or numbers');
+  }
+  if (tour.scenes?.[resolvedSceneId]) {
+    throw new Error(`Scene id already exists: ${resolvedSceneId}`);
+  }
+  if (!panoramaFileBuffer?.length) {
+    throw new Error('panoramaFile is required');
+  }
+
+  const panoramaWebPath = await saveUploadedPanoramaWebp({
+    assetsRoot,
+    root,
+    tour,
+    sceneId: resolvedSceneId,
+    fileBuffer: panoramaFileBuffer,
+  });
+
+  const record = buildSceneRecord({
+    title,
+    sceneId: resolvedSceneId,
+    panorama: panoramaWebPath,
+    defaultView,
+    description,
+  });
+
+  if (!tour.scenes) {
+    tour.scenes = {};
+  }
+  tour.scenes[record.id] = record;
+
+  await bakeSceneThumbnail({
+    root,
+    assetsRoot,
+    tour,
+    sceneId: record.id,
+    view: record.defaultView,
+  });
+
+  writeTourJson(tourPath, tour);
+  return { tourPath, scene: record };
 }
 
 export async function createNavHotspot({
@@ -135,6 +456,8 @@ export async function createNavHotspot({
   name,
   position,
   targetSceneId,
+  instant,
+  previewImage,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
@@ -145,6 +468,8 @@ export async function createNavHotspot({
     position,
     targetSceneId,
     targetView: targetScene?.defaultView,
+    instant,
+    previewImage,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
   writeTourJson(tourPath, tour);
@@ -173,6 +498,361 @@ export async function createNamingHotspot({
   appendSceneHotspot(tour, sceneId, hotspot);
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
+}
+
+export async function createInfoHotspot({
+  toursDir,
+  tourId,
+  sceneId,
+  name,
+  position,
+  title,
+  body,
+  display,
+  videoUrl,
+  image,
+}) {
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const hotspot = buildInfoHotspotRecord({
+    name,
+    position,
+    title,
+    body,
+    display,
+    videoUrl,
+    image,
+  });
+  appendSceneHotspot(tour, sceneId, hotspot);
+  writeTourJson(tourPath, tour);
+  return { tourPath, hotspot };
+}
+
+export function updateNavHotspot({
+  toursDir,
+  tourId,
+  sceneId,
+  hotspotId,
+  label,
+  targetSceneId,
+  targetView,
+  syncTargetViewFromScene,
+  instant,
+  previewImage,
+  clearPreviewImage,
+}) {
+  const resolvedHotspotId = hotspotId?.trim();
+  if (!resolvedHotspotId) {
+    throw new Error('hotspotId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+
+  if (hotspot.type !== 'nav') {
+    throw new Error(`Hotspot is not nav: ${resolvedHotspotId}`);
+  }
+
+  const nextLabel = label?.trim();
+  const nextTargetSceneId = targetSceneId?.trim();
+  const hasTargetView = targetView !== undefined && targetView !== null;
+  const hasInstant = instant !== undefined;
+  const hasPreviewImage = previewImage !== undefined;
+  const wantsClearPreview = clearPreviewImage === true;
+  const wantsSyncTargetView = syncTargetViewFromScene === true;
+
+  if (
+    !nextLabel &&
+    !nextTargetSceneId &&
+    !hasTargetView &&
+    !hasInstant &&
+    !hasPreviewImage &&
+    !wantsClearPreview &&
+    !wantsSyncTargetView
+  ) {
+    throw new Error(
+      'At least one of label, targetSceneId, targetView, instant, previewImage, clearPreviewImage, or syncTargetViewFromScene is required',
+    );
+  }
+
+  if (nextLabel) {
+    hotspot.label = nextLabel;
+  }
+
+  if (nextTargetSceneId) {
+    assertTargetSceneExists(tour, nextTargetSceneId);
+    hotspot.targetScene = nextTargetSceneId;
+    if (!hasTargetView && !wantsSyncTargetView) {
+      hotspot.targetView = normalizeDefaultView(
+        tour.scenes[nextTargetSceneId].defaultView,
+      );
+    }
+  }
+
+  if (wantsSyncTargetView) {
+    const resolvedTargetSceneId = hotspot.targetScene?.trim();
+    if (!resolvedTargetSceneId) {
+      throw new Error('Nav hotspot has no targetScene to sync targetView from');
+    }
+    assertTargetSceneExists(tour, resolvedTargetSceneId);
+    hotspot.targetView = normalizeDefaultView(
+      tour.scenes[resolvedTargetSceneId].defaultView,
+    );
+  } else if (hasTargetView) {
+    hotspot.targetView = validateOptionalViewPosition(targetView, 'targetView');
+  }
+
+  if (hasInstant) {
+    if (instant) {
+      hotspot.instant = true;
+    } else {
+      delete hotspot.instant;
+    }
+  }
+
+  if (wantsClearPreview) {
+    delete hotspot.preview;
+  } else if (hasPreviewImage) {
+    const previewPath = previewImage?.trim();
+    if (previewPath) {
+      hotspot.preview = { image: previewPath };
+    } else {
+      delete hotspot.preview;
+    }
+  }
+
+  writeTourJson(tourPath, tour);
+  return { tourPath, hotspot };
+}
+
+export function updateNamingHotspot({
+  toursDir,
+  tourId,
+  sceneId,
+  hotspotId,
+  title,
+  price,
+  status,
+  body,
+}) {
+  const resolvedHotspotId = hotspotId?.trim();
+  if (!resolvedHotspotId) {
+    throw new Error('hotspotId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+
+  if (hotspot.type !== 'info' || !hotspot.popup?.namingOpportunity) {
+    throw new Error(
+      `Hotspot is not a naming opportunity: ${resolvedHotspotId}`,
+    );
+  }
+
+  const nextTitle = title?.trim();
+  const nextPrice = price?.trim();
+  const nextStatus = status?.trim();
+  const nextBody = body?.trim();
+
+  if (nextTitle) {
+    hotspot.popup.title = nextTitle;
+    hotspot.popup.namingOpportunity.name = `${nextTitle} Naming Opportunity`;
+  }
+  if (nextPrice) {
+    hotspot.popup.namingOpportunity.price = nextPrice;
+  }
+  if (nextStatus) {
+    if (!NAMING_STATUSES.has(nextStatus)) {
+      throw new Error(`Invalid naming status: ${nextStatus}`);
+    }
+    hotspot.popup.namingOpportunity.status = nextStatus;
+  }
+  if (nextBody) {
+    hotspot.popup.body = nextBody;
+  }
+
+  if (!nextTitle && !nextPrice && !nextStatus && !nextBody) {
+    throw new Error(
+      'At least one of title, price, status, or body is required',
+    );
+  }
+
+  writeTourJson(tourPath, tour);
+  return { tourPath, hotspot };
+}
+
+export function updateInfoHotspot({
+  toursDir,
+  tourId,
+  sceneId,
+  hotspotId,
+  title,
+  body,
+  display,
+  videoUrl,
+  image,
+}) {
+  const resolvedHotspotId = hotspotId?.trim();
+  if (!resolvedHotspotId) {
+    throw new Error('hotspotId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+
+  if (hotspot.type !== 'info' || !hotspot.popup) {
+    throw new Error(`Hotspot is not info: ${resolvedHotspotId}`);
+  }
+  if (hotspot.popup.namingOpportunity) {
+    throw new Error(
+      `Hotspot is a naming opportunity — use naming update: ${resolvedHotspotId}`,
+    );
+  }
+
+  const nextTitle = title?.trim();
+  const nextBody = body?.trim();
+  const nextDisplay = display?.trim();
+  const hasVideoUrl = videoUrl !== undefined;
+  const hasImage = image !== undefined;
+
+  if (nextTitle) {
+    hotspot.popup.title = nextTitle;
+  }
+  if (nextBody) {
+    hotspot.popup.body = nextBody;
+  }
+  if (nextDisplay) {
+    if (!INFO_DISPLAYS.has(nextDisplay)) {
+      throw new Error('display must be modal or anchored');
+    }
+    hotspot.popup.display = nextDisplay;
+  }
+  if (hasVideoUrl) {
+    const nextVideoUrl = videoUrl?.trim();
+    if (nextVideoUrl) {
+      hotspot.popup.videoUrl = nextVideoUrl;
+    } else {
+      delete hotspot.popup.videoUrl;
+    }
+  }
+  if (hasImage) {
+    const nextImage = image?.trim();
+    if (nextImage) {
+      hotspot.popup.image = nextImage;
+    } else {
+      delete hotspot.popup.image;
+    }
+  }
+
+  if (!nextTitle && !nextBody && !nextDisplay && !hasVideoUrl && !hasImage) {
+    throw new Error(
+      'At least one of title, body, display, videoUrl, or image is required',
+    );
+  }
+
+  writeTourJson(tourPath, tour);
+  return { tourPath, hotspot };
+}
+
+export function updateScene({
+  toursDir,
+  tourId,
+  sceneId,
+  title,
+  description,
+  setAsFirstScene,
+  map,
+  clearMap,
+}) {
+  const resolvedSceneId = sceneId?.trim();
+  if (!resolvedSceneId) {
+    throw new Error('sceneId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const scene = tour.scenes?.[resolvedSceneId];
+  if (!scene) {
+    throw new Error(`Scene not found: ${resolvedSceneId}`);
+  }
+
+  const nextTitle = title?.trim();
+  const hasDescription = description !== undefined;
+  const nextDescription = description?.trim();
+  const wantsFirstScene = Boolean(setAsFirstScene);
+  const hasMap = map !== undefined && map !== null;
+  const wantsClearMap = clearMap === true;
+
+  if (
+    !nextTitle &&
+    !hasDescription &&
+    !wantsFirstScene &&
+    !hasMap &&
+    !wantsClearMap
+  ) {
+    throw new Error(
+      'At least one of title, description, setAsFirstScene, map, or clearMap is required',
+    );
+  }
+
+  if (nextTitle) {
+    scene.title = nextTitle;
+  }
+
+  if (hasDescription) {
+    if (nextDescription) {
+      scene.description = nextDescription;
+    } else {
+      delete scene.description;
+    }
+  }
+
+  if (wantsFirstScene) {
+    tour.firstScene = resolvedSceneId;
+  }
+
+  if (wantsClearMap) {
+    delete scene.map;
+  } else if (hasMap) {
+    scene.map = normalizeMapPosition(map);
+  }
+
+  writeTourJson(tourPath, tour);
+  return { tourPath, scene, firstScene: tour.firstScene };
+}
+
+export function deleteScene({ toursDir, tourId, sceneId }) {
+  const resolvedSceneId = sceneId?.trim();
+  if (!resolvedSceneId) {
+    throw new Error('sceneId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+
+  if (!tour.scenes?.[resolvedSceneId]) {
+    throw new Error(`Scene not found: ${resolvedSceneId}`);
+  }
+  if (resolvedSceneId === tour.firstScene) {
+    throw new Error(
+      'Cannot delete firstScene — set another scene as firstScene in JSON first',
+    );
+  }
+
+  for (const scene of Object.values(tour.scenes)) {
+    if (!Array.isArray(scene.hotspots)) continue;
+    scene.hotspots = scene.hotspots.filter(
+      (hotspot) =>
+        !(hotspot.type === 'nav' && hotspot.targetScene === resolvedSceneId),
+    );
+  }
+
+  delete tour.scenes[resolvedSceneId];
+  writeTourJson(tourPath, tour);
+  return { tourPath, sceneId: resolvedSceneId, firstScene: tour.firstScene };
 }
 
 export function resolveTourJsonPath(toursDir, tourId) {

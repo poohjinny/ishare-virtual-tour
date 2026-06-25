@@ -7,28 +7,41 @@ import type {
 import { listRoutableCatalogTours } from '../data/tourCatalog';
 import { normalizeTourAssets } from './normalizeTourAssets';
 
-import kenSargentHouseTour from '../../tours/ken-sargent-house.json';
-import kenSargentHouseKnowledge from '../../tours/ken-sargent-house-knowledge.json';
-import cancerResearchTour from '../../tours/cancer-research.json';
-import cancerResearchKnowledge from '../../tours/cancer-research-knowledge.json';
-import holodomorMuseumTour from '../../tours/holodomor-museum.json';
-import holodomorMuseumKnowledge from '../../tours/holodomor-museum-knowledge.json';
-import qchHospitalTour from '../../tours/qch-hospital.json';
-import qchHospitalKnowledge from '../../tours/qch-hospital-knowledge.json';
+const tourJsonModules = import.meta.glob('../../tours/*.json', {
+  eager: true,
+  import: 'default',
+}) as Record<string, Tour>;
 
-const TOURS: Record<string, Tour> = {
-  'ken-sargent-house': kenSargentHouseTour as Tour,
-  'cancer-research': cancerResearchTour as Tour,
-  'holodomor-museum': holodomorMuseumTour as Tour,
-  'qch-hospital': qchHospitalTour as Tour,
-};
+const knowledgeJsonModules = import.meta.glob('../../tours/*-knowledge.json', {
+  eager: true,
+  import: 'default',
+}) as Record<string, TourKnowledge>;
 
-const KNOWLEDGE: Record<string, TourKnowledge> = {
-  'ken-sargent-house': kenSargentHouseKnowledge as TourKnowledge,
-  'cancer-research': cancerResearchKnowledge as TourKnowledge,
-  'holodomor-museum': holodomorMuseumKnowledge as TourKnowledge,
-  'qch-hospital': qchHospitalKnowledge as TourKnowledge,
-};
+function buildTourRegistry(): Record<string, Tour> {
+  const tours: Record<string, Tour> = {};
+
+  for (const [path, tour] of Object.entries(tourJsonModules)) {
+    if (path.endsWith('catalog.json')) continue;
+    tours[tour.id] = tour;
+  }
+
+  return tours;
+}
+
+function buildKnowledgeRegistry(): Record<string, TourKnowledge> {
+  const knowledge: Record<string, TourKnowledge> = {};
+
+  for (const [path, record] of Object.entries(knowledgeJsonModules)) {
+    const match = path.match(/\/([^/]+)-knowledge\.json$/);
+    const tourId = match?.[1] ?? record.id;
+    knowledge[tourId] = record;
+  }
+
+  return knowledge;
+}
+
+const TOURS = buildTourRegistry();
+const KNOWLEDGE = buildKnowledgeRegistry();
 
 /** Static bundle revision — bump when shipped tour JSON changes materially. */
 const STATIC_PUBLISH_VERSION = 1;
