@@ -14,6 +14,7 @@ import {
 } from '../data/namingOpportunityStatus';
 import {
   bindYoutubeIframeForegroundMedia,
+  popupVideoSynthesiaEmbedUrl,
   popupVideoYoutubeEmbedUrl,
   resolvePopupVideo,
 } from '../utils/popupVideo';
@@ -234,7 +235,7 @@ export function PopupVideoEmbed({
         : resolved.kind === 'embed' ?
           <iframe
             ref={iframeRef}
-            src={resolved.sourceUrl}
+            src={popupVideoSynthesiaEmbedUrl(resolved.sourceUrl)}
             title={`${title} video`}
             allow='autoplay; fullscreen; encrypted-media; picture-in-picture'
             allowFullScreen
@@ -266,7 +267,11 @@ export function PopupVideoEmbed({
         type='button'
         className='tour-glass-panel__video-play'
         aria-label={`Play video: ${title}`}
-        onClick={() => setPlaying(true)}
+        onPointerDown={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setPlaying(true);
+        }}
       >
         <PopupVideoPlayIcon />
       </button>

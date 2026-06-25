@@ -66,6 +66,33 @@ export function synthesiaEmbedUrl(url: string): string | null {
   return null;
 }
 
+export function synthesiaVideoId(url: string): string | null {
+  try {
+    const parsed = new URL(url.trim());
+    const host = parsed.hostname.replace(/^www\./, '');
+    if (host !== 'share.synthesia.io') return null;
+
+    const embedMatch = parsed.pathname.match(/^\/embeds\/videos\/([^/]+)/);
+    if (embedMatch?.[1]) return embedMatch[1];
+
+    const shareMatch = parsed.pathname.match(/^\/videos\/([^/]+)/);
+    if (shareMatch?.[1]) return shareMatch[1];
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+/** Public JPG thumbnail served for Synthesia share/embed pages (see og:image on embed HTML). */
+const SYNTHESIA_THUMBNAIL_BASE =
+  'https://69jr5v75rc.execute-api.eu-west-1.amazonaws.com/prod';
+
+export function synthesiaThumbnailUrl(url: string): string | null {
+  const id = synthesiaVideoId(url);
+  return id ? `${SYNTHESIA_THUMBNAIL_BASE}/${id}/thumbnail.jpg` : null;
+}
+
 function isFileVideoUrl(url: string): boolean {
   try {
     const path = new URL(url, 'https://local.invalid').pathname;
@@ -93,7 +120,11 @@ export function resolvePopupVideo(
 
   const synthesiaEmbed = synthesiaEmbedUrl(trimmed);
   if (synthesiaEmbed) {
-    return { kind: 'embed', sourceUrl: synthesiaEmbed, thumbnailUrl: null };
+    return {
+      kind: 'embed',
+      sourceUrl: synthesiaEmbed,
+      thumbnailUrl: poster?.trim() || synthesiaThumbnailUrl(trimmed),
+    };
   }
 
   if (isFileVideoUrl(trimmed)) {
@@ -119,6 +150,14 @@ export function popupVideoYoutubeEmbedUrl(embedUrl: string): string {
   url.searchParams.set('rel', '0');
   url.searchParams.set('enablejsapi', '1');
   url.searchParams.set('origin', window.location.origin);
+  return url.toString();
+}
+
+/** Synthesia share embed — autoplay with sound after the viewer clicks our preview play control. */
+export function popupVideoSynthesiaEmbedUrl(embedUrl: string): string {
+  const url = new URL(embedUrl);
+  url.searchParams.set('autoplay', '1');
+  url.searchParams.set('mute', '0');
   return url.toString();
 }
 
@@ -278,7 +317,7 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
 
   if (kind === 'embed') {
     const iframe = document.createElement('iframe');
-    iframe.src = src;
+    iframe.src = popupVideoSynthesiaEmbedUrl(src);
     iframe.title = `${title} video`;
     iframe.setAttribute(
       'allow',
