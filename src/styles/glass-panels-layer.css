@@ -8,8 +8,9 @@
   .tour-glass-panel {
     --ishare-panel-header-btn-size: 36px;
     --ishare-panel-header-icon-size: 16px;
-    --ishare-panel-cta-icon-size: 0.9em;
-    --ishare-panel-cta-icon-opsz: 20;
+    /* Explicit px — previously Google’s unlayered 24px default overrode 0.9em in @layer. */
+    --ishare-panel-cta-icon-size: 24px;
+    --ishare-panel-cta-icon-opsz: 24;
     --ishare-panel-cta-gap: 8px;
     display: flex;
     flex-direction: column;
