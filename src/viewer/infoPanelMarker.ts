@@ -157,8 +157,13 @@ export function openAnchoredInfoPanel(
   const marker = markers.getMarker(id);
   if (marker?.domElement instanceof HTMLElement) {
     enableGlassPanelTextSelection(marker.domElement);
-    initPopupVideoPlayers(marker.domElement);
     bindGlassPanelCtaOverflowTitles(marker.domElement);
+    requestAnimationFrame(() => {
+      const live = markers.getMarker(id);
+      if (live?.domElement instanceof HTMLElement) {
+        initPopupVideoPlayers(live.domElement);
+      }
+    });
   }
 
   setActiveInfoHotspot(markers, hotspot.id);

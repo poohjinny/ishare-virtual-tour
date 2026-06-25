@@ -93,6 +93,11 @@ export function synthesiaThumbnailUrl(url: string): string | null {
   return id ? `${SYNTHESIA_THUMBNAIL_BASE}/${id}/thumbnail.jpg` : null;
 }
 
+/** Public MP4 for published Synthesia share/embed videos (see embed page dehydrated state). */
+export function synthesiaDirectVideoUrl(videoId: string): string {
+  return `https://synthesia-ttv-data.s3-eu-west-1.amazonaws.com/video_data/${videoId}/transfers/rendered_video.mp4`;
+}
+
 function isFileVideoUrl(url: string): boolean {
   try {
     const path = new URL(url, 'https://local.invalid').pathname;
@@ -115,6 +120,15 @@ export function resolvePopupVideo(
       kind: 'youtube',
       sourceUrl: youtubeEmbed,
       thumbnailUrl: youtubeThumbnailUrl(trimmed),
+    };
+  }
+
+  const synthesiaId = synthesiaVideoId(trimmed);
+  if (synthesiaId) {
+    return {
+      kind: 'file',
+      sourceUrl: synthesiaDirectVideoUrl(synthesiaId),
+      thumbnailUrl: poster?.trim() || synthesiaThumbnailUrl(trimmed),
     };
   }
 
@@ -255,6 +269,78 @@ export function popupVideoPlayIconHtml(
   </svg>`;
 }
 
+export function popupVideoSkeletonHtml(): string {
+  return `<div class="preview-hero-skeleton tour-glass-panel__video-skeleton" aria-hidden="true"></div>`;
+}
+
+function markPopupVideoThumbLoaded(shell: HTMLElement): void {
+  shell.classList.remove('tour-glass-panel__video--thumb-loading');
+  shell.classList.add('tour-glass-panel__video--thumb-loaded');
+}
+
+function settlePopupVideoThumb(
+  shell: HTMLElement,
+  thumb: HTMLImageElement,
+): void {
+  if (shell.classList.contains('tour-glass-panel__video--thumb-loaded')) return;
+
+  if (!thumb.src) return;
+
+  if (thumb.complete) {
+    markPopupVideoThumbLoaded(shell);
+  }
+}
+
+function bindPopupVideoThumbnailRoot(host: HTMLElement): void {
+  if (host.dataset.popupVideoThumbRootBound === 'true') return;
+  host.dataset.popupVideoThumbRootBound = 'true';
+
+  host.addEventListener(
+    'load',
+    (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLImageElement)) return;
+      if (!target.classList.contains('tour-glass-panel__video-thumb')) return;
+      const shell = target.closest('.tour-glass-panel__video--preview');
+      if (shell instanceof HTMLElement) markPopupVideoThumbLoaded(shell);
+    },
+    true,
+  );
+
+  host.addEventListener(
+    'error',
+    (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLImageElement)) return;
+      if (!target.classList.contains('tour-glass-panel__video-thumb')) return;
+      const shell = target.closest('.tour-glass-panel__video--preview');
+      if (shell instanceof HTMLElement) markPopupVideoThumbLoaded(shell);
+    },
+    true,
+  );
+}
+
+export function initPopupVideoThumbnails(root: ParentNode): void {
+  const host =
+    root instanceof HTMLElement ? root
+    : root instanceof Document ? root.documentElement
+    : null;
+  if (host) bindPopupVideoThumbnailRoot(host);
+
+  root.querySelectorAll('.tour-glass-panel__video--preview').forEach((node) => {
+    if (!(node instanceof HTMLElement)) return;
+
+    const thumb = node.querySelector('.tour-glass-panel__video-thumb');
+    if (!(thumb instanceof HTMLImageElement)) {
+      markPopupVideoThumbLoaded(node);
+      return;
+    }
+
+    node.classList.add('tour-glass-panel__video--thumb-loading');
+    settlePopupVideoThumb(node, thumb);
+  });
+}
+
 export function bindPopupVideoForegroundMedia(
   shell: HTMLElement,
   kind: PopupVideoKind,
@@ -334,6 +420,7 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
   video.src = src;
   video.controls = true;
   video.playsInline = true;
+  video.muted = false;
   video.setAttribute('playsinline', '');
   video.title = `${title} video`;
   shell.appendChild(video);
@@ -342,6 +429,8 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
 }
 
 export function initPopupVideoPlayers(root: ParentNode): void {
+  initPopupVideoThumbnails(root);
+
   root.querySelectorAll('.tour-glass-panel__video--preview').forEach((node) => {
     if (!(node instanceof HTMLElement)) return;
     if (node.dataset.popupVideoBound === 'true') return;

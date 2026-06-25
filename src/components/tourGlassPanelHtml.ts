@@ -49,6 +49,7 @@ import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 import {
   initPopupVideoPlayers,
   popupVideoPlayIconHtml,
+  popupVideoSkeletonHtml,
   resolvePopupVideo,
   youtubeEmbedUrl,
 } from '../utils/popupVideo';
@@ -408,11 +409,12 @@ export function buildPopupVideoHtml(popup: PopupContent): string {
     : '';
 
   return `<div
-      class="${GLASS_PANEL.video} tour-glass-panel__video--preview"
+      class="${GLASS_PANEL.video} tour-glass-panel__video--preview tour-glass-panel__video--thumb-loading"
       data-popup-video-kind="${escapeHtml(resolved.kind)}"
       data-popup-video-src="${escapeHtml(resolved.sourceUrl)}"
       data-popup-video-title="${escapeHtml(popup.title)}"
     >
+      ${popupVideoSkeletonHtml()}
       ${thumbHtml}
       <button
         type="button"

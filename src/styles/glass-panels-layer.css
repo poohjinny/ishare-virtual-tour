@@ -693,7 +693,7 @@
     width: 100%;
     border-radius: var(--ishare-radius);
     overflow: hidden;
-    background: #0f172a;
+    background: transparent;
     aspect-ratio: 16 / 9;
   }
 
@@ -727,6 +727,10 @@
     pointer-events: auto;
   }
 
+  .tour-glass-panel__video--playing video {
+    background: #000;
+  }
+
   .tour-glass-panel__video video {
     position: absolute;
     inset: 0;
@@ -735,18 +739,48 @@
     height: 100%;
     border: 0;
     object-fit: contain;
-    background: #0f172a;
+    background: transparent;
     pointer-events: auto;
+  }
+
+  .tour-glass-panel__video-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
   }
 
   .tour-glass-panel__video-thumb {
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 1;
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+  }
+
+  .tour-glass-panel__video--thumb-loaded .tour-glass-panel__video-thumb {
+    opacity: 1;
+  }
+
+  .tour-glass-panel__video--thumb-loaded .tour-glass-panel__video-skeleton {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .tour-glass-panel__video--thumb-loading .tour-glass-panel__video-play {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .tour-glass-panel__video--thumb-loaded .tour-glass-panel__video-play {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.22s ease, visibility 0.22s ease;
   }
 
   .tour-glass-panel__video--preview::after {
@@ -754,8 +788,14 @@
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: rgba(15, 23, 42, 0.32);
+    background: rgba(0, 0, 0, 0.18);
+    opacity: 0;
     pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+
+  .tour-glass-panel__video--preview.tour-glass-panel__video--thumb-loaded::after {
+    opacity: 1;
   }
 
   .tour-glass-panel__video-play {

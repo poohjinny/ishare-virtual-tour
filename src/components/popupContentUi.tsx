@@ -1,4 +1,5 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import type { NamingOpportunity, PopupContent, PopupCta } from '../types/tour';
 import {
   GIFTABULATOR_PRODUCT,
@@ -193,8 +194,25 @@ export function PopupVideoEmbed({
 }) {
   const resolved = resolvePopupVideo(videoUrl, poster);
   const [playing, setPlaying] = useState(false);
+  const [thumbLoaded, setThumbLoaded] = useState(() => !resolved?.thumbnailUrl);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const thumbRef = useRef<HTMLImageElement>(null);
+
+  useLayoutEffect(() => {
+    if (!resolved?.thumbnailUrl) {
+      setThumbLoaded(true);
+      return;
+    }
+
+    const img = thumbRef.current;
+    if (img?.complete && img.src) {
+      setThumbLoaded(true);
+      return;
+    }
+
+    setThumbLoaded(false);
+  }, [resolved?.thumbnailUrl, videoUrl, poster]);
 
   useLayoutEffect(() => {
     if (!playing || !resolved) return;
@@ -215,6 +233,8 @@ export function PopupVideoEmbed({
     const video = videoRef.current;
     if (!video) return;
 
+    video.muted = false;
+    void video.play().catch(() => undefined);
     return bindHtmlVideoForegroundMedia(video, mediaId);
   }, [playing, resolved]);
 
@@ -255,12 +275,26 @@ export function PopupVideoEmbed({
   }
 
   return (
-    <div className='tour-glass-panel__video tour-glass-panel__video--preview'>
+    <div
+      className={cn(
+        'tour-glass-panel__video tour-glass-panel__video--preview',
+        thumbLoaded ?
+          'tour-glass-panel__video--thumb-loaded'
+        : 'tour-glass-panel__video--thumb-loading',
+      )}
+    >
+      <div
+        className='preview-hero-skeleton tour-glass-panel__video-skeleton'
+        aria-hidden='true'
+      />
       {resolved.thumbnailUrl ?
         <img
+          ref={thumbRef}
           className='tour-glass-panel__video-thumb'
           src={resolved.thumbnailUrl}
           alt=''
+          onLoad={() => setThumbLoaded(true)}
+          onError={() => setThumbLoaded(true)}
         />
       : null}
       <button
@@ -270,7 +304,7 @@ export function PopupVideoEmbed({
         onPointerDown={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          setPlaying(true);
+          flushSync(() => setPlaying(true));
         }}
       >
         <PopupVideoPlayIcon />
