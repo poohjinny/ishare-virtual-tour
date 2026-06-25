@@ -24,7 +24,7 @@ import type {
   ViewerOrientation,
 } from '../types/tour';
 import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
-import { resolveTourSceneTransition } from '../utils/tourTransition';
+import { resolveTourSceneTransitionEffect } from '../utils/tourTransition';
 import { buildVirtualTourNodes } from './buildTourNodes';
 import { hotspotToMarkerConfig } from './buildMarkers';
 import {
@@ -424,7 +424,7 @@ export const PanoramaViewer = forwardRef<
       if (!nextScene) {
         await virtualTour.setCurrentNode(nextTour.firstScene, {
           forceUpdate: true,
-          ...resolveTourSceneTransition(nextTour),
+          effect: resolveTourSceneTransitionEffect(nextTour),
         });
         onSceneChangeRef.current(nextTour.firstScene);
         hotspotEnterRef.current?.schedule();
@@ -438,7 +438,7 @@ export const PanoramaViewer = forwardRef<
       if (panoramaChanged) {
         await virtualTour.setCurrentNode(currentId, {
           forceUpdate: true,
-          ...resolveTourSceneTransition(nextTour),
+          effect: resolveTourSceneTransitionEffect(nextTour),
         });
       } else {
         virtualTour.updateNode({ id: currentId, markers: markerConfigs });
@@ -603,12 +603,11 @@ export const PanoramaViewer = forwardRef<
             renderMode: '3d',
             // VT defaults: effect fade, speed 20rpm, rotation true — only hide loader
             transitionOptions: (_node: unknown, fromNode?: unknown) => {
-              const sceneTransition = resolveTourSceneTransition(tourRef.current);
+              const effect = resolveTourSceneTransitionEffect(tourRef.current);
               return fromNode ?
                   {
                     showLoader: false,
-                    effect: sceneTransition.effect,
-                    speed: sceneTransition.speed,
+                    effect,
                     rotation: false,
                   }
                 : {

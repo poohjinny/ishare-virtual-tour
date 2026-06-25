@@ -2,25 +2,19 @@ import type { Tour } from '../types/tour';
 
 export type TourSceneTransitionEffect = 'fade' | 'black';
 
-export interface TourSceneTransitionOptions {
-  effect: TourSceneTransitionEffect;
-  speed: string;
+/** PSV VirtualTourPlugin — effect only; omit JSON speed until mapped to VT format. */
+export function resolveTourSceneTransitionEffect(
+  tour: Pick<Tour, 'defaultTransition'>,
+): TourSceneTransitionEffect {
+  return tour.defaultTransition?.effect === 'black' ? 'black' : 'fade';
 }
 
-const DEFAULT_TRANSITION: TourSceneTransitionOptions = {
-  effect: 'fade',
-  speed: '500ms',
-};
-
-/** Scene-to-scene transition options for VirtualTourPlugin. */
+/** @deprecated JSON speed (e.g. 500ms) is not passed to PSV yet — use resolveTourSceneTransitionEffect */
 export function resolveTourSceneTransition(
   tour: Pick<Tour, 'defaultTransition'>,
-): TourSceneTransitionOptions {
-  const effect = tour.defaultTransition?.effect;
-  const speed = tour.defaultTransition?.speed?.trim();
-
+): { effect: TourSceneTransitionEffect; speed: string } {
   return {
-    effect: effect === 'black' ? 'black' : 'fade',
-    speed: speed || DEFAULT_TRANSITION.speed,
+    effect: resolveTourSceneTransitionEffect(tour),
+    speed: tour.defaultTransition?.speed?.trim() || '500ms',
   };
 }
