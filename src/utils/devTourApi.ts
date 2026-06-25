@@ -216,6 +216,16 @@ export interface DevUpdateTourPayload {
   fontSourceUrl?: string;
   clearFontFamily?: boolean;
   clearFontSourceUrl?: boolean;
+  productFullName?: string;
+  transitionEffect?: 'fade' | 'black';
+  transitionSpeed?: string;
+  clearDefaultTransition?: boolean;
+  immersiveAudio?: string;
+  /** Newline-separated track URLs/paths */
+  immersivePlaylist?: string;
+  immersivePlaylistManifest?: string;
+  immersiveVolume?: number;
+  clearImmersiveBackground?: boolean;
 }
 
 export interface DevSuggestBrandingResult {

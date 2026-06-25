@@ -147,9 +147,9 @@ until Admin app exists; then port endpoints and retire duplicate UI.
 
 - [x] Organization — name, email, phone(s), fax, address
 - [x] Branding — `fontFamily`, `fontSourceUrl` (Google Fonts)
-- [ ] Product copy — `productFullName`
-- [ ] Scene transitions — `defaultTransition` (fade/black, speed)
-- [ ] Immersive background — audio / playlist / volume
+- [x] Product copy — `productFullName`
+- [x] Scene transitions — `defaultTransition` (fade/black, speed)
+- [x] Immersive background — audio / playlist / manifest / volume
 
 **Scenes & assets**
 

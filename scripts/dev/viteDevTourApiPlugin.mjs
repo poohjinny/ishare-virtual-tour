@@ -510,6 +510,15 @@ function validateUpdateTourPayload(body) {
     fontSourceUrl,
     clearFontFamily,
     clearFontSourceUrl,
+    productFullName,
+    transitionEffect,
+    transitionSpeed,
+    clearDefaultTransition,
+    immersiveAudio,
+    immersivePlaylist,
+    immersivePlaylistManifest,
+    immersiveVolume,
+    clearImmersiveBackground,
   } = body ?? {};
 
   if (!tourId?.trim()) {
@@ -556,6 +565,20 @@ function validateUpdateTourPayload(body) {
     }
   }
 
+  if (
+    transitionEffect?.trim() &&
+    !['fade', 'black'].includes(transitionEffect.trim())
+  ) {
+    throw new Error('transitionEffect must be fade or black');
+  }
+
+  if (immersiveVolume !== undefined && immersiveVolume !== null) {
+    const volume = Number(immersiveVolume);
+    if (!Number.isFinite(volume) || volume < 0 || volume > 1) {
+      throw new Error('immersiveVolume must be a number between 0 and 1');
+    }
+  }
+
   return {
     tourId: tourId.trim(),
     tourTitle,
@@ -590,6 +613,26 @@ function validateUpdateTourPayload(body) {
     fontSourceUrl: typeof fontSourceUrl === 'string' ? fontSourceUrl : undefined,
     clearFontFamily: clearFontFamily === true,
     clearFontSourceUrl: clearFontSourceUrl === true,
+    productFullName:
+      typeof productFullName === 'string' ? productFullName : undefined,
+    transitionEffect:
+      typeof transitionEffect === 'string' ? transitionEffect : undefined,
+    transitionSpeed:
+      typeof transitionSpeed === 'string' ? transitionSpeed : undefined,
+    clearDefaultTransition: clearDefaultTransition === true,
+    immersiveAudio:
+      typeof immersiveAudio === 'string' ? immersiveAudio : undefined,
+    immersivePlaylist:
+      typeof immersivePlaylist === 'string' ? immersivePlaylist : undefined,
+    immersivePlaylistManifest:
+      typeof immersivePlaylistManifest === 'string' ?
+        immersivePlaylistManifest
+      : undefined,
+    immersiveVolume:
+      immersiveVolume !== undefined && immersiveVolume !== null ?
+        Number(immersiveVolume)
+      : undefined,
+    clearImmersiveBackground: clearImmersiveBackground === true,
   };
 }
 

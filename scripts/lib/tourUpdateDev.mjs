@@ -136,6 +136,147 @@ function applyOptionalOrganizationField(organization, key, value) {
   }
 }
 
+const TRANSITION_EFFECTS = new Set(['fade', 'black']);
+
+function applyProductFullName(tour, productFullName) {
+  if (productFullName === undefined) return;
+  const trimmed = productFullName.trim();
+  if (trimmed) {
+    tour.productFullName = trimmed;
+  } else {
+    delete tour.productFullName;
+  }
+}
+
+function applyDefaultTransition({
+  tour,
+  transitionEffect,
+  transitionSpeed,
+  clearDefaultTransition,
+}) {
+  if (clearDefaultTransition === true) {
+    delete tour.defaultTransition;
+    return;
+  }
+
+  const hasEffect = transitionEffect !== undefined;
+  const hasSpeed = transitionSpeed !== undefined;
+  if (!hasEffect && !hasSpeed) return;
+
+  tour.defaultTransition = tour.defaultTransition ?? {
+    speed: '500ms',
+    effect: 'fade',
+  };
+
+  if (hasEffect) {
+    const effect = transitionEffect?.trim();
+    if (!effect || !TRANSITION_EFFECTS.has(effect)) {
+      throw new Error('transitionEffect must be fade or black');
+    }
+    tour.defaultTransition.effect = effect;
+  }
+
+  if (hasSpeed) {
+    const speed = transitionSpeed?.trim();
+    if (!speed) {
+      delete tour.defaultTransition.speed;
+    } else {
+      tour.defaultTransition.speed = speed;
+    }
+  }
+
+  if (!tour.defaultTransition.effect && !tour.defaultTransition.speed) {
+    delete tour.defaultTransition;
+  }
+}
+
+function parsePlaylistLines(value) {
+  if (value === undefined) return undefined;
+  const tracks = value
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  return tracks;
+}
+
+function applyImmersiveBackground({
+  tour,
+  immersiveAudio,
+  immersivePlaylist,
+  immersivePlaylistManifest,
+  immersiveVolume,
+  clearImmersiveBackground,
+}) {
+  if (clearImmersiveBackground === true) {
+    delete tour.immersiveBackground;
+    return;
+  }
+
+  const hasAudio = immersiveAudio !== undefined;
+  const hasPlaylist = immersivePlaylist !== undefined;
+  const hasManifest = immersivePlaylistManifest !== undefined;
+  const hasVolume = immersiveVolume !== undefined;
+
+  if (!hasAudio && !hasPlaylist && !hasManifest && !hasVolume) {
+    return;
+  }
+
+  const next = { ...(tour.immersiveBackground ?? {}) };
+
+  if (hasAudio) {
+    const audio = immersiveAudio?.trim();
+    if (audio) {
+      next.audio = audio;
+      delete next.playlist;
+      delete next.playlistManifest;
+    } else {
+      delete next.audio;
+    }
+  }
+
+  if (hasPlaylist) {
+    const playlist = parsePlaylistLines(immersivePlaylist);
+    if (playlist?.length) {
+      next.playlist = playlist;
+      delete next.audio;
+      delete next.playlistManifest;
+    } else {
+      delete next.playlist;
+    }
+  }
+
+  if (hasManifest) {
+    const manifest = immersivePlaylistManifest?.trim();
+    if (manifest) {
+      next.playlistManifest = manifest;
+      delete next.audio;
+      delete next.playlist;
+    } else {
+      delete next.playlistManifest;
+    }
+  }
+
+  if (hasVolume) {
+    const volume = Number(immersiveVolume);
+    if (!Number.isFinite(volume) || volume < 0 || volume > 1) {
+      throw new Error('immersiveVolume must be a number between 0 and 1');
+    }
+    next.volume = volume;
+  }
+
+  if (
+    !next.audio &&
+    !next.playlist?.length &&
+    !next.playlistManifest &&
+    next.volume === undefined
+  ) {
+    delete tour.immersiveBackground;
+    return;
+  }
+
+  tour.immersiveBackground = next;
+}
+
 export async function updateTour({
   root,
   toursDir,
@@ -161,6 +302,15 @@ export async function updateTour({
   fontSourceUrl,
   clearFontFamily,
   clearFontSourceUrl,
+  productFullName,
+  transitionEffect,
+  transitionSpeed,
+  clearDefaultTransition,
+  immersiveAudio,
+  immersivePlaylist,
+  immersivePlaylistManifest,
+  immersiveVolume,
+  clearImmersiveBackground,
 }) {
   const resolvedTourId = tourId?.trim();
   if (!resolvedTourId) {
@@ -311,6 +461,22 @@ export async function updateTour({
   if (brandAssets.savedFavicon) {
     tour.branding.favicon = brandAssets.faviconWebPath;
   }
+
+  applyProductFullName(tour, productFullName);
+  applyDefaultTransition({
+    tour,
+    transitionEffect,
+    transitionSpeed,
+    clearDefaultTransition,
+  });
+  applyImmersiveBackground({
+    tour,
+    immersiveAudio,
+    immersivePlaylist,
+    immersivePlaylistManifest,
+    immersiveVolume,
+    clearImmersiveBackground,
+  });
 
   writeTourJson(tourPath, tour);
 

@@ -19,6 +19,8 @@ import {
   preservedSearchStringFrom,
   resolveSceneId,
 } from '../utils/tourPaths';
+import { getTourProductFullName } from '../utils/tourProductName';
+import { IMMERSIVE_PLAYLIST_MANIFEST } from '../constants/immersiveBackground';
 import {
   DEV_HOTSPOT_TABS,
   DEV_INFO_DISPLAY_OPTIONS,
@@ -322,6 +324,20 @@ export function DevViewPanel({
   const [editTourLogoAlt, setEditTourLogoAlt] = useState('');
   const [editTourFontFamily, setEditTourFontFamily] = useState('');
   const [editTourFontSourceUrl, setEditTourFontSourceUrl] = useState('');
+  const [editTourProductFullName, setEditTourProductFullName] = useState('');
+  const [editTransitionEffect, setEditTransitionEffect] = useState<
+    'fade' | 'black'
+  >('fade');
+  const [editTransitionSpeed, setEditTransitionSpeed] = useState('500ms');
+  const [editImmersiveMode, setEditImmersiveMode] = useState<
+    'platform' | 'manifest' | 'audio' | 'playlist'
+  >('platform');
+  const [editImmersiveAudio, setEditImmersiveAudio] = useState('');
+  const [editImmersivePlaylistText, setEditImmersivePlaylistText] =
+    useState('');
+  const [editImmersivePlaylistManifest, setEditImmersivePlaylistManifest] =
+    useState('');
+  const [editImmersiveVolume, setEditImmersiveVolume] = useState('');
   const [editTourLogoFile, setEditTourLogoFile] = useState<File | null>(null);
   const [editTourFaviconFile, setEditTourFaviconFile] = useState<File | null>(
     null,
@@ -522,6 +538,19 @@ export function DevViewPanel({
     )),
   );
   const canSaveEditTour = Boolean(editTourTitle.trim() && editTourCategory);
+  const editTourProductNamePreview = useMemo(
+    () =>
+      getTourProductFullName({
+        ...tour,
+        title: editTourTitle.trim() || tour.title,
+        productFullName: editTourProductFullName.trim() || undefined,
+        organization:
+          tour.organization ?
+            { ...tour.organization, name: editOrgName.trim() || tour.organization.name }
+          : undefined,
+      }),
+    [editOrgName, editTourProductFullName, editTourTitle, tour],
+  );
   const canSaveFloorPlan = Boolean(
     tour.id &&
     (floorPlanFile ||
@@ -569,10 +598,51 @@ export function DevViewPanel({
     if (panelTab !== 'tour' || !tour.id) return;
 
     void devFetchTourRecord(tour.id)
-      .then(({ catalog }) => {
-        if (!catalog) return;
-        setEditTourVisibility(catalog.visibility);
-        setEditTourFeatured(catalog.featured);
+      .then(({ tour: rawTour, catalog }) => {
+        if (catalog) {
+          setEditTourVisibility(catalog.visibility);
+          setEditTourFeatured(catalog.featured);
+        }
+
+        setEditTourProductFullName(rawTour.productFullName ?? '');
+        setEditTransitionEffect(rawTour.defaultTransition?.effect ?? 'fade');
+        setEditTransitionSpeed(rawTour.defaultTransition?.speed ?? '500ms');
+
+        const immersive = rawTour.immersiveBackground;
+        if (!immersive) {
+          setEditImmersiveMode('platform');
+          setEditImmersiveAudio('');
+          setEditImmersivePlaylistText('');
+          setEditImmersivePlaylistManifest('');
+          setEditImmersiveVolume('');
+          return;
+        }
+
+        if (immersive.playlistManifest) {
+          setEditImmersiveMode('manifest');
+          setEditImmersivePlaylistManifest(immersive.playlistManifest);
+          setEditImmersiveAudio('');
+          setEditImmersivePlaylistText('');
+        } else if (immersive.audio) {
+          setEditImmersiveMode('audio');
+          setEditImmersiveAudio(immersive.audio);
+          setEditImmersivePlaylistManifest('');
+          setEditImmersivePlaylistText('');
+        } else if (immersive.playlist?.length) {
+          setEditImmersiveMode('playlist');
+          setEditImmersivePlaylistText(immersive.playlist.join('\n'));
+          setEditImmersiveAudio('');
+          setEditImmersivePlaylistManifest('');
+        } else {
+          setEditImmersiveMode('manifest');
+          setEditImmersivePlaylistManifest('');
+          setEditImmersiveAudio('');
+          setEditImmersivePlaylistText('');
+        }
+
+        setEditImmersiveVolume(
+          immersive.volume !== undefined ? String(immersive.volume) : '',
+        );
       })
       .catch(() => {
         /* catalog entry may be missing for legacy tours */
@@ -1009,6 +1079,24 @@ export function DevViewPanel({
         logoAlt: editTourLogoAlt.trim() || undefined,
         fontFamily: editTourFontFamily,
         fontSourceUrl: editTourFontSourceUrl,
+        productFullName: editTourProductFullName,
+        transitionEffect: editTransitionEffect,
+        transitionSpeed: editTransitionSpeed.trim() || undefined,
+        clearImmersiveBackground: editImmersiveMode === 'platform',
+        immersiveAudio:
+          editImmersiveMode === 'audio' ? editImmersiveAudio : undefined,
+        immersivePlaylist:
+          editImmersiveMode === 'playlist' ?
+            editImmersivePlaylistText
+          : undefined,
+        immersivePlaylistManifest:
+          editImmersiveMode === 'manifest' ?
+            editImmersivePlaylistManifest
+          : undefined,
+        immersiveVolume:
+          editImmersiveMode !== 'platform' && editImmersiveVolume.trim() ?
+            Number(editImmersiveVolume)
+          : undefined,
         logoFile: editTourLogoFile,
         faviconFile: editTourFaviconFile,
         visibility: editTourVisibility,
@@ -1028,6 +1116,11 @@ export function DevViewPanel({
     }
   }, [
     canSaveEditTour,
+    editImmersiveAudio,
+    editImmersiveMode,
+    editImmersivePlaylistManifest,
+    editImmersivePlaylistText,
+    editImmersiveVolume,
     editOrgAddress,
     editOrgEmail,
     editOrgFax,
@@ -1040,6 +1133,9 @@ export function DevViewPanel({
     editTourFaviconFile,
     editTourFontFamily,
     editTourFontSourceUrl,
+    editTourProductFullName,
+    editTransitionEffect,
+    editTransitionSpeed,
     editTourLogoAlt,
     editTourLogoFile,
     editTourPrimaryColor,
@@ -2709,6 +2805,25 @@ export function DevViewPanel({
             </label>
 
             <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Product full name (optional)
+              </span>
+              <input
+                className={devViewPanelInputClassName}
+                type='text'
+                value={editTourProductFullName}
+                onChange={(e) => setEditTourProductFullName(e.target.value)}
+                placeholder='Leave empty for “{organization} Virtual Tour”'
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+            <p className={devViewPanelSectionHintClassName}>
+              Tab title, splash, and in-tour chrome preview:{' '}
+              <strong>{editTourProductNamePreview}</strong>
+            </p>
+
+            <label className={devViewPanelFieldClassName}>
               <span className={devViewPanelFieldLabelClassName}>Category</span>
               <select
                 className={devViewPanelSelectClassName}
@@ -2776,6 +2891,145 @@ export function DevViewPanel({
                 autoComplete='off'
               />
             </label>
+
+            <p className={devViewPanelSectionLeadClassName}>Experience</p>
+
+            <div className='grid grid-cols-2 gap-2'>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Scene transition
+                </span>
+                <select
+                  className={devViewPanelSelectClassName}
+                  value={editTransitionEffect}
+                  onChange={(e) =>
+                    setEditTransitionEffect(e.target.value as 'fade' | 'black')
+                  }
+                >
+                  <option value='fade'>Fade</option>
+                  <option value='black'>Black</option>
+                </select>
+              </label>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Transition speed
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={editTransitionSpeed}
+                  onChange={(e) => setEditTransitionSpeed(e.target.value)}
+                  placeholder='500ms'
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+              </label>
+            </div>
+            <p className={devViewPanelSectionHintClassName}>
+              Applied when navigating between scenes in the panorama viewer.
+            </p>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Immersive background (BGM)
+              </span>
+              <select
+                className={devViewPanelSelectClassName}
+                value={editImmersiveMode}
+                onChange={(e) =>
+                  setEditImmersiveMode(
+                    e.target.value as
+                      | 'platform'
+                      | 'manifest'
+                      | 'audio'
+                      | 'playlist',
+                  )
+                }
+              >
+                <option value='platform'>Platform default playlist</option>
+                <option value='manifest'>Playlist manifest JSON</option>
+                <option value='audio'>Single audio track</option>
+                <option value='playlist'>Inline playlist (one URL per line)</option>
+              </select>
+            </label>
+
+            {editImmersiveMode === 'platform' ?
+              <p className={devViewPanelSectionHintClassName}>
+                Uses platform manifest{' '}
+                <code>{IMMERSIVE_PLAYLIST_MANIFEST}</code> — no{' '}
+                <code>immersiveBackground</code> in tour JSON.
+              </p>
+            : null}
+
+            {editImmersiveMode === 'manifest' ?
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Playlist manifest path
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={editImmersivePlaylistManifest}
+                  onChange={(e) =>
+                    setEditImmersivePlaylistManifest(e.target.value)
+                  }
+                  placeholder={IMMERSIVE_PLAYLIST_MANIFEST}
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+              </label>
+            : null}
+
+            {editImmersiveMode === 'audio' ?
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Audio path or URL
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={editImmersiveAudio}
+                  onChange={(e) => setEditImmersiveAudio(e.target.value)}
+                  placeholder='/assets/…/ambient.mp3'
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+              </label>
+            : null}
+
+            {editImmersiveMode === 'playlist' ?
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Playlist tracks
+                </span>
+                <textarea
+                  className={devViewPanelInputClassName}
+                  rows={4}
+                  value={editImmersivePlaylistText}
+                  onChange={(e) => setEditImmersivePlaylistText(e.target.value)}
+                  placeholder={'https://…/track-a.mp3\nhttps://…/track-b.mp3'}
+                  spellCheck={false}
+                />
+              </label>
+            : null}
+
+            {editImmersiveMode !== 'platform' ?
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Volume (0–1)
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='number'
+                  min='0'
+                  max='1'
+                  step='0.01'
+                  value={editImmersiveVolume}
+                  onChange={(e) => setEditImmersiveVolume(e.target.value)}
+                  placeholder='0.28'
+                />
+              </label>
+            : null}
 
             <p className={devViewPanelSectionLeadClassName}>Organization</p>
             <p className={devViewPanelSectionHintClassName}>

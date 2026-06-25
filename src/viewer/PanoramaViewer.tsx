@@ -24,6 +24,7 @@ import type {
   ViewerOrientation,
 } from '../types/tour';
 import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
+import { resolveTourSceneTransition } from '../utils/tourTransition';
 import { buildVirtualTourNodes } from './buildTourNodes';
 import { hotspotToMarkerConfig } from './buildMarkers';
 import {
@@ -423,7 +424,7 @@ export const PanoramaViewer = forwardRef<
       if (!nextScene) {
         await virtualTour.setCurrentNode(nextTour.firstScene, {
           forceUpdate: true,
-          effect: 'fade',
+          ...resolveTourSceneTransition(nextTour),
         });
         onSceneChangeRef.current(nextTour.firstScene);
         hotspotEnterRef.current?.schedule();
@@ -437,7 +438,7 @@ export const PanoramaViewer = forwardRef<
       if (panoramaChanged) {
         await virtualTour.setCurrentNode(currentId, {
           forceUpdate: true,
-          effect: 'fade',
+          ...resolveTourSceneTransition(nextTour),
         });
       } else {
         virtualTour.updateNode({ id: currentId, markers: markerConfigs });
@@ -601,22 +602,29 @@ export const PanoramaViewer = forwardRef<
           {
             renderMode: '3d',
             // VT defaults: effect fade, speed 20rpm, rotation true — only hide loader
-            transitionOptions: (_node: unknown, fromNode?: unknown) =>
-              fromNode ?
-                { showLoader: false, effect: 'fade' as const, rotation: false }
-              : {
-                  showLoader: false,
-                  speed: '0ms',
-                  effect: 'none' as const,
-                  rotation: false,
-                  rotateTo: toPsvPosition(
-                    skipLanding ? landingView : randomStart,
-                  ),
-                  zoomTo:
-                    skipLanding ?
-                      toPsvZoom(landingView.zoom)
-                    : (randomStart.zoom ?? LANDING_ZOOM_OUT),
-                },
+            transitionOptions: (_node: unknown, fromNode?: unknown) => {
+              const sceneTransition = resolveTourSceneTransition(tourRef.current);
+              return fromNode ?
+                  {
+                    showLoader: false,
+                    effect: sceneTransition.effect,
+                    speed: sceneTransition.speed,
+                    rotation: false,
+                  }
+                : {
+                    showLoader: false,
+                    speed: '0ms',
+                    effect: 'none' as const,
+                    rotation: false,
+                    rotateTo: toPsvPosition(
+                      skipLanding ? landingView : randomStart,
+                    ),
+                    zoomTo:
+                      skipLanding ?
+                        toPsvZoom(landingView.zoom)
+                      : (randomStart.zoom ?? LANDING_ZOOM_OUT),
+                  };
+            },
             nodes: buildVirtualTourNodes(tourData),
             startNodeId: startSceneId,
           },
