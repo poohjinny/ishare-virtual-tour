@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './material-symbols.css';
 @import './components-layer.css';
 @import './glass-panels-layer.css';
 @import './psv-layer.css';

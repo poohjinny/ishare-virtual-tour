@@ -1,0 +1,17 @@
+/* Self-hosted variable font — avoids CDN lag and ligature text flash (FOUT). */
+@font-face {
+  font-family: 'Material Symbols Rounded';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: block;
+  src: url('/fonts/material-symbols-rounded.woff2') format('woff2');
+}
+
+/* Hide icon ligature names until the icon font is ready (html gets .material-symbols-ready). */
+html:not(.material-symbols-ready) .material-symbols-rounded {
+  visibility: hidden;
+}
+
+html.material-symbols-ready .material-symbols-rounded {
+  visibility: visible;
+}
