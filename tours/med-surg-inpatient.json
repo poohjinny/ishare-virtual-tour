@@ -41,9 +41,9 @@
           },
           "targetScene": "inpatient-suites",
           "targetView": {
-            "yaw": 91.4,
-            "pitch": -83.2,
-            "zoom": 39
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
           }
         },
         {
@@ -56,9 +56,9 @@
           },
           "targetScene": "reception-centre",
           "targetView": {
-            "yaw": 94.6,
-            "pitch": -33.4,
-            "zoom": 0
+            "yaw": 101.6,
+            "pitch": -2.8,
+            "zoom": 55
           }
         },
         {
@@ -71,9 +71,9 @@
           },
           "targetScene": "nursing-station",
           "targetView": {
-            "yaw": 94.6,
-            "pitch": -33.4,
-            "zoom": 0
+            "yaw": 84.5,
+            "pitch": -17.2,
+            "zoom": 10
           }
         },
         {
@@ -86,9 +86,9 @@
           },
           "targetScene": "multi-use-lounge-activity-room",
           "targetView": {
-            "yaw": 94.6,
-            "pitch": -33.4,
-            "zoom": 0
+            "yaw": 181.7,
+            "pitch": -18.3,
+            "zoom": 10
           }
         },
         {
@@ -101,9 +101,9 @@
           },
           "targetScene": "quiet-consultant",
           "targetView": {
-            "yaw": 117.6,
-            "pitch": -69.1,
-            "zoom": 14
+            "yaw": 231.7,
+            "pitch": -29.9,
+            "zoom": 10
           }
         },
         {
@@ -116,9 +116,9 @@
           },
           "targetScene": "dining-activity-room",
           "targetView": {
-            "yaw": 86.7,
+            "yaw": 73.6,
             "pitch": -29.2,
-            "zoom": 4
+            "zoom": 14
           }
         },
         {
@@ -131,8 +131,8 @@
           },
           "targetScene": "allied-health-team-room",
           "targetView": {
-            "yaw": 117.6,
-            "pitch": -69.1,
+            "yaw": 81,
+            "pitch": -41.3,
             "zoom": 14
           }
         },
@@ -161,9 +161,9 @@
           },
           "targetScene": "report-meeting-room",
           "targetView": {
-            "yaw": 117.6,
-            "pitch": -69.1,
-            "zoom": 14
+            "yaw": 91.4,
+            "pitch": -19.3,
+            "zoom": 32
           }
         },
         {
@@ -176,9 +176,9 @@
           },
           "targetScene": "staff-facility-lounge",
           "targetView": {
-            "yaw": 86.7,
-            "pitch": -29.2,
-            "zoom": 4
+            "yaw": 329.3,
+            "pitch": -22.6,
+            "zoom": 19
           }
         },
         {
@@ -191,9 +191,9 @@
           },
           "targetScene": "inpatient-suites",
           "targetView": {
-            "yaw": 84,
-            "pitch": -23.6,
-            "zoom": 35
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
           }
         },
         {
@@ -206,9 +206,9 @@
           },
           "targetScene": "inpatient-suites",
           "targetView": {
-            "yaw": 84,
-            "pitch": -23.6,
-            "zoom": 35
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
           }
         },
         {
@@ -221,9 +221,9 @@
           },
           "targetScene": "inpatient-suites",
           "targetView": {
-            "yaw": 84,
-            "pitch": -23.6,
-            "zoom": 35
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
           }
         }
       ],

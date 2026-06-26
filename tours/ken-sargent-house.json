@@ -23,52 +23,94 @@
     "width": 324,
     "height": 216
   },
-  "defaultTransition": { "speed": "500ms", "effect": "fade" },
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
   "scenes": {
     "overview": {
       "id": "overview",
       "title": "Overview",
       "description": "Take in an aerial view of Ken Sargent House and the surrounding campus. From here you can see the full building layout, the main entrance, visitor parking, and the landscaped grounds that welcome patients and families. The house sits within walking distance of the Grande Prairie Regional Hospital, making it a convenient home away from home during treatment.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/overview.webp",
-      "defaultView": { "yaw": 80.8, "pitch": -57, "zoom": 14 },
-      "map": { "x": 0.5, "y": 0.139, "heading": 149.2 },
+      "defaultView": {
+        "yaw": 80.8,
+        "pitch": -57,
+        "zoom": 14
+      },
+      "map": {
+        "x": 0.5,
+        "y": 0.139,
+        "heading": 149.2
+      },
       "hotspots": [
         {
           "id": "nav-to-entrance",
           "type": "nav",
           "label": "Main Entrance",
-          "position": { "yaw": 117.3, "pitch": -62.5 },
+          "position": {
+            "yaw": 117.3,
+            "pitch": -62.5
+          },
           "targetScene": "main-entrance",
-          "targetView": { "yaw": 104.6, "pitch": 6.5, "zoom": 35 }
+          "targetView": {
+            "yaw": 104.6,
+            "pitch": 6.5,
+            "zoom": 35
+          }
         },
         {
           "id": "nav-to-comfort-corner",
           "type": "nav",
           "label": "Comfort Corner",
-          "position": { "yaw": 100, "pitch": -17.7 },
+          "position": {
+            "yaw": 100,
+            "pitch": -17.7
+          },
           "targetScene": "comfort-corner",
-          "targetView": { "yaw": 107.5, "pitch": -9.6, "zoom": 15 }
+          "targetView": {
+            "yaw": 107.5,
+            "pitch": -9.6,
+            "zoom": 15
+          }
         },
         {
           "id": "nav-to-entrance-to-the-base-level",
           "type": "nav",
           "label": "Entrance to the Base Level",
-          "position": { "yaw": 26, "pitch": -38.8 },
+          "position": {
+            "yaw": 26,
+            "pitch": -38.8
+          },
           "targetScene": "entrance-to-the-base-level",
-          "targetView": { "yaw": 78.6, "pitch": 1, "zoom": 17 }
+          "targetView": {
+            "yaw": 78.6,
+            "pitch": 1,
+            "zoom": 17
+          }
         },
         {
           "id": "nav-to-kitchen",
           "type": "nav",
           "label": "Kitchen",
-          "position": { "yaw": 53.1, "pitch": -42.4 },
+          "position": {
+            "yaw": 53.1,
+            "pitch": -42.4
+          },
           "targetScene": "kitchen",
-          "targetView": { "yaw": 144.1, "pitch": -7.3, "zoom": 47 }
+          "targetView": {
+            "yaw": 144.1,
+            "pitch": -7.3,
+            "zoom": 47
+          }
         },
         {
           "id": "info-campus-overview",
           "type": "info",
-          "position": { "yaw": 86.2, "pitch": -51.4 },
+          "position": {
+            "yaw": 63,
+            "pitch": -52.5
+          },
           "popup": {
             "display": "anchored",
             "title": "Campus Overview",
@@ -83,16 +125,27 @@
       "title": "Kitchen",
       "description": "The kitchen at Ken Sargent House is a shared space where guests and families can prepare meals, store food, and gather during their stay.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/kitchen.webp",
-      "defaultView": { "yaw": 156.5, "pitch": -13.3, "zoom": 35 },
+      "defaultView": {
+        "yaw": 156.5,
+        "pitch": -13.3,
+        "zoom": 35
+      },
       "hotspots": [
         {
           "id": "nav-back-overview",
           "type": "nav",
           "label": "Overview",
           "instant": true,
-          "position": { "yaw": 180, "pitch": -10 },
+          "position": {
+            "yaw": 180,
+            "pitch": -10
+          },
           "targetScene": "overview",
-          "targetView": { "yaw": 80.8, "pitch": -57, "zoom": 14 }
+          "targetView": {
+            "yaw": 80.8,
+            "pitch": -57,
+            "zoom": 14
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/kitchen.webp"
@@ -102,16 +155,27 @@
       "title": "Entrance to the Base Level",
       "description": "Approach the base-level entrance of Ken Sargent House from the landscaped grounds. This lower entry provides access to guest spaces on the building's foundation level.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/entrance-to-the-base-level.webp",
-      "defaultView": { "yaw": 76.8, "pitch": -3.5, "zoom": 10 },
+      "defaultView": {
+        "yaw": 76.8,
+        "pitch": -3.5,
+        "zoom": 10
+      },
       "hotspots": [
         {
           "id": "nav-back-overview",
           "type": "nav",
           "label": "Overview",
           "instant": true,
-          "position": { "yaw": 180, "pitch": -10 },
+          "position": {
+            "yaw": 180,
+            "pitch": -10
+          },
           "targetScene": "overview",
-          "targetView": { "yaw": 80.8, "pitch": -57, "zoom": 14 }
+          "targetView": {
+            "yaw": 80.8,
+            "pitch": -57,
+            "zoom": 14
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/entrance-to-the-base-level.webp"
@@ -121,16 +185,27 @@
       "title": "Comfort Corner",
       "description": "The Comfort Corner at Ken Sargent House offers a welcoming space where guests can pause, connect, and find a moment of calm during their stay.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/comfort_corner.webp",
-      "defaultView": { "yaw": 107.5, "pitch": -9.6, "zoom": 15 },
+      "defaultView": {
+        "yaw": 107.5,
+        "pitch": -9.6,
+        "zoom": 15
+      },
       "hotspots": [
         {
           "id": "nav-back-overview",
           "type": "nav",
           "label": "Overview",
           "instant": true,
-          "position": { "yaw": 180, "pitch": -10 },
+          "position": {
+            "yaw": 180,
+            "pitch": -10
+          },
           "targetScene": "overview",
-          "targetView": { "yaw": 80.8, "pitch": -57, "zoom": 14 }
+          "targetView": {
+            "yaw": 80.8,
+            "pitch": -57,
+            "zoom": 14
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/comfort-corner.webp"
@@ -140,30 +215,55 @@
       "title": "Main Entrance",
       "description": "Arrive at the ground-level main entrance of Ken Sargent House. Glass doors open directly into the reception lobby, with an accessible ramp and railings on the left side of the front stairs. Illuminated welcome signage helps visitors find their way, whether arriving during the day or in the evening.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-entrance.webp",
-      "defaultView": { "yaw": 108.3, "pitch": 10.6, "zoom": 20 },
-      "map": { "x": 0.5, "y": 0.944, "heading": 14.6 },
+      "defaultView": {
+        "yaw": 108.3,
+        "pitch": 10.6,
+        "zoom": 20
+      },
+      "map": {
+        "x": 0.5,
+        "y": 0.944,
+        "heading": 14.6
+      },
       "hotspots": [
         {
           "id": "nav-back-overview",
           "type": "nav",
           "label": "Overview",
           "instant": true,
-          "position": { "yaw": 180, "pitch": -10 },
+          "position": {
+            "yaw": 180,
+            "pitch": -10
+          },
           "targetScene": "overview",
-          "targetView": { "yaw": 80.8, "pitch": -57, "zoom": 14 }
+          "targetView": {
+            "yaw": 80.8,
+            "pitch": -57,
+            "zoom": 14
+          }
         },
         {
           "id": "nav-to-reception",
           "type": "nav",
           "label": "Reception",
-          "position": { "yaw": 105.9, "pitch": 3.8 },
+          "position": {
+            "yaw": 105.9,
+            "pitch": 3.8
+          },
           "targetScene": "reception",
-          "targetView": { "yaw": 89.6, "pitch": 2.1, "zoom": 17 }
+          "targetView": {
+            "yaw": 89.6,
+            "pitch": 2.1,
+            "zoom": 17
+          }
         },
         {
           "id": "info-parking-lot",
           "type": "info",
-          "position": { "yaw": 220.7, "pitch": 2.1 },
+          "position": {
+            "yaw": 220.7,
+            "pitch": 2.1
+          },
           "popup": {
             "display": "anchored",
             "title": "Parking Lot",
@@ -183,22 +283,40 @@
       "title": "Reception",
       "description": "Step into the reception lobby at Ken Sargent House — the first point of contact for guests and families. Check in at the welcome desk, take a seat in the comfortable lounge area, and get directions to the dining hall and other guest spaces. Our reception team is here to help everyone feel informed, supported, and at home.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/reception.webp",
-      "defaultView": { "yaw": 89.6, "pitch": 2.1, "zoom": 17 },
-      "map": { "x": 0.5, "y": 0.431, "heading": 100 },
+      "defaultView": {
+        "yaw": 89.6,
+        "pitch": 2.1,
+        "zoom": 17
+      },
+      "map": {
+        "x": 0.5,
+        "y": 0.431,
+        "heading": 100
+      },
       "hotspots": [
         {
           "id": "nav-back-entrance",
           "type": "nav",
           "label": "Main Entrance",
           "instant": true,
-          "position": { "yaw": 170, "pitch": -5 },
+          "position": {
+            "yaw": 170,
+            "pitch": -5
+          },
           "targetScene": "main-entrance",
-          "targetView": { "yaw": 104.6, "pitch": 6.5, "zoom": 35 }
+          "targetView": {
+            "yaw": 104.6,
+            "pitch": 6.5,
+            "zoom": 35
+          }
         },
         {
           "id": "info-reception",
           "type": "info",
-          "position": { "yaw": 91.1, "pitch": -10.5 },
+          "position": {
+            "yaw": 91.1,
+            "pitch": -10.5
+          },
           "popup": {
             "display": "anchored",
             "title": "Reception Desk",
@@ -218,7 +336,10 @@
         {
           "id": "info-donor-wall",
           "type": "info",
-          "position": { "yaw": 314.1, "pitch": 1.1 },
+          "position": {
+            "yaw": 314.1,
+            "pitch": 1.1
+          },
           "popup": {
             "display": "anchored",
             "title": "Donor Wall",
@@ -233,7 +354,10 @@
         {
           "id": "info-guest-shelter",
           "type": "info",
-          "position": { "yaw": 243.7, "pitch": -6.3 },
+          "position": {
+            "yaw": 243.7,
+            "pitch": -6.3
+          },
           "popup": {
             "display": "anchored",
             "title": "Guest Shelter",
