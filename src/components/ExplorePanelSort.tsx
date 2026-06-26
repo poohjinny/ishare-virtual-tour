@@ -85,17 +85,18 @@ export function ExplorePanelSort({
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setOpen(false);
-      }
+      if (event.key !== 'Escape') return;
+      event.stopImmediatePropagation();
+      event.stopPropagation();
+      setOpen(false);
     };
 
     document.addEventListener('pointerdown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true);
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keydown', handleKeyDown, true);
     };
   }, [open]);
 

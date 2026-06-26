@@ -3,6 +3,7 @@ import { VIRTUAL_TOUR_GUIDE_NAME } from './branding';
 export const TOUR_HELP_PANEL_TITLE = 'Help';
 
 export const TOUR_HELP_SECTION_USING = 'Using this tour';
+export const TOUR_HELP_SECTION_SHORTCUTS = 'Keyboard shortcuts';
 export const TOUR_HELP_SECTION_CONTROLS = 'Viewer controls';
 export const TOUR_HELP_SECTION_FAQ = 'FAQ';
 export const TOUR_HELP_SECTION_CONTACT = 'Contact';
@@ -16,6 +17,17 @@ export const TOUR_HELP_VIEWER_CONTROLS = [
   'Use the control pill at the bottom for zoom, move, default view, and fullscreen',
   'Arrow keys to rotate',
   '+ / − to zoom in and out',
+] as const;
+
+export const TOUR_HELP_KEYBOARD_SHORTCUTS = [
+  'E — open or close Explore tour',
+  'S — open or close Share',
+  'C — show or hide viewer controls',
+  'H — open or close Help',
+  'R — reset to default view',
+  'F — toggle fullscreen',
+  'M — play or pause background music',
+  'Esc — close the most recently opened panel (search, tour panels, zoom/move controls, hotspot panels, and more)',
 ] as const;
 
 export interface TourHelpFaqItem {

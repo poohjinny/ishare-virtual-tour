@@ -116,6 +116,18 @@ function syncButton(
   applyIshareTooltipDom(root, resolveTitle(state), 'top');
 }
 
+/** Play / pause — shared by navbar button and keyboard shortcut (M). */
+export function toggleImmersiveBackgroundPlayback(
+  controller: ImmersiveBackgroundController,
+): void {
+  if (controller.isEnabled()) {
+    controller.pause();
+    return;
+  }
+
+  void controller.toggle();
+}
+
 export function createImmersiveBackgroundNavbarButton(
   getController: () => ImmersiveBackgroundController | null,
 ): NavbarCustomButton {
@@ -129,13 +141,8 @@ export function createImmersiveBackgroundNavbarButton(
       const controller = getController();
       if (!controller) return;
 
-      if (controller.isEnabled()) {
-        controller.pause();
-        syncButton(viewer, controller);
-        return;
-      }
-
-      void controller.toggle().then(() => syncButton(viewer, controller));
+      toggleImmersiveBackgroundPlayback(controller);
+      syncButton(viewer, controller);
     },
   };
 }

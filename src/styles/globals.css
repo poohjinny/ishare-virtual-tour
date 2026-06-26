@@ -159,6 +159,11 @@
 }
 
 .tour-load-splash__logo {
+  display: block;
+  height: 5rem;
+  width: auto;
+  max-width: min(280px, 72vw);
+  object-fit: contain;
   opacity: 1;
   transform: scale(1);
   transition:

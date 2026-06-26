@@ -8,7 +8,7 @@ import {
 import type { NavPreviewContent, ViewPosition } from '../types/tour';
 import { toPsvZoom } from '../utils/psvZoom';
 
-/** Nav preview hero — on by default; `?navPreview=0` disables (debug). */
+/** Nav preview hero — on by default; `?disableNavPreview=1` disables (debug). */
 export function isNavPreviewMiniViewerEnabled(
   searchParams?: URLSearchParams,
 ): boolean {
@@ -19,10 +19,7 @@ export function isNavPreviewMiniViewerEnabled(
     : null);
   if (!params) return true;
 
-  const value = params.get('navPreview');
-  if (value === '0') return false;
-  if (value === '1') return true;
-  return true;
+  return params.get('disableNavPreview') !== '1';
 }
 
 /** Yaw rotation speed for mini preview (degrees per second). */

@@ -402,7 +402,7 @@ export const tourNavLocationGalleryHeroBadgeGroupClassName = cn(
 
 /** Slightly translucent chips on gallery hero previews. */
 export const tourNavLocationGalleryHeroBadgeClassName = cn(
-  'backdrop-blur-[3px]',
+  'font-normal backdrop-blur-[3px]',
 );
 
 export const tourNavLocationGalleryCurrentBadgeClassName = cn(

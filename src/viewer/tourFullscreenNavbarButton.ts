@@ -48,6 +48,16 @@ function exitElementFullscreen(): void {
   webkitDocument.webkitExitFullscreen?.();
 }
 
+export function toggleTourFullscreen(target: HTMLElement | null): void {
+  if (!target) return;
+
+  if (isTargetFullscreen(target)) {
+    exitElementFullscreen();
+  } else {
+    requestElementFullscreen(target);
+  }
+}
+
 export function createTourFullscreenNavbarButton(
   getFullscreenRoot: () => HTMLElement | null,
 ): NavbarCustomButton {
@@ -58,14 +68,7 @@ export function createTourFullscreenNavbarButton(
     content: FULLSCREEN_IN_ICON,
     collapsable: false,
     onClick() {
-      const target = getFullscreenRoot();
-      if (!target) return;
-
-      if (isTargetFullscreen(target)) {
-        exitElementFullscreen();
-      } else {
-        requestElementFullscreen(target);
-      }
+      toggleTourFullscreen(getFullscreenRoot());
     },
   };
 }

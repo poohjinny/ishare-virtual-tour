@@ -12,7 +12,9 @@ import {
   TOUR_HELP_SECTION_CONTACT,
   TOUR_HELP_SECTION_CONTROLS,
   TOUR_HELP_SECTION_FAQ,
+  TOUR_HELP_SECTION_SHORTCUTS,
   TOUR_HELP_SECTION_USING,
+  TOUR_HELP_KEYBOARD_SHORTCUTS,
   TOUR_HELP_TOUR_SUPPORT_LEAD,
   TOUR_HELP_VIEWER_CONTROLS,
 } from '../constants/tourHelp';
@@ -108,6 +110,14 @@ export function TourHelpPanel({
               Viewer controls appear at the bottom by default; tap the tune icon
               to show or hide them.
             </li>
+          </ul>
+        </AccordionItem>
+
+        <AccordionItem title={TOUR_HELP_SECTION_SHORTCUTS} iconPosition='right'>
+          <ul className={tourNavHelpListClassName}>
+            {TOUR_HELP_KEYBOARD_SHORTCUTS.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ul>
         </AccordionItem>
 

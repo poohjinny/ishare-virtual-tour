@@ -25,21 +25,20 @@ function buildNavHtml(label: string): string {
   `;
 }
 
-const HOTSPOT_NAV_INFO_ICON_HTML = materialSymbolHtml('info', {
-  className: 'hotspot-nav__icon-symbol',
+const HOTSPOT_GENERAL_INFO_ICON_HTML = materialSymbolHtml('info_i', {
+  className: 'hotspot-general-info__icon-symbol',
   sizePx: 18,
 });
 
 function buildGeneralInfoHtml(hotspot: Hotspot): string {
   const title = hotspot.popup?.title?.trim() ?? hotspot.label?.trim();
-  const pillLabel = title ?? 'Learn more';
   const ariaLabel = title ?? 'Information';
+  const tooltipLabel = title ?? 'Learn more';
 
   return `
-    <button type="button" class="hotspot-nav" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}">
-      <span class="hotspot-nav__pill">
-        <span class="hotspot-nav__icon" aria-hidden="true">${HOTSPOT_NAV_INFO_ICON_HTML}</span>
-        <span class="hotspot-nav__label">${escapeHtml(pillLabel)}</span>
+    <button type="button" class="hotspot-general-info ishare-tooltip-host" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}" data-ishare-tooltip="${escapeHtml(tooltipLabel)}" data-ishare-tooltip-placement="top">
+      <span class="hotspot-general-info__chip" aria-hidden="true">
+        <span class="hotspot-general-info__icon">${HOTSPOT_GENERAL_INFO_ICON_HTML}</span>
       </span>
     </button>
   `;

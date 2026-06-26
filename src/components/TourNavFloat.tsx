@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { TourPanelStack } from '../hooks/useTourPanelStack';
+import { isTypingTarget } from '../utils/isTypingTarget';
 import {
   TOUR_DIRECTORY_PANEL_TITLE,
   TOUR_DIRECTORY_SECTION_LOCATIONS,
@@ -143,6 +145,7 @@ interface TourNavFloatProps {
   onBreadcrumbNavigate: (sceneId: string) => void;
   /** Info hotspot id when a naming opportunity panel is open in-scene. */
   activeNamingHotspotId?: string | null;
+  panelStack?: TourPanelStack;
 }
 
 type PanelMode = 'explore' | 'help' | 'share' | null;
@@ -308,6 +311,7 @@ export function TourNavFloat({
   onSelectNamingOpportunity,
   onBreadcrumbNavigate,
   activeNamingHotspotId = null,
+  panelStack,
 }: TourNavFloatProps) {
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [displayPanel, setDisplayPanel] = useState<DisplayPanel>(null);
@@ -498,11 +502,34 @@ export function TourNavFloat({
   const closeExploreSearch = useCallback(() => {
     exploreSearchRef.current?.blur();
     setExploreSearchOpen(false);
-  }, []);
+    panelStack?.closePanel('explore-search');
+  }, [panelStack]);
 
   const closePanel = useCallback(() => {
-    setPanelMode(null);
-  }, []);
+    setPanelMode((current) => {
+      if (current) panelStack?.closePanel(current);
+      return null;
+    });
+    panelStack?.closePanel('explore-search');
+    closeExploreSearch();
+  }, [closeExploreSearch, panelStack]);
+
+  const activatePanel = useCallback(
+    (next: Exclude<PanelMode, null>) => {
+      setPanelMode((current) => {
+        if (current === next) {
+          panelStack?.closePanel(next);
+          panelStack?.closePanel('explore-search');
+          return null;
+        }
+
+        if (current) panelStack?.closePanel(current);
+        panelStack?.openPanel(next);
+        return next;
+      });
+    },
+    [panelStack],
+  );
 
   useEffect(() => {
     if (targetPanel === displayPanel) {
@@ -561,17 +588,31 @@ export function TourNavFloat({
   }, [exploreSearchOpen, exploreSearchFocusRequest]);
 
   useEffect(() => {
-    if (!exploreSearchOpen) return;
+    if (!panelStack) return;
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeExploreSearch();
-      }
+    return panelStack.registerPanel('explore-search', closeExploreSearch);
+  }, [closeExploreSearch, panelStack]);
+
+  useEffect(() => {
+    if (!panelStack) return;
+
+    const unregisterExplore = panelStack.registerPanel('explore', () => {
+      setPanelMode((current) => (current === 'explore' ? null : current));
+      closeExploreSearch();
+    });
+    const unregisterHelp = panelStack.registerPanel('help', () => {
+      setPanelMode((current) => (current === 'help' ? null : current));
+    });
+    const unregisterShare = panelStack.registerPanel('share', () => {
+      setPanelMode((current) => (current === 'share' ? null : current));
+    });
+
+    return () => {
+      unregisterExplore();
+      unregisterHelp();
+      unregisterShare();
     };
-
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [exploreSearchOpen, closeExploreSearch]);
+  }, [closeExploreSearch, panelStack]);
 
   useEffect(() => {
     if (panelMode !== 'help' && panelMode !== 'share') return;
@@ -656,36 +697,54 @@ export function TourNavFloat({
     }
   };
 
-  const handleExploreClick = () => {
-    if (panelMode === 'explore') {
-      closePanel();
-      return;
-    }
+  const handleExploreClick = useCallback(() => {
+    activatePanel('explore');
+  }, [activatePanel]);
 
-    setPanelMode('explore');
-  };
+  const handleHelpClick = useCallback(() => {
+    activatePanel('help');
+  }, [activatePanel]);
 
-  const handleHelpClick = () => {
-    if (panelMode === 'help') {
-      closePanel();
-      return;
-    }
+  const handleShareClick = useCallback(() => {
+    activatePanel('share');
+  }, [activatePanel]);
 
-    setPanelMode('help');
-  };
-
-  const handleShareClick = () => {
-    if (panelMode === 'share') {
-      closePanel();
-      return;
-    }
-
-    setPanelMode('share');
-  };
-
-  const handleTuneClick = () => {
+  const handleTuneClick = useCallback(() => {
     onControlsToggle();
-  };
+  }, [onControlsToggle]);
+
+  useEffect(() => {
+    if (disabled) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (isTypingTarget(event.target)) return;
+
+      const key = event.key.toLowerCase();
+      if (key === 'e') {
+        event.preventDefault();
+        handleExploreClick();
+        return;
+      }
+      if (key === 's') {
+        event.preventDefault();
+        handleShareClick();
+        return;
+      }
+      if (key === 'c') {
+        event.preventDefault();
+        handleTuneClick();
+        return;
+      }
+      if (key === 'h') {
+        event.preventDefault();
+        handleHelpClick();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [disabled, handleExploreClick, handleHelpClick, handleShareClick, handleTuneClick]);
 
   const logoImage = clientLogo && (
     <img
@@ -720,8 +779,9 @@ export function TourNavFloat({
 
   const openExploreSearch = useCallback(() => {
     setExploreSearchOpen(true);
+    panelStack?.openPanel('explore-search');
     requestExploreSearchFocus();
-  }, []);
+  }, [panelStack]);
 
   const toggleExploreLayout = useCallback(() => {
     setExploreLayout((layout) => (layout === 'gallery' ? 'list' : 'gallery'));

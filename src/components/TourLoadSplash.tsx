@@ -77,7 +77,7 @@ export function TourLoadSplash({
     >
       <img
         className={cn(
-          'tour-load-splash__logo block h-14 w-auto',
+          'tour-load-splash__logo',
           fadeOut && 'tour-load-splash__logo--out',
         )}
         src={splashLogo}

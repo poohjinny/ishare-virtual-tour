@@ -11,7 +11,7 @@ const HOLD_CLASS = 'viewer-container--hotspots-hold';
 const ENTER_CLASS = 'viewer-container--hotspots-enter';
 
 const ENTER_TARGET_SELECTOR =
-  '.psv-marker--visible:has(.hotspot-nav) .hotspot-nav, .psv-marker--visible:has(.hotspot-info) .hotspot-info';
+  '.psv-marker--visible:has(.hotspot-nav) .hotspot-nav, .psv-marker--visible:has(.hotspot-info) .hotspot-info, .psv-marker--visible:has(.hotspot-general-info) .hotspot-general-info';
 
 export interface HotspotEnterController {
   hold: () => void;
@@ -36,7 +36,9 @@ function applyEnterStagger(container: HTMLElement): number {
 
 function clearEnterStagger(container: HTMLElement): void {
   container
-    .querySelectorAll<HTMLElement>('.hotspot-nav, .hotspot-info')
+    .querySelectorAll<HTMLElement>(
+      '.hotspot-nav, .hotspot-info, .hotspot-general-info',
+    )
     .forEach((target) => {
       target.style.animationDelay = '';
     });

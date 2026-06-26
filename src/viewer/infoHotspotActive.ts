@@ -1,9 +1,9 @@
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import { isGeneralInfoHotspot } from '../data/generalInfoHotspot';
 import type { Hotspot } from '../types/tour';
-import { NAV_HOTSPOT_ACTIVE_CLASS } from './navHotspotActive';
 
 export const INFO_HOTSPOT_ACTIVE_CLASS = 'hotspot-info--active';
+export const GENERAL_INFO_HOTSPOT_ACTIVE_CLASS = 'hotspot-general-info--active';
 
 type ActiveInfoHotspotListener = (hotspotId: string | null) => void;
 
@@ -26,15 +26,13 @@ export function setActiveInfoHotspot(
     const isActive = !!hotspotId && marker.id === hotspotId;
     const button =
       isGeneralInfoHotspot(hotspot) ?
-        marker.domElement.querySelector(
-          '.hotspot-nav[data-hotspot-type="info"]',
-        )
+        marker.domElement.querySelector('.hotspot-general-info')
       : marker.domElement.querySelector('.hotspot-info');
     if (!(button instanceof HTMLElement)) continue;
 
     const activeClass =
       isGeneralInfoHotspot(hotspot) ?
-        NAV_HOTSPOT_ACTIVE_CLASS
+        GENERAL_INFO_HOTSPOT_ACTIVE_CLASS
       : INFO_HOTSPOT_ACTIVE_CLASS;
     button.classList.toggle(activeClass, isActive);
     button.setAttribute('aria-expanded', isActive ? 'true' : 'false');
