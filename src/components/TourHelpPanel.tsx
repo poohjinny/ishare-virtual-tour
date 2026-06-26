@@ -5,7 +5,7 @@ import {
   VIRTUAL_TOUR_GUIDE_NAME,
 } from '../constants/branding';
 
-import type { TourOrganization } from '../types/tour';
+import type { TourClient } from '../types/tour';
 
 import {
   TOUR_HELP_FAQ,
@@ -22,7 +22,7 @@ import {
 import { PLATFORM_TOUR_SUPPORT } from '../data/platformContact';
 import { ISHARE, platformBrandMarkedName } from '../data/platformBrands';
 
-import { hasOrganizationContact } from '../utils/tourOrganizationContact';
+import { hasClientContact } from '../utils/tourClientContact';
 
 import { Accordion, AccordionItem } from './ui/Accordion';
 
@@ -44,7 +44,7 @@ import {
 interface TourHelpPanelProps {
   tourTitle: string;
 
-  organization?: TourOrganization;
+  client?: TourClient;
 
   logo?: ReactNode;
 }
@@ -52,12 +52,12 @@ interface TourHelpPanelProps {
 export function TourHelpPanel({
   tourTitle,
 
-  organization,
+  client,
 
   logo,
 }: TourHelpPanelProps) {
-  const showClientContact = hasOrganizationContact(organization);
-  const showTourSupport = hasOrganizationContact(PLATFORM_TOUR_SUPPORT);
+  const showClientContact = hasClientContact(client);
+  const showTourSupport = hasClientContact(PLATFORM_TOUR_SUPPORT);
   const showContact = showClientContact || showTourSupport;
 
   const tourSupportLogo = (
@@ -146,11 +146,7 @@ export function TourHelpPanel({
         {showContact && (
           <AccordionItem title={TOUR_HELP_SECTION_CONTACT} iconPosition='right'>
             {showClientContact ?
-              <TourContactInfo
-                organization={organization}
-                logo={logo}
-                embedded
-              />
+              <TourContactInfo client={client} logo={logo} embedded />
             : null}
 
             {showClientContact && showTourSupport ?
@@ -163,7 +159,7 @@ export function TourHelpPanel({
                   {TOUR_HELP_TOUR_SUPPORT_LEAD}
                 </p>
                 <TourContactInfo
-                  organization={PLATFORM_TOUR_SUPPORT}
+                  client={PLATFORM_TOUR_SUPPORT}
                   logo={tourSupportLogo}
                   embedded
                 />

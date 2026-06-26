@@ -45,7 +45,7 @@ import {
 } from '../utils/buildShareUrl';
 import { ShareTourPanel } from './ShareTourPanel';
 import { buildScenePath } from '../viewer/sceneDepth';
-import type { Scene, TourOrganization } from '../types/tour';
+import type { Scene, TourClient } from '../types/tour';
 import {
   buildTourNamingDirectory,
   filterTourNamingDirectory,
@@ -127,7 +127,7 @@ interface TourNavFloatProps {
   currentSceneId: string;
   firstSceneId: string;
   tourTitle?: string;
-  organization?: TourOrganization;
+  client?: TourClient;
   clientLogo?: string;
   logoAlt?: string;
   websiteUrl?: string;
@@ -295,7 +295,7 @@ export function TourNavFloat({
   currentSceneId,
   firstSceneId,
   tourTitle = 'Virtual Tour',
-  organization,
+  client,
   clientLogo,
   logoAlt,
   websiteUrl,
@@ -1375,7 +1375,7 @@ export function TourNavFloat({
             >
               <TourHelpPanel
                 tourTitle={tourTitle}
-                organization={organization}
+                client={client}
                 logo={logoNode}
               />
             </TourGlassPanel>

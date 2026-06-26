@@ -77,23 +77,28 @@ export function fillMissingTourSceneDescriptions(tour) {
 }
 
 /** Merge tour scenes into knowledge JSON with placeholder copy for empty fields. */
-export function syncKnowledgeFromTour(tour, knowledge) {
+export function syncKnowledgeFromTour(tour, knowledge, options = {}) {
   const tourTitle = tour.title?.trim() || tour.id;
+  const clientWebsite =
+    options.clientWebsite ??
+    tour.url ??
+    tour.client?.website ??
+    'https://example.com';
   const next = knowledge ?? {
     id: tour.id,
-    url: tour.url ?? tour.organization?.website ?? 'https://example.com',
+    url: clientWebsite,
     global: {},
     scenes: {},
   };
 
   next.id = tour.id;
   if (isBlank(next.url)) {
-    next.url = tour.url ?? tour.organization?.website ?? 'https://example.com';
+    next.url = clientWebsite;
   }
 
   next.global = next.global ?? {};
   if (isBlank(next.global.facilityName)) {
-    next.global.facilityName = tourTitle;
+    next.global.facilityName = options.clientName?.trim() || tourTitle;
   }
   if (isBlank(next.global.summary)) {
     next.global.summary = defaultKnowledgeGlobalSummary(tourTitle);

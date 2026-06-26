@@ -2,20 +2,7 @@
   "id": "qch-hospital",
   "clientId": "qchfoundation",
   "category": "Healthcare",
-  "url": "https://qchfoundation.ca",
   "title": "Queensway Carleton Hospital",
-  "organization": {
-    "name": "Queensway Carleton Hospital Foundation",
-    "website": "https://qchfoundation.ca",
-    "email": "info@qchfoundation.ca",
-    "phones": [
-      {
-        "number": "613-721-4731",
-        "label": "Telephone"
-      }
-    ],
-    "address": "3045 Baseline Road, Ottawa, ON K2H 8P4"
-  },
   "branding": {
     "logo": "/assets/qchfoundation/qch-hospital/brand/logo.png",
     "logoAlt": "Queensway Carleton Hospital Foundation",

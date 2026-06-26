@@ -55,12 +55,6 @@ export function loadTour(tourId = DEFAULT_TOUR_ID): Tour {
   return loadTourSync(tourId);
 }
 
-export {
-  setDevTourCache,
-  getDevTourCache,
-  removeDevTourCache,
-} from '../services/devTourCache';
-
 export function loadKnowledge(tourId = DEFAULT_TOUR_ID): TourKnowledge {
   return loadKnowledgeSync(tourId);
 }
@@ -69,9 +63,13 @@ export function getSceneList(tour: Tour) {
   return Object.values(tour.scenes);
 }
 
-export function getTourWebsite(tour: Tour): string {
-  return tour.organization?.website ?? tour.url;
-}
+export {
+  setDevTourCache,
+  getDevTourCache,
+  removeDevTourCache,
+} from '../services/devTourCache';
+
+export { getTourWebsite, resolveTourClient } from '../utils/resolveTourClient';
 
 export interface CatalogTourPreviewSource {
   thumbnail?: string;

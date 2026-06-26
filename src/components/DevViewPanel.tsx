@@ -13,12 +13,13 @@ import {
   setDevTourCache,
 } from '../data/loadTour';
 import { normalizeTourAssets } from '../services/normalizeTourAssets';
-import { listTourCategories } from '../data/tourCatalog';
+import { listTourCategories, findCatalogClient } from '../data/tourCatalog';
 import {
   buildTourLocation,
   preservedSearchStringFrom,
   resolveSceneId,
 } from '../utils/tourPaths';
+import { getTourClientId } from '../utils/tourClientId';
 import { getTourProductFullName } from '../utils/tourProductName';
 import { IMMERSIVE_PLAYLIST_MANIFEST } from '../constants/immersiveBackground';
 import {
@@ -293,10 +294,10 @@ export function DevViewPanel({
   const [newTourClientId, setNewTourClientId] = useState('');
   const [newTourClientName, setNewTourClientName] = useState('');
   const [newClientIdInput, setNewClientIdInput] = useState('');
-  const [newOrgEmail, setNewOrgEmail] = useState('');
-  const [newOrgPhone, setNewOrgPhone] = useState('');
-  const [newOrgPhoneLabel, setNewOrgPhoneLabel] = useState('');
-  const [newOrgAddress, setNewOrgAddress] = useState('');
+  const [newClientEmail, setNewClientEmail] = useState('');
+  const [newClientPhone, setNewClientPhone] = useState('');
+  const [newClientPhoneLabel, setNewClientPhoneLabel] = useState('');
+  const [newClientAddress, setNewClientAddress] = useState('');
   const [newTourTitle, setNewTourTitle] = useState('');
   const [newTourIdInput, setNewTourIdInput] = useState('');
   const [newTourCategory, setNewTourCategory] =
@@ -336,12 +337,12 @@ export function DevViewPanel({
   const [editTourCategory, setEditTourCategory] =
     useState<TourCategory>('Healthcare');
   const [editTourWebsite, setEditTourWebsite] = useState('');
-  const [editOrgEmail, setEditOrgEmail] = useState('');
-  const [editOrgPhone, setEditOrgPhone] = useState('');
-  const [editOrgPhoneLabel, setEditOrgPhoneLabel] = useState('');
-  const [editOrgFax, setEditOrgFax] = useState('');
-  const [editOrgFaxLabel, setEditOrgFaxLabel] = useState('');
-  const [editOrgAddress, setEditOrgAddress] = useState('');
+  const [editClientEmail, setEditClientEmail] = useState('');
+  const [editClientPhone, setEditClientPhone] = useState('');
+  const [editClientPhoneLabel, setEditClientPhoneLabel] = useState('');
+  const [editClientFax, setEditClientFax] = useState('');
+  const [editClientFaxLabel, setEditClientFaxLabel] = useState('');
+  const [editClientAddress, setEditClientAddress] = useState('');
   const [editTourVisibility, setEditTourVisibility] =
     useState<DevCatalogTourVisibility>('unlisted');
   const [editTourFeatured, setEditTourFeatured] = useState(false);
@@ -739,15 +740,21 @@ export function DevViewPanel({
   ]);
 
   useEffect(() => {
+    const catalogClient = findCatalogClient(getTourClientId(tour));
+    const primaryPhone =
+      catalogClient?.phone ?? catalogClient?.phones?.[0]?.number ?? '';
+    const primaryPhoneLabel =
+      catalogClient?.phoneLabel ?? catalogClient?.phones?.[0]?.label ?? '';
+
     setEditTourTitle(tour.title);
     setEditTourCategory((tour.category as TourCategory) ?? 'Healthcare');
-    setEditTourWebsite(tour.url ?? tour.organization?.website ?? '');
-    setEditOrgEmail(tour.organization?.email ?? '');
-    setEditOrgPhone(tour.organization?.phone ?? '');
-    setEditOrgPhoneLabel(tour.organization?.phoneLabel ?? '');
-    setEditOrgFax(tour.organization?.fax ?? '');
-    setEditOrgFaxLabel(tour.organization?.faxLabel ?? '');
-    setEditOrgAddress(tour.organization?.address ?? '');
+    setEditTourWebsite(catalogClient?.website ?? '');
+    setEditClientEmail(catalogClient?.email ?? '');
+    setEditClientPhone(primaryPhone);
+    setEditClientPhoneLabel(primaryPhoneLabel);
+    setEditClientFax(catalogClient?.fax ?? '');
+    setEditClientFaxLabel(catalogClient?.faxLabel ?? '');
+    setEditClientAddress(catalogClient?.address ?? '');
     setEditTourPrimaryColor(
       tour.branding?.primaryColor ?? DEFAULT_NEW_TOUR_PRIMARY_COLOR,
     );
@@ -771,19 +778,12 @@ export function DevViewPanel({
     tour.branding?.logoAlt,
     tour.branding?.primaryColor,
     tour.category,
+    tour.clientId,
     tour.floorPlan?.height,
     tour.floorPlan?.width,
     tour.id,
-    tour.organization?.address,
-    tour.organization?.email,
-    tour.organization?.fax,
-    tour.organization?.faxLabel,
-    tour.organization?.name,
-    tour.organization?.phone,
-    tour.organization?.phoneLabel,
-    tour.organization?.website,
     tour.title,
-    tour.url,
+    catalogTick,
   ]);
 
   useEffect(() => {
@@ -1134,12 +1134,12 @@ export function DevViewPanel({
         tourTitle: editTourTitle.trim(),
         category: editTourCategory,
         websiteUrl: editTourWebsite.trim() || undefined,
-        organizationEmail: editOrgEmail,
-        organizationPhone: editOrgPhone,
-        organizationPhoneLabel: editOrgPhoneLabel,
-        organizationFax: editOrgFax,
-        organizationFaxLabel: editOrgFaxLabel,
-        organizationAddress: editOrgAddress,
+        clientEmail: editClientEmail,
+        clientPhone: editClientPhone,
+        clientPhoneLabel: editClientPhoneLabel,
+        clientFax: editClientFax,
+        clientFaxLabel: editClientFaxLabel,
+        clientAddress: editClientAddress,
         primaryColor: normalizeHexColorInput(editTourPrimaryColor),
         logoAlt: editTourLogoAlt.trim() || undefined,
         fontFamily: editTourFontFamily,
@@ -1170,6 +1170,7 @@ export function DevViewPanel({
       setEditTourLogoFile(null);
       setEditTourFaviconFile(null);
       await onTourMutated?.({ refreshKnowledge: true });
+      await refreshDevCatalogSnapshot();
       setEditTourStatus('done');
     } catch (error) {
       setEditTourStatus('error');
@@ -1186,12 +1187,12 @@ export function DevViewPanel({
     editImmersivePlaylistManifest,
     editImmersivePlaylistText,
     editImmersiveVolume,
-    editOrgAddress,
-    editOrgEmail,
-    editOrgFax,
-    editOrgFaxLabel,
-    editOrgPhone,
-    editOrgPhoneLabel,
+    editClientAddress,
+    editClientEmail,
+    editClientFax,
+    editClientFaxLabel,
+    editClientPhone,
+    editClientPhoneLabel,
     editTourCategory,
     editTourFeatured,
     editTourFaviconFile,
@@ -1408,10 +1409,10 @@ export function DevViewPanel({
 
     try {
       const result = await devSuggestContact(websiteUrl);
-      if (result.email) setNewOrgEmail(result.email);
-      if (result.phone) setNewOrgPhone(result.phone);
-      if (result.phoneLabel) setNewOrgPhoneLabel(result.phoneLabel);
-      if (result.address) setNewOrgAddress(result.address);
+      if (result.email) setNewClientEmail(result.email);
+      if (result.phone) setNewClientPhone(result.phone);
+      if (result.phoneLabel) setNewClientPhoneLabel(result.phoneLabel);
+      if (result.address) setNewClientAddress(result.address);
       setSuggestContactNotes(result.notes);
       setSuggestContactStatus('done');
     } catch (error) {
@@ -1441,10 +1442,10 @@ export function DevViewPanel({
         tourTitle: trimmedNewTourTitle || newTourSlug,
         category: newTourCategory,
         websiteUrl: newTourWebsite.trim() || undefined,
-        organizationEmail: newOrgEmail.trim() || undefined,
-        organizationPhone: newOrgPhone.trim() || undefined,
-        organizationPhoneLabel: newOrgPhoneLabel.trim() || undefined,
-        organizationAddress: newOrgAddress.trim() || undefined,
+        clientEmail: newClientEmail.trim() || undefined,
+        clientPhone: newClientPhone.trim() || undefined,
+        clientPhoneLabel: newClientPhoneLabel.trim() || undefined,
+        clientAddress: newClientAddress.trim() || undefined,
         firstSceneTitle: newFirstSceneTitle.trim(),
         panoramaFile: newTourPanoramaFile,
         logoFile: newTourLogoFile,
@@ -1483,10 +1484,10 @@ export function DevViewPanel({
     navigate,
     newClientSlug,
     newFirstSceneTitle,
-    newOrgAddress,
-    newOrgEmail,
-    newOrgPhone,
-    newOrgPhoneLabel,
+    newClientAddress,
+    newClientEmail,
+    newClientPhone,
+    newClientPhoneLabel,
     newTourCategory,
     newTourClientId,
     newTourClientMode,
@@ -1931,7 +1932,10 @@ export function DevViewPanel({
   const stickyTourName =
     currentTourEntry?.facilityTitle ?? tour.title ?? currentTourId;
   const stickyClientName =
-    currentTourEntry?.label ?? tour.organization?.name ?? tour.clientId ?? '';
+    currentTourEntry?.label ??
+    findCatalogClient(getTourClientId(tour))?.name ??
+    tour.clientId ??
+    '';
 
   useEffect(() => {
     if (!tourSwitchOpen) return;
@@ -3500,7 +3504,7 @@ export function DevViewPanel({
                             onChange={(e) =>
                               setEditTourProductFullName(e.target.value)
                             }
-                            placeholder='Leave empty for “{organization} Virtual Tour”'
+                            placeholder='Leave empty for “{client} Virtual Tour”'
                             spellCheck={false}
                             autoComplete='off'
                           />
@@ -3580,21 +3584,6 @@ export function DevViewPanel({
                             </p>
                           </div>
                         </DevPanelFormRow>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Website
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='url'
-                            value={editTourWebsite}
-                            onChange={(e) => setEditTourWebsite(e.target.value)}
-                            placeholder='https://…'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
                       </DevPanelFormSection>
 
                       <DevPanelFormSection title='Experience' divided>
@@ -3756,10 +3745,25 @@ export function DevViewPanel({
                       </DevPanelFormSection>
 
                       <DevPanelFormSection
-                        title='Organization'
+                        title='Client contact'
                         divided
-                        description='Shown in tour chrome, share panel, and footer contact blocks.'
+                        description='Shared across all tours for this client — shown in tour chrome, share panel, and footer contact blocks.'
                       >
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Website
+                          </span>
+                          <input
+                            className={devViewPanelInputClassName}
+                            type='url'
+                            value={editTourWebsite}
+                            onChange={(e) => setEditTourWebsite(e.target.value)}
+                            placeholder='https://…'
+                            spellCheck={false}
+                            autoComplete='off'
+                          />
+                        </label>
+
                         <label className={devViewPanelFieldClassName}>
                           <span className={devViewPanelFieldLabelClassName}>
                             Email
@@ -3767,8 +3771,8 @@ export function DevViewPanel({
                           <input
                             className={devViewPanelInputClassName}
                             type='email'
-                            value={editOrgEmail}
-                            onChange={(e) => setEditOrgEmail(e.target.value)}
+                            value={editClientEmail}
+                            onChange={(e) => setEditClientEmail(e.target.value)}
                             placeholder='info@example.org'
                             spellCheck={false}
                             autoComplete='off'
@@ -3783,8 +3787,10 @@ export function DevViewPanel({
                             <input
                               className={devViewPanelInputClassName}
                               type='text'
-                              value={editOrgPhone}
-                              onChange={(e) => setEditOrgPhone(e.target.value)}
+                              value={editClientPhone}
+                              onChange={(e) =>
+                                setEditClientPhone(e.target.value)
+                              }
                               placeholder='825-412-4130'
                               spellCheck={false}
                               autoComplete='off'
@@ -3797,9 +3803,9 @@ export function DevViewPanel({
                             <input
                               className={devViewPanelInputClassName}
                               type='text'
-                              value={editOrgPhoneLabel}
+                              value={editClientPhoneLabel}
                               onChange={(e) =>
-                                setEditOrgPhoneLabel(e.target.value)
+                                setEditClientPhoneLabel(e.target.value)
                               }
                               placeholder='Telephone'
                               spellCheck={false}
@@ -3816,8 +3822,8 @@ export function DevViewPanel({
                             <input
                               className={devViewPanelInputClassName}
                               type='text'
-                              value={editOrgFax}
-                              onChange={(e) => setEditOrgFax(e.target.value)}
+                              value={editClientFax}
+                              onChange={(e) => setEditClientFax(e.target.value)}
                               spellCheck={false}
                               autoComplete='off'
                             />
@@ -3829,9 +3835,9 @@ export function DevViewPanel({
                             <input
                               className={devViewPanelInputClassName}
                               type='text'
-                              value={editOrgFaxLabel}
+                              value={editClientFaxLabel}
                               onChange={(e) =>
-                                setEditOrgFaxLabel(e.target.value)
+                                setEditClientFaxLabel(e.target.value)
                               }
                               spellCheck={false}
                               autoComplete='off'
@@ -3846,8 +3852,10 @@ export function DevViewPanel({
                           <textarea
                             className={devViewPanelInputClassName}
                             rows={2}
-                            value={editOrgAddress}
-                            onChange={(e) => setEditOrgAddress(e.target.value)}
+                            value={editClientAddress}
+                            onChange={(e) =>
+                              setEditClientAddress(e.target.value)
+                            }
                             placeholder='Street, city, province, postal code'
                             spellCheck={false}
                           />
@@ -4112,7 +4120,14 @@ export function DevViewPanel({
                     }
 
                     <DevPanelFormGroup stacked>
-                      <DevPanelFormSection title='Client'>
+                      <DevPanelFormSection
+                        title='Client'
+                        description={
+                          newTourClientMode === 'new' ?
+                            'Catalog identity and contact details shown in tour chrome, share panel, and footer.'
+                          : undefined
+                        }
+                      >
                         {newTourClientMode === 'existing' ?
                           <label className={devViewPanelFieldClassName}>
                             <span className={devViewPanelFieldLabelClassName}>
@@ -4200,112 +4215,114 @@ export function DevViewPanel({
                                 autoComplete='off'
                               />
                             </label>
+
+                            <div className='flex flex-col gap-1'>
+                              <div className={devViewPanelActionsClassName}>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'secondary',
+                                  })}
+                                  onClick={() => void suggestNewTourContact()}
+                                  disabled={
+                                    !newTourWebsite.trim() ||
+                                    suggestContactStatus === 'working'
+                                  }
+                                >
+                                  {suggestContactStatus === 'working' ?
+                                    'Suggesting…'
+                                  : 'Suggest from website'}
+                                </button>
+                              </div>
+                              <p className={devViewPanelSectionHintClassName}>
+                                Uses the client website URL to draft email,
+                                phone, and address — review before creating.
+                              </p>
+                            </div>
+
+                            {suggestContactNotes.length > 0 ?
+                              <ul className={devViewPanelSectionHintClassName}>
+                                {suggestContactNotes.map((note) => (
+                                  <li key={note}>{note}</li>
+                                ))}
+                              </ul>
+                            : null}
+
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Email
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='email'
+                                value={newClientEmail}
+                                onChange={(e) =>
+                                  setNewClientEmail(e.target.value)
+                                }
+                                placeholder='info@example.org'
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+
+                            <DevPanelFormRow>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Phone
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={newClientPhone}
+                                  onChange={(e) =>
+                                    setNewClientPhone(e.target.value)
+                                  }
+                                  placeholder='825-412-4130'
+                                  spellCheck={false}
+                                  autoComplete='off'
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Phone label
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={newClientPhoneLabel}
+                                  onChange={(e) =>
+                                    setNewClientPhoneLabel(e.target.value)
+                                  }
+                                  placeholder='Telephone'
+                                  spellCheck={false}
+                                  autoComplete='off'
+                                />
+                              </label>
+                            </DevPanelFormRow>
+
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Address
+                              </span>
+                              <textarea
+                                className={devViewPanelTextareaClassName}
+                                value={newClientAddress}
+                                onChange={(e) =>
+                                  setNewClientAddress(e.target.value)
+                                }
+                                placeholder='Street, city, province'
+                                rows={2}
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
                           </>
                         }
                       </DevPanelFormSection>
-
-                      {newTourClientMode === 'new' ?
-                        <DevPanelFormSection
-                          title='Contact'
-                          divided
-                          description='Shown in tour chrome, share panel, and footer contact blocks.'
-                        >
-                          <div className='flex flex-col gap-1'>
-                            <div className={devViewPanelActionsClassName}>
-                              <button
-                                type='button'
-                                className={devViewPanelBtnVariants({
-                                  tone: 'secondary',
-                                })}
-                                onClick={() => void suggestNewTourContact()}
-                                disabled={
-                                  !newTourWebsite.trim() ||
-                                  suggestContactStatus === 'working'
-                                }
-                              >
-                                {suggestContactStatus === 'working' ?
-                                  'Suggesting…'
-                                : 'Suggest from website'}
-                              </button>
-                            </div>
-                            <p className={devViewPanelSectionHintClassName}>
-                              Uses the client website URL to draft email, phone,
-                              and address — review before creating.
-                            </p>
-                          </div>
-
-                          {suggestContactNotes.length > 0 ?
-                            <ul className={devViewPanelSectionHintClassName}>
-                              {suggestContactNotes.map((note) => (
-                                <li key={note}>{note}</li>
-                              ))}
-                            </ul>
-                          : null}
-
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Email
-                            </span>
-                            <input
-                              className={devViewPanelInputClassName}
-                              type='email'
-                              value={newOrgEmail}
-                              onChange={(e) => setNewOrgEmail(e.target.value)}
-                              placeholder='info@example.org'
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-
-                          <DevPanelFormRow>
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Phone
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={newOrgPhone}
-                                onChange={(e) => setNewOrgPhone(e.target.value)}
-                                placeholder='825-412-4130'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Phone label
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={newOrgPhoneLabel}
-                                onChange={(e) =>
-                                  setNewOrgPhoneLabel(e.target.value)
-                                }
-                                placeholder='Telephone'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-                          </DevPanelFormRow>
-
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Address
-                            </span>
-                            <textarea
-                              className={devViewPanelTextareaClassName}
-                              value={newOrgAddress}
-                              onChange={(e) => setNewOrgAddress(e.target.value)}
-                              placeholder='Street, city, province'
-                              rows={2}
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-                        </DevPanelFormSection>
-                      : null}
 
                       <DevPanelFormSection title='Tour details' divided>
                         <DevPanelFormRow>

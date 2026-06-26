@@ -2,26 +2,7 @@
   "id": "cancer-research",
   "clientId": "cancerresearchsociety",
   "category": "Healthcare",
-  "url": "https://cancerresearchsociety.ca",
   "title": "Cancer Research",
-  "organization": {
-    "name": "Cancer Research Society",
-    "website": "https://cancerresearchsociety.ca",
-    "email": "mboustani@src-crs.ca",
-    "phones": [
-      {
-        "number": "514-861-9227",
-        "label": "Telephone"
-      },
-      {
-        "number": "1-888-766-2262",
-        "label": "Toll free"
-      }
-    ],
-    "fax": "514-861-9220",
-    "faxLabel": "Fax",
-    "address": "625 President-Kennedy Avenue Suite 402, Montreal, QC H3A 3S5"
-  },
   "branding": {
     "logo": "/assets/cancerresearchsociety/cancer-research/brand/logo.png",
     "logoAlt": "Cancer Research Society",

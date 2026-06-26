@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react';
-import type { TourOrganization } from '../types/tour';
+import type { TourClient } from '../types/tour';
 import { cn } from '../lib/cn';
 import {
   addressToGoogleMapsHref,
-  getOrganizationPhones,
-  hasOrganizationContact,
+  getClientPhones,
+  hasClientContact,
   phoneToTelHref,
-} from '../utils/tourOrganizationContact';
+} from '../utils/tourClientContact';
 import {
   tourNavContactBrandVariants,
   tourNavContactItemClassName,
@@ -21,7 +21,7 @@ import {
 } from './tourNavFloatVariants';
 
 interface TourContactInfoProps {
-  organization?: TourOrganization;
+  client?: TourClient;
   logo?: ReactNode;
   /** Skip top divider when rendered inside help accordion. */
   embedded?: boolean;
@@ -36,14 +36,14 @@ function formatWebsiteLabel(url: string): string {
 }
 
 export function TourContactInfo({
-  organization,
+  client,
   logo,
   embedded = false,
 }: TourContactInfoProps) {
-  if (!hasOrganizationContact(organization)) return null;
+  if (!hasClientContact(client)) return null;
 
-  const phones = getOrganizationPhones(organization);
-  const faxHref = organization.fax ? phoneToTelHref(organization.fax) : '';
+  const phones = getClientPhones(client);
+  const faxHref = client.fax ? phoneToTelHref(client.fax) : '';
 
   return (
     <>
@@ -56,36 +56,36 @@ export function TourContactInfo({
           <div className={tourNavPanelLogoClassName}>{logo}</div>
         : null}
         {!logo ?
-          <p className={tourNavContactNameClassName}>{organization.name}</p>
+          <p className={tourNavContactNameClassName}>{client.name}</p>
         : null}
       </div>
 
       <dl className={tourNavContactListClassName}>
-        {organization.website ?
+        {client.website ?
           <div className={tourNavContactItemClassName}>
             <dt className={tourNavContactLabelClassName}>Website</dt>
             <dd className={tourNavContactValueClassName}>
               <a
                 className={tourNavContactLinkClassName}
-                href={organization.website}
+                href={client.website}
                 target='_blank'
                 rel='noopener noreferrer'
               >
-                {formatWebsiteLabel(organization.website)}
+                {formatWebsiteLabel(client.website)}
               </a>
             </dd>
           </div>
         : null}
 
-        {organization.email ?
+        {client.email ?
           <div className={tourNavContactItemClassName}>
             <dt className={tourNavContactLabelClassName}>Email</dt>
             <dd className={tourNavContactValueClassName}>
               <a
                 className={tourNavContactLinkClassName}
-                href={`mailto:${organization.email}`}
+                href={`mailto:${client.email}`}
               >
-                {organization.email}
+                {client.email}
               </a>
             </dd>
           </div>
@@ -110,22 +110,22 @@ export function TourContactInfo({
           </div>
         ))}
 
-        {organization.fax ?
+        {client.fax ?
           <div className={tourNavContactItemClassName}>
             <dt className={tourNavContactLabelClassName}>
-              {organization.faxLabel ?? 'Fax'}
+              {client.faxLabel ?? 'Fax'}
             </dt>
             <dd className={tourNavContactValueClassName}>
               {faxHref ?
                 <a className={tourNavContactLinkClassName} href={faxHref}>
-                  {organization.fax}
+                  {client.fax}
                 </a>
-              : organization.fax}
+              : client.fax}
             </dd>
           </div>
         : null}
 
-        {organization.address ?
+        {client.address ?
           <div className={tourNavContactItemClassName}>
             <dt className={tourNavContactLabelClassName}>Address</dt>
             <dd
@@ -136,15 +136,12 @@ export function TourContactInfo({
             >
               <a
                 className={tourNavContactLinkClassName}
-                href={addressToGoogleMapsHref(
-                  organization.address,
-                  organization.name,
-                )}
+                href={addressToGoogleMapsHref(client.address, client.name)}
                 target='_blank'
                 rel='noopener noreferrer'
-                aria-label={`Open in Google Maps: ${organization.address}, ${organization.name}`}
+                aria-label={`Open in Google Maps: ${client.address}, ${client.name}`}
               >
-                {organization.address}
+                {client.address}
               </a>
             </dd>
           </div>

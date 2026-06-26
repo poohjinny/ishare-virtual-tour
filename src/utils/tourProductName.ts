@@ -1,4 +1,5 @@
 import type { Tour } from '../types/tour';
+import { resolveTourClient } from './resolveTourClient';
 
 /**
  * Client tour product naming (in-app).
@@ -12,7 +13,7 @@ export const TOUR_PRODUCT_SUFFIX = 'Virtual Tour';
 
 /** Client organization display name (full name). */
 export function getTourClientFullName(tour: Tour): string {
-  return tour.organization?.name?.trim() || tour.title.trim();
+  return resolveTourClient(tour)?.name?.trim() || tour.title.trim();
 }
 
 /** Client tour product full name — `{client full name} Virtual Tour`. */

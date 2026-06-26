@@ -1,7 +1,4 @@
-import {
-  popupCtaLabelLength,
-  resolvePopupCta,
-} from '../data/giftabulatorBrand';
+import { popupCtaLabelLength } from '../data/giftabulatorBrand';
 import {
   findPrimaryPopupCta,
   findSecondaryPopupCtas,
@@ -57,13 +54,6 @@ export function partitionPopupCtas(ctas: PopupCta[]): {
     primary,
     secondaries: findSecondaryPopupCtas(ordered, primary),
   };
-}
-
-export function resolvePopupCtaDescriptionTooltip(
-  cta: PopupCta,
-): string | undefined {
-  const sublabel = resolvePopupCta(cta).sublabel?.trim();
-  return sublabel || undefined;
 }
 
 export interface PopupFooterLayout {

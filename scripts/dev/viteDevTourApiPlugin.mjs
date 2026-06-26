@@ -363,11 +363,11 @@ function validateCreateTourPayload(body) {
     defaultView,
     visibility,
     featured,
-    organizationName,
-    organizationEmail,
-    organizationPhone,
-    organizationPhoneLabel,
-    organizationAddress,
+    clientDisplayName,
+    clientEmail,
+    clientPhone,
+    clientPhoneLabel,
+    clientAddress,
   } = body ?? {};
 
   if (mode !== 'existing' && mode !== 'new') {
@@ -430,18 +430,18 @@ function validateCreateTourPayload(body) {
     defaultView,
     visibility: visibility?.trim() || 'unlisted',
     featured: featured === true,
-    organizationName:
-      typeof organizationName === 'string' ? organizationName : undefined,
-    organizationEmail:
-      typeof organizationEmail === 'string' ? organizationEmail : undefined,
-    organizationPhone:
-      typeof organizationPhone === 'string' ? organizationPhone : undefined,
-    organizationPhoneLabel:
-      typeof organizationPhoneLabel === 'string' ?
-        organizationPhoneLabel
+    clientDisplayName:
+      typeof clientDisplayName === 'string' ? clientDisplayName : undefined,
+    clientEmail:
+      typeof clientEmail === 'string' ? clientEmail : undefined,
+    clientPhone:
+      typeof clientPhone === 'string' ? clientPhone : undefined,
+    clientPhoneLabel:
+      typeof clientPhoneLabel === 'string' ?
+        clientPhoneLabel
       : undefined,
-    organizationAddress:
-      typeof organizationAddress === 'string' ? organizationAddress : undefined,
+    clientAddress:
+      typeof clientAddress === 'string' ? clientAddress : undefined,
   };
 }
 
@@ -551,13 +551,13 @@ function validateUpdateTourPayload(body) {
     faviconFileBase64,
     visibility,
     featured,
-    organizationName,
-    organizationEmail,
-    organizationPhone,
-    organizationPhoneLabel,
-    organizationFax,
-    organizationFaxLabel,
-    organizationAddress,
+    clientDisplayName,
+    clientEmail,
+    clientPhone,
+    clientPhoneLabel,
+    clientFax,
+    clientFaxLabel,
+    clientAddress,
     fontFamily,
     fontSourceUrl,
     clearFontFamily,
@@ -645,24 +645,24 @@ function validateUpdateTourPayload(body) {
     ),
     visibility: normalizedVisibility,
     featured: typeof featured === 'boolean' ? featured : undefined,
-    organizationName:
-      typeof organizationName === 'string' ? organizationName : undefined,
-    organizationEmail:
-      typeof organizationEmail === 'string' ? organizationEmail : undefined,
-    organizationPhone:
-      typeof organizationPhone === 'string' ? organizationPhone : undefined,
-    organizationPhoneLabel:
-      typeof organizationPhoneLabel === 'string' ?
-        organizationPhoneLabel
+    clientDisplayName:
+      typeof clientDisplayName === 'string' ? clientDisplayName : undefined,
+    clientEmail:
+      typeof clientEmail === 'string' ? clientEmail : undefined,
+    clientPhone:
+      typeof clientPhone === 'string' ? clientPhone : undefined,
+    clientPhoneLabel:
+      typeof clientPhoneLabel === 'string' ?
+        clientPhoneLabel
       : undefined,
-    organizationFax:
-      typeof organizationFax === 'string' ? organizationFax : undefined,
-    organizationFaxLabel:
-      typeof organizationFaxLabel === 'string' ? organizationFaxLabel : (
+    clientFax:
+      typeof clientFax === 'string' ? clientFax : undefined,
+    clientFaxLabel:
+      typeof clientFaxLabel === 'string' ? clientFaxLabel : (
         undefined
       ),
-    organizationAddress:
-      typeof organizationAddress === 'string' ? organizationAddress : undefined,
+    clientAddress:
+      typeof clientAddress === 'string' ? clientAddress : undefined,
     fontFamily: typeof fontFamily === 'string' ? fontFamily : undefined,
     fontSourceUrl:
       typeof fontSourceUrl === 'string' ? fontSourceUrl : undefined,

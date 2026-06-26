@@ -1,16 +1,20 @@
 import type { PopupCta } from '../types/tour';
-import { GIFTABULATOR, platformBrandAriaLabel } from './platformBrands';
+import {
+  GIFTABULATOR,
+  platformBrandAriaLabel,
+  platformBrandMarkedName,
+} from './platformBrands';
 
 /** Giftabulator popup CTA copy — brand metadata lives in `platformBrands.ts`. */
 export const GIFTABULATOR_PRODUCT = {
   ...GIFTABULATOR,
-  ctaDescription: 'See your tax-efficient giving',
-  ariaLabel: platformBrandAriaLabel(GIFTABULATOR),
+  ctaLabel: 'See your tax-efficient giving',
+  ctaDescription: platformBrandAriaLabel(GIFTABULATOR),
+  ariaLabel: `See your tax-efficient giving with ${platformBrandMarkedName(GIFTABULATOR)}`,
 } as const;
 
 export function giftabulatorCtaButtonPlainLabel(): string {
-  const mark = GIFTABULATOR.mark ?? '';
-  return `${GIFTABULATOR.name}${mark}`;
+  return GIFTABULATOR_PRODUCT.ctaLabel;
 }
 
 export function giftabulatorCtaButtonLabelHtml(
@@ -70,13 +74,4 @@ export function giftabulatorCtaSublabelHtml(
 
 export function popupCtaLabelLength(cta: PopupCta): number {
   return resolvePopupCta(cta).label.length;
-}
-
-export function giftabulatorCtaTooltipLabel(cta: PopupCta): string {
-  const resolved = resolvePopupCta(cta);
-  if (resolved.kind === 'giftabulator') {
-    return resolved.ariaLabel;
-  }
-
-  return resolved.label;
 }

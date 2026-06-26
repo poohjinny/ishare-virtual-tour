@@ -2,12 +2,7 @@
   "id": "med-surg-inpatient",
   "clientId": "qchfoundation",
   "category": "Healthcare",
-  "url": "https://example.com",
   "title": "Med/Surg Inpatient",
-  "organization": {
-    "name": "Med/Surg Inpatient",
-    "website": "https://example.com"
-  },
   "branding": {
     "primaryColor": "#007078",
     "logo": "/assets/qchfoundation/med-surg-inpatient/brand/logo.png",

@@ -2,20 +2,7 @@
   "id": "holodomor-museum",
   "clientId": "holodomor",
   "category": "Culture",
-  "url": "https://holodomor.ca",
   "title": "Holodomor Museum",
-  "organization": {
-    "name": "Holodomor Research and Education Consortium",
-    "website": "https://holodomor.ca",
-    "email": "hrec@ualberta.ca",
-    "phones": [
-      {
-        "number": "416-923-4732",
-        "label": "Telephone"
-      }
-    ],
-    "address": "620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4"
-  },
   "branding": {
     "logo": "/assets/holodomor/holodomor-museum/brand/logo.png",
     "logoAlt": "Holodomor Research and Education Consortium",

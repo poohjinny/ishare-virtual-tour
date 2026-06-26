@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   bakeSceneThumbnail,
@@ -9,23 +9,16 @@ import {
 } from './tourSceneDev.mjs';
 import { syncKnowledgeFromTour } from './devContentPlaceholders.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
+import {
+  applyCatalogClientContact,
+  readCatalogJson,
+  resolveClientWebsite,
+  writeCatalogJson,
+} from './tourCatalogDev.mjs';
 
 const DEFAULT_TRANSITION = { speed: '500ms', effect: 'fade' };
 const DEFAULT_VIEW = { yaw: 0, pitch: 0, zoom: 17 };
 const DEFAULT_PRIMARY_COLOR = '#007078';
-
-function readCatalogJson(toursDir) {
-  const catalogPath = join(toursDir, 'catalog.json');
-  if (!existsSync(catalogPath)) {
-    throw new Error('catalog.json not found');
-  }
-  return JSON.parse(readFileSync(catalogPath, 'utf8'));
-}
-
-function writeCatalogJson(toursDir, catalog) {
-  const catalogPath = join(toursDir, 'catalog.json');
-  writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
-}
 
 function assertSlug(value, label) {
   const slug = slugifyHotspotName(value);
@@ -35,55 +28,28 @@ function assertSlug(value, label) {
   return slug;
 }
 
-function applyOptionalOrganizationField(organization, key, value) {
-  if (!value?.trim()) return;
-  organization[key] = value.trim();
-}
-
 function buildTourRecord({
   tourId,
   clientId,
   category,
   tourTitle,
-  websiteUrl,
   clientName,
-  organizationName,
-  organizationEmail,
-  organizationPhone,
-  organizationPhoneLabel,
-  organizationAddress,
   scene,
   primaryColor,
   hasLogo,
   hasFavicon,
 }) {
-  const url = websiteUrl?.trim() || 'https://example.com';
-  const orgName = organizationName?.trim() || clientName?.trim() || tourTitle;
-  const organization = { name: orgName, website: url };
-  applyOptionalOrganizationField(organization, 'email', organizationEmail);
-  applyOptionalOrganizationField(organization, 'phone', organizationPhone);
-  applyOptionalOrganizationField(
-    organization,
-    'phoneLabel',
-    organizationPhoneLabel,
-  );
-  applyOptionalOrganizationField(organization, 'address', organizationAddress);
-
   const color = normalizePrimaryColor(primaryColor) ?? DEFAULT_PRIMARY_COLOR;
+  const logoAlt = clientName?.trim() || tourTitle;
 
   return {
     id: tourId,
     clientId,
     category,
-    url,
     title: tourTitle,
-    organization,
     branding: {
       ...(hasLogo ?
-        {
-          logo: `/assets/${clientId}/${tourId}/brand/logo.png`,
-          logoAlt: orgName,
-        }
+        { logo: `/assets/${clientId}/${tourId}/brand/logo.png`, logoAlt }
       : {}),
       primaryColor: color,
       ...(hasFavicon ?
@@ -101,12 +67,19 @@ function registerTourInCatalog({
   mode,
   clientId,
   clientName,
+  websiteUrl,
+  clientEmail,
+  clientPhone,
+  clientPhoneLabel,
+  clientAddress,
   tourId,
   tourTitle,
   category,
   visibility,
   featured = false,
 }) {
+  const website = websiteUrl?.trim() || undefined;
+
   if (mode === 'new') {
     if (catalog.clients?.some((client) => client.id === clientId)) {
       throw new Error(`Client id already exists: ${clientId}`);
@@ -114,18 +87,33 @@ function registerTourInCatalog({
     if (!catalog.clients) {
       catalog.clients = [];
     }
-    catalog.clients.push({
+    const client = {
       id: clientId,
       name: clientName,
       tours: [{ id: tourId, category, name: tourTitle, visibility, featured }],
+    };
+    applyCatalogClientContact(client, {
+      website,
+      email: clientEmail,
+      phone: clientPhone,
+      phoneLabel: clientPhoneLabel,
+      address: clientAddress,
     });
-    return;
+    catalog.clients.push(client);
+    return client;
   }
 
   const client = catalog.clients?.find((entry) => entry.id === clientId);
   if (!client) {
     throw new Error(`Client not found in catalog: ${clientId}`);
   }
+  applyCatalogClientContact(client, {
+    website,
+    email: clientEmail,
+    phone: clientPhone,
+    phoneLabel: clientPhoneLabel,
+    address: clientAddress,
+  });
   if (client.tours?.some((entry) => entry.id === tourId)) {
     throw new Error(`Tour id already in catalog: ${tourId}`);
   }
@@ -139,6 +127,7 @@ function registerTourInCatalog({
     visibility,
     featured,
   });
+  return client;
 }
 
 export function listCatalogClients(toursDir) {
@@ -146,6 +135,13 @@ export function listCatalogClients(toursDir) {
   return (catalog.clients ?? []).map((client) => ({
     id: client.id,
     name: client.name,
+    website: client.website ?? '',
+    email: client.email ?? '',
+    phone: client.phone ?? '',
+    phoneLabel: client.phoneLabel ?? '',
+    fax: client.fax ?? '',
+    faxLabel: client.faxLabel ?? '',
+    address: client.address ?? '',
     tourCount: client.tours?.length ?? 0,
   }));
 }
@@ -169,11 +165,10 @@ export async function createTour({
   defaultView,
   visibility = 'unlisted',
   featured = false,
-  organizationName,
-  organizationEmail,
-  organizationPhone,
-  organizationPhoneLabel,
-  organizationAddress,
+  clientEmail,
+  clientPhone,
+  clientPhoneLabel,
+  clientAddress,
 }) {
   if (mode !== 'existing' && mode !== 'new') {
     throw new Error('mode must be existing or new');
@@ -209,11 +204,16 @@ export async function createTour({
   }
 
   const catalog = readCatalogJson(toursDir);
-  registerTourInCatalog({
+  const catalogClient = registerTourInCatalog({
     catalog,
     mode,
     clientId,
     clientName: clientName?.trim() ?? tourTitleValue,
+    websiteUrl,
+    clientEmail,
+    clientPhone,
+    clientPhoneLabel,
+    clientAddress,
     tourId,
     tourTitle: tourTitleValue,
     category: category.trim(),
@@ -261,13 +261,10 @@ export async function createTour({
     clientId,
     category: category.trim(),
     tourTitle: tourTitleValue,
-    websiteUrl,
-    clientName: mode === 'new' ? clientName?.trim() : undefined,
-    organizationName,
-    organizationEmail,
-    organizationPhone,
-    organizationPhoneLabel,
-    organizationAddress,
+    clientName:
+      catalogClient.name ??
+      (mode === 'new' ? clientName?.trim() : undefined) ??
+      tourTitleValue,
     scene,
     primaryColor,
     hasLogo: brandAssets.savedLogo,
@@ -288,7 +285,14 @@ export async function createTour({
   writeTourJson(tourPath, tour);
   writeFileSync(
     knowledgePath,
-    `${JSON.stringify(syncKnowledgeFromTour(tour, null), null, 2)}\n`,
+    `${JSON.stringify(
+      syncKnowledgeFromTour(tour, null, {
+        clientWebsite: resolveClientWebsite(catalogClient),
+        clientName: catalogClient.name,
+      }),
+      null,
+      2,
+    )}\n`,
     'utf8',
   );
   writeCatalogJson(toursDir, catalog);

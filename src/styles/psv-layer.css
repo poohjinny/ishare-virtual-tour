@@ -195,9 +195,7 @@ input::placeholder {
   min-width: 0;
 }
 
-.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap--full .tour-glass-panel__cta,
-.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap>.tour-glass-panel__cta,
-.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-row .tour-glass-panel__cta {
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta {
   box-sizing: border-box;
   display: flex;
   width: 100%;

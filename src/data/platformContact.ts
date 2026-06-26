@@ -1,10 +1,10 @@
 import { TOUR_CONTACT_US_EMAIL } from '../constants/tourContact';
-import type { TourOrganization } from '../types/tour';
+import type { TourClient } from '../types/tour';
 
 import { ISHARE, platformBrandMarkedName } from './platformBrands';
 
-/** Platform tour support — shown in Help → Contact below the client organization. */
-export const PLATFORM_TOUR_SUPPORT: TourOrganization = {
+/** Platform tour support — shown in Help → Contact below the client block. */
+export const PLATFORM_TOUR_SUPPORT: TourClient = {
   name: platformBrandMarkedName(ISHARE),
   website: ISHARE.url,
   email: TOUR_CONTACT_US_EMAIL,

@@ -188,6 +188,13 @@ export type DevNewTourClientMode = 'existing' | 'new';
 export interface DevCatalogClient {
   id: string;
   name: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  phoneLabel?: string;
+  fax?: string;
+  faxLabel?: string;
+  address?: string;
   tourCount: number;
 }
 
@@ -207,13 +214,13 @@ export interface DevUpdateTourPayload {
   faviconFile?: File | null;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
-  organizationName?: string;
-  organizationEmail?: string;
-  organizationPhone?: string;
-  organizationPhoneLabel?: string;
-  organizationFax?: string;
-  organizationFaxLabel?: string;
-  organizationAddress?: string;
+  clientDisplayName?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientPhoneLabel?: string;
+  clientFax?: string;
+  clientFaxLabel?: string;
+  clientAddress?: string;
   fontFamily?: string;
   fontSourceUrl?: string;
   clearFontFamily?: boolean;
@@ -263,11 +270,10 @@ export interface DevCreateTourPayload {
   defaultView?: ViewPosition;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
-  organizationName?: string;
-  organizationEmail?: string;
-  organizationPhone?: string;
-  organizationPhoneLabel?: string;
-  organizationAddress?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientPhoneLabel?: string;
+  clientAddress?: string;
 }
 
 function base64ToFile(base64: string, fileName: string, mimeType: string) {

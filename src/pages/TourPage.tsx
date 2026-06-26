@@ -22,12 +22,12 @@ import { TourNavFloat } from '../components/TourNavFloat';
 import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
 import {
   getSceneList,
-  getTourWebsite,
   loadKnowledge,
   loadTour,
   listPublicTourIds,
   DEFAULT_TOUR_ID,
 } from '../data/loadTour';
+import { getTourWebsite, resolveTourClient } from '../utils/resolveTourClient';
 import { getTourProductFullName } from '../utils/tourProductName';
 import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { useTourAssistant } from '../hooks/useTourAssistant';
@@ -835,7 +835,7 @@ function TourExperience() {
           currentSceneId={currentSceneId}
           firstSceneId={tour.firstScene}
           tourTitle={productFullName}
-          organization={tour.organization}
+          client={resolveTourClient(tour)}
           clientLogo={tour.branding?.logo}
           logoAlt={tour.branding?.logoAlt}
           websiteUrl={getTourWebsite(tour)}

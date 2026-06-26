@@ -6,18 +6,17 @@ import {
   writeTourJson,
 } from './tourSceneDev.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
+import {
+  applyCatalogClientContact,
+  findCatalogClientRecord,
+  readCatalogJson,
+  resolveClientWebsite,
+  tryReadCatalogJson,
+  writeCatalogJson,
+} from './tourCatalogDev.mjs';
 
-function readCatalogJson(toursDir) {
-  const catalogPath = join(toursDir, 'catalog.json');
-  if (!existsSync(catalogPath)) {
-    return null;
-  }
-  return JSON.parse(readFileSync(catalogPath, 'utf8'));
-}
-
-function writeCatalogJson(toursDir, catalog) {
-  const catalogPath = join(toursDir, 'catalog.json');
-  writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
+function writeCatalogJsonOrThrow(toursDir, catalog) {
+  writeCatalogJson(toursDir, catalog);
 }
 
 function updateCatalogTourEntry({
@@ -48,7 +47,7 @@ function updateCatalogTourEntry({
 const CATALOG_VISIBILITIES = new Set(['public', 'unlisted', 'internal']);
 
 export function findCatalogTourEntry(toursDir, clientId, tourId) {
-  const catalog = readCatalogJson(toursDir);
+  const catalog = tryReadCatalogJson(toursDir);
   if (!catalog) return null;
 
   const client = catalog.clients?.find((entry) => entry.id === clientId);
@@ -76,7 +75,7 @@ function updateKnowledgeFile({
   tourId,
   tourTitle,
   websiteUrl,
-  organizationName,
+  clientDisplayName,
 }) {
   const knowledgePath = join(toursDir, `${tourId}-knowledge.json`);
   if (!existsSync(knowledgePath)) return;
@@ -84,15 +83,15 @@ function updateKnowledgeFile({
   const knowledge = JSON.parse(readFileSync(knowledgePath, 'utf8'));
   const nextWebsite = websiteUrl?.trim();
   const nextTitle = tourTitle?.trim();
-  const nextOrgName = organizationName?.trim();
+  const nextClientName = clientDisplayName?.trim();
 
   if (nextWebsite) {
     knowledge.url = nextWebsite;
   }
-  if (nextOrgName || nextTitle) {
+  if (nextClientName || nextTitle) {
     knowledge.global = knowledge.global ?? {};
-    if (nextOrgName) {
-      knowledge.global.facilityName = nextOrgName;
+    if (nextClientName) {
+      knowledge.global.facilityName = nextClientName;
     } else if (nextTitle) {
       knowledge.global.facilityName = nextTitle;
     }
@@ -126,14 +125,10 @@ function assertGoogleFontSourceUrl(url) {
   }
 }
 
-function applyOptionalOrganizationField(organization, key, value) {
-  if (value === undefined) return;
-  const trimmed = value.trim();
-  if (trimmed) {
-    organization[key] = trimmed;
-  } else {
-    delete organization[key];
-  }
+function stripLegacyTourClientFields(tour) {
+  delete tour.client;
+  delete tour.organization;
+  delete tour.url;
 }
 
 const TRANSITION_EFFECTS = new Set(['fade', 'black']);
@@ -291,13 +286,13 @@ export async function updateTour({
   faviconFileBuffer,
   visibility,
   featured,
-  organizationName,
-  organizationEmail,
-  organizationPhone,
-  organizationPhoneLabel,
-  organizationFax,
-  organizationFaxLabel,
-  organizationAddress,
+  clientDisplayName,
+  clientEmail,
+  clientPhone,
+  clientPhoneLabel,
+  clientFax,
+  clientFaxLabel,
+  clientAddress,
   fontFamily,
   fontSourceUrl,
   clearFontFamily,
@@ -335,71 +330,38 @@ export async function updateTour({
   tour.title = nextTitle;
   tour.category = nextCategory;
 
-  if (nextWebsite) {
-    tour.url = nextWebsite;
-    tour.organization = tour.organization ?? {
-      name: nextTitle,
-      website: nextWebsite,
-    };
-    tour.organization.website = nextWebsite;
+  const catalog = readCatalogJson(toursDir);
+  const catalogClient = findCatalogClientRecord(catalog, clientId);
+  if (!catalogClient) {
+    throw new Error(`Client not found in catalog: ${clientId}`);
   }
 
-  const hasOrganizationFields =
-    organizationName !== undefined ||
-    organizationEmail !== undefined ||
-    organizationPhone !== undefined ||
-    organizationPhoneLabel !== undefined ||
-    organizationFax !== undefined ||
-    organizationFaxLabel !== undefined ||
-    organizationAddress !== undefined;
+  const hasClientContactPatch =
+    nextWebsite ||
+    clientDisplayName !== undefined ||
+    clientEmail !== undefined ||
+    clientPhone !== undefined ||
+    clientPhoneLabel !== undefined ||
+    clientFax !== undefined ||
+    clientFaxLabel !== undefined ||
+    clientAddress !== undefined;
 
-  if (hasOrganizationFields) {
-    tour.organization = tour.organization ?? {
-      name: organizationName?.trim() || nextTitle,
-      website: nextWebsite || tour.url || '',
-    };
-    applyOptionalOrganizationField(
-      tour.organization,
-      'name',
-      organizationName ?? '',
-    );
-    applyOptionalOrganizationField(
-      tour.organization,
-      'email',
-      organizationEmail ?? '',
-    );
-    applyOptionalOrganizationField(
-      tour.organization,
-      'phone',
-      organizationPhone ?? '',
-    );
-    applyOptionalOrganizationField(
-      tour.organization,
-      'phoneLabel',
-      organizationPhoneLabel ?? '',
-    );
-    applyOptionalOrganizationField(
-      tour.organization,
-      'fax',
-      organizationFax ?? '',
-    );
-    applyOptionalOrganizationField(
-      tour.organization,
-      'faxLabel',
-      organizationFaxLabel ?? '',
-    );
-    applyOptionalOrganizationField(
-      tour.organization,
-      'address',
-      organizationAddress ?? '',
-    );
-    if (!tour.organization.name?.trim()) {
-      tour.organization.name = nextTitle;
-    }
-    if (!tour.organization.website?.trim() && nextWebsite) {
-      tour.organization.website = nextWebsite;
-    }
+  if (hasClientContactPatch) {
+    applyCatalogClientContact(catalogClient, {
+      ...(nextWebsite ? { website: nextWebsite } : {}),
+      ...(clientDisplayName !== undefined ? { name: clientDisplayName } : {}),
+      ...(clientEmail !== undefined ? { email: clientEmail } : {}),
+      ...(clientPhone !== undefined ? { phone: clientPhone } : {}),
+      ...(clientPhoneLabel !== undefined ?
+        { phoneLabel: clientPhoneLabel }
+      : {}),
+      ...(clientFax !== undefined ? { fax: clientFax } : {}),
+      ...(clientFaxLabel !== undefined ? { faxLabel: clientFaxLabel } : {}),
+      ...(clientAddress !== undefined ? { address: clientAddress } : {}),
+    });
   }
+
+  stripLegacyTourClientFields(tour);
 
   const normalizedColor =
     primaryColor?.trim() ? normalizePrimaryColor(primaryColor) : undefined;
@@ -453,8 +415,7 @@ export async function updateTour({
   if (brandAssets.savedLogo) {
     tour.branding.logo = brandAssets.logoWebPath;
     if (!tour.branding.logoAlt?.trim()) {
-      tour.branding.logoAlt =
-        nextLogoAlt || tour.organization?.name || nextTitle;
+      tour.branding.logoAlt = nextLogoAlt || catalogClient.name || nextTitle;
     }
   }
 
@@ -480,26 +441,23 @@ export async function updateTour({
 
   writeTourJson(tourPath, tour);
 
-  const catalog = readCatalogJson(toursDir);
-  if (catalog) {
-    updateCatalogTourEntry({
-      catalog,
-      clientId,
-      tourId: tour.id,
-      tourTitle: nextTitle,
-      category: nextCategory,
-      visibility: nextVisibility,
-      featured: typeof featured === 'boolean' ? featured : undefined,
-    });
-    writeCatalogJson(toursDir, catalog);
-  }
+  updateCatalogTourEntry({
+    catalog,
+    clientId,
+    tourId: tour.id,
+    tourTitle: nextTitle,
+    category: nextCategory,
+    visibility: nextVisibility,
+    featured: typeof featured === 'boolean' ? featured : undefined,
+  });
+  writeCatalogJsonOrThrow(toursDir, catalog);
 
   updateKnowledgeFile({
     toursDir,
     tourId: tour.id,
     tourTitle: nextTitle,
-    websiteUrl: nextWebsite,
-    organizationName: tour.organization?.name,
+    websiteUrl: resolveClientWebsite(catalogClient),
+    clientDisplayName: catalogClient.name,
   });
 
   return { tourPath, tour };

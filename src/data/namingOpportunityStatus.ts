@@ -13,7 +13,9 @@ import {
   giftabulatorCtaButtonPlainLabel,
   GIFTABULATOR_PRODUCT,
 } from './giftabulatorBrand';
+import { getTourWebsite, resolveTourClient } from '../utils/resolveTourClient';
 import { buildGiftabulatorGiveNowUrl } from '../utils/giftabulatorGiveNowUrl';
+import type { PopupCtaIconKind } from '../utils/popupCtaIcon';
 
 export type NamingOpportunityContactIntent = 'inquiry' | 'simple' | 'notify';
 
@@ -29,6 +31,8 @@ export interface NamingOpportunityStatusCtaConfig {
   sublabel?: string;
   ariaLabel?: string;
   variant?: 'primary' | 'secondary';
+  /** Footer Material icon — independent of mailto vs website fallback URL. */
+  iconKind?: PopupCtaIconKind;
   /** Contact preset routing — defaults to org inquiry mailto. */
   contactIntent?: NamingOpportunityContactIntent;
   /** @deprecated Prefer {@link contactIntent} `'simple'`. */
@@ -64,12 +68,14 @@ const STATUS_CONFIG: Record<
         label: 'Express your interest',
         sublabel: 'Contact our team about this naming opportunity',
         ariaLabel: 'Express your interest in this naming opportunity',
+        iconKind: 'mail',
         variant: 'primary',
       },
       {
         preset: 'giftabulator',
         label: giftabulatorCtaButtonPlainLabel(),
         ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
+        iconKind: 'external',
         variant: 'secondary',
       },
     ],
@@ -87,12 +93,14 @@ const STATUS_CONFIG: Record<
         sublabel:
           'A naming commitment is in progress — reach out with questions',
         ariaLabel: 'Speak with our team about this reserved naming opportunity',
+        iconKind: 'mail',
         variant: 'primary',
       },
       {
         preset: 'giftabulator',
         label: giftabulatorCtaButtonPlainLabel(),
         ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
+        iconKind: 'external',
         variant: 'secondary',
       },
     ],
@@ -109,12 +117,14 @@ const STATUS_CONFIG: Record<
         contactIntent: 'notify',
         sublabel: 'Be first to know when this naming opportunity opens',
         ariaLabel: 'Request notification for this naming opportunity',
+        iconKind: 'bell',
         variant: 'primary',
       },
       {
         preset: 'giftabulator',
         label: giftabulatorCtaButtonPlainLabel(),
         ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
+        iconKind: 'external',
         variant: 'secondary',
       },
     ],
@@ -130,12 +140,14 @@ const STATUS_CONFIG: Record<
         label: 'Support our mission',
         sublabel: 'Thank you to our naming partners',
         ariaLabel: 'Visit our website to support our mission',
+        iconKind: 'heart',
         variant: 'primary',
       },
       {
         preset: 'giftabulator',
         label: giftabulatorCtaButtonPlainLabel(),
         ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
+        iconKind: 'external',
         variant: 'secondary',
       },
     ],
@@ -182,6 +194,13 @@ function buildContactMailto(email: string, naming: NamingOpportunity): string {
   return `mailto:${email}?${params.toString()}`;
 }
 
+function withStatusCtaIcon(
+  cta: PopupCta,
+  ctaConfig: NamingOpportunityStatusCtaConfig,
+): PopupCta {
+  return ctaConfig.iconKind ? { ...cta, iconKind: ctaConfig.iconKind } : cta;
+}
+
 function buildCtaFromPreset(
   ctaConfig: NamingOpportunityStatusCtaConfig,
   tour: Tour,
@@ -192,55 +211,69 @@ function buildCtaFromPreset(
       return null;
     case 'contact': {
       if (ctaConfig.mailto || ctaConfig.contactIntent === 'simple') {
-        return {
-          label: ctaConfig.label,
-          sublabel: ctaConfig.sublabel,
-          ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
-          url: ctaConfig.mailto ?? TOUR_CONTACT_US_MAILTO,
-          variant: ctaConfig.variant ?? 'primary',
-        };
+        return withStatusCtaIcon(
+          {
+            label: ctaConfig.label,
+            sublabel: ctaConfig.sublabel,
+            ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
+            url: ctaConfig.mailto ?? TOUR_CONTACT_US_MAILTO,
+            variant: ctaConfig.variant ?? 'primary',
+          },
+          ctaConfig,
+        );
       }
 
       if (ctaConfig.contactIntent === 'notify') {
-        return {
+        return withStatusCtaIcon(
+          {
+            label: ctaConfig.label,
+            sublabel: ctaConfig.sublabel,
+            ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
+            url: buildTourNotifyMeMailto(naming),
+            variant: ctaConfig.variant ?? 'primary',
+          },
+          ctaConfig,
+        );
+      }
+
+      const client = resolveTourClient(tour);
+      const email = client?.email?.trim();
+      const url =
+        email ? buildContactMailto(email, naming) : TOUR_CONTACT_US_MAILTO;
+      return withStatusCtaIcon(
+        {
           label: ctaConfig.label,
           sublabel: ctaConfig.sublabel,
           ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
-          url: buildTourNotifyMeMailto(naming),
+          url,
           variant: ctaConfig.variant ?? 'primary',
-        };
-      }
-
-      const email = tour.organization?.email?.trim();
-      const url =
-        email ?
-          buildContactMailto(email, naming)
-        : (tour.organization?.website ?? tour.url);
-      return {
-        label: ctaConfig.label,
-        sublabel: ctaConfig.sublabel,
-        ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
-        url,
-        variant: ctaConfig.variant ?? 'primary',
-      };
+        },
+        ctaConfig,
+      );
     }
     case 'website': {
-      return {
-        label: ctaConfig.label,
-        sublabel: ctaConfig.sublabel,
-        ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
-        url: tour.organization?.website ?? tour.url,
-        variant: ctaConfig.variant ?? 'primary',
-      };
+      return withStatusCtaIcon(
+        {
+          label: ctaConfig.label,
+          sublabel: ctaConfig.sublabel,
+          ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
+          url: getTourWebsite(tour),
+          variant: ctaConfig.variant ?? 'primary',
+        },
+        ctaConfig,
+      );
     }
     case 'giftabulator':
-      return {
-        product: 'giftabulator',
-        label: ctaConfig.label,
-        ariaLabel: ctaConfig.ariaLabel ?? GIFTABULATOR_PRODUCT.ariaLabel,
-        url: buildGiftabulatorGiveNowUrl(tour, naming),
-        variant: ctaConfig.variant ?? 'secondary',
-      };
+      return withStatusCtaIcon(
+        {
+          product: 'giftabulator',
+          label: ctaConfig.label,
+          ariaLabel: ctaConfig.ariaLabel ?? GIFTABULATOR_PRODUCT.ariaLabel,
+          url: buildGiftabulatorGiveNowUrl(tour, naming),
+          variant: ctaConfig.variant ?? 'secondary',
+        },
+        ctaConfig,
+      );
     default:
       return null;
   }

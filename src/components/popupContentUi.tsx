@@ -1,17 +1,12 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import type { NamingOpportunity, PopupContent, PopupCta } from '../types/tour';
-import {
-  giftabulatorCtaButtonPlainLabel,
-  resolvePopupCta,
-} from '../data/giftabulatorBrand';
-import { PlatformBrandLink } from './PlatformBrandLink';
+import { resolvePopupCta } from '../data/giftabulatorBrand';
 import { cn } from '../lib/cn';
 import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
 import {
   popupCtaRowClassName,
   popupCtaWrapClassName,
-  resolvePopupCtaDescriptionTooltip,
   resolvePopupFooterLayout,
 } from '../utils/popupCtaLayout';
 import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
@@ -43,7 +38,6 @@ import {
   resolvePopupCtaIconKind,
   shouldShowPopupCtaIcon,
 } from '../utils/popupCtaIcon';
-import { tooltipHostClassName } from './ui/tooltipClasses';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
@@ -328,16 +322,7 @@ export function PopupCtaArrowIcon() {
 }
 
 export function PopupCtaLabel({ cta }: { cta: PopupCta }) {
-  const resolved = resolvePopupCta(cta);
-  const usesDefaultGiftabulatorLabel =
-    resolved.kind === 'giftabulator' &&
-    (!cta.label || cta.label === giftabulatorCtaButtonPlainLabel());
-
-  if (usesDefaultGiftabulatorLabel) {
-    return <PlatformBrandLink brandId='giftabulator' link={false} />;
-  }
-
-  return <>{resolved.label}</>;
+  return <>{resolvePopupCta(cta).label}</>;
 }
 
 function GlassPanelCtaText({
@@ -388,30 +373,24 @@ function GlassPanelCtaText({
 export function PopupCtaButton({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
   const isSecondary = cta.variant === 'secondary';
-  const descriptionTooltip = resolvePopupCtaDescriptionTooltip(cta);
+  const showIcon = shouldShowPopupCtaIcon(cta, isSecondary);
 
   return (
     <a
       className={cn(
         'tour-glass-panel__cta',
         isSecondary && 'tour-glass-panel__cta--secondary',
-        descriptionTooltip && tooltipHostClassName,
+        showIcon && 'tour-glass-panel__cta--has-trailing-icon',
       )}
       href={resolved.url}
       target='_blank'
       rel='noopener noreferrer'
       aria-label={resolved.ariaLabel}
-      {...(descriptionTooltip ?
-        {
-          'data-ishare-tooltip': descriptionTooltip,
-          'data-ishare-tooltip-placement': 'top',
-        }
-      : {})}
     >
       <GlassPanelCtaText label={resolved.label}>
         <PopupCtaLabel cta={cta} />
       </GlassPanelCtaText>
-      {shouldShowPopupCtaIcon(cta, isSecondary) ?
+      {showIcon ?
         <PopupCtaIcon kind={resolvePopupCtaIconKind(cta)} />
       : null}
     </a>

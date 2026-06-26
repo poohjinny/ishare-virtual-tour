@@ -5,6 +5,8 @@ import {
 } from '../constants/tourCategories';
 import { getDevCatalogSnapshot } from './devCatalogSnapshot';
 
+import type { ClientPhone } from '../types/tour';
+
 export type CatalogTourVisibility = 'public' | 'unlisted' | 'internal';
 
 export interface CatalogTourEntry {
@@ -15,9 +17,18 @@ export interface CatalogTourEntry {
   featured?: boolean;
 }
 
+/** Client record in catalog.json — contact lives here, not on individual tours. */
 export interface CatalogClient {
   id: string;
   name: string;
+  website?: string;
+  email?: string;
+  phone?: string;
+  phoneLabel?: string;
+  phones?: ClientPhone[];
+  fax?: string;
+  faxLabel?: string;
+  address?: string;
   tours: CatalogTourEntry[];
 }
 
@@ -50,6 +61,10 @@ export function listTourCategories(): readonly TourCategory[] {
 
 export function listCatalogClients(): CatalogClient[] {
   return getCatalogData().clients;
+}
+
+export function findCatalogClient(clientId: string): CatalogClient | undefined {
+  return getCatalogData().clients.find((client) => client.id === clientId);
 }
 
 export interface CatalogTourListItem {

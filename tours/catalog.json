@@ -12,6 +12,11 @@
     {
       "id": "gphospitalfoundation",
       "name": "Grande Prairie Regional Hospital Foundation",
+      "website": "https://gphospitalfoundation.ca",
+      "email": "info@gphospitalfoundation.ca",
+      "phone": "825-412-4130",
+      "phoneLabel": "Telephone",
+      "address": "11205 – 110 Street, Grande Prairie, AB T8V 4B1",
       "tours": [
         {
           "id": "ken-sargent-house",
@@ -25,6 +30,15 @@
     {
       "id": "cancerresearchsociety",
       "name": "Cancer Research Society",
+      "website": "https://cancerresearchsociety.ca",
+      "email": "mboustani@src-crs.ca",
+      "phones": [
+        { "number": "514-861-9227", "label": "Telephone" },
+        { "number": "1-888-766-2262", "label": "Toll free" }
+      ],
+      "fax": "514-861-9220",
+      "faxLabel": "Fax",
+      "address": "625 President-Kennedy Avenue Suite 402, Montreal, QC H3A 3S5",
       "tours": [
         {
           "id": "cancer-research",
@@ -38,6 +52,10 @@
     {
       "id": "holodomor",
       "name": "Holodomor Research and Education Consortium",
+      "website": "https://holodomor.ca",
+      "email": "hrec@ualberta.ca",
+      "phones": [{ "number": "416-923-4732", "label": "Telephone" }],
+      "address": "620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4",
       "tours": [
         {
           "id": "holodomor-museum",
@@ -51,6 +69,10 @@
     {
       "id": "qchfoundation",
       "name": "Queensway Carleton Hospital Foundation",
+      "website": "https://qchfoundation.ca",
+      "email": "info@qchfoundation.ca",
+      "phones": [{ "number": "613-721-4731", "label": "Telephone" }],
+      "address": "3045 Baseline Road, Ottawa, ON K2H 8P4",
       "tours": [
         {
           "id": "qch-hospital",

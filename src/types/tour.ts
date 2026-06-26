@@ -20,6 +20,8 @@ export interface PopupCta {
   ariaLabel?: string;
   /** Footer button style — defaults to primary */
   variant?: 'primary' | 'secondary';
+  /** Footer icon — set from NO status defaults; URL/label heuristics when omitted */
+  iconKind?: 'arrow' | 'mail' | 'bell' | 'external' | 'heart';
 }
 
 export type NamingOpportunityStatus =
@@ -140,18 +142,19 @@ export interface Scene {
   map?: SceneMapPosition;
 }
 
-export interface OrganizationPhone {
+export interface ClientPhone {
   number: string;
   label?: string;
 }
 
-export interface TourOrganization {
+/** Client identity and contact — resolved from catalog via {@link resolveTourClient}. */
+export interface TourClient {
   name: string;
   website: string;
   email?: string;
   phone?: string;
   phoneLabel?: string;
-  phones?: OrganizationPhone[];
+  phones?: ClientPhone[];
   fax?: string;
   faxLabel?: string;
   address?: string;
@@ -192,13 +195,12 @@ export interface Tour {
   clientId?: string;
   /** Platform category — e.g. Healthcare, Education. */
   category?: string;
-  /** Primary website URL (often organization website) */
-  url: string;
+  /** @deprecated Legacy tour URL — use catalog client `website` via {@link getTourWebsite}. */
+  url?: string;
   /** Facility or experience title (e.g. "Ken Sargent House") */
   title: string;
-  /** Optional override — defaults to `{organization.name} Virtual Tour` */
+  /** Optional override — defaults to `{client.name} Virtual Tour` */
   productFullName?: string;
-  organization?: TourOrganization;
   branding?: TourBranding;
   /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
   immersiveBackground?: TourImmersiveBackground;

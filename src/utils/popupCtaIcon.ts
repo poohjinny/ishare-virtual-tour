@@ -3,8 +3,10 @@ import { resolvePopupCta } from '../data/giftabulatorBrand';
 
 export type PopupCtaIconKind = 'arrow' | 'mail' | 'bell' | 'external' | 'heart';
 
-/** Primary footer CTA icon — derived from label + destination URL. */
+/** Primary footer CTA icon — status config first, then label + destination URL. */
 export function resolvePopupCtaIconKind(cta: PopupCta): PopupCtaIconKind {
+  if (cta.iconKind) return cta.iconKind;
+
   const resolved = resolvePopupCta(cta);
   const label = resolved.label.toLowerCase();
   const url = cta.url.trim().toLowerCase();

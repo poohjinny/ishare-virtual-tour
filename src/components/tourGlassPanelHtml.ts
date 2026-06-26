@@ -11,12 +11,7 @@ import {
   navPreviewCtaLabel,
   navPreviewVisitAriaLabel,
 } from '../utils/navPreview';
-import {
-  giftabulatorCtaButtonLabelHtml,
-  giftabulatorCtaButtonPlainLabel,
-  giftabulatorCtaTooltipLabel,
-  resolvePopupCta,
-} from '../data/giftabulatorBrand';
+import { resolvePopupCta } from '../data/giftabulatorBrand';
 import {
   glassPanelCtaIconHtml,
   materialSymbolHtml,
@@ -44,7 +39,6 @@ import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import {
   popupCtaRowClassName,
   popupCtaWrapClassName,
-  resolvePopupCtaDescriptionTooltip,
   resolvePopupFooterLayout,
 } from '../utils/popupCtaLayout';
 import {
@@ -305,20 +299,17 @@ function buildShareHeaderButtonHtml(
 
 function buildPopupHeaderActionHtml(cta: PopupCta): string {
   const resolved = resolvePopupCta(cta);
-  const tooltipLabel = giftabulatorCtaTooltipLabel(cta);
   const iconHtml =
     isMailtoCtaUrl(resolved.url) ?
       glassPanelMailIconHtml()
     : glassPanelExternalLinkIconHtml();
 
   return `<a
-        class="${GLASS_PANEL.headerBtn} ishare-tooltip-host"
+        class="${GLASS_PANEL.headerBtn}"
         href="${escapeHtml(resolved.url)}"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="${escapeHtml(resolved.ariaLabel)}"
-        data-ishare-tooltip="${escapeHtml(tooltipLabel)}"
-        data-ishare-tooltip-placement="bottom"
       >${iconHtml}</a>`;
 }
 
@@ -509,16 +500,7 @@ export function buildPopupBadgeHtml(popup: PopupContent): string {
 }
 
 export function buildPopupCtaLabelHtml(cta: PopupCta): string {
-  const resolved = resolvePopupCta(cta);
-  const usesDefaultGiftabulatorLabel =
-    resolved.kind === 'giftabulator' &&
-    (!cta.label || cta.label === giftabulatorCtaButtonPlainLabel());
-
-  if (usesDefaultGiftabulatorLabel) {
-    return giftabulatorCtaButtonLabelHtml(GLASS_PANEL.reg);
-  }
-
-  return escapeHtml(resolved.label);
+  return escapeHtml(resolvePopupCta(cta).label);
 }
 
 export function buildPopupCtaTextHtml(cta: PopupCta): string {
@@ -536,25 +518,18 @@ export function buildPopupCtaButtonHtml(cta: PopupCta): string {
   const resolved = resolvePopupCta(cta);
   const labelHtml = buildPopupCtaTextHtml(cta);
   const isSecondary = cta.variant === 'secondary';
-  const descriptionTooltip = resolvePopupCtaDescriptionTooltip(cta);
-  const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}${descriptionTooltip ? ' ishare-tooltip-host' : ''}`;
   const iconHtml =
     shouldShowPopupCtaIcon(cta, isSecondary) ?
       glassPanelCtaIconHtml(resolvePopupCtaIconKind(cta), GLASS_PANEL.ctaIcon)
     : '';
-  const tooltipAttrs =
-    descriptionTooltip ?
-      `
-        data-ishare-tooltip="${escapeHtml(descriptionTooltip)}"
-        data-ishare-tooltip-placement="top"`
-    : '';
+  const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}${iconHtml ? ' tour-glass-panel__cta--has-trailing-icon' : ''}`;
 
   return `<a
         class="${className}"
         href="${escapeHtml(resolved.url)}"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="${escapeHtml(resolved.ariaLabel)}"${tooltipAttrs}
+        aria-label="${escapeHtml(resolved.ariaLabel)}"
       >${labelHtml}${iconHtml}</a>`;
 }
 

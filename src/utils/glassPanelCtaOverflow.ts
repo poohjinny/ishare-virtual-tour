@@ -10,15 +10,6 @@ export function ctaTextFullLabel(element: HTMLElement): string {
 }
 
 export function applyCtaTextOverflowTitle(element: HTMLElement): void {
-  const ctaAnchor = element.closest('.tour-glass-panel__cta');
-  if (
-    ctaAnchor instanceof HTMLElement &&
-    ctaAnchor.hasAttribute('data-ishare-tooltip')
-  ) {
-    element.removeAttribute('title');
-    return;
-  }
-
   const fullLabel = ctaTextFullLabel(element);
 
   if (!fullLabel) {
