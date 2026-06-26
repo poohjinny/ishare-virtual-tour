@@ -15,16 +15,19 @@ flag + log
 `?embed=1` tells the viewer it runs inside a **host page iframe**. The tour
 should feel like part of the parent site — not a standalone marketing visit.
 
-| Behavior                | Standalone                     | `?embed=1`                                      |
-| ----------------------- | ------------------------------ | ----------------------------------------------- |
-| Client intro at `/`     | Per catalog rules              | Skipped → default tour                          |
-| FAB dock                | Explore, Share, Controls, Help | **Explore + Controls only** (Share/Help hidden) |
-| Load splash             | ~3.2s curtain                  | **~1.1s** lighter splash                        |
-| First-visit coach pill  | Shown once                     | Hidden                                          |
-| `postMessage` to parent | No                             | Yes (when in iframe)                            |
+| Behavior                | Standalone                     | `?embed=1`                                    |
+| ----------------------- | ------------------------------ | --------------------------------------------- |
+| Client intro at `/`     | Per catalog rules              | Skipped → default tour                        |
+| FAB dock                | Explore, Share, Controls, Help | **Explore only** (Share/Help/Controls hidden) |
+| PSV control pill        | Toggle via Controls FAB        | **Always visible** (zoom, move, fullscreen)   |
+| Load splash             | ~3.2s curtain                  | **~1.1s** lighter splash                      |
+| First-visit coach pill  | Shown once                     | Hidden                                        |
+| `postMessage` to parent | No                             | Yes (when in iframe)                          |
 
 Guide FAB (AI assistant) and Explore/navigation stay available unless product
-decides otherwise later.
+decides otherwise later. Embed does not expose the Controls FAB — the bottom PSV
+pill stays on so visitors can zoom and enter fullscreen without an extra dock
+button.
 
 **Do not use `?intro=0` for client embeds** — use `embed=1` on a tour path.
 `intro=0` is a legacy root-only shortcut.

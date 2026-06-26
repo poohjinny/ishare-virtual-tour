@@ -44,6 +44,16 @@
   font-family: var(--ishare-body-font);
   --ishare-body-font: var(--client-font, var(--ishare-font));
   --ishare-display-font: var(--client-font, var(--ishare-font-display));
+  /* Tour chrome gutter — nav FAB dock, breadcrumb, dev tools, minimap, Ask Guide */
+  --tour-chrome-inset: 1rem;
+  --tour-chrome-fab-size: 2.875rem;
+}
+
+@media (max-width: 480px) {
+  .tour-page {
+    --tour-chrome-inset: 0.5rem;
+    --tour-chrome-fab-size: 2.75rem;
+  }
 }
 
 /* Thin scrollbar ? shared across panels (AI chat, nav lists, help, etc.) */
@@ -245,12 +255,12 @@ input::placeholder {
   top: auto;
   left: 50%;
   right: auto;
-  bottom: 24px;
+  bottom: 18px;
   width: auto;
   height: auto;
   transform: translateX(-50%) translateY(0);
   flex-direction: row;
-  padding: 10px 20px;
+  padding: 8px 20px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.52);
   backdrop-filter: blur(6px) saturate(120%);
@@ -295,7 +305,7 @@ input::placeholder {
   top: auto;
   left: 50%;
   right: auto;
-  bottom: 24px;
+  bottom: 18px;
   transform: translateX(-50%) translateY(0);
 }
 
@@ -317,7 +327,7 @@ input::placeholder {
   justify-content: center;
   flex: 0 0 auto;
   width: 30px;
-  height: 30px;
+  height: 28px;
   padding: 0;
   box-sizing: border-box;
   color: var(--ishare-text-muted);
@@ -334,7 +344,7 @@ input::placeholder {
 .viewer-container .psv-zoom-range.psv-button {
   flex: 0 0 auto;
   width: 56px;
-  height: 30px;
+  height: 28px;
   margin: 0 2px;
   padding: 0 4px;
   box-sizing: border-box;
@@ -674,8 +684,8 @@ input::placeholder {
 
   .viewer-container .psv-navbar,
   .viewer-container .psv-navbar--open {
-    bottom: 16px;
-    padding: 8px 14px;
+    bottom: 14px;
+    padding: 7px 14px;
   }
 
   .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {

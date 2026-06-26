@@ -3,7 +3,8 @@ import { cn } from '../../lib/cn';
 import { materialSymbolCompactClassName } from '../ui/materialSymbolClasses';
 
 export const aiAssistantStackClassName = cn(
-  'pointer-events-none absolute right-6 bottom-6 z-[95] flex flex-col items-end gap-2.5 max-sm:inset-x-3 max-sm:bottom-6 max-sm:items-stretch',
+  'pointer-events-none absolute right-[var(--tour-chrome-inset)] bottom-[var(--tour-chrome-inset)] z-[95] flex flex-col items-end gap-2.5',
+  'max-sm:left-[var(--tour-chrome-inset)] max-sm:items-stretch',
   '[&>*]:pointer-events-auto',
 );
 

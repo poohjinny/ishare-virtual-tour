@@ -37,31 +37,50 @@
         padding: 1.25rem 1rem 2rem;
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.25rem;
       }
 
       .panels-row {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 1rem;
+        gap: 1.5rem;
         align-items: stretch;
+      }
+
+      .panel--settings {
+        min-height: 0;
       }
 
       .panel--log {
         min-height: 0;
         overflow: hidden;
+        gap: 0.25rem;
+      }
+
+      .panel--log .log-head {
+        flex-shrink: 0;
       }
 
       .panel--log #log {
-        flex: 1;
-        min-height: 3.5rem;
-        max-height: 180px;
-        overflow: auto;
+        flex: 1 1 0;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
 
       @media (max-width: 760px) {
         .panels-row {
           grid-template-columns: 1fr;
+        }
+
+        .panel--log {
+          height: auto !important;
+          min-height: 0 !important;
+        }
+
+        .panel--log #log {
+          flex: none;
+          max-height: 220px;
         }
       }
 
@@ -107,7 +126,28 @@
       }
 
       .row--tour-scene {
-        align-items: end;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 0.5rem 0.75rem;
+      }
+
+      .inline-field {
+        flex: 1 1 0;
+        min-width: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .inline-field > span {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .row--tour-scene select {
+        flex: 1;
+        min-width: 0;
+        width: 100%;
       }
 
       .full-width {
@@ -154,12 +194,9 @@
         background-repeat: no-repeat;
       }
 
-      .tour-select {
-        min-width: 14rem;
-      }
-
+      .tour-select,
       .scene-select {
-        min-width: 16rem;
+        min-width: 0;
       }
 
       input[type='text'] {
@@ -257,6 +294,16 @@
 
       .url-row .load-btn {
         flex-shrink: 0;
+        align-self: flex-end;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: calc(0.8rem + 1.45em + 2px);
+        padding: 0 0.7rem;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
       }
 
       .url-block .check {
@@ -268,7 +315,7 @@
         justify-content: space-between;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0;
       }
 
       .log-head-actions {
@@ -294,7 +341,6 @@
 
       #log {
         margin: 0;
-        max-height: 180px;
         overflow: auto;
         white-space: pre-wrap;
         word-break: break-word;
@@ -337,12 +383,12 @@
         <section class="panel panel--settings" aria-label="Iframe settings">
           <form id="form" class="form-layout">
             <div class="row row--tour-scene">
-              <label>
-                Tour
+              <label class="inline-field">
+                <span>Tour</span>
                 <select id="tour" name="tour" class="tour-select"></select>
               </label>
-              <label>
-                Scene
+              <label class="inline-field">
+                <span>Scene</span>
                 <select id="scene" name="scene" class="scene-select"></select>
               </label>
             </div>
@@ -682,6 +728,9 @@
         }
         syncFormFromUrl();
         loadIframe();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(syncLogPanelHeight);
+        });
       }
 
       function updatePageUrl(tour, scene, includeDev, iframeSrc) {
@@ -722,6 +771,22 @@
         updatePageUrl(tour, scene, includeDev, src);
       }
 
+      function syncLogPanelHeight() {
+        const settingsPanel = document.querySelector('.panel--settings');
+        const logPanel = document.querySelector('.panel--log');
+        if (!settingsPanel || !logPanel) return;
+
+        if (window.matchMedia('(max-width: 760px)').matches) {
+          logPanel.style.height = '';
+          logPanel.style.minHeight = '';
+          return;
+        }
+
+        const height = Math.round(settingsPanel.getBoundingClientRect().height);
+        logPanel.style.height = height + 'px';
+        logPanel.style.minHeight = height + 'px';
+      }
+
       function appendLog(data) {
         messageCount += 1;
         const line =
@@ -753,7 +818,15 @@
       widthSlider.addEventListener('input', onSizeSliderInput);
       heightSlider.addEventListener('input', onSizeSliderInput);
 
-      window.addEventListener('resize', onViewportResize);
+      window.addEventListener('resize', () => {
+        onViewportResize();
+        syncLogPanelHeight();
+      });
+
+      const settingsPanel = document.querySelector('.panel--settings');
+      if (settingsPanel && typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(syncLogPanelHeight).observe(settingsPanel);
+      }
 
       clearBtn.addEventListener('click', () => {
         logEl.textContent = '';

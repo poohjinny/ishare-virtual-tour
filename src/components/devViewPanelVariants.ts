@@ -1,10 +1,10 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
 
-/** Same row as tour nav breadcrumb (`top-6`). */
+/** Same row as tour nav breadcrumb / FAB dock (`--tour-chrome-inset`). */
 export const devToolsStackClassName = cn(
-  'pointer-events-none absolute top-6 left-6 z-[100] flex w-[min(440px,calc(100vw-48px))] flex-col gap-2',
-  'max-[480px]:left-3 max-[480px]:w-[min(440px,calc(100vw-24px))]',
+  'pointer-events-none absolute top-[var(--tour-chrome-inset)] left-[var(--tour-chrome-inset)] z-[100]',
+  'flex w-[min(440px,calc(100vw-2*var(--tour-chrome-inset)))] flex-col gap-2',
   '[&>*]:pointer-events-auto',
 );
 

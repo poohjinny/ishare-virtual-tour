@@ -147,7 +147,7 @@ interface TourNavFloatProps {
   onBreadcrumbNavigate: (sceneId: string) => void;
   /** Info hotspot id when a naming opportunity panel is open in-scene. */
   activeNamingHotspotId?: string | null;
-  /** `?embed=1` — hide Share/Help chrome; keep Explore + Controls. */
+  /** `?embed=1` — hide Share/Help/Controls FAB; PSV control pill stays on. */
   embed?: boolean;
   panelStack?: TourPanelStack;
 }
@@ -749,7 +749,7 @@ export function TourNavFloat({
         handleShareClick();
         return;
       }
-      if (key === 'c') {
+      if (!embed && key === 'c') {
         event.preventDefault();
         handleTuneClick();
         return;
@@ -1464,17 +1464,21 @@ export function TourNavFloat({
             </IconTooltip>
           )}
 
-          <IconTooltip label={TOUR_NAV_ACTION_CONTROLS} placement='left'>
-            <button
-              type='button'
-              className={tourNavCircleBtnVariants({ active: controlsVisible })}
-              onClick={handleTuneClick}
-              aria-pressed={controlsVisible}
-              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_CONTROLS)}
-            >
-              <ControlsIcon />
-            </button>
-          </IconTooltip>
+          {!embed && (
+            <IconTooltip label={TOUR_NAV_ACTION_CONTROLS} placement='left'>
+              <button
+                type='button'
+                className={tourNavCircleBtnVariants({
+                  active: controlsVisible,
+                })}
+                onClick={handleTuneClick}
+                aria-pressed={controlsVisible}
+                {...tourNavIconButtonA11y(TOUR_NAV_ACTION_CONTROLS)}
+              >
+                <ControlsIcon />
+              </button>
+            </IconTooltip>
+          )}
 
           {!embed && (
             <IconTooltip label={TOUR_NAV_ACTION_HELP} placement='left'>

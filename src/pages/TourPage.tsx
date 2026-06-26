@@ -365,6 +365,7 @@ function TourExperience() {
   }, [route.tourId, searchParams.panoramaErrorTest, searchParams.skipLanding]);
 
   const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
+  const viewerControlsVisible = searchParams.embed ? true : controlsVisible;
   const { hintVisible, onInitialTourReveal, onFirstPanoramaInteract } =
     useTourFirstVisitHint({
       embed: searchParams.embed,
@@ -799,7 +800,7 @@ function TourExperience() {
           tour={tour}
           initialSceneId={initialScene}
           fullscreenRootRef={viewerAreaRef}
-          controlsVisible={controlsVisible}
+          controlsVisible={viewerControlsVisible}
           skipLanding={searchParams.skipLanding}
           landingTargetView={landingTargetView}
           splashDone={splashRevealReady}
@@ -866,7 +867,7 @@ function TourExperience() {
           showHistoryForward={showForward}
           onHistoryBack={goBack}
           onHistoryForward={goForward}
-          controlsVisible={controlsVisible}
+          controlsVisible={viewerControlsVisible}
           onControlsToggle={toggleControlsVisible}
           onSelectScene={handleNavigate}
           onSelectNamingOpportunity={handleSelectNamingOpportunity}

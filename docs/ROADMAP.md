@@ -66,8 +66,8 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 ### Sprint A — Embed & demo safety
 
-- [x] **`?embed=1` chrome trim** — reduce FAB dock (hide Share/Help; keep
-      Explore + Controls); lighter splash for iframe
+- [x] **`?embed=1` chrome trim** — reduce FAB dock (hide Share/Help/Controls;
+      keep Explore); PSV control pill always on; lighter splash for iframe
 - [x] **Unknown tour URL** — dedicated “Tour not found” view
 - [ ] **Explore scene thumbnails** — small equirect preview per location in
       Explore list (intro gallery already has tour-level preview). Asset

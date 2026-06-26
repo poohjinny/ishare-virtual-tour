@@ -60,8 +60,9 @@ export function scrollTourNavDirectoryToActiveItem(
 /* ── Breadcrumb ── */
 
 export const tourNavBreadcrumbClassName = cn(
-  'absolute top-6 left-1/2 z-[90] max-w-[min(calc(100vw-120px),680px)] -translate-x-1/2',
-  'max-[480px]:top-4 max-[480px]:max-w-[calc(100vw-200px)]',
+  'absolute top-[var(--tour-chrome-inset)] left-1/2 z-[90] -translate-x-1/2',
+  'max-w-[min(680px,calc(100vw-2*var(--tour-chrome-inset)-2*var(--tour-chrome-fab-size)))]',
+  'max-[480px]:max-w-[calc(100vw-2*var(--tour-chrome-inset)-2*var(--tour-chrome-fab-size)-5rem)]',
 );
 
 export const tourNavBreadcrumbRowVariants = cva(
@@ -157,9 +158,8 @@ export const tourNavBreadcrumbPulseDotClassName = cn(
 /* ── Actions root ── */
 
 export const tourNavActionsRootClassName = cn(
-  'absolute top-6 right-6 z-[90] flex flex-col-reverse items-end',
+  'absolute top-[var(--tour-chrome-inset)] right-[var(--tour-chrome-inset)] z-[90] flex flex-col-reverse items-end',
   '[--tour-directory-space:16px] [--tour-directory-divider-space:24px]',
-  'max-[480px]:top-4 max-[480px]:right-4',
 );
 
 export const tourNavActionsDockClassName = cn('flex items-center gap-2');

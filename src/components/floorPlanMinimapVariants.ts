@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
 
 export const floorPlanMinimapRootClassName = cn(
-  'pointer-events-none absolute bottom-6 left-6 z-[85] max-[480px]:bottom-4 max-[480px]:left-3',
+  'pointer-events-none absolute bottom-[var(--tour-chrome-inset)] left-[var(--tour-chrome-inset)] z-[85]',
 );
 
 export const floorPlanMinimapFrameClassName = cn(
