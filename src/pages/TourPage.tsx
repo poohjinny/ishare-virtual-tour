@@ -15,7 +15,7 @@ import { PanoramaLoadError } from '../components/PanoramaLoadError';
 import { TourNotFound } from '../components/TourNotFound';
 import {
   TourLoadSplash,
-  TOUR_LOAD_SPLASH_FADE_MS,
+  getTourLoadSplashFadeMs,
 } from '../components/TourLoadSplash';
 import { FloorPlanMinimap } from '../components/FloorPlanMinimap';
 import { TourNavFloat } from '../components/TourNavFloat';
@@ -43,6 +43,7 @@ import { useClientFont } from '../hooks/useClientFont';
 import { useImmersiveBackground } from '../hooks/useImmersiveBackground';
 import { toggleImmersiveBackgroundPlayback } from '../viewer/immersiveBackgroundNavbarButton';
 import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
+import { useTourEmbedMessaging } from '../hooks/useTourEmbedMessaging';
 import type {
   PopupContent,
   Tour,
@@ -78,7 +79,7 @@ import {
 import { resetLandingTransitionState } from '../viewer/landingTransition';
 
 /** Fallback if transitionend does not fire (e.g. reduced motion). */
-const SPLASH_UNMOUNT_FALLBACK_MS = TOUR_LOAD_SPLASH_FADE_MS + 150;
+const SPLASH_UNMOUNT_FALLBACK_PADDING_MS = 150;
 /** Extra splash hold for loader UX testing — only when `?splashHold=1` */
 const DEV_SPLASH_HOLD_MS = 2000;
 
@@ -332,6 +333,7 @@ function TourExperience() {
   const [activeNamingHotspotId, setActiveNamingHotspotId] = useState<
     string | null
   >(null);
+  const [namingOpportunityBusy, setNamingOpportunityBusy] = useState(false);
   const [devClickCoords, setDevClickCoords] = useState<ClickCoords | null>(
     null,
   );
@@ -401,12 +403,16 @@ function TourExperience() {
   }, []);
 
   const handleLoadComplete = useCallback(() => {
+    const splashUnmountFallbackMs =
+      getTourLoadSplashFadeMs(searchParams.embed) +
+      SPLASH_UNMOUNT_FALLBACK_PADDING_MS;
+
     const finishSplash = () => {
       setSplashPhase('exit');
       setSplashRevealReady(true);
       hideSplashTimerRef.current = setTimeout(() => {
         setSplashPhase((phase) => (phase === 'exit' ? 'done' : phase));
-      }, SPLASH_UNMOUNT_FALLBACK_MS);
+      }, splashUnmountFallbackMs);
 
       if (searchParams.skipLanding) {
         requestAnimationFrame(() => setSplashOverlayFade(true));
@@ -435,7 +441,7 @@ function TourExperience() {
     } else {
       finishSplash();
     }
-  }, [searchParams.skipLanding, searchParams.splashHold]);
+  }, [searchParams.embed, searchParams.skipLanding, searchParams.splashHold]);
 
   const {
     currentSceneId,
@@ -550,6 +556,14 @@ function TourExperience() {
     if (assistant.isOpen) panelStack.openPanel('ai-chat');
     else panelStack.closePanel('ai-chat');
   }, [assistant.isOpen, panelStack]);
+
+  useTourEmbedMessaging({
+    embed: searchParams.embed,
+    tourId: tour?.id ?? route.tourId,
+    sceneId: currentSceneId,
+    ready: splashRevealReady,
+    activeNamingHotspotId,
+  });
 
   useEffect(() => {
     return panelStack.registerPanel('psv-panel', () => {
@@ -772,7 +786,12 @@ function TourExperience() {
   }
 
   return (
-    <div ref={tourRootRef} className='app tour-page'>
+    <div
+      ref={tourRootRef}
+      className={
+        searchParams.embed ? 'app tour-page tour-page--embed' : 'app tour-page'
+      }
+    >
       <div ref={viewerAreaRef} className='viewer-area viewer-area--fullscreen'>
         <PanoramaViewer
           key={tour.id}
@@ -807,6 +826,7 @@ function TourExperience() {
           onFirstPanoramaInteract={onFirstPanoramaInteract}
           onPanoramaError={handlePanoramaError}
           onPanoramaRecovered={handlePanoramaRecovered}
+          onNamingOpportunityBusyChange={setNamingOpportunityBusy}
         />
 
         {showLoadError && (
@@ -840,6 +860,7 @@ function TourExperience() {
           logoAlt={tour.branding?.logoAlt}
           websiteUrl={getTourWebsite(tour)}
           disabled={isTransitioning}
+          namingOpportunityBusy={namingOpportunityBusy}
           breadcrumbHidden={transitionTargetSceneId !== null}
           showHistoryBack={showBack && currentSceneId !== tour.firstScene}
           showHistoryForward={showForward}
@@ -851,6 +872,7 @@ function TourExperience() {
           onSelectNamingOpportunity={handleSelectNamingOpportunity}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
           activeNamingHotspotId={activeNamingHotspotId}
+          embed={searchParams.embed}
           panelStack={panelStack}
         />
 
@@ -858,6 +880,7 @@ function TourExperience() {
           <TourLoadSplash
             exiting={splashPhase === 'exit'}
             fadeOverlay={splashOverlayFade}
+            embed={searchParams.embed}
             onExitComplete={handleSplashExitComplete}
             logo={tour.branding?.logo}
             logoAlt={tour.branding?.logoAlt}

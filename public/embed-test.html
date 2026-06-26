@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Embed iframe test — iShare Virtual Tour</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 13px;
+        line-height: 1.45;
+        --bg: #0f172a;
+        --panel: #1e293b;
+        --border: rgba(100, 116, 139, 0.45);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #86efac;
+        --content-max: 1100px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .wrap {
+        max-width: var(--content-max);
+        margin: 0 auto;
+        padding: 1.25rem 1rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .panels-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .panel--log {
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .panel--log #log {
+        flex: 1;
+        min-height: 3.5rem;
+        max-height: 180px;
+        overflow: auto;
+      }
+
+      @media (max-width: 760px) {
+        .panels-row {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .lead {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 0.75rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .form-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+        align-items: end;
+      }
+
+      .row--tour-scene {
+        align-items: end;
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      .full-width input[type='text'] {
+        width: 100%;
+        min-width: 0;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      input[type='text'],
+      select {
+        min-width: 12rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: rgba(15, 23, 42, 0.75);
+        color: var(--text);
+        padding: 0.4rem 0.55rem;
+        font: inherit;
+      }
+
+      select {
+        cursor: pointer;
+        padding-right: 1.75rem;
+        appearance: none;
+        background-image:
+          linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+          linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+        background-position:
+          calc(100% - 14px) calc(50% + 1px),
+          calc(100% - 9px) calc(50% + 1px);
+        background-size:
+          5px 5px,
+          5px 5px;
+        background-repeat: no-repeat;
+      }
+
+      .tour-select {
+        min-width: 14rem;
+      }
+
+      .scene-select {
+        min-width: 16rem;
+      }
+
+      input[type='text'] {
+        min-width: 12rem;
+      }
+
+      input[type='checkbox'] {
+        width: 1rem;
+        height: 1rem;
+        accent-color: var(--accent);
+      }
+
+      .check {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.4rem;
+        padding-bottom: 0.35rem;
+      }
+
+      button {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #166534;
+        color: #f0fdf4;
+        padding: 0.45rem 0.7rem;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: #1e293b;
+      }
+
+      button:hover {
+        filter: brightness(1.08);
+      }
+
+      .row--sliders {
+        align-items: center;
+      }
+
+      .slider-field {
+        flex: 1 1 10rem;
+        min-width: 10rem;
+      }
+
+      .slider-field input[type='range'] {
+        width: 100%;
+        min-width: 0;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+
+      .slider-value {
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .iframe-stage {
+        width: 100%;
+        padding: 0 1rem 1rem;
+        overflow-x: auto;
+      }
+
+      .iframe-wrap {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .iframe-wrap iframe {
+        display: block;
+        max-width: 100%;
+        flex-shrink: 0;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #000;
+      }
+
+      .url-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .url-row {
+        align-items: end;
+      }
+
+      .url-row .full-width {
+        flex: 1 1 12rem;
+        min-width: 0;
+      }
+
+      .url-row .load-btn {
+        flex-shrink: 0;
+      }
+
+      .url-block .check {
+        padding-bottom: 0;
+      }
+
+      .log-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .log-head-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .log-head button {
+        padding: 0.3rem 0.55rem;
+        font-size: 11px;
+      }
+
+      .log-head h2 {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      #log {
+        margin: 0;
+        max-height: 180px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: #f0fdf4;
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 6px;
+        padding: 0.5rem 0.65rem;
+        min-height: 3.5rem;
+      }
+
+      #log:empty::before {
+        content: 'Waiting for postMessage (source: ishare-virtual-tour)…';
+        color: var(--muted);
+      }
+
+      .hint {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .hint--error {
+        color: #fca5a5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Embed iframe test (parent page)</h1>
+        <p class="lead">
+          Simulates a client host page. The tour loads in the iframe below with
+          <code>?embed=1</code>. Open Dev inside the iframe
+          (<code>?dev=1</code>) to confirm <strong>In iframe: yes</strong> and
+          <code>[parent]</code> log lines.
+        </p>
+      </header>
+
+      <div class="panels-row">
+        <section class="panel panel--settings" aria-label="Iframe settings">
+          <form id="form" class="form-layout">
+            <div class="row row--tour-scene">
+              <label>
+                Tour
+                <select id="tour" name="tour" class="tour-select"></select>
+              </label>
+              <label>
+                Scene
+                <select id="scene" name="scene" class="scene-select"></select>
+              </label>
+            </div>
+
+            <div class="row row--sliders">
+              <label class="slider-field">
+                <span>
+                  Width
+                  <span class="slider-value" id="width-out">—</span>
+                </span>
+                <input
+                  id="iframe-width"
+                  name="iframe-width"
+                  type="range"
+                  min="320"
+                  max="100"
+                  step="10"
+                  value="100"
+                />
+              </label>
+              <label class="slider-field">
+                <span>
+                  Height
+                  <span class="slider-value" id="height-out">720px</span>
+                </span>
+                <input
+                  id="iframe-height"
+                  name="iframe-height"
+                  type="range"
+                  min="240"
+                  max="900"
+                  step="10"
+                  value="720"
+                />
+              </label>
+            </div>
+
+            <div class="url-block">
+              <div class="row url-row">
+                <label class="full-width">
+                  Iframe URL
+                  <input
+                    id="iframe-src"
+                    name="iframe-src"
+                    type="text"
+                    spellcheck="false"
+                    placeholder="http://localhost:5173/med-surg-inpatient/entrance?embed=1&dev=1"
+                  />
+                </label>
+                <button type="submit" class="load-btn">Load iframe</button>
+              </div>
+              <label class="check">
+                <input id="dev" name="dev" type="checkbox" />
+                <span><code>dev=1</code> in iframe</span>
+              </label>
+            </div>
+          </form>
+          <p class="hint" id="manifest-hint" hidden></p>
+        </section>
+
+        <section class="panel panel--log" aria-label="Parent postMessage log">
+          <div class="log-head">
+            <h2>Parent received</h2>
+            <div class="log-head-actions">
+              <span class="hint" id="count">0 messages</span>
+              <button type="button" class="secondary" id="clear-log">
+                Clear log
+              </button>
+            </div>
+          </div>
+          <pre id="log" aria-live="polite"></pre>
+        </section>
+      </div>
+    </div>
+
+    <div class="iframe-stage" aria-label="Embed preview">
+      <div class="iframe-wrap">
+        <iframe
+          id="embed-frame"
+          title="Virtual tour embed"
+          allow="fullscreen"
+          loading="lazy"
+        ></iframe>
+      </div>
+    </div>
+
+    <script>
+      const MESSAGE_SOURCE = 'ishare-virtual-tour';
+      const DEFAULT_TOUR = 'med-surg-inpatient';
+      const DEFAULT_SCENE = 'entrance';
+      const WIDTH_MIN = 320;
+      const DEFAULT_HEIGHT = 720;
+
+      const form = document.getElementById('form');
+      const tourSelect = document.getElementById('tour');
+      const sceneSelect = document.getElementById('scene');
+      const devInput = document.getElementById('dev');
+      const iframeSrcInput = document.getElementById('iframe-src');
+      const widthSlider = document.getElementById('iframe-width');
+      const heightSlider = document.getElementById('iframe-height');
+      const widthOut = document.getElementById('width-out');
+      const heightOut = document.getElementById('height-out');
+      const manifestHint = document.getElementById('manifest-hint');
+      const iframeStage = document.querySelector('.iframe-stage');
+      const iframe = document.getElementById('embed-frame');
+      const logEl = document.getElementById('log');
+      const countEl = document.getElementById('count');
+      const clearBtn = document.getElementById('clear-log');
+
+      let messageCount = 0;
+      /** @type {{ tours: Array<{ id: string; name: string; clientName?: string; firstScene?: string; scenes: Array<{ id: string; title: string }> }> } | null} */
+      let manifest = null;
+
+      function appBasePath() {
+        return location.pathname.replace(/embed-test\.html$/, '') || '/';
+      }
+
+      function buildIframeSrcFromPickers(tour, scene, includeDev) {
+        const base = appBasePath();
+        const normalizedBase = base.endsWith('/') ? base : base + '/';
+        const query = new URLSearchParams({ embed: '1' });
+        if (includeDev) query.set('dev', '1');
+
+        return (
+          location.origin +
+          normalizedBase +
+          tour +
+          '/' +
+          scene +
+          '?' +
+          query.toString()
+        );
+      }
+
+      function updateIframeUrlFromPickers() {
+        const tour = tourSelect.value || DEFAULT_TOUR;
+        const scene = sceneSelect.value || DEFAULT_SCENE;
+        iframeSrcInput.value = buildIframeSrcFromPickers(
+          tour,
+          scene,
+          devInput.checked,
+        );
+      }
+
+      function getMaxIframeWidth() {
+        const available =
+          iframeStage ?
+            iframeStage.clientWidth
+          : document.documentElement.clientWidth;
+        return Math.max(WIDTH_MIN, Math.floor(available));
+      }
+
+      function isFullIframeWidth(widthPx) {
+        return widthPx >= getMaxIframeWidth();
+      }
+
+      function syncWidthSliderBounds() {
+        const max = getMaxIframeWidth();
+        widthSlider.max = String(max);
+        const current = Number(widthSlider.value);
+        if (current > max) {
+          widthSlider.value = String(max);
+        }
+      }
+
+      function syncWidthFromUrlOrDefault() {
+        syncWidthSliderBounds();
+        const max = getMaxIframeWidth();
+        const w = new URLSearchParams(location.search).get('w');
+        if (w) {
+          const parsed = parseSizeParam(w, max);
+          widthSlider.value = String(
+            Math.min(Math.max(parsed, WIDTH_MIN), max),
+          );
+        } else {
+          widthSlider.value = String(max);
+        }
+      }
+
+      function formatWidthLabel(widthPx) {
+        const max = getMaxIframeWidth();
+        const pct = max > 0 ? Math.round((widthPx / max) * 100) : 0;
+        if (widthPx >= max) {
+          return widthPx + 'px · 100%';
+        }
+        return widthPx + 'px · ' + pct + '%';
+      }
+
+      function applyIframeSize() {
+        const width = Number(widthSlider.value);
+        const height = Number(heightSlider.value);
+        const max = getMaxIframeWidth();
+        if (width >= max) {
+          iframe.style.width = '100%';
+        } else {
+          iframe.style.width = width + 'px';
+        }
+        iframe.style.height = height + 'px';
+        widthOut.textContent = formatWidthLabel(width);
+        heightOut.textContent = height + 'px';
+      }
+
+      function syncSizeQueryToPageUrl() {
+        const params = new URLSearchParams(location.search);
+        const width = Number(widthSlider.value);
+        const height = Number(heightSlider.value);
+        if (isFullIframeWidth(width)) params.delete('w');
+        else params.set('w', String(width));
+        if (height === DEFAULT_HEIGHT) params.delete('h');
+        else params.set('h', String(height));
+        const qs = params.toString();
+        history.replaceState(
+          null,
+          '',
+          appBasePath() + 'embed-test.html' + (qs ? '?' + qs : ''),
+        );
+      }
+
+      function onViewportResize() {
+        const hadCustomWidth = new URLSearchParams(location.search).has('w');
+        const prevWidth = Number(widthSlider.value);
+        syncWidthSliderBounds();
+        const max = getMaxIframeWidth();
+        if (!hadCustomWidth) {
+          widthSlider.value = String(max);
+        } else if (prevWidth > max) {
+          widthSlider.value = String(max);
+        }
+        applyIframeSize();
+      }
+
+      function parseSizeParam(value, fallback) {
+        const parsed = Number.parseInt(value ?? '', 10);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      }
+
+      function onSizeSliderInput() {
+        applyIframeSize();
+        syncSizeQueryToPageUrl();
+      }
+
+      function findTour(tourId) {
+        return manifest?.tours?.find((t) => t.id === tourId) ?? null;
+      }
+
+      function populateTourSelect(preferredTourId) {
+        tourSelect.innerHTML = '';
+        const tours = manifest?.tours ?? [];
+        if (!tours.length) {
+          const option = document.createElement('option');
+          option.value = preferredTourId || DEFAULT_TOUR;
+          option.textContent = preferredTourId || DEFAULT_TOUR;
+          tourSelect.appendChild(option);
+          return preferredTourId || DEFAULT_TOUR;
+        }
+
+        for (const tour of tours) {
+          const option = document.createElement('option');
+          option.value = tour.id;
+          const client = tour.clientName ? tour.clientName + ' · ' : '';
+          option.textContent = client + tour.name;
+          tourSelect.appendChild(option);
+        }
+
+        const match = tours.find((t) => t.id === preferredTourId);
+        const selected = match?.id ?? tours[0].id;
+        tourSelect.value = selected;
+        return selected;
+      }
+
+      function populateSceneSelect(tourId, preferredSceneId) {
+        sceneSelect.innerHTML = '';
+        const tour = findTour(tourId);
+        const scenes = tour?.scenes ?? [];
+        if (!scenes.length) {
+          const fallback = preferredSceneId || DEFAULT_SCENE;
+          const option = document.createElement('option');
+          option.value = fallback;
+          option.textContent = fallback;
+          sceneSelect.appendChild(option);
+          return fallback;
+        }
+
+        for (const scene of scenes) {
+          const option = document.createElement('option');
+          option.value = scene.id;
+          option.textContent = scene.title;
+          sceneSelect.appendChild(option);
+        }
+
+        const match = scenes.find((s) => s.id === preferredSceneId);
+        const selected =
+          match?.id ?? tour?.firstScene ?? scenes[0]?.id ?? DEFAULT_SCENE;
+        sceneSelect.value = selected;
+        return selected;
+      }
+
+      function syncFormFromUrl() {
+        const params = new URLSearchParams(location.search);
+        const tourId = params.get('tour') || DEFAULT_TOUR;
+        const sceneId = params.get('scene') || DEFAULT_SCENE;
+        devInput.checked = params.get('dev') !== '0';
+
+        const selectedTour = populateTourSelect(tourId);
+        populateSceneSelect(selectedTour, sceneId);
+
+        const srcParam = params.get('src');
+        if (srcParam) {
+          iframeSrcInput.value = srcParam;
+        } else {
+          updateIframeUrlFromPickers();
+        }
+
+        syncWidthFromUrlOrDefault();
+        heightSlider.value = String(
+          parseSizeParam(params.get('h'), DEFAULT_HEIGHT),
+        );
+        applyIframeSize();
+      }
+
+      async function loadManifest() {
+        const url = appBasePath() + 'embed-test-manifest.json';
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          manifest = await response.json();
+          manifestHint.hidden = true;
+        } catch (error) {
+          manifest = null;
+          manifestHint.hidden = false;
+          manifestHint.className = 'hint hint--error';
+          manifestHint.textContent =
+            'Could not load tour list (' +
+            url +
+            '). Run npm run sync-assets or npm run dev. Using defaults.';
+          console.warn('embed-test manifest:', error);
+        }
+        syncFormFromUrl();
+        loadIframe();
+      }
+
+      function updatePageUrl(tour, scene, includeDev, iframeSrc) {
+        const params = new URLSearchParams();
+        const builtSrc = buildIframeSrcFromPickers(tour, scene, includeDev);
+        const width = Number(widthSlider.value);
+        const height = Number(heightSlider.value);
+
+        if (iframeSrc !== builtSrc) {
+          params.set('src', iframeSrc);
+        } else {
+          if (tour !== DEFAULT_TOUR) params.set('tour', tour);
+          if (scene !== DEFAULT_SCENE) params.set('scene', scene);
+          if (!includeDev) params.set('dev', '0');
+        }
+
+        if (!isFullIframeWidth(width)) params.set('w', String(width));
+        if (height !== DEFAULT_HEIGHT) params.set('h', String(height));
+
+        const qs = params.toString();
+        const next = appBasePath() + 'embed-test.html' + (qs ? '?' + qs : '');
+        history.replaceState(null, '', next);
+      }
+
+      function loadIframe() {
+        const tour = tourSelect.value || DEFAULT_TOUR;
+        const scene = sceneSelect.value || DEFAULT_SCENE;
+        const includeDev = devInput.checked;
+        const src = iframeSrcInput.value.trim();
+        if (!src) return;
+
+        if (iframe.src !== src) {
+          iframe.src = src;
+        } else {
+          iframe.src = '';
+          iframe.src = src;
+        }
+        updatePageUrl(tour, scene, includeDev, src);
+      }
+
+      function appendLog(data) {
+        messageCount += 1;
+        const line =
+          new Date().toLocaleTimeString() + ' ' + JSON.stringify(data) + '\n';
+        logEl.textContent = line + logEl.textContent;
+        countEl.textContent =
+          messageCount + ' message' + (messageCount === 1 ? '' : 's');
+      }
+
+      window.addEventListener('message', (event) => {
+        if (event.origin !== location.origin) return;
+        if (event.data?.source !== MESSAGE_SOURCE) return;
+        appendLog(event.data);
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        loadIframe();
+      });
+
+      tourSelect.addEventListener('change', () => {
+        populateSceneSelect(tourSelect.value);
+        updateIframeUrlFromPickers();
+      });
+
+      sceneSelect.addEventListener('change', updateIframeUrlFromPickers);
+      devInput.addEventListener('change', updateIframeUrlFromPickers);
+
+      widthSlider.addEventListener('input', onSizeSliderInput);
+      heightSlider.addEventListener('input', onSizeSliderInput);
+
+      window.addEventListener('resize', onViewportResize);
+
+      clearBtn.addEventListener('click', () => {
+        logEl.textContent = '';
+        messageCount = 0;
+        countEl.textContent = '0 messages';
+      });
+
+      loadManifest();
+    </script>
+  </body>
+</html>

@@ -14,9 +14,10 @@ import {
   devViewPanelSectionContentClassName,
   devViewPanelSectionDescriptionClassName,
   devViewPanelSectionHeaderClassName,
+  devViewPanelSectionHeaderCollapsibleClassName,
   devViewPanelSectionLeadClassName,
   devViewPanelSectionTitleClassName,
-  devViewPanelSectionTriggerClassName,
+  devViewPanelSectionChevronBtnClassName,
 } from './devViewPanelVariants';
 
 export type DevPanelSectionProps = {
@@ -72,18 +73,24 @@ export function DevPanelSection({
 
   return (
     <section className={cn(devViewPanelSectionClassName, className)}>
-      <header className={devViewPanelSectionHeaderClassName}>
+      <header
+        className={cn(
+          devViewPanelSectionHeaderClassName,
+          collapsible && devViewPanelSectionHeaderCollapsibleClassName,
+        )}
+      >
+        <div className='flex min-w-0 flex-1 flex-col gap-1.5'>
+          <h3 className={devViewPanelSectionTitleClassName}>{title}</h3>
+          {descriptionBlock}
+        </div>
         {collapsible ?
           <button
             type='button'
-            className={devViewPanelSectionTriggerClassName}
+            className={devViewPanelSectionChevronBtnClassName}
             aria-expanded={open}
+            aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
             onClick={onToggle}
           >
-            <span className='flex min-w-0 flex-1 flex-col gap-1.5'>
-              <h3 className={devViewPanelSectionTitleClassName}>{title}</h3>
-              {descriptionBlock}
-            </span>
             <AccordionChevron
               className={cn(
                 devViewPanelSectionChevronClassName,
@@ -91,11 +98,7 @@ export function DevPanelSection({
               )}
             />
           </button>
-        : <>
-            <h3 className={devViewPanelSectionTitleClassName}>{title}</h3>
-            {descriptionBlock}
-          </>
-        }
+        : null}
       </header>
       {!collapsible || open ?
         <div className={devViewPanelSectionContentClassName}>{children}</div>

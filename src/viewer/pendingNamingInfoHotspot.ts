@@ -178,7 +178,7 @@ export interface PendingNamingInfoTarget {
   hotspotId: string;
 }
 
-const MAX_OPEN_ATTEMPTS = 48;
+const MAX_OPEN_ATTEMPTS = 120;
 
 let openAttemptId = 0;
 
@@ -213,6 +213,7 @@ export function scheduleOpenPendingNamingInfoHotspot(
   pending: PendingNamingInfoTarget,
   onModalPopup?: (popup: PopupContent) => void,
   onOpened?: () => void,
+  onFailed?: () => void,
 ): void {
   const attemptId = ++openAttemptId;
   let attempts = 0;
@@ -224,15 +225,9 @@ export function scheduleOpenPendingNamingInfoHotspot(
     if (currentSceneId !== pending.sceneId) {
       if (attempts++ < MAX_OPEN_ATTEMPTS) {
         requestAnimationFrame(tryOpen);
+      } else {
+        onFailed?.();
       }
-      return;
-    }
-
-    if (
-      !markers.getMarker(pending.hotspotId) &&
-      attempts++ < MAX_OPEN_ATTEMPTS
-    ) {
-      requestAnimationFrame(tryOpen);
       return;
     }
 
@@ -247,6 +242,13 @@ export function scheduleOpenPendingNamingInfoHotspot(
       )
     ) {
       onOpened?.();
+      return;
+    }
+
+    if (attempts++ < MAX_OPEN_ATTEMPTS) {
+      requestAnimationFrame(tryOpen);
+    } else {
+      onFailed?.();
     }
   };
 

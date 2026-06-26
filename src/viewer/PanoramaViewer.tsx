@@ -118,7 +118,7 @@ export interface PanoramaViewerHandle {
   hidePsvPanel: () => void;
   /** Close anchored info / nav preview panels on the panorama. */
   closeAnchoredPanels: () => void;
-  goToNamingOpportunity: (sceneId: string, hotspotId: string) => void;
+  goToNamingOpportunity: (sceneId: string, hotspotId: string) => boolean;
   /** Animate to the scene default view (navbar recenter button). */
   recenterToDefaultView: () => void;
   /** Dev — apply fresh tour JSON without remounting the viewer. */
@@ -171,6 +171,8 @@ interface PanoramaViewerProps {
   onFirstPanoramaInteract?: () => void;
   onPanoramaError?: (info: PanoramaLoadErrorInfo) => void;
   onPanoramaRecovered?: () => void;
+  /** True while a naming-opportunity go (animate / navigate / open panel) is in flight. */
+  onNamingOpportunityBusyChange?: (busy: boolean) => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -224,6 +226,7 @@ export const PanoramaViewer = forwardRef<
     onFirstPanoramaInteract,
     onPanoramaError,
     onPanoramaRecovered,
+    onNamingOpportunityBusyChange,
   },
   ref,
 ) {
@@ -237,8 +240,9 @@ export const PanoramaViewer = forwardRef<
     null,
   );
   const goToNamingOpportunityRef = useRef<
-    (sceneId: string, hotspotId: string) => void
-  >(() => {});
+    (sceneId: string, hotspotId: string) => boolean
+  >(() => false);
+  const namingOpportunityBusyRef = useRef(false);
   const deferredErrorRef = useRef<PanoramaLoadErrorInfo | null>(null);
   const transitioningRef = useRef(false);
   const disabledRef = useRef(disabled);
@@ -287,6 +291,9 @@ export const PanoramaViewer = forwardRef<
   const onFirstPanoramaInteractRef = useLatestRef(onFirstPanoramaInteract);
   const onPanoramaErrorRef = useLatestRef(onPanoramaError);
   const onPanoramaRecoveredRef = useLatestRef(onPanoramaRecovered);
+  const onNamingOpportunityBusyChangeRef = useLatestRef(
+    onNamingOpportunityBusyChange,
+  );
   const splashDoneRef = useLatestRef(splashDone);
   const immersiveControllerRef = useLatestRef(immersiveBackgroundController);
   const activeNamingHotspotIdRef = useLatestRef(activeNamingHotspotId);
@@ -299,12 +306,61 @@ export const PanoramaViewer = forwardRef<
     () => {},
   );
 
+  const releaseNamingOpportunityBusy = () => {
+    if (!namingOpportunityBusyRef.current) return;
+    namingOpportunityBusyRef.current = false;
+    onNamingOpportunityBusyChangeRef.current?.(false);
+  };
+
+  const beginNamingOpportunityGo = () => {
+    if (namingOpportunityBusyRef.current || transitioningRef.current) {
+      return false;
+    }
+    namingOpportunityBusyRef.current = true;
+    onNamingOpportunityBusyChangeRef.current?.(true);
+    return true;
+  };
+
+  const finishNamingOpportunityGo = () => {
+    pendingNamingInfoHotspotRef.current = null;
+    releaseNamingOpportunityBusy();
+  };
+
+  const failPendingNamingInfoOpen = () => {
+    if (transitioningRef.current) return;
+    finishNamingOpportunityGo();
+  };
+
+  const schedulePendingNamingInfoOpenRef = useRef<() => void>(() => {});
+  schedulePendingNamingInfoOpenRef.current = () => {
+    const pending = pendingNamingInfoHotspotRef.current;
+    const viewer = viewerRef.current;
+    const markers = markersRef.current;
+    const virtualTour = virtualTourRef.current;
+    if (!pending || !viewer || !markers || !virtualTour) return;
+    if (virtualTour.getCurrentNode()?.id !== pending.sceneId) return;
+
+    scheduleOpenPendingNamingInfoHotspot(
+      viewer,
+      markers,
+      () => virtualTour.getCurrentNode()?.id,
+      tourRef.current,
+      pending,
+      (popup) => onInfoHotspotRef.current?.(popup),
+      finishNamingOpportunityGo,
+      failPendingNamingInfoOpen,
+    );
+  };
+
   const endNavigation = (navOk: boolean) => {
     transitioningRef.current = false;
     onTransitionEndRef.current();
 
     if (navOk) {
       hotspotEnterRef.current?.schedule();
+      requestAnimationFrame(() => {
+        schedulePendingNamingInfoOpenRef.current();
+      });
     } else {
       hotspotEnterRef.current?.release();
     }
@@ -324,6 +380,7 @@ export const PanoramaViewer = forwardRef<
     }
 
     pendingNamingInfoHotspotRef.current = null;
+    releaseNamingOpportunityBusy();
 
     if (deferred) {
       viewerRef.current?.hideError();
@@ -361,7 +418,7 @@ export const PanoramaViewer = forwardRef<
         !viewer ||
         !virtualTour ||
         transitioningRef.current ||
-        disabledRef.current
+        (disabledRef.current && !pendingNamingInfoHotspotRef.current)
       ) {
         return false;
       }
@@ -385,7 +442,7 @@ export const PanoramaViewer = forwardRef<
         if (navOk) {
           onPanoramaRecoveredRef.current?.();
         } else {
-          pendingNamingInfoHotspotRef.current = null;
+          finishNamingOpportunityGo();
         }
         return navOk;
       } finally {
@@ -423,8 +480,14 @@ export const PanoramaViewer = forwardRef<
       }
     },
     clearActiveInfoHotspot: () => {
-      if (!markersRef.current) return;
-      setActiveInfoHotspot(markersRef.current, null);
+      const markers = markersRef.current;
+      if (pendingNamingInfoHotspotRef.current) {
+        if (markers) setActiveInfoHotspot(markers, null);
+        return;
+      }
+      finishNamingOpportunityGo();
+      if (!markers) return;
+      setActiveInfoHotspot(markers, null);
     },
     hidePsvPanel: () => {
       viewerRef.current?.panel.hide();
@@ -438,7 +501,7 @@ export const PanoramaViewer = forwardRef<
       onAnchoredPanelVisibilityChangeRef.current?.(false);
     },
     goToNamingOpportunity: (sceneId, hotspotId) => {
-      goToNamingOpportunityRef.current(sceneId, hotspotId);
+      return goToNamingOpportunityRef.current(sceneId, hotspotId);
     },
     recenterToDefaultView: () => {
       const viewer = viewerRef.current;
@@ -799,18 +862,8 @@ export const PanoramaViewer = forwardRef<
     viewer.addEventListener('panorama-loaded', () => {
       pendingSceneIdRef.current = null;
 
-      if (pendingNamingInfoHotspotRef.current) {
-        scheduleOpenPendingNamingInfoHotspot(
-          viewer,
-          markers,
-          () => virtualTour.getCurrentNode()?.id,
-          tourRef.current,
-          pendingNamingInfoHotspotRef.current,
-          (popup) => onInfoHotspotRef.current?.(popup),
-          () => {
-            pendingNamingInfoHotspotRef.current = null;
-          },
-        );
+      if (pendingNamingInfoHotspotRef.current && !transitioningRef.current) {
+        schedulePendingNamingInfoOpenRef.current();
       }
 
       if (!initialLoadNotifiedRef.current) {
@@ -859,18 +912,12 @@ export const PanoramaViewer = forwardRef<
       preloadOtherScenes(viewer, virtualTour, tourRef.current, e.node.id);
 
       const pending = pendingNamingInfoHotspotRef.current;
-      if (pending && pending.sceneId === e.node.id) {
-        scheduleOpenPendingNamingInfoHotspot(
-          viewer,
-          markers,
-          () => virtualTour.getCurrentNode()?.id,
-          tourRef.current,
-          pending,
-          (popup) => onInfoHotspotRef.current?.(popup),
-          () => {
-            pendingNamingInfoHotspotRef.current = null;
-          },
-        );
+      if (
+        pending &&
+        pending.sceneId === e.node.id &&
+        !transitioningRef.current
+      ) {
+        schedulePendingNamingInfoOpenRef.current();
       }
     });
 
@@ -880,39 +927,51 @@ export const PanoramaViewer = forwardRef<
         sceneId,
         hotspotId,
       );
-      if (!targetView) return;
+      if (!targetView) return false;
+
+      const currentSceneId = virtualTour.getCurrentNode()?.id;
+      const openHostId = getOpenAnchoredPanelHostId(markers);
+
+      if (currentSceneId === sceneId && openHostId === hotspotId) {
+        if (isNamingHotspotInViewport(viewer, markers, hotspotId, targetView)) {
+          return true;
+        }
+
+        if (!beginNamingOpportunityGo()) return false;
+        void animateViewerToView(viewer, targetView).finally(
+          releaseNamingOpportunityBusy,
+        );
+        return true;
+      }
+
+      if (!beginNamingOpportunityGo()) return false;
 
       const pending: PendingNamingInfoTarget = { sceneId, hotspotId };
       pendingNamingInfoHotspotRef.current = pending;
       closeAnchoredNavPreviewPanel(markers, false);
-      closeAnchoredInfoPanel(markers, false);
-      onAnchoredPanelVisibilityChangeRef.current?.(false);
+      if (openHostId !== hotspotId) {
+        closeAnchoredInfoPanel(markers, false);
+        onAnchoredPanelVisibilityChangeRef.current?.(false);
+      }
 
       const openPending = () => {
-        scheduleOpenPendingNamingInfoHotspot(
-          viewer,
-          markers,
-          () => virtualTour.getCurrentNode()?.id,
-          tourRef.current,
-          pending,
-          (popup) => onInfoHotspotRef.current?.(popup),
-          () => {
-            pendingNamingInfoHotspotRef.current = null;
-          },
-        );
+        schedulePendingNamingInfoOpenRef.current();
       };
 
       if (virtualTour.getCurrentNode()?.id === sceneId) {
         if (isNamingHotspotInViewport(viewer, markers, hotspotId, targetView)) {
           openPending();
-          return;
+          return true;
         }
 
-        void animateViewerToView(viewer, targetView).then(openPending);
-        return;
+        void animateViewerToView(viewer, targetView)
+          .then(openPending)
+          .catch(finishNamingOpportunityGo);
+        return true;
       }
 
       onNavigateToSceneRef.current?.(sceneId, targetView);
+      return true;
     };
 
     setNavPreviewNamingPanelHandlers({

@@ -58,7 +58,7 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 - [x] Naming directory and `?no=` deep links work
 - [x] AI answers scene-relevant FAQs (mock)
 - [x] `npm run dev` and `npm run build` succeed
-- [ ] Embed mode ready for iShare iframe (`?embed=1` chrome trim +
+- [x] Embed mode ready for iShare iframe (`?embed=1` chrome trim +
       `postMessage`)
 - [x] Invalid tour id shows dedicated “Tour not found” (no silent default
       fallback)
@@ -66,8 +66,8 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 ### Sprint A — Embed & demo safety
 
-- [ ] **`?embed=1` chrome trim** — reduce FAB dock (e.g. hide Share/Help or
-      collapse to essentials); optional lighter splash for iframe
+- [x] **`?embed=1` chrome trim** — reduce FAB dock (hide Share/Help; keep
+      Explore + Controls); lighter splash for iframe
 - [x] **Unknown tour URL** — dedicated “Tour not found” view
 - [ ] **Explore scene thumbnails** — small equirect preview per location in
       Explore list (intro gallery already has tour-level preview). Asset
@@ -444,15 +444,19 @@ data — no duplicate content per format.
 
 ## Related documents
 
-| Document                                       | Relevance                                           |
-| ---------------------------------------------- | --------------------------------------------------- |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)           | URL contract, catalog visibility, schemas           |
-| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)     | SeekBeak context, stakeholder demo script           |
-| [TECH_STACK.md](./TECH_STACK.md)               | Stack; note DB/API when added                       |
-| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md) | Engineering conventions                             |
-| [PERFORMANCE.md](./PERFORMANCE.md)             | Performance playbook (how to tune; not a task list) |
-| [MOBILE.md](./MOBILE.md)                       | React UI layout on phone; PSV reference-only        |
-| [assets/README.md](../assets/README.md)        | Per-client asset layout                             |
+| Document                                                           | Relevance                                           |
+| ------------------------------------------------------------------ | --------------------------------------------------- |
+| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | URL contract, catalog visibility, schemas           |
+| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)                         | SeekBeak context, stakeholder demo script           |
+| [TECH_STACK.md](./TECH_STACK.md)                                   | Stack; note DB/API when added                       |
+| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)                     | Engineering conventions                             |
+| [DEV_PANEL.md](./DEV_PANEL.md)                                     | Dev panel usage (`?dev=1`)                          |
+| [EMBED.md](./EMBED.md)                                             | Embed mode (`?embed=1`) — iframe & postMessage      |
+| [PERFORMANCE.md](./PERFORMANCE.md)                                 | Performance playbook (how to tune; not a task list) |
+| [MOBILE.md](./MOBILE.md)                                           | React UI layout on phone; PSV reference-only        |
+| [assets/README.md](../assets/README.md)                            | Per-client asset layout                             |
+| [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client intake checklist (sales)                     |
+| [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)           | 3D architect → engineering handoff                  |
 
 ---
 

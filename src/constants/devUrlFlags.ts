@@ -17,6 +17,13 @@ export interface DevUrlFlagToggle {
 /** QA URL flags — toggled from the dev panel when `?dev=1`. */
 export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
   {
+    key: 'embed',
+    label: 'embed',
+    hint: 'Iframe delivery — trim Share/Help, lighter splash, postMessage',
+    isOn: (params) => params.embed,
+    urlPatch: (enabled) => ({ embed: enabled ? '1' : null }),
+  },
+  {
     key: 'chatTest',
     label: 'chatTest',
     hint: 'AI chat scroll test messages',

@@ -164,6 +164,7 @@ import {
   DevPanelFormSection,
 } from './DevPanelFormGroup';
 import { DevPanelTertiaryTabs } from './DevPanelTertiaryTabs';
+import { DevPanelEmbedDebug } from './DevPanelEmbedDebug';
 
 const DEFAULT_NEW_TOUR_PRIMARY_COLOR = '#007078';
 
@@ -2127,15 +2128,15 @@ export function DevViewPanel({
                 title='Panorama'
                 description='Set the landing view and thumbnail, or replace the scene image.'
               >
-                <DevPanelFormGroup>
-                  <h4 className={devViewPanelFormGroupTitleClassName}>
-                    Landing view
-                  </h4>
-                  <p className={devViewPanelSectionHintClassName}>
-                    Pan the scene — saves <code>defaultView</code> + bakes{' '}
-                    <code>thumbnail</code>
-                  </p>
-
+                <DevPanelFormGroup
+                  title='Landing view'
+                  hint={
+                    <p className={devViewPanelSectionHintClassName}>
+                      Pan the scene — saves <code>defaultView</code> + bakes{' '}
+                      <code>thumbnail</code>
+                    </p>
+                  }
+                >
                   <p className={devViewPanelCoordsClassName}>
                     {view ? formatViewPosition(view) : '—'}
                   </p>
@@ -2162,15 +2163,15 @@ export function DevViewPanel({
                   </div>
                 </DevPanelFormGroup>
 
-                <DevPanelFormGroup>
-                  <h4 className={devViewPanelFormGroupTitleClassName}>
-                    Replace panorama
-                  </h4>
-                  <p className={devViewPanelSectionHintClassName}>
-                    Overwrites <code>{scene.id}.webp</code> for this scene and
-                    rebakes the thumbnail.
-                  </p>
-
+                <DevPanelFormGroup
+                  title='Replace panorama'
+                  hint={
+                    <p className={devViewPanelSectionHintClassName}>
+                      Overwrites <code>{scene.id}.webp</code> for this scene and
+                      rebakes the thumbnail.
+                    </p>
+                  }
+                >
                   <label className={devViewPanelFieldClassName}>
                     <span className={devViewPanelFieldLabelClassName}>
                       Panorama file
@@ -2261,9 +2262,9 @@ export function DevViewPanel({
                                   <p
                                     className={devViewPanelSlugPreviewClassName}
                                   >
-                                    <code>{hotspot.id}</code> ·{' '}
+                                    {hotspotDisplayLabel(hotspot)} ·{' '}
                                     {hotspotKindLabel(hotspot)} ·{' '}
-                                    {hotspotDisplayLabel(hotspot)}
+                                    <code>{hotspot.id}</code>
                                   </p>
                                   <p
                                     className={devViewPanelSectionHintClassName}
@@ -5507,6 +5508,13 @@ export function DevViewPanel({
                     );
                   })}
                 </ul>
+                {appSearchParams.embed ?
+                  <DevPanelEmbedDebug
+                    tourId={tour.id}
+                    currentSceneId={currentSceneId}
+                    firstSceneId={tour.firstScene}
+                  />
+                : null}
               </DevPanelSection>
             </DevPanelSectionAccordion>
           </div>

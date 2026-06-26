@@ -119,8 +119,13 @@ export const devViewPanelStackedFormFooterClassName = cn(
 
 export const devViewPanelSectionHeaderClassName = cn('flex flex-col gap-1.5');
 
-export const devViewPanelSectionTriggerClassName = cn(
-  'flex w-full cursor-pointer items-start justify-between gap-2 border-0 bg-transparent p-0 text-left',
+export const devViewPanelSectionHeaderCollapsibleClassName = cn(
+  'flex flex-row items-start justify-between gap-2',
+);
+
+/** Chevron-only toggle — title/description stay outside the button. */
+export const devViewPanelSectionChevronBtnClassName = cn(
+  'mt-px shrink-0 cursor-pointer rounded border-0 bg-transparent p-0.5 text-left',
 );
 
 export const devViewPanelSectionChevronClassName = cn(

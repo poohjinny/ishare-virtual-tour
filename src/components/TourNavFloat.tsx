@@ -132,6 +132,8 @@ interface TourNavFloatProps {
   logoAlt?: string;
   websiteUrl?: string;
   disabled?: boolean;
+  /** Block naming-opportunity picks while camera / scene / panel open is in flight. */
+  namingOpportunityBusy?: boolean;
   /** Fade breadcrumb during scene-to-scene navigation (not landing zoom). */
   breadcrumbHidden?: boolean;
   showHistoryBack?: boolean;
@@ -145,6 +147,8 @@ interface TourNavFloatProps {
   onBreadcrumbNavigate: (sceneId: string) => void;
   /** Info hotspot id when a naming opportunity panel is open in-scene. */
   activeNamingHotspotId?: string | null;
+  /** `?embed=1` — hide Share/Help chrome; keep Explore + Controls. */
+  embed?: boolean;
   panelStack?: TourPanelStack;
 }
 
@@ -300,6 +304,7 @@ export function TourNavFloat({
   logoAlt,
   websiteUrl,
   disabled = false,
+  namingOpportunityBusy = false,
   breadcrumbHidden = false,
   showHistoryBack = false,
   showHistoryForward = false,
@@ -311,6 +316,7 @@ export function TourNavFloat({
   onSelectNamingOpportunity,
   onBreadcrumbNavigate,
   activeNamingHotspotId = null,
+  embed = false,
   panelStack,
 }: TourNavFloatProps) {
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
@@ -594,12 +600,24 @@ export function TourNavFloat({
   }, [closeExploreSearch, panelStack]);
 
   useEffect(() => {
+    if (!embed) return;
+    setPanelMode((current) =>
+      current === 'help' || current === 'share' ? null : current,
+    );
+  }, [embed]);
+
+  useEffect(() => {
     if (!panelStack) return;
 
     const unregisterExplore = panelStack.registerPanel('explore', () => {
       setPanelMode((current) => (current === 'explore' ? null : current));
       closeExploreSearch();
     });
+
+    if (embed) {
+      return unregisterExplore;
+    }
+
     const unregisterHelp = panelStack.registerPanel('help', () => {
       setPanelMode((current) => (current === 'help' ? null : current));
     });
@@ -612,7 +630,7 @@ export function TourNavFloat({
       unregisterHelp();
       unregisterShare();
     };
-  }, [closeExploreSearch, panelStack]);
+  }, [closeExploreSearch, embed, panelStack]);
 
   useEffect(() => {
     if (panelMode !== 'help' && panelMode !== 'share') return;
@@ -726,7 +744,7 @@ export function TourNavFloat({
         handleExploreClick();
         return;
       }
-      if (key === 's') {
+      if (!embed && key === 's') {
         event.preventDefault();
         handleShareClick();
         return;
@@ -736,7 +754,7 @@ export function TourNavFloat({
         handleTuneClick();
         return;
       }
-      if (key === 'h') {
+      if (!embed && key === 'h') {
         event.preventDefault();
         handleHelpClick();
       }
@@ -746,6 +764,7 @@ export function TourNavFloat({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [
     disabled,
+    embed,
     handleExploreClick,
     handleHelpClick,
     handleShareClick,
@@ -776,6 +795,7 @@ export function TourNavFloat({
     : null;
 
   const handleSelectNaming = (sceneId: string, hotspotId: string) => {
+    if (disabled || namingOpportunityBusy) return;
     onSelectNamingOpportunity(sceneId, hotspotId);
 
     if (exploreSearchOpen) {
@@ -937,7 +957,7 @@ export function TourNavFloat({
                   activeNamingHotspotId === item.hotspotId &&
                   currentSceneId === item.sceneId
                 }
-                disabled={disabled}
+                disabled={disabled || namingOpportunityBusy}
                 onSelect={() =>
                   handleSelectNaming(item.sceneId, item.hotspotId)
                 }
@@ -971,7 +991,7 @@ export function TourNavFloat({
                       active: isActive,
                       statusTone: isSold ? 'sold' : 'default',
                     })}
-                    disabled={disabled}
+                    disabled={disabled || namingOpportunityBusy}
                     onClick={() =>
                       handleSelectNaming(item.sceneId, item.hotspotId)
                     }
@@ -1368,7 +1388,7 @@ export function TourNavFloat({
       <div className={tourNavActionsRootClassName} ref={actionsRef}>
         {displayPanel === 'explore' && renderExplorePanel()}
 
-        {displayPanel === 'help' && (
+        {displayPanel === 'help' && !embed && (
           <div
             id='tour-nav-help-panel'
             className={tourNavPanelSlotVariants({ panel: 'help' })}
@@ -1390,7 +1410,7 @@ export function TourNavFloat({
           </div>
         )}
 
-        {displayPanel === 'share' && (
+        {displayPanel === 'share' && !embed && (
           <div
             id='tour-nav-share-panel'
             className={tourNavPanelSlotVariants({ panel: 'share' })}
@@ -1427,20 +1447,22 @@ export function TourNavFloat({
             </button>
           </IconTooltip>
 
-          <IconTooltip label={TOUR_NAV_ACTION_SHARE} placement='left'>
-            <button
-              type='button'
-              className={tourNavCircleBtnVariants({
-                active: panelMode === 'share',
-              })}
-              onClick={handleShareClick}
-              aria-expanded={panelMode === 'share'}
-              aria-controls='tour-nav-share-panel'
-              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SHARE)}
-            >
-              <ShareIconButton />
-            </button>
-          </IconTooltip>
+          {!embed && (
+            <IconTooltip label={TOUR_NAV_ACTION_SHARE} placement='left'>
+              <button
+                type='button'
+                className={tourNavCircleBtnVariants({
+                  active: panelMode === 'share',
+                })}
+                onClick={handleShareClick}
+                aria-expanded={panelMode === 'share'}
+                aria-controls='tour-nav-share-panel'
+                {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SHARE)}
+              >
+                <ShareIconButton />
+              </button>
+            </IconTooltip>
+          )}
 
           <IconTooltip label={TOUR_NAV_ACTION_CONTROLS} placement='left'>
             <button
@@ -1454,20 +1476,22 @@ export function TourNavFloat({
             </button>
           </IconTooltip>
 
-          <IconTooltip label={TOUR_NAV_ACTION_HELP} placement='left'>
-            <button
-              type='button'
-              className={tourNavCircleBtnVariants({
-                active: panelMode === 'help',
-              })}
-              onClick={handleHelpClick}
-              aria-expanded={panelMode === 'help'}
-              aria-controls='tour-nav-help-panel'
-              {...tourNavIconButtonA11y(TOUR_NAV_ACTION_HELP)}
-            >
-              <HelpIcon />
-            </button>
-          </IconTooltip>
+          {!embed && (
+            <IconTooltip label={TOUR_NAV_ACTION_HELP} placement='left'>
+              <button
+                type='button'
+                className={tourNavCircleBtnVariants({
+                  active: panelMode === 'help',
+                })}
+                onClick={handleHelpClick}
+                aria-expanded={panelMode === 'help'}
+                aria-controls='tour-nav-help-panel'
+                {...tourNavIconButtonA11y(TOUR_NAV_ACTION_HELP)}
+              >
+                <HelpIcon />
+              </button>
+            </IconTooltip>
+          )}
         </div>
       </div>
     </>

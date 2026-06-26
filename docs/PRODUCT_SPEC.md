@@ -147,12 +147,12 @@ excluded from `isKnownTourId` until dev gating exists.
 
 ## URL query contract
 
-| Param                | Values              | Role                                                |
-| -------------------- | ------------------- | --------------------------------------------------- |
-| `embed`              | `1`                 | Client delivery — skip intro; chrome trim (backlog) |
-| `intro`              | `1` / `0` / omitted | Tri-state override for intro at `/` only            |
-| `no`                 | hotspot id          | Open naming-opportunity panel                       |
-| `dev`, `chatTest`, … | `1`                 | Dev / QA only — not for production links            |
+| Param                | Values              | Role                                                                                        |
+| -------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| `embed`              | `1`                 | Client delivery — skip intro; trim Share/Help FABs; lighter splash; `postMessage` to parent |
+| `intro`              | `1` / `0` / omitted | Tri-state override for intro at `/` only                                                    |
+| `no`                 | hotspot id          | Open naming-opportunity panel                                                               |
+| `dev`, `chatTest`, … | `1`                 | Dev / QA only — not for production links                                                    |
 
 **Path vs query:** Tour and scene identity live in the path
 (`/{tourId}/{sceneId}`). Product flags (`embed`, `no`) stay in the query.
@@ -167,7 +167,11 @@ https://tour.ishare.ca/{tourId}/{firstScene}?embed=1
 
 Do not rely on `?intro=0` for embeds — use `embed=1` and a tour path.
 
-**Code reference:** `src/hooks/useAppSearchParams.ts`.
+**Full embed guide:** [EMBED.md](./EMBED.md) — iframe markup, UI differences,
+`postMessage` payloads, parent listener, local QA.
+
+**Code reference:** `src/hooks/useAppSearchParams.ts`,
+`src/constants/tourEmbed.ts`, `src/hooks/useTourEmbedMessaging.ts`.
 
 ---
 
@@ -177,6 +181,7 @@ Do not rely on `?intro=0` for embeds — use `embed=1` and a tour path.
 | ------------------------------------------ | ------------------------------------------ |
 | [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) | SeekBeak context, demo script              |
 | [ROADMAP.md](./ROADMAP.md)                 | Backlog, phasing, success criteria for v1+ |
+| [EMBED.md](./EMBED.md)                     | iframe embed URL, chrome, postMessage      |
 | [TECH_STACK.md](./TECH_STACK.md)           | Libraries, build, deploy                   |
 | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)   | Platform vs client naming in UI            |
 | [PERFORMANCE.md](./PERFORMANCE.md)         | Performance playbook (tuning guide)        |

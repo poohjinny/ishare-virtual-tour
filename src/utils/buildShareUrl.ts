@@ -46,6 +46,65 @@ export function buildSharePath({
 
 export function buildAbsoluteShareUrl(options: BuildShareUrlOptions): string {
   const relative = buildSharePath(options);
+  return buildAbsoluteTourUrl(relative);
+}
+
+/** Path + query for iframe embed (`?embed=1`, no dev / internal flags). */
+export function buildEmbedPath({
+  tourId,
+  sceneId,
+  firstSceneId,
+}: Omit<BuildShareUrlOptions, 'namingHotspotId'>): string {
+  return buildTourLocation(
+    tourId,
+    sceneId,
+    firstSceneId,
+    new URLSearchParams(),
+    {
+      embed: '1',
+      [NAMING_OPPORTUNITY_SEARCH_KEY]: null,
+      dev: null,
+      chatTest: null,
+      notFoundTest: null,
+      panoramaErrorTest: null,
+      intro: null,
+      disableNavPreview: null,
+      skipLanding: null,
+      splashHold: null,
+      firstVisitHint: null,
+    },
+  );
+}
+
+export function buildAbsoluteEmbedUrl(
+  options: Omit<BuildShareUrlOptions, 'namingHotspotId'>,
+): string {
+  return buildAbsoluteTourUrl(buildEmbedPath(options));
+}
+
+export interface BuildEmbedTestPageOptions {
+  tourId: string;
+  sceneId: string;
+  /** Include `dev=1` on the iframe tour URL (default true). */
+  dev?: boolean;
+}
+
+/** Local parent-page harness — `public/embed-test.html` */
+export function buildEmbedTestPageUrl({
+  tourId,
+  sceneId,
+  dev = true,
+}: BuildEmbedTestPageOptions): string {
+  const base = import.meta.env.BASE_URL;
+  const path = `${base}embed-test.html`.replace(/([^:]\/)\/+/g, '$1');
+  const url = new URL(path, window.location.origin);
+  url.searchParams.set('tour', tourId);
+  url.searchParams.set('scene', sceneId);
+  if (!dev) url.searchParams.set('dev', '0');
+  return url.href;
+}
+
+function buildAbsoluteTourUrl(relative: string): string {
   const pathOnly = relative.startsWith('/') ? relative.slice(1) : relative;
   const base = import.meta.env.BASE_URL;
   const urlPath = `${base}${pathOnly}`.replace(/([^:]\/)\/+/g, '$1');

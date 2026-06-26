@@ -220,10 +220,12 @@ npm run build   # outputs to dist/
 
 ### iShare embed
 
+See [EMBED.md](./EMBED.md) for URL format, `postMessage`, and QA.
+
 ```html
 <iframe
-  src="https://tour.yourdomain.com/?embed=1"
-  title="Ken Sargent House Virtual Tour"
+  src="https://tour.yourdomain.com/{tourId}/{firstScene}?embed=1"
+  title="Virtual Tour"
   allow="fullscreen"
   loading="lazy"
   style="width:100%; height:min(80vh, 720px); border:0;"
@@ -250,18 +252,18 @@ Parsed in [`useAppSearchParams()`](../src/hooks/useAppSearchParams.ts).
 Preserved across in-app navigation — see `PRESERVED_SEARCH_KEYS` in
 [`tourPaths.ts`](../src/utils/tourPaths.ts).
 
-| Param                  | Purpose                                                                |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `?embed=1`             | Embed mode — skip client intro (default tour), layout tuned for iframe |
-| `?intro=1`             | Force client intro gallery at `/` (non-embed; incl. single-tour QA)    |
-| `?intro=0`             | Skip client intro at `/` — load default tour directly                  |
-| `?dev=1`               | Dev panel — hotspots, tour switch, URL flag toggles                    |
-| `?chatTest=1`          | AI chat scroll test messages (toggle in dev panel)                     |
-| `?notFoundTest=1`      | Force tour not-found / 404 screen (toggle in dev panel)                |
-| `?panoramaErrorTest=1` | Force panorama load-error overlay (toggle in dev panel)                |
-| `?navPreview=0`        | Disable nav-preview mini viewer (default: on; toggle in dev panel)     |
-| `?skipLanding=1`       | Skip landing zoom animation (toggle in dev panel)                      |
-| `?splashHold=1`        | Hold load splash longer for loader UX testing (toggle in dev panel)    |
+| Param                  | Purpose                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| `?embed=1`             | Embed mode — see [EMBED.md](./EMBED.md)                                        |
+| `?intro=1`             | Force client intro gallery at `/` (non-embed; incl. single-tour QA)            |
+| `?intro=0`             | Skip client intro at `/` — load default tour directly                          |
+| `?dev=1`               | Dev panel — authoring, tour switch, URL flags ([DEV_PANEL.md](./DEV_PANEL.md)) |
+| `?chatTest=1`          | AI chat scroll test messages (toggle in dev panel)                             |
+| `?notFoundTest=1`      | Force tour not-found / 404 screen (toggle in dev panel)                        |
+| `?panoramaErrorTest=1` | Force panorama load-error overlay (toggle in dev panel)                        |
+| `?navPreview=0`        | Disable nav-preview mini viewer (default: on; toggle in dev panel)             |
+| `?skipLanding=1`       | Skip landing zoom animation (toggle in dev panel)                              |
+| `?splashHold=1`        | Hold load splash longer for loader UX testing (toggle in dev panel)            |
 
 Combine flags as needed, e.g. `?embed=1&skipLanding=1`. With `?dev=1`, the dev
 panel includes **Switch tour** (multi-tour) and **URL flags** checkboxes.

@@ -38,7 +38,8 @@ export function useNamingOpportunityUrlSync({
 
   const syncNamingOpportunityToUrl = useCallback(
     (hotspotId: string | null, sceneId: string = currentSceneId) => {
-      const searchValue = hotspotId ? toNamingOpportunitySearchValue(tour, hotspotId) : null;
+      const searchValue =
+        hotspotId ? toNamingOpportunitySearchValue(tour, hotspotId) : null;
       lastAppliedNoRef.current = searchValue;
 
       const target = buildTourLocation(
@@ -74,9 +75,21 @@ export function useNamingOpportunityUrlSync({
   const openNamingOpportunity = useCallback(
     (sceneId: string, hotspotId: string) => {
       pendingNamingSelectionRef.current = { sceneId, hotspotId };
+
+      const started = viewerRef.current?.goToNamingOpportunity(
+        sceneId,
+        hotspotId,
+      );
+      if (!started) {
+        pendingNamingSelectionRef.current = null;
+        return;
+      }
+
       setActiveNamingHotspotId(hotspotId);
-      lastAppliedNoRef.current = toNamingOpportunitySearchValue(tour, hotspotId);
-      viewerRef.current?.goToNamingOpportunity(sceneId, hotspotId);
+      lastAppliedNoRef.current = toNamingOpportunitySearchValue(
+        tour,
+        hotspotId,
+      );
       syncNamingOpportunityToUrl(hotspotId, sceneId);
     },
     [
@@ -118,7 +131,15 @@ export function useNamingOpportunityUrlSync({
     lastAppliedNoRef.current = noSearchValue;
     pendingNamingSelectionRef.current = { sceneId, hotspotId };
     setActiveNamingHotspotId(hotspotId);
-    viewerRef.current?.goToNamingOpportunity(sceneId, hotspotId);
+    const started = viewerRef.current?.goToNamingOpportunity(
+      sceneId,
+      hotspotId,
+    );
+    if (!started) {
+      pendingNamingSelectionRef.current = null;
+      setActiveNamingHotspotId(null);
+      return;
+    }
     syncNamingOpportunityToUrl(hotspotId, sceneId);
   }, [
     clearNamingOpportunityFromUrl,

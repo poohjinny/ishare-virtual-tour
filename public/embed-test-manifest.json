@@ -1,0 +1,128 @@
+{
+  "tours": [
+    {
+      "id": "cancer-research",
+      "name": "Cancer Research",
+      "clientName": "Cancer Research Society",
+      "firstScene": "overview",
+      "scenes": [
+        {
+          "id": "overview",
+          "title": "Overview"
+        },
+        {
+          "id": "reception",
+          "title": "Reception"
+        }
+      ]
+    },
+    {
+      "id": "holodomor-museum",
+      "name": "Holodomor Museum",
+      "clientName": "Holodomor Research and Education Consortium",
+      "firstScene": "reception",
+      "scenes": [
+        {
+          "id": "reception",
+          "title": "Reception"
+        }
+      ]
+    },
+    {
+      "id": "ken-sargent-house",
+      "name": "Ken Sargent House",
+      "clientName": "Grande Prairie Regional Hospital Foundation",
+      "firstScene": "overview",
+      "scenes": [
+        {
+          "id": "comfort-corner",
+          "title": "Comfort Corner"
+        },
+        {
+          "id": "entrance-to-the-base-level",
+          "title": "Entrance to the Base Level"
+        },
+        {
+          "id": "kitchen",
+          "title": "Kitchen"
+        },
+        {
+          "id": "main-entrance",
+          "title": "Main Entrance"
+        },
+        {
+          "id": "overview",
+          "title": "Overview"
+        },
+        {
+          "id": "reception",
+          "title": "Reception"
+        }
+      ]
+    },
+    {
+      "id": "med-surg-inpatient",
+      "name": "Med/Surg Inpatient",
+      "clientName": "Queensway Carleton Hospital Foundation",
+      "firstScene": "overview",
+      "scenes": [
+        {
+          "id": "allied-health-team-room",
+          "title": "Allied Health Team Room"
+        },
+        {
+          "id": "dining-activity-room",
+          "title": "Dining / Activity Room"
+        },
+        {
+          "id": "galley-servery",
+          "title": "Galley / Servery"
+        },
+        {
+          "id": "inpatient-suites",
+          "title": "Inpatient Suites"
+        },
+        {
+          "id": "multi-use-lounge-activity-room",
+          "title": "Multi Use Lounge / Activity Room"
+        },
+        {
+          "id": "nursing-station",
+          "title": "Nursing Station"
+        },
+        {
+          "id": "overview",
+          "title": "Overview"
+        },
+        {
+          "id": "quiet-consultant",
+          "title": "Quiet / Consultant"
+        },
+        {
+          "id": "reception-centre",
+          "title": "Reception Centre"
+        },
+        {
+          "id": "report-meeting-room",
+          "title": "Report Meeting Room"
+        },
+        {
+          "id": "staff-facility-lounge",
+          "title": "Staff Facility / Lounge"
+        }
+      ]
+    },
+    {
+      "id": "qch-hospital",
+      "name": "Queensway Carleton Hospital",
+      "clientName": "Queensway Carleton Hospital Foundation",
+      "firstScene": "overview",
+      "scenes": [
+        {
+          "id": "overview",
+          "title": "Overview"
+        }
+      ]
+    }
+  ]
+}

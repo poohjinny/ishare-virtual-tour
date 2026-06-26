@@ -20,7 +20,9 @@ import {
 type DevPanelFormGroupProps = {
   children: ReactNode;
   className?: string;
+  /** Shown under `title` with tight spacing (or alone when no title). */
   hint?: ReactNode;
+  title?: string;
   inline?: boolean;
   /** Extra top spacing for Manage-tab row edit panels. */
   manageEdit?: boolean;
@@ -28,14 +30,25 @@ type DevPanelFormGroupProps = {
   stacked?: boolean;
 };
 
+function renderFormGroupHint(hint: ReactNode): ReactNode {
+  if (typeof hint === 'string') {
+    return <p className={devViewPanelSectionHintClassName}>{hint}</p>;
+  }
+
+  return hint;
+}
+
 export function DevPanelFormGroup({
   children,
   className,
   hint,
+  title,
   inline = false,
   manageEdit = false,
   stacked = false,
 }: DevPanelFormGroupProps) {
+  const hasHeader = Boolean(title || (hint != null && hint !== ''));
+
   return (
     <div
       className={cn(
@@ -46,8 +59,13 @@ export function DevPanelFormGroup({
         className,
       )}
     >
-      {hint != null && hint !== '' ?
-        <p className={devViewPanelSectionHintClassName}>{hint}</p>
+      {hasHeader ?
+        <div className='flex min-w-0 flex-col gap-1.5'>
+          {title ?
+            <h4 className={devViewPanelFormGroupTitleClassName}>{title}</h4>
+          : null}
+          {hint != null && hint !== '' ? renderFormGroupHint(hint) : null}
+        </div>
       : null}
       {children}
     </div>
@@ -90,14 +108,16 @@ export function DevPanelFormSection({
     >
       {hasHeader ?
         <div className={devViewPanelSectionHeaderClassName}>
-          {title ?
-            <h4 className={devViewPanelFormGroupTitleClassName}>{title}</h4>
-          : null}
-          {description != null && description !== '' ?
-            <div className={devViewPanelSectionDescriptionClassName}>
-              {renderFormSectionDescription(description)}
-            </div>
-          : null}
+          <div className='flex min-w-0 flex-col gap-1.5'>
+            {title ?
+              <h4 className={devViewPanelFormGroupTitleClassName}>{title}</h4>
+            : null}
+            {description != null && description !== '' ?
+              <div className={devViewPanelSectionDescriptionClassName}>
+                {renderFormSectionDescription(description)}
+              </div>
+            : null}
+          </div>
         </div>
       : null}
       <div className={devViewPanelFormSectionBodyClassName}>{children}</div>

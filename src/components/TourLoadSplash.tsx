@@ -5,12 +5,24 @@ import { PLATFORM_PRODUCT_LOGO } from '../constants/branding';
 /** White overlay fade — applied via `--tour-load-splash-fade-ms` on the splash root */
 export const TOUR_LOAD_SPLASH_OVERLAY_FADE_MS = 3200;
 
+/** Shorter curtain for iframe embed — parent page already provides context. */
+export const TOUR_LOAD_SPLASH_EMBED_OVERLAY_FADE_MS = 1100;
+
 export const TOUR_LOAD_SPLASH_FADE_MS = TOUR_LOAD_SPLASH_OVERLAY_FADE_MS + 120;
+
+export const TOUR_LOAD_SPLASH_EMBED_FADE_MS =
+  TOUR_LOAD_SPLASH_EMBED_OVERLAY_FADE_MS + 120;
+
+export function getTourLoadSplashFadeMs(embed = false): number {
+  return embed ? TOUR_LOAD_SPLASH_EMBED_FADE_MS : TOUR_LOAD_SPLASH_FADE_MS;
+}
 
 interface TourLoadSplashProps {
   exiting?: boolean;
   /** Begin overlay fade — synced to landing camera motion start. */
   fadeOverlay?: boolean;
+  /** `?embed=1` — faster logo + curtain timing. */
+  embed?: boolean;
   onExitComplete?: () => void;
   logo?: string;
   logoAlt?: string;
@@ -21,11 +33,16 @@ interface TourLoadSplashProps {
 export function TourLoadSplash({
   exiting = false,
   fadeOverlay = false,
+  embed = false,
   onExitComplete,
   logo,
   logoAlt,
   productName,
 }: TourLoadSplashProps) {
+  const overlayFadeMs =
+    embed ?
+      TOUR_LOAD_SPLASH_EMBED_OVERLAY_FADE_MS
+    : TOUR_LOAD_SPLASH_OVERLAY_FADE_MS;
   const splashLogo = logo ?? PLATFORM_PRODUCT_LOGO;
   const splashAlt = logoAlt ?? productName ?? 'Virtual Tour';
   const [fadeOut, setFadeOut] = useState(false);
@@ -54,12 +71,11 @@ export function TourLoadSplash({
     <div
       className={cn(
         'tour-load-splash pointer-events-none absolute inset-0 z-[105] flex items-center justify-center bg-white',
+        embed && 'tour-load-splash--embed',
         fadeOut && 'tour-load-splash--out',
       )}
       style={
-        {
-          '--tour-load-splash-fade-ms': `${TOUR_LOAD_SPLASH_OVERLAY_FADE_MS}ms`,
-        } as CSSProperties
+        { '--tour-load-splash-fade-ms': `${overlayFadeMs}ms` } as CSSProperties
       }
       role='status'
       aria-live='polite'
