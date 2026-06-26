@@ -33,6 +33,7 @@ interface GlassPanelHeaderActionsProps {
     shareUrl: string;
     message: Parameters<typeof ShareTourHeaderButton>[0]['message'];
     ariaLabel: string;
+    tooltipLabel?: string;
   };
 }
 
@@ -49,6 +50,7 @@ export function GlassPanelHeaderActions({
           shareUrl={share.shareUrl}
           message={share.message}
           ariaLabel={share.ariaLabel}
+          tooltipLabel={share.tooltipLabel}
         />
       )}
       {headerCtas.map((cta, index) => (

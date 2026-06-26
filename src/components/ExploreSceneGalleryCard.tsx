@@ -57,6 +57,7 @@ export function ExploreSceneGalleryCard({
         type='button'
         role='option'
         aria-selected={active}
+        data-tour-nav-directory-kind='location'
         disabled={disabled}
         className={tourNavLocationGalleryCardClassName({ active })}
         onClick={onSelect}

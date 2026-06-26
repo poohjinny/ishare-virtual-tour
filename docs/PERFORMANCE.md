@@ -121,13 +121,13 @@ not a task list.
 
 ## When to apply which priority
 
-| Signal                             | Start with                                                                                            |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Slow first load on 4G              | P0 (images) + P2 (JS split)                                                                           |
-| Scene change stutter after preload | P0 resolution + P1 preload limits                                                                     |
-| Vite / bundle budget CI failure    | P2                                                                                                    |
-| 10+ scenes per tour                | P1 + per-tour JSON (P2)                                                                               |
-| Embed in iShare mobile webview     | P0 + mobile tiers (P0); layout — [ROADMAP Sprint B](./ROADMAP.md#sprint-b--orientation--content-sync) |
+| Signal                             | Start with                                                         |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| Slow first load on 4G              | P0 (images) + P2 (JS split)                                        |
+| Scene change stutter after preload | P0 resolution + P1 preload limits                                  |
+| Vite / bundle budget CI failure    | P2                                                                 |
+| 10+ scenes per tour                | P1 + per-tour JSON (P2)                                            |
+| Embed in iShare mobile webview     | P0 + mobile tiers (P0); React UI layout — [MOBILE.md](./MOBILE.md) |
 
 ---
 

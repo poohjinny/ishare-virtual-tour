@@ -63,7 +63,7 @@ import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
 import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import {  
+import {
   MATERIAL_SYMBOL_SIZE_20,
   MATERIAL_SYMBOL_SIZE_22,
 } from './ui/materialSymbolClasses';
@@ -93,7 +93,7 @@ import {
   tourNavBreadcrumbSepClassName,
   tourNavCircleBtnVariants,
   tourNavCircleIconClassName,
-  tourNavDirectoryActiveSelector,
+  scrollTourNavDirectoryToActiveItem,
   tourNavDirectoryItemVariants,
   tourNavDirectoryPanelClassName,
   tourNavDirectorySectionClassName,
@@ -634,17 +634,15 @@ export function TourNavFloat({
 
   useEffect(() => {
     if (panelMode !== 'explore') return;
-    if (directoryTab === 'naming') return;
 
     const scrollRoot = exploreScrollRef.current;
     if (!scrollRoot) return;
 
-    const activeItem = scrollRoot.querySelector<HTMLElement>(
-      tourNavDirectoryActiveSelector,
-    );
-    activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    scrollTourNavDirectoryToActiveItem(scrollRoot, {
+      preferNaming: activeNamingItem !== null,
+    });
   }, [
-    activeNamingHotspotId,
+    activeNamingItem,
     currentSceneId,
     directoryTab,
     exploreLayout,
@@ -657,12 +655,11 @@ export function TourNavFloat({
     const scrollRoot = exploreSearchScrollRef.current;
     if (!scrollRoot) return;
 
-    const activeItem = scrollRoot.querySelector<HTMLElement>(
-      tourNavDirectoryActiveSelector,
-    );
-    activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    scrollTourNavDirectoryToActiveItem(scrollRoot, {
+      preferNaming: activeNamingItem !== null,
+    });
   }, [
-    activeNamingHotspotId,
+    activeNamingItem,
     currentSceneId,
     isExploreSearchActive,
     exploreFilteredScenes,
@@ -698,8 +695,11 @@ export function TourNavFloat({
   };
 
   const handleExploreClick = useCallback(() => {
+    if (activeNamingItem) {
+      setDirectoryTab('naming');
+    }
     activatePanel('explore');
-  }, [activatePanel]);
+  }, [activatePanel, activeNamingItem]);
 
   const handleHelpClick = useCallback(() => {
     activatePanel('help');
@@ -744,7 +744,13 @@ export function TourNavFloat({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [disabled, handleExploreClick, handleHelpClick, handleShareClick, handleTuneClick]);
+  }, [
+    disabled,
+    handleExploreClick,
+    handleHelpClick,
+    handleShareClick,
+    handleTuneClick,
+  ]);
 
   const logoImage = clientLogo && (
     <img
@@ -847,6 +853,7 @@ export function TourNavFloat({
                     type='button'
                     role='option'
                     aria-selected={isActive}
+                    data-tour-nav-directory-kind='location'
                     className={tourNavDirectoryItemVariants({
                       kind: 'location',
                       active: isActive,
@@ -958,6 +965,7 @@ export function TourNavFloat({
                     type='button'
                     role='option'
                     aria-selected={isActive}
+                    data-tour-nav-directory-kind='naming'
                     className={tourNavDirectoryItemVariants({
                       kind: 'naming',
                       active: isActive,

@@ -11,7 +11,10 @@ import {
   resolvePopupContentCtas,
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
-import { TOUR_SHARE_OPPORTUNITY_ARIA } from '../constants/tourShare';
+import {
+  TOUR_SHARE_OPPORTUNITY_ARIA,
+  TOUR_SHARE_OPPORTUNITY_LABEL,
+} from '../constants/tourShare';
 import {
   buildAbsoluteShareUrl,
   buildShareMessage,
@@ -193,6 +196,7 @@ export function InfoPopup({
                         shareUrl,
                         message: shareMessage,
                         ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
+                        tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
                       }
                     : undefined
                   }

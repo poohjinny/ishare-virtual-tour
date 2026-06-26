@@ -272,6 +272,11 @@
     gap: 4px;
   }
 
+  .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__header-actions .ishare-tooltip-host::after,
+  .info-popup .tour-glass-panel__header-actions .ishare-tooltip-host::after {
+    z-index: 30;
+  }
+
   .tour-glass-panel__header-btn {
     display: inline-flex;
     align-items: center;
@@ -1199,6 +1204,11 @@
     /* Above primary CTA shadow in stacked footer layout. */
     position: relative;
     z-index: 1;
+    transform: none;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
   }
 
   .tour-glass-panel__cta--secondary:hover,
@@ -1207,7 +1217,7 @@
     color: var(--ishare-text);
     box-shadow: none;
     border-color: rgba(15, 23, 42, 0.2);
-    transform: translateY(-1px);
+    transform: none;
     outline: none;
   }
 

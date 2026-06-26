@@ -34,6 +34,7 @@ import {
   TOUR_SHARE_LOCATION_ARIA,
   TOUR_SHARE_LOCATION_LABEL,
   TOUR_SHARE_OPPORTUNITY_ARIA,
+  TOUR_SHARE_OPPORTUNITY_LABEL,
 } from '../constants/tourShare';
 import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import {
@@ -285,6 +286,7 @@ function glassPanelExternalLinkIconHtml(): string {
 function buildShareHeaderButtonHtml(
   dataAttr: string,
   ariaLabel: string,
+  tooltipLabel: string,
   className = GLASS_PANEL.headerBtn,
 ): string {
   return `<button
@@ -292,8 +294,8 @@ function buildShareHeaderButtonHtml(
         class="${className} ishare-tooltip-host"
         data-${dataAttr}="true"
         aria-label="${escapeHtml(ariaLabel)}"
-        data-ishare-tooltip="${escapeHtml(ariaLabel)}"
-        data-ishare-tooltip-placement="bottom"
+        data-ishare-tooltip="${escapeHtml(tooltipLabel)}"
+        data-ishare-tooltip-placement="left"
       >${glassPanelShareIconHtml()}</button>`;
 }
 
@@ -683,6 +685,7 @@ export function buildAnchoredPopupHtml(
         buildShareHeaderButtonHtml(
           'info-panel-share',
           TOUR_SHARE_OPPORTUNITY_ARIA,
+          TOUR_SHARE_OPPORTUNITY_LABEL,
         )
       : undefined,
   });

@@ -33,6 +33,7 @@ import {
 import {
   TOUR_SHARE_LOCATION_LABEL,
   TOUR_SHARE_OPPORTUNITY_ARIA,
+  TOUR_SHARE_OPPORTUNITY_LABEL,
 } from '../constants/tourShare';
 import { applyShareButtonFeedback, shareTourView } from '../utils/shareTour';
 import { mountPopupVideoPlayer } from '../utils/popupVideo';
@@ -1019,8 +1020,9 @@ export const PanoramaViewer = forwardRef<
               infoShareButton,
               result,
               namingHotspotId ?
-                TOUR_SHARE_OPPORTUNITY_ARIA
+                TOUR_SHARE_OPPORTUNITY_LABEL
               : TOUR_SHARE_LOCATION_LABEL,
+              namingHotspotId ? TOUR_SHARE_OPPORTUNITY_ARIA : undefined,
             );
           },
         );

@@ -54,14 +54,15 @@ export function shareTourResultLabel(result: ShareTourResult): string | null {
 export function applyShareButtonFeedback(
   button: HTMLButtonElement,
   result: ShareTourResult,
-  defaultLabel: string,
+  defaultTooltipLabel: string,
+  defaultAriaLabel: string = defaultTooltipLabel,
 ): void {
   const label = shareTourResultLabel(result);
   if (!label) return;
 
   const textEl = button.querySelector('.tour-glass-panel__cta-text');
   if (textEl instanceof HTMLElement) {
-    const previous = textEl.textContent ?? defaultLabel;
+    const previous = textEl.textContent ?? defaultTooltipLabel;
     textEl.textContent = label;
     button.disabled = true;
 
@@ -72,14 +73,16 @@ export function applyShareButtonFeedback(
     return;
   }
 
-  const previousLabel = button.getAttribute('aria-label') ?? defaultLabel;
+  const previousTooltip =
+    button.getAttribute('data-ishare-tooltip') ?? defaultTooltipLabel;
+  const previousAria = button.getAttribute('aria-label') ?? defaultAriaLabel;
   button.setAttribute('aria-label', label);
   setIshareTooltipLabel(button, label);
   button.disabled = true;
 
   window.setTimeout(() => {
-    button.setAttribute('aria-label', previousLabel);
-    setIshareTooltipLabel(button, previousLabel);
+    button.setAttribute('aria-label', previousAria);
+    setIshareTooltipLabel(button, previousTooltip);
     button.disabled = false;
   }, 2400);
 }

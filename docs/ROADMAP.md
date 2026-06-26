@@ -77,12 +77,14 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 ### Sprint B — Orientation & content sync
 
 - [x] **Hotspot coordinate fine-tuning** — `?dev=1` dev panel: click-to-place,
-      move, nav/info/NO create & edit, `targetView` / `instant` / `preview.image`
+      move, nav/info/NO create & edit, `targetView` / `instant` /
+      `preview.image`
 - [ ] **Floor plan coverage** — `map` coordinates for all Ken Sargent scenes on
       `floorplan.svg` (kitchen, comfort-corner, base-level entrance)
 - [ ] **Holodomor / Cancer Research** — scene and NO content pass
-- [ ] **Mobile layout pass** — FAB dock vs minimap vs guide FAB on ≤480px;
-      safe-area padding audit. If load or jank on device:
+- [ ] **Mobile layout pass** — React UI chrome on phone: FAB dock vs minimap vs
+      guide FAB, safe-area, panel sizing. Spec: [MOBILE.md](./MOBILE.md). PSV
+      viewer acceptable as-is (reference only). If load or jank on device:
       [PERFORMANCE P0–P1](./PERFORMANCE.md#when-to-start).
 - [x] **Scene transition feedback** — load progress bar on scene navigation (dim
       overlay not needed; sufficient on slow panoramas)
@@ -91,8 +93,8 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 Local JSON authoring in the Vite dev server — **precursor to Phase 2 Admin
 CMS**. The panel writes `tours/*.json`, `tours/*-knowledge.json`,
-`tours/catalog.json`, and `assets/{clientId}/{tourId}/` without redeploy.
-Admin will reuse the same schemas and API shapes; viewer stays iframe-only.
+`tours/catalog.json`, and `assets/{clientId}/{tourId}/` without redeploy. Admin
+will reuse the same schemas and API shapes; viewer stays iframe-only.
 
 **Evolution:** `DevViewPanel` → `apps/admin` (Next.js) + authenticated dev API.
 Do not embed PSV in admin — preview via iframe to this viewer.
@@ -107,12 +109,14 @@ Do not embed PSV in admin — preview via iframe to this viewer.
 - [x] Delete tour — JSON, knowledge, catalog entry, asset folder (danger zone)
 - [x] Live catalog snapshot — intro gallery updates without page reload
 - [x] Dev tour cache — create/edit/delete reflects in viewer without reload
-- [x] Bootstrap unknown tour in dev mode (`devFetchTour` when not in static repo)
+- [x] Bootstrap unknown tour in dev mode (`devFetchTour` when not in static
+      repo)
 
 **Scenes**
 
 - [x] Create scene — panorama upload, title, description, defaultView
-- [x] Update scene — title, description, firstScene, floor-plan pin (`map` x/y/heading)
+- [x] Update scene — title, description, firstScene, floor-plan pin (`map`
+      x/y/heading)
 - [x] Delete scene (non-`firstScene`)
 - [x] Apply landing view (`defaultView` + thumbnail)
 - [x] Replace panorama
@@ -130,11 +134,13 @@ Do not embed PSV in admin — preview via iframe to this viewer.
 **Floor plan & knowledge**
 
 - [x] Floor plan CRUD — upload SVG/PNG/JPG/WebP, width/height, remove
-- [x] Knowledge JSON editor — global + per-scene facts, FAQs, suggested questions
+- [x] Knowledge JSON editor — global + per-scene facts, FAQs, suggested
+      questions
 
 **Viewer integration**
 
-- [x] General info hotspots — full badge label “Information”, nav-style pill + info icon
+- [x] General info hotspots — full badge label “Information”, nav-style pill +
+      info icon
 - [x] DevTools FAB — collapsible panel shell
 - [x] Dev URL flags — preserved across in-app navigation
 
@@ -172,9 +178,9 @@ until Admin app exists; then port endpoints and retire duplicate UI.
 
 **Docs & QA**
 
-- [ ] Dev API reference in `docs/` (endpoint list mirrors `viteDevTourApiPlugin`)
+- [ ] Dev API reference in `docs/` (endpoint list mirrors
+      `viteDevTourApiPlugin`)
 - [ ] Smoke-test checklist for new tours (qch-hospital, ken-sargent-house)
-
 
 ### Sprint C — Discovery & share polish
 
@@ -278,15 +284,15 @@ admin `users` / roles.
 
 ### 7 — Admin MVP pages
 
-| Route                              | Purpose                                            | Dev panel today (`?dev=1`)                    |
-| ---------------------------------- | -------------------------------------------------- | --------------------------------------------- |
-| `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                            |
-| `/`                                | dashboard — clients, tours, draft/published status   | partial — create tour, catalog visibility     |
-| `/clients/[clientId]`              | tour list, visibility, featured                    | partial — featured/visibility on tour update  |
-| `/tours/[tourId]`                  | tour settings — branding, org, floor plan          | partial — tour tab, org, fonts, floor plan  |
-| `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                      |
-| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move                  |
-| `/tours/[tourId]/preview`          | iframe preview with token URL                      | — (viewer `?dev=1` is the preview today)      |
+| Route                              | Purpose                                            | Dev panel today (`?dev=1`)                   |
+| ---------------------------------- | -------------------------------------------------- | -------------------------------------------- |
+| `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                           |
+| `/`                                | dashboard — clients, tours, draft/published status | partial — create tour, catalog visibility    |
+| `/clients/[clientId]`              | tour list, visibility, featured                    | partial — featured/visibility on tour update |
+| `/tours/[tourId]`                  | tour settings — branding, org, floor plan          | partial — tour tab, org, fonts, floor plan   |
+| `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                     |
+| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move                 |
+| `/tours/[tourId]/preview`          | iframe preview with token URL                      | — (viewer `?dev=1` is the preview today)     |
 
 Follow-ups: `/tours/[tourId]/knowledge` (dev panel ✅), `/tours/[tourId]/naming`
 (NO + CTA — partial via NO hotspot forms).
@@ -431,6 +437,7 @@ data — no duplicate content per format.
 | overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                             |
 | Mock AI limited until Phase 2    | Rich FAQs + suggested chips; dev knowledge editor                                                                  |
 | Large panorama load on mobile    | [PERFORMANCE P0](./PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./PERFORMANCE.md#p1--preload-strategy) |
+| React UI overlap on phone        | [MOBILE.md](./MOBILE.md) — layout pass M1–M2                                                                       |
 | JSON edits bypass admin audit    | Dev panel local-only; Admin + publish for production                                                               |
 
 ---
@@ -444,6 +451,7 @@ data — no duplicate content per format.
 | [TECH_STACK.md](./TECH_STACK.md)               | Stack; note DB/API when added                       |
 | [CODING_GUIDELINES.md](./CODING_GUIDELINES.md) | Engineering conventions                             |
 | [PERFORMANCE.md](./PERFORMANCE.md)             | Performance playbook (how to tune; not a task list) |
+| [MOBILE.md](./MOBILE.md)                       | React UI layout on phone; PSV reference-only        |
 | [assets/README.md](../assets/README.md)        | Per-client asset layout                             |
 
 ---
@@ -452,6 +460,7 @@ data — no duplicate content per format.
 
 | Date       | Note                                                                                    |
 | ---------- | --------------------------------------------------------------------------------------- |
+| 2026-06-25 | MOBILE.md — React UI layout spec; PSV reference-only; links from ROADMAP/PERFORMANCE    |
 | 2026-06-11 | Dev panel — organization + Google Fonts branding on tour update                         |
 | 2026-06-11 | Dev panel v1 — full tour/scene/hotspot/floor-plan/knowledge CRUD; Admin migration table |
 | 2026-06-11 | Scene transition feedback done — progress bar only (no dim overlay)                     |

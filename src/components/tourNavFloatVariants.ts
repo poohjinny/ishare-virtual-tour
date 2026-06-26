@@ -30,6 +30,33 @@ const tourNavDockBtnHoverClassName = cn(
 export const tourNavDirectoryActiveSelector =
   '[role="option"][aria-selected="true"]';
 
+export const tourNavDirectoryActiveNamingSelector =
+  '[data-tour-nav-directory-kind="naming"][role="option"][aria-selected="true"]';
+
+export const tourNavDirectoryActiveLocationSelector =
+  '[data-tour-nav-directory-kind="location"][role="option"][aria-selected="true"]';
+
+export function scrollTourNavDirectoryToActiveItem(
+  scrollRoot: HTMLElement,
+  options: { preferNaming: boolean },
+): void {
+  const namingItem = scrollRoot.querySelector<HTMLElement>(
+    tourNavDirectoryActiveNamingSelector,
+  );
+  const locationItem = scrollRoot.querySelector<HTMLElement>(
+    tourNavDirectoryActiveLocationSelector,
+  );
+
+  const activeItem =
+    options.preferNaming && namingItem ?
+      namingItem
+    : (locationItem ??
+      namingItem ??
+      scrollRoot.querySelector<HTMLElement>(tourNavDirectoryActiveSelector));
+
+  activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
 /* ── Breadcrumb ── */
 
 export const tourNavBreadcrumbClassName = cn(

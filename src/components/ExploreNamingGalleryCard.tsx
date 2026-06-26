@@ -86,6 +86,7 @@ export function ExploreNamingGalleryCard({
         type='button'
         role='option'
         aria-selected={active}
+        data-tour-nav-directory-kind='naming'
         disabled={disabled}
         className={tourNavLocationGalleryCardClassName({ active })}
         onClick={onSelect}

@@ -17,6 +17,7 @@ linked specs.
 | **Product / copy names**       | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)               | Tab title, Help, Guide, splash               |
 | **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                       | PSV, Vite, iframe embed                      |
 | **Performance playbook**       | [PERFORMANCE.md](./PERFORMANCE.md)                     | When embed/mobile feels slow (no task list)  |
+| **Mobile React UI layout**     | [MOBILE.md](./MOBILE.md)                               | Phone chrome, collisions, safe-area          |
 | **Client assets**              | [`assets/README.md`](../assets/README.md)              | Panoramas, logos, new client                 |
 | **Backlog & phasing**          | [ROADMAP.md](./ROADMAP.md)                             | What to build next                           |
 | **Product contracts**          | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                   | URL, embed, catalog, schemas                 |
