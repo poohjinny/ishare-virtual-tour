@@ -103,11 +103,17 @@ input::placeholder {
   width: 100%;
   height: 100%;
   background: #000;
+  --ishare-hotspot-glass-padding-block: 1px;
+  --ishare-hotspot-glass-border-width: 1.5px;
+  /* Match nav pill block size (label line box + padding + border). */
+  --ishare-hotspot-glass-block-size: max(26px,
+      calc(2 * var(--ishare-hotspot-glass-padding-block) + 2 * var(--ishare-hotspot-glass-border-width) + 2 * var(--ishare-font-size-sm)));
 }
 
 /* Hotspot HTML markers ? allow pulse rings to extend outside the pill box */
 .viewer-container .psv-marker:has(.hotspot-info),
-.viewer-container .psv-marker:has(.hotspot-nav) {
+.viewer-container .psv-marker:has(.hotspot-nav),
+.viewer-container .psv-marker:has(.hotspot-general-info) {
   overflow: visible;
 }
 
@@ -181,7 +187,8 @@ input::placeholder {
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-primary-group,
-.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-row {
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-row,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap--primary-stack {
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
@@ -362,9 +369,9 @@ input::placeholder {
   background: var(--ishare-text);
 }
 
-/* Control groups: zoom | move + default view | fullscreen */
+/* Control groups: zoom | move + default view | immersive + fullscreen */
 .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
-  margin-left: 18px;
+  margin-left: 24px;
 }
 
 .viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
@@ -372,11 +379,11 @@ input::placeholder {
 }
 
 .viewer-container .psv-recenter-button+.psv-immersive-bg-button {
-  margin-left: 18px;
+  margin-left: 24px;
 }
 
 .viewer-container .psv-recenter-button+.psv-fullscreen-button {
-  margin-left: 18px;
+  margin-left: 24px;
 }
 
 .viewer-container .psv-immersive-bg-button+.psv-fullscreen-button {
@@ -671,7 +678,7 @@ input::placeholder {
   }
 
   .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
-    margin-left: 14px;
+    margin-left: 18px;
   }
 
   .viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
@@ -679,11 +686,11 @@ input::placeholder {
   }
 
   .viewer-container .psv-recenter-button+.psv-immersive-bg-button {
-    margin-left: 14px;
+    margin-left: 18px;
   }
 
   .viewer-container .psv-recenter-button+.psv-fullscreen-button {
-    margin-left: 14px;
+    margin-left: 18px;
   }
 
   .viewer-container .psv-immersive-bg-button+.psv-fullscreen-button {
@@ -720,14 +727,15 @@ input::placeholder {
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 32px;
-  padding: 2px 16px;
+  gap: 6px;
+  box-sizing: border-box;
+  min-height: var(--ishare-hotspot-glass-block-size);
+  padding: var(--ishare-hotspot-glass-padding-block) 11px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px) saturate(120%);
   -webkit-backdrop-filter: blur(8px) saturate(120%);
-  border: 1.5px solid transparent;
+  border: var(--ishare-hotspot-glass-border-width) solid transparent;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
   transition:
     transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
@@ -738,8 +746,8 @@ input::placeholder {
 
 .hotspot-nav__dot {
   flex-shrink: 0;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--ishare-primary);
   box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.4);
@@ -776,17 +784,20 @@ input::placeholder {
 
 .hotspot-nav__label {
   font-family: var(--ishare-display-font);
-  font-size: var(--ishare-font-size-md);
+  font-size: var(--ishare-font-size-sm);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--ishare-text);
   white-space: nowrap;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hotspot-nav:not(.hotspot-nav--active):hover .hotspot-nav__pill,
 .hotspot-nav:not(.hotspot-nav--active):focus-visible .hotspot-nav__pill {
-  transform: scale(1.06);
+  transform: scale(1.04);
   background: rgba(255, 255, 255, 0.86);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
 }
@@ -828,6 +839,86 @@ input::placeholder {
   color: var(--ishare-primary);
 }
 
+/* ?? General info hotspot ? glass chip + colored icon (lowest priority tier) ?? */
+
+.hotspot-general-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hotspot-general-info__chip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--ishare-hotspot-glass-block-size);
+  height: var(--ishare-hotspot-glass-block-size);
+  min-height: var(--ishare-hotspot-glass-block-size);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  border: var(--ishare-hotspot-glass-border-width) solid transparent;
+  padding: var(--ishare-hotspot-glass-padding-block);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  color: var(--ishare-text);
+  transition:
+    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease;
+}
+
+.hotspot-general-info__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.hotspot-general-info__icon-symbol {
+  display: block;
+  line-height: 1;
+}
+
+.hotspot-general-info:not(.hotspot-general-info--active):hover .hotspot-general-info__chip,
+.hotspot-general-info:not(.hotspot-general-info--active):focus-visible .hotspot-general-info__chip {
+  transform: scale(1.04);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+
+.hotspot-general-info:focus-visible .hotspot-general-info__chip {
+  outline: none;
+}
+
+.hotspot-general-info--active .hotspot-general-info__chip,
+.hotspot-general-info--active:hover .hotspot-general-info__chip,
+.hotspot-general-info--active:focus-visible .hotspot-general-info__chip {
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--ishare-hotspot-active-glow);
+  color: var(--ishare-primary);
+  transform: none;
+}
+
+.hotspot-general-info--active:hover .hotspot-general-info__chip,
+.hotspot-general-info--active:focus-visible .hotspot-general-info__chip {
+  box-shadow: var(--ishare-hotspot-active-glow-strong);
+}
+
 /* ?? Info hotspot ? naming opportunity pill (primary + heart) ?? */
 
 .hotspot-info {
@@ -864,9 +955,9 @@ input::placeholder {
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 3px 18px 3px 12px;
+  gap: 5px;
+  min-height: 28px;
+  padding: 2px 12px 2px 9px;
   border-radius: 999px;
   background: var(--ishare-primary);
   color: #fff;
@@ -885,8 +976,8 @@ input::placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   overflow: visible;
   color: rgba(255, 255, 255, 0.58);
   border-radius: 50%;
@@ -899,25 +990,28 @@ input::placeholder {
 }
 
 .hotspot-info__icon {
-  width: 17px;
-  height: 17px;
+  width: 14px;
+  height: 14px;
   display: block;
   overflow: visible;
 }
 
 .hotspot-info__label {
   font-family: var(--ishare-display-font);
-  font-size: var(--ishare-font-size-md);
+  font-size: var(--ishare-font-size-sm);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: #fff;
   white-space: nowrap;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .hotspot-info:hover .hotspot-info__pill,
 .hotspot-info:focus-visible .hotspot-info__pill {
-  transform: scale(1.06);
+  transform: scale(1.04);
   background: var(--ishare-primary-dark);
   box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
 }
@@ -937,16 +1031,16 @@ input::placeholder {
 .hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__icon-wrap,
 .hotspot-info--active:not(.hotspot-info--status-sold):hover .hotspot-info__icon-wrap,
 .hotspot-info--active:not(.hotspot-info--status-sold):focus-visible .hotspot-info__icon-wrap {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   background: var(--ishare-active-icon-leading-bg);
   box-shadow: var(--ishare-active-icon-leading-ring);
   color: var(--ishare-primary);
 }
 
 .hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__icon {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
 }
 
 .hotspot-info:focus-visible .hotspot-info__pill {
@@ -993,16 +1087,16 @@ input::placeholder {
 }
 
 .hotspot-info--active.hotspot-info--status-sold .hotspot-info__icon-wrap {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   background: var(--ishare-active-icon-leading-sold-bg);
   box-shadow: var(--ishare-active-icon-leading-sold-ring);
   color: rgba(71, 85, 105, 0.72);
 }
 
 .hotspot-info--active.hotspot-info--status-sold .hotspot-info__icon {
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
 }
 
 .hotspot-info--active.hotspot-info--status-sold .hotspot-info__pulse {
@@ -1064,24 +1158,28 @@ input::placeholder {
 /* ?? Post?scene-change enter (delay + fade + scale) ?? */
 
 .viewer-container--hotspots-hold .psv-marker:has(.hotspot-nav).psv-marker--visible,
-.viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible {
+.viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible,
+.viewer-container--hotspots-hold .psv-marker:has(.hotspot-general-info).psv-marker--visible {
   opacity: 0 !important;
 }
 
 .viewer-container--hotspots-enter .psv-marker:has(.hotspot-nav).psv-marker--visible .hotspot-nav,
-.viewer-container--hotspots-enter .psv-marker:has(.hotspot-info).psv-marker--visible .hotspot-info {
+.viewer-container--hotspots-enter .psv-marker:has(.hotspot-info).psv-marker--visible .hotspot-info,
+.viewer-container--hotspots-enter .psv-marker:has(.hotspot-general-info).psv-marker--visible .hotspot-general-info {
   animation: hotspot-enter 420ms cubic-bezier(0.34, 1.25, 0.64, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
 
   .viewer-container--hotspots-hold .psv-marker:has(.hotspot-nav).psv-marker--visible,
-  .viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible {
+  .viewer-container--hotspots-hold .psv-marker:has(.hotspot-info).psv-marker--visible,
+  .viewer-container--hotspots-hold .psv-marker:has(.hotspot-general-info).psv-marker--visible {
     opacity: 1 !important;
   }
 
   .viewer-container--hotspots-enter .psv-marker:has(.hotspot-nav).psv-marker--visible .hotspot-nav,
-  .viewer-container--hotspots-enter .psv-marker:has(.hotspot-info).psv-marker--visible .hotspot-info {
+  .viewer-container--hotspots-enter .psv-marker:has(.hotspot-info).psv-marker--visible .hotspot-info,
+  .viewer-container--hotspots-enter .psv-marker:has(.hotspot-general-info).psv-marker--visible .hotspot-general-info {
     animation: none;
   }
 }

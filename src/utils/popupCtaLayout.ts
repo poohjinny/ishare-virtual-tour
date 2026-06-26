@@ -1,5 +1,6 @@
 import {
   popupCtaLabelLength,
+  resolvePopupCta,
 } from '../data/giftabulatorBrand';
 import {
   findPrimaryPopupCta,
@@ -56,4 +57,27 @@ export function partitionPopupCtas(ctas: PopupCta[]): {
     primary,
     secondaries: findSecondaryPopupCtas(ordered, primary),
   };
+}
+
+export function resolvePopupCtaDescriptionTooltip(
+  cta: PopupCta,
+): string | undefined {
+  const sublabel = resolvePopupCta(cta).sublabel?.trim();
+  return sublabel || undefined;
+}
+
+export interface PopupFooterLayout {
+  mode: PopupCtaLayoutMode;
+  primary: PopupCta;
+  secondaries: PopupCta[];
+}
+
+export function resolvePopupFooterLayout(
+  ctas: PopupCta[],
+): PopupFooterLayout | null {
+  if (ctas.length === 0) return null;
+
+  const { primary, secondaries } = partitionPopupCtas(ctas);
+
+  return { mode: resolvePopupCtaLayoutMode(ctas), primary, secondaries };
 }

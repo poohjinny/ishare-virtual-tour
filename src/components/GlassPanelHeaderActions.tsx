@@ -1,5 +1,8 @@
 import type { PopupCta } from '../types/tour';
-import { resolvePopupCta } from '../data/giftabulatorBrand';
+import {
+  giftabulatorCtaTooltipLabel,
+  resolvePopupCta,
+} from '../data/giftabulatorBrand';
 import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import { ShareTourHeaderButton } from './ShareTourHeaderButton';
 import { IconTooltip } from './ui/IconTooltip';
@@ -10,9 +13,10 @@ const HEADER_BTN_ICON_CLASS = 'tour-glass-panel__header-btn-icon';
 
 export function PopupCtaHeaderLink({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
+  const tooltipLabel = giftabulatorCtaTooltipLabel(cta);
 
   return (
-    <IconTooltip label={resolved.label} placement='bottom'>
+    <IconTooltip label={tooltipLabel} placement='bottom'>
       <a
         className='tour-glass-panel__header-btn'
         href={resolved.url}

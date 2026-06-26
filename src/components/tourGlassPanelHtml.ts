@@ -13,7 +13,8 @@ import {
 } from '../utils/navPreview';
 import {
   giftabulatorCtaButtonLabelHtml,
-  popupCtaLabelLength,
+  giftabulatorCtaButtonPlainLabel,
+  giftabulatorCtaTooltipLabel,
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
 import {
@@ -24,7 +25,10 @@ import {
   MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_22,
 } from './ui/materialSymbolClasses';
-import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
+import {
+  resolvePopupCtaIconKind,
+  shouldShowPopupCtaIcon,
+} from '../utils/popupCtaIcon';
 import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
@@ -36,10 +40,13 @@ import {
   TOUR_SHARE_LOCATION_LABEL,
   TOUR_SHARE_OPPORTUNITY_ARIA,
 } from '../constants/tourShare';
+import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import {
-  partitionPopupCtasForPlacement,
-  isMailtoCtaUrl,
-} from '../utils/popupCtaPlacement';
+  popupCtaRowClassName,
+  popupCtaWrapClassName,
+  resolvePopupCtaDescriptionTooltip,
+  resolvePopupFooterLayout,
+} from '../utils/popupCtaLayout';
 import {
   isNamingStatusIconModifier,
   namingStatusBadgeIconHtml,
@@ -59,13 +66,16 @@ export { youtubeEmbedUrl, initPopupVideoPlayers };
 export const GLASS_PANEL_SIZE = {
   minWidth: 320,
   maxWidth: 500,
-  defaultWidth: 380,
+  defaultWidth: 440,
   minHeight: 0,
   maxHeight: 840,
   maxHeightRatio: 0.92,
   viewportMargin: 48,
   viewportMarginMobile: 32,
 } as const;
+
+/** Shared dock width — dev panel, nav preview, info panels. */
+export const TOUR_DOCK_PANEL_WIDTH = 440;
 
 const GLASS_PANEL_WIDTH_TIER: Record<PopupWidthTier, number> = {
   compact: 320,
@@ -86,40 +96,19 @@ function viewportMaxPanelWidth(): number {
   return Math.max(GLASS_PANEL_SIZE.minWidth, viewport - margin);
 }
 
-function tierFromPopupContent(
-  popup: PopupContent,
-  tour?: Tour,
-): PopupWidthTier {
-  const resolvedCtas =
-    tour ? resolvePopupContentCtas(popup, tour)
-    : popup.cta ? [popup.cta]
-    : [];
-  const hasVideo = !!popup.videoUrl;
-  const hasCta = resolvedCtas.length > 0;
-  const longBody = popup.body.length > 300;
-  const longCta = resolvedCtas.some((cta) => popupCtaLabelLength(cta) > 40);
-
-  if (hasVideo && hasCta && (longBody || longCta)) return 'wide';
-  if (hasVideo || hasCta) return 'rich';
-  if (popup.body.length > 180) return 'standard';
-  return 'compact';
-}
-
-function preferredWidthFromPopup(popup: PopupContent, tour?: Tour): number {
+function preferredWidthFromPopup(popup: PopupContent): number {
   if (typeof popup.width === 'number') return popup.width;
   if (popup.width) return GLASS_PANEL_WIDTH_TIER[popup.width];
-  return GLASS_PANEL_WIDTH_TIER[tierFromPopupContent(popup, tour)];
+  return TOUR_DOCK_PANEL_WIDTH;
 }
 
-/** clamp(viewport) ← tier(popup) ← json override */
+/** clamp(viewport) ← dock default ← json override / tier preset */
 export function resolveGlassPanelWidth(
   popup?: PopupContent,
-  tour?: Tour,
+  _tour?: Tour,
 ): number {
   const preferred =
-    popup ?
-      preferredWidthFromPopup(popup, tour)
-    : GLASS_PANEL_SIZE.defaultWidth;
+    popup ? preferredWidthFromPopup(popup) : GLASS_PANEL_SIZE.defaultWidth;
 
   return Math.round(
     Math.min(
@@ -240,7 +229,6 @@ export const GLASS_PANEL = {
   headerActions: 'tour-glass-panel__header-actions',
   headerBtn: 'tour-glass-panel__header-btn',
   headerBtnIcon: 'tour-glass-panel__header-btn-icon',
-  ctaSublabel: 'tour-glass-panel__cta-sublabel',
 } as const;
 
 function readMeasuredAnchoredPanelHeight(host: ParentNode): number {
@@ -317,6 +305,7 @@ function buildShareHeaderButtonHtml(
 
 function buildPopupHeaderActionHtml(cta: PopupCta): string {
   const resolved = resolvePopupCta(cta);
+  const tooltipLabel = giftabulatorCtaTooltipLabel(cta);
   const iconHtml =
     isMailtoCtaUrl(resolved.url) ?
       glassPanelMailIconHtml()
@@ -328,7 +317,7 @@ function buildPopupHeaderActionHtml(cta: PopupCta): string {
         target="_blank"
         rel="noopener noreferrer"
         aria-label="${escapeHtml(resolved.ariaLabel)}"
-        data-ishare-tooltip="${escapeHtml(resolved.label)}"
+        data-ishare-tooltip="${escapeHtml(tooltipLabel)}"
         data-ishare-tooltip-placement="bottom"
       >${iconHtml}</a>`;
 }
@@ -349,21 +338,41 @@ function buildPopupHeaderActionsHtml(options: {
   return `<div class="${GLASS_PANEL.headerActions}">${actionHtml}</div>`;
 }
 
-function buildPopupPrimaryFooterInnerHtml(primary: PopupCta): string {
-  const primaryCta: PopupCta = { ...primary, variant: 'primary' };
-  const resolved = resolvePopupCta(primaryCta);
-  const sublabel =
-    primaryCta.sublabel ??
-    (resolved.kind === 'custom' ? resolved.sublabel : undefined);
-  const sublabelHtml =
-    sublabel ?
-      `<p class="${GLASS_PANEL.ctaSublabel}">${escapeHtml(sublabel)}</p>`
-    : '';
+function buildPopupFooterInnerHtml(ctas: PopupCta[]): string {
+  const layout = resolvePopupFooterLayout(ctas);
+  if (!layout) return '';
 
-  return `<div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
-      ${buildPopupCtaButtonHtml(primaryCta)}
-      ${sublabelHtml}
+  const { mode, primary, secondaries } = layout;
+  const primaryButton = buildPopupCtaButtonHtml({
+    ...primary,
+    variant: 'primary',
+  });
+
+  if (secondaries.length === 0) {
+    return `<div class="${GLASS_PANEL.ctaWrap} ${popupCtaWrapClassName('full')}">
+      ${primaryButton}
     </div>`;
+  }
+
+  const secondaryButtons = secondaries
+    .map((cta) => buildPopupCtaButtonHtml({ ...cta, variant: 'secondary' }))
+    .join('');
+
+  if (mode === 'row-equal') {
+    return `<div class="${GLASS_PANEL.ctaWrap} ${popupCtaWrapClassName('row-equal')}">
+      <div class="${popupCtaRowClassName(secondaries.length)}">
+        ${secondaryButtons}
+        ${primaryButton}
+      </div>
+    </div>`;
+  }
+
+  return `<div class="${GLASS_PANEL.ctaWrap} ${popupCtaWrapClassName('primary-stack')}">
+    ${secondaryButtons}
+    <div class="${GLASS_PANEL.ctaPrimaryGroup}">
+      ${primaryButton}
+    </div>
+  </div>`;
 }
 
 function navPreviewCloseIconHtml(): string {
@@ -501,8 +510,11 @@ export function buildPopupBadgeHtml(popup: PopupContent): string {
 
 export function buildPopupCtaLabelHtml(cta: PopupCta): string {
   const resolved = resolvePopupCta(cta);
+  const usesDefaultGiftabulatorLabel =
+    resolved.kind === 'giftabulator' &&
+    (!cta.label || cta.label === giftabulatorCtaButtonPlainLabel());
 
-  if (resolved.kind === 'giftabulator' && !cta.label) {
+  if (usesDefaultGiftabulatorLabel) {
     return giftabulatorCtaButtonLabelHtml(GLASS_PANEL.reg);
   }
 
@@ -524,25 +536,30 @@ export function buildPopupCtaButtonHtml(cta: PopupCta): string {
   const resolved = resolvePopupCta(cta);
   const labelHtml = buildPopupCtaTextHtml(cta);
   const isSecondary = cta.variant === 'secondary';
-  const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}`;
-  const arrowHtml =
-    isSecondary ? '' : (
+  const descriptionTooltip = resolvePopupCtaDescriptionTooltip(cta);
+  const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}${descriptionTooltip ? ' ishare-tooltip-host' : ''}`;
+  const iconHtml =
+    shouldShowPopupCtaIcon(cta, isSecondary) ?
       glassPanelCtaIconHtml(resolvePopupCtaIconKind(cta), GLASS_PANEL.ctaIcon)
-    );
+    : '';
+  const tooltipAttrs =
+    descriptionTooltip ?
+      `
+        data-ishare-tooltip="${escapeHtml(descriptionTooltip)}"
+        data-ishare-tooltip-placement="top"`
+    : '';
 
   return `<a
         class="${className}"
         href="${escapeHtml(resolved.url)}"
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="${escapeHtml(resolved.ariaLabel)}"
-      >${labelHtml}${arrowHtml}</a>`;
+        aria-label="${escapeHtml(resolved.ariaLabel)}"${tooltipAttrs}
+      >${labelHtml}${iconHtml}</a>`;
 }
 
 function buildPopupFooterButtonsHtml(ctas: PopupCta[]): string {
-  const { primary } = partitionPopupCtasForPlacement(ctas);
-  if (!primary) return '';
-  return buildPopupPrimaryFooterInnerHtml(primary);
+  return buildPopupFooterInnerHtml(ctas);
 }
 
 export function buildPopupFooterHtml(popup: PopupContent, tour?: Tour): string {
@@ -684,9 +701,8 @@ export function buildAnchoredPopupHtml(
 
   const ctas =
     options?.tour ? resolvePopupContentCtas(popup, options.tour) : [];
-  const { primary, headerCtas } = partitionPopupCtasForPlacement(ctas);
   const headerActionsHtml = buildPopupHeaderActionsHtml({
-    headerCtas,
+    headerCtas: [],
     shareHtml:
       naming ?
         buildShareHeaderButtonHtml(
@@ -696,8 +712,8 @@ export function buildAnchoredPopupHtml(
       : undefined,
   });
   const footerHtml =
-    primary ?
-      `<footer class="${GLASS_PANEL.footer}">${buildPopupPrimaryFooterInnerHtml(primary)}</footer>`
+    ctas.length > 0 ?
+      `<footer class="${GLASS_PANEL.footer}">${buildPopupFooterInnerHtml(ctas)}</footer>`
     : buildPopupFooterHtml(popup, options?.tour);
 
   return buildTourGlassPanelHtml({
@@ -722,13 +738,12 @@ export function buildAnchoredPopupHtml(
   });
 }
 
-const NAV_PREVIEW_PANEL_WIDTH = 440;
 const NAV_PREVIEW_HERO_ASPECT = 8 / 16;
 const NAV_PREVIEW_MAX_HEIGHT = 960;
 const NAV_PREVIEW_MAX_HEIGHT_RATIO = 0.96;
 
 export function resolveNavPreviewPanelWidth(): number {
-  return Math.round(Math.min(NAV_PREVIEW_PANEL_WIDTH, viewportMaxPanelWidth()));
+  return Math.round(Math.min(TOUR_DOCK_PANEL_WIDTH, viewportMaxPanelWidth()));
 }
 
 export function resolveNavPreviewHeroHeight(

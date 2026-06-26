@@ -9,6 +9,11 @@ import {
   TOUR_CONTACT_US_MAILTO,
   buildTourNotifyMeMailto,
 } from '../constants/tourContact';
+import {
+  giftabulatorCtaButtonPlainLabel,
+  GIFTABULATOR_PRODUCT,
+} from './giftabulatorBrand';
+import { buildGiftabulatorGiveNowUrl } from '../utils/giftabulatorGiveNowUrl';
 
 export type NamingOpportunityContactIntent = 'inquiry' | 'simple' | 'notify';
 
@@ -62,9 +67,9 @@ const STATUS_CONFIG: Record<
         variant: 'primary',
       },
       {
-        preset: 'website',
-        label: 'Visit our website',
-        ariaLabel: 'Visit our website to learn more about naming opportunities',
+        preset: 'giftabulator',
+        label: giftabulatorCtaButtonPlainLabel(),
+        ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
         variant: 'secondary',
       },
     ],
@@ -77,17 +82,17 @@ const STATUS_CONFIG: Record<
     ctas: [
       {
         preset: 'contact',
-        label: 'Contact us',
+        label: 'Speak with our team',
         contactIntent: 'simple',
         sublabel:
           'A naming commitment is in progress — reach out with questions',
-        ariaLabel: 'Contact us about this reserved naming opportunity',
+        ariaLabel: 'Speak with our team about this reserved naming opportunity',
         variant: 'primary',
       },
       {
-        preset: 'website',
-        label: 'Visit our website',
-        ariaLabel: 'Visit our website to learn more',
+        preset: 'giftabulator',
+        label: giftabulatorCtaButtonPlainLabel(),
+        ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
         variant: 'secondary',
       },
     ],
@@ -107,9 +112,9 @@ const STATUS_CONFIG: Record<
         variant: 'primary',
       },
       {
-        preset: 'website',
-        label: 'Visit our website',
-        ariaLabel: 'Visit our website to learn more',
+        preset: 'giftabulator',
+        label: giftabulatorCtaButtonPlainLabel(),
+        ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
         variant: 'secondary',
       },
     ],
@@ -128,10 +133,9 @@ const STATUS_CONFIG: Record<
         variant: 'primary',
       },
       {
-        preset: 'contact',
-        label: 'Contact us',
-        contactIntent: 'simple',
-        ariaLabel: 'Contact us about other ways to support our mission',
+        preset: 'giftabulator',
+        label: giftabulatorCtaButtonPlainLabel(),
+        ariaLabel: GIFTABULATOR_PRODUCT.ariaLabel,
         variant: 'secondary',
       },
     ],
@@ -230,7 +234,13 @@ function buildCtaFromPreset(
       };
     }
     case 'giftabulator':
-      return null;
+      return {
+        product: 'giftabulator',
+        label: ctaConfig.label,
+        ariaLabel: ctaConfig.ariaLabel ?? GIFTABULATOR_PRODUCT.ariaLabel,
+        url: buildGiftabulatorGiveNowUrl(tour, naming),
+        variant: ctaConfig.variant ?? 'secondary',
+      };
     default:
       return null;
   }
@@ -280,20 +290,14 @@ export function findSecondaryPopupCtas(
   return ctas.filter((cta) => cta !== primary);
 }
 
-function buildContactSecondaryFromStatus(
-  status: NamingOpportunityStatus | undefined,
-  tour: Tour,
-  naming: NamingOpportunity,
-): PopupCta | null {
-  const contactConfig = namingOpportunityStatusConfig(status).ctas.find(
-    (cta) => cta.preset === 'contact',
-  );
-  if (!contactConfig) return null;
+function applyGiftabulatorUrlOverride(
+  ctas: PopupCta[],
+  overrideUrl?: string,
+): PopupCta[] {
+  if (!overrideUrl) return ctas;
 
-  return buildCtaFromPreset(
-    { ...contactConfig, variant: 'secondary', sublabel: undefined },
-    tour,
-    naming,
+  return ctas.map((cta) =>
+    cta.product === 'giftabulator' ? { ...cta, url: overrideUrl } : cta,
   );
 }
 
@@ -309,27 +313,17 @@ export function resolveNamingOpportunityPopupCtas(
     return orderPopupCtasForFooter(normalizePopupCtaVariants(popup.ctas));
   }
 
-  if (popup.cta) {
-    const primary: PopupCta = {
-      ...popup.cta,
-      variant: popup.cta.variant ?? 'primary',
-    };
-    const secondary = buildContactSecondaryFromStatus(
-      naming.status,
-      tour,
-      naming,
-    );
-
-    return orderPopupCtasForFooter(
-      secondary ? [primary, secondary] : [primary],
-    );
-  }
+  const giftabulatorUrlOverride =
+    popup.cta?.product === 'giftabulator' ? popup.cta.url : undefined;
 
   return orderPopupCtasForFooter(
-    buildCtasFromConfigs(
-      namingOpportunityStatusConfig(naming.status).ctas,
-      tour,
-      naming,
+    applyGiftabulatorUrlOverride(
+      buildCtasFromConfigs(
+        namingOpportunityStatusConfig(naming.status).ctas,
+        tour,
+        naming,
+      ),
+      giftabulatorUrlOverride,
     ),
   );
 }

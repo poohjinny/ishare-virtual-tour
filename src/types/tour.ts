@@ -51,14 +51,14 @@ export interface PopupContent {
   body: string;
   /** modal = screen overlay (default), anchored = HTML marker on panorama */
   display?: PopupDisplay;
-  /** Panel width in px, or preset tier (anchored popups). Auto-tier when omitted. */
+  /** Panel width in px, or preset tier. Defaults to dock panel width (440px) when omitted. */
   width?: number | PopupWidthTier;
   namingOpportunity?: NamingOpportunity;
   image?: string;
   videoUrl?: string;
   /** Optional poster for local `videoUrl` (mp4/webm) */
   videoPoster?: string;
-  /** Single CTA override — primary; status contact CTA added as secondary when present */
+  /** Optional Giftabulator URL override (`calc=` prefill) when auto price-based params are not desired */
   cta?: PopupCta;
   /** Full footer CTA override (replaces status defaults) */
   ctas?: PopupCta[];

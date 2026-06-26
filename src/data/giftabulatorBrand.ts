@@ -1,18 +1,16 @@
 import type { PopupCta } from '../types/tour';
-import { GIFTABULATOR } from './platformBrands';
-import { platformBrandLinkedNameHtml } from '../utils/platformBrandHtml';
+import { GIFTABULATOR, platformBrandAriaLabel } from './platformBrands';
 
 /** Giftabulator popup CTA copy — brand metadata lives in `platformBrands.ts`. */
 export const GIFTABULATOR_PRODUCT = {
   ...GIFTABULATOR,
-  ctaButtonLabelPrefix: 'See your tax-efficient giving with ',
-  ctaSublabelPrefix: 'Calculate your gift with ',
-  ariaLabel: 'See your tax-efficient giving with GIFTABULATOR',
+  ctaDescription: 'See your tax-efficient giving',
+  ariaLabel: platformBrandAriaLabel(GIFTABULATOR),
 } as const;
 
 export function giftabulatorCtaButtonPlainLabel(): string {
   const mark = GIFTABULATOR.mark ?? '';
-  return `${GIFTABULATOR_PRODUCT.ctaButtonLabelPrefix}${GIFTABULATOR.name}${mark}`;
+  return `${GIFTABULATOR.name}${mark}`;
 }
 
 export function giftabulatorCtaButtonLabelHtml(
@@ -22,7 +20,8 @@ export function giftabulatorCtaButtonLabelHtml(
     GIFTABULATOR.mark ?
       `<sup class="${regClass}" aria-hidden="true">${GIFTABULATOR.mark}</sup>`
     : '';
-  return `${GIFTABULATOR_PRODUCT.ctaButtonLabelPrefix}${GIFTABULATOR.name}${markHtml}`;
+
+  return `${GIFTABULATOR.name}${markHtml}`;
 }
 
 export type GiftabulatorProductId = typeof GIFTABULATOR_PRODUCT.id;
@@ -32,7 +31,7 @@ export type ResolvedPopupCta =
       kind: 'giftabulator';
       url: string;
       label: string;
-      sublabelOverride?: string;
+      sublabel?: string;
       ariaLabel: string;
     }
   | {
@@ -49,7 +48,7 @@ export function resolvePopupCta(cta: PopupCta): ResolvedPopupCta {
       kind: 'giftabulator',
       url: cta.url,
       label: cta.label ?? giftabulatorCtaButtonPlainLabel(),
-      sublabelOverride: cta.sublabel,
+      sublabel: cta.sublabel ?? GIFTABULATOR_PRODUCT.ctaDescription,
       ariaLabel: cta.ariaLabel ?? GIFTABULATOR_PRODUCT.ariaLabel,
     };
   }
@@ -66,9 +65,18 @@ export function resolvePopupCta(cta: PopupCta): ResolvedPopupCta {
 export function giftabulatorCtaSublabelHtml(
   regClass = 'tour-glass-panel__reg',
 ): string {
-  return `${GIFTABULATOR_PRODUCT.ctaSublabelPrefix}${platformBrandLinkedNameHtml(GIFTABULATOR, { regClass })}`;
+  return giftabulatorCtaButtonLabelHtml(regClass);
 }
 
 export function popupCtaLabelLength(cta: PopupCta): number {
   return resolvePopupCta(cta).label.length;
+}
+
+export function giftabulatorCtaTooltipLabel(cta: PopupCta): string {
+  const resolved = resolvePopupCta(cta);
+  if (resolved.kind === 'giftabulator') {
+    return resolved.ariaLabel;
+  }
+
+  return resolved.label;
 }

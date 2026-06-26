@@ -22,3 +22,12 @@ export function resolvePopupCtaIconKind(cta: PopupCta): PopupCtaIconKind {
 
   return 'arrow';
 }
+
+/** Footer CTA icon — secondary Giftabulator keeps open-in-new. */
+export function shouldShowPopupCtaIcon(
+  cta: PopupCta,
+  isSecondary: boolean,
+): boolean {
+  if (!isSecondary) return true;
+  return resolvePopupCta(cta).kind === 'giftabulator';
+}

@@ -2,12 +2,18 @@ import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import type { NamingOpportunity, PopupContent, PopupCta } from '../types/tour';
 import {
-  GIFTABULATOR_PRODUCT,
+  giftabulatorCtaButtonPlainLabel,
   resolvePopupCta,
 } from '../data/giftabulatorBrand';
 import { PlatformBrandLink } from './PlatformBrandLink';
 import { cn } from '../lib/cn';
 import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
+import {
+  popupCtaRowClassName,
+  popupCtaWrapClassName,
+  resolvePopupCtaDescriptionTooltip,
+  resolvePopupFooterLayout,
+} from '../utils/popupCtaLayout';
 import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
@@ -33,7 +39,11 @@ import type { NamingStatusModifier } from './ui/Badge';
 import { formatNamingPriceDisplay } from '../utils/namingPrice';
 import { applyCtaTextOverflowTitle } from '../utils/glassPanelCtaOverflow';
 import { PopupCtaIcon } from './glassPanelCtaIcons';
-import { resolvePopupCtaIconKind } from '../utils/popupCtaIcon';
+import {
+  resolvePopupCtaIconKind,
+  shouldShowPopupCtaIcon,
+} from '../utils/popupCtaIcon';
+import { tooltipHostClassName } from './ui/tooltipClasses';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
@@ -319,14 +329,12 @@ export function PopupCtaArrowIcon() {
 
 export function PopupCtaLabel({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
+  const usesDefaultGiftabulatorLabel =
+    resolved.kind === 'giftabulator' &&
+    (!cta.label || cta.label === giftabulatorCtaButtonPlainLabel());
 
-  if (resolved.kind === 'giftabulator' && !cta.label) {
-    return (
-      <>
-        {GIFTABULATOR_PRODUCT.ctaButtonLabelPrefix}
-        <PlatformBrandLink brandId='giftabulator' link={false} />
-      </>
-    );
+  if (usesDefaultGiftabulatorLabel) {
+    return <PlatformBrandLink brandId='giftabulator' link={false} />;
   }
 
   return <>{resolved.label}</>;
@@ -380,39 +388,87 @@ function GlassPanelCtaText({
 export function PopupCtaButton({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
   const isSecondary = cta.variant === 'secondary';
+  const descriptionTooltip = resolvePopupCtaDescriptionTooltip(cta);
 
   return (
     <a
-      className={`tour-glass-panel__cta${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}`}
+      className={cn(
+        'tour-glass-panel__cta',
+        isSecondary && 'tour-glass-panel__cta--secondary',
+        descriptionTooltip && tooltipHostClassName,
+      )}
       href={resolved.url}
       target='_blank'
       rel='noopener noreferrer'
       aria-label={resolved.ariaLabel}
+      {...(descriptionTooltip ?
+        {
+          'data-ishare-tooltip': descriptionTooltip,
+          'data-ishare-tooltip-placement': 'top',
+        }
+      : {})}
     >
       <GlassPanelCtaText label={resolved.label}>
         <PopupCtaLabel cta={cta} />
       </GlassPanelCtaText>
-      {!isSecondary && <PopupCtaIcon kind={resolvePopupCtaIconKind(cta)} />}
+      {shouldShowPopupCtaIcon(cta, isSecondary) ?
+        <PopupCtaIcon kind={resolvePopupCtaIconKind(cta)} />
+      : null}
     </a>
   );
 }
 
-export function PopupPrimaryCtaFooter({ cta }: { cta: PopupCta }) {
-  const resolved = resolvePopupCta(cta);
-  const sublabel =
-    cta.sublabel ??
-    (resolved.kind === 'custom' ? resolved.sublabel : undefined);
+export function PopupCtasFooter({ ctas }: { ctas: PopupCta[] }) {
+  const layout = resolvePopupFooterLayout(ctas);
+  if (!layout) return null;
+
+  const { mode, primary, secondaries } = layout;
+  const primaryButton = (
+    <PopupCtaButton cta={{ ...primary, variant: 'primary' }} />
+  );
+
+  if (secondaries.length === 0) {
+    return (
+      <footer className='tour-glass-panel__footer'>
+        <div className={popupCtaWrapClassName('full')}>{primaryButton}</div>
+      </footer>
+    );
+  }
+
+  const secondaryButtons = secondaries.map((cta, index) => (
+    <PopupCtaButton
+      key={`${cta.url}-${cta.label ?? cta.product ?? index}`}
+      cta={{ ...cta, variant: 'secondary' }}
+    />
+  ));
+
+  if (mode === 'row-equal') {
+    return (
+      <footer className='tour-glass-panel__footer'>
+        <div className={popupCtaWrapClassName('row-equal')}>
+          <div className={popupCtaRowClassName(secondaries.length)}>
+            {secondaryButtons}
+            {primaryButton}
+          </div>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer className='tour-glass-panel__footer'>
-      <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
-        <PopupCtaButton cta={{ ...cta, variant: 'primary' }} />
-        {sublabel && (
-          <p className='tour-glass-panel__cta-sublabel'>{sublabel}</p>
-        )}
+      <div className={popupCtaWrapClassName('primary-stack')}>
+        {secondaryButtons}
+        <div className='tour-glass-panel__cta-primary-group'>
+          {primaryButton}
+        </div>
       </div>
     </footer>
   );
+}
+
+export function PopupPrimaryCtaFooter({ cta }: { cta: PopupCta }) {
+  return <PopupCtasFooter ctas={[cta]} />;
 }
 
 export function PopupCtasContent({ ctas }: { ctas: PopupCta[] }) {
@@ -427,10 +483,7 @@ export function PopupCtasContent({ ctas }: { ctas: PopupCta[] }) {
 }
 
 export function PopupCtasBlock({ ctas }: { ctas: PopupCta[] }) {
-  const { primary } = partitionPopupCtasForPlacement(ctas);
-  if (!primary) return null;
-
-  return <PopupPrimaryCtaFooter cta={primary} />;
+  return <PopupCtasFooter ctas={ctas} />;
 }
 
 export function PopupCtaBlock({ cta }: { cta: PopupCta }) {

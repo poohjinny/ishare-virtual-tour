@@ -4,7 +4,7 @@ import {
   PopupBodyCopy,
   PopupHeaderMeta,
   NamingOpportunityPrice,
-  PopupPrimaryCtaFooter,
+  PopupCtasFooter,
   PopupVideoEmbed,
 } from './popupContentUi';
 import {
@@ -16,9 +16,8 @@ import {
   buildAbsoluteShareUrl,
   buildShareMessage,
 } from '../utils/buildShareUrl';
-import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
-import { GlassPanelHeaderActions } from './GlassPanelHeaderActions';
 import { resolveGlassPanelWidth } from './tourGlassPanelHtml';
+import { GlassPanelHeaderActions } from './GlassPanelHeaderActions';
 import { GlassPanelCloseIcon } from './TourGlassPanel';
 import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
 import {
@@ -86,13 +85,7 @@ export function InfoPopup({
     if (!shown || isExiting) return;
 
     closeRef.current?.focus();
-
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [shown, isExiting, onClose]);
+  }, [shown, isExiting]);
 
   const handleDismiss = useCallback(() => {
     if (isExiting) return;
@@ -104,10 +97,7 @@ export function InfoPopup({
     [shown, tour],
   );
 
-  const { primary: footerPrimary, headerCtas } = useMemo(
-    () => partitionPopupCtasForPlacement(resolvedCtas),
-    [resolvedCtas],
-  );
+  const hasFooterCtas = resolvedCtas.length > 0;
 
   const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
   const namingName =
@@ -138,6 +128,11 @@ export function InfoPopup({
     [namingName, sceneTitle, tourTitle],
   );
 
+  const panelWidth = useMemo(
+    () => (shown ? resolveGlassPanelWidth(shown, tour) : undefined),
+    [shown, tour],
+  );
+
   if (!shown) return null;
 
   const showNamingShare =
@@ -160,7 +155,9 @@ export function InfoPopup({
         aria-modal='true'
         aria-labelledby='info-popup-title'
         data-info-panel-naming={shown.namingOpportunity ? 'true' : undefined}
-        style={{ maxWidth: resolveGlassPanelWidth(shown, tour) }}
+        style={
+          panelWidth ? { width: panelWidth, maxWidth: panelWidth } : undefined
+        }
         onClick={(e) => e.stopPropagation()}
       >
         <div className={tourGlassPanelShellVariants({ animation: 'none' })}>
@@ -190,7 +187,6 @@ export function InfoPopup({
               </div>
               <div className={tourGlassPanelTitleActionsClassName}>
                 <GlassPanelHeaderActions
-                  headerCtas={headerCtas}
                   share={
                     showNamingShare ?
                       {
@@ -233,7 +229,7 @@ export function InfoPopup({
             )}
           </div>
 
-          {footerPrimary && <PopupPrimaryCtaFooter cta={footerPrimary} />}
+          {hasFooterCtas && <PopupCtasFooter ctas={resolvedCtas} />}
         </div>
       </article>
     </div>

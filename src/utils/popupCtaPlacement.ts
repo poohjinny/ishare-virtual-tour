@@ -1,8 +1,4 @@
-import {
-  findPrimaryPopupCta,
-  findSecondaryPopupCtas,
-  orderPopupCtasForFooter,
-} from '../data/namingOpportunityStatus';
+import { findPrimaryPopupCta, orderPopupCtasForFooter } from '../data/namingOpportunityStatus';
 import type { PopupCta } from '../types/tour';
 
 export interface PopupCtaPlacement {
@@ -10,7 +6,7 @@ export interface PopupCtaPlacement {
   headerCtas: PopupCta[];
 }
 
-/** Footer = primary only; secondaries move to header icon actions. */
+/** Footer holds all CTAs; header keeps share only. */
 export function partitionPopupCtasForPlacement(
   ctas: PopupCta[],
 ): PopupCtaPlacement {
@@ -20,11 +16,11 @@ export function partitionPopupCtasForPlacement(
   }
 
   const primary = findPrimaryPopupCta(ordered);
-  if (!primary) {
-    return { primary: undefined, headerCtas: [] };
-  }
 
-  return { primary, headerCtas: findSecondaryPopupCtas(ordered, primary) };
+  return {
+    primary,
+    headerCtas: [],
+  };
 }
 
 export function isMailtoCtaUrl(url: string): boolean {
