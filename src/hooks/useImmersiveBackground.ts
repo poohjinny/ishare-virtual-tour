@@ -18,6 +18,7 @@ export function useImmersiveBackground(
 
   useLayoutEffect(() => {
     const config = tour.immersiveBackground;
+
     if (!config) {
       setController(null);
       unregisterImmersiveBackgroundController();
@@ -25,6 +26,7 @@ export function useImmersiveBackground(
     }
 
     const next = createImmersiveBackgroundController(config);
+
     registerImmersiveBackgroundController(next);
     setController(next);
 

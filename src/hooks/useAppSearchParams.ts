@@ -15,8 +15,8 @@ export interface AppSearchParams {
   notFoundTest: boolean;
   /** Force panorama load-error overlay — `?panoramaErrorTest=1`. */
   panoramaErrorTest: boolean;
-  /** Nav preview mini PSV hero — false when `navPreview=0` (debug). */
-  navPreview: boolean;
+  /** Disable nav preview mini PSV hero — `?disableNavPreview=1` (debug). */
+  disableNavPreview: boolean;
   /** Skip landing zoom animation — start at scene `defaultView`. */
   skipLanding: boolean;
   /** Hold splash longer for loader UX testing. */
@@ -37,7 +37,7 @@ export function useAppSearchParams(): AppSearchParams {
       chatTest: searchParams.get('chatTest') === '1',
       notFoundTest: searchParams.get('notFoundTest') === '1',
       panoramaErrorTest: searchParams.get('panoramaErrorTest') === '1',
-      navPreview: searchParams.get('navPreview') !== '0',
+      disableNavPreview: searchParams.get('disableNavPreview') === '1',
       skipLanding: searchParams.get('skipLanding') === '1',
       splashHold: searchParams.get('splashHold') === '1',
       firstVisitHint: searchParams.get('firstVisitHint') === '1',

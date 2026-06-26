@@ -36,7 +36,7 @@ export function buildSharePath({
       notFoundTest: null,
       panoramaErrorTest: null,
       intro: null,
-      navPreview: null,
+      disableNavPreview: null,
       skipLanding: null,
       splashHold: null,
       firstVisitHint: null,

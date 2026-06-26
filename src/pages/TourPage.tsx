@@ -31,6 +31,9 @@ import {
 import { getTourProductFullName } from '../utils/tourProductName';
 import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { useTourAssistant } from '../hooks/useTourAssistant';
+import { useTourEscapeClose } from '../hooks/useTourEscapeClose';
+import { useTourPanelStack } from '../hooks/useTourPanelStack';
+import { useTourViewerShortcuts } from '../hooks/useTourViewerShortcuts';
 import { useTourRouteSync } from '../hooks/useTourRouteSync';
 import { useNamingOpportunityUrlSync } from '../hooks/useNamingOpportunityUrlSync';
 import { useTourState } from '../hooks/useTourState';
@@ -38,6 +41,7 @@ import { useClientTheme } from '../hooks/useClientTheme';
 import { useClientFavicon } from '../hooks/useClientFavicon';
 import { useClientFont } from '../hooks/useClientFont';
 import { useImmersiveBackground } from '../hooks/useImmersiveBackground';
+import { toggleImmersiveBackgroundPlayback } from '../viewer/immersiveBackgroundNavbarButton';
 import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
 import type {
   PopupContent,
@@ -519,6 +523,78 @@ function TourExperience() {
   );
 
   const assistant = useTourAssistant(bootstrapKnowledge, currentSceneId);
+  const panelStack = useTourPanelStack();
+
+  const closeInfoPopup = useCallback(() => {
+    pendingNamingSelectionRef.current = null;
+    setActivePopup(null);
+    setActiveNamingHotspotId(null);
+    clearNamingOpportunityFromUrl();
+    viewerRef.current?.clearActiveInfoHotspot();
+  }, [clearNamingOpportunityFromUrl]);
+
+  useEffect(() => {
+    return panelStack.registerPanel('info-popup', closeInfoPopup);
+  }, [closeInfoPopup, panelStack]);
+
+  useEffect(() => {
+    if (activePopup) panelStack.openPanel('info-popup');
+    else panelStack.closePanel('info-popup');
+  }, [activePopup, panelStack]);
+
+  useEffect(() => {
+    return panelStack.registerPanel('ai-chat', assistant.close);
+  }, [assistant.close, panelStack]);
+
+  useEffect(() => {
+    if (assistant.isOpen) panelStack.openPanel('ai-chat');
+    else panelStack.closePanel('ai-chat');
+  }, [assistant.isOpen, panelStack]);
+
+  useEffect(() => {
+    return panelStack.registerPanel('psv-panel', () => {
+      viewerRef.current?.hidePsvPanel();
+    });
+  }, [panelStack]);
+
+  useEffect(() => {
+    return panelStack.registerPanel('anchored-panel', () => {
+      viewerRef.current?.closeAnchoredPanels();
+    });
+  }, [panelStack]);
+
+  const handlePsvPanelVisibilityChange = useCallback(
+    (visible: boolean) => {
+      if (visible) panelStack.openPanel('psv-panel');
+      else panelStack.closePanel('psv-panel');
+    },
+    [panelStack],
+  );
+
+  const handleAnchoredPanelVisibilityChange = useCallback(
+    (visible: boolean) => {
+      if (visible) panelStack.openPanel('anchored-panel');
+      else panelStack.closePanel('anchored-panel');
+    },
+    [panelStack],
+  );
+
+  const handleRecenterToDefaultView = useCallback(() => {
+    viewerRef.current?.recenterToDefaultView();
+  }, []);
+
+  const handleToggleBackgroundMusic = useCallback(() => {
+    if (!immersiveBackgroundController) return;
+    toggleImmersiveBackgroundPlayback(immersiveBackgroundController);
+  }, [immersiveBackgroundController]);
+
+  useTourEscapeClose(panelStack, { disabled: isTransitioning });
+  useTourViewerShortcuts(viewerAreaRef, {
+    disabled: isTransitioning,
+    onRecenter: handleRecenterToDefaultView,
+    onToggleBackgroundMusic:
+      immersiveBackgroundController ? handleToggleBackgroundMusic : undefined,
+  });
 
   const handleSelectNamingOpportunity = useCallback(
     (sceneId: string, hotspotId: string) => {
@@ -711,11 +787,12 @@ function TourExperience() {
           immersiveBackgroundController={immersiveBackgroundController}
           activeNamingHotspotId={activeNamingHotspotId}
           disabled={isTransitioning}
-          suppressKeyboard={assistant.isOpen}
           onSceneChange={handleSceneChange}
           onInfoHotspot={setActivePopup}
           onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
           onDismissModalPopups={handleDismissModalPopups}
+          onPsvPanelVisibilityChange={handlePsvPanelVisibilityChange}
+          onAnchoredPanelVisibilityChange={handleAnchoredPanelVisibilityChange}
           onNavigateToScene={handleNavigate}
           onTransitionStart={handleTransitionStart}
           onTransitionEnd={handleTransitionEnd}
@@ -774,6 +851,7 @@ function TourExperience() {
           onSelectNamingOpportunity={handleSelectNamingOpportunity}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
           activeNamingHotspotId={activeNamingHotspotId}
+          panelStack={panelStack}
         />
 
         {splashPhase !== 'done' && (
@@ -811,6 +889,7 @@ function TourExperience() {
             sceneOptions={devSceneOptions}
             view={devViewCoords}
             clickCoords={devClickCoords}
+            panelStack={panelStack}
           />
         )}
       </div>
@@ -821,13 +900,7 @@ function TourExperience() {
         tourTitle={productFullName}
         sceneId={currentSceneId}
         namingHotspotId={activeNamingHotspotId}
-        onClose={() => {
-          pendingNamingSelectionRef.current = null;
-          setActivePopup(null);
-          setActiveNamingHotspotId(null);
-          clearNamingOpportunityFromUrl();
-          viewerRef.current?.clearActiveInfoHotspot();
-        }}
+        onClose={closeInfoPopup}
       />
     </div>
   );

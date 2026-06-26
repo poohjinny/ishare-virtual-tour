@@ -144,7 +144,7 @@ export const PRESERVED_SEARCH_KEYS = [
   'chatTest',
   'notFoundTest',
   'panoramaErrorTest',
-  'navPreview',
+  'disableNavPreview',
   'skipLanding',
   'splashHold',
   'firstVisitHint',

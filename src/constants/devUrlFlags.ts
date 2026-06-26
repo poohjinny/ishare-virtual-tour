@@ -38,11 +38,11 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     urlPatch: (enabled) => ({ panoramaErrorTest: enabled ? '1' : null }),
   },
   {
-    key: 'navPreview',
-    label: 'navPreview',
-    hint: 'Nav hotspot mini viewer',
-    isOn: (params) => params.navPreview,
-    urlPatch: (enabled) => ({ navPreview: enabled ? null : '0' }),
+    key: 'disableNavPreview',
+    label: 'disableNavPreview',
+    hint: 'Disable nav hotspot mini viewer',
+    isOn: (params) => params.disableNavPreview,
+    urlPatch: (enabled) => ({ disableNavPreview: enabled ? '1' : null }),
   },
   {
     key: 'skipLanding',
