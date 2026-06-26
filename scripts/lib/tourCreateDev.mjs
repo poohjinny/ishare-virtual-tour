@@ -35,6 +35,11 @@ function assertSlug(value, label) {
   return slug;
 }
 
+function applyOptionalOrganizationField(organization, key, value) {
+  if (!value?.trim()) return;
+  organization[key] = value.trim();
+}
+
 function buildTourRecord({
   tourId,
   clientId,
@@ -42,13 +47,28 @@ function buildTourRecord({
   tourTitle,
   websiteUrl,
   clientName,
+  organizationName,
+  organizationEmail,
+  organizationPhone,
+  organizationPhoneLabel,
+  organizationAddress,
   scene,
   primaryColor,
   hasLogo,
   hasFavicon,
 }) {
   const url = websiteUrl?.trim() || 'https://example.com';
-  const orgName = clientName?.trim() || tourTitle;
+  const orgName = organizationName?.trim() || clientName?.trim() || tourTitle;
+  const organization = { name: orgName, website: url };
+  applyOptionalOrganizationField(organization, 'email', organizationEmail);
+  applyOptionalOrganizationField(organization, 'phone', organizationPhone);
+  applyOptionalOrganizationField(
+    organization,
+    'phoneLabel',
+    organizationPhoneLabel,
+  );
+  applyOptionalOrganizationField(organization, 'address', organizationAddress);
+
   const color = normalizePrimaryColor(primaryColor) ?? DEFAULT_PRIMARY_COLOR;
 
   return {
@@ -57,7 +77,7 @@ function buildTourRecord({
     category,
     url,
     title: tourTitle,
-    organization: { name: orgName, website: url },
+    organization,
     branding: {
       ...(hasLogo ?
         {
@@ -149,6 +169,11 @@ export async function createTour({
   defaultView,
   visibility = 'unlisted',
   featured = false,
+  organizationName,
+  organizationEmail,
+  organizationPhone,
+  organizationPhoneLabel,
+  organizationAddress,
 }) {
   if (mode !== 'existing' && mode !== 'new') {
     throw new Error('mode must be existing or new');
@@ -238,6 +263,11 @@ export async function createTour({
     tourTitle: tourTitleValue,
     websiteUrl,
     clientName: mode === 'new' ? clientName?.trim() : undefined,
+    organizationName,
+    organizationEmail,
+    organizationPhone,
+    organizationPhoneLabel,
+    organizationAddress,
     scene,
     primaryColor,
     hasLogo: brandAssets.savedLogo,

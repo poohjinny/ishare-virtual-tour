@@ -34,6 +34,7 @@ import {
   normalizePrimaryColor,
   suggestBrandingFromWebsite,
 } from '../lib/tourBrandDev.mjs';
+import { suggestContactFromWebsite } from '../lib/tourContactDev.mjs';
 import {
   readKnowledgeJson,
   updateKnowledge,
@@ -362,6 +363,11 @@ function validateCreateTourPayload(body) {
     defaultView,
     visibility,
     featured,
+    organizationName,
+    organizationEmail,
+    organizationPhone,
+    organizationPhoneLabel,
+    organizationAddress,
   } = body ?? {};
 
   if (mode !== 'existing' && mode !== 'new') {
@@ -424,6 +430,18 @@ function validateCreateTourPayload(body) {
     defaultView,
     visibility: visibility?.trim() || 'unlisted',
     featured: featured === true,
+    organizationName:
+      typeof organizationName === 'string' ? organizationName : undefined,
+    organizationEmail:
+      typeof organizationEmail === 'string' ? organizationEmail : undefined,
+    organizationPhone:
+      typeof organizationPhone === 'string' ? organizationPhone : undefined,
+    organizationPhoneLabel:
+      typeof organizationPhoneLabel === 'string' ?
+        organizationPhoneLabel
+      : undefined,
+    organizationAddress:
+      typeof organizationAddress === 'string' ? organizationAddress : undefined,
   };
 }
 
@@ -751,6 +769,13 @@ export function viteDevTourApiPlugin() {
           if (req.url === '/__dev/api/tour/suggest-branding') {
             const { websiteUrl } = validateSuggestBrandingPayload(body);
             const suggestion = await suggestBrandingFromWebsite(websiteUrl);
+            sendJson(res, 200, { ok: true, ...suggestion });
+            return;
+          }
+
+          if (req.url === '/__dev/api/tour/suggest-contact') {
+            const { websiteUrl } = validateSuggestBrandingPayload(body);
+            const suggestion = await suggestContactFromWebsite(websiteUrl);
             sendJson(res, 200, { ok: true, ...suggestion });
             return;
           }

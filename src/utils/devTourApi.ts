@@ -239,6 +239,14 @@ export interface DevSuggestBrandingResult {
   notes: string[];
 }
 
+export interface DevSuggestContactResult {
+  email: string | null;
+  phone: string | null;
+  phoneLabel: string | null;
+  address: string | null;
+  notes: string[];
+}
+
 export interface DevCreateTourPayload {
   mode: DevNewTourClientMode;
   clientId?: string;
@@ -255,6 +263,11 @@ export interface DevCreateTourPayload {
   defaultView?: ViewPosition;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
+  organizationName?: string;
+  organizationEmail?: string;
+  organizationPhone?: string;
+  organizationPhoneLabel?: string;
+  organizationAddress?: string;
 }
 
 function base64ToFile(base64: string, fileName: string, mimeType: string) {
@@ -312,6 +325,22 @@ export async function devSuggestBranding(
     faviconFileName: data.faviconFileName,
     logoFileBase64: data.logoFileBase64,
     logoFileName: data.logoFileName,
+    notes: data.notes,
+  };
+}
+
+export async function devSuggestContact(
+  websiteUrl: string,
+): Promise<DevSuggestContactResult> {
+  const data = await postDevTourJson<{ ok: true } & DevSuggestContactResult>(
+    '/tour/suggest-contact',
+    { websiteUrl },
+  );
+  return {
+    email: data.email,
+    phone: data.phone,
+    phoneLabel: data.phoneLabel,
+    address: data.address,
     notes: data.notes,
   };
 }

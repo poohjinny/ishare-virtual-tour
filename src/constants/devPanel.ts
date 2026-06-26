@@ -26,3 +26,10 @@ export const DEV_NEW_TOUR_CLIENT_TABS: {
   { id: 'existing', label: 'Existing client' },
   { id: 'new', label: 'New client' },
 ];
+
+export type DevCrudModeTab = 'manage' | 'create';
+
+export const DEV_CRUD_MODE_TABS: { id: DevCrudModeTab; label: string }[] = [
+  { id: 'manage', label: 'Manage' },
+  { id: 'create', label: 'Create' },
+];

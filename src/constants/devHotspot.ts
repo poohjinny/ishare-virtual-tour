@@ -21,7 +21,7 @@ export const DEV_INFO_DISPLAY_OPTIONS: {
 ];
 
 export const DEV_HOTSPOT_TABS: { id: DevHotspotTab; label: string }[] = [
-  { id: 'nav', label: 'Nav' },
-  { id: 'naming', label: 'NO' },
+  { id: 'nav', label: 'Navigation' },
+  { id: 'naming', label: 'Naming opportunity' },
   { id: 'info', label: 'Info' },
 ];
