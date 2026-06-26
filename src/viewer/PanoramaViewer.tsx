@@ -42,6 +42,7 @@ import type { ClickCoords } from '../utils/devHotspotLogger';
 import { logHotspotClick, toViewPosition } from '../utils/devHotspotLogger';
 import { fromPsvZoom, toPsvZoom } from '../utils/psvZoom';
 import { VIEWER_CONTROLS_VISIBLE_DEFAULT } from '../utils/viewerControlsPreference';
+import { bindViewerPerfPause } from './viewerPerfPause';
 import {
   closeAnchoredInfoPanel,
   getOpenAnchoredPanelHostId,
@@ -1287,6 +1288,13 @@ export const PanoramaViewer = forwardRef<
       markersRef.current = null;
     };
   }, [tour.id, skipLanding]);
+
+  useEffect(() => {
+    const scope = fullscreenRootRef?.current;
+    if (!scope) return;
+
+    return bindViewerPerfPause({ scope, getViewer: () => viewerRef.current });
+  }, [fullscreenRootRef]);
 
   return (
     <div

@@ -108,6 +108,9 @@ input::placeholder {
   /* Match nav pill block size (label line box + padding + border). */
   --ishare-hotspot-glass-block-size: max(26px,
       calc(2 * var(--ishare-hotspot-glass-padding-block) + 2 * var(--ishare-hotspot-glass-border-width) + 2 * var(--ishare-font-size-sm)));
+  --ishare-hotspot-glass-bg: rgba(255, 255, 255, 0.72);
+  --ishare-hotspot-glass-bg-hover: rgba(255, 255, 255, 0.86);
+  --ishare-hotspot-glass-blur: blur(8px) saturate(120%);
 }
 
 /* Hotspot HTML markers ? allow pulse rings to extend outside the pill box */
@@ -730,13 +733,12 @@ input::placeholder {
   min-height: var(--ishare-hotspot-glass-block-size);
   padding: var(--ishare-hotspot-glass-padding-block) 11px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  background: var(--ishare-hotspot-glass-bg);
+  backdrop-filter: var(--ishare-hotspot-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
   border: var(--ishare-hotspot-glass-border-width) solid transparent;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
   transition:
-    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.22s ease,
     background 0.22s ease,
     border-color 0.22s ease;
@@ -775,7 +777,6 @@ input::placeholder {
 
 .hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__pill {
   transition:
-    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.22s ease,
     background 0.22s ease;
 }
@@ -795,8 +796,7 @@ input::placeholder {
 
 .hotspot-nav:not(.hotspot-nav--active):hover .hotspot-nav__pill,
 .hotspot-nav:not(.hotspot-nav--active):focus-visible .hotspot-nav__pill {
-  transform: scale(1.04);
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--ishare-hotspot-glass-bg-hover);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
 }
 
@@ -866,15 +866,14 @@ input::placeholder {
   height: var(--ishare-hotspot-glass-block-size);
   min-height: var(--ishare-hotspot-glass-block-size);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  background: var(--ishare-hotspot-glass-bg);
+  backdrop-filter: var(--ishare-hotspot-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
   border: var(--ishare-hotspot-glass-border-width) solid transparent;
   padding: var(--ishare-hotspot-glass-padding-block);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
   color: var(--ishare-text);
   transition:
-    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.22s ease,
     background 0.22s ease,
     color 0.22s ease;
@@ -894,8 +893,7 @@ input::placeholder {
 
 .hotspot-general-info:not(.hotspot-general-info--active):hover .hotspot-general-info__chip,
 .hotspot-general-info:not(.hotspot-general-info--active):focus-visible .hotspot-general-info__chip {
-  transform: scale(1.04);
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--ishare-hotspot-glass-bg-hover);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
 }
 
@@ -906,10 +904,9 @@ input::placeholder {
 .hotspot-general-info--active .hotspot-general-info__chip,
 .hotspot-general-info--active:hover .hotspot-general-info__chip,
 .hotspot-general-info--active:focus-visible .hotspot-general-info__chip {
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--ishare-hotspot-glass-bg);
   box-shadow: var(--ishare-hotspot-active-glow);
   color: var(--ishare-primary);
-  transform: none;
 }
 
 .hotspot-general-info--active:hover .hotspot-general-info__chip,
@@ -962,7 +959,6 @@ input::placeholder {
   border: 1.5px solid transparent;
   box-shadow: 0 8px 24px rgba(var(--ishare-primary-rgb), 0.28);
   transition:
-    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 0.22s ease,
     background 0.22s ease,
     border-color 0.22s ease,
@@ -1009,15 +1005,13 @@ input::placeholder {
 
 .hotspot-info:hover .hotspot-info__pill,
 .hotspot-info:focus-visible .hotspot-info__pill {
-  transform: scale(1.04);
   background: var(--ishare-primary-dark);
   box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
 }
 
 .hotspot-info--active:not(.hotspot-info--status-sold):hover .hotspot-info__pill,
 .hotspot-info--active:not(.hotspot-info--status-sold):focus-visible .hotspot-info__pill {
-  transform: scale(1.04);
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--ishare-hotspot-glass-bg-hover);
   box-shadow: var(--ishare-hotspot-active-glow-strong);
 }
 
@@ -1048,12 +1042,11 @@ input::placeholder {
 
 /* Active ? popup open: glass pill, theme label/icon + glow (no pulse ? already engaged) */
 .hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__pill {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  background: var(--ishare-hotspot-glass-bg);
+  backdrop-filter: var(--ishare-hotspot-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
   border-color: transparent;
   box-shadow: var(--ishare-hotspot-active-glow);
-  transform: none;
 }
 
 .hotspot-info--active:not(.hotspot-info--status-sold) .hotspot-info__label {
@@ -1072,12 +1065,11 @@ input::placeholder {
 }
 
 .hotspot-info--active.hotspot-info--status-sold .hotspot-info__pill {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  background: var(--ishare-hotspot-glass-bg);
+  backdrop-filter: var(--ishare-hotspot-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
   border-color: var(--ishare-active-item-sold-border);
   box-shadow: var(--ishare-hotspot-active-glow-sold);
-  transform: none;
 }
 
 .hotspot-info--active.hotspot-info--status-sold .hotspot-info__label {
@@ -1104,8 +1096,7 @@ input::placeholder {
 
 .hotspot-info--active.hotspot-info--status-sold:hover .hotspot-info__pill,
 .hotspot-info--active.hotspot-info--status-sold:focus-visible .hotspot-info__pill {
-  transform: scale(1.04);
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--ishare-hotspot-glass-bg-hover);
   box-shadow: var(--ishare-hotspot-active-glow-sold-strong);
 }
 
@@ -1121,7 +1112,6 @@ input::placeholder {
 
 .hotspot-info--status-sold:not(.hotspot-info--active):hover .hotspot-info__pill,
 .hotspot-info--status-sold:not(.hotspot-info--active):focus-visible .hotspot-info__pill {
-  transform: scale(1.04);
   background: rgba(51, 65, 85, 0.88);
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.2);
 }
@@ -1133,6 +1123,38 @@ input::placeholder {
 .hotspot-info--status-sold:not(.hotspot-info--active):hover .hotspot-info__icon-wrap,
 .hotspot-info--status-sold:not(.hotspot-info--active):focus-visible .hotspot-info__icon-wrap {
   color: rgba(255, 255, 255, 0.58);
+}
+
+/* Pause infinite hotspot motion when the tab, window, or pointer leaves the browser. */
+.viewer-area--perf-pause .hotspot-nav__dot {
+  animation: none;
+}
+
+.viewer-area--perf-pause .hotspot-info__pulse {
+  animation: none;
+  opacity: 0.35;
+  transform: scale(1.08);
+}
+
+.viewer-area--perf-pause .animate-floor-plan-pulse {
+  animation: none;
+}
+
+.viewer-area--perf-pause .animate-tour-nav-dot-glow {
+  animation: none !important;
+}
+
+.viewer-area--perf-pause .animate-tour-nav-dot-glow::before,
+.viewer-area--perf-pause .animate-tour-nav-dot-glow::after {
+  animation: none !important;
+}
+
+.viewer-area--perf-pause .psv-immersive-bg-bar {
+  animation: none;
+}
+
+.viewer-area--perf-pause .psv-immersive-bg-button--loading .psv-immersive-bg-bar {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

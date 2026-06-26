@@ -7,6 +7,12 @@ import {
 } from '../components/tourGlassPanelHtml';
 import type { NavPreviewContent, ViewPosition } from '../types/tour';
 import { toPsvZoom } from '../utils/psvZoom';
+import {
+  applyViewerRenderPerfPause,
+  getTourPerfPauseState,
+  subscribeTourPerfPause,
+  type TourPerfPauseState,
+} from './viewerPerfPause';
 
 /** Nav preview hero — on by default; `?disableNavPreview=1` disables (debug). */
 export function isNavPreviewMiniViewerEnabled(
@@ -31,9 +37,12 @@ const PREVIEW_ZOOM_PULLBACK = 22;
 interface MiniViewerEntry {
   viewer: Viewer;
   stopRotate: () => void;
+  renderPaused: boolean;
 }
 
 const activeViewers = new Map<string, MiniViewerEntry>();
+
+let perfPauseUnsub: (() => void) | null = null;
 
 function prefersReducedMotion(): boolean {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -120,6 +129,52 @@ function startAutoRotate(viewer: Viewer): () => void {
   };
 }
 
+function pauseMiniViewerRender(entry: MiniViewerEntry): void {
+  if (entry.renderPaused) return;
+
+  entry.renderPaused = true;
+  entry.stopRotate();
+  entry.stopRotate = () => {};
+  applyViewerRenderPerfPause(entry.viewer, true);
+}
+
+function resumeMiniViewerRender(entry: MiniViewerEntry): void {
+  if (!entry.renderPaused) return;
+
+  entry.renderPaused = false;
+  entry.stopRotate = startAutoRotate(entry.viewer);
+  applyViewerRenderPerfPause(entry.viewer, false);
+}
+
+function applyPerfPauseToEntry(
+  entry: MiniViewerEntry,
+  { viewerRenderPaused }: TourPerfPauseState,
+): void {
+  if (viewerRenderPaused) {
+    pauseMiniViewerRender(entry);
+    return;
+  }
+
+  resumeMiniViewerRender(entry);
+}
+
+function syncAllMiniViewers(state: TourPerfPauseState): void {
+  for (const entry of activeViewers.values()) {
+    applyPerfPauseToEntry(entry, state);
+  }
+}
+
+function ensureMiniViewerPerfPause(): void {
+  if (perfPauseUnsub) return;
+  perfPauseUnsub = subscribeTourPerfPause(syncAllMiniViewers);
+}
+
+function teardownMiniViewerPerfPauseIfIdle(): void {
+  if (activeViewers.size > 0 || !perfPauseUnsub) return;
+  perfPauseUnsub();
+  perfPauseUnsub = null;
+}
+
 function toPreviewDefaultView(view: ViewPosition) {
   const zoomLvl = Math.max(0, toPsvZoom(view.zoom) - PREVIEW_ZOOM_PULLBACK);
   return {
@@ -158,8 +213,13 @@ function mountPanoramaViewer(
     ...toPreviewDefaultView(view),
   });
 
-  const entry: MiniViewerEntry = { viewer, stopRotate: () => {} };
+  const entry: MiniViewerEntry = {
+    viewer,
+    stopRotate: () => {},
+    renderPaused: false,
+  };
   activeViewers.set(markerId, entry);
+  ensureMiniViewerPerfPause();
 
   viewer.addEventListener(
     'panorama-loaded',
@@ -170,6 +230,13 @@ function mountPanoramaViewer(
         height: `${container.clientHeight}px`,
       });
       markHeroLoaded(hero);
+
+      const { viewerRenderPaused } = getTourPerfPauseState();
+      if (viewerRenderPaused) {
+        pauseMiniViewerRender(entry);
+        return;
+      }
+
       entry.stopRotate = startAutoRotate(viewer);
     },
     { once: true },
@@ -181,6 +248,7 @@ function mountPanoramaViewer(
         entry.stopRotate();
         viewer.destroy();
         activeViewers.delete(markerId);
+        teardownMiniViewerPerfPauseIfIdle();
         container.replaceChildren();
         wireFallbackImage(hero, fallbackImage);
         return;
@@ -237,6 +305,7 @@ export function destroyNavPreviewMiniViewer(markerId: string): void {
   entry.stopRotate();
   entry.viewer.destroy();
   activeViewers.delete(markerId);
+  teardownMiniViewerPerfPauseIfIdle();
 }
 
 export function destroyAllNavPreviewMiniViewers(): void {

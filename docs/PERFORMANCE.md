@@ -90,11 +90,12 @@ not a task list.
 
 ### P3 — Runtime & rendering
 
-| Technique              | Guidance                                                                                                                                 |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices. |
-| **Marker DOM churn**   | Minimize HTML marker add/remove on scene change; profile 10+ hotspots.                                                                   |
-| **Panel measure host** | Cache off-screen NO/nav height per `(popup hash, width)` if repeat opens are hot.                                                        |
+| Technique              | Guidance                                                                                                                                                                                                                                                 |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices.                                                                                                                 |
+| **Hotspot marker GPU** | Hotspot glass uses `backdrop-filter`; chrome animations pause when the tab is hidden or the pointer leaves the browser; main PSV and nav preview mini viewer pause render when the window loses focus (`viewerPerfPause.ts`, `navPreviewMiniViewer.ts`). |
+| **Marker DOM churn**   | Minimize HTML marker add/remove on scene change; profile 10+ hotspots.                                                                                                                                                                                   |
+| **Panel measure host** | Cache off-screen NO/nav height per `(popup hash, width)` if repeat opens are hot.                                                                                                                                                                        |
 
 ---
 
@@ -152,10 +153,12 @@ Optional: `vite-plugin-visualizer` for chunk composition (temporary).
 
 ## Related code
 
-| Concern          | Location                                                            |
-| ---------------- | ------------------------------------------------------------------- |
-| Scene preload    | [`src/viewer/transition.ts`](../src/viewer/transition.ts)           |
-| Viewer mount     | [`src/viewer/PanoramaViewer.tsx`](../src/viewer/PanoramaViewer.tsx) |
-| Tour asset paths | [`src/data/loadTour.ts`](../src/data/loadTour.ts)                   |
-| Build config     | [`vite.config.ts`](../vite.config.ts)                               |
-| Panorama files   | `assets/{clientId}/panoramas/` → `public/assets/` via sync script   |
+| Concern              | Location                                                                      |
+| -------------------- | ----------------------------------------------------------------------------- |
+| Scene preload        | [`src/viewer/transition.ts`](../src/viewer/transition.ts)                     |
+| Viewer mount         | [`src/viewer/PanoramaViewer.tsx`](../src/viewer/PanoramaViewer.tsx)           |
+| Hotspot perf pause   | [`src/viewer/viewerPerfPause.ts`](../src/viewer/viewerPerfPause.ts)           |
+| Nav preview mini PSV | [`src/viewer/navPreviewMiniViewer.ts`](../src/viewer/navPreviewMiniViewer.ts) |
+| Tour asset paths     | [`src/data/loadTour.ts`](../src/data/loadTour.ts)                             |
+| Build config         | [`vite.config.ts`](../vite.config.ts)                                         |
+| Panorama files       | `assets/{clientId}/panoramas/` → `public/assets/` via sync script             |
