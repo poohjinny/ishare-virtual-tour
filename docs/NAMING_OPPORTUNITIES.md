@@ -7,20 +7,21 @@ Status-driven footer CTAs for naming opportunity popups. Config lives in
 
 Each status defines **two footer CTAs** (primary + secondary):
 
-| JSON `status`         | Label       | Primary CTA                                | Secondary CTA              |
-| --------------------- | ----------- | ------------------------------------------ | -------------------------- |
-| `on_sale` _(default)_ | On sale     | **Express interest** → `mailto:` org email | **Visit our website**      |
-| `reserved`            | Reserved    | **Contact us** → `mailto:`                 | **Visit our website**      |
-| `coming_soon`         | Coming soon | **Notify me** → `mailto:`                  | **Visit our website**      |
-| `sold`                | Sold        | **Support our mission** → org website      | **Contact us** → `mailto:` |
+| JSON `status`         | Label       | Primary CTA                           | Secondary CTA     |
+| --------------------- | ----------- | ------------------------------------- | ----------------- |
+| `on_sale` _(default)_ | On sale     | **Express your interest** → `mailto:` | **GIFTABULATOR®** |
+| `reserved`            | Reserved    | **Speak with our team** → `mailto:`   | **GIFTABULATOR®** |
+| `coming_soon`         | Coming soon | **Notify me** → `mailto:`             | **GIFTABULATOR®** |
+| `sold`                | Sold        | **Support our mission** → org website | **GIFTABULATOR®** |
 
 Omit `status` in tour JSON → treated as `on_sale`.
 
 ## Giftabulator® CTA
 
-Giftabulator links to a tax-benefit calculator pre-filled with the naming
-opportunity price. It fits best when a donor is **actively evaluating a gift at
-that amount**:
+Secondary footer button — brand label **GIFTABULATOR®**, tooltip description
+_See your tax-efficient giving_. Links to the client’s Giftabulator give-now
+page with `calc=` prefill from NO price. URL rules:
+[GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md).
 
 | Status        | Giftabulator fit | Notes                                                                 |
 | ------------- | ---------------- | --------------------------------------------------------------------- |
@@ -29,49 +30,43 @@ that amount**:
 | `reserved`    | Poor             | Opportunity is spoken for — contact is the right path.                |
 | `sold`        | Avoid            | Gift is complete; mission / thank-you CTAs only.                      |
 
-Per-opportunity Giftabulator URLs (with `calc=` prefill) live in tour JSON — not
-in global status defaults.
-
 ## CTA resolution
 
 1. If `popup.ctas` is set → **full override** (array of buttons).
-2. Else if `popup.cta` is set → **primary override** (e.g. Giftabulator) plus
-   status **contact** CTA as secondary (`Express interest`, `Contact us`, or
-   `Notify me` depending on status).
-3. Else → status defaults from `namingOpportunityStatus.ts` (`ctas` array).
+2. Else → status defaults from `namingOpportunityStatus.ts` (`ctas` array).
+3. If `popup.cta` has `product: "giftabulator"` + `url` → **GT URL override**
+   only (hand-tuned `calc=`); primary status CTA unchanged.
 4. Contact preset uses `organization.email`; falls back to
    `organization.website` or `tour.url` if no email.
 5. Mail subject/body include the naming opportunity legal name.
-6. Primary CTA sublabel renders below both buttons (nav preview order: secondary
-   left, primary right).
-7. Dual footer layout: secondary is shrink-wrapped (`nowrap`); primary grows and
-   **wraps** (Giftabulator-length labels). Very narrow viewports stack via
-   `flex-wrap`.
+6. Primary CTA description (`sublabel`) → **hover tooltip** on the primary
+   button, not footer text.
+7. Footer order: secondary left, primary right (`primary-stack` / `row-equal`).
 
 ## Tour JSON example
 
 ```json
 "namingOpportunity": {
   "name": "Reception Desk Naming Opportunity",
-  "price": "$150,000",
+  "price": "150000",
   "status": "on_sale"
 }
 ```
 
-No `cta` block required for standard behaviour.
+Giftabulator URL is built automatically from `price` — no `cta` block required.
 
-## Giftabulator override (Reception Desk pattern)
+## Giftabulator URL override
 
 ```json
-"namingOpportunity": { "name": "...", "price": "$150,000", "status": "on_sale" },
+"namingOpportunity": { "name": "...", "price": "150000", "status": "on_sale" },
 "cta": {
   "product": "giftabulator",
   "url": "https://client.giftabulatornow.com/give-now?locale=en-CA&calc=..."
 }
 ```
 
-Footer: **Express interest** (secondary, mailto) + **Calculate your gift with
-GIFTABULATOR®** (primary).
+Replaces only the secondary GT link. See
+[GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md) for auto `calc` rules.
 
 ## Adding a status
 
