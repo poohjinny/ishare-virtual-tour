@@ -30,5 +30,9 @@ export const TOUR_DIRECTORY_EMPTY_NAMING_PRICE =
 
 export const TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL = 'Price range';
 
+export const EXPLORE_REFINE_PANEL_LABEL = 'Refine';
+export const EXPLORE_REFINE_SUBSECTION_SORT = 'Sort';
+export const EXPLORE_REFINE_SUBSECTION_FILTER = 'Filter';
+
 export const TOUR_DIRECTORY_EMPTY_SEARCH =
   'No locations or naming opportunities match your search.';

@@ -189,6 +189,7 @@ export function openNamingInfoHotspot(
   sceneId: string,
   hotspotId: string,
   onModalPopup?: (popup: PopupContent) => void,
+  hideShare = false,
 ): boolean {
   const hotspot = tour.scenes[sceneId]?.hotspots.find(
     (h) => h.id === hotspotId,
@@ -196,7 +197,7 @@ export function openNamingInfoHotspot(
   if (!hotspot?.popup) return false;
 
   if (isAnchoredPopup(hotspot.popup)) {
-    openAnchoredInfoPanel(viewer, markers, hotspot, tour);
+    openAnchoredInfoPanel(viewer, markers, hotspot, tour, hideShare);
   } else {
     setActiveInfoHotspot(markers, hotspot.id);
     onModalPopup?.(hotspot.popup);
@@ -214,6 +215,7 @@ export function scheduleOpenPendingNamingInfoHotspot(
   onModalPopup?: (popup: PopupContent) => void,
   onOpened?: () => void,
   onFailed?: () => void,
+  hideShare = false,
 ): void {
   const attemptId = ++openAttemptId;
   let attempts = 0;
@@ -239,6 +241,7 @@ export function scheduleOpenPendingNamingInfoHotspot(
         pending.sceneId,
         pending.hotspotId,
         onModalPopup,
+        hideShare,
       )
     ) {
       onOpened?.();

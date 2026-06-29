@@ -9,6 +9,8 @@ import {
   segmentedTabsIndicatorReadyClassName,
   segmentedTabsListClassName,
   segmentedTabsScrollableClassName,
+  segmentedTabsScrollableTrackClassName,
+  segmentedTabsTrackClassName,
 } from './segmentedTabsClasses';
 
 export interface SegmentedTabItem<T extends string> {
@@ -40,14 +42,16 @@ export function SegmentedTabs<T extends string>({
   scrollToStartKey,
   disabled = false,
 }: SegmentedTabsProps<T>) {
-  const { tablistRef, indicator, indicatorReady } = useSegmentedTabIndicator(
-    value,
-    { scrollable, scrollToStartKey, observeKey: tabs.length },
-  );
+  const { trackRef, scrollRef, indicator, indicatorReady } =
+    useSegmentedTabIndicator(value, {
+      scrollable,
+      scrollToStartKey,
+      observeKey: tabs.length,
+    });
 
   return (
     <div
-      ref={tablistRef}
+      ref={scrollRef}
       className={cn(
         segmentedTabsListClassName,
         scrollable && segmentedTabsScrollableClassName,
@@ -56,37 +60,44 @@ export function SegmentedTabs<T extends string>({
       role='tablist'
       aria-label={ariaLabel}
     >
-      <span
+      <div
+        ref={trackRef}
         className={cn(
-          segmentedTabsIndicatorClassName,
-          indicatorReady && segmentedTabsIndicatorReadyClassName,
+          segmentedTabsTrackClassName,
+          scrollable && segmentedTabsScrollableTrackClassName,
         )}
-        aria-hidden='true'
-        style={{
-          width: `${indicator.width}px`,
-          transform: `translateX(${indicator.left}px)`,
-        }}
-      />
-      {tabs.map((tab) => {
-        const active = value === tab.id;
-        return (
-          <button
-            key={tab.id}
-            type='button'
-            role='tab'
-            id={tab.htmlId}
-            aria-selected={active}
-            aria-controls={tab.ariaControls}
-            {...{ [SEGMENTED_TAB_ATTR]: '' }}
-            {...{ [SEGMENTED_TAB_ACTIVE_ATTR]: active ? 'true' : 'false' }}
-            className={segmentedTabButtonClassName(active)}
-            disabled={disabled || tab.disabled}
-            onClick={() => onChange(tab.id)}
-          >
-            {tab.label}
-          </button>
-        );
-      })}
+      >
+        <span
+          className={cn(
+            segmentedTabsIndicatorClassName,
+            indicatorReady && segmentedTabsIndicatorReadyClassName,
+          )}
+          aria-hidden='true'
+          style={{ left: `${indicator.left}px`, width: `${indicator.width}px` }}
+        />
+        {tabs.map((tab) => {
+          const active = value === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type='button'
+              role='tab'
+              id={tab.htmlId}
+              aria-selected={active}
+              aria-controls={tab.ariaControls}
+              {...{ [SEGMENTED_TAB_ATTR]: '' }}
+              {...{ [SEGMENTED_TAB_ACTIVE_ATTR]: active ? 'true' : 'false' }}
+              className={segmentedTabButtonClassName(active, {
+                grow: !scrollable,
+              })}
+              disabled={disabled || tab.disabled}
+              onClick={() => onChange(tab.id)}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

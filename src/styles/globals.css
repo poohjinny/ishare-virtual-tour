@@ -31,8 +31,8 @@
   --color-danger: #ef4444;
 
   /* Naming status */
-  --color-status-on-sale: #15803d;
-  --color-status-coming-soon: #0284c7;
+  --color-status-open: #15803d;
+  --color-status-soon: #0284c7;
 
   /* Tour category */
   --color-category-healthcare: var(--color-primary-dark);
@@ -378,8 +378,8 @@
     /* Computed — depend on primary */
     --ishare-active-item-bg: rgba(var(--ishare-primary-rgb), 0.08);
     --ishare-active-item-border: rgba(var(--ishare-primary-rgb), 0.2);
-    --ishare-active-item-sold-bg: rgba(71, 85, 105, 0.1);
-    --ishare-active-item-sold-border: rgba(71, 85, 105, 0.22);
+    --ishare-active-item-closed-bg: rgba(71, 85, 105, 0.1);
+    --ishare-active-item-closed-border: rgba(71, 85, 105, 0.22);
 
     --ishare-hotspot-active-glow:
       0 8px 24px rgba(15, 23, 42, 0.12),
@@ -389,17 +389,17 @@
       0 10px 28px rgba(15, 23, 42, 0.14),
       0 0 20px rgba(var(--ishare-primary-rgb), 0.36),
       0 0 40px rgba(var(--ishare-primary-rgb), 0.16);
-    --ishare-hotspot-active-glow-sold:
+    --ishare-hotspot-active-glow-closed:
       0 8px 24px rgba(15, 23, 42, 0.12),
       0 0 16px rgba(71, 85, 105, 0.22),
       0 0 32px rgba(71, 85, 105, 0.1);
-    --ishare-hotspot-active-glow-sold-strong:
+    --ishare-hotspot-active-glow-closed-strong:
       0 10px 28px rgba(15, 23, 42, 0.14),
       0 0 20px rgba(71, 85, 105, 0.3),
       0 0 40px rgba(71, 85, 105, 0.12);
 
-    --ishare-active-icon-leading-sold-bg: rgba(71, 85, 105, 0.1);
-    --ishare-active-icon-leading-sold-ring: 0 0 0 2px rgba(71, 85, 105, 0.12);
+    --ishare-active-icon-leading-closed-bg: rgba(71, 85, 105, 0.1);
+    --ishare-active-icon-leading-closed-ring: 0 0 0 2px rgba(71, 85, 105, 0.12);
     --ishare-active-icon-dot-ring: 0 0 0 4px rgba(var(--ishare-primary-rgb), 0.15);
     --ishare-active-icon-leading-bg: rgba(var(--ishare-primary-rgb), 0.1);
     --ishare-active-icon-leading-ring: 0 0 0 2px rgba(var(--ishare-primary-rgb), 0.12);
@@ -444,14 +444,14 @@
     --ishare-font-size-icon: var(--text-icon);
 
     /* Naming status badges */
-    --ishare-naming-status-on-sale-bg: rgba(34, 197, 94, 0.14);
-    --ishare-naming-status-on-sale-color: var(--color-status-on-sale);
-    --ishare-naming-status-sold-bg: rgba(15, 23, 42, 0.08);
-    --ishare-naming-status-sold-color: var(--color-muted);
+    --ishare-naming-status-open-bg: rgba(34, 197, 94, 0.14);
+    --ishare-naming-status-open-color: var(--color-status-open);
+    --ishare-naming-status-closed-bg: rgba(15, 23, 42, 0.08);
+    --ishare-naming-status-closed-color: var(--color-muted);
     --ishare-naming-status-reserved-bg: var(--ishare-badge-accent-bg);
     --ishare-naming-status-reserved-color: var(--ishare-badge-accent-color);
-    --ishare-naming-status-coming-soon-bg: rgba(56, 189, 248, 0.14);
-    --ishare-naming-status-coming-soon-color: var(--color-status-coming-soon);
+    --ishare-naming-status-soon-bg: rgba(56, 189, 248, 0.14);
+    --ishare-naming-status-soon-color: var(--color-status-soon);
 
     /* Tour category badges */
     --ishare-tour-category-healthcare-bg: var(--color-category-healthcare-bg);

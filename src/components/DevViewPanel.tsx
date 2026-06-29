@@ -136,8 +136,10 @@ import {
   devViewPanelFormCheckboxLabelClassName,
   devViewPanelToggleInputClassName,
   devViewPanelToggleLabelClassName,
+  devViewPanelToggleLabelMultilineClassName,
   devViewPanelToggleListClassName,
   devViewPanelToggleNameClassName,
+  devViewPanelToggleTextClassName,
   devViewPanelTourSwitchAnchorClassName,
   devViewPanelTourSwitchChevronClassName,
   devViewPanelTourSwitchMenuClassName,
@@ -148,6 +150,15 @@ import {
   devViewPanelManageListClassName,
   devViewPanelStackedFormFooterClassName,
   devViewPanelManageListItemClassName,
+  devViewPanelManageListItemHeadClassName,
+  devViewPanelManageListItemHeadMainClassName,
+  devViewPanelManageListItemTitleClassName,
+  devViewPanelManageListItemBulletClassName,
+  devViewPanelManageListItemIdClassName,
+  devSceneManageBadgeVariants,
+  devViewPanelManageListItemBadgesClassName,
+  devHotspotKindBadgeVariants,
+  type DevHotspotKindBadgeKind,
   devViewPanelHotspotRowSelectedClassName,
 } from './devViewPanelVariants';
 import {
@@ -165,6 +176,7 @@ import {
 } from './DevPanelFormGroup';
 import { DevPanelTertiaryTabs } from './DevPanelTertiaryTabs';
 import { DevPanelEmbedDebug } from './DevPanelEmbedDebug';
+import { Badge } from './ui/Badge';
 
 const DEFAULT_NEW_TOUR_PRIMARY_COLOR = '#007078';
 
@@ -197,13 +209,46 @@ function hotspotKindLabel(hotspot: Hotspot): string {
   return hotspot.type;
 }
 
+function hotspotKindBadgeKind(hotspot: Hotspot): DevHotspotKindBadgeKind {
+  if (hotspot.type === 'nav') return 'nav';
+  if (isNamingInfoHotspot(hotspot)) return 'naming';
+  return 'info';
+}
+
 function hotspotDisplayLabel(hotspot: Hotspot): string {
   if (hotspot.type === 'nav') return hotspot.label ?? hotspot.id;
   return hotspot.popup?.title ?? hotspot.id;
 }
 
+function confirmDevPanelDelete(message: string): boolean {
+  return window.confirm(`${message}\n\nThis cannot be undone.`);
+}
+
 function formatHotspotPosition(hotspot: Hotspot): string {
   return formatViewPosition({ ...hotspot.position, zoom: 0 });
+}
+
+function hotspotManageKindOrder(hotspot: Hotspot): number {
+  if (hotspot.type === 'nav') return 0;
+  if (isNamingInfoHotspot(hotspot)) return 1;
+  if (hotspot.type === 'info') return 2;
+  return 3;
+}
+
+function sortSceneHotspotsForManage(hotspots: Hotspot[]): Hotspot[] {
+  return [...hotspots].sort((a, b) => {
+    const kindDiff = hotspotManageKindOrder(a) - hotspotManageKindOrder(b);
+    if (kindDiff !== 0) return kindDiff;
+
+    const labelDiff = hotspotDisplayLabel(a).localeCompare(
+      hotspotDisplayLabel(b),
+      undefined,
+      { sensitivity: 'base' },
+    );
+    if (labelDiff !== 0) return labelDiff;
+
+    return a.id.localeCompare(b.id);
+  });
 }
 
 function readSessionValue(key: string): string {
@@ -258,9 +303,6 @@ export function DevViewPanel({
   const [editingHotspotId, setEditingHotspotId] = useState<string | null>(null);
   const [editNavLabel, setEditNavLabel] = useState('');
   const [editNavTarget, setEditNavTarget] = useState('');
-  const [editNavTargetViewYaw, setEditNavTargetViewYaw] = useState('');
-  const [editNavTargetViewPitch, setEditNavTargetViewPitch] = useState('');
-  const [editNavTargetViewZoom, setEditNavTargetViewZoom] = useState('');
   const [editNavInstant, setEditNavInstant] = useState(false);
   const [editNavPreviewImage, setEditNavPreviewImage] = useState('');
   const [editNoTitle, setEditNoTitle] = useState('');
@@ -424,7 +466,7 @@ export function DevViewPanel({
   >(null);
 
   const currentSceneHotspots = useMemo(
-    () => tour.scenes[scene.id]?.hotspots ?? [],
+    () => sortSceneHotspotsForManage(tour.scenes[scene.id]?.hotspots ?? []),
     [scene.id, tour],
   );
   const tourScenes = useMemo(
@@ -986,6 +1028,11 @@ export function DevViewPanel({
       });
       await onTourMutated?.();
       setNamingStatus('done');
+      setNoName('');
+      setNoPrice('');
+      setNoBody('');
+      setNoVideoUrl('');
+      setNoImage('');
     } catch (error) {
       setNamingStatus('error');
       setNamingError(
@@ -1029,6 +1076,10 @@ export function DevViewPanel({
       });
       await onTourMutated?.();
       setInfoStatus('done');
+      setInfoName('');
+      setInfoBody('');
+      setInfoVideoUrl('');
+      setInfoImage('');
     } catch (error) {
       setInfoStatus('error');
       setInfoError(
@@ -1066,6 +1117,8 @@ export function DevViewPanel({
             toViewPosition(view.yaw, view.pitch, view.zoom ?? 0)
           : undefined,
       });
+      setSceneTitle('');
+      setSceneDescription('');
       setScenePanoramaFile(null);
       setSceneStatus('done');
       await onTourMutated?.({ navigateToScene: result.scene.id });
@@ -1510,6 +1563,18 @@ export function DevViewPanel({
     async (hotspotId: string) => {
       if (!scene.tourId) return;
 
+      const hotspot = tour.scenes[scene.id]?.hotspots?.find(
+        (entry) => entry.id === hotspotId,
+      );
+      const label = hotspot ? hotspotDisplayLabel(hotspot) : hotspotId;
+      if (
+        !confirmDevPanelDelete(
+          `Delete hotspot “${label}” (${hotspotId}) from scene “${scene.id}”?`,
+        )
+      ) {
+        return;
+      }
+
       setHotspotManageStatus('working');
       setHotspotManageError(null);
 
@@ -1536,7 +1601,14 @@ export function DevViewPanel({
         );
       }
     },
-    [editingHotspotId, movingHotspotId, onTourMutated, scene.id, scene.tourId],
+    [
+      editingHotspotId,
+      movingHotspotId,
+      onTourMutated,
+      scene.id,
+      scene.tourId,
+      tour.scenes,
+    ],
   );
 
   const moveHotspotToClick = useCallback(async () => {
@@ -1578,9 +1650,6 @@ export function DevViewPanel({
     if (hotspot.type === 'nav') {
       setEditNavLabel(hotspot.label ?? '');
       setEditNavTarget(hotspot.targetScene ?? '');
-      setEditNavTargetViewYaw(String(hotspot.targetView?.yaw ?? 0));
-      setEditNavTargetViewPitch(String(hotspot.targetView?.pitch ?? 0));
-      setEditNavTargetViewZoom(String(hotspot.targetView?.zoom ?? 0));
       setEditNavInstant(Boolean(hotspot.instant));
       setEditNavPreviewImage(hotspot.preview?.image ?? '');
       return;
@@ -1601,22 +1670,20 @@ export function DevViewPanel({
     setEditInfoImage(hotspot.popup?.image ?? '');
   }, []);
 
-  const applyTargetSceneLandingToNavTarget = useCallback(() => {
-    const targetSceneId = editNavTarget.trim();
-    if (!targetSceneId) return;
-    const targetScene = tour.scenes[targetSceneId];
-    if (!targetScene) return;
-    setEditNavTargetViewYaw(String(targetScene.defaultView.yaw));
-    setEditNavTargetViewPitch(String(targetScene.defaultView.pitch));
-    setEditNavTargetViewZoom(String(targetScene.defaultView.zoom ?? 0));
-  }, [editNavTarget, tour.scenes]);
-
-  const applyCurrentViewToNavTarget = useCallback(() => {
-    if (!view) return;
-    setEditNavTargetViewYaw(String(view.yaw));
-    setEditNavTargetViewPitch(String(view.pitch));
-    setEditNavTargetViewZoom(String(view.zoom ?? 0));
-  }, [view]);
+  const openNavTargetScene = useCallback(
+    (targetSceneId: string) => {
+      if (!scene.tourId || !targetSceneId.trim()) return;
+      navigate(
+        buildTourLocation(
+          scene.tourId,
+          targetSceneId.trim(),
+          tour.firstScene,
+          searchParams,
+        ),
+      );
+    },
+    [navigate, scene.tourId, searchParams, tour.firstScene],
+  );
 
   const saveHotspotEdit = useCallback(async () => {
     if (!scene.tourId || !editingHotspotId) return;
@@ -1636,11 +1703,7 @@ export function DevViewPanel({
           hotspotId: editingHotspotId,
           label: editNavLabel.trim() || undefined,
           targetSceneId: editNavTarget.trim() || undefined,
-          targetView: {
-            yaw: Number(editNavTargetViewYaw),
-            pitch: Number(editNavTargetViewPitch),
-            zoom: Number(editNavTargetViewZoom) || 0,
-          },
+          syncTargetViewFromScene: true,
           instant: editNavInstant,
           previewImage: editNavPreviewImage.trim() || undefined,
         });
@@ -1690,9 +1753,6 @@ export function DevViewPanel({
     editNavPreviewImage,
     editNavLabel,
     editNavTarget,
-    editNavTargetViewPitch,
-    editNavTargetViewYaw,
-    editNavTargetViewZoom,
     editNoBody,
     editNoImage,
     editNoPrice,
@@ -1708,6 +1768,16 @@ export function DevViewPanel({
   const deleteTourScene = useCallback(
     async (sceneId: string) => {
       if (!scene.tourId || sceneId === tour.firstScene) return;
+
+      const sceneEntry = tour.scenes[sceneId];
+      const title = sceneEntry?.title ?? sceneId;
+      if (
+        !confirmDevPanelDelete(
+          `Delete scene “${title}” (${sceneId}) and all hotspots on it?`,
+        )
+      ) {
+        return;
+      }
 
       setSceneManageStatus('working');
       setSceneManageError(null);
@@ -1732,7 +1802,14 @@ export function DevViewPanel({
         );
       }
     },
-    [editingSceneId, onTourMutated, scene.id, scene.tourId, tour.firstScene],
+    [
+      editingSceneId,
+      onTourMutated,
+      scene.id,
+      scene.tourId,
+      tour.firstScene,
+      tour.scenes,
+    ],
   );
 
   const openTourScene = useCallback(
@@ -2259,19 +2336,77 @@ export function DevViewPanel({
                                   key={hotspot.id}
                                   className={`${devViewPanelManageListItemClassName}${isMoving || isEditing ? ` ${devViewPanelHotspotRowSelectedClassName}` : ''}`}
                                 >
-                                  <p
-                                    className={devViewPanelSlugPreviewClassName}
+                                  <div
+                                    className={
+                                      devViewPanelManageListItemHeadClassName
+                                    }
                                   >
-                                    {hotspotDisplayLabel(hotspot)} ·{' '}
-                                    {hotspotKindLabel(hotspot)} ·{' '}
-                                    <code>{hotspot.id}</code>
-                                  </p>
+                                    <div
+                                      className={
+                                        devViewPanelManageListItemHeadMainClassName
+                                      }
+                                    >
+                                      <span
+                                        className={
+                                          devViewPanelManageListItemTitleClassName
+                                        }
+                                      >
+                                        {hotspotDisplayLabel(hotspot)}
+                                      </span>
+                                      <span
+                                        className={
+                                          devViewPanelManageListItemBulletClassName
+                                        }
+                                        aria-hidden='true'
+                                      >
+                                        ·
+                                      </span>
+                                      <code
+                                        className={
+                                          devViewPanelManageListItemIdClassName
+                                        }
+                                      >
+                                        {hotspot.id}
+                                      </code>
+                                    </div>
+                                    <Badge
+                                      variant='fill'
+                                      size='sm'
+                                      tone='none'
+                                      className={devHotspotKindBadgeVariants({
+                                        kind: hotspotKindBadgeKind(hotspot),
+                                      })}
+                                    >
+                                      {hotspotKindLabel(hotspot)}
+                                    </Badge>
+                                  </div>
                                   <p
                                     className={devViewPanelSectionHintClassName}
                                   >
                                     {formatHotspotPosition(hotspot)}
                                   </p>
                                   <div className={devViewPanelActionsClassName}>
+                                    {(
+                                      hotspot.type === 'nav' &&
+                                      hotspot.targetScene
+                                    ) ?
+                                      <button
+                                        type='button'
+                                        className={devViewPanelBtnVariants({
+                                          tone: 'secondary',
+                                        })}
+                                        onClick={() =>
+                                          openNavTargetScene(
+                                            hotspot.targetScene!,
+                                          )
+                                        }
+                                        disabled={
+                                          hotspotManageStatus === 'working'
+                                        }
+                                      >
+                                        Open
+                                      </button>
+                                    : null}
                                     <button
                                       type='button'
                                       className={devViewPanelBtnVariants({
@@ -2293,19 +2428,15 @@ export function DevViewPanel({
                                     <button
                                       type='button'
                                       className={devViewPanelBtnVariants({
-                                        tone:
-                                          isEditing ? 'primary' : 'secondary',
+                                        tone: 'secondary',
                                       })}
-                                      onClick={() =>
-                                        isEditing ?
-                                          setEditingHotspotId(null)
-                                        : startEditHotspot(hotspot)
-                                      }
+                                      onClick={() => startEditHotspot(hotspot)}
                                       disabled={
-                                        hotspotManageStatus === 'working'
+                                        hotspotManageStatus === 'working' ||
+                                        isEditing
                                       }
                                     >
-                                      {isEditing ? 'Cancel edit' : 'Edit'}
+                                      Edit
                                     </button>
                                     <button
                                       type='button'
@@ -2384,110 +2515,12 @@ export function DevViewPanel({
                                             devViewPanelSectionHintClassName
                                           }
                                         >
-                                          Target view (after transition)
+                                          Arrival camera uses the target scene
+                                          landing view. Open the target scene,
+                                          frame the shot, Apply landing view,
+                                          then Save nav to copy it into{' '}
+                                          <code>targetView</code>.
                                         </p>
-                                        <div
-                                          className={
-                                            devViewPanelActionsClassName
-                                          }
-                                        >
-                                          <button
-                                            type='button'
-                                            className={devViewPanelBtnVariants({
-                                              tone: 'secondary',
-                                            })}
-                                            onClick={
-                                              applyCurrentViewToNavTarget
-                                            }
-                                            disabled={!view}
-                                          >
-                                            Use current view
-                                          </button>
-                                          <button
-                                            type='button'
-                                            className={devViewPanelBtnVariants({
-                                              tone: 'secondary',
-                                            })}
-                                            onClick={
-                                              applyTargetSceneLandingToNavTarget
-                                            }
-                                            disabled={!editNavTarget.trim()}
-                                          >
-                                            Use target landing
-                                          </button>
-                                        </div>
-                                        <label
-                                          className={devViewPanelFieldClassName}
-                                        >
-                                          <span
-                                            className={
-                                              devViewPanelFieldLabelClassName
-                                            }
-                                          >
-                                            Yaw
-                                          </span>
-                                          <input
-                                            className={
-                                              devViewPanelInputClassName
-                                            }
-                                            type='number'
-                                            step='0.1'
-                                            value={editNavTargetViewYaw}
-                                            onChange={(e) =>
-                                              setEditNavTargetViewYaw(
-                                                e.target.value,
-                                              )
-                                            }
-                                          />
-                                        </label>
-                                        <label
-                                          className={devViewPanelFieldClassName}
-                                        >
-                                          <span
-                                            className={
-                                              devViewPanelFieldLabelClassName
-                                            }
-                                          >
-                                            Pitch
-                                          </span>
-                                          <input
-                                            className={
-                                              devViewPanelInputClassName
-                                            }
-                                            type='number'
-                                            step='0.1'
-                                            value={editNavTargetViewPitch}
-                                            onChange={(e) =>
-                                              setEditNavTargetViewPitch(
-                                                e.target.value,
-                                              )
-                                            }
-                                          />
-                                        </label>
-                                        <label
-                                          className={devViewPanelFieldClassName}
-                                        >
-                                          <span
-                                            className={
-                                              devViewPanelFieldLabelClassName
-                                            }
-                                          >
-                                            Zoom
-                                          </span>
-                                          <input
-                                            className={
-                                              devViewPanelInputClassName
-                                            }
-                                            type='number'
-                                            step='1'
-                                            value={editNavTargetViewZoom}
-                                            onChange={(e) =>
-                                              setEditNavTargetViewZoom(
-                                                e.target.value,
-                                              )
-                                            }
-                                          />
-                                        </label>
                                         <label
                                           className={
                                             devViewPanelToggleLabelClassName
@@ -2553,6 +2586,20 @@ export function DevViewPanel({
                                             devViewPanelActionsClassName
                                           }
                                         >
+                                          <button
+                                            type='button'
+                                            className={devViewPanelBtnVariants({
+                                              tone: 'secondary',
+                                            })}
+                                            onClick={() =>
+                                              setEditingHotspotId(null)
+                                            }
+                                            disabled={
+                                              hotspotManageStatus === 'working'
+                                            }
+                                          >
+                                            Cancel
+                                          </button>
                                           <button
                                             type='button'
                                             className={devViewPanelBtnVariants({
@@ -2724,6 +2771,20 @@ export function DevViewPanel({
                                           <button
                                             type='button'
                                             className={devViewPanelBtnVariants({
+                                              tone: 'secondary',
+                                            })}
+                                            onClick={() =>
+                                              setEditingHotspotId(null)
+                                            }
+                                            disabled={
+                                              hotspotManageStatus === 'working'
+                                            }
+                                          >
+                                            Cancel
+                                          </button>
+                                          <button
+                                            type='button'
+                                            className={devViewPanelBtnVariants({
                                               tone: 'primary',
                                             })}
                                             onClick={() =>
@@ -2871,6 +2932,20 @@ export function DevViewPanel({
                                             devViewPanelActionsClassName
                                           }
                                         >
+                                          <button
+                                            type='button'
+                                            className={devViewPanelBtnVariants({
+                                              tone: 'secondary',
+                                            })}
+                                            onClick={() =>
+                                              setEditingHotspotId(null)
+                                            }
+                                            disabled={
+                                              hotspotManageStatus === 'working'
+                                            }
+                                          >
+                                            Cancel
+                                          </button>
                                           <button
                                             type='button'
                                             className={devViewPanelBtnVariants({
@@ -3038,7 +3113,8 @@ export function DevViewPanel({
                                     this scene
                                   </>
                                 : null}{' '}
-                                · uses target <code>defaultView</code>
+                                · copies target <code>defaultView</code> on
+                                create and save
                               </p>
                             : null}
 
@@ -5098,20 +5174,72 @@ export function DevViewPanel({
                                   key={entry.id}
                                   className={`${devViewPanelManageListItemClassName}${isEditing || isCurrent ? ` ${devViewPanelHotspotRowSelectedClassName}` : ''}`}
                                 >
-                                  <p
-                                    className={devViewPanelSlugPreviewClassName}
+                                  <div
+                                    className={
+                                      devViewPanelManageListItemHeadClassName
+                                    }
                                   >
-                                    {entry.title} · <code>{entry.id}</code>
-                                    {isFirst ?
-                                      <>
-                                        {' '}
-                                        · <code>firstScene</code>
-                                      </>
+                                    <div
+                                      className={
+                                        devViewPanelManageListItemHeadMainClassName
+                                      }
+                                    >
+                                      <span
+                                        className={
+                                          devViewPanelManageListItemTitleClassName
+                                        }
+                                      >
+                                        {entry.title}
+                                      </span>
+                                      <span
+                                        className={
+                                          devViewPanelManageListItemBulletClassName
+                                        }
+                                        aria-hidden='true'
+                                      >
+                                        ·
+                                      </span>
+                                      <code
+                                        className={
+                                          devViewPanelManageListItemIdClassName
+                                        }
+                                      >
+                                        {entry.id}
+                                      </code>
+                                    </div>
+                                    {isFirst || isCurrent ?
+                                      <div
+                                        className={
+                                          devViewPanelManageListItemBadgesClassName
+                                        }
+                                      >
+                                        {isFirst ?
+                                          <Badge
+                                            variant='fill'
+                                            size='sm'
+                                            tone='none'
+                                            className={devSceneManageBadgeVariants(
+                                              { kind: 'first' },
+                                            )}
+                                          >
+                                            First
+                                          </Badge>
+                                        : null}
+                                        {isCurrent ?
+                                          <Badge
+                                            variant='fill'
+                                            size='sm'
+                                            tone='none'
+                                            className={devSceneManageBadgeVariants(
+                                              { kind: 'current' },
+                                            )}
+                                          >
+                                            Current
+                                          </Badge>
+                                        : null}
+                                      </div>
                                     : null}
-                                    {isCurrent ?
-                                      <> · current</>
-                                    : null}
-                                  </p>
+                                  </div>
                                   {entry.description ?
                                     <p
                                       className={
@@ -5137,17 +5265,15 @@ export function DevViewPanel({
                                     <button
                                       type='button'
                                       className={devViewPanelBtnVariants({
-                                        tone:
-                                          isEditing ? 'primary' : 'secondary',
+                                        tone: 'secondary',
                                       })}
-                                      onClick={() =>
-                                        isEditing ?
-                                          setEditingSceneId(null)
-                                        : startEditScene(entry)
+                                      onClick={() => startEditScene(entry)}
+                                      disabled={
+                                        sceneManageStatus === 'working' ||
+                                        isEditing
                                       }
-                                      disabled={sceneManageStatus === 'working'}
                                     >
-                                      {isEditing ? 'Cancel edit' : 'Edit'}
+                                      Edit
                                     </button>
                                     <button
                                       type='button'
@@ -5211,7 +5337,38 @@ export function DevViewPanel({
                                           placeholder='Optional — leave empty to remove'
                                         />
                                       </label>
-                                      {!isFirst ?
+                                      <div
+                                        className={
+                                          devViewPanelToggleListClassName
+                                        }
+                                      >
+                                        {!isFirst ?
+                                          <label
+                                            className={
+                                              devViewPanelToggleLabelClassName
+                                            }
+                                          >
+                                            <input
+                                              type='checkbox'
+                                              className={
+                                                devViewPanelToggleInputClassName
+                                              }
+                                              checked={editSceneAsFirst}
+                                              onChange={(e) =>
+                                                setEditSceneAsFirst(
+                                                  e.currentTarget.checked,
+                                                )
+                                              }
+                                            />
+                                            <span
+                                              className={
+                                                devViewPanelToggleTextClassName
+                                              }
+                                            >
+                                              Set as firstScene
+                                            </span>
+                                          </label>
+                                        : null}
                                         <label
                                           className={
                                             devViewPanelToggleLabelClassName
@@ -5222,37 +5379,24 @@ export function DevViewPanel({
                                             className={
                                               devViewPanelToggleInputClassName
                                             }
-                                            checked={editSceneAsFirst}
+                                            checked={editSceneMapEnabled}
                                             onChange={(e) =>
-                                              setEditSceneAsFirst(
+                                              setEditSceneMapEnabled(
                                                 e.currentTarget.checked,
                                               )
                                             }
                                           />
-                                          <span>Set as firstScene</span>
+                                          <span
+                                            className={
+                                              devViewPanelToggleTextClassName
+                                            }
+                                          >
+                                            Floor plan map position
+                                          </span>
                                         </label>
-                                      : null}
-                                      <label
-                                        className={
-                                          devViewPanelToggleLabelClassName
-                                        }
-                                      >
-                                        <input
-                                          type='checkbox'
-                                          className={
-                                            devViewPanelToggleInputClassName
-                                          }
-                                          checked={editSceneMapEnabled}
-                                          onChange={(e) =>
-                                            setEditSceneMapEnabled(
-                                              e.currentTarget.checked,
-                                            )
-                                          }
-                                        />
-                                        <span>Floor plan map position</span>
-                                      </label>
+                                      </div>
                                       {editSceneMapEnabled ?
-                                        <>
+                                        <DevPanelFormRow cols={3}>
                                           <label
                                             className={
                                               devViewPanelFieldClassName
@@ -5331,11 +5475,25 @@ export function DevViewPanel({
                                               }
                                             />
                                           </label>
-                                        </>
+                                        </DevPanelFormRow>
                                       : null}
                                       <div
                                         className={devViewPanelActionsClassName}
                                       >
+                                        <button
+                                          type='button'
+                                          className={devViewPanelBtnVariants({
+                                            tone: 'secondary',
+                                          })}
+                                          onClick={() =>
+                                            setEditingSceneId(null)
+                                          }
+                                          disabled={
+                                            sceneManageStatus === 'working'
+                                          }
+                                        >
+                                          Cancel
+                                        </button>
                                         <button
                                           type='button'
                                           className={devViewPanelBtnVariants({
@@ -5485,7 +5643,9 @@ export function DevViewPanel({
 
                     return (
                       <li key={toggle.key}>
-                        <label className={devViewPanelToggleLabelClassName}>
+                        <label
+                          className={devViewPanelToggleLabelMultilineClassName}
+                        >
                           <input
                             type='checkbox'
                             className={devViewPanelToggleInputClassName}
@@ -5494,7 +5654,7 @@ export function DevViewPanel({
                               setDevUrlFlag(toggle, event.currentTarget.checked)
                             }
                           />
-                          <span>
+                          <span className={devViewPanelToggleTextClassName}>
                             <span className={devViewPanelToggleNameClassName}>
                               <code>{toggle.label}</code>
                             </span>

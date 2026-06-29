@@ -12,6 +12,7 @@ import {
 /** Tour-scoped immersive bed — survives PanoramaViewer remounts during scene navigation. */
 export function useImmersiveBackground(
   tour: Tour,
+  disabled = false,
 ): ImmersiveBackgroundController | null {
   const [controller, setController] =
     useState<ImmersiveBackgroundController | null>(null);
@@ -19,7 +20,7 @@ export function useImmersiveBackground(
   useLayoutEffect(() => {
     const config = tour.immersiveBackground;
 
-    if (!config) {
+    if (disabled || !config) {
       setController(null);
       unregisterImmersiveBackgroundController();
       return;
@@ -35,7 +36,7 @@ export function useImmersiveBackground(
       unregisterImmersiveBackgroundController();
       setController(null);
     };
-  }, [tour.id]);
+  }, [disabled, tour.id]);
 
   return controller;
 }

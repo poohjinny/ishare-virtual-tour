@@ -61,9 +61,9 @@ function buildInfoHtml(hotspot: Hotspot): string {
   const statusClass =
     (
       naming &&
-      namingOpportunityStatusConfig(naming.status).cssModifier === 'sold'
+      namingOpportunityStatusConfig(naming.status).cssModifier === 'closed'
     ) ?
-      ' hotspot-info--status-sold'
+      ' hotspot-info--status-closed'
     : '';
 
   return `

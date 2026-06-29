@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
+import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
+import { TOUR_CHROME_COMPACT_MAX_PX } from '../constants/tourChrome';
+import {
+  FLIP_LIST_KEY_ATTR,
+  useFlipListReorder,
+} from '../hooks/useFlipListReorder';
 import { isTypingTarget } from '../utils/isTypingTarget';
 import {
   TOUR_DIRECTORY_PANEL_TITLE,
@@ -10,31 +16,30 @@ import {
   TOUR_DIRECTORY_EMPTY_LOCATIONS,
   TOUR_DIRECTORY_EMPTY_NAMING,
   TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
-  TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL,
   TOUR_DIRECTORY_EMPTY_SEARCH,
   type TourDirectoryTab,
 } from '../constants/tourDirectory';
 import {
-  EXPLORE_DIRECTORY_SORT_DEFAULT,
-  exploreDirectorySortOptionsForContext,
+  EXPLORE_LOCATIONS_SORT_DEFAULT,
+  EXPLORE_NAMING_SORT_DEFAULT,
+  exploreDirectorySortGroupsForContext,
   type ExploreDirectorySort,
 } from '../constants/tourDirectorySort';
 import { ExploreDirectoryTabLabel } from './icons/ExploreDirectoryTabIcons';
 import { TourMarkerIcon } from './icons/TourMarkerIcon';
 import { ExploreNamingGalleryCard } from './ExploreNamingGalleryCard';
 import { ExplorePanelSearch } from './ExplorePanelSearch';
-import { ExplorePanelSort } from './ExplorePanelSort';
+import { ExplorePanelRefine } from './ExplorePanelRefine';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
-import { NamingPriceRangeFilter } from './NamingPriceRangeFilter';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
   TOUR_NAV_ACTION_SHARE,
   TOUR_SHARE_PANEL_TITLE,
 } from '../constants/tourShare';
 import {
-  TOUR_NAV_ACTION_CONTROLS,
   TOUR_NAV_ACTION_EXPLORE,
   TOUR_NAV_ACTION_HELP,
+  TOUR_NAV_ACTION_MORE,
   tourNavExploreLayoutActionLabel,
   tourNavIconButtonA11y,
   type ExploreDirectoryLayout,
@@ -76,10 +81,13 @@ import {
   tourGlassPanelCloseClassName,
   tourGlassPanelCloseIconClassName,
 } from './tourGlassPanelVariants';
+import { cn } from '../lib/cn';
 import { ShareIcon } from './icons/ShareIcon';
 import {
   tourNavActionsDockClassName,
   tourNavActionsRootClassName,
+  tourNavDockOverflowWrapClassName,
+  tourNavBreadcrumbAlignVariants,
   tourNavBreadcrumbBarClassName,
   tourNavBreadcrumbClassName,
   tourNavBreadcrumbCurrentClassName,
@@ -93,6 +101,8 @@ import {
   tourNavBreadcrumbSepClassName,
   tourNavCircleBtnVariants,
   tourNavCircleIconClassName,
+  tourNavDockOverflowItemClassName,
+  tourNavDockOverflowMenuClassName,
   scrollTourNavDirectoryToActiveItem,
   tourNavDirectoryItemVariants,
   tourNavDirectoryPanelClassName,
@@ -140,14 +150,12 @@ interface TourNavFloatProps {
   showHistoryForward?: boolean;
   onHistoryBack?: () => void;
   onHistoryForward?: () => void;
-  controlsVisible: boolean;
-  onControlsToggle: () => void;
   onSelectScene: (sceneId: string) => void;
   onSelectNamingOpportunity: (sceneId: string, hotspotId: string) => void;
   onBreadcrumbNavigate: (sceneId: string) => void;
   /** Info hotspot id when a naming opportunity panel is open in-scene. */
   activeNamingHotspotId?: string | null;
-  /** `?embed=1` — hide Share/Help/Controls FAB; PSV control pill stays on. */
+  /** `?embed=1` — hide Share/Help FAB; PSV control pill stays on. */
   embed?: boolean;
   panelStack?: TourPanelStack;
 }
@@ -184,20 +192,20 @@ function ExploreTourIcon() {
   );
 }
 
-function ControlsIcon() {
+function HelpIcon() {
   return (
     <MaterialSymbol
-      name='tune'
+      name='help'
       className={tourNavCircleIconClassName}
       sizePx={MATERIAL_SYMBOL_SIZE_22}
     />
   );
 }
 
-function HelpIcon() {
+function MoreIcon() {
   return (
     <MaterialSymbol
-      name='help'
+      name='more_horiz'
       className={tourNavCircleIconClassName}
       sizePx={MATERIAL_SYMBOL_SIZE_22}
     />
@@ -235,17 +243,17 @@ function HistoryForwardIcon() {
 
 function NamingHeartIcon({
   active,
-  sold = false,
+  closed = false,
 }: {
   active: boolean;
-  sold?: boolean;
+  closed?: boolean;
 }) {
   return (
     <MaterialSymbol
       name='favorite'
       filled={active}
       data-tour-nav-naming-icon
-      className={tourNavItemIconNamingVariants({ active, sold })}
+      className={tourNavItemIconNamingVariants({ active, closed })}
       sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
@@ -310,8 +318,6 @@ export function TourNavFloat({
   showHistoryForward = false,
   onHistoryBack,
   onHistoryForward,
-  controlsVisible,
-  onControlsToggle,
   onSelectScene,
   onSelectNamingOpportunity,
   onBreadcrumbNavigate,
@@ -319,6 +325,8 @@ export function TourNavFloat({
   embed = false,
   panelStack,
 }: TourNavFloatProps) {
+  const { isMobile, isDesktop } = useTourChromeLayout();
+  const [dockOverflowOpen, setDockOverflowOpen] = useState(false);
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [displayPanel, setDisplayPanel] = useState<DisplayPanel>(null);
   const [panelPhase, setPanelPhase] = useState<PanelAnimPhase>('idle');
@@ -326,9 +334,10 @@ export function TourNavFloat({
   const [directoryTab, setDirectoryTab] = useState<TourDirectoryTab>('all');
   const [exploreLayout, setExploreLayout] =
     useState<ExploreDirectoryLayout>('gallery');
-  const [exploreSort, setExploreSort] = useState<ExploreDirectorySort>(
-    EXPLORE_DIRECTORY_SORT_DEFAULT,
-  );
+  const [exploreLocationsSort, setExploreLocationsSort] =
+    useState<ExploreDirectorySort>(EXPLORE_LOCATIONS_SORT_DEFAULT);
+  const [exploreNamingSort, setExploreNamingSort] =
+    useState<ExploreDirectorySort>(EXPLORE_NAMING_SORT_DEFAULT);
   const [exploreSearch, setExploreSearch] = useState('');
   const [exploreSearchFocusRequest, setExploreSearchFocusRequest] = useState(0);
   const actionsRef = useRef<HTMLDivElement>(null);
@@ -360,10 +369,42 @@ export function TourNavFloat({
     return () => window.clearTimeout(timer);
   }, [breadcrumbHidden, currentSceneId, showHistoryBack, showHistoryForward]);
 
-  const breadcrumbItems = useMemo(
-    () => buildBreadcrumbItems(firstSceneId, scenes, displaySceneId),
-    [displaySceneId, firstSceneId, scenes],
-  );
+  const breadcrumbItems = useMemo(() => {
+    const items = buildBreadcrumbItems(firstSceneId, scenes, displaySceneId);
+    if (isMobile && items.length > 1) {
+      return [items[items.length - 1]];
+    }
+    return items;
+  }, [isMobile, displaySceneId, firstSceneId, scenes]);
+
+  useEffect(() => {
+    setDockOverflowOpen(false);
+  }, [panelMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const compactMq = window.matchMedia(
+      `(max-width: ${TOUR_CHROME_COMPACT_MAX_PX}px)`,
+    );
+    const onBreakpointChange = () => setDockOverflowOpen(false);
+    compactMq.addEventListener('change', onBreakpointChange);
+    return () => compactMq.removeEventListener('change', onBreakpointChange);
+  }, []);
+
+  useEffect(() => {
+    if (!dockOverflowOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (actionsRef.current?.contains(target)) return;
+      setDockOverflowOpen(false);
+    };
+
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => window.removeEventListener('pointerdown', onPointerDown);
+  }, [dockOverflowOpen]);
 
   const namingItems = useMemo(() => buildTourNamingDirectory(scenes), [scenes]);
 
@@ -467,35 +508,71 @@ export function TourNavFloat({
     return 'mixed' as const;
   }, [directoryTab, isExploreSearchActive]);
 
-  const exploreSortOptions = useMemo(
-    () => exploreDirectorySortOptionsForContext(exploreSortContext),
+  const exploreSortGroups = useMemo(
+    () => exploreDirectorySortGroupsForContext(exploreSortContext),
     [exploreSortContext],
   );
 
-  useEffect(() => {
-    if (exploreSortOptions.some((option) => option.id === exploreSort)) return;
-    setExploreSort(EXPLORE_DIRECTORY_SORT_DEFAULT);
-  }, [exploreSort, exploreSortOptions]);
+  const namingPriceFilterActive = useMemo(() => {
+    if (
+      !namingPriceBounds ||
+      namingPriceMin == null ||
+      namingPriceMax == null
+    ) {
+      return false;
+    }
+
+    return (
+      namingPriceMin > namingPriceBounds.min ||
+      namingPriceMax < namingPriceBounds.max
+    );
+  }, [namingPriceBounds, namingPriceMax, namingPriceMin]);
 
   const exploreSortedScenes = useMemo(
-    () => sortTourScenes(scenes, exploreSort),
-    [exploreSort, scenes],
+    () => sortTourScenes(scenes, exploreLocationsSort),
+    [exploreLocationsSort, scenes],
   );
 
   const exploreSortedNamingItems = useMemo(
-    () => sortTourNamingDirectory(exploreNamingItems, exploreSort),
-    [exploreNamingItems, exploreSort],
+    () => sortTourNamingDirectory(exploreNamingItems, exploreNamingSort),
+    [exploreNamingItems, exploreNamingSort],
   );
 
   const exploreSortedFilteredScenes = useMemo(
-    () => sortTourScenes(exploreFilteredScenes, exploreSort),
-    [exploreFilteredScenes, exploreSort],
+    () => sortTourScenes(exploreFilteredScenes, exploreLocationsSort),
+    [exploreFilteredScenes, exploreLocationsSort],
   );
 
   const exploreSortedFilteredNamingItems = useMemo(
-    () => sortTourNamingDirectory(exploreFilteredNamingItems, exploreSort),
-    [exploreFilteredNamingItems, exploreSort],
+    () =>
+      sortTourNamingDirectory(exploreFilteredNamingItems, exploreNamingSort),
+    [exploreFilteredNamingItems, exploreNamingSort],
   );
+
+  const locationsGalleryListRef = useRef<HTMLUListElement>(null);
+  const locationsListRef = useRef<HTMLUListElement>(null);
+  const namingGalleryListRef = useRef<HTMLUListElement>(null);
+  const namingListRef = useRef<HTMLUListElement>(null);
+
+  const locationsOrderKey = exploreLocationsSort;
+  const namingOrderKey = `${exploreNamingSort}:${namingPriceMin ?? ''}:${namingPriceMax ?? ''}`;
+
+  useFlipListReorder(
+    locationsGalleryListRef,
+    locationsOrderKey,
+    exploreLayout === 'gallery',
+  );
+  useFlipListReorder(
+    locationsListRef,
+    locationsOrderKey,
+    exploreLayout === 'list',
+  );
+  useFlipListReorder(
+    namingGalleryListRef,
+    namingOrderKey,
+    exploreLayout === 'gallery',
+  );
+  useFlipListReorder(namingListRef, namingOrderKey, exploreLayout === 'list');
 
   const targetPanel = panelMode;
 
@@ -727,10 +804,6 @@ export function TourNavFloat({
     activatePanel('share');
   }, [activatePanel]);
 
-  const handleTuneClick = useCallback(() => {
-    onControlsToggle();
-  }, [onControlsToggle]);
-
   useEffect(() => {
     if (disabled) return;
 
@@ -749,11 +822,6 @@ export function TourNavFloat({
         handleShareClick();
         return;
       }
-      if (!embed && key === 'c') {
-        event.preventDefault();
-        handleTuneClick();
-        return;
-      }
       if (!embed && key === 'h') {
         event.preventDefault();
         handleHelpClick();
@@ -762,14 +830,7 @@ export function TourNavFloat({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [
-    disabled,
-    embed,
-    handleExploreClick,
-    handleHelpClick,
-    handleShareClick,
-    handleTuneClick,
-  ]);
+  }, [disabled, embed, handleExploreClick, handleHelpClick, handleShareClick]);
 
   const logoImage = clientLogo && (
     <img
@@ -843,6 +904,7 @@ export function TourNavFloat({
       items.length > 0 ?
         <>
           <ul
+            ref={locationsGalleryListRef}
             hidden={exploreLayout !== 'gallery'}
             className={tourNavLocationGalleryListClassName}
             role='listbox'
@@ -860,6 +922,7 @@ export function TourNavFloat({
             ))}
           </ul>
           <ul
+            ref={locationsListRef}
             hidden={exploreLayout !== 'list'}
             className={tourNavListClassName}
             role='listbox'
@@ -868,7 +931,11 @@ export function TourNavFloat({
             {items.map((scene) => {
               const isActive = scene.id === currentSceneId;
               return (
-                <li key={scene.id} role='presentation'>
+                <li
+                  key={scene.id}
+                  role='presentation'
+                  {...{ [FLIP_LIST_KEY_ATTR]: scene.id }}
+                >
                   <button
                     type='button'
                     role='option'
@@ -933,7 +1000,6 @@ export function TourNavFloat({
     items: TourDirectoryNamingItem[],
     options?: {
       showSectionTitle?: boolean;
-      showPriceFilter?: boolean;
       emptyMessage?: string;
       listBodyOnly?: boolean;
     },
@@ -942,6 +1008,7 @@ export function TourNavFloat({
       items.length > 0 ?
         <>
           <ul
+            ref={namingGalleryListRef}
             hidden={exploreLayout !== 'gallery'}
             className={tourNavLocationGalleryListClassName}
             role='listbox'
@@ -965,6 +1032,7 @@ export function TourNavFloat({
             ))}
           </ul>
           <ul
+            ref={namingListRef}
             hidden={exploreLayout !== 'list'}
             className={tourNavListClassName}
             role='listbox'
@@ -974,12 +1042,15 @@ export function TourNavFloat({
               const isActive =
                 activeNamingHotspotId === item.hotspotId &&
                 currentSceneId === item.sceneId;
-              const isSold = item.statusModifier === 'sold';
+              const isClosed = item.statusModifier === 'closed';
 
               return (
                 <li
                   key={`${item.sceneId}:${item.hotspotId}`}
                   role='presentation'
+                  {...{
+                    [FLIP_LIST_KEY_ATTR]: `${item.sceneId}:${item.hotspotId}`,
+                  }}
                 >
                   <button
                     type='button'
@@ -989,7 +1060,7 @@ export function TourNavFloat({
                     className={tourNavDirectoryItemVariants({
                       kind: 'naming',
                       active: isActive,
-                      statusTone: isSold ? 'sold' : 'default',
+                      statusTone: isClosed ? 'closed' : 'default',
                     })}
                     disabled={disabled || namingOpportunityBusy}
                     onClick={() =>
@@ -997,7 +1068,7 @@ export function TourNavFloat({
                     }
                   >
                     <span className={tourNavItemLeadingClassName}>
-                      <NamingHeartIcon active={isActive} sold={isSold} />
+                      <NamingHeartIcon active={isActive} closed={isClosed} />
                     </span>
                     <span className={tourNavItemNamingLabelClassName}>
                       <span className={tourNavItemNamingNameClassName}>
@@ -1051,22 +1122,6 @@ export function TourNavFloat({
             {TOUR_DIRECTORY_SECTION_NAMING}
           </h3>
         )}
-
-        {options?.showPriceFilter &&
-          namingPriceBounds &&
-          namingPriceMin != null &&
-          namingPriceMax != null && (
-            <NamingPriceRangeFilter
-              label={TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL}
-              min={namingPriceBounds.min}
-              max={namingPriceBounds.max}
-              step={namingPriceBounds.step}
-              valueMin={namingPriceMin}
-              valueMax={namingPriceMax}
-              disabled={disabled}
-              onChange={handleNamingPriceRangeChange}
-            />
-          )}
 
         {listBody}
       </section>
@@ -1135,21 +1190,6 @@ export function TourNavFloat({
                 {TOUR_DIRECTORY_SECTION_NAMING}
               </h3>
             )}
-
-            {namingPriceBounds &&
-              namingPriceMin != null &&
-              namingPriceMax != null && (
-                <NamingPriceRangeFilter
-                  label={TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL}
-                  min={namingPriceBounds.min}
-                  max={namingPriceBounds.max}
-                  step={namingPriceBounds.step}
-                  valueMin={namingPriceMin}
-                  valueMax={namingPriceMax}
-                  disabled={disabled}
-                  onChange={handleNamingPriceRangeChange}
-                />
-              )}
 
             <ExploreLayoutPanel layout={exploreLayout}>
               {renderNamingList(exploreSortedNamingItems, {
@@ -1239,11 +1279,19 @@ export function TourNavFloat({
               onClose={closeExploreSearch}
               onChange={setExploreSearch}
             />
-            <ExplorePanelSort
-              value={exploreSort}
-              options={exploreSortOptions}
+            <ExplorePanelRefine
+              context={exploreSortContext}
+              locationsSort={exploreLocationsSort}
+              namingSort={exploreNamingSort}
+              groups={exploreSortGroups}
+              namingPriceBounds={namingPriceBounds}
+              namingPriceMin={namingPriceMin}
+              namingPriceMax={namingPriceMax}
+              namingPriceFilterActive={namingPriceFilterActive}
               disabled={disabled}
-              onChange={setExploreSort}
+              onLocationsSortChange={setExploreLocationsSort}
+              onNamingSortChange={setExploreNamingSort}
+              onNamingPriceRangeChange={handleNamingPriceRangeChange}
             />
             <IconTooltip
               label={tourNavExploreLayoutActionLabel(exploreLayout)}
@@ -1310,7 +1358,15 @@ export function TourNavFloat({
 
   return (
     <>
-      <nav className={tourNavBreadcrumbClassName} aria-label='Tour location'>
+      <nav
+        className={cn(
+          tourNavBreadcrumbClassName,
+          tourNavBreadcrumbAlignVariants({
+            align: isDesktop ? 'center' : 'start',
+          }),
+        )}
+        aria-label='Tour location'
+      >
         <div
           className={tourNavBreadcrumbRowVariants({ hidden: breadcrumbHidden })}
         >
@@ -1447,55 +1503,92 @@ export function TourNavFloat({
             </button>
           </IconTooltip>
 
-          {!embed && (
-            <IconTooltip label={TOUR_NAV_ACTION_SHARE} placement='left'>
-              <button
-                type='button'
-                className={tourNavCircleBtnVariants({
-                  active: panelMode === 'share',
-                })}
-                onClick={handleShareClick}
-                aria-expanded={panelMode === 'share'}
-                aria-controls='tour-nav-share-panel'
-                {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SHARE)}
-              >
-                <ShareIconButton />
-              </button>
-            </IconTooltip>
-          )}
+          {!embed &&
+            (isDesktop ?
+              <>
+                <IconTooltip label={TOUR_NAV_ACTION_SHARE} placement='left'>
+                  <button
+                    type='button'
+                    className={tourNavCircleBtnVariants({
+                      active: panelMode === 'share',
+                    })}
+                    onClick={handleShareClick}
+                    aria-expanded={panelMode === 'share'}
+                    aria-controls='tour-nav-share-panel'
+                    {...tourNavIconButtonA11y(TOUR_NAV_ACTION_SHARE)}
+                  >
+                    <ShareIconButton />
+                  </button>
+                </IconTooltip>
 
-          {!embed && (
-            <IconTooltip label={TOUR_NAV_ACTION_CONTROLS} placement='left'>
-              <button
-                type='button'
-                className={tourNavCircleBtnVariants({
-                  active: controlsVisible,
-                })}
-                onClick={handleTuneClick}
-                aria-pressed={controlsVisible}
-                {...tourNavIconButtonA11y(TOUR_NAV_ACTION_CONTROLS)}
-              >
-                <ControlsIcon />
-              </button>
-            </IconTooltip>
-          )}
+                <IconTooltip label={TOUR_NAV_ACTION_HELP} placement='left'>
+                  <button
+                    type='button'
+                    className={tourNavCircleBtnVariants({
+                      active: panelMode === 'help',
+                    })}
+                    onClick={handleHelpClick}
+                    aria-expanded={panelMode === 'help'}
+                    aria-controls='tour-nav-help-panel'
+                    {...tourNavIconButtonA11y(TOUR_NAV_ACTION_HELP)}
+                  >
+                    <HelpIcon />
+                  </button>
+                </IconTooltip>
+              </>
+            : <div className={tourNavDockOverflowWrapClassName}>
+                <IconTooltip label={TOUR_NAV_ACTION_MORE} placement='left'>
+                  <button
+                    type='button'
+                    className={tourNavCircleBtnVariants({
+                      active: dockOverflowOpen,
+                    })}
+                    onClick={() => setDockOverflowOpen((open) => !open)}
+                    aria-expanded={dockOverflowOpen}
+                    aria-haspopup='menu'
+                    {...tourNavIconButtonA11y(TOUR_NAV_ACTION_MORE)}
+                  >
+                    <MoreIcon />
+                  </button>
+                </IconTooltip>
 
-          {!embed && (
-            <IconTooltip label={TOUR_NAV_ACTION_HELP} placement='left'>
-              <button
-                type='button'
-                className={tourNavCircleBtnVariants({
-                  active: panelMode === 'help',
-                })}
-                onClick={handleHelpClick}
-                aria-expanded={panelMode === 'help'}
-                aria-controls='tour-nav-help-panel'
-                {...tourNavIconButtonA11y(TOUR_NAV_ACTION_HELP)}
-              >
-                <HelpIcon />
-              </button>
-            </IconTooltip>
-          )}
+                {dockOverflowOpen && (
+                  <ul
+                    className={tourNavDockOverflowMenuClassName}
+                    role='menu'
+                    aria-label={TOUR_NAV_ACTION_MORE}
+                  >
+                    <li role='none'>
+                      <button
+                        type='button'
+                        role='menuitem'
+                        className={tourNavDockOverflowItemClassName}
+                        onClick={() => {
+                          setDockOverflowOpen(false);
+                          handleShareClick();
+                        }}
+                      >
+                        <ShareIconButton />
+                        {TOUR_NAV_ACTION_SHARE}
+                      </button>
+                    </li>
+                    <li role='none'>
+                      <button
+                        type='button'
+                        role='menuitem'
+                        className={tourNavDockOverflowItemClassName}
+                        onClick={() => {
+                          setDockOverflowOpen(false);
+                          handleHelpClick();
+                        }}
+                      >
+                        <HelpIcon />
+                        {TOUR_NAV_ACTION_HELP}
+                      </button>
+                    </li>
+                  </ul>
+                )}
+              </div>)}
         </div>
       </div>
     </>

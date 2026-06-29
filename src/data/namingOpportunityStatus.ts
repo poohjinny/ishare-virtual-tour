@@ -45,7 +45,7 @@ export interface NamingOpportunityStatusConfig {
   shortLabel: string;
   /** Hotspot pill label when this is a naming-opportunity hotspot */
   hotspotLabel: string;
-  cssModifier: string;
+  cssModifier: NamingOpportunityStatus;
   ctas: NamingOpportunityStatusCtaConfig[];
 }
 
@@ -53,15 +53,32 @@ export interface NamingOpportunityStatusConfig {
 export const NAMING_OPPORTUNITY_BADGE_LABEL = 'Naming Opportunity';
 export const NAMING_OPPORTUNITY_BADGE_SHORT_LABEL = 'NO';
 
+/** Display / sort order — open → reserved → soon → closed. */
+export const NAMING_OPPORTUNITY_STATUS_ORDER = [
+  'open',
+  'reserved',
+  'soon',
+  'closed',
+] as const satisfies readonly NamingOpportunityStatus[];
+
+/** Legacy tour JSON / CSS values normalized to canonical status keys. */
+const LEGACY_NAMING_STATUS_ALIASES: Record<string, NamingOpportunityStatus> = {
+  on_sale: 'open',
+  'on-sale': 'open',
+  coming_soon: 'soon',
+  'coming-soon': 'soon',
+  sold: 'closed',
+};
+
 const STATUS_CONFIG: Record<
   NamingOpportunityStatus,
   NamingOpportunityStatusConfig
 > = {
-  on_sale: {
-    label: 'On sale',
-    shortLabel: 'Sale',
+  open: {
+    label: 'Open',
+    shortLabel: 'Open',
     hotspotLabel: 'Naming opportunity',
-    cssModifier: 'on-sale',
+    cssModifier: 'open',
     ctas: [
       {
         preset: 'contact',
@@ -105,11 +122,11 @@ const STATUS_CONFIG: Record<
       },
     ],
   },
-  coming_soon: {
+  soon: {
     label: 'Coming soon',
     shortLabel: 'Soon',
     hotspotLabel: 'Coming soon',
-    cssModifier: 'coming-soon',
+    cssModifier: 'soon',
     ctas: [
       {
         preset: 'contact',
@@ -129,11 +146,11 @@ const STATUS_CONFIG: Record<
       },
     ],
   },
-  sold: {
-    label: 'Sold',
-    shortLabel: 'Sold',
-    hotspotLabel: 'Sold',
-    cssModifier: 'sold',
+  closed: {
+    label: 'Closed',
+    shortLabel: 'Closed',
+    hotspotLabel: 'Closed',
+    cssModifier: 'closed',
     ctas: [
       {
         preset: 'website',
@@ -154,10 +171,49 @@ const STATUS_CONFIG: Record<
   },
 };
 
+export function normalizeNamingOpportunityStatus(
+  status?: string | NamingOpportunityStatus,
+): NamingOpportunityStatus {
+  if (!status) return 'open';
+  if (status in STATUS_CONFIG) return status as NamingOpportunityStatus;
+  return LEGACY_NAMING_STATUS_ALIASES[status] ?? 'open';
+}
+
 export function resolveNamingOpportunityStatus(
   status?: NamingOpportunityStatus,
 ): NamingOpportunityStatus {
-  return status ?? 'on_sale';
+  return normalizeNamingOpportunityStatus(status);
+}
+
+export function namingOpportunityStatusFromCssModifier(
+  modifier: string,
+): NamingOpportunityStatus {
+  return normalizeNamingOpportunityStatus(modifier);
+}
+
+export function namingOpportunityStatusRank(
+  status?: NamingOpportunityStatus,
+): number {
+  const resolved = resolveNamingOpportunityStatus(status);
+  const index = NAMING_OPPORTUNITY_STATUS_ORDER.indexOf(resolved);
+  return index === -1 ? NAMING_OPPORTUNITY_STATUS_ORDER.length : index;
+}
+
+export function compareNamingOpportunityStatus(
+  a: NamingOpportunityStatus | undefined,
+  b: NamingOpportunityStatus | undefined,
+): number {
+  return namingOpportunityStatusRank(a) - namingOpportunityStatusRank(b);
+}
+
+export function compareNamingOpportunityStatusModifiers(
+  a: string,
+  b: string,
+): number {
+  return (
+    namingOpportunityStatusRank(namingOpportunityStatusFromCssModifier(a)) -
+    namingOpportunityStatusRank(namingOpportunityStatusFromCssModifier(b))
+  );
 }
 
 export function namingOpportunityStatusConfig(

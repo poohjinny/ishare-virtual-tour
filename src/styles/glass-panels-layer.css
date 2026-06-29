@@ -456,11 +456,11 @@
     font-weight: 400;
   }
 
-  .tour-glass-panel__price--sold {
+  .tour-glass-panel__price--closed {
     opacity: 0.78;
   }
 
-  .tour-glass-panel__price--sold .tour-glass-panel__price-value {
+  .tour-glass-panel__price--closed .tour-glass-panel__price-value {
     text-decoration: line-through;
     text-decoration-color: rgba(15, 23, 42, 0.2);
   }
@@ -1277,6 +1277,8 @@
     gap: var(--tour-directory-space, 16px);
     padding: 20px 0 0;
     overflow: hidden;
+    overflow-x: clip;
+    --tour-directory-inline-padding: 20px;
   }
 
   /* Explore directory — content-height min; caps at max-height then scrolls inside body */
@@ -1292,6 +1294,36 @@
     height: auto;
     min-height: auto;
     max-height: min(90vh, 840px);
+    overflow: hidden;
+  }
+
+  .tour-glass-panel--directory .tour-glass-panel__header {
+    position: relative;
+    z-index: 10;
+    overflow: visible;
+  }
+
+  .tour-glass-panel--directory .tour-glass-panel__title-row {
+    min-width: 0;
+  }
+
+  .tour-glass-panel--directory .tour-glass-panel__header-leading {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 42%;
+  }
+
+  .tour-glass-panel--directory .tour-glass-panel__title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tour-glass-panel--directory .tour-glass-panel__title-actions {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow: visible;
   }
 
   .tour-glass-panel--directory .tour-glass-panel__body--directory {
@@ -1415,6 +1447,8 @@
     position: relative;
     gap: 0;
     padding: 0;
+    overflow: hidden;
+    overflow-x: clip;
   }
 
   @media (max-width: 480px) {
@@ -1446,6 +1480,31 @@
 
     .tour-glass-panel__body {
       padding: 22px 22px 18px;
+    }
+
+    .tour-glass-panel__body--ai {
+      padding: 0;
+      overflow: hidden;
+      overflow-x: clip;
+    }
+
+    .tour-glass-panel__body--directory {
+      gap: var(--tour-directory-space, 16px);
+      padding: 16px 0 0;
+      overflow: hidden;
+      overflow-x: clip;
+      --tour-directory-inline-padding: 22px;
+    }
+
+    .tour-glass-panel__body--share {
+      gap: 0;
+      padding: 16px 0 0;
+      overflow-x: clip;
+    }
+
+    .tour-glass-panel__body--help {
+      gap: 24px;
+      padding: 20px;
     }
 
     .tour-glass-panel__footer {

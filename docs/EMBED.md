@@ -15,14 +15,16 @@ flag + log
 `?embed=1` tells the viewer it runs inside a **host page iframe**. The tour
 should feel like part of the parent site — not a standalone marketing visit.
 
-| Behavior                | Standalone                     | `?embed=1`                                    |
-| ----------------------- | ------------------------------ | --------------------------------------------- |
-| Client intro at `/`     | Per catalog rules              | Skipped → default tour                        |
-| FAB dock                | Explore, Share, Controls, Help | **Explore only** (Share/Help/Controls hidden) |
-| PSV control pill        | Toggle via Controls FAB        | **Always visible** (zoom, move, fullscreen)   |
-| Load splash             | ~3.2s curtain                  | **~1.1s** lighter splash                      |
-| First-visit coach pill  | Shown once                     | Hidden                                        |
-| `postMessage` to parent | No                             | Yes (when in iframe)                          |
+| Behavior                 | Standalone                     | `?embed=1`                                    |
+| ------------------------ | ------------------------------ | --------------------------------------------- |
+| Client intro at `/`      | Per catalog rules              | Skipped → default tour                        |
+| FAB dock                 | Explore, Share, Controls, Help | **Explore only** (Share/Help/Controls hidden) |
+| Glass panel share        | NO + location preview headers  | **Hidden**                                    |
+| PSV control pill         | Toggle via Controls FAB        | **Always visible** (zoom, move, fullscreen)   |
+| Immersive ambience (BGM) | PSV navbar music control       | **Off** — iframe audio is unreliable          |
+| Load splash              | ~3.2s curtain                  | **~1.1s** lighter splash                      |
+| First-visit coach pill   | Shown once                     | Hidden                                        |
+| `postMessage` to parent  | No                             | Yes (when in iframe)                          |
 
 Guide FAB (AI assistant) and Explore/navigation stay available unless product
 decides otherwise later. Embed does not expose the Controls FAB — the bottom PSV

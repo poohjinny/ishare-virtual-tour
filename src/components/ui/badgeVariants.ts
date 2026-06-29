@@ -16,10 +16,10 @@ export const badgeVariants = cva(
       tone: { none: '', muted: '', primary: '', accent: '' },
       status: {
         none: '',
-        'on-sale': '',
-        sold: '',
+        open: '',
+        closed: '',
         reserved: '',
-        'coming-soon': '',
+        soon: '',
       },
       uppercase: { true: 'uppercase tracking-[0.04em]', false: '' },
     },
@@ -45,15 +45,15 @@ export const badgeVariants = cva(
       },
       {
         variant: 'fill',
-        status: 'on-sale',
+        status: 'open',
         class:
-          'bg-[var(--ishare-naming-status-on-sale-bg)] font-semibold text-[var(--ishare-naming-status-on-sale-color)]',
+          'bg-[var(--ishare-naming-status-open-bg)] font-semibold text-[var(--ishare-naming-status-open-color)]',
       },
       {
         variant: 'fill',
-        status: 'sold',
+        status: 'closed',
         class:
-          'bg-[var(--ishare-naming-status-sold-bg)] font-semibold text-[var(--ishare-naming-status-sold-color)]',
+          'bg-[var(--ishare-naming-status-closed-bg)] font-semibold text-[var(--ishare-naming-status-closed-color)]',
       },
       {
         variant: 'fill',
@@ -63,9 +63,9 @@ export const badgeVariants = cva(
       },
       {
         variant: 'fill',
-        status: 'coming-soon',
+        status: 'soon',
         class:
-          'bg-[var(--ishare-naming-status-coming-soon-bg)] font-semibold text-[var(--ishare-naming-status-coming-soon-color)]',
+          'bg-[var(--ishare-naming-status-soon-bg)] font-semibold text-[var(--ishare-naming-status-soon-color)]',
       },
     ],
     defaultVariants: {

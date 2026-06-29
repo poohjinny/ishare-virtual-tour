@@ -132,6 +132,7 @@ export function measureAnchoredGlassPanelHeight(
   popup: PopupContent,
   hotspotId: string,
   tour?: Tour,
+  hideShare = false,
 ): number {
   if (typeof document === 'undefined') return GLASS_PANEL_SIZE.minHeight;
 
@@ -150,6 +151,7 @@ export function measureAnchoredGlassPanelHeight(
   const html = buildAnchoredPopupHtml(popup, hotspotId, {
     animate: false,
     tour,
+    hideShare,
   }).replace(
     GLASS_PANEL.rootAnchored,
     `${GLASS_PANEL.rootAnchored} tour-glass-panel--measure`,
@@ -163,9 +165,15 @@ export function glassPanelMarkerSize(
   popup: PopupContent,
   hotspotId: string,
   tour?: Tour,
+  hideShare = false,
 ): { width: number; height: number } {
   const width = resolveGlassPanelWidth(popup, tour);
-  const contentHeight = measureAnchoredGlassPanelHeight(popup, hotspotId, tour);
+  const contentHeight = measureAnchoredGlassPanelHeight(
+    popup,
+    hotspotId,
+    tour,
+    hideShare,
+  );
   const maxHeight = resolveGlassPanelMaxHeight(popup);
 
   return { width, height: Math.min(contentHeight, maxHeight) };
@@ -193,11 +201,11 @@ export const GLASS_PANEL = {
   price: 'tour-glass-panel__price',
   priceUnderTitle:
     'tour-glass-panel__price tour-glass-panel__price--under-title',
-  priceUnderTitleSold:
-    'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--sold',
+  priceUnderTitleClosed:
+    'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--closed',
   priceInline: 'tour-glass-panel__price tour-glass-panel__price--inline',
-  priceInlineSold:
-    'tour-glass-panel__price tour-glass-panel__price--inline tour-glass-panel__price--sold',
+  priceInlineClosed:
+    'tour-glass-panel__price tour-glass-panel__price--inline tour-glass-panel__price--closed',
   priceSep: 'tour-glass-panel__price-sep',
   priceValue: 'tour-glass-panel__price-value',
   badgeStatus: (modifier: string) => BADGE_CLASS.fillLgStatus(modifier),
@@ -440,9 +448,9 @@ export function buildGlassPanelParagraphsHtml(body: string): string {
     .join('');
 }
 
-function buildNamingPriceInlineHtml(price: string, sold: boolean): string {
+function buildNamingPriceInlineHtml(price: string, closed: boolean): string {
   const priceClass =
-    sold ? GLASS_PANEL.priceInlineSold : GLASS_PANEL.priceInline;
+    closed ? GLASS_PANEL.priceInlineClosed : GLASS_PANEL.priceInline;
   const displayPrice = formatNamingPriceDisplay(price);
 
   return `<span class="${priceClass}">
@@ -453,10 +461,10 @@ function buildNamingPriceInlineHtml(price: string, sold: boolean): string {
 
 export function buildNamingPriceUnderTitleHtml(
   price: string,
-  sold: boolean,
+  closed: boolean,
 ): string {
   const priceClass =
-    sold ? GLASS_PANEL.priceUnderTitleSold : GLASS_PANEL.priceUnderTitle;
+    closed ? GLASS_PANEL.priceUnderTitleClosed : GLASS_PANEL.priceUnderTitle;
   const displayPrice = formatNamingPriceDisplay(price);
 
   return `<p class="${priceClass}">
@@ -660,7 +668,7 @@ export function buildTourGlassPanelHtml(
 export function buildAnchoredPopupHtml(
   popup: PopupContent,
   hotspotId: string,
-  options?: { animate?: boolean; tour?: Tour },
+  options?: { animate?: boolean; tour?: Tour; hideShare?: boolean },
 ): string {
   const titleId = `info-panel-title-${hotspotId}`;
   const naming = popup.namingOpportunity;
@@ -668,7 +676,7 @@ export function buildAnchoredPopupHtml(
     naming ?
       buildNamingPriceUnderTitleHtml(
         naming.price,
-        namingOpportunityStatusConfig(naming.status).cssModifier === 'sold',
+        namingOpportunityStatusConfig(naming.status).cssModifier === 'closed',
       )
     : '';
   const titleSubHtml =
@@ -681,7 +689,7 @@ export function buildAnchoredPopupHtml(
   const headerActionsHtml = buildPopupHeaderActionsHtml({
     headerCtas: [],
     shareHtml:
-      naming ?
+      naming && !options?.hideShare ?
         buildShareHeaderButtonHtml(
           'info-panel-share',
           TOUR_SHARE_OPPORTUNITY_ARIA,
@@ -740,6 +748,7 @@ export function resolveNavPreviewPanelMaxHeight(): number {
 export function measureAnchoredNavPreviewHeight(
   preview: NavPreviewContent,
   hotspotId: string,
+  hideShare = false,
 ): number {
   if (typeof document === 'undefined') return GLASS_PANEL_SIZE.minHeight;
 
@@ -756,6 +765,7 @@ export function measureAnchoredNavPreviewHeight(
 
   const html = buildAnchoredNavPreviewHtml(preview, hotspotId, {
     animate: false,
+    hideShare,
   }).replace(
     GLASS_PANEL.rootAnchored,
     `${GLASS_PANEL.rootAnchored} tour-glass-panel--measure`,
@@ -780,8 +790,13 @@ export function measureAnchoredNavPreviewHeight(
 export function navPreviewPanelMarkerSize(
   preview: NavPreviewContent,
   hotspotId: string,
+  hideShare = false,
 ): { width: number; height: number } {
-  const contentHeight = measureAnchoredNavPreviewHeight(preview, hotspotId);
+  const contentHeight = measureAnchoredNavPreviewHeight(
+    preview,
+    hotspotId,
+    hideShare,
+  );
   const maxHeight = resolveNavPreviewPanelMaxHeight();
 
   return {
@@ -822,7 +837,7 @@ export function buildNavPreviewNamingListHtml(
       const statusHtml = buildNavPreviewNamingStatusHtml(item);
       const priceHtml = buildNamingPriceInlineHtml(
         item.price,
-        item.statusModifier === 'sold',
+        item.statusModifier === 'closed',
       );
       const ctaHtml = buildNavPreviewNamingActionsHtml(item);
 
@@ -904,10 +919,26 @@ function navPreviewNamingCtaArrowHtml(): string {
 </svg>`;
 }
 
+function navPreviewShareButtonHtml(inline = false): string {
+  const className =
+    inline ?
+      'nav-preview-panel__header-btn nav-preview-panel__header-btn--inline ishare-tooltip-host'
+    : 'nav-preview-panel__header-btn ishare-tooltip-host';
+
+  return `<button
+            type="button"
+            class="${className}"
+            data-nav-panel-share="true"
+            aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
+            data-ishare-tooltip="${escapeHtml(TOUR_SHARE_LOCATION_LABEL)}"
+            data-ishare-tooltip-placement="left"
+          >${navPreviewShareIconHtml()}</button>`;
+}
+
 export function buildAnchoredNavPreviewHtml(
   preview: NavPreviewContent,
   hotspotId: string,
-  options?: { animate?: boolean },
+  options?: { animate?: boolean; hideShare?: boolean },
 ): string {
   const titleId = `nav-panel-title-${hotspotId}`;
   const shellClass =
@@ -923,6 +954,9 @@ export function buildAnchoredNavPreviewHtml(
     : '';
 
   const heroHeight = resolveNavPreviewHeroHeight();
+
+  const hideShare = options?.hideShare ?? false;
+  const navShareHtml = hideShare ? '' : navPreviewShareButtonHtml();
 
   const heroHtml =
     preview.panorama ?
@@ -942,14 +976,7 @@ export function buildAnchoredNavPreviewHtml(
         }
         ${heroTitleOverlayHtml}
         <div class="nav-preview-panel__hero-actions">
-          <button
-            type="button"
-            class="nav-preview-panel__header-btn ishare-tooltip-host"
-            data-nav-panel-share="true"
-            aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
-            data-ishare-tooltip="${escapeHtml(TOUR_SHARE_LOCATION_LABEL)}"
-            data-ishare-tooltip-placement="left"
-          >${navPreviewShareIconHtml()}</button>
+          ${navShareHtml}
           <button
             type="button"
             class="nav-preview-panel__close"
@@ -964,14 +991,7 @@ export function buildAnchoredNavPreviewHtml(
     preview.panorama ? '' : (
       `<div class="nav-preview-panel__body-toolbar">
         <div class="nav-preview-panel__toolbar-actions">
-          <button
-            type="button"
-            class="nav-preview-panel__header-btn nav-preview-panel__header-btn--inline ishare-tooltip-host"
-            data-nav-panel-share="true"
-            aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
-            data-ishare-tooltip="${escapeHtml(TOUR_SHARE_LOCATION_LABEL)}"
-            data-ishare-tooltip-placement="left"
-          >${navPreviewShareIconHtml()}</button>
+          ${hideShare ? '' : navPreviewShareButtonHtml(true)}
           <button
             type="button"
             class="nav-preview-panel__close nav-preview-panel__close--inline"

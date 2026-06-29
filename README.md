@@ -67,9 +67,12 @@ canonical `/{tourId}/{sceneId}` form.
 
 ## iShare Embed
 
+Production host: **`https://tour.ishare.ca`**. Deploy steps:
+[docs/DEPLOY.md](docs/DEPLOY.md).
+
 ```html
 <iframe
-  src="https://your-domain.com/ken-sargent-house/overview?embed=1"
+  src="https://tour.ishare.ca/ken-sargent-house/overview?embed=1"
   title="Ken Sargent House Virtual Tour"
   allow="fullscreen"
   loading="lazy"

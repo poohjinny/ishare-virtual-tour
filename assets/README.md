@@ -82,8 +82,9 @@ quality. Re-export or lower `WEBP_QUALITY` if a WebP is still too large.
 
 ## Scene thumbnails (defaultView)
 
-Explore / intro gallery cards use baked rectilinear previews when
-`scene.thumbnail` is set in tour JSON. Generate from each scene's `defaultView`:
+Explore location gallery/list cards use baked `scene.thumbnail` when set. Intro
+gallery and catalog cards use the same hook. Generate from each scene's
+`defaultView`:
 
 ```bash
 npm run generate-thumbnails
@@ -99,8 +100,9 @@ THUMBNAIL_WIDTH=640 THUMBNAIL_QUALITY=85 npm run generate-thumbnails
 
 Writes `assets/{clientId}/{tourId}/thumbnails/{sceneId}.webp` and updates
 `tours/{tourId}.json` with `scene.thumbnail` paths. Re-run after changing
-`defaultView` or swapping a panorama. Naming-opportunity cards still use runtime
-preview until per-NO thumbnails exist.
+`defaultView` or swapping a panorama. Naming-opportunity gallery cards fall back
+to a small runtime rectilinear crop at the hotspot view when no dedicated NO
+thumbnail exists.
 
 ## Adding a new tour
 

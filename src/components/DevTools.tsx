@@ -4,6 +4,7 @@ import type { ClickCoords, DevSceneRef } from '../utils/devHotspotLogger';
 import type { Tour, ViewPosition } from '../types/tour';
 import type { DevTourMutateOptions } from '../utils/devTourApi';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
+import { prefersMobileTourChrome } from '../hooks/useTourChromeLayout';
 import { isTypingTarget } from '../utils/isTypingTarget';
 import { devFabVariants, devToolsStackClassName } from './devViewPanelVariants';
 
@@ -28,7 +29,7 @@ export function DevTools({
   clickCoords,
   panelStack,
 }: DevToolsProps) {
-  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelOpen, setPanelOpen] = useState(() => !prefersMobileTourChrome());
 
   useEffect(() => {
     return panelStack?.registerPanel('dev-panel', () => {

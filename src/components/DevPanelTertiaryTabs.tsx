@@ -35,7 +35,7 @@ export function DevPanelTertiaryTabs<T extends string>({
   value,
   onChange,
 }: DevPanelTertiaryTabsProps<T>) {
-  const { tablistRef, indicator, indicatorReady } = useSegmentedTabIndicator(
+  const { trackRef, indicator, indicatorReady } = useSegmentedTabIndicator(
     value,
     { observeKey: tabs.length },
   );
@@ -43,7 +43,7 @@ export function DevPanelTertiaryTabs<T extends string>({
   return (
     <div className={devViewPanelTertiaryTabsWrapClassName}>
       <div
-        ref={tablistRef}
+        ref={trackRef}
         className={devViewPanelTertiaryTabsClassName}
         role='tablist'
         aria-label={ariaLabel}
@@ -54,10 +54,7 @@ export function DevPanelTertiaryTabs<T extends string>({
             indicatorReady && devViewPanelTertiaryTabIndicatorReadyClassName,
           )}
           aria-hidden='true'
-          style={{
-            width: `${indicator.width}px`,
-            transform: `translateX(${indicator.left}px)`,
-          }}
+          style={{ left: `${indicator.left}px`, width: `${indicator.width}px` }}
         />
         {tabs.map((tab) => {
           const active = value === tab.id;

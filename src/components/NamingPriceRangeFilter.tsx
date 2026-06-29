@@ -13,6 +13,9 @@ import {
   namingPriceFilterLabelRowClassName,
   namingPriceFilterRailClassName,
   namingPriceFilterRootClassName,
+  namingPriceFilterRootEmbeddedClassName,
+  namingPriceFilterEmbeddedHeaderClassName,
+  namingPriceFilterEmbeddedLabelClassName,
   namingPriceFilterTrackClassName,
   namingPriceFilterValuesClassName,
   namingPriceFilterVariants,
@@ -27,6 +30,8 @@ interface NamingPriceRangeFilterProps {
   valueMax: number;
   onChange: (nextMin: number, nextMax: number) => void;
   disabled?: boolean;
+  /** Compact layout for the Explore Refine popover. */
+  embedded?: boolean;
 }
 
 function toPercent(value: number, min: number, max: number): number {
@@ -43,6 +48,7 @@ export function NamingPriceRangeFilter({
   valueMax,
   onChange,
   disabled = false,
+  embedded = false,
 }: NamingPriceRangeFilterProps) {
   const fillStyle = useMemo(
     () => ({
@@ -67,24 +73,37 @@ export function NamingPriceRangeFilter({
   return (
     <div
       className={cn(
-        namingPriceFilterRootClassName,
+        embedded ?
+          namingPriceFilterRootEmbeddedClassName
+        : namingPriceFilterRootClassName,
         namingPriceFilterVariants({ active: isActive }),
       )}
     >
-      <div className={namingPriceFilterHeaderClassName}>
-        <span className={namingPriceFilterLabelRowClassName}>
-          <MaterialSymbol
-            name='filter_list'
-            className={namingPriceFilterIconClassName}
-            sizePx={MATERIAL_SYMBOL_SIZE_16}
-          />
-          <span className={namingPriceFilterLabelClassName}>{label}</span>
-        </span>
-        <span className={namingPriceFilterValuesClassName} aria-live='polite'>
-          {formatNamingPriceAmount(valueMin)} –{' '}
-          {formatNamingPriceAmount(valueMax)}
-        </span>
-      </div>
+      {embedded ?
+        <div className={namingPriceFilterEmbeddedHeaderClassName}>
+          <span className={namingPriceFilterEmbeddedLabelClassName}>
+            {label}
+          </span>
+          <span className={namingPriceFilterValuesClassName} aria-live='polite'>
+            {formatNamingPriceAmount(valueMin)} –{' '}
+            {formatNamingPriceAmount(valueMax)}
+          </span>
+        </div>
+      : <div className={namingPriceFilterHeaderClassName}>
+          <span className={namingPriceFilterLabelRowClassName}>
+            <MaterialSymbol
+              name='filter_list'
+              className={namingPriceFilterIconClassName}
+              sizePx={MATERIAL_SYMBOL_SIZE_16}
+            />
+            <span className={namingPriceFilterLabelClassName}>{label}</span>
+          </span>
+          <span className={namingPriceFilterValuesClassName} aria-live='polite'>
+            {formatNamingPriceAmount(valueMin)} –{' '}
+            {formatNamingPriceAmount(valueMax)}
+          </span>
+        </div>
+      }
 
       <div className={namingPriceFilterTrackClassName}>
         <div className={namingPriceFilterRailClassName} aria-hidden='true'>

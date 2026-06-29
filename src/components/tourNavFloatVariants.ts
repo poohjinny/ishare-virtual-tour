@@ -6,6 +6,7 @@ import {
   materialSymbolFabClassName,
 } from './ui/materialSymbolClasses';
 import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
+import { segmentedTabsTrackChromeClassName } from './ui/segmentedTabsClasses';
 
 const tourNavGlassShadow = cn(
   'shadow-[0_10px_28px_rgba(15,23,42,0.14),0_4px_12px_rgba(15,23,42,0.08)]',
@@ -60,16 +61,25 @@ export function scrollTourNavDirectoryToActiveItem(
 /* ── Breadcrumb ── */
 
 export const tourNavBreadcrumbClassName = cn(
-  'absolute top-[var(--tour-chrome-inset)] left-1/2 z-[90] -translate-x-1/2',
-  'max-w-[min(680px,calc(100vw-2*var(--tour-chrome-inset)-2*var(--tour-chrome-fab-size)))]',
-  'max-[480px]:max-w-[calc(100vw-2*var(--tour-chrome-inset)-2*var(--tour-chrome-fab-size)-5rem)]',
+  'absolute top-[var(--tour-chrome-inset-top)] z-[90]',
+  'max-w-[min(680px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)-var(--tour-chrome-top-dock-width)))]',
 );
+
+export const tourNavBreadcrumbAlignVariants = cva('', {
+  variants: {
+    align: {
+      center: 'left-1/2 -translate-x-1/2',
+      start: 'left-[var(--tour-chrome-inset-left)] translate-x-0',
+    },
+  },
+  defaultVariants: { align: 'center' },
+});
 
 export const tourNavBreadcrumbRowVariants = cva(
   cn(
     'flex w-fit max-w-full items-center justify-center gap-2.5 opacity-100 visible translate-y-0',
     'transition-[transform,opacity,visibility] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
-    'max-[480px]:gap-2',
+    'max-[1023px]:justify-start max-[480px]:gap-2',
   ),
   {
     variants: {
@@ -158,11 +168,26 @@ export const tourNavBreadcrumbPulseDotClassName = cn(
 /* ── Actions root ── */
 
 export const tourNavActionsRootClassName = cn(
-  'absolute top-[var(--tour-chrome-inset)] right-[var(--tour-chrome-inset)] z-[90] flex flex-col-reverse items-end',
+  'absolute top-[var(--tour-chrome-inset-top)] right-[var(--tour-chrome-inset-right)] z-[90] flex flex-col-reverse items-end',
   '[--tour-directory-space:16px] [--tour-directory-divider-space:24px]',
 );
 
-export const tourNavActionsDockClassName = cn('flex items-center gap-2');
+export const tourNavActionsDockClassName = cn(
+  'relative flex items-center gap-2 overflow-visible',
+);
+
+/** ⋯ overflow menu anchor (mobile + compact). */
+export const tourNavDockOverflowWrapClassName = cn('relative');
+
+export const tourNavDockOverflowMenuClassName = cn(
+  'absolute top-[calc(100%+6px)] right-0 z-20 m-0 w-max min-w-[190px] max-w-[min(260px,calc(100vw-96px))] list-none rounded-lg origin-top-right',
+  'border border-[color:var(--ishare-border)] bg-white/95 p-1.5 shadow-[0_12px_28px_rgba(15,23,42,0.14)] backdrop-blur-[6px]',
+);
+
+export const tourNavDockOverflowItemClassName = cn(
+  'flex w-full cursor-pointer items-center gap-2.5 rounded-md border-none bg-transparent px-3 py-2.5 text-left font-display text-md text-body',
+  'transition-colors duration-150 hover:bg-[rgba(15,23,42,0.06)] focus-visible:bg-[rgba(15,23,42,0.06)] focus-visible:outline-none',
+);
 
 export const tourNavCircleBtnVariants = cva(
   cn(
@@ -198,7 +223,7 @@ export const tourNavExploreSearchIconClassName = cn(
 
 /** Explore panel header — search pill + layout toggle */
 export const tourNavExploreHeaderActionsClassName = cn(
-  'flex shrink-0 items-center justify-end gap-1',
+  'flex min-w-0 flex-1 items-center justify-end gap-1 overflow-visible',
 );
 
 export const tourNavExploreSearchPillVariants = cva(
@@ -212,7 +237,7 @@ export const tourNavExploreSearchPillVariants = cva(
         false:
           'h-[var(--ishare-panel-header-btn-size)] w-[var(--ishare-panel-header-btn-size)] max-w-[var(--ishare-panel-header-btn-size)] shrink-0 border-b border-transparent pb-0',
         true: cn(
-          'h-[var(--ishare-panel-header-btn-size)] w-[min(240px,calc(100vw-176px))] max-w-[min(240px,calc(100vw-176px))] shrink-0 gap-1.5',
+          'h-[var(--ishare-panel-header-btn-size)] min-w-0 w-full max-w-[240px] flex-1 basis-24 gap-1.5',
           'border-b border-[color:var(--ishare-border)]',
           'focus-within:border-primary-light',
         ),
@@ -245,10 +270,43 @@ export const tourNavExploreSearchCloseClassName = cn(
 
 export const tourNavExploreSortRootClassName = cn('relative shrink-0');
 
+export const tourNavExploreRefineMenuClassName = cn(
+  'fixed z-[200] m-0 w-max max-w-[min(280px,calc(100vw-96px))] rounded-lg origin-top-right',
+  'border border-[color:var(--ishare-border)] bg-white/92 p-2 shadow-[var(--ishare-glass-dock-shadow)]',
+  'backdrop-blur-[8px] backdrop-saturate-[120%]',
+);
+
+export const tourNavExploreRefineGroupBlockClassName = cn(
+  'flex flex-col gap-0.5',
+);
+
+export const tourNavExploreRefineGroupHeadingClassName = cn(
+  'mb-2 flex min-w-0 items-center gap-1.5 px-2.5 pt-1 pb-0 font-display text-sm font-semibold leading-[1.2] text-foreground',
+);
+
+export const tourNavExploreRefineSubsectionClassName = cn(
+  'px-3 pt-0.5 pb-0.5 text-right font-display text-[0.625rem] font-semibold uppercase tracking-[0.06em] text-muted',
+);
+
+export const tourNavExploreRefineFilterBlockClassName = cn(
+  'flex min-w-[13.75rem] flex-col gap-1.5 px-1 pb-1',
+);
+
+export const tourNavExploreRefineTriggerActiveClassName = cn(
+  'text-primary [&_.material-symbols-outlined]:text-primary',
+);
+
 export const tourNavExploreSortMenuClassName = cn(
-  'absolute top-[calc(100%+6px)] right-0 z-20 m-0 w-max min-w-[170px] max-w-[min(220px,calc(100vw-96px))] list-none rounded-lg origin-top-right',
+  'absolute top-[calc(100%+6px)] right-0 z-30 m-0 w-max min-w-[190px] max-w-[min(260px,calc(100vw-96px))] list-none rounded-lg origin-top-right',
   'border border-[color:var(--ishare-border)] bg-white/92 p-1 shadow-[var(--ishare-glass-dock-shadow)]',
   'backdrop-blur-[8px] backdrop-saturate-[120%]',
+);
+
+export const tourNavExploreSortGroupHeadingClassName =
+  tourNavExploreRefineGroupHeadingClassName;
+
+export const tourNavExploreSortGroupSeparatorClassName = cn(
+  'mx-2.5 my-3.5 h-0 shrink-0 border-0 border-t border-[rgba(15,23,42,0.06)]',
 );
 
 export const tourNavExploreSortMenuInClassName = cn(
@@ -302,6 +360,7 @@ export const tourNavPanelSlotVariants = cva(
     '[&_.tour-glass-panel__title-actions]:min-w-0',
     '[&_.tour-glass-panel__title-actions]:overflow-visible',
     '[&_[data-explore-search-pill]]:overflow-visible',
+    '[&_[data-explore-refine-root]]:overflow-visible',
     '[&_.tour-glass-panel__close]:mt-0',
   ),
   {
@@ -310,13 +369,15 @@ export const tourNavPanelSlotVariants = cva(
         explore: cn(
           '[&_.tour-glass-panel]:w-[min(520px,calc(100vw-48px))]',
           'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
-          '[&_.tour-glass-panel__title-actions]:shrink-0',
         ),
         help: cn(
           '[&_.tour-glass-panel]:w-[min(420px,calc(100vw-48px))]',
           'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
         ),
-        share: '',
+        share: cn(
+          '[&_.tour-glass-panel]:w-[min(420px,calc(100vw-48px))]',
+          'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
+        ),
       },
     },
     defaultVariants: { panel: 'explore' },
@@ -324,10 +385,12 @@ export const tourNavPanelSlotVariants = cva(
 );
 
 export const tourNavPanelScrollClassName = cn(
-  'ishare-scrollbar min-h-0 flex-1 overflow-y-auto',
+  'ishare-scrollbar min-h-0 min-w-0 flex-1 overflow-x-clip overflow-y-auto',
 );
 
-export const tourNavPanelScrollInnerClassName = cn('px-5 pb-5');
+export const tourNavPanelScrollInnerClassName = cn(
+  'px-[var(--tour-directory-inline-padding,20px)] pb-5 max-[480px]:pb-[18px]',
+);
 
 export const tourNavPanelLogoClassName = cn(
   'tour-nav-panel-logo mb-5 flex justify-center',
@@ -427,14 +490,17 @@ export const tourNavLocationGalleryHeroBadgeGroupClassName = cn(
   'flex flex-row flex-wrap items-center justify-end gap-1.5',
 );
 
-/** Slightly translucent chips on gallery hero previews. */
-export const tourNavLocationGalleryHeroBadgeClassName = cn(
-  'font-normal backdrop-blur-[3px]',
+/** Solid chips on gallery hero previews. */
+export const tourNavLocationGalleryHeroBadgeClassName = cn('font-normal');
+
+export const tourNavLocationGalleryFeaturedBadgeClassName = cn(
+  tourNavLocationGalleryHeroBadgeClassName,
+  'gap-0.5 bg-gold text-white',
 );
 
 export const tourNavLocationGalleryCurrentBadgeClassName = cn(
   tourNavLocationGalleryHeroBadgeClassName,
-  'bg-primary/60 text-white',
+  'gap-0.5 bg-primary text-white',
 );
 
 export const tourNavLocationGalleryStatusBadgeVariants = cva(
@@ -442,10 +508,10 @@ export const tourNavLocationGalleryStatusBadgeVariants = cva(
   {
     variants: {
       status: {
-        'on-sale': 'bg-[var(--color-status-on-sale)]/60',
-        sold: 'bg-[#475569]/60',
-        reserved: 'bg-[var(--color-accent-dark)]/60',
-        'coming-soon': 'bg-[var(--color-status-coming-soon)]/60',
+        open: 'bg-[var(--color-status-open)]',
+        closed: 'bg-[#475569]',
+        reserved: 'bg-[var(--color-accent-dark)]',
+        soon: 'bg-[var(--color-status-soon)]',
       },
     },
   },
@@ -504,7 +570,7 @@ export const tourNavDirectoryItemVariants = cva(
   {
     variants: {
       kind: { location: '', naming: 'items-center px-3.5 py-3' },
-      statusTone: { default: '', sold: '' },
+      statusTone: { default: '', closed: '' },
       active: {
         false: cn(
           'cursor-pointer',
@@ -610,9 +676,13 @@ export const tourNavSectionTitleClassName = cn(
 );
 
 export const tourNavDirectoryTabsClassName = cn(
-  'mx-5 mb-2 mt-0 box-border min-h-[42px] min-w-0 shrink-0 overflow-y-hidden',
-  '[&_[data-segmented-tab]]:flex-none [&_[data-segmented-tab]]:min-w-[8.75rem]',
-  '[&_#tour-nav-directory-tab-naming]:min-w-[12.5rem]',
+  'mx-[var(--tour-directory-inline-padding,20px)] mb-2 mt-0 box-border w-[calc(100%-2*var(--tour-directory-inline-padding,20px))] max-w-full min-w-0 shrink-0 overflow-y-hidden',
+  segmentedTabsTrackChromeClassName,
+  // Desktop — equal full-width pills
+  'min-[1024px]:[&_[data-segmented-tab]]:min-w-0 min-[1024px]:[&_[data-segmented-tab]]:flex-1 min-[1024px]:[&_[data-segmented-tab]]:basis-0 min-[1024px]:[&_[data-segmented-tab]]:overflow-hidden',
+  // Mobile + compact — horizontal scroll
+  'max-[1023px]:[&_[data-segmented-tab]]:shrink-0 max-[1023px]:[&_[data-segmented-tab]]:flex-none max-[1023px]:[&_[data-segmented-tab]]:min-w-[8.75rem] max-[1023px]:[&_[data-segmented-tab]]:overflow-hidden',
+  'max-[1023px]:[&_#tour-nav-directory-tab-naming]:min-w-[10.5rem]',
 );
 
 export const tourNavDirectoryPanelClassName = cn('flex flex-col gap-0');
@@ -633,9 +703,9 @@ export const tourNavItemIconNamingVariants = cva(
   {
     variants: {
       active: { true: 'text-primary', false: 'text-[rgba(100,116,139,0.42)]' },
-      sold: { true: '', false: '' },
+      closed: { true: '', false: '' },
     },
-    defaultVariants: { active: false, sold: false },
+    defaultVariants: { active: false, closed: false },
   },
 );
 

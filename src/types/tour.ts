@@ -24,11 +24,7 @@ export interface PopupCta {
   iconKind?: 'arrow' | 'mail' | 'bell' | 'external' | 'heart';
 }
 
-export type NamingOpportunityStatus =
-  | 'on_sale'
-  | 'sold'
-  | 'reserved'
-  | 'coming_soon';
+export type NamingOpportunityStatus = 'open' | 'reserved' | 'soon' | 'closed';
 
 export interface NamingOpportunity {
   /** Full naming opportunity title (e.g. "Reception Desk Naming Opportunity") */
@@ -36,7 +32,7 @@ export interface NamingOpportunity {
   /** Numeric amount only in tour JSON (e.g. "75000") — formatted at display time. */
   price: string;
   priceLabel?: string;
-  /** Availability — defaults to `on_sale` when omitted */
+  /** Availability — defaults to `open` when omitted */
   status?: NamingOpportunityStatus;
 }
 
@@ -135,7 +131,7 @@ export interface Scene {
   title: string;
   description?: string;
   panorama: string;
-  /** Baked rectilinear preview at defaultView — generated via `npm run generate-thumbnails`. */
+  /** Baked rectilinear preview at defaultView — Explore location cards; from `npm run generate-thumbnails`. */
   thumbnail?: string;
   defaultView: ViewPosition;
   hotspots: Hotspot[];

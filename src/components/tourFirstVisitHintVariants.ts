@@ -5,6 +5,7 @@ export const TOUR_FIRST_VISIT_HINT_FADE_MS = 280;
 
 export const tourFirstVisitHintRootClassName = cn(
   'pointer-events-none absolute inset-0 z-[85] flex items-center justify-center px-4',
+  'max-[480px]:items-end max-[480px]:pb-[calc(var(--tour-chrome-inset-bottom)+4rem+0.75rem)]',
 );
 
 export const tourFirstVisitHintPillClassName = cn(

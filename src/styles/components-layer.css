@@ -106,26 +106,26 @@
     text-transform: none;
   }
 
-  .ishare-badge--price-sold {
+  .ishare-badge--price-closed {
     background: rgba(15, 23, 42, 0.06);
     color: var(--ishare-text-muted);
   }
 
-  .ishare-badge--price-sold .ishare-badge__label {
+  .ishare-badge--price-closed .ishare-badge__label {
     text-decoration: line-through;
     text-decoration-color: rgba(15, 23, 42, 0.28);
   }
 
-  .ishare-badge--status-on-sale {
+  .ishare-badge--status-open {
     font-weight: 600;
-    background: var(--ishare-naming-status-on-sale-bg);
-    color: var(--ishare-naming-status-on-sale-color);
+    background: var(--ishare-naming-status-open-bg);
+    color: var(--ishare-naming-status-open-color);
   }
 
-  .ishare-badge--status-sold {
+  .ishare-badge--status-closed {
     font-weight: 600;
-    background: var(--ishare-naming-status-sold-bg);
-    color: var(--ishare-naming-status-sold-color);
+    background: var(--ishare-naming-status-closed-bg);
+    color: var(--ishare-naming-status-closed-color);
   }
 
   .ishare-badge--status-reserved {
@@ -134,10 +134,10 @@
     color: var(--ishare-naming-status-reserved-color);
   }
 
-  .ishare-badge--status-coming-soon {
+  .ishare-badge--status-soon {
     font-weight: 600;
-    background: var(--ishare-naming-status-coming-soon-bg);
-    color: var(--ishare-naming-status-coming-soon-color);
+    background: var(--ishare-naming-status-soon-bg);
+    color: var(--ishare-naming-status-soon-color);
   }
 
   .ishare-badge__dot {

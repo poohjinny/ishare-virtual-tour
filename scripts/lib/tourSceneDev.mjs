@@ -142,7 +142,7 @@ export function buildNavHotspotRecord({
   return record;
 }
 
-const NAMING_STATUSES = new Set(['on_sale', 'sold', 'reserved', 'coming_soon']);
+const NAMING_STATUSES = new Set(['open', 'closed', 'reserved', 'soon']);
 
 function applyPopupMediaFields(popup, { videoUrl, image }) {
   const nextVideoUrl = videoUrl?.trim();
@@ -164,7 +164,7 @@ export function buildNamingHotspotRecord({
   const title = name.trim();
   const slug = slugifyHotspotName(title);
   const priceValue = normalizeNamingPriceStorage(price);
-  const statusValue = status?.trim() || 'coming_soon';
+  const statusValue = status?.trim() || 'soon';
   const bodyValue = body?.trim() || defaultNamingBody(title, tourTitle);
 
   if (!title) throw new Error('Hotspot name is required');

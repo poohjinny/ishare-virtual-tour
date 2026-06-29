@@ -69,6 +69,7 @@ import {
   setActiveInfoHotspot,
   setActiveInfoHotspotChangeListener,
 } from './infoHotspotActive';
+import { setAnchoredPanelVisibilityListener } from './anchoredPanelVisibility';
 import { navigateToScene, preloadOtherScenes } from './transition';
 import { createRecenterViewNavbarButton } from './recenterViewNavbarButton';
 import {
@@ -76,11 +77,19 @@ import {
   createTourFullscreenNavbarButton,
 } from './tourFullscreenNavbarButton';
 import {
+  createTourToolbarToggleNavbarButton,
+  syncTourToolbarToggleNavbarButton,
+} from './tourToolbarToggleNavbarButton';
+import {
   bindImmersiveBackgroundNavbarButton,
   createImmersiveBackgroundNavbarButton,
 } from './immersiveBackgroundNavbarButton';
 import type { ImmersiveBackgroundController } from './immersiveBackgroundController';
 import { patchZoomSliderSmoothZoom } from './patchZoomSlider';
+import {
+  bindPsvNavbarChromeControls,
+  primePsvDesktopTouchSupport,
+} from './syncPsvNavbarDesktopControls';
 import {
   LANDING_ZOOM_OUT,
   hasLandingTransitionPlayed,
@@ -131,6 +140,8 @@ interface PanoramaViewerProps {
   /** Root element for browser fullscreen — keeps tour overlays visible. */
   fullscreenRootRef?: RefObject<HTMLElement | null>;
   controlsVisible?: boolean;
+  /** Desktop — collapse/expand PSV toolbar from the bottom pill toggle. */
+  onControlsToggle?: () => void;
   /** Skip landing zoom — start at scene `defaultView` (`?skipLanding=1`). */
   skipLanding?: boolean;
   /** Override landing end pose (e.g. `?no=` on the initial scene). */
@@ -141,6 +152,8 @@ interface PanoramaViewerProps {
   immersiveBackgroundController?: ImmersiveBackgroundController | null;
   /** Open naming-opportunity panel on the current scene (for default-view recenter). */
   activeNamingHotspotId?: string | null;
+  /** `?embed=1` — hide glass-panel share controls (FAB Share is already hidden). */
+  embed?: boolean;
   disabled?: boolean;
   suppressKeyboard?: boolean;
   onSceneChange: (sceneId: string) => void;
@@ -199,11 +212,13 @@ export const PanoramaViewer = forwardRef<
     initialSceneId,
     fullscreenRootRef,
     controlsVisible = VIEWER_CONTROLS_VISIBLE_DEFAULT,
+    onControlsToggle,
     skipLanding = false,
     landingTargetView,
     splashDone = false,
     immersiveBackgroundController = null,
     activeNamingHotspotId = null,
+    embed = false,
     disabled = false,
     suppressKeyboard = false,
     onSceneChange,
@@ -248,6 +263,7 @@ export const PanoramaViewer = forwardRef<
   const disabledRef = useRef(disabled);
   const suppressKeyboardRef = useLatestRef(suppressKeyboard);
   const tourRef = useLatestRef(tour);
+  const embedRef = useLatestRef(embed);
   const fullscreenRootRefLatest = useLatestRef(fullscreenRootRef);
   /** Fixed at mount — URL scene changes must not recreate the PSV viewer (causes black flash). */
   const initialSceneIdAtMount = useRef(initialSceneId);
@@ -297,6 +313,9 @@ export const PanoramaViewer = forwardRef<
   const splashDoneRef = useLatestRef(splashDone);
   const immersiveControllerRef = useLatestRef(immersiveBackgroundController);
   const activeNamingHotspotIdRef = useLatestRef(activeNamingHotspotId);
+  const controlsVisibleRef = useRef(controlsVisible);
+  controlsVisibleRef.current = controlsVisible;
+  const onControlsToggleRef = useLatestRef(onControlsToggle);
   const initialLoadNotifiedRef = useRef(false);
   const tryStartLandingRef = useRef<(() => void) | null>(null);
   const hotspotEnterRef = useRef<ReturnType<
@@ -349,6 +368,7 @@ export const PanoramaViewer = forwardRef<
       (popup) => onInfoHotspotRef.current?.(popup),
       finishNamingOpportunityGo,
       failPendingNamingInfoOpen,
+      embedRef.current,
     );
   };
 
@@ -397,6 +417,13 @@ export const PanoramaViewer = forwardRef<
       onActiveInfoHotspotChangeRef.current?.(hotspotId);
     });
     return () => setActiveInfoHotspotChangeListener(null);
+  }, []);
+
+  useEffect(() => {
+    setAnchoredPanelVisibilityListener((open) => {
+      onAnchoredPanelVisibilityChangeRef.current?.(open);
+    });
+    return () => setAnchoredPanelVisibilityListener(null);
   }, []);
 
   useEffect(() => {
@@ -722,6 +749,16 @@ export const PanoramaViewer = forwardRef<
       navbarButtons.push(immersiveBgButton);
     }
     navbarButtons.push(fullscreenButton);
+    if (onControlsToggleRef.current) {
+      navbarButtons.push(
+        createTourToolbarToggleNavbarButton(
+          () => !controlsVisibleRef.current,
+          () => onControlsToggleRef.current?.(),
+        ),
+      );
+    }
+
+    primePsvDesktopTouchSupport();
 
     const viewer = new Viewer({
       container: containerRef.current,
@@ -772,6 +809,7 @@ export const PanoramaViewer = forwardRef<
       () => fullscreenRootRefLatest.current?.current ?? null,
     );
     patchZoomSliderSmoothZoom(viewer);
+    const unbindDesktopNavbarControls = bindPsvNavbarChromeControls(viewer);
     const virtualTour = viewer.getPlugin<VirtualTourPlugin>(VirtualTourPlugin);
     virtualTourRef.current = virtualTour;
 
@@ -1162,7 +1200,13 @@ export const PanoramaViewer = forwardRef<
               return;
             }
             setActiveInfoHotspot(markers, null);
-            toggleAnchoredInfoPanel(viewer, markers, hotspot, tourRef.current);
+            toggleAnchoredInfoPanel(
+              viewer,
+              markers,
+              hotspot,
+              tourRef.current,
+              embedRef.current,
+            );
             return;
           }
           closeAnchoredInfoPanel(markers, false);
@@ -1203,6 +1247,7 @@ export const PanoramaViewer = forwardRef<
               hotspot,
               preview,
               tourRef.current.id,
+              embedRef.current,
             );
             return;
           }
@@ -1339,6 +1384,7 @@ export const PanoramaViewer = forwardRef<
       keyboardControlRef.current?.destroy();
       keyboardControlRef.current = null;
       unbindTourFullscreen();
+      unbindDesktopNavbarControls();
       releaseAllTourMedia();
       viewer.destroy();
       viewerRef.current = null;
@@ -1355,10 +1401,17 @@ export const PanoramaViewer = forwardRef<
     return bindViewerPerfPause({ scope, getViewer: () => viewerRef.current });
   }, [fullscreenRootRef]);
 
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer || !viewerReady || !onControlsToggle) return;
+
+    syncTourToolbarToggleNavbarButton(viewer, !controlsVisible);
+  }, [controlsVisible, onControlsToggle, viewerReady]);
+
   return (
     <div
       ref={containerRef}
-      className={`viewer-container${controlsVisible ? '' : ' viewer-container--controls-hidden'}`}
+      className={`viewer-container${controlsVisible ? '' : ' viewer-container--controls-collapsed'}`}
     />
   );
 });

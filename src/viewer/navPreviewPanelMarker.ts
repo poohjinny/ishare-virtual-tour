@@ -25,6 +25,7 @@ import {
 } from './anchoredPanelPosition';
 import { bindNavPreviewNamingAccordion } from './navPreviewNamingAccordion';
 import { scheduleNudgeCameraForClippedPanel } from './anchoredPanelCameraNudge';
+import { notifyAnchoredPanelOpened } from './anchoredPanelVisibility';
 
 const PANEL_ID_SUFFIX = '-nav-panel';
 const PANEL_EXIT_MS = 200;
@@ -167,6 +168,7 @@ export function openAnchoredNavPreviewPanel(
   hotspot: Hotspot,
   preview: NavPreviewContent,
   tourId: string,
+  hideShare = false,
 ): void {
   closeAnchoredNavPreviewPanel(markers, false, false);
   setActiveNavHotspot(markers, hotspot.id);
@@ -180,8 +182,8 @@ export function openAnchoredNavPreviewPanel(
 
   markers.addMarker({
     id,
-    html: buildAnchoredNavPreviewHtml(preview, hotspot.id),
-    size: navPreviewPanelMarkerSize(preview, hotspot.id),
+    html: buildAnchoredNavPreviewHtml(preview, hotspot.id, { hideShare }),
+    size: navPreviewPanelMarkerSize(preview, hotspot.id, hideShare),
     position: anchoredPanelMarkerPosition(viewer, hotspot.position, halfHeight),
     anchor: 'bottom center',
     data: {
@@ -233,6 +235,8 @@ export function openAnchoredNavPreviewPanel(
       },
     );
   }
+
+  notifyAnchoredPanelOpened();
 }
 
 export function toggleAnchoredNavPreviewPanel(
@@ -241,11 +245,19 @@ export function toggleAnchoredNavPreviewPanel(
   hotspot: Hotspot,
   preview: NavPreviewContent,
   tourId: string,
+  hideShare = false,
 ): void {
   const openHostId = getOpenNavPreviewHostId(markers);
   if (openHostId === hotspot.id) {
     closeAnchoredNavPreviewPanel(markers, true);
     return;
   }
-  openAnchoredNavPreviewPanel(viewer, markers, hotspot, preview, tourId);
+  openAnchoredNavPreviewPanel(
+    viewer,
+    markers,
+    hotspot,
+    preview,
+    tourId,
+    hideShare,
+  );
 }

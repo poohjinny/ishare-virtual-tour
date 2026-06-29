@@ -33,6 +33,7 @@ import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { useTourAssistant } from '../hooks/useTourAssistant';
 import { useTourEscapeClose } from '../hooks/useTourEscapeClose';
 import { useTourPanelStack } from '../hooks/useTourPanelStack';
+import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { useTourViewerShortcuts } from '../hooks/useTourViewerShortcuts';
 import { useTourRouteSync } from '../hooks/useTourRouteSync';
 import { useNamingOpportunityUrlSync } from '../hooks/useNamingOpportunityUrlSync';
@@ -301,7 +302,15 @@ function TourExperience() {
   useClientTheme(bootstrapTour);
   useClientFavicon(bootstrapTour);
   useClientFont(bootstrapTour, tourRootRef);
-  const immersiveBackgroundController = useImmersiveBackground(bootstrapTour);
+  const immersiveBackgroundController = useImmersiveBackground(
+    bootstrapTour,
+    searchParams.embed,
+  );
+
+  const viewerTour = useMemo((): Tour => {
+    if (!searchParams.embed || !tour) return bootstrapTour;
+    return { ...bootstrapTour, immersiveBackground: undefined };
+  }, [bootstrapTour, searchParams.embed, tour]);
 
   useEffect(() => {
     document.title = productFullName;
@@ -366,6 +375,7 @@ function TourExperience() {
 
   const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
   const viewerControlsVisible = searchParams.embed ? true : controlsVisible;
+  const { isDesktop } = useTourChromeLayout();
   const { hintVisible, onInitialTourReveal, onFirstPanoramaInteract } =
     useTourFirstVisitHint({
       embed: searchParams.embed,
@@ -574,9 +584,12 @@ function TourExperience() {
 
   useEffect(() => {
     return panelStack.registerPanel('anchored-panel', () => {
+      pendingNamingSelectionRef.current = null;
+      setActiveNamingHotspotId(null);
+      clearNamingOpportunityFromUrl();
       viewerRef.current?.closeAnchoredPanels();
     });
-  }, [panelStack]);
+  }, [clearNamingOpportunityFromUrl, panelStack]);
 
   const handlePsvPanelVisibilityChange = useCallback(
     (visible: boolean) => {
@@ -609,6 +622,8 @@ function TourExperience() {
     onRecenter: handleRecenterToDefaultView,
     onToggleBackgroundMusic:
       immersiveBackgroundController ? handleToggleBackgroundMusic : undefined,
+    onToggleToolbar:
+      !searchParams.embed && isDesktop ? toggleControlsVisible : undefined,
   });
 
   const handleSelectNamingOpportunity = useCallback(
@@ -797,15 +812,19 @@ function TourExperience() {
         <PanoramaViewer
           key={tour.id}
           ref={viewerRef}
-          tour={tour}
+          tour={viewerTour}
           initialSceneId={initialScene}
           fullscreenRootRef={viewerAreaRef}
           controlsVisible={viewerControlsVisible}
+          onControlsToggle={
+            searchParams.embed ? undefined : toggleControlsVisible
+          }
           skipLanding={searchParams.skipLanding}
           landingTargetView={landingTargetView}
           splashDone={splashRevealReady}
           immersiveBackgroundController={immersiveBackgroundController}
           activeNamingHotspotId={activeNamingHotspotId}
+          embed={searchParams.embed}
           disabled={isTransitioning}
           onSceneChange={handleSceneChange}
           onInfoHotspot={setActivePopup}
@@ -867,8 +886,6 @@ function TourExperience() {
           showHistoryForward={showForward}
           onHistoryBack={goBack}
           onHistoryForward={goForward}
-          controlsVisible={viewerControlsVisible}
-          onControlsToggle={toggleControlsVisible}
           onSelectScene={handleNavigate}
           onSelectNamingOpportunity={handleSelectNamingOpportunity}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
@@ -924,6 +941,7 @@ function TourExperience() {
         tourTitle={productFullName}
         sceneId={currentSceneId}
         namingHotspotId={activeNamingHotspotId}
+        embed={searchParams.embed}
         onClose={closeInfoPopup}
       />
     </div>

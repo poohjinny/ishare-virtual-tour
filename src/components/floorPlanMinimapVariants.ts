@@ -1,12 +1,35 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
+import { materialSymbolCompactClassName } from './ui/materialSymbolClasses';
 
 export const floorPlanMinimapRootClassName = cn(
-  'pointer-events-none absolute bottom-[var(--tour-chrome-inset)] left-[var(--tour-chrome-inset)] z-[85]',
+  'pointer-events-none absolute z-[85]',
+  'bottom-[var(--tour-chrome-inset-bottom)] left-[var(--tour-chrome-inset-left)]',
 );
 
+export const floorPlanMinimapCollapsedRootClassName = cn(
+  'pointer-events-auto absolute z-[85]',
+  'bottom-[var(--tour-chrome-inset-bottom)] left-[var(--tour-chrome-inset-left)]',
+);
+
+export const floorPlanMinimapChipBtnClassName = cn(
+  'flex size-11 cursor-pointer items-center justify-center rounded-full border-none',
+  'bg-[var(--ishare-float-glass-bg)] text-foreground shadow-[var(--ishare-float-glass-shadow)]',
+  'backdrop-blur-[4px] backdrop-saturate-[110%]',
+  'transition-[background,transform] duration-150',
+  'hover:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+);
+
+export const floorPlanMinimapChipIconClassName = materialSymbolCompactClassName;
+
 export const floorPlanMinimapFrameClassName = cn(
-  'relative w-fit overflow-hidden rounded-[10px] bg-[var(--ishare-float-glass-bg)] p-1.5 leading-none shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%] max-[480px]:rounded-lg max-[480px]:p-2',
+  'pointer-events-auto relative w-fit overflow-hidden rounded-[10px] bg-[var(--ishare-float-glass-bg)] p-1.5 leading-none shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%] max-[480px]:rounded-lg max-[480px]:p-2',
+);
+
+export const floorPlanMinimapCloseBtnClassName = cn(
+  'absolute top-1 right-1 z-[2] flex size-7 cursor-pointer items-center justify-center rounded-full border-none',
+  'bg-white/88 text-muted shadow-sm backdrop-blur-[2px]',
+  'hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary-light',
 );
 
 export const floorPlanMinimapMapClassName = cn(

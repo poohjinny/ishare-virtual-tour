@@ -48,6 +48,7 @@ interface InfoPopupProps {
   tourTitle: string;
   sceneId: string;
   namingHotspotId?: string | null;
+  embed?: boolean;
   onClose: () => void;
 }
 
@@ -57,6 +58,7 @@ export function InfoPopup({
   tourTitle,
   sceneId,
   namingHotspotId = null,
+  embed = false,
   onClose,
 }: InfoPopupProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -139,7 +141,7 @@ export function InfoPopup({
   if (!shown) return null;
 
   const showNamingShare =
-    Boolean(shown.namingOpportunity) && Boolean(namingHotspotId);
+    !embed && Boolean(shown.namingOpportunity) && Boolean(namingHotspotId);
 
   return (
     <div

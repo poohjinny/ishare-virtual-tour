@@ -27,16 +27,40 @@ export function segmentedTabClassName(
 }
 
 export const segmentedTabsListClassName = cn(
-  'relative box-border flex items-stretch gap-1 rounded-full border border-[color:var(--ishare-border)] bg-white/55 p-1',
+  'relative box-border flex items-stretch rounded-full border border-[color:var(--ishare-border)] bg-white/55 p-1',
+);
+
+/** Flex row that holds the indicator + tabs; scrolls with horizontal overflow. */
+export const segmentedTabsTrackClassName = cn(
+  'relative flex min-h-0 w-full min-w-full flex-1 items-stretch gap-1',
+);
+
+/** 32px track, flush indicator, tab items fill track height (apply on tablist shell). */
+export const segmentedTabsTrackChromeClassName = cn(
+  '[&>div]:h-8 [&>div]:min-h-8 [&>div]:w-full [&>div]:min-w-full',
+  '[&_span[aria-hidden=true]]:top-0 [&_span[aria-hidden=true]]:bottom-0',
+  '[&_[data-segmented-tab]]:min-h-0 [&_[data-segmented-tab]]:h-full',
+);
+
+export const segmentedTabsScrollableItemsClassName = cn(
+  '[&_[data-segmented-tab]]:shrink-0 [&_[data-segmented-tab]]:flex-none [&_[data-segmented-tab]]:min-w-[8.75rem] [&_[data-segmented-tab]]:overflow-hidden',
+);
+
+export const segmentedTabsScrollableTrackClassName = cn(
+  'flex-nowrap max-[1023px]:w-max',
 );
 
 export const segmentedTabsIndicatorClassName = cn(
-  'pointer-events-none absolute top-1 bottom-1 left-0 z-0 rounded-full bg-white/95 shadow-[0_1px_4px_rgba(15,23,42,0.1)]',
+  'pointer-events-none absolute top-1 bottom-1 z-0 rounded-full bg-white/95 shadow-[0_1px_4px_rgba(15,23,42,0.1)]',
 );
 
-export function segmentedTabButtonClassName(active: boolean): string {
+export function segmentedTabButtonClassName(
+  active: boolean,
+  options?: { grow?: boolean },
+): string {
   return cn(
-    'relative z-[1] inline-flex min-h-8 min-w-0 flex-1 cursor-pointer appearance-none items-center justify-center gap-1.5 rounded-full border-none bg-transparent px-3 text-center font-[inherit] text-sm font-semibold leading-[1.2] whitespace-nowrap text-muted transition-[background,color,box-shadow] duration-150 [-webkit-tap-highlight-color:transparent]',
+    'relative z-[1] inline-flex min-h-8 min-w-0 self-stretch cursor-pointer appearance-none items-center justify-center gap-1.5 rounded-full border-none bg-transparent px-3 text-center font-[inherit] text-sm font-semibold leading-[1.2] whitespace-nowrap text-muted transition-[background,color,box-shadow] duration-150 [-webkit-tap-highlight-color:transparent]',
+    options?.grow !== false && 'flex-1',
     'data-[active=false]:hover:text-foreground data-[active=false]:hover:bg-white/45',
     'disabled:cursor-not-allowed disabled:opacity-50',
     active && 'text-foreground',
@@ -46,11 +70,11 @@ export function segmentedTabButtonClassName(active: boolean): string {
 export const segmentedTabIconClassName = materialSymbolTabClassName;
 
 export const segmentedTabsScrollableClassName = cn(
-  'flex-nowrap overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-segmented-tab]]:min-w-20 [&_[data-segmented-tab]]:flex-none',
+  'w-full max-w-full flex-nowrap overflow-x-auto overflow-y-hidden overscroll-x-contain [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
 );
 
 export const segmentedTabsIndicatorReadyClassName =
-  'transition-[transform,width] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none';
+  'transition-[left,width] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none';
 
 /** Clip enter animations; avoid overflow-x-only (forces overflow-y: auto → scrollbar flash). */
 export const segmentedTabPanelContentClassName = cn('overflow-hidden');

@@ -62,16 +62,19 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
       `postMessage`)
 - [x] Invalid tour id shows dedicated “Tour not found” (no silent default
       fallback)
-- [ ] Deployed to production host
+- [ ] Deployed to production host — CI + `tour.ishare.ca` DNS; see
+      [DEPLOY.md](./DEPLOY.md)
 
 ### Sprint A — Embed & demo safety
 
 - [x] **`?embed=1` chrome trim** — reduce FAB dock (hide Share/Help/Controls;
       keep Explore); PSV control pill always on; lighter splash for iframe
 - [x] **Unknown tour URL** — dedicated “Tour not found” view
-- [ ] **Explore scene thumbnails** — small equirect preview per location in
-      Explore list (intro gallery already has tour-level preview). Asset
-      approach:
+- [x] **Explore scene thumbnails** — baked `scene.thumbnail` previews for
+      location gallery/list cards (`npm run generate-thumbnails`). Naming
+      gallery cards still use a lightweight runtime crop at the hotspot view
+      when no per-NO thumb exists. See
+      [assets/README.md](../assets/README.md#scene-thumbnails-defaultview) and
       [PERFORMANCE P0 — thumbnails](./PERFORMANCE.md#p0--panorama-assets-highest-impact).
 
 ### Sprint B — Orientation & content sync
@@ -81,11 +84,10 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
       `preview.image`
 - [ ] **Floor plan coverage** — `map` coordinates for all Ken Sargent scenes on
       `floorplan.svg` (kitchen, comfort-corner, base-level entrance)
-- [ ] **Holodomor / Cancer Research** — scene and NO content pass
 - [ ] **Mobile layout pass** — React UI chrome on phone: FAB dock vs minimap vs
-      guide FAB, safe-area, panel sizing. Spec: [MOBILE.md](./MOBILE.md). PSV
-      viewer acceptable as-is (reference only). If load or jank on device:
-      [PERFORMANCE P0–P1](./PERFORMANCE.md#when-to-start).
+      guide FAB, safe-area, panel sizing. Spec: [MOBILE.md](./MOBILE.md).
+      **M0+M1 done** (chrome tiers, overflow dock, minimap chip, safe-area); M2+
+      pending.
 - [x] **Scene transition feedback** — load progress bar on scene navigation (dim
       overlay not needed; sufficient on slow panoramas)
 
@@ -125,8 +127,10 @@ Do not embed PSV in admin — preview via iframe to this viewer.
 
 - [x] Create nav / naming (NO) / general info hotspots — click-to-place
 - [x] Move hotspot — reposition from panorama click
-- [x] Edit nav — label, target scene, `targetView`, `instant`, `preview.image`
-- [x] Create nav — `instant`, `preview.image`
+- [x] Edit nav — label, target scene, `targetView` sync from landing, `instant`,
+      `preview.image`
+- [x] Create nav — `instant`, `preview.image`; `targetView` from target
+      `defaultView`
 - [x] Edit naming — title, price, status, body
 - [x] Edit info — title, body, display, video URL, image
 - [x] Delete hotspot
@@ -159,8 +163,13 @@ until Admin app exists; then port endpoints and retire duplicate UI.
 
 **Scenes & assets**
 
-- [ ] Nav create — custom `targetView` (edit-only today)
-- [ ] Scene thumbnail — trigger `generate-thumbnails` or upload
+- [x] Scene thumbnail (per scene) — dev panel **Apply defaultView (L)** and
+      **Replace panorama** bake `scene.thumbnail` via dev API; Explore cards
+      consume baked paths. Bulk offline: `npm run generate-thumbnails` (see
+      [assets/README.md](../assets/README.md#scene-thumbnails-defaultview)).
+- [ ] Bulk thumbnail regen — dev panel button for whole tour (today: CLI only)
+- [ ] Thumbnail direct upload — optional custom `thumbnails/*.webp` without
+      equirect bake
 - [ ] Bulk floor-plan pin placement — visual editor on plan image
 
 **Hotspots & naming**
@@ -194,8 +203,10 @@ until Admin app exists; then port endpoints and retire duplicate UI.
 
 - [x] Catalog `visibility` + intro gallery filter
 - [ ] **iShare iframe integration** — `postMessage` to parent (analytics,
-      resize)
-- [ ] **Deploy** — `tour.ishare.ca` (or chosen host), SPA fallback, env config
+      resize); parent site iframe `src` on ishare.ca
+- [x] **Deploy pipeline** — production `npm run build`, GitHub Actions, `CNAME`,
+      `staticwebapp.config.json`, [DEPLOY.md](./DEPLOY.md). **Remaining:** DNS +
+      GitHub Pages custom domain + ishare.ca iframe cutover
 
 ---
 

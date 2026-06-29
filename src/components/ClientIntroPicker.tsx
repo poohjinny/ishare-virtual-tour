@@ -20,15 +20,16 @@ import {
 import { loadTour } from '../data/loadTour';
 import { buildTourLocation } from '../utils/tourPaths';
 import { SegmentedTabs } from './ui/SegmentedTabs';
+import {
+  segmentedTabsScrollableItemsClassName,
+  segmentedTabsTrackChromeClassName,
+} from './ui/segmentedTabsClasses';
 import { SegmentedTabPanelContent } from './ui/SegmentedTabPanel';
 import { useSegmentedTabPanelScroll } from '../hooks/useSegmentedTabPanelScroll';
 import { ClientIntroTabLabel } from './icons/ClientIntroTabIcons';
 import { ClientIntroGalleryCard } from './ClientIntroGalleryCard';
 import { TourGlassPanel } from './TourGlassPanel';
-import {
-  tourNavPanelScrollClassName,
-  tourNavPanelScrollInnerClassName,
-} from './tourNavFloatVariants';
+import { tourNavPanelScrollClassName } from './tourNavFloatVariants';
 
 interface ClientIntroPickerProps {
   searchParams: URLSearchParams;
@@ -44,17 +45,23 @@ function categoryFilterId(category: CategoryFilter): string {
 }
 
 const INTRO_PANEL_CLASS = cn(
-  'tour-glass-panel--intro relative z-[1] flex flex-col',
+  'tour-glass-panel--intro relative z-[1] mx-auto flex w-[min(640px,calc(100vw-48px))] shrink-0 flex-col self-center',
+  'max-[480px]:w-[min(100%,calc(100vw-32px))]',
   '[&_.tour-glass-panel__header]:shrink-0',
 );
 
 const INTRO_BODY_CLASS = cn(
-  'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
+  'flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip overflow-hidden',
 );
 
 const INTRO_FILTERS_CLASS = cn(
-  'mx-5 mb-2 box-border min-h-[42px] min-w-0 shrink-0 overflow-y-hidden max-[480px]:mx-4',
-  '[&_[data-segmented-tab]]:min-w-[8.75rem] [&_[data-segmented-tab]]:flex-none',
+  'mx-5 mb-2 box-border w-[calc(100%-2.5rem)] max-w-full min-w-0 shrink-0 overflow-x-auto overflow-y-hidden max-[480px]:mx-4 max-[480px]:w-[calc(100%-2rem)]',
+  segmentedTabsTrackChromeClassName,
+  segmentedTabsScrollableItemsClassName,
+);
+
+const INTRO_GALLERY_SCROLL_INNER_CLASS = cn(
+  'px-5 pb-5 max-[480px]:px-4 max-[480px]:pb-[18px]',
 );
 
 export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
@@ -219,7 +226,7 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
           role='tabpanel'
           aria-labelledby={categoryFilterId(categoryFilter)}
         >
-          <div className={tourNavPanelScrollInnerClassName}>
+          <div className={INTRO_GALLERY_SCROLL_INNER_CLASS}>
             <SegmentedTabPanelContent
               panelKey={categoryFilter}
               tabOrder={filterTabOrder}

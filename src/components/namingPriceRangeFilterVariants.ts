@@ -66,3 +66,15 @@ export const namingPriceFilterInputMaxClassName = cn(
 export const namingPriceFilterRootClassName = cn(
   'mb-[var(--tour-directory-space,16px)] flex flex-col gap-2.5 px-1',
 );
+
+export const namingPriceFilterRootEmbeddedClassName = cn(
+  'flex flex-col gap-2 px-1 py-0.5',
+);
+
+export const namingPriceFilterEmbeddedHeaderClassName = cn(
+  'flex items-center justify-between gap-3',
+);
+
+export const namingPriceFilterEmbeddedLabelClassName = cn(
+  'font-display text-xs font-semibold text-foreground',
+);

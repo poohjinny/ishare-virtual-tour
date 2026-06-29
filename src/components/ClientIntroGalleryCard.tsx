@@ -10,13 +10,19 @@ import {
   tourNavLocationGalleryCardHeroImageClassName,
   tourNavLocationGalleryCardHeroSkeletonClassName,
   tourNavLocationGalleryCtaClassName,
-  tourNavLocationGalleryCurrentBadgeClassName,
+  tourNavLocationGalleryFeaturedBadgeClassName,
   tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryHeroCtaOverlayClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { TourCategoryBadge } from './TourCategoryBadge';
 import { Badge } from './ui/Badge';
+import { BADGE_CLASS } from './ui/badgeClasses';
+import { MaterialSymbol } from './ui/MaterialSymbol';
+import {
+  materialSymbolBadgeClassName,
+  MATERIAL_SYMBOL_SIZE_16,
+} from './ui/materialSymbolClasses';
 
 interface ClientIntroGalleryCardProps {
   entry: CatalogTourListItem;
@@ -92,8 +98,14 @@ export function ClientIntroGalleryCard({
                 variant='fill'
                 size='sm'
                 tone='primary'
-                className={tourNavLocationGalleryCurrentBadgeClassName}
+                className={tourNavLocationGalleryFeaturedBadgeClassName}
               >
+                <MaterialSymbol
+                  name='star'
+                  className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
+                  sizePx={MATERIAL_SYMBOL_SIZE_16}
+                  filled
+                />
                 Featured
               </Badge>
             : null}

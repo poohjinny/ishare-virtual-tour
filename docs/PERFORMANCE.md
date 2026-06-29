@@ -49,12 +49,12 @@ not a task list.
 
 ### P0 — Panorama assets (highest impact)
 
-| Technique               | Guidance                                                                                                                          |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Compress exports**    | Target ~800 KB–1.2 MB per scene at acceptable quality (current ~1.1–2.4 MB).                                                      |
-| **Resolution tiers**    | Optional mobile/downlink-aware URLs (e.g. 4K desktop, 2K mobile) via tour JSON or loader.                                         |
-| **CDN / cache headers** | Long-cache `public/assets/`; align with iShare embed origin — [ROADMAP Phase 2](./ROADMAP.md#accessibility--performance-ongoing). |
-| **Thumbnail previews**  | Use thumbs for Explore / nav preview instead of full equirects — [ROADMAP Sprint A](./ROADMAP.md#sprint-a--embed--demo-safety).   |
+| Technique               | Guidance                                                                                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Compress exports**    | Target ~800 KB–1.2 MB per scene at acceptable quality (current ~1.1–2.4 MB).                                                                                                    |
+| **Resolution tiers**    | Optional mobile/downlink-aware URLs (e.g. 4K desktop, 2K mobile) via tour JSON or loader.                                                                                       |
+| **CDN / cache headers** | Long-cache `public/assets/`; align with iShare embed origin — [ROADMAP Phase 2](./ROADMAP.md#accessibility--performance-ongoing).                                               |
+| **Thumbnail previews**  | Explore location cards use baked `scene.thumbnail`; naming hotspot cards may still runtime-crop at the NO view — [ROADMAP Sprint A](./ROADMAP.md#sprint-a--embed--demo-safety). |
 
 **Touch:** `assets/{clientId}/{tourId}/panoramas/`, `tours/*.json` (`panorama`,
 `thumbnail`), deploy/CDN config.

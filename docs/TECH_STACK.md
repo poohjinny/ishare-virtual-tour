@@ -214,8 +214,9 @@ npm run build   # outputs to dist/
 
 ### Hosting options
 
+- **Production:** `https://tour.ishare.ca` — see [DEPLOY.md](./DEPLOY.md)
 - Vercel / Netlify — zero-config static deploy
-- Azure Static Web Apps — aligns with enterprise infra
+- Azure Static Web Apps — `public/staticwebapp.config.json` included
 - Any static file server + CDN
 
 ### iShare embed
@@ -224,7 +225,7 @@ See [EMBED.md](./EMBED.md) for URL format, `postMessage`, and QA.
 
 ```html
 <iframe
-  src="https://tour.yourdomain.com/{tourId}/{firstScene}?embed=1"
+  src="https://tour.ishare.ca/{tourId}/{firstScene}?embed=1"
   title="Virtual Tour"
   allow="fullscreen"
   loading="lazy"

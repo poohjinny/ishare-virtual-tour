@@ -1,4 +1,5 @@
 import type { FloorPlan, Tour, ViewerOrientation } from '../types/tour';
+import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import {
   buildFovWedgePath,
   getMappedScenes,
@@ -33,6 +34,12 @@ export function FloorPlanMinimap({
   disabled = false,
   onSelectScene,
 }: FloorPlanMinimapProps) {
+  const { isDesktop } = useTourChromeLayout();
+
+  if (!isDesktop) {
+    return null;
+  }
+
   const scene = tour.scenes[currentSceneId];
   const mapPoints = getMappedScenes(tour.scenes);
 

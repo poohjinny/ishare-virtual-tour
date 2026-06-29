@@ -184,7 +184,7 @@ export function formatNamingHotspotJson(
           namingOpportunity: {
             name: `${title} Naming Opportunity`,
             price: '$75,000',
-            status: 'coming_soon',
+            status: 'soon',
           },
           body: 'First paragraph describing the naming opportunity…',
         },

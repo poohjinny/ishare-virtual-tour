@@ -2,6 +2,7 @@ import {
   Children,
   Fragment,
   isValidElement,
+  type KeyboardEvent,
   type ReactElement,
   type ReactNode,
 } from 'react';
@@ -17,7 +18,6 @@ import {
   devViewPanelSectionHeaderCollapsibleClassName,
   devViewPanelSectionLeadClassName,
   devViewPanelSectionTitleClassName,
-  devViewPanelSectionChevronBtnClassName,
 } from './devViewPanelVariants';
 
 export type DevPanelSectionProps = {
@@ -71,33 +71,46 @@ export function DevPanelSection({
       </div>
     : null;
 
+  const handleHeaderKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!collapsible || !onToggle) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onToggle();
+    }
+  };
+
   return (
     <section className={cn(devViewPanelSectionClassName, className)}>
       <header
         className={cn(
           devViewPanelSectionHeaderClassName,
           collapsible && devViewPanelSectionHeaderCollapsibleClassName,
+          collapsible && 'cursor-pointer select-none',
         )}
+        role={collapsible ? 'button' : undefined}
+        tabIndex={collapsible ? 0 : undefined}
+        aria-expanded={collapsible ? open : undefined}
+        aria-label={
+          collapsible ?
+            open ?
+              `Collapse ${title}`
+            : `Expand ${title}`
+          : undefined
+        }
+        onClick={collapsible ? onToggle : undefined}
+        onKeyDown={handleHeaderKeyDown}
       >
         <div className='flex min-w-0 flex-1 flex-col gap-1.5'>
           <h3 className={devViewPanelSectionTitleClassName}>{title}</h3>
           {descriptionBlock}
         </div>
         {collapsible ?
-          <button
-            type='button'
-            className={devViewPanelSectionChevronBtnClassName}
-            aria-expanded={open}
-            aria-label={open ? `Collapse ${title}` : `Expand ${title}`}
-            onClick={onToggle}
-          >
-            <AccordionChevron
-              className={cn(
-                devViewPanelSectionChevronClassName,
-                open && devViewPanelSectionChevronOpenClassName,
-              )}
-            />
-          </button>
+          <AccordionChevron
+            className={cn(
+              devViewPanelSectionChevronClassName,
+              open && devViewPanelSectionChevronOpenClassName,
+            )}
+          />
         : null}
       </header>
       {!collapsible || open ?

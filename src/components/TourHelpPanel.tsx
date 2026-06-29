@@ -7,6 +7,8 @@ import {
 
 import type { TourClient } from '../types/tour';
 
+import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
+
 import {
   TOUR_HELP_FAQ,
   TOUR_HELP_SECTION_CONTACT,
@@ -56,6 +58,7 @@ export function TourHelpPanel({
 
   logo,
 }: TourHelpPanelProps) {
+  const { isCoarsePointer } = useTourChromeLayout();
   const showClientContact = hasClientContact(client);
   const showTourSupport = hasClientContact(PLATFORM_TOUR_SUPPORT);
   const showContact = showClientContact || showTourSupport;
@@ -107,19 +110,24 @@ export function TourHelpPanel({
             </li>
 
             <li>
-              Viewer controls appear at the bottom by default; tap the tune icon
-              to show or hide them.
+              Viewer controls appear at the bottom by default; use the Viewer
+              controls button to show or hide them.
             </li>
           </ul>
         </AccordionItem>
 
-        <AccordionItem title={TOUR_HELP_SECTION_SHORTCUTS} iconPosition='right'>
-          <ul className={tourNavHelpListClassName}>
-            {TOUR_HELP_KEYBOARD_SHORTCUTS.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </AccordionItem>
+        {!isCoarsePointer && (
+          <AccordionItem
+            title={TOUR_HELP_SECTION_SHORTCUTS}
+            iconPosition='right'
+          >
+            <ul className={tourNavHelpListClassName}>
+              {TOUR_HELP_KEYBOARD_SHORTCUTS.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </AccordionItem>
+        )}
 
         <AccordionItem title={TOUR_HELP_SECTION_CONTROLS} iconPosition='right'>
           <ul className={tourNavControlsListClassName}>

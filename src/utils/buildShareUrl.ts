@@ -4,6 +4,7 @@ import {
   buildTourLocation,
   toNamingOpportunitySearchValue,
 } from './tourPaths';
+import { resolveTourPublicOrigin } from '../constants/tourOrigin';
 
 export interface BuildShareUrlOptions {
   tourId: string;
@@ -108,7 +109,7 @@ function buildAbsoluteTourUrl(relative: string): string {
   const pathOnly = relative.startsWith('/') ? relative.slice(1) : relative;
   const base = import.meta.env.BASE_URL;
   const urlPath = `${base}${pathOnly}`.replace(/([^:]\/)\/+/g, '$1');
-  return new URL(urlPath, window.location.origin).href;
+  return new URL(urlPath, resolveTourPublicOrigin()).href;
 }
 
 export interface ShareMessage {

@@ -18,6 +18,7 @@ import {
   measureHotspotHalfHeightPx,
 } from './anchoredPanelPosition';
 import { scheduleNudgeCameraForClippedPanel } from './anchoredPanelCameraNudge';
+import { notifyAnchoredPanelOpened } from './anchoredPanelVisibility';
 
 const PANEL_ID_SUFFIX = '-panel';
 const PANEL_EXIT_MS = 200;
@@ -127,6 +128,7 @@ export function openAnchoredInfoPanel(
   markers: MarkersPlugin,
   hotspot: Hotspot,
   tour: Tour,
+  hideShare = false,
 ): void {
   if (!hotspot.popup) return;
 
@@ -141,8 +143,11 @@ export function openAnchoredInfoPanel(
 
   markers.addMarker({
     id,
-    html: buildAnchoredPopupHtml(hotspot.popup, hotspot.id, { tour }),
-    size: glassPanelMarkerSize(hotspot.popup, hotspot.id, tour),
+    html: buildAnchoredPopupHtml(hotspot.popup, hotspot.id, {
+      tour,
+      hideShare,
+    }),
+    size: glassPanelMarkerSize(hotspot.popup, hotspot.id, tour, hideShare),
     position: anchoredPanelMarkerPosition(viewer, hotspot.position, halfHeight),
     anchor: 'bottom center',
     data: { infoPanel: true, hostHotspotId: hotspot.id },
@@ -167,6 +172,7 @@ export function openAnchoredInfoPanel(
   }
 
   setActiveInfoHotspot(markers, hotspot.id);
+  notifyAnchoredPanelOpened();
 
   scheduleNudgeCameraForClippedPanel(viewer, () => {
     const panelMarker = markers.getMarker(id);
@@ -181,13 +187,14 @@ export function toggleAnchoredInfoPanel(
   markers: MarkersPlugin,
   hotspot: Hotspot,
   tour: Tour,
+  hideShare = false,
 ): void {
   const openHostId = getOpenAnchoredPanelHostId(markers);
   if (openHostId === hotspot.id) {
     closeAnchoredInfoPanel(markers, true);
     return;
   }
-  openAnchoredInfoPanel(viewer, markers, hotspot, tour);
+  openAnchoredInfoPanel(viewer, markers, hotspot, tour, hideShare);
 }
 
 export function isAnchoredPopup(popup: PopupContent): boolean {

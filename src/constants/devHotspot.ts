@@ -1,14 +1,16 @@
+import {
+  NAMING_OPPORTUNITY_STATUS_ORDER,
+  namingOpportunityStatusConfig,
+} from '../data/namingOpportunityStatus';
 import type { NamingOpportunityStatus } from '../types/tour';
 
 export const DEV_NAMING_STATUS_OPTIONS: {
   value: NamingOpportunityStatus;
   label: string;
-}[] = [
-  { value: 'coming_soon', label: 'Coming soon' },
-  { value: 'on_sale', label: 'On sale' },
-  { value: 'reserved', label: 'Reserved' },
-  { value: 'sold', label: 'Sold' },
-];
+}[] = NAMING_OPPORTUNITY_STATUS_ORDER.map((value) => ({
+  value,
+  label: namingOpportunityStatusConfig(value).label,
+}));
 
 export type DevHotspotTab = 'nav' | 'naming' | 'info';
 

@@ -11,10 +11,10 @@ export type BadgeSize = 'sm' | 'lg';
 export type BadgeTone = 'primary' | 'accent' | 'muted' | 'none';
 
 export type NamingStatusModifier =
-  | 'on-sale'
-  | 'sold'
+  | 'open'
   | 'reserved'
-  | 'coming-soon';
+  | 'soon'
+  | 'closed';
 
 export interface BadgeProps {
   children: React.ReactNode;

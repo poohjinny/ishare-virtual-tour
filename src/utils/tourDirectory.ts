@@ -1,4 +1,5 @@
 import type { ExploreDirectorySort } from '../constants/tourDirectorySort';
+import { compareNamingOpportunityStatusModifiers } from '../data/namingOpportunityStatus';
 import type { Scene, Tour, ViewPosition } from '../types/tour';
 import { parseNamingPrice } from './namingPrice';
 import { buildNavPreviewNamingItems } from './navPreview';
@@ -112,6 +113,35 @@ function compareLocaleStrings(a: string, b: string, direction: 1 | -1): number {
   return a.localeCompare(b) * direction;
 }
 
+function compareNamingDirectoryNames(
+  a: TourDirectoryNamingItem,
+  b: TourDirectoryNamingItem,
+  direction: 1 | -1,
+): number {
+  const nameDiff = compareLocaleStrings(a.name, b.name, direction);
+  if (nameDiff !== 0) return nameDiff;
+
+  return compareNamingOpportunityStatusModifiers(
+    a.statusModifier,
+    b.statusModifier,
+  );
+}
+
+function compareNamingDirectoryLocations(
+  a: TourDirectoryNamingItem,
+  b: TourDirectoryNamingItem,
+  direction: 1 | -1,
+): number {
+  const locationDiff = compareLocaleStrings(
+    a.sceneTitle,
+    b.sceneTitle,
+    direction,
+  );
+  if (locationDiff !== 0) return locationDiff;
+
+  return compareNamingDirectoryNames(a, b, 1);
+}
+
 function compareNamingPrices(
   a: TourDirectoryNamingItem,
   b: TourDirectoryNamingItem,
@@ -121,7 +151,7 @@ function compareNamingPrices(
   const bPrice = b.priceAmount;
 
   if (aPrice == null && bPrice == null) {
-    return a.name.localeCompare(b.name);
+    return compareNamingDirectoryNames(a, b, 1);
   }
   if (aPrice == null) return 1;
   if (bPrice == null) return -1;
@@ -129,21 +159,48 @@ function compareNamingPrices(
   const diff = (aPrice - bPrice) * direction;
   if (diff !== 0) return diff;
 
-  return a.name.localeCompare(b.name);
+  return compareNamingDirectoryNames(a, b, 1);
+}
+
+function sceneNamingOpportunityCount(scene: Scene): number {
+  return buildNavPreviewNamingItems(scene).length;
+}
+
+function compareScenesByNamingCount(
+  a: Scene,
+  b: Scene,
+  direction: 1 | -1,
+): number {
+  const countDiff =
+    (sceneNamingOpportunityCount(a) - sceneNamingOpportunityCount(b)) *
+    direction;
+  if (countDiff !== 0) return countDiff;
+
+  return compareLocaleStrings(a.title, b.title, 1);
 }
 
 export function sortTourScenes(
   scenes: Scene[],
   sort: ExploreDirectorySort,
 ): Scene[] {
-  if (sort === 'tour-order') return scenes;
-
   const sorted = [...scenes];
 
-  if (sort === 'name-asc' || sort === 'price-asc') {
-    sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, 1));
-  } else if (sort === 'name-desc' || sort === 'price-desc') {
-    sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, -1));
+  switch (sort) {
+    case 'name-asc':
+      sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, 1));
+      break;
+    case 'name-desc':
+      sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, -1));
+      break;
+    case 'naming-count-desc':
+      sorted.sort((a, b) => compareScenesByNamingCount(a, b, -1));
+      break;
+    case 'naming-count-asc':
+      sorted.sort((a, b) => compareScenesByNamingCount(a, b, 1));
+      break;
+    default:
+      sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, 1));
+      break;
   }
 
   return sorted;
@@ -153,16 +210,31 @@ export function sortTourNamingDirectory(
   items: TourDirectoryNamingItem[],
   sort: ExploreDirectorySort,
 ): TourDirectoryNamingItem[] {
-  if (sort === 'tour-order') return items;
-
   const sorted = [...items];
 
   switch (sort) {
     case 'name-asc':
-      sorted.sort((a, b) => compareLocaleStrings(a.name, b.name, 1));
+      sorted.sort((a, b) => compareNamingDirectoryNames(a, b, 1));
       break;
     case 'name-desc':
-      sorted.sort((a, b) => compareLocaleStrings(a.name, b.name, -1));
+      sorted.sort((a, b) => compareNamingDirectoryNames(a, b, -1));
+      break;
+    case 'location-asc':
+      sorted.sort((a, b) => compareNamingDirectoryLocations(a, b, 1));
+      break;
+    case 'location-desc':
+      sorted.sort((a, b) => compareNamingDirectoryLocations(a, b, -1));
+      break;
+    case 'status-asc':
+      sorted.sort((a, b) => {
+        const statusDiff = compareNamingOpportunityStatusModifiers(
+          a.statusModifier,
+          b.statusModifier,
+        );
+        if (statusDiff !== 0) return statusDiff;
+
+        return a.name.localeCompare(b.name);
+      });
       break;
     case 'price-asc':
       sorted.sort((a, b) => compareNamingPrices(a, b, 1));

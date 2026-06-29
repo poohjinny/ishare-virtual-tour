@@ -12,7 +12,7 @@ export const BADGE_CLASS = {
   fillLgAccentIcon: `${B} ${B}--fill ${B}--fill-lg ${B}--tone-accent ${B}--has-icon`,
   fillLgPrimaryIcon: `${B} ${B}--fill ${B}--fill-lg ${B}--tone-primary ${B}--has-icon`,
   fillLgPrimary: `${B} ${B}--fill ${B}--fill-lg ${B}--tone-primary ${B}--price`,
-  fillLgPrimarySold: `${B} ${B}--fill ${B}--fill-lg ${B}--tone-primary ${B}--price ${B}--price-sold`,
+  fillLgPrimaryClosed: `${B} ${B}--fill ${B}--fill-lg ${B}--tone-primary ${B}--price ${B}--price-closed`,
   fillLgSponsor: `${B} ${B}--fill ${B}--fill-lg ${B}--tone-accent ${B}--sponsor`,
   fillLgStatus: (modifier: string) =>
     `${B} ${B}--fill ${B}--fill-lg ${B}--status-${modifier}`,

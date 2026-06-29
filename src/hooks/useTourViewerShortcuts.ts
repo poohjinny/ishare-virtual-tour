@@ -7,6 +7,7 @@ interface UseTourViewerShortcutsOptions {
   disabled?: boolean;
   onRecenter?: () => void;
   onToggleBackgroundMusic?: () => void;
+  onToggleToolbar?: () => void;
 }
 
 export function useTourViewerShortcuts(
@@ -15,6 +16,7 @@ export function useTourViewerShortcuts(
     disabled = false,
     onRecenter,
     onToggleBackgroundMusic,
+    onToggleToolbar,
   }: UseTourViewerShortcutsOptions = {},
 ) {
   useEffect(() => {
@@ -35,6 +37,11 @@ export function useTourViewerShortcuts(
         onRecenter?.();
         return;
       }
+      if (key === 'c' && onToggleToolbar) {
+        event.preventDefault();
+        onToggleToolbar();
+        return;
+      }
       if (key === 'm' && onToggleBackgroundMusic) {
         event.preventDefault();
         onToggleBackgroundMusic();
@@ -43,5 +50,11 @@ export function useTourViewerShortcuts(
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [disabled, fullscreenRootRef, onRecenter, onToggleBackgroundMusic]);
+  }, [
+    disabled,
+    fullscreenRootRef,
+    onRecenter,
+    onToggleBackgroundMusic,
+    onToggleToolbar,
+  ]);
 }

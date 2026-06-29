@@ -70,14 +70,14 @@ export function NamingOpportunityPrice({
 }: {
   opportunity: NamingOpportunity;
 }) {
-  const priceSold =
-    namingOpportunityStatusConfig(opportunity.status).cssModifier === 'sold';
+  const priceClosed =
+    namingOpportunityStatusConfig(opportunity.status).cssModifier === 'closed';
 
   return (
     <p
       className={
-        priceSold ?
-          'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--sold'
+        priceClosed ?
+          'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--closed'
         : 'tour-glass-panel__price tour-glass-panel__price--under-title'
       }
     >

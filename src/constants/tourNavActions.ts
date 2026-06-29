@@ -8,6 +8,8 @@ export const TOUR_NAV_ACTION_CONTROLS = 'Viewer controls';
 
 export const TOUR_NAV_ACTION_HELP = 'Help';
 
+export const TOUR_NAV_ACTION_MORE = 'More options';
+
 export function tourNavExploreLayoutActionLabel(
   layout: ExploreDirectoryLayout,
 ): string {

@@ -3,6 +3,7 @@ import { cn } from '../lib/cn';
 
 export const shareTourPanelRootClassName = cn(
   'flex min-w-0 flex-col gap-3.5 px-5 pb-5',
+  'max-[480px]:px-[22px] max-[480px]:pb-[18px]',
 );
 
 export const shareTourPanelLeadClassName = cn(

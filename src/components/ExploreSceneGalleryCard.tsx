@@ -1,3 +1,4 @@
+import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import { cn } from '../lib/cn';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
@@ -52,6 +53,7 @@ export function ExploreSceneGalleryCard({
       ref={ref}
       className='m-0 flex min-h-0 list-none p-0'
       role='presentation'
+      {...{ [FLIP_LIST_KEY_ATTR]: scene.id }}
     >
       <button
         type='button'

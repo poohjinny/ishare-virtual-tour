@@ -15,6 +15,7 @@ export const TOUR_HELP_VIEWER_CONTROLS = [
   'Drag to look around',
   'Scroll or pinch to zoom',
   'Use the control pill at the bottom for zoom, move, default view, and fullscreen',
+  'Collapse or expand the toolbar from the pill (Show toolbar / Hide toolbar)',
   'Arrow keys to rotate',
   '+ / − to zoom in and out',
 ] as const;
@@ -22,7 +23,7 @@ export const TOUR_HELP_VIEWER_CONTROLS = [
 export const TOUR_HELP_KEYBOARD_SHORTCUTS = [
   'E — open or close Explore tour',
   'S — open or close Share',
-  'C — show or hide viewer controls',
+  'C — collapse or expand the viewer toolbar (desktop)',
   'H — open or close Help',
   'R — reset to default view',
   'F — toggle fullscreen',

@@ -3,8 +3,9 @@ import { cn } from '../../lib/cn';
 import { materialSymbolCompactClassName } from '../ui/materialSymbolClasses';
 
 export const aiAssistantStackClassName = cn(
-  'pointer-events-none absolute right-[var(--tour-chrome-inset)] bottom-[var(--tour-chrome-inset)] z-[95] flex flex-col items-end gap-2.5',
-  'max-sm:left-[var(--tour-chrome-inset)] max-sm:items-stretch',
+  'pointer-events-none absolute z-[95] flex flex-col items-end gap-2.5',
+  'right-[var(--tour-chrome-inset-right)] bottom-[var(--tour-chrome-inset-bottom)]',
+  'max-[480px]:left-[var(--tour-chrome-inset-left)] max-[480px]:items-stretch',
   '[&>*]:pointer-events-auto',
 );
 
@@ -16,6 +17,8 @@ const aiFabHoverClassName = cn(
 export const aiFabVariants = cva(
   cn(
     'ai-fab group/fab relative box-border inline-flex h-[76px] min-h-[76px] min-w-[76px] w-auto max-w-[76px] cursor-pointer flex-row items-center justify-start overflow-hidden rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-2 shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%]',
+    'max-[480px]:h-16 max-[480px]:min-h-16 max-[480px]:min-w-16 max-[480px]:max-w-16 max-[480px]:self-end max-[480px]:p-2',
+    'max-[480px]:hover:max-w-16 max-[480px]:focus-visible:max-w-16',
   ),
   {
     variants: {
@@ -30,7 +33,8 @@ export const aiFabVariants = cva(
 );
 
 export const aiFabAvatarClassName = cn(
-  'inline-flex size-[60px] shrink-0 items-center justify-center overflow-visible leading-none',
+  'inline-flex size-[60px] shrink-0 items-center justify-center overflow-hidden leading-none',
+  'max-[480px]:size-12',
 );
 
 export const aiFabIconClassName = cn(
@@ -39,6 +43,7 @@ export const aiFabIconClassName = cn(
 
 export const aiFabLabelClassName = cn(
   'ai-fab__label shrink-0 whitespace-nowrap pl-[13px] pr-[11px] font-display text-lg font-medium text-foreground opacity-0 transition-opacity duration-[240ms] ease-out',
+  'max-[480px]:hidden',
   'group-hover/fab:opacity-100 group-hover/fab:duration-[320ms] group-hover/fab:delay-150 group-hover/fab:ease-out',
   'group-focus-visible/fab:opacity-100 group-focus-visible/fab:duration-[320ms] group-focus-visible/fab:delay-150 group-focus-visible/fab:ease-out',
 );
@@ -51,7 +56,7 @@ export const aiPanelVariants = cva(
     '[--ai-panel-avatar-size:48px] [--ai-panel-header-gap:14px] [--ai-panel-inline-padding:20px]',
     '[&_.tour-glass-panel__shell]:h-full [&_.tour-glass-panel__shell]:max-h-none',
     '[&_.tour-glass-panel__header]:flex-row [&_.tour-glass-panel__header]:items-center [&_.tour-glass-panel__header]:justify-between [&_.tour-glass-panel__header]:gap-3 [&_.tour-glass-panel__header]:px-[var(--ai-panel-inline-padding)]',
-    'max-sm:h-[min(520px,calc(100vh-72px))] max-sm:max-h-[520px] max-sm:w-full',
+    'max-[480px]:h-[min(520px,calc(100vh-72px))] max-[480px]:max-h-[520px] max-[480px]:w-full',
   ),
   {
     variants: {

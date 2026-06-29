@@ -8,10 +8,10 @@ import {
 } from './ui/materialSymbolClasses';
 import { cn } from '../lib/cn';
 const NAMING_STATUS_MATERIAL_ICONS: Record<NamingStatusModifier, string> = {
-  'on-sale': 'sell',
-  reserved: 'lock',
-  'coming-soon': 'schedule',
-  sold: 'check_circle',
+  open: 'door_open',
+  reserved: 'handshake',
+  soon: 'schedule',
+  closed: 'check_circle',
 };
 
 export function NamingStatusBadgeIcon({
@@ -43,9 +43,9 @@ export function isNamingStatusIconModifier(
   modifier: string,
 ): modifier is NamingStatusModifier {
   return (
-    modifier === 'on-sale' ||
-    modifier === 'sold' ||
+    modifier === 'open' ||
     modifier === 'reserved' ||
-    modifier === 'coming-soon'
+    modifier === 'soon' ||
+    modifier === 'closed'
   );
 }

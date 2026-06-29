@@ -224,7 +224,7 @@
         {
           "id": "nav-to-ambulance-of-load",
           "type": "nav",
-          "label": "Ambulance of Load",
+          "label": "Ambulance Off-Load",
           "position": {
             "yaw": 151.3,
             "pitch": -49.5

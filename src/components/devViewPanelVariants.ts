@@ -1,11 +1,13 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
 
-/** Same row as tour nav breadcrumb / FAB dock (`--tour-chrome-inset`). */
+/** Same chrome insets as nav dock; ≤1023px anchors bottom-left (mobile + compact). */
 export const devToolsStackClassName = cn(
-  'pointer-events-none absolute top-[var(--tour-chrome-inset)] left-[var(--tour-chrome-inset)] z-[100]',
-  'flex w-[min(440px,calc(100vw-2*var(--tour-chrome-inset)))] flex-col gap-2',
+  'pointer-events-none absolute left-[var(--tour-chrome-inset-left)] z-[100]',
+  'top-[var(--tour-chrome-inset-top)]',
+  'flex w-[min(440px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)))] flex-col gap-2',
   '[&>*]:pointer-events-auto',
+  'max-[1023px]:top-auto max-[1023px]:bottom-[var(--tour-chrome-inset-bottom)] max-[1023px]:flex-col-reverse',
 );
 
 export const devFabVariants = cva(
@@ -28,6 +30,7 @@ export const devFabVariants = cva(
 
 export const devViewPanelRootClassName = cn(
   'flex max-h-[min(calc(100vh-72px),900px)] min-h-0 flex-col overflow-hidden rounded-lg border border-[rgba(0,255,128,0.35)] bg-[rgba(0,0,0,0.85)] font-mono text-xs text-[#e2e8f0]',
+  'max-[1023px]:max-h-[min(calc(100vh-var(--tour-chrome-inset-bottom)-var(--tour-chrome-inset-top)-4.5rem),900px)]',
 );
 
 export const devViewPanelStickyHeaderClassName = cn(
@@ -123,11 +126,7 @@ export const devViewPanelSectionHeaderCollapsibleClassName = cn(
   'flex flex-row items-start justify-between gap-2',
 );
 
-/** Chevron-only toggle — title/description stay outside the button. */
-export const devViewPanelSectionChevronBtnClassName = cn(
-  'mt-px shrink-0 cursor-pointer rounded border-0 bg-transparent p-0.5 text-left',
-);
-
+/** Collapsible section header — whole row toggles expand/collapse. */
 export const devViewPanelSectionChevronClassName = cn(
   'mt-px shrink-0 text-[#64748b] transition-[transform,color] duration-200',
 );
@@ -314,7 +313,7 @@ export const devViewPanelTertiaryTabIndicatorClassName = cn(
 );
 
 export const devViewPanelTertiaryTabIndicatorReadyClassName = cn(
-  'opacity-100 transition-[transform,width,opacity] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none',
+  'opacity-100 transition-[left,width,opacity] duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)] motion-reduce:transition-none',
 );
 
 export const devViewPanelTertiaryTabButtonVariants = cva(
@@ -454,26 +453,32 @@ export const devViewPanelToggleListClassName = cn(
   'm-0 flex flex-col gap-1 p-0',
 );
 
+/** Checkbox row — grid keeps the input column aligned with label text. */
 export const devViewPanelToggleLabelClassName = cn(
-  'flex cursor-pointer items-start gap-2 rounded px-0.5 py-0.5 text-2xs leading-[1.35] text-[#cbd5e1] hover:text-[#f0fdf4]',
+  'grid cursor-pointer grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0 rounded px-0.5 py-0.5 text-2xs text-[#cbd5e1] hover:text-[#f0fdf4]',
+);
+
+/** Multi-line toggle copy (e.g. debug URL flags with hint suffix). */
+export const devViewPanelToggleLabelMultilineClassName = cn(
+  devViewPanelToggleLabelClassName,
+  'items-start [&>input]:mt-0.5',
 );
 
 export const devViewPanelToggleInputClassName = cn(
-  'mt-0.5 size-3 shrink-0 cursor-pointer accent-[#4ade80]',
+  'size-3 shrink-0 cursor-pointer accent-[#4ade80]',
 );
 
-/** Checkbox row inside form grids — centers input with single-line label. */
-export const devViewPanelFormCheckboxLabelClassName = cn(
-  devViewPanelToggleLabelClassName,
-  'items-center',
-);
+/** Checkbox row inside form grids — same layout as devViewPanelToggleLabelClassName. */
+export const devViewPanelFormCheckboxLabelClassName =
+  devViewPanelToggleLabelClassName;
 
-export const devViewPanelFormCheckboxInputClassName = cn(
-  devViewPanelToggleInputClassName,
-  'mt-0',
-);
+export const devViewPanelFormCheckboxInputClassName =
+  devViewPanelToggleInputClassName;
+
+export const devViewPanelToggleTextClassName = cn('min-w-0 leading-[1.35]');
 
 export const devViewPanelToggleNameClassName = cn(
+  devViewPanelToggleTextClassName,
   'font-semibold text-[#fde047] [&_code]:text-[#fde047]',
 );
 
@@ -490,6 +495,58 @@ export const devViewPanelManageListClassName = cn(
 );
 
 export const devViewPanelManageListItemClassName = cn('flex flex-col gap-2');
+
+export type DevHotspotKindBadgeKind = 'nav' | 'naming' | 'info';
+
+const devManageBadgeBaseClassName =
+  'px-2 py-0.5 text-[0.5625rem] font-medium leading-[1.35]';
+
+/** Matches dev hotspot tertiary tab colors (nav / naming / info). */
+export const devHotspotKindBadgeVariants = cva(devManageBadgeBaseClassName, {
+  variants: {
+    kind: {
+      nav: 'border border-[#38bdf8] bg-[rgba(56,189,248,0.28)] text-[#bae6fd] shadow-[inset_0_0_0_1px_rgba(56,189,248,0.18)]',
+      naming:
+        'border border-[#f472b6] bg-[rgba(244,114,182,0.28)] text-[#fbcfe8] shadow-[inset_0_0_0_1px_rgba(244,114,182,0.18)]',
+      info: 'border border-[#facc15] bg-[rgba(250,204,21,0.28)] text-[#fef08a] shadow-[inset_0_0_0_1px_rgba(250,204,21,0.18)]',
+    },
+  },
+});
+
+export const devViewPanelManageListItemHeadClassName = cn(
+  'm-0 flex w-full items-center gap-2 text-2xs leading-[1.4]',
+);
+
+export const devViewPanelManageListItemHeadMainClassName = cn(
+  'flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1',
+);
+
+export const devViewPanelManageListItemTitleClassName = cn(
+  'font-medium text-[#e2e8f0]',
+);
+
+export const devViewPanelManageListItemBulletClassName = cn('text-[#64748b]');
+
+export const devViewPanelManageListItemIdClassName = cn(
+  'font-normal text-[#94a3b8]',
+);
+
+export type DevSceneManageBadgeKind = 'current' | 'first';
+
+export const devSceneManageBadgeVariants = cva(devManageBadgeBaseClassName, {
+  variants: {
+    kind: {
+      current:
+        'border border-[#4ade80] bg-[rgba(74,222,128,0.22)] text-[#86efac] shadow-[inset_0_0_0_1px_rgba(74,222,128,0.15)]',
+      first:
+        'border border-[rgba(148,163,184,0.45)] bg-[rgba(100,116,139,0.22)] text-[#cbd5e1]',
+    },
+  },
+});
+
+export const devViewPanelManageListItemBadgesClassName = cn(
+  'flex shrink-0 flex-wrap items-center justify-end gap-1',
+);
 
 export const devViewPanelHotspotRowClassName = cn(
   'flex flex-col gap-2 rounded-md border border-[rgba(100,116,139,0.35)] bg-[rgba(0,0,0,0.25)] px-2.5 py-2',
