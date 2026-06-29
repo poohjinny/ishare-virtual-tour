@@ -119,8 +119,28 @@
       "firstScene": "overview",
       "scenes": [
         {
+          "id": "ambulance-of-load",
+          "title": "Ambulance of Load"
+        },
+        {
+          "id": "corridor",
+          "title": "Corridor"
+        },
+        {
           "id": "overview",
           "title": "Overview"
+        },
+        {
+          "id": "satalite-imaging-waiting-area",
+          "title": "Satalite Imaging Waiting Area"
+        },
+        {
+          "id": "waiting-room",
+          "title": "Waiting Area"
+        },
+        {
+          "id": "walk-in-entrace",
+          "title": "Zone - 1: Walk In Entrace"
         }
       ]
     }

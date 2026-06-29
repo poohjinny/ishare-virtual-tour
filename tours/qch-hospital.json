@@ -21,9 +21,9 @@
       "description": "Take in an aerial view of Queensway Carleton Hospital and the surrounding community. QCH provides care to half of Ottawa's population — and community support through the Foundation helps purchase critical medical equipment and fund hospital priorities.",
       "panorama": "/assets/qchfoundation/qch-hospital/panoramas/overview.webp",
       "defaultView": {
-        "yaw": 68.1,
-        "pitch": -71.8,
-        "zoom": 29
+        "yaw": 78.3,
+        "pitch": -77.4,
+        "zoom": 10
       },
       "hotspots": [
         {
@@ -36,24 +36,24 @@
           },
           "targetScene": "overview",
           "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
+            "yaw": 78.3,
+            "pitch": -77.4,
+            "zoom": 10
           }
         },
         {
           "id": "nav-to-satellite-imaging",
           "type": "nav",
-          "label": "Satellite Imaging",
+          "label": "Satalite Imaging Waiting Area",
           "position": {
-            "yaw": 132.5,
-            "pitch": -61.1
+            "yaw": 125.9,
+            "pitch": -68.3
           },
-          "targetScene": "overview",
+          "targetScene": "satalite-imaging-waiting-area",
           "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
+            "yaw": 73,
+            "pitch": 3.3,
+            "zoom": 20
           }
         },
         {
@@ -66,9 +66,9 @@
           },
           "targetScene": "overview",
           "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
+            "yaw": 78.3,
+            "pitch": -77.4,
+            "zoom": 10
           }
         },
         {
@@ -76,14 +76,14 @@
           "type": "nav",
           "label": "Zone 1: Walk-in Entrance",
           "position": {
-            "yaw": 157,
-            "pitch": -46.6
+            "yaw": 160.5,
+            "pitch": -43.7
           },
-          "targetScene": "overview",
+          "targetScene": "walk-in-entrace",
           "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
+            "yaw": 51.9,
+            "pitch": -0.4,
+            "zoom": 35
           }
         },
         {
@@ -177,21 +177,6 @@
           }
         },
         {
-          "id": "nav-to-zone1-walk-in-entrance",
-          "type": "nav",
-          "label": "Zone 1: Walk-in Entrance",
-          "position": {
-            "yaw": 171.4,
-            "pitch": -63.6
-          },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
-        },
-        {
           "id": "nav-to-zone-3-acute-care-pod-a",
           "type": "nav",
           "label": "Zone 3: Acute Care, Pod A",
@@ -205,9 +190,119 @@
             "pitch": -77.5,
             "zoom": 1
           }
+        },
+        {
+          "id": "nav-to-corridor",
+          "type": "nav",
+          "label": "Corridor",
+          "position": {
+            "yaw": 93.8,
+            "pitch": -71
+          },
+          "targetScene": "corridor",
+          "targetView": {
+            "yaw": 110.6,
+            "pitch": 1.2,
+            "zoom": 5
+          }
+        },
+        {
+          "id": "nav-to-waiting-area",
+          "type": "nav",
+          "label": "Waiting Area",
+          "position": {
+            "yaw": 159.6,
+            "pitch": -60.7
+          },
+          "targetScene": "waiting-room",
+          "targetView": {
+            "yaw": 355.3,
+            "pitch": -4.9,
+            "zoom": 5
+          }
+        },
+        {
+          "id": "nav-to-ambulance-of-load",
+          "type": "nav",
+          "label": "Ambulance of Load",
+          "position": {
+            "yaw": 151.3,
+            "pitch": -49.5
+          },
+          "targetScene": "ambulance-of-load",
+          "targetView": {
+            "yaw": 109.7,
+            "pitch": 1.3,
+            "zoom": 15
+          }
         }
       ],
       "thumbnail": "/assets/qchfoundation/qch-hospital/thumbnails/overview.webp"
+    },
+    "walk-in-entrace": {
+      "id": "walk-in-entrace",
+      "title": "Zone - 1: Walk In Entrace",
+      "description": "Explore Walk In Entrace at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/qch-hospital/panoramas/walk-in-entrace.webp",
+      "defaultView": {
+        "yaw": 42.1,
+        "pitch": -4.2,
+        "zoom": 35
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/qch-hospital/thumbnails/walk-in-entrace.webp"
+    },
+    "ambulance-of-load": {
+      "id": "ambulance-of-load",
+      "title": "Ambulance of Load",
+      "description": "Explore Ambulance of Load at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/qch-hospital/panoramas/ambulance-of-load.webp",
+      "defaultView": {
+        "yaw": 109.7,
+        "pitch": 1.3,
+        "zoom": 15
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/qch-hospital/thumbnails/ambulance-of-load.webp"
+    },
+    "satalite-imaging-waiting-area": {
+      "id": "satalite-imaging-waiting-area",
+      "title": "Satalite Imaging Waiting Area",
+      "description": "Explore Satalite Imaging Waiting Area at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/qch-hospital/panoramas/satalite-imaging-waiting-area.webp",
+      "defaultView": {
+        "yaw": 73,
+        "pitch": 3.3,
+        "zoom": 20
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/qch-hospital/thumbnails/satalite-imaging-waiting-area.webp"
+    },
+    "corridor": {
+      "id": "corridor",
+      "title": "Corridor",
+      "description": "Explore Corridor at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/qch-hospital/panoramas/corridor.webp",
+      "defaultView": {
+        "yaw": 110.6,
+        "pitch": 1.2,
+        "zoom": 5
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/qch-hospital/thumbnails/corridor.webp"
+    },
+    "waiting-room": {
+      "id": "waiting-room",
+      "title": "Waiting Area",
+      "description": "Explore Waiting Room at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/qch-hospital/panoramas/waiting-room.webp",
+      "defaultView": {
+        "yaw": 355.3,
+        "pitch": -4.9,
+        "zoom": 5
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/qch-hospital/thumbnails/waiting-room.webp"
     }
   }
 }

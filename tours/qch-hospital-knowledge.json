@@ -33,6 +33,116 @@
         "How can I contact the Foundation?",
         "How can I donate?"
       ]
+    },
+    "walk-in-entrace": {
+      "title": "Walk In Entrace",
+      "description": "Explore Walk In Entrace at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "Walk In Entrace is part of the Queensway Carleton Hospital virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Walk In Entrace?",
+          "a": "Explore Walk In Entrace at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Walk In Entrace",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "ambulance-of-load": {
+      "title": "Ambulance of Load",
+      "description": "Explore Ambulance of Load at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "Ambulance of Load is part of the Queensway Carleton Hospital virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Ambulance of Load?",
+          "a": "Explore Ambulance of Load at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Ambulance of Load",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "satalite-imaging-waiting-area": {
+      "title": "Satalite Imaging Waiting Area",
+      "description": "Explore Satalite Imaging Waiting Area at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "Satalite Imaging Waiting Area is part of the Queensway Carleton Hospital virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Satalite Imaging Waiting Area?",
+          "a": "Explore Satalite Imaging Waiting Area at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Satalite Imaging Waiting Area",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "corridor": {
+      "title": "Corridor",
+      "description": "Explore Corridor at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "Corridor is part of the Queensway Carleton Hospital virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Corridor?",
+          "a": "Explore Corridor at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Corridor",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "waiting-room": {
+      "title": "Waiting Room",
+      "description": "Explore Waiting Room at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "Waiting Room is part of the Queensway Carleton Hospital virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Waiting Room?",
+          "a": "Explore Waiting Room at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Waiting Room",
+        "What is available at Queensway Carleton Hospital?"
+      ]
     }
   }
 }

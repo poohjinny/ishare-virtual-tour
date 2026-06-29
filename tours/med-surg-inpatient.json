@@ -394,5 +394,10 @@
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/staff-facility-lounge.webp"
     }
+  },
+  "floorPlan": {
+    "image": "/assets/qchfoundation/med-surg-inpatient/maps/floorplan.svg",
+    "width": 324,
+    "height": 216
   }
 }
