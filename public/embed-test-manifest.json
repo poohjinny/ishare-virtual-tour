@@ -113,18 +113,18 @@
       ]
     },
     {
-      "id": "mh",
-      "name": "MH",
+      "id": "mental-health-emergency-services-unit",
+      "name": "Mental Health Emergency Services Unit",
       "clientName": "Queensway Carleton Hospital Foundation",
       "firstScene": "overview",
       "scenes": [
         {
-          "id": "mh-1",
-          "title": "MH - 1"
+          "id": "mh-2",
+          "title": "Emergency Department Walk in Entrance"
         },
         {
-          "id": "mh-2",
-          "title": "MH - 2"
+          "id": "mh-1",
+          "title": "MH - 1"
         },
         {
           "id": "mh-3",

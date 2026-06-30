@@ -1,5 +1,5 @@
 {
-  "id": "mh",
+  "id": "mental-health-emergency-services-unit",
   "clientId": "qchfoundation",
   "category": "Healthcare",
   "title": "Mental Health Emergency Services Unit",
@@ -13,7 +13,7 @@
       "id": "overview",
       "title": "Overview",
       "description": "Explore Overview at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
-      "panorama": "/assets/qchfoundation/mh/panoramas/overview.webp",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/overview.webp",
       "defaultView": {
         "yaw": 90.2,
         "pitch": -60.3,
@@ -66,46 +66,46 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/mh/thumbnails/overview.webp"
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/overview.webp"
     },
     "mh-1": {
       "id": "mh-1",
       "title": "MH - 1",
       "description": "Explore MH - 1 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
-      "panorama": "/assets/qchfoundation/mh/panoramas/mh-1.webp",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-1.webp",
       "defaultView": {
         "yaw": 95.6,
         "pitch": -56.6,
         "zoom": 0
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/mh/thumbnails/mh-1.webp"
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-1.webp"
     },
     "mh-2": {
       "id": "mh-2",
       "title": "Emergency Department Walk in Entrance",
-      "description": "Explore MH - 2 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
-      "panorama": "/assets/qchfoundation/mh/panoramas/mh-2.webp",
+      "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-2.webp",
       "defaultView": {
-        "yaw": 95.6,
-        "pitch": -56.6,
+        "yaw": 78.5,
+        "pitch": -7.9,
         "zoom": 0
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/mh/thumbnails/mh-2.webp"
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-2.webp"
     },
     "mh-3": {
       "id": "mh-3",
       "title": "MH - 3",
       "description": "Explore MH - 3 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
-      "panorama": "/assets/qchfoundation/mh/panoramas/mh-3.webp",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-3.webp",
       "defaultView": {
         "yaw": 95.6,
         "pitch": -56.6,
         "zoom": 0
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/mh/thumbnails/mh-3.webp"
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-3.webp"
     }
   }
 }
