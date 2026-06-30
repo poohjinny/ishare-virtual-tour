@@ -1,0 +1,111 @@
+{
+  "id": "mh",
+  "clientId": "qchfoundation",
+  "category": "Healthcare",
+  "title": "Mental Health Emergency Services Unit",
+  "firstScene": "overview",
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
+  "scenes": {
+    "overview": {
+      "id": "overview",
+      "title": "Overview",
+      "description": "Explore Overview at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/mh/panoramas/overview.webp",
+      "defaultView": {
+        "yaw": 90.2,
+        "pitch": -60.3,
+        "zoom": 46
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-mh-1",
+          "type": "nav",
+          "label": "MH - 1",
+          "position": {
+            "yaw": 117.6,
+            "pitch": -49.4
+          },
+          "targetScene": "mh-1",
+          "targetView": {
+            "yaw": 95.6,
+            "pitch": -56.6,
+            "zoom": 0
+          }
+        },
+        {
+          "id": "nav-to-mh-2",
+          "type": "nav",
+          "label": "MH - 2",
+          "position": {
+            "yaw": 60.6,
+            "pitch": -69.9
+          },
+          "targetScene": "mh-2",
+          "targetView": {
+            "yaw": 95.6,
+            "pitch": -56.6,
+            "zoom": 0
+          }
+        },
+        {
+          "id": "nav-to-mh-3",
+          "type": "nav",
+          "label": "MH - 3",
+          "position": {
+            "yaw": 76.2,
+            "pitch": -56.4
+          },
+          "targetScene": "mh-3",
+          "targetView": {
+            "yaw": 95.6,
+            "pitch": -56.6,
+            "zoom": 0
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/mh/thumbnails/overview.webp"
+    },
+    "mh-1": {
+      "id": "mh-1",
+      "title": "MH - 1",
+      "description": "Explore MH - 1 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/mh/panoramas/mh-1.webp",
+      "defaultView": {
+        "yaw": 95.6,
+        "pitch": -56.6,
+        "zoom": 0
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/mh/thumbnails/mh-1.webp"
+    },
+    "mh-2": {
+      "id": "mh-2",
+      "title": "Emergency Department Walk in Entrance",
+      "description": "Explore MH - 2 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/mh/panoramas/mh-2.webp",
+      "defaultView": {
+        "yaw": 95.6,
+        "pitch": -56.6,
+        "zoom": 0
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/mh/thumbnails/mh-2.webp"
+    },
+    "mh-3": {
+      "id": "mh-3",
+      "title": "MH - 3",
+      "description": "Explore MH - 3 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/qchfoundation/mh/panoramas/mh-3.webp",
+      "defaultView": {
+        "yaw": 95.6,
+        "pitch": -56.6,
+        "zoom": 0
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/mh/thumbnails/mh-3.webp"
+    }
+  }
+}
