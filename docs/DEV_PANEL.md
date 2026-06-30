@@ -24,25 +24,100 @@ scenes. See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) for the full URL contract.
 
 ---
 
+## Catalog data model (dev writes)
+
+Authoring touches two catalog layers plus per-tour JSON:
+
+| Layer          | Source                                     | What it holds                                                                             |
+| -------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| **Client**     | `tours/catalog.json` → `clients[]`         | Display name, website, contact, **shared branding** (logo, favicon, primary color, fonts) |
+| **Tour entry** | `tours/catalog.json` → `clients[].tours[]` | Tour id, display name, category, `visibility`, `featured`, optional `summary`             |
+| **Tour body**  | `tours/{tourId}.json`                      | Scenes, hotspots, transitions, immersive bg, optional **tour-only** `branding` override   |
+
+**Branding resolution** (runtime): `catalog.clients[].branding` is the default;
+`tour.branding` overrides when present. Dev create/update uses
+`brandingMode: 'client' | 'custom'` to choose where uploads are saved.
+
+**Asset paths**
+
+| Branding mode   | Logo / favicon path                                          |
+| --------------- | ------------------------------------------------------------ |
+| Client (shared) | `assets/{clientId}/brand/logo.png`, `…/favicon.png`          |
+| Tour (custom)   | `assets/{clientId}/{tourId}/brand/logo.png`, `…/favicon.png` |
+
+Panoramas and scene thumbs stay under `assets/{clientId}/{tourId}/panoramas/`
+and `…/thumbnails/`.
+
+**Code:** `src/utils/resolveTourBranding.ts`, `scripts/lib/tourBrandDev.mjs`,
+`scripts/lib/tourCatalogDev.mjs`
+
+---
+
 ## Panel layout
 
 ```
 ┌─ Sticky header ─────────────────────────────┐
 │  [logo] Tour name | Client    ▼ Switch tour │
 ├─ Primary tabs ──────────────────────────────┤
-│  Scene  |  Tour  |  Debug                   │
+│  Scene  |  Client  |  Tour  |  Debug       │
 ├─ Accordion sections (per tab) ──────────────┤
 │  …                                          │
 └─────────────────────────────────────────────┘
 ```
 
-| Tab       | Purpose                                             |
-| --------- | --------------------------------------------------- |
-| **Scene** | Current scene — panorama, hotspots                  |
-| **Tour**  | Tour metadata, floor plan, AI knowledge, all scenes |
-| **Debug** | URL flag toggles, embed QA                          |
+| Tab        | Purpose                                                                  |
+| ---------- | ------------------------------------------------------------------------ |
+| **Scene**  | Current scene — panorama, hotspots                                       |
+| **Client** | Catalog clients — contact, shared branding, create client _(see below)_  |
+| **Tour**   | Open tour — metadata, floor plan, knowledge, scenes, tour-only overrides |
+| **Debug**  | URL flag toggles, embed QA                                               |
 
 **Code:** `src/components/DevTools.tsx`, `src/components/DevViewPanel.tsx`
+
+---
+
+## Client tab
+
+> **Goal:** Match the catalog model — client settings should not live only
+> inside Tour. Tour tab should focus on the open tour.
+
+### Target UX
+
+Secondary tabs: **Manage** | **Create**
+
+#### Manage
+
+1. Pick a client from the catalog list (name, id, tour count).
+2. Edit **client-only** fields:
+   - Identity — display name (id is read-only after create)
+   - Website, email, phone(s), fax, address
+   - **Shared branding** — primary color, logo alt, logo, favicon, fonts
+   - Suggest contact / branding from website URL
+3. Show tours under this client with links to open each tour (Tour tab manages
+   tour body).
+
+#### Create
+
+Create a **client without a tour** — name, id, website, contact, branding. After
+save, add tours from Tour → Create (existing client picker only).
+
+### Migration from Tour tab
+
+| Phase     | Status                                                                          |
+| --------- | ------------------------------------------------------------------------------- |
+| **Done**  | Client tab — Manage (contact + shared branding) and Create (standalone client)  |
+| **Done**  | `POST /__dev/api/client/create`, `PATCH /__dev/api/client/update`               |
+| **Done**  | Tour → Manage: client contact removed; branding = inherit vs tour override only |
+| **Done**  | Tour → Create: existing client picker only (new clients on Client tab)          |
+| **Later** | Admin CMS port                                                                  |
+
+### Dev API
+
+| Route                            | Purpose                                       |
+| -------------------------------- | --------------------------------------------- |
+| `GET /__dev/api/catalog/clients` | List clients                                  |
+| `POST /__dev/api/client/create`  | New `clients[]` entry + optional brand assets |
+| `PATCH /__dev/api/client/update` | Patch contact + `clients[].branding`          |
 
 ---
 
@@ -108,11 +183,33 @@ Accordion sections:
 
 ### Tour
 
-**Manage** — edit the open tour (title, category, visibility, branding, contact,
-immersive background, transitions, …).
+Secondary tabs: **Manage** | **Create**
 
-**Create** — new tour under an existing or new catalog client (first scene
-upload, branding, visibility).
+#### Manage _(open tour)_
+
+Edits the tour currently loaded in the viewer.
+
+| Section         | Writes to                                           | Notes                                                                                           |
+| --------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Basics**      | `tours/{id}.json`, catalog tour entry               | Title, category, summary, visibility, featured, product name, transitions, immersive background |
+| **Branding**    | `tours/{id}.json` when custom                       | **Use client branding** inherits from Client tab; **Custom** overrides on this tour only        |
+| **Danger zone** | deletes tour JSON, knowledge, catalog entry, assets | Irreversible                                                                                    |
+
+Shared client contact and branding: **Client** tab.
+
+#### Create _(new tour)_
+
+Pick an **existing catalog client** (add new clients on the **Client** tab),
+then tour details, optional branding override, and first scene.
+
+Branding on create:
+
+- **Use client branding** — inherits `clients[].branding` (no `tour.branding`).
+- **Custom branding for this tour** — saves to `tours/{id}.json` `branding`
+  only.
+
+`*-knowledge.json` is not created on tour create; use Knowledge accordion after
+open.
 
 Changes write to `tours/{tourId}.json` and `tours/catalog.json`.
 
@@ -202,12 +299,15 @@ preserving query flags (`dev`, `embed`, etc.).
 
 ## What gets written
 
-| Action              | Files / paths touched                                      |
-| ------------------- | ---------------------------------------------------------- |
-| Tour CRUD           | `tours/{id}.json`, `tours/catalog.json`                    |
-| Knowledge           | `tours/{id}-knowledge.json`                                |
-| Scene / hotspot     | `tours/{id}.json` (scene graph)                            |
-| Panorama / branding | `assets/{clientId}/{tourId}/…`, `public/assets/…` (synced) |
+| Action                                        | Files / paths touched                                             |
+| --------------------------------------------- | ----------------------------------------------------------------- |
+| Tour CRUD                                     | `tours/{id}.json`, `tours/catalog.json`                           |
+| Client contact / shared branding (Client tab) | `tours/catalog.json` `clients[]`                                  |
+| Tour-only branding                            | `tours/{id}.json` `branding`, `assets/{clientId}/{tourId}/brand/` |
+| Client branding                               | `catalog.json` `clients[].branding`, `assets/{clientId}/brand/`   |
+| Knowledge                                     | `tours/{id}-knowledge.json`                                       |
+| Scene / hotspot                               | `tours/{id}.json` (scene graph)                                   |
+| Panorama / scene thumb                        | `assets/{clientId}/{tourId}/panoramas/`, `…/thumbnails/`          |
 
 The viewer refreshes from an in-memory dev cache after mutations — no manual
 page reload. API routes live under `/__dev/api` (Vite dev server only).
@@ -220,6 +320,8 @@ page reload. API routes live under `/__dev/api` (Vite dev server only).
 - **No auth / audit** — JSON edits are local and immediate; production will use
   Admin + publish
   ([ROADMAP Sprint B½](./ROADMAP.md#sprint-b½--dev-panel-authoring-dev1)).
+- **Client vs tour UX** — client contact and shared branding live on the
+  **Client** tab; Tour tab handles tour body and optional branding override.
 - **Click-to-place** — hotspots are positioned by panorama click, not drag (drag
   planned for Admin).
 - **Phone** — panel defaults open and can overlap chrome; see
