@@ -113,6 +113,30 @@
       ]
     },
     {
+      "id": "mh",
+      "name": "MH",
+      "clientName": "Queensway Carleton Hospital Foundation",
+      "firstScene": "overview",
+      "scenes": [
+        {
+          "id": "mh-1",
+          "title": "MH - 1"
+        },
+        {
+          "id": "mh-2",
+          "title": "MH - 2"
+        },
+        {
+          "id": "mh-3",
+          "title": "MH - 3"
+        },
+        {
+          "id": "overview",
+          "title": "Overview"
+        }
+      ]
+    },
+    {
       "id": "qch-hospital",
       "name": "Queensway Carleton Hospital",
       "clientName": "Queensway Carleton Hospital Foundation",
