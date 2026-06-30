@@ -57,6 +57,23 @@ export interface DevInfoHotspotPayload extends DevHotspotBasePayload {
   image?: string;
 }
 
+async function patchDevTourJson<T>(path: string, payload: unknown): Promise<T> {
+  const response = await fetch(`${DEV_API_BASE}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  const data = (await response.json()) as { error?: string } & T;
+  if (!response.ok) {
+    throw new DevTourApiError(
+      data.error ?? `Dev API failed (${response.status})`,
+    );
+  }
+
+  return data;
+}
+
 async function postDevTourJson<T>(path: string, payload: unknown): Promise<T> {
   const response = await fetch(`${DEV_API_BASE}${path}`, {
     method: 'POST',
@@ -183,7 +200,9 @@ export interface DevTourMutateOptions {
   refreshKnowledge?: boolean;
 }
 
-export type DevNewTourClientMode = 'existing' | 'new';
+import type { TourBranding } from '../types/tour';
+
+export type DevTourBrandingMode = 'client' | 'custom';
 
 export interface DevCatalogClient {
   id: string;
@@ -195,32 +214,29 @@ export interface DevCatalogClient {
   fax?: string;
   faxLabel?: string;
   address?: string;
+  branding?: TourBranding | null;
   tourCount: number;
 }
 
 export interface DevTourCatalogMeta {
   visibility: 'public' | 'unlisted' | 'internal';
   featured: boolean;
+  summary: string;
+  clientBranding: TourBranding | null;
 }
 
 export interface DevUpdateTourPayload {
   tourId: string;
   tourTitle: string;
+  tourSummary?: string;
   category: string;
-  websiteUrl?: string;
+  brandingMode?: DevTourBrandingMode;
   primaryColor?: string;
   logoAlt?: string;
   logoFile?: File | null;
   faviconFile?: File | null;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
-  clientDisplayName?: string;
-  clientEmail?: string;
-  clientPhone?: string;
-  clientPhoneLabel?: string;
-  clientFax?: string;
-  clientFaxLabel?: string;
-  clientAddress?: string;
   fontFamily?: string;
   fontSourceUrl?: string;
   clearFontFamily?: boolean;
@@ -235,6 +251,44 @@ export interface DevUpdateTourPayload {
   immersivePlaylistManifest?: string;
   immersiveVolume?: number;
   clearImmersiveBackground?: boolean;
+}
+
+export interface DevCreateClientPayload {
+  clientId: string;
+  clientName: string;
+  websiteUrl?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientPhoneLabel?: string;
+  clientFax?: string;
+  clientFaxLabel?: string;
+  clientAddress?: string;
+  clientLogoAlt?: string;
+  primaryColor?: string;
+  logoFile?: File | null;
+  faviconFile?: File | null;
+  fontFamily?: string;
+  fontSourceUrl?: string;
+}
+
+export interface DevUpdateClientPayload {
+  clientId: string;
+  clientName?: string;
+  websiteUrl?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  clientPhoneLabel?: string;
+  clientFax?: string;
+  clientFaxLabel?: string;
+  clientAddress?: string;
+  clientLogoAlt?: string;
+  primaryColor?: string;
+  logoFile?: File | null;
+  faviconFile?: File | null;
+  fontFamily?: string;
+  fontSourceUrl?: string;
+  clearFontFamily?: boolean;
+  clearFontSourceUrl?: boolean;
 }
 
 export interface DevSuggestBrandingResult {
@@ -255,25 +309,21 @@ export interface DevSuggestContactResult {
 }
 
 export interface DevCreateTourPayload {
-  mode: DevNewTourClientMode;
-  clientId?: string;
-  clientName?: string;
+  clientId: string;
   tourId: string;
   tourTitle: string;
+  tourSummary?: string;
   category: string;
-  websiteUrl?: string;
+  brandingMode?: DevTourBrandingMode;
   firstSceneTitle: string;
   panoramaFile: File;
   logoFile?: File | null;
   faviconFile?: File | null;
   primaryColor?: string;
+  logoAlt?: string;
   defaultView?: ViewPosition;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
-  clientEmail?: string;
-  clientPhone?: string;
-  clientPhoneLabel?: string;
-  clientAddress?: string;
 }
 
 function base64ToFile(base64: string, fileName: string, mimeType: string) {
@@ -316,6 +366,53 @@ export async function devUpdateTour({
     '/tour/update',
     { ...payload, logoFileBase64, faviconFileBase64 },
   );
+}
+
+async function clientBrandFilesToBase64({
+  logoFile,
+  faviconFile,
+}: {
+  logoFile?: File | null;
+  faviconFile?: File | null;
+}) {
+  const logoFileBase64 = logoFile ? await fileToBase64(logoFile) : undefined;
+  const faviconFileBase64 =
+    faviconFile ? await fileToBase64(faviconFile) : undefined;
+  return { logoFileBase64, faviconFileBase64 };
+}
+
+export async function devCreateClient({
+  logoFile,
+  faviconFile,
+  ...payload
+}: DevCreateClientPayload) {
+  const { logoFileBase64, faviconFileBase64 } = await clientBrandFilesToBase64({
+    logoFile,
+    faviconFile,
+  });
+
+  return postDevTourJson<{
+    ok: true;
+    clientId: string;
+    client: { id: string; name: string };
+  }>('/client/create', { ...payload, logoFileBase64, faviconFileBase64 });
+}
+
+export async function devUpdateClient({
+  logoFile,
+  faviconFile,
+  ...payload
+}: DevUpdateClientPayload) {
+  const { logoFileBase64, faviconFileBase64 } = await clientBrandFilesToBase64({
+    logoFile,
+    faviconFile,
+  });
+
+  return patchDevTourJson<{
+    ok: true;
+    clientId: string;
+    client: { id: string; name: string };
+  }>('/client/update', { ...payload, logoFileBase64, faviconFileBase64 });
 }
 
 export async function devSuggestBranding(

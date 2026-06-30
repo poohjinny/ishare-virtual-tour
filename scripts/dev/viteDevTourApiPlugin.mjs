@@ -20,6 +20,7 @@ import {
   updateScene,
 } from '../lib/tourSceneDev.mjs';
 import { createTour, listCatalogClients } from '../lib/tourCreateDev.mjs';
+import { createClient, updateClient } from '../lib/clientDev.mjs';
 import { updateTour, findCatalogTourEntry } from '../lib/tourUpdateDev.mjs';
 import {
   deleteTour,
@@ -345,33 +346,156 @@ function decodeOptionalImageBuffer(base64, label) {
   return buffer;
 }
 
-function validateCreateTourPayload(body) {
+function validateClientBrandingFields(body) {
   const {
-    mode,
+    primaryColor,
+    logoFileBase64,
+    faviconFileBase64,
+    fontFamily,
+    fontSourceUrl,
+    clearFontFamily,
+    clearFontSourceUrl,
+  } = body ?? {};
+
+  const normalizedPrimaryColor =
+    primaryColor?.trim() ? normalizePrimaryColor(primaryColor) : undefined;
+  if (primaryColor?.trim() && !normalizedPrimaryColor) {
+    throw new Error('primaryColor must be a valid hex color');
+  }
+
+  if (fontSourceUrl?.trim()) {
+    try {
+      const parsed = new URL(fontSourceUrl.trim());
+      if (
+        parsed.protocol !== 'https:' ||
+        parsed.hostname !== 'fonts.googleapis.com'
+      ) {
+        throw new Error(
+          'fontSourceUrl must be an https://fonts.googleapis.com/ URL',
+        );
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('fontSourceUrl')) {
+        throw error;
+      }
+      throw new Error('fontSourceUrl must be a valid URL');
+    }
+  }
+
+  return {
+    primaryColor: normalizedPrimaryColor,
+    logoFileBuffer: decodeOptionalImageBuffer(logoFileBase64, 'Logo file'),
+    faviconFileBuffer: decodeOptionalImageBuffer(
+      faviconFileBase64,
+      'Favicon file',
+    ),
+    fontFamily: typeof fontFamily === 'string' ? fontFamily : undefined,
+    fontSourceUrl:
+      typeof fontSourceUrl === 'string' ? fontSourceUrl : undefined,
+    clearFontFamily: clearFontFamily === true,
+    clearFontSourceUrl: clearFontSourceUrl === true,
+  };
+}
+
+function validateCreateClientPayload(body) {
+  const {
     clientId,
     clientName,
+    websiteUrl,
+    clientEmail,
+    clientPhone,
+    clientPhoneLabel,
+    clientFax,
+    clientFaxLabel,
+    clientAddress,
+    clientLogoAlt,
+  } = body ?? {};
+
+  if (!clientName?.trim()) {
+    throw new Error('clientName is required');
+  }
+  if (!clientId?.trim() && !clientName?.trim()) {
+    throw new Error('clientId or clientName is required');
+  }
+
+  return {
+    clientId,
+    clientName,
+    websiteUrl,
+    clientLogoAlt:
+      typeof clientLogoAlt === 'string' ? clientLogoAlt : undefined,
+    clientEmail: typeof clientEmail === 'string' ? clientEmail : undefined,
+    clientPhone: typeof clientPhone === 'string' ? clientPhone : undefined,
+    clientPhoneLabel:
+      typeof clientPhoneLabel === 'string' ? clientPhoneLabel : undefined,
+    clientFax: typeof clientFax === 'string' ? clientFax : undefined,
+    clientFaxLabel:
+      typeof clientFaxLabel === 'string' ? clientFaxLabel : undefined,
+    clientAddress:
+      typeof clientAddress === 'string' ? clientAddress : undefined,
+    ...validateClientBrandingFields(body),
+  };
+}
+
+function validateUpdateClientPayload(body) {
+  const {
+    clientId,
+    clientName,
+    websiteUrl,
+    clientEmail,
+    clientPhone,
+    clientPhoneLabel,
+    clientFax,
+    clientFaxLabel,
+    clientAddress,
+    clientLogoAlt,
+  } = body ?? {};
+
+  if (!clientId?.trim()) {
+    throw new Error('clientId is required');
+  }
+
+  return {
+    clientId: clientId.trim(),
+    clientName: typeof clientName === 'string' ? clientName : undefined,
+    websiteUrl: typeof websiteUrl === 'string' ? websiteUrl : undefined,
+    clientLogoAlt:
+      typeof clientLogoAlt === 'string' ? clientLogoAlt : undefined,
+    clientEmail: typeof clientEmail === 'string' ? clientEmail : undefined,
+    clientPhone: typeof clientPhone === 'string' ? clientPhone : undefined,
+    clientPhoneLabel:
+      typeof clientPhoneLabel === 'string' ? clientPhoneLabel : undefined,
+    clientFax: typeof clientFax === 'string' ? clientFax : undefined,
+    clientFaxLabel:
+      typeof clientFaxLabel === 'string' ? clientFaxLabel : undefined,
+    clientAddress:
+      typeof clientAddress === 'string' ? clientAddress : undefined,
+    ...validateClientBrandingFields(body),
+  };
+}
+
+function validateCreateTourPayload(body) {
+  const {
+    clientId,
     tourId,
     tourTitle,
     category,
-    websiteUrl,
+    tourSummary,
     firstSceneTitle,
     panoramaFileBase64,
     panoramaFileName,
     logoFileBase64,
     faviconFileBase64,
     primaryColor,
+    logoAlt,
     defaultView,
     visibility,
     featured,
-    clientDisplayName,
-    clientEmail,
-    clientPhone,
-    clientPhoneLabel,
-    clientAddress,
+    brandingMode,
   } = body ?? {};
 
-  if (mode !== 'existing' && mode !== 'new') {
-    throw new Error('mode must be existing or new');
+  if (!clientId?.trim()) {
+    throw new Error('clientId is required');
   }
   if (!tourId?.trim() || !tourTitle?.trim() || !category?.trim()) {
     throw new Error('tourId, tourTitle, and category are required');
@@ -381,15 +505,6 @@ function validateCreateTourPayload(body) {
   }
   if (!panoramaFileBase64) {
     throw new Error('panoramaFile is required');
-  }
-  if (mode === 'new' && !clientName?.trim()) {
-    throw new Error('clientName is required for a new client');
-  }
-  if (mode === 'existing' && !clientId?.trim()) {
-    throw new Error('clientId is required for an existing client');
-  }
-  if (mode === 'new' && !clientId?.trim() && !clientName?.trim()) {
-    throw new Error('clientId or clientName is required for a new client');
   }
   if (
     defaultView &&
@@ -412,13 +527,11 @@ function validateCreateTourPayload(body) {
   }
 
   return {
-    mode,
     clientId,
-    clientName,
     tourId,
     tourTitle,
     category,
-    websiteUrl,
+    tourSummary: typeof tourSummary === 'string' ? tourSummary : undefined,
     firstSceneTitle,
     panoramaFileBuffer,
     logoFileBuffer: decodeOptionalImageBuffer(logoFileBase64, 'Logo file'),
@@ -427,21 +540,11 @@ function validateCreateTourPayload(body) {
       'Favicon file',
     ),
     primaryColor: normalizedPrimaryColor,
+    logoAlt: typeof logoAlt === 'string' ? logoAlt : undefined,
     defaultView,
     visibility: visibility?.trim() || 'unlisted',
     featured: featured === true,
-    clientDisplayName:
-      typeof clientDisplayName === 'string' ? clientDisplayName : undefined,
-    clientEmail:
-      typeof clientEmail === 'string' ? clientEmail : undefined,
-    clientPhone:
-      typeof clientPhone === 'string' ? clientPhone : undefined,
-    clientPhoneLabel:
-      typeof clientPhoneLabel === 'string' ?
-        clientPhoneLabel
-      : undefined,
-    clientAddress:
-      typeof clientAddress === 'string' ? clientAddress : undefined,
+    brandingMode: brandingMode === 'custom' ? 'custom' : 'client',
   };
 }
 
@@ -544,6 +647,7 @@ function validateUpdateTourPayload(body) {
     tourId,
     tourTitle,
     category,
+    tourSummary,
     websiteUrl,
     primaryColor,
     logoAlt,
@@ -551,6 +655,7 @@ function validateUpdateTourPayload(body) {
     faviconFileBase64,
     visibility,
     featured,
+    brandingMode,
     clientDisplayName,
     clientEmail,
     clientPhone,
@@ -635,6 +740,7 @@ function validateUpdateTourPayload(body) {
     tourId: tourId.trim(),
     tourTitle,
     category,
+    tourSummary: typeof tourSummary === 'string' ? tourSummary : undefined,
     websiteUrl,
     primaryColor: normalizedPrimaryColor,
     logoAlt,
@@ -645,22 +751,16 @@ function validateUpdateTourPayload(body) {
     ),
     visibility: normalizedVisibility,
     featured: typeof featured === 'boolean' ? featured : undefined,
+    brandingMode: brandingMode === 'custom' ? 'custom' : 'client',
     clientDisplayName:
       typeof clientDisplayName === 'string' ? clientDisplayName : undefined,
-    clientEmail:
-      typeof clientEmail === 'string' ? clientEmail : undefined,
-    clientPhone:
-      typeof clientPhone === 'string' ? clientPhone : undefined,
+    clientEmail: typeof clientEmail === 'string' ? clientEmail : undefined,
+    clientPhone: typeof clientPhone === 'string' ? clientPhone : undefined,
     clientPhoneLabel:
-      typeof clientPhoneLabel === 'string' ?
-        clientPhoneLabel
-      : undefined,
-    clientFax:
-      typeof clientFax === 'string' ? clientFax : undefined,
+      typeof clientPhoneLabel === 'string' ? clientPhoneLabel : undefined,
+    clientFax: typeof clientFax === 'string' ? clientFax : undefined,
     clientFaxLabel:
-      typeof clientFaxLabel === 'string' ? clientFaxLabel : (
-        undefined
-      ),
+      typeof clientFaxLabel === 'string' ? clientFaxLabel : undefined,
     clientAddress:
       typeof clientAddress === 'string' ? clientAddress : undefined,
     fontFamily: typeof fontFamily === 'string' ? fontFamily : undefined,
@@ -759,12 +859,52 @@ export function viteDevTourApiPlugin() {
             return;
           }
 
-          if (req.method !== 'POST') {
+          if (req.method !== 'POST' && req.method !== 'PATCH') {
             sendJson(res, 405, { error: 'Method not allowed' });
             return;
           }
 
           const body = await readJsonBody(req);
+
+          if (
+            req.url === '/__dev/api/client/update' &&
+            req.method === 'PATCH'
+          ) {
+            const payload = validateUpdateClientPayload(body);
+            const result = await updateClient({
+              root,
+              toursDir,
+              assetsRoot,
+              ...payload,
+            });
+            sendJson(res, 200, {
+              ok: true,
+              clientId: result.clientId,
+              client: result.client,
+            });
+            return;
+          }
+
+          if (req.method !== 'POST') {
+            sendJson(res, 405, { error: 'Method not allowed' });
+            return;
+          }
+
+          if (req.url === '/__dev/api/client/create') {
+            const payload = validateCreateClientPayload(body);
+            const result = await createClient({
+              root,
+              toursDir,
+              assetsRoot,
+              ...payload,
+            });
+            sendJson(res, 200, {
+              ok: true,
+              clientId: result.clientId,
+              client: result.client,
+            });
+            return;
+          }
 
           if (req.url === '/__dev/api/tour/suggest-branding') {
             const { websiteUrl } = validateSuggestBrandingPayload(body);

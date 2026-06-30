@@ -10,7 +10,6 @@ import {
 import { syncKnowledgeFromTour } from './devContentPlaceholders.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
 import {
-  applyCatalogClientContact,
   readCatalogJson,
   resolveClientWebsite,
   writeCatalogJson,
@@ -33,100 +32,119 @@ function buildTourRecord({
   clientId,
   category,
   tourTitle,
-  clientName,
   scene,
-  primaryColor,
-  hasLogo,
-  hasFavicon,
+  brandingMode,
+  branding,
 }) {
-  const color = normalizePrimaryColor(primaryColor) ?? DEFAULT_PRIMARY_COLOR;
-  const logoAlt = clientName?.trim() || tourTitle;
-
-  return {
+  const record = {
     id: tourId,
     clientId,
     category,
     title: tourTitle,
-    branding: {
-      ...(hasLogo ?
-        { logo: `/assets/${clientId}/${tourId}/brand/logo.png`, logoAlt }
-      : {}),
-      primaryColor: color,
-      ...(hasFavicon ?
-        { favicon: `/assets/${clientId}/${tourId}/favicon.png` }
-      : {}),
-    },
     firstScene: scene.id,
     defaultTransition: DEFAULT_TRANSITION,
     scenes: { [scene.id]: scene },
   };
+
+  if (brandingMode === 'custom' && branding) {
+    record.branding = branding;
+  }
+
+  return record;
 }
 
-function registerTourInCatalog({
-  catalog,
-  mode,
+async function applyCreateTourBranding({
+  root,
+  assetsRoot,
+  brandingMode,
   clientId,
-  clientName,
-  websiteUrl,
-  clientEmail,
-  clientPhone,
-  clientPhoneLabel,
-  clientAddress,
+  tourId,
+  catalogClient,
+  tourTitle,
+  primaryColor,
+  logoFileBuffer,
+  faviconFileBuffer,
+  logoAlt,
+}) {
+  if (brandingMode !== 'custom') {
+    return { brandingMode: 'client' };
+  }
+
+  const color = normalizePrimaryColor(primaryColor) ?? DEFAULT_PRIMARY_COLOR;
+  const resolvedLogoAlt = logoAlt?.trim() || catalogClient.name || tourTitle;
+
+  const brandAssets = await saveTourBrandAssets({
+    root,
+    assetsRoot,
+    clientId,
+    tourId,
+    logoFileBuffer,
+    faviconFileBuffer,
+  });
+
+  const branding = { primaryColor: color };
+  if (brandAssets.savedLogo) {
+    branding.logo = brandAssets.logoWebPath;
+    branding.logoAlt = resolvedLogoAlt;
+  }
+  if (brandAssets.savedFavicon) {
+    branding.favicon = brandAssets.faviconWebPath;
+  }
+
+  return { brandingMode: 'custom', branding };
+}
+
+function normalizeCatalogTourSummary(value) {
+  const trimmed = typeof value === 'string' ? value.trim() : '';
+  return trimmed || undefined;
+}
+
+function buildCatalogTourEntry({
   tourId,
   tourTitle,
   category,
   visibility,
   featured = false,
+  tourSummary,
 }) {
-  const website = websiteUrl?.trim() || undefined;
-
-  if (mode === 'new') {
-    if (catalog.clients?.some((client) => client.id === clientId)) {
-      throw new Error(`Client id already exists: ${clientId}`);
-    }
-    if (!catalog.clients) {
-      catalog.clients = [];
-    }
-    const client = {
-      id: clientId,
-      name: clientName,
-      tours: [{ id: tourId, category, name: tourTitle, visibility, featured }],
-    };
-    applyCatalogClientContact(client, {
-      website,
-      email: clientEmail,
-      phone: clientPhone,
-      phoneLabel: clientPhoneLabel,
-      address: clientAddress,
-    });
-    catalog.clients.push(client);
-    return client;
+  const entry = { id: tourId, category, name: tourTitle, visibility, featured };
+  const summary = normalizeCatalogTourSummary(tourSummary);
+  if (summary) {
+    entry.summary = summary;
   }
+  return entry;
+}
 
+function registerTourInCatalog({
+  catalog,
+  clientId,
+  tourId,
+  tourTitle,
+  tourSummary,
+  category,
+  visibility,
+  featured = false,
+}) {
   const client = catalog.clients?.find((entry) => entry.id === clientId);
   if (!client) {
     throw new Error(`Client not found in catalog: ${clientId}`);
   }
-  applyCatalogClientContact(client, {
-    website,
-    email: clientEmail,
-    phone: clientPhone,
-    phoneLabel: clientPhoneLabel,
-    address: clientAddress,
-  });
   if (client.tours?.some((entry) => entry.id === tourId)) {
     throw new Error(`Tour id already in catalog: ${tourId}`);
   }
   if (!client.tours) {
     client.tours = [];
   }
-  client.tours.push({
-    id: tourId,
-    category,
-    name: tourTitle,
-    visibility,
-    featured,
-  });
+  client.tours.push(
+    buildCatalogTourEntry({
+      tourId,
+      tourTitle,
+      category,
+      visibility,
+      featured,
+      tourSummary,
+    }),
+  );
   return client;
 }
 
@@ -142,6 +160,7 @@ export function listCatalogClients(toursDir) {
     fax: client.fax ?? '',
     faxLabel: client.faxLabel ?? '',
     address: client.address ?? '',
+    branding: client.branding ?? null,
     tourCount: client.tours?.length ?? 0,
   }));
 }
@@ -150,28 +169,24 @@ export async function createTour({
   root,
   toursDir,
   assetsRoot,
-  mode,
   clientId: rawClientId,
-  clientName,
   tourId: rawTourId,
   tourTitle,
+  tourSummary,
   category,
-  websiteUrl,
   firstSceneTitle,
   panoramaFileBuffer,
   logoFileBuffer,
   faviconFileBuffer,
   primaryColor,
+  logoAlt,
   defaultView,
   visibility = 'unlisted',
   featured = false,
-  clientEmail,
-  clientPhone,
-  clientPhoneLabel,
-  clientAddress,
+  brandingMode = 'client',
 }) {
-  if (mode !== 'existing' && mode !== 'new') {
-    throw new Error('mode must be existing or new');
+  if (!rawClientId?.trim()) {
+    throw new Error('clientId is required');
   }
   if (!rawTourId?.trim() || !tourTitle?.trim() || !category?.trim()) {
     throw new Error('tourId, tourTitle, and category are required');
@@ -182,18 +197,14 @@ export async function createTour({
   if (!panoramaFileBuffer?.length) {
     throw new Error('panoramaFile is required');
   }
-  if (mode === 'new' && !clientName?.trim()) {
-    throw new Error('clientName is required for a new client');
-  }
-  if (mode === 'existing' && !rawClientId?.trim()) {
-    throw new Error('clientId is required for an existing client');
+  if (brandingMode !== 'client' && brandingMode !== 'custom') {
+    throw new Error('brandingMode must be client or custom');
   }
 
+  const resolvedBrandingMode = brandingMode === 'custom' ? 'custom' : 'client';
+
   const tourId = assertSlug(rawTourId, 'Tour id');
-  const clientId =
-    mode === 'new' ?
-      assertSlug(rawClientId ?? clientName, 'Client id')
-    : assertSlug(rawClientId, 'Client id');
+  const clientId = assertSlug(rawClientId, 'Client id');
   const sceneId = slugifyHotspotName(firstSceneTitle.trim()) || 'overview';
   const tourTitleValue = tourTitle.trim();
   const sceneTitleValue = firstSceneTitle.trim();
@@ -206,16 +217,10 @@ export async function createTour({
   const catalog = readCatalogJson(toursDir);
   const catalogClient = registerTourInCatalog({
     catalog,
-    mode,
     clientId,
-    clientName: clientName?.trim() ?? tourTitleValue,
-    websiteUrl,
-    clientEmail,
-    clientPhone,
-    clientPhoneLabel,
-    clientAddress,
     tourId,
     tourTitle: tourTitleValue,
+    tourSummary,
     category: category.trim(),
     visibility,
     featured,
@@ -247,13 +252,18 @@ export async function createTour({
     recursive: true,
   });
 
-  const brandAssets = await saveTourBrandAssets({
+  const brandingResult = await applyCreateTourBranding({
     root,
     assetsRoot,
+    brandingMode: resolvedBrandingMode,
     clientId,
     tourId,
+    catalogClient,
+    tourTitle: tourTitleValue,
+    primaryColor,
     logoFileBuffer,
     faviconFileBuffer,
+    logoAlt,
   });
 
   const tour = buildTourRecord({
@@ -261,14 +271,9 @@ export async function createTour({
     clientId,
     category: category.trim(),
     tourTitle: tourTitleValue,
-    clientName:
-      catalogClient.name ??
-      (mode === 'new' ? clientName?.trim() : undefined) ??
-      tourTitleValue,
     scene,
-    primaryColor,
-    hasLogo: brandAssets.savedLogo,
-    hasFavicon: brandAssets.savedFavicon,
+    brandingMode: brandingResult.brandingMode,
+    branding: brandingResult.branding,
   });
 
   await bakeSceneThumbnail({

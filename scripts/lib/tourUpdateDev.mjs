@@ -7,7 +7,6 @@ import {
 } from './tourSceneDev.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
 import {
-  applyCatalogClientContact,
   findCatalogClientRecord,
   readCatalogJson,
   resolveClientWebsite,
@@ -19,11 +18,17 @@ function writeCatalogJsonOrThrow(toursDir, catalog) {
   writeCatalogJson(toursDir, catalog);
 }
 
+function normalizeCatalogTourSummary(value) {
+  const trimmed = typeof value === 'string' ? value.trim() : '';
+  return trimmed || undefined;
+}
+
 function updateCatalogTourEntry({
   catalog,
   clientId,
   tourId,
   tourTitle,
+  tourSummary,
   category,
   visibility,
   featured,
@@ -36,6 +41,14 @@ function updateCatalogTourEntry({
 
   entry.name = tourTitle;
   entry.category = category;
+  if (tourSummary !== undefined) {
+    const summary = normalizeCatalogTourSummary(tourSummary);
+    if (summary) {
+      entry.summary = summary;
+    } else {
+      delete entry.summary;
+    }
+  }
   if (visibility) {
     entry.visibility = visibility;
   }
@@ -59,6 +72,8 @@ export function findCatalogTourEntry(toursDir, clientId, tourId) {
   return {
     visibility: entry.visibility ?? 'public',
     featured: entry.featured ?? false,
+    summary: entry.summary ?? '',
+    clientBranding: client.branding ?? null,
   };
 }
 
@@ -278,12 +293,14 @@ export async function updateTour({
   assetsRoot,
   tourId,
   tourTitle,
+  tourSummary,
   category,
   websiteUrl,
   primaryColor,
   logoAlt,
   logoFileBuffer,
   faviconFileBuffer,
+  brandingMode,
   visibility,
   featured,
   clientDisplayName,
@@ -336,31 +353,6 @@ export async function updateTour({
     throw new Error(`Client not found in catalog: ${clientId}`);
   }
 
-  const hasClientContactPatch =
-    nextWebsite ||
-    clientDisplayName !== undefined ||
-    clientEmail !== undefined ||
-    clientPhone !== undefined ||
-    clientPhoneLabel !== undefined ||
-    clientFax !== undefined ||
-    clientFaxLabel !== undefined ||
-    clientAddress !== undefined;
-
-  if (hasClientContactPatch) {
-    applyCatalogClientContact(catalogClient, {
-      ...(nextWebsite ? { website: nextWebsite } : {}),
-      ...(clientDisplayName !== undefined ? { name: clientDisplayName } : {}),
-      ...(clientEmail !== undefined ? { email: clientEmail } : {}),
-      ...(clientPhone !== undefined ? { phone: clientPhone } : {}),
-      ...(clientPhoneLabel !== undefined ?
-        { phoneLabel: clientPhoneLabel }
-      : {}),
-      ...(clientFax !== undefined ? { fax: clientFax } : {}),
-      ...(clientFaxLabel !== undefined ? { faxLabel: clientFaxLabel } : {}),
-      ...(clientAddress !== undefined ? { address: clientAddress } : {}),
-    });
-  }
-
   stripLegacyTourClientFields(tour);
 
   const normalizedColor =
@@ -369,58 +361,67 @@ export async function updateTour({
     throw new Error('primaryColor must be a valid hex color');
   }
 
-  tour.branding = tour.branding ?? {};
-  if (normalizedColor) {
-    tour.branding.primaryColor = normalizedColor;
-  }
-
   const nextLogoAlt = logoAlt?.trim();
-  if (nextLogoAlt) {
-    tour.branding.logoAlt = nextLogoAlt;
-  }
-
   const normalizedFontSourceUrl =
     fontSourceUrl !== undefined ?
       assertGoogleFontSourceUrl(fontSourceUrl)
     : undefined;
-  if (clearFontFamily === true) {
-    delete tour.branding.fontFamily;
-  } else if (fontFamily !== undefined) {
-    const nextFontFamily = fontFamily.trim();
-    if (nextFontFamily) {
-      tour.branding.fontFamily = nextFontFamily;
-    } else {
+
+  const resolvedBrandingMode = brandingMode === 'custom' ? 'custom' : 'client';
+
+  if (resolvedBrandingMode === 'client') {
+    delete tour.branding;
+  } else {
+    tour.branding = tour.branding ?? {};
+    if (normalizedColor) {
+      tour.branding.primaryColor = normalizedColor;
+    }
+    if (nextLogoAlt) {
+      tour.branding.logoAlt = nextLogoAlt;
+    }
+    if (clearFontFamily === true) {
       delete tour.branding.fontFamily;
+    } else if (fontFamily !== undefined) {
+      const nextFontFamily = fontFamily.trim();
+      if (nextFontFamily) {
+        tour.branding.fontFamily = nextFontFamily;
+      } else {
+        delete tour.branding.fontFamily;
+      }
     }
-  }
-  if (clearFontSourceUrl === true) {
-    delete tour.branding.fontSourceUrl;
-  } else if (fontSourceUrl !== undefined) {
-    if (normalizedFontSourceUrl) {
-      tour.branding.fontSourceUrl = normalizedFontSourceUrl;
-    } else {
+    if (clearFontSourceUrl === true) {
       delete tour.branding.fontSourceUrl;
+    } else if (fontSourceUrl !== undefined) {
+      if (normalizedFontSourceUrl) {
+        tour.branding.fontSourceUrl = normalizedFontSourceUrl;
+      } else {
+        delete tour.branding.fontSourceUrl;
+      }
     }
-  }
 
-  const brandAssets = await saveTourBrandAssets({
-    root,
-    assetsRoot,
-    clientId,
-    tourId: tour.id,
-    logoFileBuffer,
-    faviconFileBuffer,
-  });
+    const brandAssets = await saveTourBrandAssets({
+      root,
+      assetsRoot,
+      clientId,
+      tourId: tour.id,
+      logoFileBuffer,
+      faviconFileBuffer,
+    });
 
-  if (brandAssets.savedLogo) {
-    tour.branding.logo = brandAssets.logoWebPath;
-    if (!tour.branding.logoAlt?.trim()) {
-      tour.branding.logoAlt = nextLogoAlt || catalogClient.name || nextTitle;
+    if (brandAssets.savedLogo) {
+      tour.branding.logo = brandAssets.logoWebPath;
+      if (!tour.branding.logoAlt?.trim()) {
+        tour.branding.logoAlt = nextLogoAlt || catalogClient.name || nextTitle;
+      }
     }
-  }
 
-  if (brandAssets.savedFavicon) {
-    tour.branding.favicon = brandAssets.faviconWebPath;
+    if (brandAssets.savedFavicon) {
+      tour.branding.favicon = brandAssets.faviconWebPath;
+    }
+
+    if (Object.keys(tour.branding).length === 0) {
+      delete tour.branding;
+    }
   }
 
   applyProductFullName(tour, productFullName);
@@ -446,6 +447,7 @@ export async function updateTour({
     clientId,
     tourId: tour.id,
     tourTitle: nextTitle,
+    tourSummary,
     category: nextCategory,
     visibility: nextVisibility,
     featured: typeof featured === 'boolean' ? featured : undefined,
