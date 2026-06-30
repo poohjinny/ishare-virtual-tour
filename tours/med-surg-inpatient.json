@@ -3,12 +3,6 @@
   "clientId": "qchfoundation",
   "category": "Healthcare",
   "title": "Med/Surg Inpatient",
-  "branding": {
-    "primaryColor": "#007078",
-    "logo": "/assets/qchfoundation/med-surg-inpatient/brand/logo.png",
-    "logoAlt": "Med/Surg Inpatient",
-    "favicon": "/assets/qchfoundation/med-surg-inpatient/favicon.png"
-  },
   "firstScene": "overview",
   "defaultTransition": {
     "speed": "500ms",

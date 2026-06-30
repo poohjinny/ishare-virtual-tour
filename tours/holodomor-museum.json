@@ -3,13 +3,6 @@
   "clientId": "holodomor",
   "category": "Culture",
   "title": "Holodomor Museum",
-  "branding": {
-    "logo": "/assets/holodomor/holodomor-museum/brand/logo.png",
-    "logoAlt": "Holodomor Research and Education Consortium",
-    "primaryColor": "#ffcc66",
-    "fontFamily": "'Open Sans', Arial, sans-serif",
-    "fontSourceUrl": "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
-  },
   "firstScene": "reception",
   "defaultTransition": {
     "speed": "500ms",

@@ -3,11 +3,6 @@
   "clientId": "cancerresearchsociety",
   "category": "Healthcare",
   "title": "Cancer Research",
-  "branding": {
-    "logo": "/assets/cancerresearchsociety/cancer-research/brand/logo.png",
-    "logoAlt": "Cancer Research Society",
-    "primaryColor": "#e12827"
-  },
   "firstScene": "overview",
   "defaultTransition": {
     "speed": "500ms",

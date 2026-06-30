@@ -3,12 +3,6 @@
   "clientId": "qchfoundation",
   "category": "Healthcare",
   "title": "Queensway Carleton Hospital",
-  "branding": {
-    "logo": "/assets/qchfoundation/qch-hospital/brand/logo.png",
-    "logoAlt": "Queensway Carleton Hospital Foundation",
-    "primaryColor": "#007078",
-    "favicon": "/assets/qchfoundation/qch-hospital/favicon.png"
-  },
   "firstScene": "overview",
   "defaultTransition": {
     "speed": "500ms",
