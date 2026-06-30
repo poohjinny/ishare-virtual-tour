@@ -355,6 +355,7 @@ export const devViewPanelTabVariants = cva(
         naming: '',
         info: '',
         scene: '',
+        client: '',
         tour: '',
         debug: '',
         manage: '',
@@ -384,6 +385,12 @@ export const devViewPanelTabVariants = cva(
         kind: 'scene',
         active: true,
         class: 'bg-[rgba(74,222,128,0.22)] text-[#86efac]',
+      },
+      {
+        depth: 'primary',
+        kind: 'client',
+        active: true,
+        class: 'bg-[rgba(56,189,248,0.22)] text-[#7dd3fc]',
       },
       {
         depth: 'primary',

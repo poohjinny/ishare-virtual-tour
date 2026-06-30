@@ -13,13 +13,21 @@ import {
   setDevTourCache,
 } from '../data/loadTour';
 import { normalizeTourAssets } from '../services/normalizeTourAssets';
-import { listTourCategories, findCatalogClient } from '../data/tourCatalog';
+import {
+  listTourCategories,
+  findCatalogClient,
+  findCatalogTour,
+} from '../data/tourCatalog';
 import {
   buildTourLocation,
   preservedSearchStringFrom,
   resolveSceneId,
 } from '../utils/tourPaths';
 import { getTourClientId } from '../utils/tourClientId';
+import {
+  resolveTourBranding,
+  tourUsesCustomBranding,
+} from '../utils/resolveTourBranding';
 import { getTourProductFullName } from '../utils/tourProductName';
 import { IMMERSIVE_PLAYLIST_MANIFEST } from '../constants/immersiveBackground';
 import {
@@ -30,12 +38,10 @@ import {
 } from '../constants/devHotspot';
 import {
   DEV_CRUD_MODE_TABS,
-  DEV_NEW_TOUR_CLIENT_TABS,
   DEV_PANEL_TABS,
   DEV_CATALOG_VISIBILITY_OPTIONS,
   type DevCatalogTourVisibility,
   type DevCrudModeTab,
-  type DevNewTourClientMode,
   type DevPanelTab,
 } from '../constants/devPanel';
 import type { TourCategory } from '../constants/tourCategories';
@@ -80,7 +86,6 @@ import {
   devBase64ToImageFile,
   devReplaceScenePanorama,
   devSuggestBranding,
-  devSuggestContact,
   devUpdateHotspotPosition,
   devUpdateInfoHotspot,
   devUpdateNavHotspot,
@@ -89,6 +94,7 @@ import {
   devUpdateTour,
   devUpdateTourFloorPlan,
   type DevCatalogClient,
+  type DevTourBrandingMode,
   type DevTourMutateOptions,
 } from '../utils/devTourApi';
 import {
@@ -165,6 +171,7 @@ import {
   DevPanelSection,
   DevPanelSectionAccordion,
 } from './DevPanelSectionAccordion';
+import { DevClientPanel } from './DevClientPanel';
 import {
   DevPanelColorField,
   normalizeHexColorInput,
@@ -331,27 +338,23 @@ export function DevViewPanel({
     useState<ActionStatus>('idle');
   const [sceneManageError, setSceneManageError] = useState<string | null>(null);
   const [tourModeTab, setTourModeTab] = useState<DevCrudModeTab>('manage');
-  const [newTourClientMode, setNewTourClientMode] =
-    useState<DevNewTourClientMode>('existing');
+  const [manageClientId, setManageClientId] = useState('');
   const [catalogClients, setCatalogClients] = useState<DevCatalogClient[]>([]);
   const [newTourClientId, setNewTourClientId] = useState('');
-  const [newTourClientName, setNewTourClientName] = useState('');
-  const [newClientIdInput, setNewClientIdInput] = useState('');
-  const [newClientEmail, setNewClientEmail] = useState('');
-  const [newClientPhone, setNewClientPhone] = useState('');
-  const [newClientPhoneLabel, setNewClientPhoneLabel] = useState('');
-  const [newClientAddress, setNewClientAddress] = useState('');
   const [newTourTitle, setNewTourTitle] = useState('');
+  const [newTourSummary, setNewTourSummary] = useState('');
   const [newTourIdInput, setNewTourIdInput] = useState('');
   const [newTourCategory, setNewTourCategory] =
     useState<TourCategory>('Healthcare');
   const [newTourVisibility, setNewTourVisibility] =
     useState<DevCatalogTourVisibility>('unlisted');
   const [newTourFeatured, setNewTourFeatured] = useState(false);
-  const [newTourWebsite, setNewTourWebsite] = useState('');
   const [newTourPrimaryColor, setNewTourPrimaryColor] = useState(
     DEFAULT_NEW_TOUR_PRIMARY_COLOR,
   );
+  const [newTourBrandingMode, setNewTourBrandingMode] =
+    useState<DevTourBrandingMode>('client');
+  const [newTourLogoAlt, setNewTourLogoAlt] = useState('');
   const [newTourLogoFile, setNewTourLogoFile] = useState<File | null>(null);
   const [newTourFaviconFile, setNewTourFaviconFile] = useState<File | null>(
     null,
@@ -367,9 +370,6 @@ export function DevViewPanel({
   const [suggestBrandingNotes, setSuggestBrandingNotes] = useState<string[]>(
     [],
   );
-  const [suggestContactStatus, setSuggestContactStatus] =
-    useState<ActionStatus>('idle');
-  const [suggestContactNotes, setSuggestContactNotes] = useState<string[]>([]);
   const [newFirstSceneTitle, setNewFirstSceneTitle] = useState('Overview');
   const [newTourPanoramaFile, setNewTourPanoramaFile] = useState<File | null>(
     null,
@@ -377,21 +377,17 @@ export function DevViewPanel({
   const [newTourStatus, setNewTourStatus] = useState<ActionStatus>('idle');
   const [newTourError, setNewTourError] = useState<string | null>(null);
   const [editTourTitle, setEditTourTitle] = useState('');
+  const [editTourSummary, setEditTourSummary] = useState('');
   const [editTourCategory, setEditTourCategory] =
     useState<TourCategory>('Healthcare');
-  const [editTourWebsite, setEditTourWebsite] = useState('');
-  const [editClientEmail, setEditClientEmail] = useState('');
-  const [editClientPhone, setEditClientPhone] = useState('');
-  const [editClientPhoneLabel, setEditClientPhoneLabel] = useState('');
-  const [editClientFax, setEditClientFax] = useState('');
-  const [editClientFaxLabel, setEditClientFaxLabel] = useState('');
-  const [editClientAddress, setEditClientAddress] = useState('');
   const [editTourVisibility, setEditTourVisibility] =
     useState<DevCatalogTourVisibility>('unlisted');
   const [editTourFeatured, setEditTourFeatured] = useState(false);
   const [editTourPrimaryColor, setEditTourPrimaryColor] = useState(
     DEFAULT_NEW_TOUR_PRIMARY_COLOR,
   );
+  const [editTourBrandingMode, setEditTourBrandingMode] =
+    useState<DevTourBrandingMode>('client');
   const [editTourLogoAlt, setEditTourLogoAlt] = useState('');
   const [editTourFontFamily, setEditTourFontFamily] = useState('');
   const [editTourFontSourceUrl, setEditTourFontSourceUrl] = useState('');
@@ -591,16 +587,21 @@ export function DevViewPanel({
   );
   const tourCategoryOptions = useMemo(() => listTourCategories(), []);
   const trimmedNewTourTitle = newTourTitle.trim();
+  const selectedCreateCatalogClient = useMemo(
+    () => catalogClients.find((client) => client.id === newTourClientId),
+    [catalogClients, newTourClientId],
+  );
+  const createTourClientWebsite = selectedCreateCatalogClient?.website ?? '';
+  const openCatalogClient = useMemo(
+    () => findCatalogClient(getTourClientId(tour)),
+    [tour, catalogTick],
+  );
   const newTourSlug = useMemo(
     () =>
       newTourIdInput.trim() ? slugifyHotspotName(newTourIdInput)
       : trimmedNewTourTitle ? slugifyHotspotName(trimmedNewTourTitle)
       : '',
     [newTourIdInput, trimmedNewTourTitle],
-  );
-  const newClientSlug = useMemo(
-    () => (newClientIdInput.trim() ? slugifyHotspotName(newClientIdInput) : ''),
-    [newClientIdInput],
   );
   const newFirstSceneSlug = useMemo(
     () =>
@@ -619,12 +620,7 @@ export function DevViewPanel({
     scene.tourId && trimmedSceneTitle && scenePanoramaFile,
   );
   const canCreateNewTour = Boolean(
-    newTourSlug &&
-    newFirstSceneSlug &&
-    newTourPanoramaFile &&
-    (newTourClientMode === 'existing' ? newTourClientId : (
-      newTourClientName.trim() && newClientIdInput.trim() && newClientSlug
-    )),
+    newTourSlug && newFirstSceneSlug && newTourPanoramaFile && newTourClientId,
   );
   const canSaveEditTour = Boolean(editTourTitle.trim() && editTourCategory);
   const editTourProductNamePreview = useMemo(
@@ -667,17 +663,28 @@ export function DevViewPanel({
   );
 
   useEffect(() => {
-    if (panelTab !== 'tour') return;
+    if (panelTab !== 'tour' && panelTab !== 'client') return;
 
     void devFetchCatalogClients()
       .then((clients) => {
         setCatalogClients(clients);
         setNewTourClientId((current) => current || clients[0]?.id || '');
+        setManageClientId((current) => {
+          if (current) return current;
+          const openClientId = getTourClientId(tour);
+          if (
+            openClientId &&
+            clients.some((client) => client.id === openClientId)
+          ) {
+            return openClientId;
+          }
+          return clients[0]?.id ?? '';
+        });
       })
       .catch(() => {
         setCatalogClients([]);
       });
-  }, [panelTab]);
+  }, [panelTab, tour]);
 
   useEffect(() => {
     if (panelTab !== 'tour' || !tour.id) return;
@@ -687,6 +694,7 @@ export function DevViewPanel({
         if (catalog) {
           setEditTourVisibility(catalog.visibility);
           setEditTourFeatured(catalog.featured);
+          setEditTourSummary(catalog.summary);
         }
 
         setEditTourProductFullName(rawTour.productFullName ?? '');
@@ -784,26 +792,22 @@ export function DevViewPanel({
 
   useEffect(() => {
     const catalogClient = findCatalogClient(getTourClientId(tour));
-    const primaryPhone =
-      catalogClient?.phone ?? catalogClient?.phones?.[0]?.number ?? '';
-    const primaryPhoneLabel =
-      catalogClient?.phoneLabel ?? catalogClient?.phones?.[0]?.label ?? '';
 
     setEditTourTitle(tour.title);
-    setEditTourCategory((tour.category as TourCategory) ?? 'Healthcare');
-    setEditTourWebsite(catalogClient?.website ?? '');
-    setEditClientEmail(catalogClient?.email ?? '');
-    setEditClientPhone(primaryPhone);
-    setEditClientPhoneLabel(primaryPhoneLabel);
-    setEditClientFax(catalogClient?.fax ?? '');
-    setEditClientFaxLabel(catalogClient?.faxLabel ?? '');
-    setEditClientAddress(catalogClient?.address ?? '');
-    setEditTourPrimaryColor(
-      tour.branding?.primaryColor ?? DEFAULT_NEW_TOUR_PRIMARY_COLOR,
+    setEditTourSummary(
+      findCatalogTour(getTourClientId(tour), tour.id)?.summary ?? '',
     );
-    setEditTourLogoAlt(tour.branding?.logoAlt ?? '');
-    setEditTourFontFamily(tour.branding?.fontFamily ?? '');
-    setEditTourFontSourceUrl(tour.branding?.fontSourceUrl ?? '');
+    setEditTourCategory((tour.category as TourCategory) ?? 'Healthcare');
+    const usesCustomBranding = tourUsesCustomBranding(tour);
+    setEditTourBrandingMode(usesCustomBranding ? 'custom' : 'client');
+    const brandingSource =
+      usesCustomBranding ? tour.branding : catalogClient?.branding;
+    setEditTourPrimaryColor(
+      brandingSource?.primaryColor ?? DEFAULT_NEW_TOUR_PRIMARY_COLOR,
+    );
+    setEditTourLogoAlt(brandingSource?.logoAlt ?? catalogClient?.name ?? '');
+    setEditTourFontFamily(brandingSource?.fontFamily ?? '');
+    setEditTourFontSourceUrl(brandingSource?.fontSourceUrl ?? '');
     setEditTourLogoFile(null);
     setEditTourFaviconFile(null);
     setEditTourSuggestNotes([]);
@@ -851,23 +855,45 @@ export function DevViewPanel({
 
   useEffect(() => {
     if (!editTourLogoFile) {
-      setEditTourLogoPreviewUrl(tour.branding?.logo ?? null);
+      const catalogClient = findCatalogClient(getTourClientId(tour));
+      const source =
+        editTourBrandingMode === 'custom' ?
+          tour.branding
+        : catalogClient?.branding;
+      setEditTourLogoPreviewUrl(source?.logo ?? null);
       return;
     }
     const url = URL.createObjectURL(editTourLogoFile);
     setEditTourLogoPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [editTourLogoFile, tour.branding?.logo]);
+  }, [
+    editTourLogoFile,
+    editTourBrandingMode,
+    tour.branding?.logo,
+    catalogTick,
+    tour.clientId,
+  ]);
 
   useEffect(() => {
     if (!editTourFaviconFile) {
-      setEditTourFaviconPreviewUrl(tour.branding?.favicon ?? null);
+      const catalogClient = findCatalogClient(getTourClientId(tour));
+      const source =
+        editTourBrandingMode === 'custom' ?
+          tour.branding
+        : catalogClient?.branding;
+      setEditTourFaviconPreviewUrl(source?.favicon ?? null);
       return;
     }
     const url = URL.createObjectURL(editTourFaviconFile);
     setEditTourFaviconPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [editTourFaviconFile, tour.branding?.favicon]);
+  }, [
+    editTourFaviconFile,
+    editTourBrandingMode,
+    tour.branding?.favicon,
+    catalogTick,
+    tour.clientId,
+  ]);
 
   useEffect(() => {
     if (!newTourFaviconFile) {
@@ -1140,7 +1166,7 @@ export function DevViewPanel({
   ]);
 
   const suggestEditTourBranding = useCallback(async () => {
-    const websiteUrl = editTourWebsite.trim();
+    const websiteUrl = openCatalogClient?.website?.trim() ?? '';
     if (!websiteUrl) return;
 
     setEditTourSuggestStatus('working');
@@ -1174,7 +1200,7 @@ export function DevViewPanel({
         : 'Could not suggest branding from website',
       ]);
     }
-  }, [editTourWebsite]);
+  }, [openCatalogClient?.website]);
 
   const saveEditTour = useCallback(async () => {
     if (!canSaveEditTour || !tour.id) return;
@@ -1186,14 +1212,9 @@ export function DevViewPanel({
       await devUpdateTour({
         tourId: tour.id,
         tourTitle: editTourTitle.trim(),
+        tourSummary: editTourSummary,
         category: editTourCategory,
-        websiteUrl: editTourWebsite.trim() || undefined,
-        clientEmail: editClientEmail,
-        clientPhone: editClientPhone,
-        clientPhoneLabel: editClientPhoneLabel,
-        clientFax: editClientFax,
-        clientFaxLabel: editClientFaxLabel,
-        clientAddress: editClientAddress,
+        brandingMode: editTourBrandingMode,
         primaryColor: normalizeHexColorInput(editTourPrimaryColor),
         logoAlt: editTourLogoAlt.trim() || undefined,
         fontFamily: editTourFontFamily,
@@ -1241,12 +1262,6 @@ export function DevViewPanel({
     editImmersivePlaylistManifest,
     editImmersivePlaylistText,
     editImmersiveVolume,
-    editClientAddress,
-    editClientEmail,
-    editClientFax,
-    editClientFaxLabel,
-    editClientPhone,
-    editClientPhoneLabel,
     editTourCategory,
     editTourFeatured,
     editTourFaviconFile,
@@ -1257,10 +1272,11 @@ export function DevViewPanel({
     editTransitionSpeed,
     editTourLogoAlt,
     editTourLogoFile,
+    editTourBrandingMode,
     editTourPrimaryColor,
     editTourTitle,
+    editTourSummary,
     editTourVisibility,
-    editTourWebsite,
     onTourMutated,
     tour.id,
   ]);
@@ -1418,7 +1434,7 @@ export function DevViewPanel({
   ]);
 
   const suggestNewTourBranding = useCallback(async () => {
-    const websiteUrl = newTourWebsite.trim();
+    const websiteUrl = createTourClientWebsite.trim();
     if (!websiteUrl) return;
 
     setSuggestBrandingStatus('working');
@@ -1452,32 +1468,7 @@ export function DevViewPanel({
         : 'Could not suggest branding from website',
       ]);
     }
-  }, [newTourWebsite]);
-
-  const suggestNewTourContact = useCallback(async () => {
-    const websiteUrl = newTourWebsite.trim();
-    if (!websiteUrl) return;
-
-    setSuggestContactStatus('working');
-    setSuggestContactNotes([]);
-
-    try {
-      const result = await devSuggestContact(websiteUrl);
-      if (result.email) setNewClientEmail(result.email);
-      if (result.phone) setNewClientPhone(result.phone);
-      if (result.phoneLabel) setNewClientPhoneLabel(result.phoneLabel);
-      if (result.address) setNewClientAddress(result.address);
-      setSuggestContactNotes(result.notes);
-      setSuggestContactStatus('done');
-    } catch (error) {
-      setSuggestContactStatus('error');
-      setSuggestContactNotes([
-        error instanceof DevTourApiError ?
-          error.message
-        : 'Could not suggest contact from website',
-      ]);
-    }
-  }, [newTourWebsite]);
+  }, [createTourClientWebsite]);
 
   const createNewTour = useCallback(async () => {
     if (!canCreateNewTour || !newTourPanoramaFile || !newTourSlug) return;
@@ -1487,30 +1478,31 @@ export function DevViewPanel({
 
     try {
       const result = await devCreateTour({
-        mode: newTourClientMode,
-        clientId:
-          newTourClientMode === 'existing' ? newTourClientId : newClientSlug,
-        clientName:
-          newTourClientMode === 'new' ? newTourClientName.trim() : undefined,
+        clientId: newTourClientId,
         tourId: newTourSlug,
         tourTitle: trimmedNewTourTitle || newTourSlug,
+        tourSummary: newTourSummary.trim() || undefined,
         category: newTourCategory,
-        websiteUrl: newTourWebsite.trim() || undefined,
-        clientEmail: newClientEmail.trim() || undefined,
-        clientPhone: newClientPhone.trim() || undefined,
-        clientPhoneLabel: newClientPhoneLabel.trim() || undefined,
-        clientAddress: newClientAddress.trim() || undefined,
         firstSceneTitle: newFirstSceneTitle.trim(),
         panoramaFile: newTourPanoramaFile,
-        logoFile: newTourLogoFile,
-        faviconFile: newTourFaviconFile,
-        primaryColor: normalizeHexColorInput(newTourPrimaryColor),
+        logoFile: newTourBrandingMode === 'custom' ? newTourLogoFile : null,
+        faviconFile:
+          newTourBrandingMode === 'custom' ? newTourFaviconFile : null,
+        primaryColor:
+          newTourBrandingMode === 'custom' ?
+            normalizeHexColorInput(newTourPrimaryColor)
+          : undefined,
+        logoAlt:
+          newTourBrandingMode === 'custom' ?
+            newTourLogoAlt.trim() || undefined
+          : undefined,
         defaultView:
           view ?
             toViewPosition(view.yaw, view.pitch, view.zoom ?? 0)
           : undefined,
         visibility: newTourVisibility,
         featured: newTourFeatured,
+        brandingMode: newTourBrandingMode,
       });
 
       const freshTour = normalizeTourAssets(result.tour);
@@ -1536,24 +1528,19 @@ export function DevViewPanel({
   }, [
     canCreateNewTour,
     navigate,
-    newClientSlug,
     newFirstSceneTitle,
-    newClientAddress,
-    newClientEmail,
-    newClientPhone,
-    newClientPhoneLabel,
+    newTourBrandingMode,
     newTourCategory,
     newTourClientId,
-    newTourClientMode,
-    newTourClientName,
     newTourFaviconFile,
+    newTourLogoAlt,
     newTourLogoFile,
     newTourPanoramaFile,
     newTourPrimaryColor,
     newTourFeatured,
     newTourSlug,
+    newTourSummary,
     newTourVisibility,
-    newTourWebsite,
     searchParams,
     trimmedNewTourTitle,
     view,
@@ -2002,7 +1989,12 @@ export function DevViewPanel({
   const markerCoords =
     clickCoords ? formatViewPosition({ ...clickCoords, zoom: 0 }) : '—';
 
-  const stickyTourIcon = tour.branding?.favicon ?? tour.branding?.logo;
+  const stickyTourBranding = useMemo(
+    () => resolveTourBranding(tour),
+    [tour, catalogTick],
+  );
+  const stickyTourIcon =
+    stickyTourBranding?.favicon ?? stickyTourBranding?.logo;
   const currentTourEntry = useMemo(
     () => tourOptions.find((option) => option.id === currentTourId),
     [currentTourId, tourOptions],
@@ -2067,6 +2059,173 @@ export function DevViewPanel({
     [location.pathname, navigate, searchParams],
   );
 
+  const handleOpenTourFromClient = useCallback(
+    (tourId: string) => {
+      const loadedTour = loadTour(tourId);
+      navigate(
+        buildTourLocation(
+          tourId,
+          loadedTour.firstScene,
+          loadedTour.firstScene,
+          searchParams,
+        ),
+      );
+      setPanelTab('tour');
+    },
+    [navigate, searchParams],
+  );
+
+  const handleCreateTourForClient = useCallback((clientId: string) => {
+    setNewTourClientId(clientId);
+    setTourModeTab('create');
+    setPanelTab('tour');
+  }, []);
+
+  const createTourBrandingSection = (
+    <DevPanelFormSection
+      title='Branding (optional)'
+      divided
+      description='Choose whether this tour inherits the client brand or uses its own.'
+    >
+      <div className='flex flex-col gap-2'>
+        <label className={devViewPanelFormCheckboxLabelClassName}>
+          <input
+            className={devViewPanelFormCheckboxInputClassName}
+            type='radio'
+            name='new-tour-branding-mode'
+            checked={newTourBrandingMode === 'client'}
+            onChange={() => setNewTourBrandingMode('client')}
+          />
+          <span className={devViewPanelToggleNameClassName}>
+            Use client branding
+          </span>
+        </label>
+        <label className={devViewPanelFormCheckboxLabelClassName}>
+          <input
+            className={devViewPanelFormCheckboxInputClassName}
+            type='radio'
+            name='new-tour-branding-mode'
+            checked={newTourBrandingMode === 'custom'}
+            onChange={() => setNewTourBrandingMode('custom')}
+          />
+          <span className={devViewPanelToggleNameClassName}>
+            Custom branding for this tour
+          </span>
+        </label>
+      </div>
+      <p className={devViewPanelSectionHintClassName}>
+        {newTourBrandingMode === 'client' ?
+          selectedCreateCatalogClient ?
+            `Inherits ${selectedCreateCatalogClient.name} branding from the Client tab. Edit shared branding there.`
+          : 'Select a client to inherit its catalog branding.'
+        : 'Logo and colors are saved on this tour only.'}
+      </p>
+
+      {newTourBrandingMode === 'custom' ?
+        <>
+          <div className='flex flex-col gap-1'>
+            <div className={devViewPanelActionsClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                onClick={() => void suggestNewTourBranding()}
+                disabled={
+                  !createTourClientWebsite.trim() ||
+                  suggestBrandingStatus === 'working'
+                }
+              >
+                {suggestBrandingStatus === 'working' ?
+                  'Suggesting…'
+                : 'Suggest from website'}
+              </button>
+            </div>
+            <p className={devViewPanelSectionHintClassName}>
+              Uses the client website from the Client tab to draft logo,
+              favicon, and primary color.
+            </p>
+          </div>
+
+          {suggestBrandingNotes.length > 0 ?
+            <ul className={devViewPanelSectionHintClassName}>
+              {suggestBrandingNotes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          : null}
+
+          <DevPanelColorField
+            label='Primary color'
+            value={newTourPrimaryColor}
+            onChange={setNewTourPrimaryColor}
+            defaultColor={DEFAULT_NEW_TOUR_PRIMARY_COLOR}
+            pickerAriaLabel='Primary color picker'
+          />
+
+          <label className={devViewPanelFieldClassName}>
+            <span className={devViewPanelFieldLabelClassName}>
+              Logo alt text
+            </span>
+            <input
+              className={devViewPanelInputClassName}
+              type='text'
+              value={newTourLogoAlt}
+              onChange={(e) => setNewTourLogoAlt(e.target.value)}
+              placeholder={trimmedNewTourTitle || 'Tour title'}
+              spellCheck={true}
+              autoComplete='off'
+            />
+          </label>
+
+          <DevPanelFormRow>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>Logo</span>
+              <input
+                className={devViewPanelFileInputClassName}
+                type='file'
+                accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+                onChange={(e) =>
+                  setNewTourLogoFile(e.target.files?.[0] ?? null)
+                }
+              />
+              {newTourLogoPreviewUrl ?
+                <div className={devViewPanelBrandPreviewWrapClassName}>
+                  <img
+                    className={devViewPanelBrandLogoClassName}
+                    src={newTourLogoPreviewUrl}
+                    alt='Logo preview'
+                  />
+                </div>
+              : null}
+            </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Favicon (optional)
+              </span>
+              <input
+                className={devViewPanelFileInputClassName}
+                type='file'
+                accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
+                onChange={(e) =>
+                  setNewTourFaviconFile(e.target.files?.[0] ?? null)
+                }
+              />
+              {newTourFaviconPreviewUrl ?
+                <div className={devViewPanelBrandFaviconWrapClassName}>
+                  <img
+                    className={devViewPanelBrandFaviconClassName}
+                    src={newTourFaviconPreviewUrl}
+                    alt='Favicon preview'
+                  />
+                </div>
+              : null}
+            </label>
+          </DevPanelFormRow>
+        </>
+      : null}
+    </DevPanelFormSection>
+  );
+
   return (
     <div id={id} className={devViewPanelRootClassName}>
       <div className={devViewPanelStickyHeaderClassName}>
@@ -2076,7 +2235,7 @@ export function DevViewPanel({
               <img
                 className={devViewPanelStickyTourLogoClassName}
                 src={stickyTourIcon}
-                alt={tour.branding?.logoAlt ?? tour.title}
+                alt={stickyTourBranding?.logoAlt ?? tour.title}
               />
             </div>
           : null}
@@ -3513,6 +3672,32 @@ export function DevViewPanel({
               </DevPanelSection>
             </DevPanelSectionAccordion>
           </div>
+        : panelTab === 'client' ?
+          <div
+            id='dev-panel-client'
+            role='tabpanel'
+            aria-labelledby='dev-panel-tab-client'
+            className={devViewPanelTabPanelClassName}
+          >
+            <DevPanelSectionAccordion>
+              <DevPanelSection
+                title='Client'
+                description='Catalog clients — shared contact and branding. Tour-only settings stay on the Tour tab.'
+              >
+                <DevClientPanel
+                  catalogClients={catalogClients}
+                  catalogTick={catalogTick}
+                  manageClientId={manageClientId}
+                  onManageClientIdChange={setManageClientId}
+                  onCatalogRefresh={async () => {
+                    await refreshDevCatalogSnapshot();
+                  }}
+                  onOpenTour={handleOpenTourFromClient}
+                  onCreateTourForClient={handleCreateTourForClient}
+                />
+              </DevPanelSection>
+            </DevPanelSectionAccordion>
+          </div>
         : panelTab === 'tour' ?
           <div
             id='dev-panel-tour'
@@ -3568,6 +3753,24 @@ export function DevViewPanel({
                             spellCheck={false}
                             autoComplete='off'
                           />
+                        </label>
+
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Tour summary (optional)
+                          </span>
+                          <textarea
+                            className={devViewPanelTextareaClassName}
+                            value={editTourSummary}
+                            onChange={(e) => setEditTourSummary(e.target.value)}
+                            placeholder='Short marketing blurb for gallery cards and share previews'
+                            rows={2}
+                            spellCheck={true}
+                          />
+                          <p className={devViewPanelSectionHintClassName}>
+                            Stored in <code>catalog.json</code> (1–2 sentences).
+                            Not the AI knowledge summary or scene descriptions.
+                          </p>
                         </label>
 
                         <label className={devViewPanelFieldClassName}>
@@ -3821,275 +4024,210 @@ export function DevViewPanel({
                         : null}
                       </DevPanelFormSection>
 
-                      <DevPanelFormSection
-                        title='Client contact'
-                        divided
-                        description='Shared across all tours for this client — shown in tour chrome, share panel, and footer contact blocks.'
-                      >
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Website
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='url'
-                            value={editTourWebsite}
-                            onChange={(e) => setEditTourWebsite(e.target.value)}
-                            placeholder='https://…'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Email
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='email'
-                            value={editClientEmail}
-                            onChange={(e) => setEditClientEmail(e.target.value)}
-                            placeholder='info@example.org'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-
-                        <DevPanelFormRow>
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Phone
-                            </span>
-                            <input
-                              className={devViewPanelInputClassName}
-                              type='text'
-                              value={editClientPhone}
-                              onChange={(e) =>
-                                setEditClientPhone(e.target.value)
-                              }
-                              placeholder='825-412-4130'
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Phone label
-                            </span>
-                            <input
-                              className={devViewPanelInputClassName}
-                              type='text'
-                              value={editClientPhoneLabel}
-                              onChange={(e) =>
-                                setEditClientPhoneLabel(e.target.value)
-                              }
-                              placeholder='Telephone'
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-                        </DevPanelFormRow>
-
-                        <DevPanelFormRow>
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Fax
-                            </span>
-                            <input
-                              className={devViewPanelInputClassName}
-                              type='text'
-                              value={editClientFax}
-                              onChange={(e) => setEditClientFax(e.target.value)}
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Fax label
-                            </span>
-                            <input
-                              className={devViewPanelInputClassName}
-                              type='text'
-                              value={editClientFaxLabel}
-                              onChange={(e) =>
-                                setEditClientFaxLabel(e.target.value)
-                              }
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-                        </DevPanelFormRow>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Address
-                          </span>
-                          <textarea
-                            className={devViewPanelInputClassName}
-                            rows={2}
-                            value={editClientAddress}
-                            onChange={(e) =>
-                              setEditClientAddress(e.target.value)
-                            }
-                            placeholder='Street, city, province, postal code'
-                            spellCheck={false}
-                          />
-                        </label>
-                      </DevPanelFormSection>
-
                       <DevPanelFormSection title='Branding' divided>
-                        <div className='flex flex-col gap-1'>
-                          <div className={devViewPanelActionsClassName}>
-                            <button
-                              type='button'
-                              className={devViewPanelBtnVariants({
-                                tone: 'secondary',
-                              })}
-                              onClick={() => void suggestEditTourBranding()}
-                              disabled={
-                                !editTourWebsite.trim() ||
-                                editTourSuggestStatus === 'working'
-                              }
-                            >
-                              {editTourSuggestStatus === 'working' ?
-                                'Suggesting…'
-                              : 'Suggest from website'}
-                            </button>
-                          </div>
-                          <p className={devViewPanelSectionHintClassName}>
-                            Uses the Basics website URL to draft logo, favicon,
-                            and primary color — review before saving.
-                          </p>
+                        <div className='flex flex-col gap-2'>
+                          <label
+                            className={devViewPanelFormCheckboxLabelClassName}
+                          >
+                            <input
+                              className={devViewPanelFormCheckboxInputClassName}
+                              type='radio'
+                              name='edit-tour-branding-mode'
+                              checked={editTourBrandingMode === 'client'}
+                              onChange={() => setEditTourBrandingMode('client')}
+                            />
+                            <span className={devViewPanelToggleNameClassName}>
+                              Use client branding (shared)
+                            </span>
+                          </label>
+                          <label
+                            className={devViewPanelFormCheckboxLabelClassName}
+                          >
+                            <input
+                              className={devViewPanelFormCheckboxInputClassName}
+                              type='radio'
+                              name='edit-tour-branding-mode'
+                              checked={editTourBrandingMode === 'custom'}
+                              onChange={() => setEditTourBrandingMode('custom')}
+                            />
+                            <span className={devViewPanelToggleNameClassName}>
+                              Custom branding for this tour only
+                            </span>
+                          </label>
                         </div>
-
-                        {editTourSuggestNotes.length > 0 ?
-                          <ul className={devViewPanelSectionHintClassName}>
-                            {editTourSuggestNotes.map((note) => (
-                              <li key={note}>{note}</li>
-                            ))}
-                          </ul>
-                        : null}
-
-                        <DevPanelColorField
-                          label='Primary color'
-                          value={editTourPrimaryColor}
-                          onChange={setEditTourPrimaryColor}
-                          defaultColor={DEFAULT_NEW_TOUR_PRIMARY_COLOR}
-                          pickerAriaLabel='Edit tour primary color picker'
-                        />
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Logo alt
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='text'
-                            value={editTourLogoAlt}
-                            onChange={(e) => setEditTourLogoAlt(e.target.value)}
-                            placeholder='Accessible logo label'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Font family (CSS stack)
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='text'
-                            value={editTourFontFamily}
-                            onChange={(e) =>
-                              setEditTourFontFamily(e.target.value)
-                            }
-                            placeholder="'Montserrat', sans-serif"
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Google Fonts URL
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='url'
-                            value={editTourFontSourceUrl}
-                            onChange={(e) =>
-                              setEditTourFontSourceUrl(e.target.value)
-                            }
-                            placeholder='https://fonts.googleapis.com/css2?family=…'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
                         <p className={devViewPanelSectionHintClassName}>
-                          Must be <code>https://fonts.googleapis.com/…</code>.
-                          Clear both font fields to revert to platform defaults.
+                          {editTourBrandingMode === 'client' ?
+                            'Inherits shared branding from the Client tab. Switch to custom to override on this tour only.'
+                          : 'Stored on this tour JSON only — overrides the client brand.'
+                          }
                         </p>
 
-                        <DevPanelFormRow>
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Logo (replace)
-                            </span>
-                            <input
-                              className={devViewPanelFileInputClassName}
-                              type='file'
-                              accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
-                              onChange={(e) =>
-                                setEditTourLogoFile(e.target.files?.[0] ?? null)
-                              }
-                            />
-                            {editTourLogoPreviewUrl ?
-                              <div
-                                className={
-                                  devViewPanelBrandPreviewWrapClassName
-                                }
-                              >
-                                <img
-                                  className={devViewPanelBrandLogoClassName}
-                                  src={editTourLogoPreviewUrl}
-                                  alt='Current logo preview'
-                                />
+                        {editTourBrandingMode === 'custom' ?
+                          <>
+                            <div className='flex flex-col gap-1'>
+                              <div className={devViewPanelActionsClassName}>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'secondary',
+                                  })}
+                                  onClick={() => void suggestEditTourBranding()}
+                                  disabled={
+                                    !openCatalogClient?.website?.trim() ||
+                                    editTourSuggestStatus === 'working'
+                                  }
+                                >
+                                  {editTourSuggestStatus === 'working' ?
+                                    'Suggesting…'
+                                  : 'Suggest from website'}
+                                </button>
                               </div>
-                            : null}
-                          </label>
+                              <p className={devViewPanelSectionHintClassName}>
+                                Uses the client website from the Client tab to
+                                draft logo, favicon, and primary color — review
+                                before saving.
+                              </p>
+                            </div>
 
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Favicon (replace)
-                            </span>
-                            <input
-                              className={devViewPanelFileInputClassName}
-                              type='file'
-                              accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
-                              onChange={(e) =>
-                                setEditTourFaviconFile(
-                                  e.target.files?.[0] ?? null,
-                                )
-                              }
-                            />
-                            {editTourFaviconPreviewUrl ?
-                              <div
-                                className={
-                                  devViewPanelBrandFaviconWrapClassName
-                                }
-                              >
-                                <img
-                                  className={devViewPanelBrandFaviconClassName}
-                                  src={editTourFaviconPreviewUrl}
-                                  alt='Current favicon preview'
-                                />
-                              </div>
+                            {editTourSuggestNotes.length > 0 ?
+                              <ul className={devViewPanelSectionHintClassName}>
+                                {editTourSuggestNotes.map((note) => (
+                                  <li key={note}>{note}</li>
+                                ))}
+                              </ul>
                             : null}
-                          </label>
-                        </DevPanelFormRow>
+
+                            <DevPanelColorField
+                              label='Primary color'
+                              value={editTourPrimaryColor}
+                              onChange={setEditTourPrimaryColor}
+                              defaultColor={DEFAULT_NEW_TOUR_PRIMARY_COLOR}
+                              pickerAriaLabel='Edit tour primary color picker'
+                            />
+
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Logo alt
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='text'
+                                value={editTourLogoAlt}
+                                onChange={(e) =>
+                                  setEditTourLogoAlt(e.target.value)
+                                }
+                                placeholder='Accessible logo label'
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Font family (CSS stack)
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='text'
+                                value={editTourFontFamily}
+                                onChange={(e) =>
+                                  setEditTourFontFamily(e.target.value)
+                                }
+                                placeholder="'Montserrat', sans-serif"
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Google Fonts URL
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='url'
+                                value={editTourFontSourceUrl}
+                                onChange={(e) =>
+                                  setEditTourFontSourceUrl(e.target.value)
+                                }
+                                placeholder='https://fonts.googleapis.com/css2?family=…'
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+                            <p className={devViewPanelSectionHintClassName}>
+                              Must be{' '}
+                              <code>https://fonts.googleapis.com/…</code>. Clear
+                              both font fields to revert to platform defaults.
+                            </p>
+
+                            <DevPanelFormRow>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Logo (replace)
+                                </span>
+                                <input
+                                  className={devViewPanelFileInputClassName}
+                                  type='file'
+                                  accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+                                  onChange={(e) =>
+                                    setEditTourLogoFile(
+                                      e.target.files?.[0] ?? null,
+                                    )
+                                  }
+                                />
+                                {editTourLogoPreviewUrl ?
+                                  <div
+                                    className={
+                                      devViewPanelBrandPreviewWrapClassName
+                                    }
+                                  >
+                                    <img
+                                      className={devViewPanelBrandLogoClassName}
+                                      src={editTourLogoPreviewUrl}
+                                      alt='Current logo preview'
+                                    />
+                                  </div>
+                                : null}
+                              </label>
+
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Favicon (replace)
+                                </span>
+                                <input
+                                  className={devViewPanelFileInputClassName}
+                                  type='file'
+                                  accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
+                                  onChange={(e) =>
+                                    setEditTourFaviconFile(
+                                      e.target.files?.[0] ?? null,
+                                    )
+                                  }
+                                />
+                                {editTourFaviconPreviewUrl ?
+                                  <div
+                                    className={
+                                      devViewPanelBrandFaviconWrapClassName
+                                    }
+                                  >
+                                    <img
+                                      className={
+                                        devViewPanelBrandFaviconClassName
+                                      }
+                                      src={editTourFaviconPreviewUrl}
+                                      alt='Current favicon preview'
+                                    />
+                                  </div>
+                                : null}
+                              </label>
+                            </DevPanelFormRow>
+                          </>
+                        : null}
 
                         {editTourError ?
                           <p className={devViewPanelSectionHintClassName}>
@@ -4173,232 +4311,38 @@ export function DevViewPanel({
                   </>
                 : <>
                     <p className={devViewPanelTabHintClassName}>
-                      Create under an existing or new client.
+                      Create a tour under an existing catalog client. Add new
+                      clients on the Client tab first.
                     </p>
-                    <DevPanelTertiaryTabs
-                      aria-label='New tour client'
-                      value={newTourClientMode}
-                      onChange={setNewTourClientMode}
-                      tabs={DEV_NEW_TOUR_CLIENT_TABS.map((tab) => ({
-                        id: tab.id,
-                        label: tab.label,
-                        kind: tab.id === 'existing' ? 'tour' : 'scene',
-                      }))}
-                    />
-
-                    {newTourClientMode === 'existing' ?
-                      <p className={devViewPanelTabHintClassName}>
-                        Pick a client already in the catalog.
-                      </p>
-                    : <p className={devViewPanelTabHintClassName}>
-                        New client — catalog display name and a unique client
-                        id.
-                      </p>
-                    }
 
                     <DevPanelFormGroup stacked>
-                      <DevPanelFormSection
-                        title='Client'
-                        description={
-                          newTourClientMode === 'new' ?
-                            'Catalog identity and contact details shown in tour chrome, share panel, and footer.'
-                          : undefined
-                        }
-                      >
-                        {newTourClientMode === 'existing' ?
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Client
-                            </span>
-                            <select
-                              className={devViewPanelSelectClassName}
-                              value={newTourClientId}
-                              onChange={(e) =>
-                                setNewTourClientId(e.target.value)
-                              }
-                            >
-                              {catalogClients.length === 0 ?
-                                <option value=''>Loading clients…</option>
-                              : catalogClients.map((client) => (
-                                  <option key={client.id} value={client.id}>
-                                    {client.name} ({client.id}) ·{' '}
-                                    {client.tourCount} tour
-                                    {client.tourCount === 1 ? '' : 's'}
-                                  </option>
-                                ))
-                              }
-                            </select>
-                          </label>
-                        : <>
-                            <DevPanelFormRow>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Client name
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={newTourClientName}
-                                  onChange={(e) =>
-                                    setNewTourClientName(e.target.value)
-                                  }
-                                  placeholder='e.g. Example Foundation'
-                                  spellCheck={false}
-                                  autoComplete='off'
-                                />
-                              </label>
-
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Client id
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={newClientIdInput}
-                                  onChange={(e) =>
-                                    setNewClientIdInput(e.target.value)
-                                  }
-                                  placeholder='e.g. example-foundation'
-                                  spellCheck={false}
-                                  autoComplete='off'
-                                />
-                              </label>
-                            </DevPanelFormRow>
-
-                            {newClientSlug ?
-                              <p className={devViewPanelSlugPreviewClassName}>
-                                client id <code>{newClientSlug}</code>
-                              </p>
-                            : null}
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Website
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='url'
-                                value={newTourWebsite}
-                                onChange={(e) =>
-                                  setNewTourWebsite(e.target.value)
-                                }
-                                placeholder='https://…'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <div className='flex flex-col gap-1'>
-                              <div className={devViewPanelActionsClassName}>
-                                <button
-                                  type='button'
-                                  className={devViewPanelBtnVariants({
-                                    tone: 'secondary',
-                                  })}
-                                  onClick={() => void suggestNewTourContact()}
-                                  disabled={
-                                    !newTourWebsite.trim() ||
-                                    suggestContactStatus === 'working'
-                                  }
-                                >
-                                  {suggestContactStatus === 'working' ?
-                                    'Suggesting…'
-                                  : 'Suggest from website'}
-                                </button>
-                              </div>
-                              <p className={devViewPanelSectionHintClassName}>
-                                Uses the client website URL to draft email,
-                                phone, and address — review before creating.
-                              </p>
-                            </div>
-
-                            {suggestContactNotes.length > 0 ?
-                              <ul className={devViewPanelSectionHintClassName}>
-                                {suggestContactNotes.map((note) => (
-                                  <li key={note}>{note}</li>
-                                ))}
-                              </ul>
-                            : null}
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Email
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='email'
-                                value={newClientEmail}
-                                onChange={(e) =>
-                                  setNewClientEmail(e.target.value)
-                                }
-                                placeholder='info@example.org'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <DevPanelFormRow>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Phone
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={newClientPhone}
-                                  onChange={(e) =>
-                                    setNewClientPhone(e.target.value)
-                                  }
-                                  placeholder='825-412-4130'
-                                  spellCheck={false}
-                                  autoComplete='off'
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Phone label
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={newClientPhoneLabel}
-                                  onChange={(e) =>
-                                    setNewClientPhoneLabel(e.target.value)
-                                  }
-                                  placeholder='Telephone'
-                                  spellCheck={false}
-                                  autoComplete='off'
-                                />
-                              </label>
-                            </DevPanelFormRow>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Address
-                              </span>
-                              <textarea
-                                className={devViewPanelTextareaClassName}
-                                value={newClientAddress}
-                                onChange={(e) =>
-                                  setNewClientAddress(e.target.value)
-                                }
-                                placeholder='Street, city, province'
-                                rows={2}
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-                          </>
-                        }
+                      <DevPanelFormSection title='Client'>
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Client
+                          </span>
+                          <select
+                            className={devViewPanelSelectClassName}
+                            value={newTourClientId}
+                            onChange={(e) => setNewTourClientId(e.target.value)}
+                          >
+                            {catalogClients.length === 0 ?
+                              <option value=''>Loading clients…</option>
+                            : catalogClients.map((client) => (
+                                <option key={client.id} value={client.id}>
+                                  {client.name} ({client.id}) ·{' '}
+                                  {client.tourCount} tour
+                                  {client.tourCount === 1 ? '' : 's'}
+                                </option>
+                              ))
+                            }
+                          </select>
+                        </label>
+                        {catalogClients.length === 0 ?
+                          <p className={devViewPanelSectionHintClassName}>
+                            No clients yet — create one on the Client tab.
+                          </p>
+                        : null}
                       </DevPanelFormSection>
 
                       <DevPanelFormSection title='Tour details' divided>
@@ -4435,6 +4379,24 @@ export function DevViewPanel({
                             />
                           </label>
                         </DevPanelFormRow>
+
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Tour summary (optional)
+                          </span>
+                          <textarea
+                            className={devViewPanelTextareaClassName}
+                            value={newTourSummary}
+                            onChange={(e) => setNewTourSummary(e.target.value)}
+                            placeholder='Short marketing blurb for gallery cards and share previews'
+                            rows={2}
+                            spellCheck={true}
+                          />
+                          <p className={devViewPanelSectionHintClassName}>
+                            Saved to <code>catalog.json</code> with the tour
+                            entry (1–2 sentences).
+                          </p>
+                        </label>
 
                         <DevPanelFormRow>
                           <label className={devViewPanelFieldClassName}>
@@ -4506,134 +4468,9 @@ export function DevViewPanel({
                             </p>
                           </div>
                         </DevPanelFormRow>
-
-                        {newTourClientMode === 'existing' ?
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Website (optional)
-                            </span>
-                            <input
-                              className={devViewPanelInputClassName}
-                              type='url'
-                              value={newTourWebsite}
-                              onChange={(e) =>
-                                setNewTourWebsite(e.target.value)
-                              }
-                              placeholder='https://…'
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-                        : null}
                       </DevPanelFormSection>
 
-                      <DevPanelFormSection
-                        title='Branding (optional)'
-                        divided
-                        description='Upload logo and favicon manually, or suggest drafts below — review before creating the tour.'
-                      >
-                        <div className='flex flex-col gap-1'>
-                          <div className={devViewPanelActionsClassName}>
-                            <button
-                              type='button'
-                              className={devViewPanelBtnVariants({
-                                tone: 'secondary',
-                              })}
-                              onClick={() => void suggestNewTourBranding()}
-                              disabled={
-                                !newTourWebsite.trim() ||
-                                suggestBrandingStatus === 'working'
-                              }
-                            >
-                              {suggestBrandingStatus === 'working' ?
-                                'Suggesting…'
-                              : 'Suggest from website'}
-                            </button>
-                          </div>
-                          <p className={devViewPanelSectionHintClassName}>
-                            Uses the client website URL to draft logo, favicon,
-                            and primary color.
-                          </p>
-                        </div>
-
-                        {suggestBrandingNotes.length > 0 ?
-                          <ul className={devViewPanelSectionHintClassName}>
-                            {suggestBrandingNotes.map((note) => (
-                              <li key={note}>{note}</li>
-                            ))}
-                          </ul>
-                        : null}
-
-                        <DevPanelColorField
-                          label='Primary color'
-                          value={newTourPrimaryColor}
-                          onChange={setNewTourPrimaryColor}
-                          defaultColor={DEFAULT_NEW_TOUR_PRIMARY_COLOR}
-                          pickerAriaLabel='Primary color picker'
-                        />
-
-                        <DevPanelFormRow>
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Logo
-                            </span>
-                            <input
-                              className={devViewPanelFileInputClassName}
-                              type='file'
-                              accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
-                              onChange={(e) =>
-                                setNewTourLogoFile(e.target.files?.[0] ?? null)
-                              }
-                            />
-                            {newTourLogoPreviewUrl ?
-                              <div
-                                className={
-                                  devViewPanelBrandPreviewWrapClassName
-                                }
-                              >
-                                <img
-                                  className={devViewPanelBrandLogoClassName}
-                                  src={newTourLogoPreviewUrl}
-                                  alt='Logo preview'
-                                />
-                              </div>
-                            : null}
-                          </label>
-
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Favicon (optional)
-                            </span>
-                            <input
-                              className={devViewPanelFileInputClassName}
-                              type='file'
-                              accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
-                              onChange={(e) =>
-                                setNewTourFaviconFile(
-                                  e.target.files?.[0] ?? null,
-                                )
-                              }
-                            />
-                            {newTourFaviconPreviewUrl ?
-                              <div
-                                className={
-                                  devViewPanelBrandFaviconWrapClassName
-                                }
-                              >
-                                <img
-                                  className={devViewPanelBrandFaviconClassName}
-                                  src={newTourFaviconPreviewUrl}
-                                  alt='Favicon preview'
-                                />
-                              </div>
-                            : null}
-                            <p className={devViewPanelSectionHintClassName}>
-                              If omitted, a 32×32 favicon is generated from the
-                              logo on create.
-                            </p>
-                          </label>
-                        </DevPanelFormRow>
-                      </DevPanelFormSection>
+                      {createTourBrandingSection}
 
                       <DevPanelFormSection title='First scene' divided>
                         <label className={devViewPanelFieldClassName}>
@@ -4674,11 +4511,8 @@ export function DevViewPanel({
                             tour <code>{newTourSlug}</code> · scene{' '}
                             <code>{newFirstSceneSlug}</code> ·{' '}
                             <code>
-                              assets/
-                              {newTourClientMode === 'existing' ?
-                                newTourClientId
-                              : newClientSlug || '…'}
-                              /{newTourSlug}/panoramas/{newFirstSceneSlug}.webp
+                              assets/{newTourClientId}/{newTourSlug}/panoramas/
+                              {newFirstSceneSlug}.webp
                             </code>{' '}
                             · catalog <code>{newTourVisibility}</code>
                             {newTourFeatured ?
