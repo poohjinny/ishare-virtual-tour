@@ -2,6 +2,7 @@ import { cn } from '../lib/cn';
 import { CLIENT_INTRO_CTA } from '../constants/clientIntro';
 import type { CatalogTourListItem } from '../data/tourCatalog';
 import { loadTour } from '../data/loadTour';
+import { resolveTourBranding } from '../utils/resolveTourBranding';
 import { useCatalogTourPreview } from '../hooks/useCatalogTourPreview';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import {
@@ -44,7 +45,7 @@ export function ClientIntroGalleryCard({
     revealed: previewLoaded,
     onLoad: onPreviewLoad,
   } = usePreviewHeroReveal(previewSrc);
-  const logo = tour.branding?.logo;
+  const logo = resolveTourBranding(tour)?.logo;
 
   return (
     <li className='m-0 flex min-h-0 list-none p-0'>

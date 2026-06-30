@@ -42,7 +42,15 @@ export function normalizeTourAssets(tour: Tour): Tour {
     ...tour,
     branding:
       tour.branding ?
-        { ...tour.branding, logo: withBaseUrl(tour.branding.logo) }
+        {
+          ...tour.branding,
+          ...(tour.branding.logo ?
+            { logo: withBaseUrl(tour.branding.logo) }
+          : {}),
+          ...(tour.branding.favicon ?
+            { favicon: withBaseUrl(tour.branding.favicon) }
+          : {}),
+        }
       : undefined,
     floorPlan:
       tour.floorPlan ?

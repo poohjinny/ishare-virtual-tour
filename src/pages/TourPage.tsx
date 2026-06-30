@@ -28,6 +28,7 @@ import {
   DEFAULT_TOUR_ID,
 } from '../data/loadTour';
 import { getTourWebsite, resolveTourClient } from '../utils/resolveTourClient';
+import { resolveTourBranding } from '../utils/resolveTourBranding';
 import { getTourProductFullName } from '../utils/tourProductName';
 import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { useTourAssistant } from '../hooks/useTourAssistant';
@@ -291,6 +292,10 @@ function TourExperience() {
   const productFullName = useMemo(
     () => (tour ? getTourProductFullName(tour) : ''),
     [tour],
+  );
+  const tourBranding = useMemo(
+    () => resolveTourBranding(bootstrapTour),
+    [bootstrapTour],
   );
   const scenes = useMemo(() => (tour ? getSceneList(tour) : []), [tour]);
   const devSceneOptions = useMemo(
@@ -876,8 +881,8 @@ function TourExperience() {
           firstSceneId={tour.firstScene}
           tourTitle={productFullName}
           client={resolveTourClient(tour)}
-          clientLogo={tour.branding?.logo}
-          logoAlt={tour.branding?.logoAlt}
+          clientLogo={tourBranding?.logo}
+          logoAlt={tourBranding?.logoAlt}
           websiteUrl={getTourWebsite(tour)}
           disabled={isTransitioning}
           namingOpportunityBusy={namingOpportunityBusy}
@@ -900,8 +905,8 @@ function TourExperience() {
             fadeOverlay={splashOverlayFade}
             embed={searchParams.embed}
             onExitComplete={handleSplashExitComplete}
-            logo={tour.branding?.logo}
-            logoAlt={tour.branding?.logoAlt}
+            logo={tourBranding?.logo}
+            logoAlt={tourBranding?.logoAlt}
             productName={productFullName}
           />
         )}

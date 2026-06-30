@@ -36,3 +36,6 @@ export const EXPLORE_REFINE_SUBSECTION_FILTER = 'Filter';
 
 export const TOUR_DIRECTORY_EMPTY_SEARCH =
   'No locations or naming opportunities match your search.';
+
+/** Explore gallery card — hover CTA below description. */
+export const EXPLORE_GALLERY_VISIT_LABEL = 'Visit';

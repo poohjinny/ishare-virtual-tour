@@ -15,6 +15,8 @@ export interface TourDirectoryNamingItem {
   statusLabel: string;
   statusShortLabel: string;
   statusModifier: string;
+  /** First paragraph from the naming opportunity popup body. */
+  description?: string;
 }
 
 export function buildTourNamingDirectory(
@@ -34,6 +36,7 @@ export function buildTourNamingDirectory(
         statusLabel: naming.statusLabel,
         statusShortLabel: naming.statusShortLabel,
         statusModifier: naming.statusModifier,
+        description: naming.description,
       });
     }
   }
@@ -89,7 +92,8 @@ export function filterTourScenes(scenes: Scene[], query: string): Scene[] {
   return scenes.filter(
     (scene) =>
       scene.title.toLowerCase().includes(q) ||
-      scene.id.toLowerCase().includes(q),
+      scene.id.toLowerCase().includes(q) ||
+      scene.description?.toLowerCase().includes(q),
   );
 }
 
@@ -105,7 +109,8 @@ export function filterTourNamingDirectory(
       item.name.toLowerCase().includes(q) ||
       item.sceneTitle.toLowerCase().includes(q) ||
       item.statusLabel.toLowerCase().includes(q) ||
-      item.statusShortLabel.toLowerCase().includes(q),
+      item.statusShortLabel.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q),
   );
 }
 
