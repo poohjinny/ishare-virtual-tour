@@ -74,8 +74,8 @@
       "description": "Explore MH - 1 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-1.webp",
       "defaultView": {
-        "yaw": 95.6,
-        "pitch": -56.6,
+        "yaw": 59,
+        "pitch": -3.2,
         "zoom": 0
       },
       "hotspots": [],
@@ -100,9 +100,9 @@
       "description": "Explore MH - 3 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-3.webp",
       "defaultView": {
-        "yaw": 95.6,
-        "pitch": -56.6,
-        "zoom": 0
+        "yaw": 77.9,
+        "pitch": -5.2,
+        "zoom": 43
       },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-3.webp"
