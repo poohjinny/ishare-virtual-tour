@@ -5,15 +5,21 @@ import {
   materialSymbolCompactClassName,
 } from '../ui/materialSymbolClasses';
 
-export function ExploreGalleryCtaArrowIcon() {
+interface ExploreGalleryCtaArrowIconProps {
+  sizePx?: number;
+}
+
+export function ExploreGalleryCtaArrowIcon({
+  sizePx = MATERIAL_SYMBOL_SIZE_22,
+}: ExploreGalleryCtaArrowIconProps = {}) {
   return (
     <MaterialSymbol
       name='arrow_forward'
       className={cn(
         materialSymbolCompactClassName,
-        'transition-transform duration-200',
+        'transition-transform duration-300 ease-out',
       )}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={sizePx}
     />
   );
 }

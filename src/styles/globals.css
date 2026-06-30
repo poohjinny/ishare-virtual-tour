@@ -514,6 +514,12 @@
   }
 
   /* Explore gallery hero — same skeleton as nav preview (see glass-panels-layer.css) */
+  .tour-nav-gallery-card-hero {
+    --tour-gallery-hover-duration: 0.45s;
+    --tour-gallery-hover-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --tour-gallery-zoom-duration: 0.75s;
+  }
+
   .tour-nav-gallery-card-hero .preview-hero-skeleton {
     position: absolute;
     inset: -1px;
@@ -525,7 +531,11 @@
     scale: 1;
     transition:
       opacity 0.28s ease-out,
-      scale 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+      scale var(--tour-gallery-zoom-duration) var(--tour-gallery-hover-ease);
+  }
+
+  .tour-nav-gallery-card-hero-hover-body {
+    transition: grid-template-rows var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease);
   }
 
   @media (hover: hover) {
@@ -539,6 +549,19 @@
   @media (prefers-reduced-motion: reduce) {
     .tour-nav-gallery-card-hero-media {
       transition: opacity 0.28s ease-out;
+    }
+
+    .tour-nav-gallery-card-hero-hover-body {
+      transition: none;
+    }
+
+    .tour-nav-gallery-card-hero-overlay {
+      transition: none;
+    }
+
+    .group\/card:hover .tour-nav-gallery-card-hero-hover-body,
+    .group\/card:focus-visible .tour-nav-gallery-card-hero-hover-body {
+      grid-template-rows: 1fr;
     }
   }
 }

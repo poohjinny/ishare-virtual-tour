@@ -518,8 +518,40 @@ export const tourNavLocationGalleryStatusBadgeVariants = cva(
 );
 
 export const tourNavLocationGalleryHeroBottomOverlayClassName = cn(
-  'pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2.5 pt-5 pb-1.5',
-  'bg-gradient-to-t from-[rgba(15,23,42,0.82)] via-[rgba(15,23,42,0.4)] via-35% to-transparent',
+  'tour-nav-gallery-card-hero-overlay pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2.5 pb-1.5 pt-2',
+  'transition-[padding-top] duration-[var(--tour-gallery-hover-duration)] ease-[var(--tour-gallery-hover-ease)]',
+  'group-hover/card:pt-9 group-focus-visible/card:pt-9',
+  'bg-[linear-gradient(to_top,rgba(15,23,42,0.8)_0%,rgba(15,23,42,0.6)_50%,rgba(15,23,42,0.3)_84%,rgba(15,23,42,0)_100%,transparent_100%)]',
+);
+
+export const tourNavLocationGalleryHeroOverlayInnerClassName = cn(
+  'flex min-w-0 flex-col gap-1',
+);
+
+export const tourNavLocationGalleryHeroHoverBodyClassName = cn(
+  'tour-nav-gallery-card-hero-hover-body grid min-w-0 grid-rows-[0fr]',
+  'group-hover/card:grid-rows-[1fr] group-focus-visible/card:grid-rows-[1fr]',
+);
+
+export const tourNavLocationGalleryHeroHoverBodyInnerClassName =
+  'min-h-0 overflow-hidden';
+
+export const tourNavLocationGalleryHeroTitleRowClassName = cn(
+  'flex min-w-0 items-center gap-2',
+);
+
+export const tourNavLocationGalleryHeroDescriptionClassName = cn(
+  'tour-nav-gallery-card-hero-desc min-w-0 text-xs leading-[1.4] text-white/85 line-clamp-4',
+);
+
+export const tourNavLocationGalleryHeroCtaClassName = cn(
+  'tour-nav-gallery-card-hero-cta hidden size-6 shrink-0 items-center justify-center rounded-full bg-primary text-white',
+  'group-hover/card:inline-flex',
+  'pointer-events-none scale-95 opacity-0 transition-[opacity,transform] duration-[var(--tour-gallery-hover-duration)] ease-out',
+  'group-hover/card:pointer-events-auto group-hover/card:scale-100 group-hover/card:opacity-100',
+  'group-focus-visible/card:inline-flex group-focus-visible/card:pointer-events-auto group-focus-visible/card:scale-100 group-focus-visible/card:opacity-100',
+  'group-hover/card:[&_.material-symbols-rounded]:translate-x-px group-focus-visible/card:[&_.material-symbols-rounded]:translate-x-px',
+  'motion-reduce:scale-100 motion-reduce:opacity-100 motion-reduce:transition-none',
 );
 
 export const tourNavLocationGalleryHeroCtaOverlayClassName = cn(
@@ -527,12 +559,15 @@ export const tourNavLocationGalleryHeroCtaOverlayClassName = cn(
 );
 
 export const tourNavLocationGalleryHeroTitleOverlayClassName = cn(
-  'min-w-0 flex-1 font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
+  'min-w-0 flex-1 truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
+);
+
+export const tourNavLocationGalleryHeroNamingTitleRowClassName = cn(
+  'flex min-w-0 flex-1 items-center gap-2',
 );
 
 export const tourNavLocationGalleryHeroNamingLabelClassName = cn(
-  tourNavLocationGalleryHeroTitleOverlayClassName,
-  'flex min-w-0 items-baseline gap-x-1.5',
+  'flex min-w-0 flex-1 items-baseline gap-x-1.5 font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
 );
 
 export const tourNavLocationGalleryHeroNamingNameClassName =
@@ -551,14 +586,18 @@ export const tourNavLocationGalleryHeroNamingLocationClassName = cn(
   'min-w-0 shrink truncate font-normal',
 );
 
-export const tourNavLocationGalleryCtaClassName = cn(
+export const tourNavLocationGalleryCenterCtaClassName = cn(
   'inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-white max-[480px]:size-11',
-  'pointer-events-none scale-95 opacity-0 transition-[opacity,transform] duration-200',
+  'pointer-events-none scale-95 opacity-0 transition-[opacity,transform] duration-[var(--tour-gallery-hover-duration)] ease-out',
   'group-hover/card:pointer-events-auto group-hover/card:scale-100 group-hover/card:opacity-100',
   'group-focus-visible/card:pointer-events-auto group-focus-visible/card:scale-100 group-focus-visible/card:opacity-100',
   'group-hover/card:[&_.material-symbols-rounded]:translate-x-px group-focus-visible/card:[&_.material-symbols-rounded]:translate-x-px',
   'motion-reduce:scale-100 motion-reduce:opacity-100 motion-reduce:transition-none',
 );
+
+/** @deprecated Use {@link tourNavLocationGalleryCenterCtaClassName}. */
+export const tourNavLocationGalleryCtaClassName =
+  tourNavLocationGalleryCenterCtaClassName;
 
 export const tourNavDirectoryItemVariants = cva(
   cn(
@@ -569,7 +608,10 @@ export const tourNavDirectoryItemVariants = cva(
   ),
   {
     variants: {
-      kind: { location: '', naming: 'items-center px-3.5 py-3' },
+      kind: {
+        location: 'items-start px-3 py-3',
+        naming: 'items-start px-3.5 py-3',
+      },
       statusTone: { default: '', closed: '' },
       active: {
         false: cn(
@@ -598,6 +640,7 @@ export const tourNavDirectoryItemVariants = cva(
           'border-[color:var(--ishare-active-item-border)]',
           'font-semibold text-foreground',
           '[&_[data-tour-nav-location-icon]]:text-primary',
+          '[&_.tour-nav-item-description]:font-normal',
         ),
       },
       {
@@ -620,6 +663,7 @@ export const tourNavDirectoryItemVariants = cva(
           'hover:enabled:bg-white/[0.3] focus-visible:enabled:bg-white/[0.3]',
           '[&_.tour-nav-item-label]:font-semibold',
           '[&_.tour-nav-item-meta]:font-normal',
+          '[&_.tour-nav-item-description]:font-normal',
           '[&_[data-tour-nav-naming-icon]]:text-primary',
           'hover:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
           'focus-visible:enabled:[&_[data-tour-nav-naming-icon]]:text-primary',
@@ -636,6 +680,11 @@ export const tourNavItemLeadingClassName = cn(
   'tour-nav-item-leading flex size-4 shrink-0 items-center justify-center',
 );
 
+export const tourNavItemLeadingLocationClassName = cn(
+  tourNavItemLeadingClassName,
+  'mt-0.5',
+);
+
 export const tourNavItemLocationIconClassName = cn(
   materialSymbolCompactClassName,
   'text-[rgba(100,116,139,0.42)] transition-colors duration-150',
@@ -649,6 +698,10 @@ export const tourNavItemNamingLabelClassName = cn(
   'flex min-w-0 flex-1 items-baseline gap-x-1.5',
 );
 
+export const tourNavItemNamingHeadingClassName = cn(
+  'flex min-w-0 items-baseline gap-x-1.5',
+);
+
 export const tourNavItemNamingNameClassName = cn(
   'tour-nav-item-label min-w-0 truncate font-medium transition-colors duration-150',
 );
@@ -660,12 +713,18 @@ export const tourNavItemNamingLocationClassName = cn(
 );
 
 export const tourNavItemTextClassName = cn(
-  'flex min-w-0 flex-1 flex-col gap-0.5',
+  'flex min-w-0 flex-1 flex-col gap-1.5',
 );
 
 export const tourNavItemMetaClassName = cn(
   'tour-nav-item-meta text-xs leading-[1.3] text-muted',
 );
+
+export const tourNavItemDescriptionClassName = cn(
+  'tour-nav-item-description text-xs leading-[1.35] text-muted line-clamp-2',
+);
+
+export const tourNavItemBadgePlacementClassName = cn('shrink-0 self-center');
 
 export const tourNavEmptyClassName = cn(
   'm-0 px-1 py-2 text-center text-md leading-[1.55] text-muted',

@@ -11,13 +11,18 @@ import {
   tourNavLocationGalleryCardHeroImageClassName,
   tourNavLocationGalleryCardHeroSkeletonClassName,
   tourNavLocationGalleryCurrentBadgeClassName,
-  tourNavLocationGalleryCtaClassName,
   tourNavLocationGalleryHeroBadgePlacementClassName,
   tourNavLocationGalleryHeroBottomOverlayClassName,
-  tourNavLocationGalleryHeroCtaOverlayClassName,
+  tourNavLocationGalleryHeroCtaClassName,
+  tourNavLocationGalleryHeroDescriptionClassName,
+  tourNavLocationGalleryHeroHoverBodyClassName,
+  tourNavLocationGalleryHeroHoverBodyInnerClassName,
+  tourNavLocationGalleryHeroOverlayInnerClassName,
   tourNavLocationGalleryHeroTitleOverlayClassName,
+  tourNavLocationGalleryHeroTitleRowClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
+import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
 
 interface ExploreSceneGalleryCardProps {
   tourId: string;
@@ -47,6 +52,13 @@ export function ExploreSceneGalleryCard({
   } = usePreviewHeroReveal(previewSrc);
   const heroLoading =
     previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
+  const description = scene.description?.trim();
+  const ariaLabel =
+    active ?
+      description ? `${scene.title}, current location. ${description}`
+      : `${scene.title}, current location`
+    : description ? `Go to ${scene.title}. ${description}`
+    : `Go to ${scene.title}`;
 
   return (
     <li
@@ -63,9 +75,7 @@ export function ExploreSceneGalleryCard({
         disabled={disabled}
         className={tourNavLocationGalleryCardClassName({ active })}
         onClick={onSelect}
-        aria-label={
-          active ? `${scene.title}, current location` : `Go to ${scene.title}`
-        }
+        aria-label={ariaLabel}
       >
         <span
           className={cn(
@@ -114,16 +124,40 @@ export function ExploreSceneGalleryCard({
               Current
             </Badge>
           : null}
-          {!active ?
-            <span className={tourNavLocationGalleryHeroCtaOverlayClassName}>
-              <span className={tourNavLocationGalleryCtaClassName}>
-                <ExploreGalleryCtaArrowIcon />
-              </span>
-            </span>
-          : null}
           <span className={tourNavLocationGalleryHeroBottomOverlayClassName}>
-            <span className={tourNavLocationGalleryHeroTitleOverlayClassName}>
-              {scene.title}
+            <span className={tourNavLocationGalleryHeroOverlayInnerClassName}>
+              <span className={tourNavLocationGalleryHeroTitleRowClassName}>
+                <span
+                  className={tourNavLocationGalleryHeroTitleOverlayClassName}
+                >
+                  {scene.title}
+                </span>
+                {!active ?
+                  <span
+                    className={tourNavLocationGalleryHeroCtaClassName}
+                    aria-hidden='true'
+                  >
+                    <ExploreGalleryCtaArrowIcon
+                      sizePx={MATERIAL_SYMBOL_SIZE_14}
+                    />
+                  </span>
+                : null}
+              </span>
+              {description ?
+                <span className={tourNavLocationGalleryHeroHoverBodyClassName}>
+                  <span
+                    className={
+                      tourNavLocationGalleryHeroHoverBodyInnerClassName
+                    }
+                  >
+                    <span
+                      className={tourNavLocationGalleryHeroDescriptionClassName}
+                    >
+                      {description}
+                    </span>
+                  </span>
+                </span>
+              : null}
             </span>
           </span>
         </span>

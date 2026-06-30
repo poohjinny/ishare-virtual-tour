@@ -113,14 +113,17 @@ import {
   tourNavHistoryBtnClassName,
   tourNavHistoryBtnIconClassName,
   tourNavItemBadgeClassName,
+  tourNavItemBadgePlacementClassName,
+  tourNavItemDescriptionClassName,
   tourNavItemIconNamingVariants,
   tourNavItemLocationIconClassName,
   tourNavItemLabelClassName,
-  tourNavItemLeadingClassName,
-  tourNavItemNamingLabelClassName,
+  tourNavItemLeadingLocationClassName,
+  tourNavItemNamingHeadingClassName,
   tourNavItemNamingLocationClassName,
   tourNavItemNamingNameClassName,
   tourNavItemNamingSeparatorClassName,
+  tourNavItemTextClassName,
   tourNavListClassName,
   tourNavLocationGalleryListClassName,
   tourNavLogoClassName,
@@ -898,38 +901,51 @@ export function TourNavFloat({
       showSectionTitle?: boolean;
       emptyMessage?: string;
       listBodyOnly?: boolean;
+      /** Search results — list rows only (no gallery cards). */
+      listOnly?: boolean;
     },
   ) => {
     const listBody =
       items.length > 0 ?
         <>
-          <ul
-            ref={locationsGalleryListRef}
-            hidden={exploreLayout !== 'gallery'}
-            className={tourNavLocationGalleryListClassName}
-            role='listbox'
-            aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
-          >
-            {items.map((scene) => (
-              <ExploreSceneGalleryCard
-                key={scene.id}
-                tourId={tourId}
-                scene={scene}
-                active={scene.id === currentSceneId}
-                disabled={disabled}
-                onSelect={() => handleSelect(scene.id)}
-              />
-            ))}
-          </ul>
+          {!options?.listOnly ?
+            <ul
+              ref={locationsGalleryListRef}
+              hidden={exploreLayout !== 'gallery'}
+              className={tourNavLocationGalleryListClassName}
+              role='listbox'
+              aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
+            >
+              {items.map((scene) => (
+                <ExploreSceneGalleryCard
+                  key={scene.id}
+                  tourId={tourId}
+                  scene={scene}
+                  active={scene.id === currentSceneId}
+                  disabled={disabled}
+                  onSelect={() => handleSelect(scene.id)}
+                />
+              ))}
+            </ul>
+          : null}
           <ul
             ref={locationsListRef}
-            hidden={exploreLayout !== 'list'}
+            hidden={!options?.listOnly && exploreLayout !== 'list'}
             className={tourNavListClassName}
             role='listbox'
             aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
           >
             {items.map((scene) => {
               const isActive = scene.id === currentSceneId;
+              const description = scene.description?.trim();
+              const ariaLabel =
+                isActive ?
+                  description ?
+                    `${scene.title}, current location. ${description}`
+                  : `${scene.title}, current location`
+                : description ? `Go to ${scene.title}. ${description}`
+                : `Go to ${scene.title}`;
+
               return (
                 <li
                   key={scene.id}
@@ -947,15 +963,29 @@ export function TourNavFloat({
                     })}
                     disabled={disabled}
                     onClick={() => handleSelect(scene.id)}
+                    aria-label={ariaLabel}
                   >
-                    <span className={tourNavItemLeadingClassName}>
+                    <span className={tourNavItemLeadingLocationClassName}>
                       <TourLocationItemIcon active={isActive} />
                     </span>
-                    <span className={tourNavItemLabelClassName}>
-                      {scene.title}
+                    <span className={tourNavItemTextClassName}>
+                      <span className={tourNavItemLabelClassName}>
+                        {scene.title}
+                      </span>
+                      {description ?
+                        <span className={tourNavItemDescriptionClassName}>
+                          {description}
+                        </span>
+                      : null}
                     </span>
                     {isActive && (
-                      <Badge variant='fill' size='sm' tone='primary' uppercase>
+                      <Badge
+                        variant='fill'
+                        size='sm'
+                        tone='primary'
+                        uppercase
+                        className={tourNavItemBadgePlacementClassName}
+                      >
                         Current
                       </Badge>
                     )}
@@ -1002,38 +1032,42 @@ export function TourNavFloat({
       showSectionTitle?: boolean;
       emptyMessage?: string;
       listBodyOnly?: boolean;
+      /** Search results — list rows only (no gallery cards). */
+      listOnly?: boolean;
     },
   ) => {
     const listBody =
       items.length > 0 ?
         <>
-          <ul
-            ref={namingGalleryListRef}
-            hidden={exploreLayout !== 'gallery'}
-            className={tourNavLocationGalleryListClassName}
-            role='listbox'
-            aria-label={TOUR_DIRECTORY_SECTION_NAMING}
-          >
-            {items.map((item) => (
-              <ExploreNamingGalleryCard
-                key={`${item.sceneId}:${item.hotspotId}`}
-                tourId={tourId}
-                scenes={scenes}
-                item={item}
-                active={
-                  activeNamingHotspotId === item.hotspotId &&
-                  currentSceneId === item.sceneId
-                }
-                disabled={disabled || namingOpportunityBusy}
-                onSelect={() =>
-                  handleSelectNaming(item.sceneId, item.hotspotId)
-                }
-              />
-            ))}
-          </ul>
+          {!options?.listOnly ?
+            <ul
+              ref={namingGalleryListRef}
+              hidden={exploreLayout !== 'gallery'}
+              className={tourNavLocationGalleryListClassName}
+              role='listbox'
+              aria-label={TOUR_DIRECTORY_SECTION_NAMING}
+            >
+              {items.map((item) => (
+                <ExploreNamingGalleryCard
+                  key={`${item.sceneId}:${item.hotspotId}`}
+                  tourId={tourId}
+                  scenes={scenes}
+                  item={item}
+                  active={
+                    activeNamingHotspotId === item.hotspotId &&
+                    currentSceneId === item.sceneId
+                  }
+                  disabled={disabled || namingOpportunityBusy}
+                  onSelect={() =>
+                    handleSelectNaming(item.sceneId, item.hotspotId)
+                  }
+                />
+              ))}
+            </ul>
+          : null}
           <ul
             ref={namingListRef}
-            hidden={exploreLayout !== 'list'}
+            hidden={!options?.listOnly && exploreLayout !== 'list'}
             className={tourNavListClassName}
             role='listbox'
             aria-label={TOUR_DIRECTORY_SECTION_NAMING}
@@ -1043,6 +1077,15 @@ export function TourNavFloat({
                 activeNamingHotspotId === item.hotspotId &&
                 currentSceneId === item.sceneId;
               const isClosed = item.statusModifier === 'closed';
+              const description = item.description?.trim();
+              const ariaLabel =
+                isActive ?
+                  description ?
+                    `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${description}`
+                  : `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}.`
+                : description ?
+                  `${item.name}, ${item.sceneTitle}. ${item.statusLabel}. ${description}`
+                : `${item.name}, ${item.sceneTitle}. ${item.statusLabel}.`;
 
               return (
                 <li
@@ -1066,30 +1109,41 @@ export function TourNavFloat({
                     onClick={() =>
                       handleSelectNaming(item.sceneId, item.hotspotId)
                     }
+                    aria-label={ariaLabel}
                   >
-                    <span className={tourNavItemLeadingClassName}>
+                    <span className={tourNavItemLeadingLocationClassName}>
                       <NamingHeartIcon active={isActive} closed={isClosed} />
                     </span>
-                    <span className={tourNavItemNamingLabelClassName}>
-                      <span className={tourNavItemNamingNameClassName}>
-                        {item.name}
+                    <span className={tourNavItemTextClassName}>
+                      <span className={tourNavItemNamingHeadingClassName}>
+                        <span className={tourNavItemNamingNameClassName}>
+                          {item.name}
+                        </span>
+                        <span
+                          className={tourNavItemNamingSeparatorClassName}
+                          aria-hidden='true'
+                        >
+                          |
+                        </span>
+                        <span className={tourNavItemNamingLocationClassName}>
+                          {item.sceneTitle}
+                        </span>
                       </span>
-                      <span
-                        className={tourNavItemNamingSeparatorClassName}
-                        aria-hidden='true'
-                      >
-                        |
-                      </span>
-                      <span className={tourNavItemNamingLocationClassName}>
-                        {item.sceneTitle}
-                      </span>
+                      {description ?
+                        <span className={tourNavItemDescriptionClassName}>
+                          {description}
+                        </span>
+                      : null}
                     </span>
                     <NamingStatusBadge
                       statusModifier={
                         item.statusModifier as NamingStatusModifier
                       }
                       label={item.statusLabel}
-                      className={tourNavItemBadgeClassName}
+                      className={cn(
+                        tourNavItemBadgeClassName,
+                        tourNavItemBadgePlacementClassName,
+                      )}
                     />
                   </button>
                 </li>
@@ -1232,8 +1286,11 @@ export function TourNavFloat({
             >
               {TOUR_DIRECTORY_SECTION_LOCATIONS}
             </h3>
-            <ExploreLayoutPanel layout={exploreLayout}>
-              {renderLocationsList(sceneResults, { listBodyOnly: true })}
+            <ExploreLayoutPanel layout='list'>
+              {renderLocationsList(sceneResults, {
+                listBodyOnly: true,
+                listOnly: true,
+              })}
             </ExploreLayoutPanel>
           </section>
         )}
@@ -1249,8 +1306,11 @@ export function TourNavFloat({
             >
               {TOUR_DIRECTORY_SECTION_NAMING}
             </h3>
-            <ExploreLayoutPanel layout={exploreLayout}>
-              {renderNamingList(namingResults, { listBodyOnly: true })}
+            <ExploreLayoutPanel layout='list'>
+              {renderNamingList(namingResults, {
+                listBodyOnly: true,
+                listOnly: true,
+              })}
             </ExploreLayoutPanel>
           </section>
         )}
