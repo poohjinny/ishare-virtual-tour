@@ -224,6 +224,55 @@ export async function suggestBrandingFromWebsite(websiteUrl) {
   };
 }
 
+export async function saveClientBrandAssets({
+  root,
+  assetsRoot,
+  clientId,
+  logoFileBuffer,
+  faviconFileBuffer,
+}) {
+  const logoWebPath = `/assets/${clientId}/brand/logo.png`;
+  const faviconWebPath = `/assets/${clientId}/favicon.png`;
+  const logoFilePath = join(assetsRoot, clientId, 'brand', 'logo.png');
+  const faviconFilePath = join(assetsRoot, clientId, 'favicon.png');
+
+  let savedLogo = false;
+  let savedFavicon = false;
+
+  if (logoFileBuffer?.length) {
+    mkdirSync(dirname(logoFilePath), { recursive: true });
+    await sharp(logoFileBuffer).png().toFile(logoFilePath);
+    syncAssetToPublic(root, logoFilePath, logoWebPath);
+    savedLogo = true;
+  }
+
+  let faviconBuffer = faviconFileBuffer;
+  if (!faviconBuffer?.length && logoFileBuffer?.length) {
+    faviconBuffer = await sharp(logoFileBuffer)
+      .resize(32, 32, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+  }
+
+  if (faviconBuffer?.length) {
+    mkdirSync(dirname(faviconFilePath), { recursive: true });
+    await sharp(faviconBuffer)
+      .resize(32, 32, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toFile(faviconFilePath);
+    syncAssetToPublic(root, faviconFilePath, faviconWebPath);
+    savedFavicon = true;
+  }
+
+  return { savedLogo, savedFavicon, logoWebPath, faviconWebPath };
+}
+
 export async function saveTourBrandAssets({
   root,
   assetsRoot,

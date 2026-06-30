@@ -79,3 +79,70 @@ export function applyCatalogClientContact(
 export function resolveClientWebsite(client, fallback = 'https://example.com') {
   return client?.website?.trim() || fallback;
 }
+
+function applyOptionalBrandingField(branding, key, value) {
+  if (value === undefined) return;
+  const trimmed = typeof value === 'string' ? value.trim() : value;
+  if (!trimmed) {
+    delete branding[key];
+    return;
+  }
+  branding[key] = trimmed;
+}
+
+/** Patch catalog client branding (logo paths, colors, fonts). */
+export function applyCatalogClientBranding(
+  client,
+  {
+    logo,
+    logoAlt,
+    primaryColor,
+    fontFamily,
+    fontSourceUrl,
+    favicon,
+    clearFontFamily,
+    clearFontSourceUrl,
+  },
+) {
+  if (
+    logo === undefined &&
+    logoAlt === undefined &&
+    primaryColor === undefined &&
+    fontFamily === undefined &&
+    fontSourceUrl === undefined &&
+    favicon === undefined &&
+    clearFontFamily !== true &&
+    clearFontSourceUrl !== true
+  ) {
+    return;
+  }
+
+  client.branding = client.branding ?? {};
+
+  if (logo !== undefined) {
+    applyOptionalBrandingField(client.branding, 'logo', logo);
+  }
+  if (logoAlt !== undefined) {
+    applyOptionalBrandingField(client.branding, 'logoAlt', logoAlt);
+  }
+  if (primaryColor !== undefined) {
+    applyOptionalBrandingField(client.branding, 'primaryColor', primaryColor);
+  }
+  if (favicon !== undefined) {
+    applyOptionalBrandingField(client.branding, 'favicon', favicon);
+  }
+  if (clearFontFamily === true) {
+    delete client.branding.fontFamily;
+  } else if (fontFamily !== undefined) {
+    applyOptionalBrandingField(client.branding, 'fontFamily', fontFamily);
+  }
+  if (clearFontSourceUrl === true) {
+    delete client.branding.fontSourceUrl;
+  } else if (fontSourceUrl !== undefined) {
+    applyOptionalBrandingField(client.branding, 'fontSourceUrl', fontSourceUrl);
+  }
+
+  if (Object.keys(client.branding).length === 0) {
+    delete client.branding;
+  }
+}

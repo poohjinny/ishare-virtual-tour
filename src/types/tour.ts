@@ -157,15 +157,14 @@ export interface TourClient {
 }
 
 export interface TourBranding {
-  logo: string;
-  logoAlt: string;
+  logo?: string;
+  logoAlt?: string;
   /** Client brand primary — e.g. "#cb007c" */
   primaryColor?: string;
   /** Client tour font — sets `--client-font` on `.tour-page` (body + headings) */
   fontFamily?: string;
   /** Google Fonts stylesheet URL (https://fonts.googleapis.com/… only) */
   fontSourceUrl?: string;
-  /** Optional override — defaults to /assets/{clientId}/{tourId}/favicon.ico */
   favicon?: string;
 }
 
@@ -197,6 +196,7 @@ export interface Tour {
   title: string;
   /** Optional override — defaults to `{client.name} Virtual Tour` */
   productFullName?: string;
+  /** Optional per-tour branding override — defaults to catalog client `branding`. */
   branding?: TourBranding;
   /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
   immersiveBackground?: TourImmersiveBackground;

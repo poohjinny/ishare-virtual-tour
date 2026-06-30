@@ -5,7 +5,7 @@ import {
 } from '../constants/tourCategories';
 import { getDevCatalogSnapshot } from './devCatalogSnapshot';
 
-import type { ClientPhone } from '../types/tour';
+import type { ClientPhone, TourBranding } from '../types/tour';
 
 export type CatalogTourVisibility = 'public' | 'unlisted' | 'internal';
 
@@ -13,6 +13,8 @@ export interface CatalogTourEntry {
   id: string;
   category: TourCategory;
   name: string;
+  /** Short marketing blurb for gallery cards, share previews, and listings. */
+  summary?: string;
   visibility?: CatalogTourVisibility;
   featured?: boolean;
 }
@@ -29,6 +31,8 @@ export interface CatalogClient {
   fax?: string;
   faxLabel?: string;
   address?: string;
+  /** Shared client branding — tours inherit unless `tour.branding` overrides. */
+  branding?: TourBranding;
   tours: CatalogTourEntry[];
 }
 
@@ -65,6 +69,13 @@ export function listCatalogClients(): CatalogClient[] {
 
 export function findCatalogClient(clientId: string): CatalogClient | undefined {
   return getCatalogData().clients.find((client) => client.id === clientId);
+}
+
+export function findCatalogTour(
+  clientId: string,
+  tourId: string,
+): CatalogTourEntry | undefined {
+  return findCatalogClient(clientId)?.tours.find((tour) => tour.id === tourId);
 }
 
 export interface CatalogTourListItem {
