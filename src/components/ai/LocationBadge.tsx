@@ -1,6 +1,11 @@
-import { Badge } from '../ui/Badge';
-import { cn } from '../../lib/cn';
-import { aiPanelLocationBadgeClassName } from './aiAssistantVariants';
+import { GUIDE_PANEL_CURRENT_SCENE_LABEL } from '../../constants/branding';
+import {
+  aiPanelLocationBadgeClassName,
+  aiPanelLocationBadgeLabelClassName,
+  aiPanelLocationBadgeSeparatorClassName,
+  aiPanelLocationBadgeTitleClassName,
+  aiPanelLocationDotClassName,
+} from './aiAssistantVariants';
 
 interface LocationBadgeProps {
   title: string;
@@ -8,14 +13,21 @@ interface LocationBadgeProps {
 
 export function LocationBadge({ title }: LocationBadgeProps) {
   return (
-    <Badge
-      variant='outline'
-      tone='muted'
-      dot
-      className={cn(aiPanelLocationBadgeClassName, 'ishare-badge--dot-primary')}
-      aria-label={`Current location: ${title}`}
+    <p
+      className={aiPanelLocationBadgeClassName}
+      aria-label={`${GUIDE_PANEL_CURRENT_SCENE_LABEL}: ${title}`}
     >
-      {`You're on ${title}`}
-    </Badge>
+      <span className={aiPanelLocationDotClassName} aria-hidden='true' />
+      <span className={aiPanelLocationBadgeLabelClassName}>
+        {GUIDE_PANEL_CURRENT_SCENE_LABEL}
+      </span>
+      <span
+        className={aiPanelLocationBadgeSeparatorClassName}
+        aria-hidden='true'
+      >
+        ·
+      </span>
+      <span className={aiPanelLocationBadgeTitleClassName}>{title}</span>
+    </p>
   );
 }

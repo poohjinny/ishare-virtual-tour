@@ -25,11 +25,6 @@ export const PLATFORM_FMI_LOGO = withBaseUrl('/assets/brand/logo_fmi.png');
 /** Platform symbol mark (shared asset). */
 export const PLATFORM_SYMBOL = withBaseUrl('/assets/brand/symbol_ishare.png');
 
-/** Platform default guide avatar — overridden when `assets/{clientId}/{tourId}/brand/tour-guide.png` exists. */
-export const VIRTUAL_TOUR_GUIDE_AVATAR = withBaseUrl(
-  '/assets/brand/tour-guide.png',
-);
-
 /** Looping hero for the multi-client intro screen (`/`). */
 export const CLIENT_INTRO_HERO_VIDEO = withBaseUrl(
   '/assets/brand/client-intro-hero.mp4',
@@ -40,6 +35,9 @@ export const VIRTUAL_TOUR_GUIDE_NAME = 'Virtual Tour Guide';
 
 /** Short CTA label on nav preview and assistant FAB hover. */
 export const VIRTUAL_TOUR_GUIDE_CTA = 'Ask Guide';
+
+/** Guide panel location badge — prefixes the active scene title. */
+export const GUIDE_PANEL_CURRENT_SCENE_LABEL = 'Current scene';
 
 /** Shown in chat until live AI is connected. */
 export const VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE =

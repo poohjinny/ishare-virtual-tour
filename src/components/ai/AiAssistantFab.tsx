@@ -1,8 +1,8 @@
 import { VIRTUAL_TOUR_GUIDE_NAME } from '../../constants/branding';
-import { GuideAvatarImage } from './GuideAvatarImage';
+import { GuideAvatar } from './GuideAvatar';
 import {
   aiFabAvatarClassName,
-  aiFabIconClassName,
+  aiFabGuideMarkClassName,
   aiFabLabelAccentClassName,
   aiFabLabelClassName,
   aiFabVariants,
@@ -10,14 +10,12 @@ import {
 
 interface AiAssistantFabProps {
   phase: 'idle' | 'enter' | 'exit';
-  guideAvatarUrl: string;
   onClick: () => void;
   onWarmup?: () => void;
 }
 
 export function AiAssistantFab({
   phase,
-  guideAvatarUrl,
   onClick,
   onWarmup,
 }: AiAssistantFabProps) {
@@ -32,11 +30,7 @@ export function AiAssistantFab({
       aria-expanded={false}
     >
       <span className={aiFabAvatarClassName}>
-        <GuideAvatarImage
-          className={aiFabIconClassName}
-          src={guideAvatarUrl}
-          alt=''
-        />
+        <GuideAvatar className={aiFabGuideMarkClassName} />
       </span>
       <span className={aiFabLabelClassName}>
         Ask <span className={aiFabLabelAccentClassName}>Guide</span>

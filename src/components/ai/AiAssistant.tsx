@@ -1,7 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
-import { useGuideAvatar } from '../../hooks/useGuideAvatar';
 import type { useTourAssistant } from '../../hooks/useTourAssistant';
-import type { Tour } from '../../types/tour';
 import { AiAssistantFab } from './AiAssistantFab';
 import { AiChatPanelFallback } from './AiChatPanelFallback';
 import { AiChatPanelLazy, preloadAiChatPanel } from './aiChatPanelLazy';
@@ -15,19 +13,13 @@ const PANEL_ENTER_MS = 170;
 type AssistantState = ReturnType<typeof useTourAssistant>;
 
 interface AiAssistantProps {
-  tour: Pick<Tour, 'id' | 'clientId'>;
   assistant: AssistantState;
   chatTest?: boolean;
 }
 
 type AnimPhase = 'idle' | 'enter' | 'exit';
 
-export function AiAssistant({
-  tour,
-  assistant,
-  chatTest = false,
-}: AiAssistantProps) {
-  const guideAvatarUrl = useGuideAvatar(tour);
+export function AiAssistant({ assistant, chatTest = false }: AiAssistantProps) {
   const {
     isOpen,
     toggle,
@@ -119,7 +111,6 @@ export function AiAssistant({
       {fabShown && (
         <AiAssistantFab
           phase={fabPhase}
-          guideAvatarUrl={guideAvatarUrl}
           onClick={handleFabClick}
           onWarmup={preloadAiChatPanel}
         />
@@ -128,7 +119,6 @@ export function AiAssistant({
         <Suspense fallback={<AiChatPanelFallback />}>
           <AiChatPanelLazy
             panelPhase={panelPhase}
-            guideAvatarUrl={guideAvatarUrl}
             chatTest={chatTest}
             messages={messages}
             locationTitle={locationTitle}
