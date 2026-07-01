@@ -13,6 +13,23 @@ export function clientBrandFaviconPath(clientId: string): string {
   return `/assets/${clientId}/favicon.png`;
 }
 
+export function clientBrandFaviconIcoPath(clientId: string): string {
+  return `/assets/${clientId}/favicon.ico`;
+}
+
+/** Client-root favicon paths — catalog entry first, then conventional png/ico locations. */
+export function clientBrandFaviconCandidates(
+  clientId: string,
+  catalogFavicon?: string | null,
+): string[] {
+  const paths: string[] = [];
+  const catalog = catalogFavicon?.trim();
+  if (catalog) paths.push(catalog);
+  paths.push(clientBrandFaviconPath(clientId));
+  paths.push(clientBrandFaviconIcoPath(clientId));
+  return [...new Set(paths)];
+}
+
 function mergeBrandingFields(
   clientBranding: BrandingFields | undefined,
   tourBranding: BrandingFields | undefined,
