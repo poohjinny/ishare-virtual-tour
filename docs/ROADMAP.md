@@ -189,7 +189,8 @@ until Admin app exists; then port endpoints and retire duplicate UI.
 
 - [ ] Dev API reference in `docs/` (endpoint list mirrors
       `viteDevTourApiPlugin`)
-- [ ] Smoke-test checklist for new tours (qch-hospital, ken-sargent-house)
+- [ ] Smoke-test checklist for new tours (queensway-carleton-hospital,
+      ken-sargent-house)
 
 ### Sprint C — Discovery & share polish
 
