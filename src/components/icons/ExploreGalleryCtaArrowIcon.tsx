@@ -1,24 +1,28 @@
-import { cn } from '../../lib/cn';
 import { MaterialSymbol } from '../ui/MaterialSymbol';
 import {
-  MATERIAL_SYMBOL_SIZE_22,
-  materialSymbolCompactClassName,
-} from '../ui/materialSymbolClasses';
+  exploreCtaTextArrowIconClassName,
+  exploreGalleryCtaArrowIconClassName,
+} from '../tourNavFloatVariants';
+import { MATERIAL_SYMBOL_SIZE_22 } from '../ui/materialSymbolClasses';
 
 interface ExploreGalleryCtaArrowIconProps {
   sizePx?: number;
+  /** gallery = centered icon chip; text = trailing arrow on pill CTA */
+  variant?: 'gallery' | 'text';
 }
 
 export function ExploreGalleryCtaArrowIcon({
   sizePx = MATERIAL_SYMBOL_SIZE_22,
+  variant = 'gallery',
 }: ExploreGalleryCtaArrowIconProps = {}) {
   return (
     <MaterialSymbol
       name='arrow_forward'
-      className={cn(
-        materialSymbolCompactClassName,
-        'transition-transform duration-300 ease-out',
-      )}
+      className={
+        variant === 'text' ?
+          exploreCtaTextArrowIconClassName
+        : exploreGalleryCtaArrowIconClassName
+      }
       sizePx={sizePx}
     />
   );

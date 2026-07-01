@@ -10,8 +10,8 @@ export const aiAssistantStackClassName = cn(
 );
 
 const aiFabHoverClassName = cn(
-  'hover:max-w-[168px] hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
-  'focus-visible:max-w-[168px] focus-visible:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'hover:max-w-[160px] hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'focus-visible:max-w-[160px] focus-visible:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
 );
 
 export const aiFabVariants = cva(
@@ -33,16 +33,26 @@ export const aiFabVariants = cva(
 );
 
 export const aiFabAvatarClassName = cn(
-  'inline-flex size-[60px] shrink-0 items-center justify-center overflow-hidden leading-none',
+  'inline-flex size-[60px] shrink-0 items-center justify-center overflow-visible leading-none',
   'max-[480px]:size-12',
 );
 
-export const aiFabIconClassName = cn(
-  'block size-full object-contain object-center',
+/** FAB orb — inset within the pill so outer shadow is not clipped by `overflow-hidden`. */
+export const aiFabGuideMarkClassName = cn(
+  'size-[52px] max-[480px]:size-11',
+  'origin-center animate-guide-avatar-orb motion-reduce:animate-none',
+  'shadow-[inset_0_-2px_8px_rgba(var(--ishare-primary-rgb),0.2),0_0_0_1px_rgba(var(--ishare-primary-rgb),0.22),0_2px_6px_rgba(var(--ishare-primary-rgb),0.28)]',
+);
+
+/** Default Ask Guide avatar — primary-tinted orb when no per-tour image override. */
+export const guideAvatarMarkClassName = cn(
+  'block size-full shrink-0 rounded-full',
+  'bg-[radial-gradient(circle_at_36%_30%,rgba(255,255,255,0.94)_0%,rgba(var(--ishare-primary-rgb),0.9)_30%,rgba(var(--ishare-primary-rgb),0.52)_58%,rgba(var(--ishare-primary-rgb),0.14)_100%)]',
+  'shadow-[inset_0_-3px_10px_rgba(var(--ishare-primary-rgb),0.22),0_0_0_1px_rgba(var(--ishare-primary-rgb),0.24),0_4px_14px_rgba(var(--ishare-primary-rgb),0.3)]',
 );
 
 export const aiFabLabelClassName = cn(
-  'ai-fab__label shrink-0 whitespace-nowrap pl-[13px] pr-[11px] font-display text-lg font-medium text-foreground opacity-0 transition-opacity duration-[240ms] ease-out',
+  'ai-fab__label shrink-0 whitespace-nowrap pl-2 pr-2.5 font-display text-lg font-medium text-foreground opacity-0 transition-opacity duration-[240ms] ease-out',
   'max-[480px]:hidden',
   'group-hover/fab:opacity-100 group-hover/fab:duration-[320ms] group-hover/fab:delay-150 group-hover/fab:ease-out',
   'group-focus-visible/fab:opacity-100 group-focus-visible/fab:duration-[320ms] group-focus-visible/fab:delay-150 group-focus-visible/fab:ease-out',
@@ -89,7 +99,22 @@ export const aiPanelTitleClassName = cn(
 );
 
 export const aiPanelLocationBadgeClassName = cn(
-  'self-start [&_.ishare-badge__dot]:size-1.5 [&_.ishare-badge__dot]:animate-hotspot-nav-dot-glow motion-reduce:[&_.ishare-badge__dot]:animate-none',
+  'm-0 flex max-w-full min-w-0 items-center gap-1.5 self-start font-body text-xs leading-snug',
+);
+
+export const aiPanelLocationDotClassName = cn(
+  'size-1.5 shrink-0 rounded-full bg-primary',
+  'animate-hotspot-nav-dot-glow motion-reduce:animate-none',
+);
+
+export const aiPanelLocationBadgeLabelClassName = cn('shrink-0 text-muted');
+
+export const aiPanelLocationBadgeSeparatorClassName = cn(
+  'shrink-0 text-muted/70',
+);
+
+export const aiPanelLocationBadgeTitleClassName = cn(
+  'min-w-0 truncate font-medium text-foreground',
 );
 
 export const aiPanelHeaderActionsClassName = cn(
@@ -111,23 +136,22 @@ export const aiPanelPoweredByClassName = cn(
 );
 
 export const aiPanelMessagesClassName = cn(
-  'ishare-scrollbar flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto p-[var(--ai-panel-inline-padding)] pb-[88px]',
+  'ishare-scrollbar flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-[var(--ai-panel-inline-padding)] pb-[88px]',
 );
 
-export const aiPanelIntroClassName = cn('flex flex-col gap-3.5 self-stretch');
+export const aiPanelIntroClassName = cn('flex flex-col gap-5 self-stretch');
 
 export const aiPanelNoticeClassName = cn(
   'max-w-full self-stretch rounded-lg border border-[#e8c878] bg-[#fdf4e3] px-3.5 py-2.5 text-sm leading-normal text-muted',
 );
 
 export const aiMessageVariants = cva(
-  'max-w-[90%] rounded-lg px-[15px] py-[11px] text-lg leading-[1.55] shadow-none',
+  'max-w-[90%] text-lg leading-[1.55] shadow-none',
   {
     variants: {
       role: {
-        user: 'self-end border border-[#e7eaef] bg-white text-body',
-        assistant:
-          'self-start border border-[color-mix(in_srgb,var(--color-primary)_10%,#e2e8f0)] bg-[color-mix(in_srgb,var(--color-primary)_4%,#ffffff)] text-body',
+        user: 'self-end rounded-lg border border-[#e7eaef] bg-white px-[15px] py-[11px] text-body',
+        assistant: 'max-w-full self-start px-0 py-0 text-body',
       },
     },
   },

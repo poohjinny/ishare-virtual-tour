@@ -2,8 +2,8 @@ export type DevPanelTab = 'scene' | 'client' | 'tour' | 'debug';
 
 export const DEV_PANEL_TABS: { id: DevPanelTab; label: string }[] = [
   { id: 'scene', label: 'Scene' },
-  { id: 'client', label: 'Client' },
   { id: 'tour', label: 'Tour' },
+  { id: 'client', label: 'Client' },
   { id: 'debug', label: 'Debug' },
 ];
 

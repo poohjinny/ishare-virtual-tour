@@ -1,5 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
+import { tourGlassPanelBodyLeadClassName } from './tourGlassPanelVariants';
 
 export const shareTourPanelRootClassName = cn(
   'flex min-w-0 flex-col gap-3.5 px-5 pb-5',
@@ -7,7 +8,8 @@ export const shareTourPanelRootClassName = cn(
 );
 
 export const shareTourPanelLeadClassName = cn(
-  'm-0 font-body text-md leading-[1.55] text-[var(--ishare-glass-body-text)] [&_strong]:font-semibold [&_strong]:text-foreground',
+  tourGlassPanelBodyLeadClassName,
+  '[&_strong]:font-semibold [&_strong]:text-foreground',
 );
 
 export const shareTourPanelUrlFieldClassName = cn('mt-2.5 block min-w-0');

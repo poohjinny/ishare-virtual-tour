@@ -158,7 +158,7 @@ function applyProductFullName(tour, productFullName) {
   }
 }
 
-function applyDefaultTransition({
+export function applyDefaultTransition({
   tour,
   transitionEffect,
   transitionSpeed,
@@ -209,7 +209,7 @@ function parsePlaylistLines(value) {
   return tracks;
 }
 
-function applyImmersiveBackground({
+export function applyImmersiveBackground({
   tour,
   immersiveAudio,
   immersivePlaylist,

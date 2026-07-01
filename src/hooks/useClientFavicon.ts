@@ -6,9 +6,10 @@ import { resolveTourBranding } from '../utils/resolveTourBranding';
 
 export function useClientFavicon(tour: Tour): void {
   const branding = resolveTourBranding(tour);
+  const clientId = tour.clientId ?? tour.id;
 
   useEffect(() => {
     applyClientFavicon(tour);
     return resetClientFavicon;
-  }, [tour, branding?.favicon, branding?.logo]);
+  }, [tour, clientId, branding?.favicon, branding?.logo]);
 }

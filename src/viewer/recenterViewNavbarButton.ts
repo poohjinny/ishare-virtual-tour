@@ -19,7 +19,7 @@ export function createRecenterViewNavbarButton(
     title: 'Default view',
     className: 'psv-recenter-button',
     content: RECENTER_VIEW_ICON,
-    collapsable: true,
+    collapsable: false,
     onClick(viewer: Viewer) {
       if (isDisabled?.()) return;
 

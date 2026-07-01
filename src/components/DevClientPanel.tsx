@@ -3,6 +3,8 @@ import { findCatalogClient } from '../data/tourCatalog';
 import { loadTour } from '../data/loadTour';
 import { DEV_CRUD_MODE_TABS, type DevCrudModeTab } from '../constants/devPanel';
 import { slugifyHotspotName } from '../utils/devHotspotLogger';
+import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
+import { DevBrandFaviconPreview } from './DevBrandFaviconPreview';
 import {
   DevTourApiError,
   devBase64ToImageFile,
@@ -21,18 +23,20 @@ import {
   DevPanelFormRow,
   DevPanelFormSection,
 } from './DevPanelFormGroup';
+import { DevPanelFileField } from './DevPanelFileField';
+import { DevPanelFileInput } from './DevPanelFileInput';
+import { DevLocalFilePreview } from './DevLocalFilePreview';
 import {
   devViewPanelActionsClassName,
-  devViewPanelBrandFaviconClassName,
-  devViewPanelBrandFaviconWrapClassName,
-  devViewPanelBrandLogoClassName,
-  devViewPanelBrandPreviewWrapClassName,
   devViewPanelBtnVariants,
   devViewPanelFieldClassName,
   devViewPanelFieldLabelClassName,
-  devViewPanelFileInputClassName,
+  devViewPanelBrandFaviconClassName,
+  devViewPanelBrandLogoClassName,
   devViewPanelInputClassName,
   devViewPanelManageListClassName,
+  devViewPanelManageListFooterClassName,
+  devViewPanelManageListItemBulletClassName,
   devViewPanelManageListItemClassName,
   devViewPanelManageListItemHeadClassName,
   devViewPanelManageListItemHeadMainClassName,
@@ -42,7 +46,9 @@ import {
   devViewPanelSectionHintClassName,
   devViewPanelSelectClassName,
   devViewPanelSlugPreviewClassName,
+  devViewPanelStackedFormFooterClassName,
   devViewPanelTabHintClassName,
+  devViewPanelTabPanelBodyClassName,
   devViewPanelTabVariants,
   devViewPanelTextareaClassName,
 } from './devViewPanelVariants';
@@ -58,6 +64,7 @@ type DevClientPanelProps = {
   onManageClientIdChange: (clientId: string) => void;
   onCatalogRefresh: () => Promise<void>;
   onOpenTour: (tourId: string) => void;
+  onEditTour: (tourId: string) => void;
   onCreateTourForClient: (clientId: string) => void;
 };
 
@@ -68,6 +75,7 @@ export function DevClientPanel({
   onManageClientIdChange,
   onCatalogRefresh,
   onOpenTour,
+  onEditTour,
   onCreateTourForClient,
 }: DevClientPanelProps) {
   const [clientModeTab, setClientModeTab] = useState<DevCrudModeTab>('manage');
@@ -81,15 +89,10 @@ export function DevClientPanel({
   const [faxLabel, setFaxLabel] = useState('');
   const [address, setAddress] = useState('');
   const [primaryColor, setPrimaryColor] = useState(DEFAULT_PRIMARY_COLOR);
-  const [logoAlt, setLogoAlt] = useState('');
   const [fontFamily, setFontFamily] = useState('');
   const [fontSourceUrl, setFontSourceUrl] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
-  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
-  const [faviconPreviewUrl, setFaviconPreviewUrl] = useState<string | null>(
-    null,
-  );
 
   const [createClientIdInput, setCreateClientIdInput] = useState('');
   const [createClientName, setCreateClientName] = useState('');
@@ -112,6 +115,34 @@ export function DevClientPanel({
     [manageClientId, catalogTick],
   );
 
+  const selectedManageCatalogClient = useMemo(
+    () => catalogClients.find((client) => client.id === manageClientId),
+    [catalogClients, manageClientId],
+  );
+
+  const managedLogoPreviewUrl = useMemo(() => {
+    if (clientModeTab !== 'manage' || logoFile) return null;
+    const path = selectedManageCatalogClient?.branding?.logo;
+    if (!path) return null;
+    return withBaseUrl(appendCacheBust(path, catalogTick));
+  }, [
+    catalogTick,
+    clientModeTab,
+    logoFile,
+    selectedManageCatalogClient?.branding?.logo,
+  ]);
+
+  const managedFaviconPreviewAlt = useMemo(
+    () =>
+      `${clientName.trim() || selectedManageCatalogClient?.name || 'Client'} favicon`,
+    [clientName, selectedManageCatalogClient?.name],
+  );
+
+  const showManagedFaviconPreview =
+    clientModeTab === 'manage' &&
+    Boolean(manageClientId) &&
+    !faviconFile;
+
   const createClientSlug = useMemo(
     () =>
       createClientIdInput.trim() ? slugifyHotspotName(createClientIdInput) : '',
@@ -124,25 +155,18 @@ export function DevClientPanel({
 
   const canSaveClient = Boolean(manageClientId && clientName.trim());
 
-  useEffect(() => {
-    if (!selectedClient) return;
-
-    setClientName(selectedClient.name);
-    setWebsite(selectedClient.website ?? '');
-    setEmail(selectedClient.email ?? '');
-    setPhone(selectedClient.phone ?? selectedClient.phones?.[0]?.number ?? '');
-    setPhoneLabel(
-      selectedClient.phoneLabel ?? selectedClient.phones?.[0]?.label ?? '',
-    );
-    setFax(selectedClient.fax ?? '');
-    setFaxLabel(selectedClient.faxLabel ?? '');
-    setAddress(selectedClient.address ?? '');
-    setPrimaryColor(
-      selectedClient.branding?.primaryColor ?? DEFAULT_PRIMARY_COLOR,
-    );
-    setLogoAlt(selectedClient.branding?.logoAlt ?? selectedClient.name);
-    setFontFamily(selectedClient.branding?.fontFamily ?? '');
-    setFontSourceUrl(selectedClient.branding?.fontSourceUrl ?? '');
+  const hydrateManagedClientForm = useCallback((client: DevCatalogClient) => {
+    setClientName(client.name);
+    setWebsite(client.website ?? '');
+    setEmail(client.email ?? '');
+    setPhone(client.phone ?? '');
+    setPhoneLabel(client.phoneLabel ?? '');
+    setFax(client.fax ?? '');
+    setFaxLabel(client.faxLabel ?? '');
+    setAddress(client.address ?? '');
+    setPrimaryColor(client.branding?.primaryColor ?? DEFAULT_PRIMARY_COLOR);
+    setFontFamily(client.branding?.fontFamily ?? '');
+    setFontSourceUrl(client.branding?.fontSourceUrl ?? '');
     setLogoFile(null);
     setFaviconFile(null);
     setSuggestBrandingNotes([]);
@@ -151,27 +175,50 @@ export function DevClientPanel({
     setSuggestContactStatus('idle');
     setSaveStatus('idle');
     setSaveError(null);
-  }, [selectedClient?.id, catalogTick]);
+  }, []);
+
+  const resetCreateClientForm = useCallback(() => {
+    setCreateClientIdInput('');
+    setCreateClientName('');
+    setWebsite('');
+    setEmail('');
+    setPhone('');
+    setPhoneLabel('');
+    setFax('');
+    setFaxLabel('');
+    setAddress('');
+    setPrimaryColor(DEFAULT_PRIMARY_COLOR);
+    setFontFamily('');
+    setFontSourceUrl('');
+    setLogoFile(null);
+    setFaviconFile(null);
+    setSuggestBrandingNotes([]);
+    setSuggestBrandingStatus('idle');
+    setSuggestContactNotes([]);
+    setSuggestContactStatus('idle');
+    setCreateStatus('idle');
+    setCreateError(null);
+  }, []);
+
+  const handleClientModeTabChange = useCallback(
+    (tab: DevCrudModeTab) => {
+      if (tab === 'create') {
+        resetCreateClientForm();
+      }
+      setClientModeTab(tab);
+    },
+    [resetCreateClientForm],
+  );
 
   useEffect(() => {
-    if (!logoFile) {
-      setLogoPreviewUrl(selectedClient?.branding?.logo ?? null);
-      return;
-    }
-    const url = URL.createObjectURL(logoFile);
-    setLogoPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [logoFile, selectedClient?.branding?.logo]);
-
-  useEffect(() => {
-    if (!faviconFile) {
-      setFaviconPreviewUrl(selectedClient?.branding?.favicon ?? null);
-      return;
-    }
-    const url = URL.createObjectURL(faviconFile);
-    setFaviconPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [faviconFile, selectedClient?.branding?.favicon]);
+    if (clientModeTab !== 'manage' || !selectedManageCatalogClient) return;
+    hydrateManagedClientForm(selectedManageCatalogClient);
+  }, [
+    clientModeTab,
+    selectedManageCatalogClient,
+    catalogTick,
+    hydrateManagedClientForm,
+  ]);
 
   const suggestBranding = useCallback(async () => {
     const websiteUrl = website.trim();
@@ -250,7 +297,7 @@ export function DevClientPanel({
         clientFax: fax.trim() || undefined,
         clientFaxLabel: faxLabel.trim() || undefined,
         clientAddress: address.trim() || undefined,
-        clientLogoAlt: logoAlt.trim() || undefined,
+        clientLogoAlt: clientName.trim() || undefined,
         primaryColor: normalizeHexColorInput(primaryColor),
         fontFamily: fontFamily.trim() || undefined,
         fontSourceUrl: fontSourceUrl.trim() || undefined,
@@ -279,7 +326,6 @@ export function DevClientPanel({
     faviconFile,
     fontFamily,
     fontSourceUrl,
-    logoAlt,
     logoFile,
     manageClientId,
     onCatalogRefresh,
@@ -306,7 +352,7 @@ export function DevClientPanel({
         clientFax: fax.trim() || undefined,
         clientFaxLabel: faxLabel.trim() || undefined,
         clientAddress: address.trim() || undefined,
-        clientLogoAlt: logoAlt.trim() || undefined,
+        clientLogoAlt: createClientName.trim() || undefined,
         primaryColor: normalizeHexColorInput(primaryColor),
         fontFamily: fontFamily.trim() || undefined,
         fontSourceUrl: fontSourceUrl.trim() || undefined,
@@ -315,9 +361,8 @@ export function DevClientPanel({
       });
       await onCatalogRefresh();
       onManageClientIdChange(result.clientId);
+      resetCreateClientForm();
       setClientModeTab('manage');
-      setCreateClientIdInput('');
-      setCreateClientName('');
       setCreateStatus('done');
     } catch (error) {
       setCreateStatus('error');
@@ -338,13 +383,13 @@ export function DevClientPanel({
     faviconFile,
     fontFamily,
     fontSourceUrl,
-    logoAlt,
     logoFile,
     onCatalogRefresh,
     onManageClientIdChange,
     phone,
     phoneLabel,
     primaryColor,
+    resetCreateClientForm,
     website,
   ]);
 
@@ -376,6 +421,10 @@ export function DevClientPanel({
             : 'Suggest contact from website'}
           </button>
         </div>
+        <p className={devViewPanelSectionHintClassName}>
+          Fetches the website URL above to draft email, phone, and address —
+          review before saving.
+        </p>
       </div>
 
       {suggestContactNotes.length > 0 ?
@@ -407,6 +456,7 @@ export function DevClientPanel({
             type='text'
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
+            placeholder='e.g. (416) 555-0100'
             spellCheck={false}
             autoComplete='off'
           />
@@ -418,6 +468,7 @@ export function DevClientPanel({
             type='text'
             value={phoneLabel}
             onChange={(e) => setPhoneLabel(e.target.value)}
+            placeholder='e.g. Main line'
             spellCheck={false}
             autoComplete='off'
           />
@@ -432,6 +483,7 @@ export function DevClientPanel({
             type='text'
             value={fax}
             onChange={(e) => setFax(e.target.value)}
+            placeholder='e.g. (416) 555-0101'
             spellCheck={false}
             autoComplete='off'
           />
@@ -443,6 +495,7 @@ export function DevClientPanel({
             type='text'
             value={faxLabel}
             onChange={(e) => setFaxLabel(e.target.value)}
+            placeholder='e.g. Fax'
             spellCheck={false}
             autoComplete='off'
           />
@@ -455,6 +508,7 @@ export function DevClientPanel({
           className={devViewPanelTextareaClassName}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+          placeholder='e.g. 123 Main St, Toronto, ON'
           rows={2}
           spellCheck={false}
         />
@@ -477,6 +531,10 @@ export function DevClientPanel({
             : 'Suggest branding from website'}
           </button>
         </div>
+        <p className={devViewPanelSectionHintClassName}>
+          Fetches the website URL above to draft logo, favicon, and primary
+          color — review before saving.
+        </p>
       </div>
 
       {suggestBrandingNotes.length > 0 ?
@@ -495,57 +553,77 @@ export function DevClientPanel({
         pickerAriaLabel='Primary color picker'
       />
 
-      <label className={devViewPanelFieldClassName}>
-        <span className={devViewPanelFieldLabelClassName}>Logo alt text</span>
-        <input
-          className={devViewPanelInputClassName}
-          type='text'
-          value={logoAlt}
-          onChange={(e) => setLogoAlt(e.target.value)}
-          placeholder={clientName.trim() || 'Client name'}
-          spellCheck={true}
-        />
-      </label>
-
       <DevPanelFormRow>
         <label className={devViewPanelFieldClassName}>
-          <span className={devViewPanelFieldLabelClassName}>Logo</span>
-          <input
-            className={devViewPanelFileInputClassName}
-            type='file'
-            accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
-            onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
-          />
-          {logoPreviewUrl ?
-            <div className={devViewPanelBrandPreviewWrapClassName}>
-              <img
-                className={devViewPanelBrandLogoClassName}
-                src={logoPreviewUrl}
-                alt='Logo preview'
-              />
-            </div>
-          : null}
+          <span className={devViewPanelFieldLabelClassName}>
+            {clientModeTab === 'manage' && managedLogoPreviewUrl ?
+              'Logo (replace)'
+            : 'Logo'}
+          </span>
+          <DevPanelFileField
+            {...(logoFile != null ? { file: logoFile } : {})}
+            preview={
+              logoFile ?
+                <DevLocalFilePreview
+                  file={logoFile}
+                  className={devViewPanelBrandLogoClassName}
+                  alt='Logo preview'
+                />
+              : managedLogoPreviewUrl ?
+                <img
+                  className={devViewPanelBrandLogoClassName}
+                  src={managedLogoPreviewUrl}
+                  alt={`${clientName.trim() || selectedManageCatalogClient?.name || 'Client'} logo`}
+                />
+              : null
+            }
+            onClearPreview={() => setLogoFile(null)}
+            showClear={Boolean(logoFile)}
+          >
+            <DevPanelFileInput
+              accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+              file={logoFile}
+              onChange={setLogoFile}
+            />
+          </DevPanelFileField>
         </label>
 
         <label className={devViewPanelFieldClassName}>
           <span className={devViewPanelFieldLabelClassName}>
-            Favicon (optional)
+            {showManagedFaviconPreview ?
+              'Favicon (replace)'
+            : 'Favicon (optional)'}
           </span>
-          <input
-            className={devViewPanelFileInputClassName}
-            type='file'
-            accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
-            onChange={(e) => setFaviconFile(e.target.files?.[0] ?? null)}
-          />
-          {faviconPreviewUrl ?
-            <div className={devViewPanelBrandFaviconWrapClassName}>
-              <img
-                className={devViewPanelBrandFaviconClassName}
-                src={faviconPreviewUrl}
-                alt='Favicon preview'
-              />
-            </div>
-          : null}
+          <DevPanelFileField
+            {...(faviconFile != null ? { file: faviconFile } : {})}
+            preview={
+              faviconFile ?
+                <DevLocalFilePreview
+                  file={faviconFile}
+                  className={devViewPanelBrandFaviconClassName}
+                  alt='Favicon preview'
+                />
+              : showManagedFaviconPreview && manageClientId ?
+                <DevBrandFaviconPreview
+                  catalogFavicon={
+                    selectedManageCatalogClient?.branding?.favicon
+                  }
+                  clientId={manageClientId}
+                  cacheKey={catalogTick}
+                  className={devViewPanelBrandFaviconClassName}
+                  alt={managedFaviconPreviewAlt}
+                />
+              : null
+            }
+            onClearPreview={() => setFaviconFile(null)}
+            showClear={Boolean(faviconFile)}
+          >
+            <DevPanelFileInput
+              accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
+              file={faviconFile}
+              onChange={setFaviconFile}
+            />
+          </DevPanelFileField>
         </label>
       </DevPanelFormRow>
 
@@ -596,7 +674,7 @@ export function DevClientPanel({
               kind: tab.id === 'manage' ? 'manage' : 'create',
               active: clientModeTab === tab.id,
             })}
-            onClick={() => setClientModeTab(tab.id)}
+            onClick={() => handleClientModeTabChange(tab.id)}
           >
             {tab.label}
           </button>
@@ -604,7 +682,7 @@ export function DevClientPanel({
       </div>
 
       {clientModeTab === 'manage' ?
-        <>
+        <div className={devViewPanelTabPanelBodyClassName}>
           <p className={devViewPanelTabHintClassName}>
             Shared contact and branding for all tours under this client.
           </p>
@@ -665,92 +743,116 @@ export function DevClientPanel({
                   {brandingFields}
                 </DevPanelFormSection>
 
-                <DevPanelFormSection title='Tours' divided>
-                  {selectedClient.tours.length > 0 ?
-                    <ul className={devViewPanelManageListClassName}>
-                      {selectedClient.tours.map((catalogTour) => (
-                        <li
-                          key={catalogTour.id}
-                          className={devViewPanelManageListItemClassName}
-                        >
-                          <div
-                            className={devViewPanelManageListItemHeadClassName}
-                          >
-                            <div
-                              className={
-                                devViewPanelManageListItemHeadMainClassName
-                              }
-                            >
-                              <span
-                                className={
-                                  devViewPanelManageListItemTitleClassName
-                                }
-                              >
-                                {catalogTour.name}
-                              </span>
-                              <span
-                                className={
-                                  devViewPanelManageListItemIdClassName
-                                }
-                              >
-                                {catalogTour.id}
-                              </span>
-                            </div>
-                            <button
-                              type='button'
-                              className={devViewPanelBtnVariants({
-                                tone: 'secondary',
-                              })}
-                              onClick={() => {
-                                loadTour(catalogTour.id);
-                                onOpenTour(catalogTour.id);
-                              }}
-                            >
-                              Open
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  : <p className={devViewPanelSectionHintClassName}>
-                      No tours yet.
+                <div className={devViewPanelStackedFormFooterClassName}>
+                  {saveError ?
+                    <p className={devViewPanelSectionHintClassName}>
+                      {saveError}
                     </p>
-                  }
+                  : null}
 
                   <div className={devViewPanelActionsClassName}>
                     <button
                       type='button'
-                      className={devViewPanelBtnVariants({ tone: 'secondary' })}
-                      onClick={() => onCreateTourForClient(manageClientId)}
+                      className={devViewPanelBtnVariants({ tone: 'primary' })}
+                      onClick={() => void saveClient()}
+                      disabled={!canSaveClient || saveStatus === 'working'}
                     >
-                      Add tour for this client…
+                      {saveStatus === 'working' ?
+                        'Saving…'
+                      : saveStatus === 'done' ?
+                        'Saved!'
+                      : 'Save client'}
                     </button>
                   </div>
-                </DevPanelFormSection>
-
-                <div className={devViewPanelActionsClassName}>
-                  <button
-                    type='button'
-                    className={devViewPanelBtnVariants({ tone: 'primary' })}
-                    onClick={() => void saveClient()}
-                    disabled={!canSaveClient || saveStatus === 'working'}
-                  >
-                    {saveStatus === 'working' ?
-                      'Saving…'
-                    : saveStatus === 'done' ?
-                      'Saved!'
-                    : 'Save client'}
-                  </button>
                 </div>
-                {saveError ?
-                  <p className={devViewPanelSectionHintClassName}>
-                    {saveError}
-                  </p>
-                : null}
               </>
             : null}
           </DevPanelFormGroup>
-        </>
+
+          {selectedClient ?
+            <DevPanelFormGroup
+              title='Tours'
+              hint='Open a tour to edit it in the Tour tab, or add a new one for this client.'
+            >
+              {selectedClient.tours.length > 0 ?
+                <ul className={devViewPanelManageListClassName}>
+                  {selectedClient.tours.map((catalogTour) => (
+                    <li
+                      key={catalogTour.id}
+                      className={devViewPanelManageListItemClassName}
+                    >
+                      <div className={devViewPanelManageListItemHeadClassName}>
+                        <div
+                          className={
+                            devViewPanelManageListItemHeadMainClassName
+                          }
+                        >
+                          <span
+                            className={devViewPanelManageListItemTitleClassName}
+                          >
+                            {catalogTour.name}
+                          </span>
+                          <span
+                            className={
+                              devViewPanelManageListItemBulletClassName
+                            }
+                            aria-hidden='true'
+                          >
+                            ·
+                          </span>
+                          <code
+                            className={devViewPanelManageListItemIdClassName}
+                          >
+                            {catalogTour.id}
+                          </code>
+                        </div>
+                      </div>
+                      <div className={devViewPanelActionsClassName}>
+                        <button
+                          type='button'
+                          className={devViewPanelBtnVariants({
+                            tone: 'secondary',
+                          })}
+                          onClick={() => {
+                            loadTour(catalogTour.id);
+                            onOpenTour(catalogTour.id);
+                          }}
+                        >
+                          Open
+                        </button>
+                        <button
+                          type='button'
+                          className={devViewPanelBtnVariants({
+                            tone: 'secondary',
+                          })}
+                          onClick={() => {
+                            loadTour(catalogTour.id);
+                            onEditTour(catalogTour.id);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              : <p className={devViewPanelSectionHintClassName}>
+                  No tours yet.
+                </p>
+              }
+
+              <div className={devViewPanelManageListFooterClassName}>
+                <button
+                  type='button'
+                  className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                  onClick={() => onCreateTourForClient(manageClientId)}
+                >
+                  Add tour for this client
+                </button>
+              </div>
+            </DevPanelFormGroup>
+          : null}
+        </div>
       : <>
           <p className={devViewPanelTabHintClassName}>
             Create a catalog client without a tour. Add tours from Manage or
@@ -798,27 +900,36 @@ export function DevClientPanel({
               {contactFields}
             </DevPanelFormSection>
 
-            <DevPanelFormSection title='Shared branding' divided>
+            <DevPanelFormSection
+              title='Shared branding'
+              divided
+              description='Saved to catalog.json — every tour for this client inherits unless a tour overrides.'
+            >
               {brandingFields}
             </DevPanelFormSection>
 
-            <div className={devViewPanelActionsClassName}>
-              <button
-                type='button'
-                className={devViewPanelBtnVariants({ tone: 'primary' })}
-                onClick={() => void createClient()}
-                disabled={!canCreateClient || createStatus === 'working'}
-              >
-                {createStatus === 'working' ?
-                  'Creating…'
-                : createStatus === 'done' ?
-                  'Client created!'
-                : 'Create client'}
-              </button>
+            <div className={devViewPanelStackedFormFooterClassName}>
+              {createError ?
+                <p className={devViewPanelSectionHintClassName}>
+                  {createError}
+                </p>
+              : null}
+
+              <div className={devViewPanelActionsClassName}>
+                <button
+                  type='button'
+                  className={devViewPanelBtnVariants({ tone: 'primary' })}
+                  onClick={() => void createClient()}
+                  disabled={!canCreateClient || createStatus === 'working'}
+                >
+                  {createStatus === 'working' ?
+                    'Creating…'
+                  : createStatus === 'done' ?
+                    'Client created!'
+                  : 'Create client'}
+                </button>
+              </div>
             </div>
-            {createError ?
-              <p className={devViewPanelSectionHintClassName}>{createError}</p>
-            : null}
           </DevPanelFormGroup>
         </>
       }

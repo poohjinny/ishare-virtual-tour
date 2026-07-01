@@ -8,7 +8,6 @@ export type TourPanelStackId =
   | 'info-popup'
   | 'ai-chat'
   | 'dev-panel'
-  | 'psv-panel'
   | 'anchored-panel';
 
 type CloseHandler = () => void;

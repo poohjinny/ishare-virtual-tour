@@ -16,19 +16,18 @@ assets/
         ├── thumbnails/      # Baked scene previews at defaultView (see below)
         ├── maps/            # Floor plans (optional)
         ├── brand/
-        │   ├── logo.png
-        │   └── tour-guide.png   # Optional AI guide avatar override
+        │   └── logo.png
         └── audio/           # Optional tour-specific audio
 ```
 
 ### Current clients & tours
 
-| clientId                | tourId              | website                           | assets folder                                    |
-| ----------------------- | ------------------- | --------------------------------- | ------------------------------------------------ |
-| `gphospitalfoundation`  | `ken-sargent-house` | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/ken-sargent-house/` |
-| `cancerresearchsociety` | `cancer-research`   | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/cancer-research/`  |
-| `holodomor`             | `holodomor-museum`  | https://holodomor.ca/             | `assets/holodomor/holodomor-museum/`             |
-| `qchfoundation`         | `qch-hospital`      | https://qchfoundation.ca/         | `assets/qchfoundation/qch-hospital/`             |
+| clientId                | tourId                        | website                           | assets folder                                       |
+| ----------------------- | ----------------------------- | --------------------------------- | --------------------------------------------------- |
+| `gphospitalfoundation`  | `ken-sargent-house`           | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/ken-sargent-house/`    |
+| `cancerresearchsociety` | `cancer-research`             | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/cancer-research/`     |
+| `holodomor`             | `holodomor-museum`            | https://holodomor.ca/             | `assets/holodomor/holodomor-museum/`                |
+| `qchfoundation`         | `queensway-carleton-hospital` | https://qchfoundation.ca/         | `assets/qchfoundation/queensway-carleton-hospital/` |
 
 ## Client id convention
 
@@ -120,7 +119,6 @@ thumbnail exists.
 | Panorama  | `gphospitalfoundation/ken-sargent-house/panoramas/overview.webp` | `/assets/gphospitalfoundation/ken-sargent-house/panoramas/overview.webp` |
 | Logo      | `gphospitalfoundation/ken-sargent-house/brand/logo.png`          | `/assets/gphospitalfoundation/ken-sargent-house/brand/logo.png`          |
 | Favicon   | `gphospitalfoundation/ken-sargent-house/favicon.ico`             | `/assets/gphospitalfoundation/ken-sargent-house/favicon.ico` (auto)      |
-| Guide     | `gphospitalfoundation/ken-sargent-house/brand/tour-guide.png`    | auto via `resolveGuideAvatarUrl()`                                       |
 
 Use `tourAssetPath()` in `src/utils/tourAssetPath.ts` when building paths in
 code.

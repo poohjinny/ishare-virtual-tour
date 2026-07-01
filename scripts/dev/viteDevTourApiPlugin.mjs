@@ -492,6 +492,13 @@ function validateCreateTourPayload(body) {
     visibility,
     featured,
     brandingMode,
+    transitionEffect,
+    transitionSpeed,
+    immersiveAudio,
+    immersivePlaylist,
+    immersivePlaylistManifest,
+    immersiveVolume,
+    clearImmersiveBackground,
   } = body ?? {};
 
   if (!clientId?.trim()) {
@@ -526,6 +533,20 @@ function validateCreateTourPayload(body) {
     throw new Error('primaryColor must be a valid hex color');
   }
 
+  if (
+    transitionEffect?.trim() &&
+    !['fade', 'black'].includes(transitionEffect.trim())
+  ) {
+    throw new Error('transitionEffect must be fade or black');
+  }
+
+  if (immersiveVolume !== undefined && immersiveVolume !== null) {
+    const volume = Number(immersiveVolume);
+    if (!Number.isFinite(volume) || volume < 0 || volume > 1) {
+      throw new Error('immersiveVolume must be a number between 0 and 1');
+    }
+  }
+
   return {
     clientId,
     tourId,
@@ -545,6 +566,23 @@ function validateCreateTourPayload(body) {
     visibility: visibility?.trim() || 'unlisted',
     featured: featured === true,
     brandingMode: brandingMode === 'custom' ? 'custom' : 'client',
+    transitionEffect:
+      typeof transitionEffect === 'string' ? transitionEffect : undefined,
+    transitionSpeed:
+      typeof transitionSpeed === 'string' ? transitionSpeed : undefined,
+    immersiveAudio:
+      typeof immersiveAudio === 'string' ? immersiveAudio : undefined,
+    immersivePlaylist:
+      typeof immersivePlaylist === 'string' ? immersivePlaylist : undefined,
+    immersivePlaylistManifest:
+      typeof immersivePlaylistManifest === 'string' ?
+        immersivePlaylistManifest
+      : undefined,
+    immersiveVolume:
+      immersiveVolume !== undefined && immersiveVolume !== null ?
+        Number(immersiveVolume)
+      : undefined,
+    clearImmersiveBackground: clearImmersiveBackground === true,
   };
 }
 

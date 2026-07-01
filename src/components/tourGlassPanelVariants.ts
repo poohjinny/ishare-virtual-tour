@@ -48,6 +48,11 @@ export const tourGlassPanelBodyClassName = cn(
   'tour-glass-panel__body ishare-scrollbar',
 );
 
+/** Intro copy below panel header — Explore, Share, Help body leads. */
+export const tourGlassPanelBodyLeadClassName = cn(
+  'm-0 font-body text-md leading-[1.55] text-[var(--ishare-glass-body-text)]',
+);
+
 export function tourGlassPanelRootClassName(
   variant: 'anchored' | 'dock',
   extra?: string,

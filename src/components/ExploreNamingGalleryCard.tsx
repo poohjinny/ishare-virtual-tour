@@ -16,7 +16,7 @@ import {
   tourNavLocationGalleryCurrentBadgeClassName,
   tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryHeroBottomOverlayClassName,
-  tourNavLocationGalleryHeroCtaClassName,
+  tourNavLocationGalleryHeroCtaInActionsClassName,
   tourNavLocationGalleryHeroDescriptionClassName,
   tourNavLocationGalleryHeroHoverBodyClassName,
   tourNavLocationGalleryHeroHoverBodyInnerClassName,
@@ -26,6 +26,7 @@ import {
   tourNavLocationGalleryHeroNamingSeparatorClassName,
   tourNavLocationGalleryHeroNamingTitleRowClassName,
   tourNavLocationGalleryHeroOverlayInnerClassName,
+  tourNavLocationGalleryHeroTitleActionsClassName,
   tourNavLocationGalleryHeroTitleRowClassName,
   tourNavLocationGalleryStatusBadgeVariants,
 } from './tourNavFloatVariants';
@@ -196,12 +197,18 @@ export function ExploreNamingGalleryCard({
                 </span>
                 {!active ?
                   <span
-                    className={tourNavLocationGalleryHeroCtaClassName}
-                    aria-hidden='true'
+                    className={tourNavLocationGalleryHeroTitleActionsClassName}
                   >
-                    <ExploreGalleryCtaArrowIcon
-                      sizePx={MATERIAL_SYMBOL_SIZE_14}
-                    />
+                    <span
+                      className={
+                        tourNavLocationGalleryHeroCtaInActionsClassName
+                      }
+                      aria-hidden='true'
+                    >
+                      <ExploreGalleryCtaArrowIcon
+                        sizePx={MATERIAL_SYMBOL_SIZE_14}
+                      />
+                    </span>
                   </span>
                 : null}
               </span>

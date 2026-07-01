@@ -2,6 +2,7 @@ import type { Viewer } from '@photo-sphere-viewer/core';
 import { resolveTourChromeModeFromMatchMedia } from '../constants/tourChrome';
 
 const PSV_TOUCH_SUPPORT_KEY = 'photoSphereViewer_touchSupport';
+const PSV_MENU_BUTTON_ID = 'menu';
 
 const ZOOM_MOVE_NAVBAR_BUTTON_IDS = [
   'zoomIn',
@@ -19,37 +20,27 @@ type NavbarButtonWithState = {
   hide: (refresh?: boolean) => void;
 };
 
+type NavbarWithCollapsed = {
+  collapsed?: Array<{ uncollapse: () => void }>;
+  autoSize: () => void;
+  container?: HTMLElement;
+};
+
 /** Desktop chrome — always show PSV zoom / move controls in the bottom pill. */
 export function shouldForcePsvDesktopNavbarControls(): boolean {
   return resolveTourChromeModeFromMatchMedia() === 'desktop';
 }
 
-function prefersTouchPsvNavbar(): boolean {
-  if (typeof window === 'undefined') return false;
-
-  return (
-    window.matchMedia('(pointer: coarse)').matches ||
-    navigator.maxTouchPoints > 0
-  );
-}
-
-/** Prime PSV touch probe on desktop only — never leak mouse mode to phone/tablet. */
-function primePsvTouchSupportForChrome(): void {
+/** Prime PSV touch probe so zoom / move stay in the bottom pill (not overflow menu). */
+function primePsvTouchSupportForInlineControls(): void {
   try {
-    if (shouldForcePsvDesktopNavbarControls()) {
-      localStorage.setItem(PSV_TOUCH_SUPPORT_KEY, 'false');
-      return;
-    }
-
-    localStorage.removeItem(PSV_TOUCH_SUPPORT_KEY);
+    localStorage.setItem(PSV_TOUCH_SUPPORT_KEY, 'false');
   } catch {
     // ignore quota / private mode
   }
 }
 
-export function syncPsvNavbarDesktopControls(viewer: Viewer): void {
-  if (!shouldForcePsvDesktopNavbarControls()) return;
-
+function showPsvZoomMoveButtons(viewer: Viewer): void {
   viewer.container.classList.remove('psv--is-touch');
 
   for (const id of ZOOM_MOVE_NAVBAR_BUTTON_IDS) {
@@ -62,51 +53,51 @@ export function syncPsvNavbarDesktopControls(viewer: Viewer): void {
     }
     withState.show(false);
   }
-
-  (viewer.navbar as unknown as { autoSize: () => void }).autoSize();
 }
 
-/** Restore PSV touch navbar on mobile / compact after desktop override. */
+function hidePsvNavbarMenuButton(viewer: Viewer): void {
+  const menu = viewer.navbar.getButton(PSV_MENU_BUTTON_ID, false);
+  if (!menu) return;
+  (menu as unknown as NavbarButtonWithState).hide(false);
+}
+
+function restorePsvNavbarUncollapsedButtons(viewer: Viewer): void {
+  const navbar = viewer.navbar as unknown as NavbarWithCollapsed;
+  if (!navbar.collapsed?.length) return;
+
+  navbar.collapsed.forEach((item) => item.uncollapse());
+  navbar.collapsed = [];
+}
+
+/** Keep every control in the bottom pill — no PSV overflow menu button or drawer. */
+function finalizePsvNavbarInlineLayout(viewer: Viewer): void {
+  restorePsvNavbarUncollapsedButtons(viewer);
+  hidePsvNavbarMenuButton(viewer);
+}
+
+export function syncPsvNavbarDesktopControls(viewer: Viewer): void {
+  showPsvZoomMoveButtons(viewer);
+  (viewer.navbar as unknown as NavbarWithCollapsed).autoSize();
+  finalizePsvNavbarInlineLayout(viewer);
+}
+
+/** @deprecated Menu overflow removed — same as `syncPsvNavbarDesktopControls`. */
 export function releasePsvNavbarDesktopControls(viewer: Viewer): void {
-  if (shouldForcePsvDesktopNavbarControls()) return;
-
-  primePsvTouchSupportForChrome();
-
-  if (!prefersTouchPsvNavbar()) return;
-
-  viewer.container.classList.add('psv--is-touch');
-
-  for (const id of ZOOM_MOVE_NAVBAR_BUTTON_IDS) {
-    const button = viewer.navbar.getButton(id, false);
-    if (!button) continue;
-
-    const withState = button as unknown as NavbarButtonWithState;
-    if (withState.state) {
-      withState.state.supported = false;
-    }
-    withState.hide(false);
-  }
-
-  (viewer.navbar as unknown as { autoSize: () => void }).autoSize();
+  syncPsvNavbarDesktopControls(viewer);
 }
 
 export function syncPsvNavbarChromeControls(viewer: Viewer): void {
-  if (shouldForcePsvDesktopNavbarControls()) {
-    syncPsvNavbarDesktopControls(viewer);
-    return;
-  }
-
-  releasePsvNavbarDesktopControls(viewer);
+  syncPsvNavbarDesktopControls(viewer);
 }
 
 /**
- * Keep zoom / move navbar buttons visible on desktop only.
- * PSV hides them when touch is detected (`maxTouchPoints`, cached localStorage, etc.).
+ * Keep zoom / move navbar buttons visible and suppress PSV's overflow menu drawer.
+ * PSV hides zoom/move on touch and collapses custom buttons into a menu when space is tight.
  */
 export function bindPsvNavbarChromeControls(viewer: Viewer): () => void {
   const sync = () => syncPsvNavbarChromeControls(viewer);
 
-  primePsvTouchSupportForChrome();
+  primePsvTouchSupportForInlineControls();
   sync();
 
   // PSV resolves touch support asynchronously (up to ~10s); re-sync after probe settles.
@@ -116,10 +107,7 @@ export function bindPsvNavbarChromeControls(viewer: Viewer): () => void {
   );
 
   const touchClassObserver = new MutationObserver(() => {
-    if (
-      shouldForcePsvDesktopNavbarControls() &&
-      viewer.container.classList.contains('psv--is-touch')
-    ) {
+    if (viewer.container.classList.contains('psv--is-touch')) {
       syncPsvNavbarDesktopControls(viewer);
     }
   });
@@ -128,8 +116,17 @@ export function bindPsvNavbarChromeControls(viewer: Viewer): () => void {
     attributeFilter: ['class'],
   });
 
+  const navbar = viewer.navbar as unknown as NavbarWithCollapsed;
+  const resizeObserver =
+    navbar.container ?
+      new ResizeObserver(() => {
+        finalizePsvNavbarInlineLayout(viewer);
+      })
+    : null;
+  resizeObserver?.observe(navbar.container!);
+
   const onResize = () => {
-    primePsvTouchSupportForChrome();
+    primePsvTouchSupportForInlineControls();
     sync();
   };
   window.addEventListener('resize', onResize);
@@ -137,6 +134,7 @@ export function bindPsvNavbarChromeControls(viewer: Viewer): () => void {
   return () => {
     retryTimeoutIds.forEach((id) => window.clearTimeout(id));
     touchClassObserver.disconnect();
+    resizeObserver?.disconnect();
     window.removeEventListener('resize', onResize);
   };
 }
@@ -144,7 +142,7 @@ export function bindPsvNavbarChromeControls(viewer: Viewer): () => void {
 /** @deprecated Use `bindPsvNavbarChromeControls`. */
 export const bindPsvNavbarDesktopControls = bindPsvNavbarChromeControls;
 
-/** @deprecated Desktop-only; use `primePsvTouchSupportForChrome` via bind. */
+/** @deprecated Use `primePsvTouchSupportForInlineControls` via bind. */
 export function primePsvDesktopTouchSupport(): void {
-  primePsvTouchSupportForChrome();
+  primePsvTouchSupportForInlineControls();
 }

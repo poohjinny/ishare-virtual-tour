@@ -5,6 +5,7 @@ import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
 import type { Scene } from '../types/tour';
 import { Badge } from './ui/Badge';
+import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import {
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
@@ -13,11 +14,12 @@ import {
   tourNavLocationGalleryCurrentBadgeClassName,
   tourNavLocationGalleryHeroBadgePlacementClassName,
   tourNavLocationGalleryHeroBottomOverlayClassName,
-  tourNavLocationGalleryHeroCtaClassName,
+  tourNavLocationGalleryHeroCtaInActionsClassName,
   tourNavLocationGalleryHeroDescriptionClassName,
   tourNavLocationGalleryHeroHoverBodyClassName,
   tourNavLocationGalleryHeroHoverBodyInnerClassName,
   tourNavLocationGalleryHeroOverlayInnerClassName,
+  tourNavLocationGalleryHeroTitleActionsClassName,
   tourNavLocationGalleryHeroTitleOverlayClassName,
   tourNavLocationGalleryHeroTitleRowClassName,
 } from './tourNavFloatVariants';
@@ -30,6 +32,7 @@ interface ExploreSceneGalleryCardProps {
   active: boolean;
   disabled?: boolean;
   onSelect: () => void;
+  onShowDescription?: () => void;
 }
 
 export function ExploreSceneGalleryCard({
@@ -38,6 +41,7 @@ export function ExploreSceneGalleryCard({
   active,
   disabled = false,
   onSelect,
+  onShowDescription,
 }: ExploreSceneGalleryCardProps) {
   const { ref, inView } = useLazyInView<HTMLLIElement>();
   const {
@@ -53,6 +57,7 @@ export function ExploreSceneGalleryCard({
   const heroLoading =
     previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
   const description = scene.description?.trim();
+  const showInfo = Boolean(description && onShowDescription);
   const ariaLabel =
     active ?
       description ? `${scene.title}, current location. ${description}`
@@ -132,14 +137,30 @@ export function ExploreSceneGalleryCard({
                 >
                   {scene.title}
                 </span>
-                {!active ?
+                {showInfo || !active ?
                   <span
-                    className={tourNavLocationGalleryHeroCtaClassName}
-                    aria-hidden='true'
+                    className={tourNavLocationGalleryHeroTitleActionsClassName}
                   >
-                    <ExploreGalleryCtaArrowIcon
-                      sizePx={MATERIAL_SYMBOL_SIZE_14}
-                    />
+                    {showInfo ?
+                      <ExploreSceneInfoButton
+                        sceneTitle={scene.title}
+                        disabled={disabled}
+                        variant='galleryHero'
+                        onShow={onShowDescription!}
+                      />
+                    : null}
+                    {!active ?
+                      <span
+                        className={
+                          tourNavLocationGalleryHeroCtaInActionsClassName
+                        }
+                        aria-hidden='true'
+                      >
+                        <ExploreGalleryCtaArrowIcon
+                          sizePx={MATERIAL_SYMBOL_SIZE_14}
+                        />
+                      </span>
+                    : null}
                   </span>
                 : null}
               </span>

@@ -59,7 +59,7 @@ and `…/thumbnails/`.
 ┌─ Sticky header ─────────────────────────────┐
 │  [logo] Tour name | Client    ▼ Switch tour │
 ├─ Primary tabs ──────────────────────────────┤
-│  Scene  |  Client  |  Tour  |  Debug       │
+│  Scene  |  Tour  |  Client  |  Debug       │
 ├─ Accordion sections (per tab) ──────────────┤
 │  …                                          │
 └─────────────────────────────────────────────┘
@@ -68,8 +68,8 @@ and `…/thumbnails/`.
 | Tab        | Purpose                                                                  |
 | ---------- | ------------------------------------------------------------------------ |
 | **Scene**  | Current scene — panorama, hotspots                                       |
-| **Client** | Catalog clients — contact, shared branding, create client _(see below)_  |
 | **Tour**   | Open tour — metadata, floor plan, knowledge, scenes, tour-only overrides |
+| **Client** | Catalog clients — contact, shared branding, create client _(see below)_  |
 | **Debug**  | URL flag toggles, embed QA                                               |
 
 **Code:** `src/components/DevTools.tsx`, `src/components/DevViewPanel.tsx`
@@ -242,8 +242,9 @@ Single accordion card: **URL flags**. Toggles apply immediately via URL
 ### URL flags
 
 | Flag                | Effect                                                         |
-| ------------------- | -------------------------------------------------------------- |
+| ------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `embed`             | `?embed=1` — trim Share/Help FABs, lighter splash, postMessage |
+| `intro`             | `?intro=1                                                      | 0`— force or skip client tour picker at`/` (tri-state select + Open button) |
 | `chatTest`          | AI chat scroll test messages                                   |
 | `notFoundTest`      | Force tour not-found (404) screen                              |
 | `panoramaErrorTest` | Force panorama load-error overlay                              |
@@ -259,13 +260,15 @@ Combine with `dev=1` as needed, e.g. `?dev=1&embed=1`.
 Shown below the checkboxes **only when `embed` is checked**. Product guide:
 [EMBED.md](./EMBED.md). Dev-panel QA fields:
 
-| Field                | Meaning                                                             |
-| -------------------- | ------------------------------------------------------------------- |
-| **In iframe**        | `window.parent !== window` — parent actually receives messages      |
-| **Message source**   | Filter key for parent listeners: `ishare-virtual-tour`              |
-| **Embed URL**        | Production-style link for current scene (`?embed=1`, no `dev`)      |
-| **Open iframe test** | New tab — `embed-test.html` parent harness ([EMBED.md](./EMBED.md)) |
-| **postMessage log**  | Last 20 outbound messages (scrollable)                              |
+| Field               | Meaning                                                           |
+| ------------------- | ----------------------------------------------------------------- |
+| **In iframe**       | `window.parent !== window` — parent actually receives messages    |
+| **Fullscreen API**  | Iframe only — needs parent `allow="fullscreen"` for control pill  |
+| **Message source**  | Filter key for parent listeners: `ishare-virtual-tour`            |
+| **Embed URL**       | Production-style link for current scene (`?embed=1`, no `dev`)    |
+| **Iframe HTML**     | Ready-to-paste host markup (`allow="fullscreen"` included)        |
+| **Copy actions**    | Copy embed URL or iframe HTML; **Open iframe test** for parent QA |
+| **postMessage log** | Last 20 outbound messages (scrollable)                            |
 
 **Log entries** appear after embed mode is on and the tour loads/navigates.
 Typical sequence:

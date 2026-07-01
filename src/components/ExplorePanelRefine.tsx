@@ -9,18 +9,26 @@ import {
   type RefObject,
 } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  EXPLORE_REFINE_SUBSECTION_FILTER,
-  EXPLORE_REFINE_SUBSECTION_SORT,
-  TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL,
-} from '../constants/tourDirectory';
 import type {
   ExploreDirectorySort,
+  ExploreDirectorySortField,
   ExploreDirectorySortGroup,
   ExploreDirectorySortGroupConfig,
 } from '../constants/tourDirectorySort';
 import {
-  EXPLORE_DIRECTORY_TAB_MATERIAL_ICONS,
+  EXPLORE_REFINE_SUBSECTION_FILTER,
+  EXPLORE_REFINE_SUBSECTION_FILTER_ICON,
+  EXPLORE_REFINE_SUBSECTION_SORT,
+  EXPLORE_REFINE_SUBSECTION_SORT_ICON,
+  TOUR_DIRECTORY_NAMING_PRICE_FILTER_LABEL,
+} from '../constants/tourDirectory';
+import {
+  exploreSortDirectionLabel,
+  exploreSortDirectionToggleLabel,
+  exploreSortDirectionToggleTooltip,
+  exploreSortIdForField,
+  flipExploreSortDirection,
+  resolveExploreSortDirection,
   tourNavExploreRefineActionLabel,
 } from '../constants/tourDirectorySort';
 import type { ExploreDirectorySortContext } from '../constants/tourDirectorySort';
@@ -30,15 +38,12 @@ import {
   tourGlassPanelCloseClassName,
   tourGlassPanelCloseIconClassName,
 } from './tourGlassPanelVariants';
-import { ExploreSortOptionIcon } from './icons/ExploreSortOptionIcons';
 import { NamingPriceRangeFilter } from './NamingPriceRangeFilter';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
-  MATERIAL_SYMBOL_SIZE_20,
   MATERIAL_SYMBOL_SIZE_22,
-  materialSymbolTabClassName,
 } from './ui/materialSymbolClasses';
 import {
   tourNavExploreRefineFilterBlockClassName,
@@ -46,13 +51,17 @@ import {
   tourNavExploreRefineGroupHeadingClassName,
   tourNavExploreRefineMenuClassName,
   tourNavExploreRefineSubsectionClassName,
+  tourNavExploreRefineSubsectionIconClassName,
   tourNavExploreRefineTriggerActiveClassName,
-  tourNavExploreSortCheckClassName,
+  tourNavExploreSortDirectionToggleClassName,
+  tourNavExploreSortFieldCheckClassName,
+  tourNavExploreSortFieldListClassName,
+  tourNavExploreSortFieldOptionClassName,
+  tourNavExploreSortFieldRowClassName,
   tourNavExploreSortGroupSeparatorClassName,
+  tourNavExploreSortCheckClassName,
   tourNavExploreSortMenuInClassName,
   tourNavExploreSortMenuOutClassName,
-  tourNavExploreSortOptionLeadingClassName,
-  tourNavExploreSortOptionVariants,
   tourNavExploreSortRootClassName,
 } from './tourNavFloatVariants';
 
@@ -122,32 +131,122 @@ function useRefineMenuPosition(
   return style;
 }
 
-function isSortOptionSelected(
-  group: ExploreDirectorySortGroup,
-  optionId: ExploreDirectorySort,
-  locationsSort: ExploreDirectorySort,
-  namingSort: ExploreDirectorySort,
+function isSortFieldSelected(
+  field: ExploreDirectorySortField,
+  currentSort: ExploreDirectorySort,
 ): boolean {
-  return group === 'locations' ?
-      locationsSort === optionId
-    : namingSort === optionId;
+  return field.asc === currentSort || field.desc === currentSort;
 }
 
-function ExploreRefineGroupHeading({
-  groupId,
-  label,
-}: {
-  groupId: ExploreDirectorySortGroup;
-  label: string;
-}) {
+function resolveGroupSort(
+  group: ExploreDirectorySortGroup,
+  locationsSort: ExploreDirectorySort,
+  namingSort: ExploreDirectorySort,
+): ExploreDirectorySort {
+  return group === 'locations' ? locationsSort : namingSort;
+}
+
+interface ExploreSortFieldRowProps {
+  field: ExploreDirectorySortField;
+  currentSort: ExploreDirectorySort;
+  menuOpen: boolean;
+  onSortChange: (sort: ExploreDirectorySort) => void;
+}
+
+function ExploreSortFieldRow({
+  field,
+  currentSort,
+  menuOpen,
+  onSortChange,
+}: ExploreSortFieldRowProps) {
+  const selected = isSortFieldSelected(field, currentSort);
+  const direction =
+    selected ?
+      resolveExploreSortDirection(currentSort, field)
+    : field.defaultDirection;
+  const bidirectional = Boolean(field.desc);
+
+  return (
+    <li role='presentation'>
+      <div className={tourNavExploreSortFieldRowClassName}>
+        <button
+          type='button'
+          role='option'
+          data-sort-field-option
+          aria-selected={selected}
+          tabIndex={menuOpen ? 0 : -1}
+          data-selected={selected ? 'true' : 'false'}
+          className={tourNavExploreSortFieldOptionClassName}
+          onClick={() => {
+            onSortChange(
+              selected ? currentSort : (
+                exploreSortIdForField(field, field.defaultDirection)
+              ),
+            );
+          }}
+        >
+          {field.label}
+        </button>
+        {selected && bidirectional ?
+          <IconTooltip
+            label={exploreSortDirectionToggleTooltip(field, direction)}
+            placement='left'
+          >
+            <button
+              type='button'
+              className={tourNavExploreSortDirectionToggleClassName}
+              aria-label={exploreSortDirectionToggleLabel(field, direction)}
+              tabIndex={menuOpen ? 0 : -1}
+              onClick={(event) => {
+                event.stopPropagation();
+                onSortChange(flipExploreSortDirection(currentSort, field));
+              }}
+            >
+              {exploreSortDirectionLabel(field, direction)}
+            </button>
+          </IconTooltip>
+        : selected ?
+          <span
+            className={tourNavExploreSortFieldCheckClassName}
+            aria-hidden='true'
+          >
+            <MaterialSymbol
+              name='check'
+              className={tourNavExploreSortCheckClassName}
+              sizePx={MATERIAL_SYMBOL_SIZE_18}
+            />
+          </span>
+        : null}
+      </div>
+    </li>
+  );
+}
+
+function ExploreRefineGroupHeading({ label }: { label: string }) {
   return (
     <div className={tourNavExploreRefineGroupHeadingClassName}>
-      <MaterialSymbol
-        name={EXPLORE_DIRECTORY_TAB_MATERIAL_ICONS[groupId]}
-        className={materialSymbolTabClassName}
-        sizePx={MATERIAL_SYMBOL_SIZE_20}
-      />
       <span className='min-w-0 truncate'>{label}</span>
+    </div>
+  );
+}
+
+function ExploreRefineSubsectionHeading({
+  icon,
+  label,
+  className,
+}: {
+  icon: string;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div className={cn(tourNavExploreRefineSubsectionClassName, className)}>
+      <MaterialSymbol
+        name={icon}
+        className={tourNavExploreRefineSubsectionIconClassName}
+        sizePx={MATERIAL_SYMBOL_SIZE_18}
+      />
+      <span>{label}</span>
     </div>
   );
 }
@@ -161,6 +260,8 @@ interface ExplorePanelRefineProps {
   namingPriceMin: number | null;
   namingPriceMax: number | null;
   namingPriceFilterActive: boolean;
+  /** All-tab (mixed) view — keep section headings when only one group is visible. */
+  showGroupHeadings?: boolean;
   disabled?: boolean;
   onLocationsSortChange: (sort: ExploreDirectorySort) => void;
   onNamingSortChange: (sort: ExploreDirectorySort) => void;
@@ -176,6 +277,7 @@ export function ExplorePanelRefine({
   namingPriceMin,
   namingPriceMax,
   namingPriceFilterActive,
+  showGroupHeadings: showGroupHeadingsProp,
   disabled = false,
   onLocationsSortChange,
   onNamingSortChange,
@@ -188,7 +290,7 @@ export function ExplorePanelRefine({
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const menuStyle = useRefineMenuPosition(menuMounted, triggerRef);
-  const showGroupHeadings = groups.length > 1;
+  const showGroupHeadings = showGroupHeadingsProp ?? groups.length > 1;
   const showNamingFilter =
     namingPriceBounds != null &&
     namingPriceMin != null &&
@@ -284,76 +386,45 @@ export function ExplorePanelRefine({
                   />
                 : null}
                 {showGroupHeadings ?
-                  <ExploreRefineGroupHeading
-                    groupId={group.id}
-                    label={group.label}
-                  />
+                  <ExploreRefineGroupHeading label={group.label} />
                 : null}
 
                 <div className={tourNavExploreRefineGroupBlockClassName}>
-                  <div className={tourNavExploreRefineSubsectionClassName}>
-                    {EXPLORE_REFINE_SUBSECTION_SORT}
-                  </div>
+                  <ExploreRefineSubsectionHeading
+                    icon={EXPLORE_REFINE_SUBSECTION_SORT_ICON}
+                    label={EXPLORE_REFINE_SUBSECTION_SORT}
+                  />
                   <ul
                     role='listbox'
                     aria-label={`${group.label} sort`}
-                    className='m-0 list-none p-0'
+                    className={tourNavExploreSortFieldListClassName}
                   >
-                    {group.options.map((option) => {
-                      const selected = isSortOptionSelected(
-                        group.id,
-                        option.id,
-                        locationsSort,
-                        namingSort,
-                      );
-
-                      return (
-                        <li key={`${group.id}-${option.id}`} role='presentation'>
-                          <button
-                            type='button'
-                            role='option'
-                            aria-selected={selected}
-                            tabIndex={open ? 0 : -1}
-                            className={tourNavExploreSortOptionVariants({
-                              selected,
-                            })}
-                            onClick={() => {
-                              if (group.id === 'locations') {
-                                onLocationsSortChange(option.id);
-                              } else {
-                                onNamingSortChange(option.id);
-                              }
-                            }}
-                          >
-                            <span
-                              className={tourNavExploreSortOptionLeadingClassName}
-                            >
-                              <ExploreSortOptionIcon sort={option.id} />
-                              <span>{option.label}</span>
-                            </span>
-                            {selected ?
-                              <MaterialSymbol
-                                name='check'
-                                className={tourNavExploreSortCheckClassName}
-                                sizePx={MATERIAL_SYMBOL_SIZE_18}
-                              />
-                            : null}
-                          </button>
-                        </li>
-                      );
-                    })}
+                    {group.fields.map((field) => (
+                      <ExploreSortFieldRow
+                        key={`${group.id}-${field.id}`}
+                        field={field}
+                        currentSort={resolveGroupSort(
+                          group.id,
+                          locationsSort,
+                          namingSort,
+                        )}
+                        menuOpen={open}
+                        onSortChange={
+                          group.id === 'locations' ?
+                            onLocationsSortChange
+                          : onNamingSortChange
+                        }
+                      />
+                    ))}
                   </ul>
 
                   {group.id === 'naming' && showNamingFilter ?
                     <>
-                      <div
-                        className={cn(
-                          tourNavExploreRefineSubsectionClassName,
-                          'pt-2',
-                        )}
-                      >
-                        {EXPLORE_REFINE_SUBSECTION_FILTER}
-                      </div>
+                      <ExploreRefineSubsectionHeading
+                        className='pt-3'
+                        icon={EXPLORE_REFINE_SUBSECTION_FILTER_ICON}
+                        label={EXPLORE_REFINE_SUBSECTION_FILTER}
+                      />
                       <div className={tourNavExploreRefineFilterBlockClassName}>
                         <NamingPriceRangeFilter
                           embedded

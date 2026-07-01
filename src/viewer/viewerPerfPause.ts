@@ -16,15 +16,14 @@ export interface ViewerPerfPauseOptions {
 type PerfPauseListener = (state: TourPerfPauseState) => void;
 
 let signalsBound = false;
-let pointerInDocument = true;
 let currentState: TourPerfPauseState = {
   chromePaused: false,
   viewerRenderPaused: false,
 };
 const subscribers = new Set<PerfPauseListener>();
 
-function computeState(pointerInDoc: boolean): TourPerfPauseState {
-  const chromePaused = document.hidden || !pointerInDoc;
+function computeState(): TourPerfPauseState {
+  const chromePaused = document.hidden;
   return {
     chromePaused,
     viewerRenderPaused: chromePaused || !document.hasFocus(),
@@ -44,31 +43,17 @@ function publish(next: TourPerfPauseState): void {
 }
 
 function syncSignals(): void {
-  publish(computeState(pointerInDocument));
+  publish(computeState());
 }
 
-/** Shared tab / focus / pointer signals for tour chrome, main PSV, and nav preview. */
+/** Shared tab / focus signals for tour chrome, main PSV, and nav preview. */
 export function ensureTourPerfPauseSignals(): void {
   if (signalsBound) return;
   signalsBound = true;
 
-  const onVisibility = () => syncSignals();
-  const onWindowFocus = () => syncSignals();
-  const onWindowBlur = () => syncSignals();
-  const onDocumentMouseLeave = () => {
-    pointerInDocument = false;
-    syncSignals();
-  };
-  const onDocumentMouseEnter = () => {
-    pointerInDocument = true;
-    syncSignals();
-  };
-
-  document.addEventListener('visibilitychange', onVisibility);
-  window.addEventListener('focus', onWindowFocus);
-  window.addEventListener('blur', onWindowBlur);
-  document.documentElement.addEventListener('mouseleave', onDocumentMouseLeave);
-  document.documentElement.addEventListener('mouseenter', onDocumentMouseEnter);
+  document.addEventListener('visibilitychange', syncSignals);
+  window.addEventListener('focus', syncSignals);
+  window.addEventListener('blur', syncSignals);
   syncSignals();
 }
 
@@ -99,9 +84,8 @@ export function applyViewerRenderPerfPause(
 
 /**
  * Pause tour motion when attention leaves the tour:
- * - Chrome animations follow the pointer (alive when cursor is over the tour,
- *   even if another app/window is focused).
- * - PSV render is stricter and stops when the window loses focus.
+ * - Chrome animations pause when the tab is hidden.
+ * - PSV render also stops when the window loses focus.
  */
 export function bindViewerPerfPause({
   scope,

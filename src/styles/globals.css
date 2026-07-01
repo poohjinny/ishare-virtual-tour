@@ -83,15 +83,19 @@
   --animate-error-backdrop-in: error-backdrop-in 0.3s ease-out forwards;
   --animate-error-card-in: error-card-in 0.34s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both;
   --animate-floor-plan-pulse: floor-plan-pulse 2.4s ease-out infinite;
+  --animate-guide-avatar-orb: guide-avatar-orb-breathe 4.5s ease-in-out infinite;
   --animate-ai-fab-in: ai-fab-in 0.14s ease-out forwards;
   --animate-ai-fab-out: ai-fab-out 0.14s ease-in forwards;
   --animate-ai-panel-in: ai-panel-in 0.17s ease-out forwards;
   --animate-ai-panel-out: ai-panel-out 0.14s ease-in forwards;
   --animate-hotspot-nav-dot-glow: hotspot-nav-dot-glow 2.8s ease-out infinite;
-  --animate-tour-nav-dot-glow: tour-nav-dot-glow 2.2s ease-out infinite;
-  --animate-tour-nav-dot-pulse: tour-nav-dot-pulse 2.2s ease-out infinite;
+  --animate-tour-nav-dot-glow: tour-nav-dot-glow 4.3s ease-out infinite;
+  --animate-tour-nav-dot-pulse: tour-nav-dot-pulse 4.3s ease-out infinite backwards;
   --animate-explore-sort-menu-in: explore-sort-menu-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-explore-sort-menu-out: explore-sort-menu-out 0.14s cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-explore-scene-detail-in: explore-scene-detail-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-explore-scene-detail-out: explore-scene-detail-out 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+  --animate-explore-directory-back-in: explore-directory-back-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes segmented-tab-panel-in {
@@ -193,6 +197,29 @@
   }
 }
 
+@keyframes guide-avatar-orb-breathe {
+
+  0%,
+  100% {
+    transform: scale(0.94);
+    filter: brightness(0.96);
+    box-shadow:
+      inset 0 -2px 8px rgba(var(--ishare-primary-rgb), 0.18),
+      0 0 0 1px rgba(var(--ishare-primary-rgb), 0.2),
+      0 2px 5px rgba(var(--ishare-primary-rgb), 0.22);
+  }
+
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.1);
+    box-shadow:
+      inset 0 -4px 14px rgba(var(--ishare-primary-rgb), 0.3),
+      0 0 0 1px rgba(var(--ishare-primary-rgb), 0.3),
+      0 5px 16px rgba(var(--ishare-primary-rgb), 0.42),
+      0 0 20px rgba(var(--ishare-primary-rgb), 0.24);
+  }
+}
+
 @keyframes ai-fab-in {
   from {
     opacity: 0;
@@ -265,15 +292,52 @@
   }
 }
 
+@keyframes explore-scene-detail-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--explore-detail-enter-x, 16px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes explore-scene-detail-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(var(--explore-detail-exit-x, 16px));
+  }
+}
+
+@keyframes explore-directory-back-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--explore-directory-enter-x, -16px));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes tour-nav-dot-glow {
   0% {
     box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.55);
   }
 
-  45% {
+  23% {
     box-shadow: 0 0 0 7px rgba(var(--ishare-primary-rgb), 0);
   }
 
+  77%,
   100% {
     box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0);
   }
@@ -281,12 +345,18 @@
 
 @keyframes tour-nav-dot-pulse {
   0% {
-    transform: scale(0.75);
+    transform: scale(1);
     opacity: 0.95;
   }
 
-  100% {
+  51% {
     transform: scale(2.6);
+    opacity: 0;
+  }
+
+  51.01%,
+  100% {
+    transform: scale(1);
     opacity: 0;
   }
 }
@@ -538,7 +608,31 @@
     transition: grid-template-rows var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease);
   }
 
+  /* Shared bottom scrim — fixed default height so location + NO cards match */
+  .tour-nav-gallery-card-hero-overlay::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3.25rem;
+    pointer-events: none;
+    background: linear-gradient(to top,
+        rgba(15, 23, 42, 0.8) 0%,
+        rgba(15, 23, 42, 0.6) 50%,
+        rgba(15, 23, 42, 0.3) 84%,
+        rgba(15, 23, 42, 0) 100%,
+        transparent 100%);
+    transition: height var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease);
+  }
+
   @media (hover: hover) {
+
+    .group\/card:hover .tour-nav-gallery-card-hero-overlay::before,
+    .group\/card:focus-visible .tour-nav-gallery-card-hero-overlay::before {
+      height: 100%;
+    }
 
     .group\/card:hover .tour-nav-gallery-card-hero-media--zoomable,
     .group\/card:focus-visible .tour-nav-gallery-card-hero-media--zoomable {

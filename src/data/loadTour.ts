@@ -55,8 +55,25 @@ export function loadTour(tourId = DEFAULT_TOUR_ID): Tour {
   return loadTourSync(tourId);
 }
 
+/** Non-throwing `loadTour` — for post-delete navigation and route fallbacks. */
+export function tryLoadTour(tourId: string): Tour | null {
+  try {
+    return loadTour(tourId);
+  } catch {
+    return null;
+  }
+}
+
 export function loadKnowledge(tourId = DEFAULT_TOUR_ID): TourKnowledge {
   return loadKnowledgeSync(tourId);
+}
+
+export function tryLoadKnowledge(tourId: string): TourKnowledge | null {
+  try {
+    return loadKnowledge(tourId);
+  } catch {
+    return null;
+  }
 }
 
 export function getSceneList(tour: Tour) {

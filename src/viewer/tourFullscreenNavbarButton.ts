@@ -1,10 +1,16 @@
 import type { NavbarCustomButton, Viewer } from '@photo-sphere-viewer/core';
 
+import { getTourFullscreenBlockHint } from '../utils/tourEmbedFullscreen';
+
 export const TOUR_FULLSCREEN_NAVBAR_BUTTON_ID = 'tour-fullscreen';
 
-const FULLSCREEN_IN_ICON = `<svg class="psv-button-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M100 40H87.1V18.8h-21V6H100zM100 93.2H66V80.3h21.1v-21H100zM34 93.2H0v-34h12.9v21.1h21zM12.9 40H0V6h34v12.9H12.8z"/></svg>`;
+const FULLSCREEN_IN_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path d="M9 4H5a1 1 0 0 0-1 1v4M20 9V5a1 1 0 0 0-1-1h-4M15 20h4a1 1 0 0 0 1-1v-4M4 15v4a1 1 0 0 0 1 1h4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
 
-const FULLSCREEN_OUT_ICON = `<svg class="psv-button-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M66 7h13v21h21v13H66zM66 60.3h34v12.9H79v21H66zM0 60.3h34v34H21V73.1H0zM21 7h13v34H0V28h21z"/></svg>`;
+const FULLSCREEN_OUT_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <path d="M4 9V5a1 1 0 0 1 1-1h4M20 15v4a1 1 0 0 1-1 1h-4M15 4h4a1 1 0 0 1 1 1v4M9 20H5a1 1 0 0 1-1-1v-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
 
 interface NavbarButtonWithContainer {
   container: HTMLElement;
@@ -25,15 +31,27 @@ function isTargetFullscreen(target: HTMLElement | null): boolean {
 }
 
 function requestElementFullscreen(target: HTMLElement): void {
+  const blockHint = getTourFullscreenBlockHint();
+  if (blockHint) {
+    console.warn(`[tour fullscreen] ${blockHint}`);
+    return;
+  }
+
   if (target.requestFullscreen) {
-    void target.requestFullscreen();
+    void target.requestFullscreen().catch((error: unknown) => {
+      console.warn('[tour fullscreen] requestFullscreen failed', error);
+    });
     return;
   }
 
   const webkitTarget = target as HTMLElement & {
     webkitRequestFullscreen?: () => Promise<void> | void;
   };
-  webkitTarget.webkitRequestFullscreen?.();
+  try {
+    webkitTarget.webkitRequestFullscreen?.();
+  } catch (error: unknown) {
+    console.warn('[tour fullscreen] webkitRequestFullscreen failed', error);
+  }
 }
 
 function exitElementFullscreen(): void {
@@ -63,7 +81,7 @@ export function createTourFullscreenNavbarButton(
 ): NavbarCustomButton {
   return {
     id: TOUR_FULLSCREEN_NAVBAR_BUTTON_ID,
-    title: 'Fullscreen',
+    title: getTourFullscreenBlockHint() ?? 'Fullscreen',
     className: 'psv-fullscreen-button',
     content: FULLSCREEN_IN_ICON,
     collapsable: false,

@@ -135,14 +135,13 @@ clinical spec sheet.
 
 ## 5. Branding
 
-| Asset               | Required    | Format                      | Notes                      |
-| ------------------- | ----------- | --------------------------- | -------------------------- |
-| Logo (full color)   | Yes         | PNG, transparent background | Nav, splash, panels        |
-| Logo alt text       | Yes         | Plain language              | Accessibility              |
-| Primary brand color | Yes         | Hex e.g. `#007078`          | Buttons, accents, nav      |
-| Favicon             | Recommended | ICO or PNG                  | Browser tab; can use logo  |
-| AI guide avatar     | Optional    | PNG                         | Defaults to platform guide |
-| Secondary colors    | Optional    |                             | Not required for v1        |
+| Asset               | Required    | Format                      | Notes                     |
+| ------------------- | ----------- | --------------------------- | ------------------------- |
+| Logo (full color)   | Yes         | PNG, transparent background | Nav, splash, panels       |
+| Logo alt text       | Yes         | Plain language              | Accessibility             |
+| Primary brand color | Yes         | Hex e.g. `#007078`          | Buttons, accents, nav     |
+| Favicon             | Recommended | ICO or PNG                  | Browser tab; can use logo |
+| Secondary colors    | Optional    |                             | Not required for v1       |
 
 **Do not use** low-resolution social avatars for the main logo.
 
@@ -222,13 +221,14 @@ Optional ambient background music during the tour.
 
 ## 10. Launch & embed
 
-| Item                                    | Required                            |
-| --------------------------------------- | ----------------------------------- |
-| Page(s) where tour will be embedded     | Yes                                 |
-| iframe allowed? (CSP / X-Frame-Options) | Confirm with client IT              |
-| Preferred URL slug                      | Recommended — `/{tourId}/{sceneId}` |
-| Analytics / UTM requirements            | Optional                            |
-| Post-launch content owner               | Yes — who updates NO status/prices? |
+| Item                                    | Required                             |
+| --------------------------------------- | ------------------------------------ |
+| Page(s) where tour will be embedded     | Yes                                  |
+| iframe allowed? (CSP / X-Frame-Options) | Confirm with client IT               |
+| iframe `allow="fullscreen"` on embed    | Required for control-pill fullscreen |
+| Preferred URL slug                      | Recommended — `/{tourId}/{sceneId}`  |
+| Analytics / UTM requirements            | Optional                             |
+| Post-launch content owner               | Yes — who updates NO status/prices?  |
 
 **Embed flag:** `?embed=1` for minimal chrome on client sites —
 [EMBED.md](./EMBED.md).

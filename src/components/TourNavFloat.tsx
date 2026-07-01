@@ -24,12 +24,18 @@ import {
   EXPLORE_NAMING_SORT_DEFAULT,
   exploreDirectorySortGroupsForContext,
   type ExploreDirectorySort,
+  type ExploreDirectorySortContext,
 } from '../constants/tourDirectorySort';
 import { ExploreDirectoryTabLabel } from './icons/ExploreDirectoryTabIcons';
 import { TourMarkerIcon } from './icons/TourMarkerIcon';
+import { ExploreDirectoryLead } from './ExploreDirectoryLead';
+import { ExploreDirectoryPanel } from './ExploreDirectoryPanel';
 import { ExploreNamingGalleryCard } from './ExploreNamingGalleryCard';
 import { ExplorePanelSearch } from './ExplorePanelSearch';
 import { ExplorePanelRefine } from './ExplorePanelRefine';
+import { ExploreSceneDirectoryListItem } from './ExploreSceneDirectoryListItem';
+import { ExploreSceneDescriptionView } from './ExploreSceneDescriptionView';
+import { ExploreSceneDetailPanel } from './ExploreSceneDetailPanel';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
@@ -40,6 +46,8 @@ import {
   TOUR_NAV_ACTION_EXPLORE,
   TOUR_NAV_ACTION_HELP,
   TOUR_NAV_ACTION_MORE,
+  TOUR_NAV_HISTORY_BACK,
+  TOUR_NAV_HISTORY_FORWARD,
   tourNavExploreLayoutActionLabel,
   tourNavIconButtonA11y,
   type ExploreDirectoryLayout,
@@ -72,7 +80,7 @@ import {
   MATERIAL_SYMBOL_SIZE_20,
   MATERIAL_SYMBOL_SIZE_22,
 } from './ui/materialSymbolClasses';
-import { Badge, type NamingStatusModifier } from './ui/Badge';
+import { type NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import { TourHelpPanel } from './TourHelpPanel';
 import { TourHelpFooter } from './TourHelpFooter';
@@ -96,8 +104,7 @@ import {
   tourNavBreadcrumbLinkClassName,
   tourNavBreadcrumbListClassName,
   tourNavBreadcrumbPulseDotClassName,
-  tourNavBreadcrumbRootIconClassName,
-  tourNavBreadcrumbRowVariants,
+  tourNavBreadcrumbRowClassName,
   tourNavBreadcrumbSepClassName,
   tourNavCircleBtnVariants,
   tourNavCircleIconClassName,
@@ -108,16 +115,16 @@ import {
   tourNavDirectoryPanelClassName,
   tourNavDirectorySectionClassName,
   tourNavDirectoryTabsClassName,
+  tourNavDirectoryListItemBadgeColumnClassName,
   tourNavEmptyClassName,
   tourNavExploreHeaderActionsClassName,
-  tourNavHistoryBtnClassName,
   tourNavHistoryBtnIconClassName,
-  tourNavItemBadgeClassName,
-  tourNavItemBadgePlacementClassName,
+  tourNavHistoryGroupBtnClassName,
+  tourNavHistoryGroupClassName,
   tourNavItemDescriptionClassName,
+  tourNavItemBadgeClassName,
   tourNavItemIconNamingVariants,
   tourNavItemLocationIconClassName,
-  tourNavItemLabelClassName,
   tourNavItemLeadingLocationClassName,
   tourNavItemNamingHeadingClassName,
   tourNavItemNamingLocationClassName,
@@ -147,8 +154,8 @@ interface TourNavFloatProps {
   disabled?: boolean;
   /** Block naming-opportunity picks while camera / scene / panel open is in flight. */
   namingOpportunityBusy?: boolean;
-  /** Fade breadcrumb during scene-to-scene navigation (not landing zoom). */
-  breadcrumbHidden?: boolean;
+  /** Catalog summary (or overview fallback) — explore panel body lead. */
+  exploreLead?: string;
   showHistoryBack?: boolean;
   showHistoryForward?: boolean;
   onHistoryBack?: () => void;
@@ -170,8 +177,6 @@ type PanelAnimPhase = 'enter' | 'exit' | 'idle';
 const PANEL_ENTER_MS = 150;
 const PANEL_EXIT_MS = 140;
 const SEARCH_PILL_EXPAND_MS = 180;
-/** Match `tourNavBreadcrumbRowVariants` transform duration */
-const BREADCRUMB_EXIT_MS = 280;
 
 function panelAnimation(phase: PanelAnimPhase): TourGlassPanelAnimation {
   if (phase === 'enter') return 'enter';
@@ -273,16 +278,6 @@ function TourLocationItemIcon({ active }: { active: boolean }) {
   );
 }
 
-function BreadcrumbRootIcon() {
-  return (
-    <MaterialSymbol
-      name='home'
-      className={tourNavBreadcrumbRootIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
-    />
-  );
-}
-
 function buildBreadcrumbItems(
   firstSceneId: string,
   scenes: Scene[],
@@ -316,7 +311,7 @@ export function TourNavFloat({
   websiteUrl,
   disabled = false,
   namingOpportunityBusy = false,
-  breadcrumbHidden = false,
+  exploreLead,
   showHistoryBack = false,
   showHistoryForward = false,
   onHistoryBack,
@@ -342,43 +337,27 @@ export function TourNavFloat({
   const [exploreNamingSort, setExploreNamingSort] =
     useState<ExploreDirectorySort>(EXPLORE_NAMING_SORT_DEFAULT);
   const [exploreSearch, setExploreSearch] = useState('');
+  const [exploreSceneDetailId, setExploreSceneDetailId] = useState<
+    string | null
+  >(null);
+  const [exploreSceneDetailExiting, setExploreSceneDetailExiting] =
+    useState(false);
+  const [exploreDirectoryEnterToken, setExploreDirectoryEnterToken] =
+    useState(0);
   const [exploreSearchFocusRequest, setExploreSearchFocusRequest] = useState(0);
   const actionsRef = useRef<HTMLDivElement>(null);
   const exploreScrollRef = useRef<HTMLDivElement>(null);
   const exploreSearchScrollRef = useRef<HTMLDivElement>(null);
   const exploreSearchRef = useRef<HTMLInputElement>(null);
   const targetPanelRef = useRef<DisplayPanel>(null);
-  const [displaySceneId, setDisplaySceneId] = useState(currentSceneId);
-  const [displayShowHistoryBack, setDisplayShowHistoryBack] =
-    useState(showHistoryBack);
-  const [displayShowHistoryForward, setDisplayShowHistoryForward] =
-    useState(showHistoryForward);
-
-  // Defer breadcrumb row updates until slide-out finishes (labels + ←/→ buttons).
-  useEffect(() => {
-    if (!breadcrumbHidden) {
-      setDisplaySceneId(currentSceneId);
-      setDisplayShowHistoryBack(showHistoryBack);
-      setDisplayShowHistoryForward(showHistoryForward);
-      return;
-    }
-
-    const timer = window.setTimeout(() => {
-      setDisplaySceneId(currentSceneId);
-      setDisplayShowHistoryBack(showHistoryBack);
-      setDisplayShowHistoryForward(showHistoryForward);
-    }, BREADCRUMB_EXIT_MS);
-
-    return () => window.clearTimeout(timer);
-  }, [breadcrumbHidden, currentSceneId, showHistoryBack, showHistoryForward]);
 
   const breadcrumbItems = useMemo(() => {
-    const items = buildBreadcrumbItems(firstSceneId, scenes, displaySceneId);
+    const items = buildBreadcrumbItems(firstSceneId, scenes, currentSceneId);
     if (isMobile && items.length > 1) {
       return [items[items.length - 1]];
     }
     return items;
-  }, [isMobile, displaySceneId, firstSceneId, scenes]);
+  }, [isMobile, currentSceneId, firstSceneId, scenes]);
 
   useEffect(() => {
     setDockOverflowOpen(false);
@@ -410,6 +389,28 @@ export function TourNavFloat({
   }, [dockOverflowOpen]);
 
   const namingItems = useMemo(() => buildTourNamingDirectory(scenes), [scenes]);
+
+  const exploreSceneDetail = useMemo(() => {
+    if (!exploreSceneDetailId) return null;
+    return scenes.find((scene) => scene.id === exploreSceneDetailId) ?? null;
+  }, [exploreSceneDetailId, scenes]);
+
+  const openExploreSceneDetail = useCallback((sceneId: string) => {
+    setExploreSceneDetailExiting(false);
+    setExploreSceneDetailId(sceneId);
+    exploreScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const requestCloseExploreSceneDetail = useCallback(() => {
+    if (!exploreSceneDetailId || exploreSceneDetailExiting) return;
+    setExploreSceneDetailExiting(true);
+  }, [exploreSceneDetailExiting, exploreSceneDetailId]);
+
+  const finishCloseExploreSceneDetail = useCallback(() => {
+    setExploreSceneDetailId(null);
+    setExploreSceneDetailExiting(false);
+    setExploreDirectoryEnterToken((token) => token + 1);
+  }, []);
 
   const currentSceneTitle = useMemo(() => {
     return (
@@ -511,10 +512,32 @@ export function TourNavFloat({
     return 'mixed' as const;
   }, [directoryTab, isExploreSearchActive]);
 
-  const exploreSortGroups = useMemo(
-    () => exploreDirectorySortGroupsForContext(exploreSortContext),
-    [exploreSortContext],
+  const exploreRefineNamingAvailable = useMemo(
+    () =>
+      isExploreSearchActive ?
+        exploreFilteredNamingItems.length > 0
+      : namingItems.length > 0,
+    [
+      exploreFilteredNamingItems.length,
+      isExploreSearchActive,
+      namingItems.length,
+    ],
   );
+
+  const exploreSortGroups = useMemo(
+    () =>
+      exploreDirectorySortGroupsForContext(exploreSortContext).filter(
+        (group) => group.id !== 'naming' || exploreRefineNamingAvailable,
+      ),
+    [exploreSortContext, exploreRefineNamingAvailable],
+  );
+
+  const exploreRefineContext = useMemo((): ExploreDirectorySortContext => {
+    if (!exploreRefineNamingAvailable && exploreSortContext !== 'locations') {
+      return 'locations';
+    }
+    return exploreSortContext;
+  }, [exploreRefineNamingAvailable, exploreSortContext]);
 
   const namingPriceFilterActive = useMemo(() => {
     if (
@@ -774,7 +797,16 @@ export function TourNavFloat({
     if (panelMode === 'explore') return;
 
     closeExploreSearch();
+    setExploreSceneDetailExiting(false);
+    setExploreSceneDetailId(null);
   }, [closeExploreSearch, panelMode]);
+
+  useEffect(() => {
+    if (!isExploreSearchActive) return;
+
+    setExploreSceneDetailExiting(false);
+    setExploreSceneDetailId(null);
+  }, [isExploreSearchActive]);
 
   useEffect(() => {
     if (panelMode !== null) return;
@@ -790,7 +822,31 @@ export function TourNavFloat({
     if (exploreSearchOpen) {
       closeExploreSearch();
     }
+
+    setExploreSceneDetailExiting(false);
+    setExploreSceneDetailId(null);
   };
+
+  const handleExploreSceneDetailVisit = useCallback(() => {
+    if (!exploreSceneDetailId) return;
+
+    if (exploreSceneDetailId !== currentSceneId) {
+      onSelectScene(exploreSceneDetailId);
+    }
+
+    if (exploreSearchOpen) {
+      closeExploreSearch();
+    }
+
+    setExploreSceneDetailExiting(false);
+    setExploreSceneDetailId(null);
+  }, [
+    closeExploreSearch,
+    currentSceneId,
+    exploreSceneDetailId,
+    exploreSearchOpen,
+    onSelectScene,
+  ]);
 
   const handleExploreClick = useCallback(() => {
     if (activeNamingItem) {
@@ -924,6 +980,11 @@ export function TourNavFloat({
                   active={scene.id === currentSceneId}
                   disabled={disabled}
                   onSelect={() => handleSelect(scene.id)}
+                  onShowDescription={
+                    scene.description?.trim() ?
+                      () => openExploreSceneDetail(scene.id)
+                    : undefined
+                  }
                 />
               ))}
             </ul>
@@ -935,64 +996,23 @@ export function TourNavFloat({
             role='listbox'
             aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
           >
-            {items.map((scene) => {
-              const isActive = scene.id === currentSceneId;
-              const description = scene.description?.trim();
-              const ariaLabel =
-                isActive ?
-                  description ?
-                    `${scene.title}, current location. ${description}`
-                  : `${scene.title}, current location`
-                : description ? `Go to ${scene.title}. ${description}`
-                : `Go to ${scene.title}`;
-
-              return (
-                <li
-                  key={scene.id}
-                  role='presentation'
-                  {...{ [FLIP_LIST_KEY_ATTR]: scene.id }}
-                >
-                  <button
-                    type='button'
-                    role='option'
-                    aria-selected={isActive}
-                    data-tour-nav-directory-kind='location'
-                    className={tourNavDirectoryItemVariants({
-                      kind: 'location',
-                      active: isActive,
-                    })}
-                    disabled={disabled}
-                    onClick={() => handleSelect(scene.id)}
-                    aria-label={ariaLabel}
-                  >
-                    <span className={tourNavItemLeadingLocationClassName}>
-                      <TourLocationItemIcon active={isActive} />
-                    </span>
-                    <span className={tourNavItemTextClassName}>
-                      <span className={tourNavItemLabelClassName}>
-                        {scene.title}
-                      </span>
-                      {description ?
-                        <span className={tourNavItemDescriptionClassName}>
-                          {description}
-                        </span>
-                      : null}
-                    </span>
-                    {isActive && (
-                      <Badge
-                        variant='fill'
-                        size='sm'
-                        tone='primary'
-                        uppercase
-                        className={tourNavItemBadgePlacementClassName}
-                      >
-                        Current
-                      </Badge>
-                    )}
-                  </button>
-                </li>
-              );
-            })}
+            {items.map((scene) => (
+              <ExploreSceneDirectoryListItem
+                key={scene.id}
+                scene={scene}
+                active={scene.id === currentSceneId}
+                disabled={disabled}
+                onSelect={() => handleSelect(scene.id)}
+                onShowDescription={
+                  scene.description?.trim() ?
+                    () => openExploreSceneDetail(scene.id)
+                  : undefined
+                }
+                locationIcon={
+                  <TourLocationItemIcon active={scene.id === currentSceneId} />
+                }
+              />
+            ))}
           </ul>
         </>
       : options?.emptyMessage ?
@@ -1135,16 +1155,17 @@ export function TourNavFloat({
                         </span>
                       : null}
                     </span>
-                    <NamingStatusBadge
-                      statusModifier={
-                        item.statusModifier as NamingStatusModifier
-                      }
-                      label={item.statusLabel}
-                      className={cn(
-                        tourNavItemBadgeClassName,
-                        tourNavItemBadgePlacementClassName,
-                      )}
-                    />
+                    <span
+                      className={tourNavDirectoryListItemBadgeColumnClassName}
+                    >
+                      <NamingStatusBadge
+                        statusModifier={
+                          item.statusModifier as NamingStatusModifier
+                        }
+                        label={item.statusLabel}
+                        className={cn(tourNavItemBadgeClassName, 'ml-0')}
+                      />
+                    </span>
                   </button>
                 </li>
               );
@@ -1339,20 +1360,25 @@ export function TourNavFloat({
               onClose={closeExploreSearch}
               onChange={setExploreSearch}
             />
-            <ExplorePanelRefine
-              context={exploreSortContext}
-              locationsSort={exploreLocationsSort}
-              namingSort={exploreNamingSort}
-              groups={exploreSortGroups}
-              namingPriceBounds={namingPriceBounds}
-              namingPriceMin={namingPriceMin}
-              namingPriceMax={namingPriceMax}
-              namingPriceFilterActive={namingPriceFilterActive}
-              disabled={disabled}
-              onLocationsSortChange={setExploreLocationsSort}
-              onNamingSortChange={setExploreNamingSort}
-              onNamingPriceRangeChange={handleNamingPriceRangeChange}
-            />
+            {exploreSortGroups.length > 0 ?
+              <ExplorePanelRefine
+                context={exploreRefineContext}
+                locationsSort={exploreLocationsSort}
+                namingSort={exploreNamingSort}
+                groups={exploreSortGroups}
+                namingPriceBounds={namingPriceBounds}
+                namingPriceMin={namingPriceMin}
+                namingPriceMax={namingPriceMax}
+                namingPriceFilterActive={
+                  exploreRefineNamingAvailable && namingPriceFilterActive
+                }
+                showGroupHeadings={exploreSortContext === 'mixed'}
+                disabled={disabled}
+                onLocationsSortChange={setExploreLocationsSort}
+                onNamingSortChange={setExploreNamingSort}
+                onNamingPriceRangeChange={handleNamingPriceRangeChange}
+              />
+            : null}
             <IconTooltip
               label={tourNavExploreLayoutActionLabel(exploreLayout)}
               placement='bottom'
@@ -1400,7 +1426,29 @@ export function TourNavFloat({
               )}
             </div>
           </div>
-        : <>
+        : exploreSceneDetail ?
+          <div ref={exploreScrollRef} className={tourNavPanelScrollClassName}>
+            <div className={tourNavPanelScrollInnerClassName}>
+              <ExploreSceneDetailPanel
+                sceneId={exploreSceneDetail.id}
+                exiting={exploreSceneDetailExiting}
+                onExitComplete={finishCloseExploreSceneDetail}
+              >
+                <ExploreSceneDescriptionView
+                  tourId={tourId}
+                  scene={exploreSceneDetail}
+                  active={exploreSceneDetail.id === currentSceneId}
+                  disabled={disabled}
+                  onBack={requestCloseExploreSceneDetail}
+                  onVisit={handleExploreSceneDetailVisit}
+                />
+              </ExploreSceneDetailPanel>
+            </div>
+          </div>
+        : <ExploreDirectoryPanel enterToken={exploreDirectoryEnterToken}>
+            {exploreLead ?
+              <ExploreDirectoryLead text={exploreLead} />
+            : null}
             {renderDirectoryTabs()}
 
             <div ref={exploreScrollRef} className={tourNavPanelScrollClassName}>
@@ -1408,13 +1456,11 @@ export function TourNavFloat({
                 {renderDirectoryBody()}
               </div>
             </div>
-          </>
+          </ExploreDirectoryPanel>
         }
       </TourGlassPanel>
     </div>
   );
-
-  const showBreadcrumbRootIcon = breadcrumbItems.length >= 2;
 
   return (
     <>
@@ -1427,21 +1473,7 @@ export function TourNavFloat({
         )}
         aria-label='Tour location'
       >
-        <div
-          className={tourNavBreadcrumbRowVariants({ hidden: breadcrumbHidden })}
-        >
-          {displayShowHistoryBack && (
-            <button
-              type='button'
-              className={tourNavHistoryBtnClassName}
-              aria-label='Previous view'
-              disabled={disabled}
-              onClick={onHistoryBack}
-            >
-              <HistoryBackIcon />
-            </button>
-          )}
-
+        <div className={tourNavBreadcrumbRowClassName}>
           <div className={tourNavBreadcrumbBarClassName}>
             <ol className={tourNavBreadcrumbListClassName}>
               {breadcrumbItems.map((item, index) => (
@@ -1459,13 +1491,11 @@ export function TourNavFloat({
                       className={tourNavBreadcrumbCurrentClassName}
                       aria-current='location'
                     >
-                      {index === 0 && showBreadcrumbRootIcon && (
-                        <BreadcrumbRootIcon />
-                      )}
                       <span className={tourNavBreadcrumbCurrentLabelClassName}>
                         {item.title}
                       </span>
                       <span
+                        key={currentSceneId}
                         className={tourNavBreadcrumbPulseDotClassName}
                         aria-hidden='true'
                       />
@@ -1476,9 +1506,6 @@ export function TourNavFloat({
                       disabled={disabled}
                       onClick={() => onBreadcrumbNavigate(item.id)}
                     >
-                      {index === 0 && showBreadcrumbRootIcon && (
-                        <BreadcrumbRootIcon />
-                      )}
                       {item.title}
                     </button>
                   }
@@ -1487,16 +1514,47 @@ export function TourNavFloat({
             </ol>
           </div>
 
-          {displayShowHistoryForward && (
-            <button
-              type='button'
-              className={tourNavHistoryBtnClassName}
-              aria-label='Next view'
-              disabled={disabled}
-              onClick={onHistoryForward}
+          {(showHistoryBack || showHistoryForward) && (
+            <div
+              className={tourNavHistoryGroupClassName}
+              role='group'
+              aria-label='View history'
             >
-              <HistoryForwardIcon />
-            </button>
+              {showHistoryBack ?
+                <IconTooltip
+                  label={TOUR_NAV_HISTORY_BACK}
+                  placement='bottom'
+                  disabled={disabled}
+                >
+                  <button
+                    type='button'
+                    className={tourNavHistoryGroupBtnClassName}
+                    disabled={disabled}
+                    onClick={onHistoryBack}
+                    {...tourNavIconButtonA11y(TOUR_NAV_HISTORY_BACK)}
+                  >
+                    <HistoryBackIcon />
+                  </button>
+                </IconTooltip>
+              : null}
+              {showHistoryForward ?
+                <IconTooltip
+                  label={TOUR_NAV_HISTORY_FORWARD}
+                  placement='bottom'
+                  disabled={disabled}
+                >
+                  <button
+                    type='button'
+                    className={tourNavHistoryGroupBtnClassName}
+                    disabled={disabled}
+                    onClick={onHistoryForward}
+                    {...tourNavIconButtonA11y(TOUR_NAV_HISTORY_FORWARD)}
+                  >
+                    <HistoryForwardIcon />
+                  </button>
+                </IconTooltip>
+              : null}
+            </div>
           )}
         </div>
       </nav>

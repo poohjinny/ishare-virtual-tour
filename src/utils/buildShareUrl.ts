@@ -5,6 +5,7 @@ import {
   toNamingOpportunitySearchValue,
 } from './tourPaths';
 import { resolveTourPublicOrigin } from '../constants/tourOrigin';
+import { getTourProductFullName } from './tourProductName';
 
 export interface BuildShareUrlOptions {
   tourId: string;
@@ -81,6 +82,34 @@ export function buildAbsoluteEmbedUrl(
   options: Omit<BuildShareUrlOptions, 'namingHotspotId'>,
 ): string {
   return buildAbsoluteTourUrl(buildEmbedPath(options));
+}
+
+function escapeHtmlAttribute(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;');
+}
+
+/** Ready-to-paste iframe markup for client host pages (see docs/EMBED.md). */
+export function buildEmbedIframeHtml(
+  options: Omit<BuildShareUrlOptions, 'namingHotspotId'> & {
+    title?: string;
+  },
+): string {
+  const tour = loadTour(options.tourId);
+  const src = buildAbsoluteEmbedUrl(options);
+  const title = escapeHtmlAttribute(
+    options.title ?? getTourProductFullName(tour),
+  );
+
+  return `<iframe
+  src="${src}"
+  title="${title}"
+  allow="fullscreen"
+  loading="lazy"
+  style="width:100%; height:min(80vh, 720px); border:0;"
+></iframe>`;
 }
 
 export interface BuildEmbedTestPageOptions {

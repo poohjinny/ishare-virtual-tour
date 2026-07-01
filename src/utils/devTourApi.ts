@@ -198,6 +198,8 @@ export async function devReplaceScenePanorama({
 export interface DevTourMutateOptions {
   navigateToScene?: string;
   refreshKnowledge?: boolean;
+  /** Reload tour JSON without leaving the open scene (e.g. quick-create nav target). */
+  keepCurrentScene?: boolean;
 }
 
 import type { TourBranding } from '../types/tour';
@@ -324,6 +326,14 @@ export interface DevCreateTourPayload {
   defaultView?: ViewPosition;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
+  transitionEffect?: 'fade' | 'black';
+  transitionSpeed?: string;
+  immersiveAudio?: string;
+  /** Newline-separated track URLs/paths */
+  immersivePlaylist?: string;
+  immersivePlaylistManifest?: string;
+  immersiveVolume?: number;
+  clearImmersiveBackground?: boolean;
 }
 
 function base64ToFile(base64: string, fileName: string, mimeType: string) {

@@ -1,5 +1,5 @@
 import type { Hotspot, Tour, TourImmersiveBackground } from '../types/tour';
-import { withBaseUrl } from '../utils/assetUrl';
+import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import { GLOBAL_IMMERSIVE_BACKGROUND } from '../constants/immersiveBackground';
 
 function normalizeHotspot(hotspot: Hotspot): Hotspot {
@@ -68,6 +68,23 @@ export function normalizeTourAssets(tour: Tour): Tour {
           thumbnail: scene.thumbnail ? withBaseUrl(scene.thumbnail) : undefined,
           hotspots: scene.hotspots.map(normalizeHotspot),
         },
+      ]),
+    ),
+  };
+}
+
+/** Bust baked scene thumbnail URLs after dev rebake (same path, new file bytes). */
+export function bustSceneThumbnailUrls(tour: Tour, version: number): Tour {
+  if (version <= 0) return tour;
+
+  return {
+    ...tour,
+    scenes: Object.fromEntries(
+      Object.entries(tour.scenes).map(([id, scene]) => [
+        id,
+        scene.thumbnail ?
+          { ...scene, thumbnail: appendCacheBust(scene.thumbnail, version) }
+        : scene,
       ]),
     ),
   };

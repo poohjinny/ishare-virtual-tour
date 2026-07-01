@@ -12,7 +12,7 @@ import { MaterialSymbol } from '../ui/MaterialSymbol';
 import { MATERIAL_SYMBOL_SIZE_22 } from '../ui/materialSymbolClasses';
 import { PlatformBrandLink } from '../PlatformBrandLink';
 import { LocationBadge } from './LocationBadge';
-import { GuideAvatarImage } from './GuideAvatarImage';
+import { GuideAvatar } from './GuideAvatar';
 import { SuggestedQuestions } from './SuggestedQuestions';
 import {
   aiComposerActionsClassName,
@@ -41,7 +41,6 @@ import {
 
 interface AiChatPanelProps {
   panelPhase: 'idle' | 'enter' | 'exit';
-  guideAvatarUrl: string;
   chatTest?: boolean;
   messages: ChatMessage[];
   locationTitle: string;
@@ -83,7 +82,6 @@ function ArrowUpIcon() {
 
 export function AiChatPanel({
   panelPhase,
-  guideAvatarUrl,
   chatTest = false,
   messages,
   locationTitle,
@@ -102,7 +100,7 @@ export function AiChatPanel({
   );
   const greeting = useMemo(
     () =>
-      `Hi! I'm ${VIRTUAL_TOUR_GUIDE_NAME}. You're on ${locationTitle} — ask me anything you'd like to know about this area.`,
+      `Hi! I'm ${VIRTUAL_TOUR_GUIDE_NAME}. What would you like to know about ${locationTitle}?`,
     [locationTitle],
   );
 
@@ -144,12 +142,7 @@ export function AiChatPanel({
       header={
         <>
           <div className={aiPanelHeaderMainClassName}>
-            <GuideAvatarImage
-              className={aiPanelSymbolClassName}
-              src={guideAvatarUrl}
-              alt=''
-              draggable={false}
-            />
+            <GuideAvatar className={aiPanelSymbolClassName} />
             <div className={aiPanelHeaderTextClassName}>
               <p id='ai-guide-panel-title' className={aiPanelTitleClassName}>
                 Virtual Tour Guide

@@ -1,11 +1,10 @@
 import {
   devViewPanelColorFieldClassName,
+  devViewPanelColorInputInnerClassName,
   devViewPanelColorPickerClassName,
   devViewPanelFieldClassName,
   devViewPanelFieldLabelClassName,
-  devViewPanelInputClassName,
 } from './devViewPanelVariants';
-import { cn } from '../lib/cn';
 
 const DEFAULT_HEX = '#007078';
 
@@ -42,8 +41,7 @@ export function DevPanelColorField({
   defaultColor = DEFAULT_HEX,
   pickerAriaLabel,
 }: DevPanelColorFieldProps) {
-  const pickerValue =
-    /^#[0-9a-f]{6}$/i.test(value) ? value : defaultColor;
+  const pickerValue = /^#[0-9a-f]{6}$/i.test(value) ? value : defaultColor;
 
   return (
     <div className={devViewPanelFieldClassName}>
@@ -57,7 +55,7 @@ export function DevPanelColorField({
           aria-label={pickerAriaLabel ?? `${label} picker`}
         />
         <input
-          className={cn(devViewPanelInputClassName, 'min-w-0 flex-1')}
+          className={devViewPanelColorInputInnerClassName}
           type='text'
           value={value}
           onChange={(e) => onChange(e.target.value)}

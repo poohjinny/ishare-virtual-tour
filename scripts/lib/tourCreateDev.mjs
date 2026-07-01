@@ -10,6 +10,10 @@ import {
 import { syncKnowledgeFromTour } from './devContentPlaceholders.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
 import {
+  applyDefaultTransition,
+  applyImmersiveBackground,
+} from './tourUpdateDev.mjs';
+import {
   readCatalogJson,
   resolveClientWebsite,
   writeCatalogJson,
@@ -184,6 +188,13 @@ export async function createTour({
   visibility = 'unlisted',
   featured = false,
   brandingMode = 'client',
+  transitionEffect,
+  transitionSpeed,
+  immersiveAudio,
+  immersivePlaylist,
+  immersivePlaylistManifest,
+  immersiveVolume,
+  clearImmersiveBackground,
 }) {
   if (!rawClientId?.trim()) {
     throw new Error('clientId is required');
@@ -274,6 +285,20 @@ export async function createTour({
     scene,
     brandingMode: brandingResult.brandingMode,
     branding: brandingResult.branding,
+  });
+
+  applyDefaultTransition({
+    tour,
+    transitionEffect,
+    transitionSpeed,
+  });
+  applyImmersiveBackground({
+    tour,
+    immersiveAudio,
+    immersivePlaylist,
+    immersivePlaylistManifest,
+    immersiveVolume,
+    clearImmersiveBackground,
   });
 
   await bakeSceneThumbnail({

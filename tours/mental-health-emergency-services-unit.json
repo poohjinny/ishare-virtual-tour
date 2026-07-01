@@ -30,8 +30,8 @@
           },
           "targetScene": "mh-1",
           "targetView": {
-            "yaw": 95.6,
-            "pitch": -56.6,
+            "yaw": 59,
+            "pitch": -3.2,
             "zoom": 0
           }
         },
@@ -45,8 +45,8 @@
           },
           "targetScene": "mh-2",
           "targetView": {
-            "yaw": 95.6,
-            "pitch": -56.6,
+            "yaw": 78.5,
+            "pitch": -7.9,
             "zoom": 0
           }
         },
@@ -60,9 +60,9 @@
           },
           "targetScene": "mh-3",
           "targetView": {
-            "yaw": 95.6,
-            "pitch": -56.6,
-            "zoom": 0
+            "yaw": 77.9,
+            "pitch": -5.2,
+            "zoom": 43
           }
         }
       ],
@@ -87,8 +87,8 @@
       "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-2.webp",
       "defaultView": {
-        "yaw": 78.5,
-        "pitch": -7.9,
+        "yaw": 79,
+        "pitch": -7.6,
         "zoom": 0
       },
       "hotspots": [],

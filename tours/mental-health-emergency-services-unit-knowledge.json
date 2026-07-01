@@ -45,10 +45,7 @@
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": [
-        "Tell me about MH - 1",
-        "What is available at MH?"
-      ]
+      "suggestedQuestions": ["Tell me about MH - 1", "What is available at MH?"]
     },
     "mh-2": {
       "title": "MH - 2",
@@ -67,10 +64,7 @@
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": [
-        "Tell me about MH - 2",
-        "What is available at MH?"
-      ]
+      "suggestedQuestions": ["Tell me about MH - 2", "What is available at MH?"]
     },
     "mh-3": {
       "title": "MH - 3",
@@ -89,10 +83,7 @@
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": [
-        "Tell me about MH - 3",
-        "What is available at MH?"
-      ]
+      "suggestedQuestions": ["Tell me about MH - 3", "What is available at MH?"]
     }
   }
 }
