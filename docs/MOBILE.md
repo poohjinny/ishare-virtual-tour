@@ -31,7 +31,7 @@ Source of truth: `src/constants/tourChrome.ts` + `useTourChromeLayout()`. Prefer
 | **desktop** | ≥1024px    | Full path; centered      | Explore + Share + Help    | Shown   | Shown           |
 
 - **PSV bottom pill** — zoom / move / recenter / immersive / fullscreen. On
-  desktop, collapse to a small chip via **Show toolbar** / **Hide toolbar** on
+  desktop, collapse to a small chip via **Show controls** / **Hide controls** on
   the pill (`viewer-container--controls-collapsed`); keyboard **C** toggles the
   same. Hidden ≤1023px (`psv-layer.css`); desktop forces zoom+move when touch is
   mis-detected (`syncPsvNavbarDesktopControls.ts`).

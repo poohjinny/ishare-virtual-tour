@@ -282,6 +282,8 @@ test page:
     <iframe
       id="tour"
       src="http://localhost:5173/med-surg-inpatient/entrance?embed=1"
+      title="Virtual Tour"
+      allow="fullscreen"
       width="100%"
       height="600"
       style="border:0"
