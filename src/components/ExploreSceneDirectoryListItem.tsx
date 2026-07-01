@@ -1,0 +1,101 @@
+import { type ReactNode } from 'react';
+import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
+import type { Scene } from '../types/tour';
+import { Badge } from './ui/Badge';
+import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
+import {
+  tourNavDirectoryItemVariants,
+  tourNavDirectoryListItemBadgeColumnClassName,
+  tourNavDirectoryListItemSelectClassName,
+  tourNavItemBadgeClassName,
+  tourNavItemDescriptionClassName,
+  tourNavItemLabelClassName,
+  tourNavItemLeadingLocationClassName,
+  tourNavItemTextClassName,
+} from './tourNavFloatVariants';
+import { cn } from '../lib/cn';
+
+interface ExploreSceneDirectoryListItemProps {
+  scene: Scene;
+  active: boolean;
+  disabled?: boolean;
+  onSelect: () => void;
+  onShowDescription?: () => void;
+  locationIcon: ReactNode;
+}
+
+export function ExploreSceneDirectoryListItem({
+  scene,
+  active,
+  disabled = false,
+  onSelect,
+  onShowDescription,
+  locationIcon,
+}: ExploreSceneDirectoryListItemProps) {
+  const description = scene.description?.trim();
+  const showInfo = Boolean(description && onShowDescription);
+  const ariaLabel =
+    active ?
+      description ? `${scene.title}, current location. ${description}`
+      : `${scene.title}, current location`
+    : description ? `Go to ${scene.title}. ${description}`
+    : `Go to ${scene.title}`;
+
+  return (
+    <li role='presentation' {...{ [FLIP_LIST_KEY_ATTR]: scene.id }}>
+      <div
+        className={cn(
+          tourNavDirectoryItemVariants({ kind: 'location', active }),
+          disabled && 'pointer-events-none opacity-50',
+        )}
+      >
+        <button
+          type='button'
+          role='option'
+          aria-selected={active}
+          data-tour-nav-directory-kind='location'
+          className={tourNavDirectoryListItemSelectClassName}
+          disabled={disabled}
+          onClick={onSelect}
+          aria-label={ariaLabel}
+        >
+          <span className={tourNavItemLeadingLocationClassName}>
+            {locationIcon}
+          </span>
+          <span className={tourNavItemTextClassName}>
+            <span className={tourNavItemLabelClassName}>{scene.title}</span>
+            {description ?
+              <span className={tourNavItemDescriptionClassName}>
+                {description}
+              </span>
+            : null}
+          </span>
+        </button>
+        <div
+          className={tourNavDirectoryListItemBadgeColumnClassName}
+          aria-hidden={!active && !showInfo ? true : undefined}
+        >
+          {showInfo ?
+            <ExploreSceneInfoButton
+              variant='list'
+              sceneTitle={scene.title}
+              disabled={disabled}
+              onShow={onShowDescription!}
+            />
+          : null}
+          {active ?
+            <Badge
+              variant='fill'
+              size='sm'
+              tone='primary'
+              uppercase
+              className={cn(tourNavItemBadgeClassName, 'ml-0')}
+            >
+              Current
+            </Badge>
+          : null}
+        </div>
+      </div>
+    </li>
+  );
+}

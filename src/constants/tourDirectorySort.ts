@@ -57,16 +57,35 @@ export function normalizeLocationsSort(
 
 export type ExploreDirectorySortContext = 'locations' | 'naming' | 'mixed';
 
-export interface ExploreDirectorySortOption {
-  id: ExploreDirectorySort;
+export type ExploreSortFieldId =
+  | 'name'
+  | 'naming-count'
+  | 'location'
+  | 'price'
+  | 'status';
+
+export type ExploreSortDirection = 'asc' | 'desc';
+
+export interface ExploreDirectorySortField {
+  id: ExploreSortFieldId;
   label: string;
   group: ExploreDirectorySortGroup;
+  asc: ExploreDirectorySort;
+  desc?: ExploreDirectorySort;
+  defaultDirection: ExploreSortDirection;
 }
 
 export interface ExploreDirectorySortGroupConfig {
   id: ExploreDirectorySortGroup;
   label: string;
-  options: ExploreDirectorySortOption[];
+  fields: ExploreDirectorySortField[];
+}
+
+/** @deprecated Flat asc/desc rows — use {@link ExploreDirectorySortField}. */
+export interface ExploreDirectorySortOption {
+  id: ExploreDirectorySort;
+  label: string;
+  group: ExploreDirectorySortGroup;
 }
 
 export const EXPLORE_DIRECTORY_SORT_GROUP_LABELS: Record<
@@ -77,6 +96,57 @@ export const EXPLORE_DIRECTORY_SORT_GROUP_LABELS: Record<
   naming: TOUR_DIRECTORY_SECTION_NAMING,
 };
 
+export const EXPLORE_DIRECTORY_SORT_FIELDS: ExploreDirectorySortField[] = [
+  {
+    id: 'name',
+    label: 'Name',
+    group: 'locations',
+    asc: 'name-asc',
+    desc: 'name-desc',
+    defaultDirection: 'asc',
+  },
+  {
+    id: 'naming-count',
+    label: 'Naming opportunities',
+    group: 'locations',
+    asc: 'naming-count-asc',
+    desc: 'naming-count-desc',
+    defaultDirection: 'desc',
+  },
+  {
+    id: 'name',
+    label: 'Name',
+    group: 'naming',
+    asc: 'name-asc',
+    desc: 'name-desc',
+    defaultDirection: 'asc',
+  },
+  {
+    id: 'location',
+    label: 'Location',
+    group: 'naming',
+    asc: 'location-asc',
+    desc: 'location-desc',
+    defaultDirection: 'asc',
+  },
+  {
+    id: 'price',
+    label: 'Price',
+    group: 'naming',
+    asc: 'price-asc',
+    desc: 'price-desc',
+    defaultDirection: 'asc',
+  },
+  {
+    id: 'status',
+    label: 'Status',
+    group: 'naming',
+    asc: 'status-asc',
+    defaultDirection: 'asc',
+  },
+];
+
+/** @deprecated Use {@link EXPLORE_DIRECTORY_SORT_FIELDS}. */
 export const EXPLORE_DIRECTORY_SORT_OPTIONS: ExploreDirectorySortOption[] = [
   { id: 'name-asc', label: 'Name A–Z', group: 'locations' },
   { id: 'name-desc', label: 'Name Z–A', group: 'locations' },
@@ -119,11 +189,107 @@ const EXPLORE_DIRECTORY_SORT_GROUP_ORDER: ExploreDirectorySortGroup[] = [
   'naming',
 ];
 
+export function exploreSortFieldsForGroup(
+  group: ExploreDirectorySortGroup,
+): ExploreDirectorySortField[] {
+  return EXPLORE_DIRECTORY_SORT_FIELDS.filter((field) => field.group === group);
+}
+
+export function resolveExploreSortField(
+  sort: ExploreDirectorySort,
+  group: ExploreDirectorySortGroup,
+): ExploreDirectorySortField | undefined {
+  return exploreSortFieldsForGroup(group).find(
+    (field) => field.asc === sort || field.desc === sort,
+  );
+}
+
+export function resolveExploreSortDirection(
+  sort: ExploreDirectorySort,
+  field: ExploreDirectorySortField,
+): ExploreSortDirection {
+  return field.desc === sort ? 'desc' : 'asc';
+}
+
+export function exploreSortIdForField(
+  field: ExploreDirectorySortField,
+  direction: ExploreSortDirection,
+): ExploreDirectorySort {
+  if (direction === 'desc' && field.desc) return field.desc;
+  return field.asc;
+}
+
+export function flipExploreSortDirection(
+  sort: ExploreDirectorySort,
+  field: ExploreDirectorySortField,
+): ExploreDirectorySort {
+  if (!field.desc) return field.asc;
+  const direction = resolveExploreSortDirection(sort, field);
+  return exploreSortIdForField(field, direction === 'asc' ? 'desc' : 'asc');
+}
+
+export function exploreSortDirectionLabel(
+  field: ExploreDirectorySortField,
+  direction: ExploreSortDirection,
+): string {
+  switch (field.id) {
+    case 'name':
+      return direction === 'asc' ? 'A–Z' : 'Z–A';
+    case 'naming-count':
+      return direction === 'desc' ? 'Most' : 'Least';
+    case 'location':
+      return direction === 'asc' ? 'A–Z' : 'Z–A';
+    case 'price':
+      return direction === 'asc' ? 'Low–High' : 'High–Low';
+    case 'status':
+      return 'Default order';
+    default:
+      return direction === 'asc' ? 'Ascending' : 'Descending';
+  }
+}
+
+export function exploreSortDirectionToggleLabel(
+  field: ExploreDirectorySortField,
+  direction: ExploreSortDirection,
+): string {
+  if (!field.desc) return field.label;
+  const flipped = direction === 'asc' ? 'desc' : 'asc';
+  return `Sort ${field.label.toLowerCase()} · ${exploreSortDirectionLabel(field, flipped)}`;
+}
+
+/** Hover tooltip — current direction and the option a click will switch to. */
+export function exploreSortDirectionToggleTooltip(
+  field: ExploreDirectorySortField,
+  direction: ExploreSortDirection,
+): string {
+  const current = exploreSortDirectionLabel(field, direction);
+  if (!field.desc) return `${field.label}: ${current}`;
+  const flipped = direction === 'asc' ? 'desc' : 'asc';
+  const next = exploreSortDirectionLabel(field, flipped);
+  return `${field.label}: ${current}. Switch to ${next}.`;
+}
+
 export function exploreDirectorySortOptionsForContext(
   context: ExploreDirectorySortContext,
 ): ExploreDirectorySortOption[] {
-  return exploreDirectorySortGroupsForContext(context).flatMap(
-    (group) => group.options,
+  return exploreDirectorySortGroupsForContext(context).flatMap((group) =>
+    group.fields.flatMap((field) => {
+      const options: ExploreDirectorySortOption[] = [
+        {
+          id: field.asc,
+          label: `${field.label} · ${exploreSortDirectionLabel(field, 'asc')}`,
+          group: field.group,
+        },
+      ];
+      if (field.desc) {
+        options.push({
+          id: field.desc,
+          label: `${field.label} · ${exploreSortDirectionLabel(field, 'desc')}`,
+          group: field.group,
+        });
+      }
+      return options;
+    }),
   );
 }
 
@@ -138,17 +304,18 @@ export function exploreDirectorySortGroupsForContext(
   return groups.map((group) => ({
     id: group,
     label: EXPLORE_DIRECTORY_SORT_GROUP_LABELS[group],
-    options: EXPLORE_DIRECTORY_SORT_OPTIONS.filter(
-      (option) => option.group === group,
-    ),
+    fields: exploreSortFieldsForGroup(group),
   }));
 }
 
 function sortOptionLabel(sort: ExploreDirectorySort): string {
-  const match = EXPLORE_DIRECTORY_SORT_OPTIONS.find(
-    (option) => option.id === sort,
-  );
-  return match?.label ?? 'Sort';
+  for (const group of EXPLORE_DIRECTORY_SORT_GROUP_ORDER) {
+    const field = resolveExploreSortField(sort, group);
+    if (!field) continue;
+    const direction = resolveExploreSortDirection(sort, field);
+    return `${field.label} · ${exploreSortDirectionLabel(field, direction)}`;
+  }
+  return 'Sort';
 }
 
 export function tourNavExploreRefineActionLabel(input: {

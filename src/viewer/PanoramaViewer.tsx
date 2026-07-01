@@ -79,16 +79,19 @@ import {
 import {
   createTourToolbarToggleNavbarButton,
   syncTourToolbarToggleNavbarButton,
+  syncTourToolbarToggleNavbarButtonVisibility,
 } from './tourToolbarToggleNavbarButton';
 import {
   bindImmersiveBackgroundNavbarButton,
   createImmersiveBackgroundNavbarButton,
+  syncImmersiveBackgroundNavbarButtonVisibility,
 } from './immersiveBackgroundNavbarButton';
 import type { ImmersiveBackgroundController } from './immersiveBackgroundController';
 import { patchZoomSliderSmoothZoom } from './patchZoomSlider';
 import {
   bindPsvNavbarChromeControls,
   primePsvDesktopTouchSupport,
+  syncPsvNavbarChromeControls,
 } from './syncPsvNavbarDesktopControls';
 import {
   LANDING_ZOOM_OUT,
@@ -123,7 +126,7 @@ export interface PanoramaViewerHandle {
   ) => Promise<boolean>;
   retryScene: (sceneId?: string) => Promise<boolean>;
   clearActiveInfoHotspot: () => void;
-  /** Close the PSV navbar sidebar (zoom / move controls). */
+  /** Close any open PSV panel (legacy overflow menu — kept for panel stack). */
   hidePsvPanel: () => void;
   /** Close anchored info / nav preview panels on the panorama. */
   closeAnchoredPanels: () => void;
@@ -150,6 +153,10 @@ interface PanoramaViewerProps {
   splashDone?: boolean;
   /** Tour-scoped controller — owned by TourPage so scene nav does not reset audio. */
   immersiveBackgroundController?: ImmersiveBackgroundController | null;
+  /** Tour JSON has immersive bed — navbar slot stays mounted for embed dev toggles. */
+  immersiveNavbarAvailable?: boolean;
+  /** Desktop toolbar collapse control — hidden in embed mode. */
+  toolbarToggleAvailable?: boolean;
   /** Open naming-opportunity panel on the current scene (for default-view recenter). */
   activeNamingHotspotId?: string | null;
   /** `?embed=1` — hide glass-panel share controls (FAB Share is already hidden). */
@@ -162,8 +169,6 @@ interface PanoramaViewerProps {
   onActiveInfoHotspotChange?: (hotspotId: string | null) => void;
   /** Close modal info popup when an anchored panel opens on the panorama. */
   onDismissModalPopups?: () => void;
-  /** PSV navbar sidebar (zoom / move) opened or closed. */
-  onPsvPanelVisibilityChange?: (visible: boolean) => void;
   /** Anchored hotspot panel on the panorama opened or closed. */
   onAnchoredPanelVisibilityChange?: (visible: boolean) => void;
   /** Scene nav from panorama hotspots — same path as location menu (TourPage handleNavigate). */
@@ -217,6 +222,8 @@ export const PanoramaViewer = forwardRef<
     landingTargetView,
     splashDone = false,
     immersiveBackgroundController = null,
+    immersiveNavbarAvailable = false,
+    toolbarToggleAvailable = false,
     activeNamingHotspotId = null,
     embed = false,
     disabled = false,
@@ -225,7 +232,6 @@ export const PanoramaViewer = forwardRef<
     onInfoHotspot,
     onActiveInfoHotspotChange,
     onDismissModalPopups,
-    onPsvPanelVisibilityChange,
     onAnchoredPanelVisibilityChange,
     onNavigateToScene,
     onTransitionStart,
@@ -287,9 +293,6 @@ export const PanoramaViewer = forwardRef<
   const onInfoHotspotRef = useLatestRef(onInfoHotspot);
   const onActiveInfoHotspotChangeRef = useLatestRef(onActiveInfoHotspotChange);
   const onDismissModalPopupsRef = useLatestRef(onDismissModalPopups);
-  const onPsvPanelVisibilityChangeRef = useLatestRef(
-    onPsvPanelVisibilityChange,
-  );
   const onAnchoredPanelVisibilityChangeRef = useLatestRef(
     onAnchoredPanelVisibilityChange,
   );
@@ -312,6 +315,8 @@ export const PanoramaViewer = forwardRef<
   );
   const splashDoneRef = useLatestRef(splashDone);
   const immersiveControllerRef = useLatestRef(immersiveBackgroundController);
+  const immersiveNavbarAvailableRef = useLatestRef(immersiveNavbarAvailable);
+  const toolbarToggleAvailableRef = useLatestRef(toolbarToggleAvailable);
   const activeNamingHotspotIdRef = useLatestRef(activeNamingHotspotId);
   const controlsVisibleRef = useRef(controlsVisible);
   controlsVisibleRef.current = controlsVisible;
@@ -432,10 +437,33 @@ export const PanoramaViewer = forwardRef<
 
   useEffect(() => {
     const viewer = viewerRef.current;
-    const controller = immersiveBackgroundController;
-    if (!viewerReady || !viewer || !controller) return;
-    return bindImmersiveBackgroundNavbarButton(viewer, controller);
-  }, [immersiveBackgroundController, viewerReady, tour.id, skipLanding]);
+    if (!viewerReady || !viewer) return;
+
+    const showImmersive = Boolean(immersiveBackgroundController);
+    syncImmersiveBackgroundNavbarButtonVisibility(viewer, showImmersive);
+    syncPsvNavbarChromeControls(viewer);
+    if (!showImmersive || !immersiveBackgroundController) return;
+
+    return bindImmersiveBackgroundNavbarButton(
+      viewer,
+      immersiveBackgroundController,
+    );
+  }, [immersiveBackgroundController, viewerReady]);
+
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewerReady || !viewer) return;
+
+    const showToolbarToggle = Boolean(onControlsToggle);
+    syncTourToolbarToggleNavbarButtonVisibility(viewer, showToolbarToggle);
+    if (!showToolbarToggle) {
+      syncPsvNavbarChromeControls(viewer);
+      return;
+    }
+
+    syncTourToolbarToggleNavbarButton(viewer, !controlsVisible);
+    syncPsvNavbarChromeControls(viewer);
+  }, [controlsVisible, onControlsToggle, viewerReady]);
 
   useImperativeHandle(ref, () => ({
     navigateToScene: async (sceneId, targetView) => {
@@ -745,11 +773,11 @@ export const PanoramaViewer = forwardRef<
       'move',
       recenterViewButton,
     ];
-    if (tourData.immersiveBackground) {
+    if (immersiveNavbarAvailableRef.current) {
       navbarButtons.push(immersiveBgButton);
     }
     navbarButtons.push(fullscreenButton);
-    if (onControlsToggleRef.current) {
+    if (toolbarToggleAvailableRef.current) {
       navbarButtons.push(
         createTourToolbarToggleNavbarButton(
           () => !controlsVisibleRef.current,
@@ -922,15 +950,6 @@ export const PanoramaViewer = forwardRef<
       viewerReady = true;
       tryStartLanding();
     });
-
-    const handleShowPanel = () => {
-      onPsvPanelVisibilityChangeRef.current?.(true);
-    };
-    const handleHidePanel = () => {
-      onPsvPanelVisibilityChangeRef.current?.(false);
-    };
-    viewer.addEventListener('show-panel', handleShowPanel);
-    viewer.addEventListener('hide-panel', handleHidePanel);
 
     const syncAnchoredPanelVisibility = () => {
       const open = markers
@@ -1358,8 +1377,6 @@ export const PanoramaViewer = forwardRef<
       hotspotEnter.destroy();
       hotspotEnterRef.current = null;
       cancelAnimationFrame(devRaf);
-      viewer.removeEventListener('show-panel', handleShowPanel);
-      viewer.removeEventListener('hide-panel', handleHidePanel);
       viewer.removeEventListener('render', syncAnchoredPanelPositions);
       viewer.container.removeEventListener(
         'pointerdown',
@@ -1400,13 +1417,6 @@ export const PanoramaViewer = forwardRef<
 
     return bindViewerPerfPause({ scope, getViewer: () => viewerRef.current });
   }, [fullscreenRootRef]);
-
-  useEffect(() => {
-    const viewer = viewerRef.current;
-    if (!viewer || !viewerReady || !onControlsToggle) return;
-
-    syncTourToolbarToggleNavbarButton(viewer, !controlsVisible);
-  }, [controlsVisible, onControlsToggle, viewerReady]);
 
   return (
     <div

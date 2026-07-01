@@ -14,6 +14,7 @@
     --ishare-panel-cta-icon-opsz: 24;
     --ishare-panel-cta-gap: 8px;
     --ishare-panel-cta-icon-slot: calc(var(--ishare-panel-cta-icon-size) + var(--ishare-panel-cta-gap));
+    --ishare-panel-cta-icon-hover-shift: 6px;
     --ishare-panel-cta-icon-on-primary: rgba(255, 255, 255, 0.72);
     --ishare-panel-cta-icon-on-secondary: var(--ishare-text-muted);
     display: flex;
@@ -555,6 +556,13 @@
   }
 
   /* Shared footer CTA � nav preview, anchored info/NO, modal info */
+  .tour-glass-panel--nav-preview,
+  .tour-glass-panel--anchored[data-info-panel-naming='true'],
+  .tour-glass-panel--modal[data-info-panel-naming='true'] {
+    --ishare-panel-cta-icon-size: 20px;
+    --ishare-panel-cta-icon-opsz: 20;
+  }
+
   .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer,
   .tour-glass-panel--nav-preview .tour-glass-panel__footer {
     padding: var(--ishare-panel-footer-padding-y) var(--ishare-panel-inline-padding);
@@ -752,18 +760,15 @@
   }
 
   /* Footer primary CTA hover � nav preview + info/NO panels */
-  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
-    transition: transform 0.22s ease;
-  }
-
-  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon {
-    transform: translateX(4px);
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon) .tour-glass-panel__cta-icon {
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-trailing-icon:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-trailing-icon:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon {
-    transform: translateY(-50%) translateX(4px);
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-trailing-icon:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon,
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):hover .tour-glass-panel__cta-icon,
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):focus-visible .tour-glass-panel__cta-icon {
+    transform: translateY(-50%) translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
   }
 
   /* NO panel primary CTA icon — Material Symbols fill on hover */
@@ -2244,8 +2249,8 @@
 
   .nav-preview-panel__naming-cta-icon {
     flex-shrink: 0;
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     display: block;
   }
 
@@ -2282,13 +2287,13 @@
       transition: none;
     }
 
-    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
+    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon) .tour-glass-panel__cta-icon {
       transition: none;
     }
 
-    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon {
-      transform: none;
+    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):hover .tour-glass-panel__cta-icon,
+    .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):focus-visible .tour-glass-panel__cta-icon {
+      transform: translateY(-50%);
     }
 
     .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,

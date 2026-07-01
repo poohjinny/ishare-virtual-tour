@@ -22,6 +22,10 @@ export const TOUR_NAV_ACTION_SEARCH_OPEN = 'Search';
 
 export const TOUR_NAV_ACTION_SEARCH_CLOSE = 'Close search';
 
+export const TOUR_NAV_HISTORY_BACK = 'Previous view';
+
+export const TOUR_NAV_HISTORY_FORWARD = 'Next view';
+
 /** Mirror label for screen readers (visual tooltip via IconTooltip / data-ishare-tooltip). */
 export function tourNavIconButtonA11y(label: string): { 'aria-label': string } {
   return { 'aria-label': label };

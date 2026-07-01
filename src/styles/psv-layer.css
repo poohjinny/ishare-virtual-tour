@@ -47,12 +47,14 @@
   /* Tour chrome gutter — nav FAB dock, breadcrumb, dev tools, minimap, Ask Guide */
   --tour-chrome-inset: 1rem;
   --tour-chrome-fab-size: 2.875rem;
-  --tour-chrome-breadcrumb-row-height: 3rem;
+  --tour-chrome-breadcrumb-row-height: 2.75rem;
   --tour-chrome-top-dock-width: calc(4 * var(--tour-chrome-fab-size) + 3 * 0.5rem);
   --tour-chrome-inset-top: max(var(--tour-chrome-inset), env(safe-area-inset-top, 0px));
   --tour-chrome-inset-right: max(var(--tour-chrome-inset), env(safe-area-inset-right, 0px));
   --tour-chrome-inset-bottom: max(var(--tour-chrome-inset), env(safe-area-inset-bottom, 0px));
   --tour-chrome-inset-left: max(var(--tour-chrome-inset), env(safe-area-inset-left, 0px));
+  --tour-explore-panel-width: 580px;
+  --tour-explore-panel-width-mobile-max: 380px;
 }
 
 @media (max-width: 1023px) {
@@ -65,7 +67,7 @@
   .tour-page {
     --tour-chrome-inset: 0.5rem;
     --tour-chrome-fab-size: 2.75rem;
-    --tour-chrome-breadcrumb-row-height: 2.75rem;
+    --tour-chrome-breadcrumb-row-height: 2.5rem;
   }
 }
 
@@ -327,6 +329,7 @@ input::placeholder {
   }
 
   .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg,
+  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol,
   .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
     transition:
       width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
@@ -389,11 +392,13 @@ input::placeholder {
     justify-content: center;
   }
 
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg {
+  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg,
+  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol {
     display: block;
     width: 22px;
     height: 22px;
     flex: 0 0 22px;
+    font-size: 22px;
   }
 
   .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
@@ -416,10 +421,12 @@ input::placeholder {
 }
 
 @media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+
   .viewer-container .psv-navbar,
   .viewer-container .psv-navbar .psv-button:not(.psv-tour-toolbar-toggle),
   .viewer-container .psv-navbar .psv-tour-toolbar-toggle,
   .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg,
+  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol,
   .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
     transition: none !important;
   }
@@ -531,6 +538,10 @@ input::placeholder {
 }
 
 /* Control groups: zoom | move + default view | immersive + fullscreen */
+.viewer-container .psv-navbar .psv-menu-button {
+  display: none !important;
+}
+
 .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
   margin-left: 24px;
 }
@@ -561,6 +572,15 @@ input::placeholder {
   justify-content: center;
   width: var(--psv-nav-icon-size);
   height: var(--psv-nav-icon-size);
+}
+
+.viewer-container .psv-toolbar-toggle-material-symbol {
+  display: block;
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+  font-size: var(--psv-nav-icon-size);
+  line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 }
 
 .viewer-container .psv-immersive-bg-volume {
@@ -695,45 +715,49 @@ input::placeholder {
 }
 
 .viewer-container .psv-button--active {
-  background: var(--ishare-primary);
-  color: #fff;
+  background: transparent;
+  color: var(--ishare-primary);
 }
 
-/* Toggle-on ? fullscreen (exit); immersive bg highlighted while enabled */
+/* Toggle-on — fullscreen (exit); immersive bg highlighted while enabled */
 .viewer-container .psv-fullscreen-button.psv-button--active,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
-  background: var(--ishare-primary);
-  color: #fff;
+  background: transparent;
+  color: var(--ishare-primary);
 }
 
 .viewer-container .psv-fullscreen-button.psv-button--active:hover,
 .viewer-container .psv-fullscreen-button.psv-button--active:focus-visible,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible {
-  color: var(--ishare-text);
+  color: var(--ishare-primary);
   background: rgba(15, 23, 42, 0.06);
 }
 
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-button-svg,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-immersive-bg-bar {
-  color: #fff;
-  fill: #fff;
+  color: var(--ishare-primary);
+  fill: var(--ishare-primary);
 }
 
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-button-svg,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-immersive-bg-bar,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-button-svg,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-immersive-bg-bar {
-  color: var(--ishare-text);
-  fill: var(--ishare-text);
+  color: var(--ishare-primary);
+  fill: var(--ishare-primary);
+}
+
+.viewer-container .psv-fullscreen-button.psv-button--active .psv-button-svg {
+  color: var(--ishare-primary);
 }
 
 .viewer-area:fullscreen .viewer-container .psv-fullscreen-button,
 .viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button,
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled,
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
-  color: #fff;
-  background: var(--ishare-primary);
+  color: var(--ishare-primary);
+  background: transparent;
 }
 
 .viewer-area:fullscreen .viewer-container .psv-fullscreen-button:hover,
@@ -744,7 +768,7 @@ input::placeholder {
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible,
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible {
-  color: var(--ishare-text);
+  color: var(--ishare-primary);
   background: rgba(15, 23, 42, 0.06);
 }
 
@@ -752,8 +776,8 @@ input::placeholder {
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-button-svg,
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-immersive-bg-bar,
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled .psv-immersive-bg-bar {
-  color: #fff;
-  fill: #fff;
+  color: var(--ishare-primary);
+  fill: var(--ishare-primary);
 }
 
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover .psv-button-svg,
@@ -764,8 +788,8 @@ input::placeholder {
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-button-svg,
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-immersive-bg-bar,
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible .psv-immersive-bg-bar {
-  color: var(--ishare-text);
-  fill: var(--ishare-text);
+  color: var(--ishare-primary);
+  fill: var(--ishare-primary);
 }
 
 /* Move arrows ? thin stroke chevrons (::before icon; native title tooltips) */
@@ -918,17 +942,14 @@ input::placeholder {
 
 .hotspot-nav__dot {
   flex-shrink: 0;
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--ishare-primary);
-  box-shadow: 0 0 0 0 rgba(var(--ishare-primary-rgb), 0.4);
   transform-origin: center;
-  animation: hotspot-nav-dot-glow 2.5s ease-out infinite;
   transition:
     background 0.22s ease,
-    box-shadow 0.22s ease,
-    transform 0.22s ease;
+    box-shadow 0.22s ease;
 }
 
 .hotspot-nav__icon {
@@ -1297,11 +1318,7 @@ input::placeholder {
   color: rgba(255, 255, 255, 0.58);
 }
 
-/* Pause infinite hotspot motion when the tab, window, or pointer leaves the browser. */
-.viewer-area--perf-pause .hotspot-nav__dot {
-  animation: none;
-}
-
+/* Pause infinite chrome motion when the tab is hidden or the window loses focus. */
 .viewer-area--perf-pause .hotspot-info__pulse {
   animation: none;
   opacity: 0.35;
@@ -1330,11 +1347,6 @@ input::placeholder {
 }
 
 @media (prefers-reduced-motion: reduce) {
-
-  .hotspot-nav__dot {
-    animation: none;
-    transform: none;
-  }
 
   .hotspot-nav--active .hotspot-nav__dot {
     box-shadow: var(--ishare-active-icon-dot-ring);

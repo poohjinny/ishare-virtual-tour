@@ -43,6 +43,8 @@ const IMMERSIVE_BG_LOADING_ICON = `<svg class="psv-button-svg psv-immersive-bg-v
 interface NavbarButtonWithContainer {
   container: HTMLElement;
   toggleActive: (active?: boolean) => void;
+  show: (refresh?: boolean) => void;
+  hide: (refresh?: boolean) => void;
 }
 
 function resolveImmersiveButtonRoot(container: HTMLElement): HTMLElement {
@@ -126,6 +128,54 @@ export function toggleImmersiveBackgroundPlayback(
   }
 
   void controller.toggle();
+}
+
+function applyImmersiveBackgroundNavbarButtonOff(viewer: Viewer): void {
+  const button = viewer.navbar.getButton(
+    IMMERSIVE_BG_NAVBAR_BUTTON_ID,
+    false,
+  ) as NavbarButtonWithContainer | undefined;
+
+  if (!button) return;
+
+  const root = resolveImmersiveButtonRoot(button.container);
+
+  button.toggleActive(false);
+  root.classList.remove(
+    'psv-button--active',
+    'psv-immersive-bg-button--enabled',
+    'psv-immersive-bg-button--loading',
+  );
+  button.container.innerHTML = resolveIcon('off');
+  root.setAttribute('aria-pressed', 'false');
+  root.setAttribute('aria-busy', 'false');
+  root.setAttribute('aria-label', resolveAriaLabel('off'));
+  applyIshareTooltipDom(root, resolveTitle('off'), 'top');
+}
+
+export function resetImmersiveBackgroundNavbarButtonIdle(viewer: Viewer): void {
+  applyImmersiveBackgroundNavbarButtonOff(viewer);
+}
+
+export function syncImmersiveBackgroundNavbarButtonVisibility(
+  viewer: Viewer,
+  visible: boolean,
+): void {
+  const button = viewer.navbar.getButton(
+    IMMERSIVE_BG_NAVBAR_BUTTON_ID,
+    false,
+  ) as NavbarButtonWithContainer | undefined;
+
+  if (!button) return;
+
+  if (visible) {
+    button.show(false);
+  } else {
+    applyImmersiveBackgroundNavbarButtonOff(viewer);
+    button.hide(false);
+  }
+
+  (viewer.navbar as unknown as { autoSize: () => void }).autoSize();
 }
 
 export function createImmersiveBackgroundNavbarButton(

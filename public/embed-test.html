@@ -648,8 +648,8 @@
         for (const tour of tours) {
           const option = document.createElement('option');
           option.value = tour.id;
-          const client = tour.clientName ? tour.clientName + ' · ' : '';
-          option.textContent = client + tour.name;
+          const client = tour.clientName ? ' - ' + tour.clientName : '';
+          option.textContent = tour.name + client;
           tourSelect.appendChild(option);
         }
 

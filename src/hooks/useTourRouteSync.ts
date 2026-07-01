@@ -28,7 +28,6 @@ interface UseTourRouteSyncOptions {
   isTransitioning: boolean;
   viewerRef: RefObject<PanoramaViewerHandle | null>;
   syncSceneFromRoute: (sceneId: string) => void;
-  prepareSceneNavigate?: (sceneId: string) => void;
   pendingNamingSelectionRef?: RefObject<{
     sceneId: string;
     hotspotId: string;
@@ -41,7 +40,6 @@ export function useTourRouteSync({
   isTransitioning,
   viewerRef,
   syncSceneFromRoute,
-  prepareSceneNavigate,
   pendingNamingSelectionRef,
 }: UseTourRouteSyncOptions) {
   const navigate = useNavigate();
@@ -105,7 +103,6 @@ export function useTourRouteSync({
 
     syncingFromUrlRef.current = true;
     syncSceneFromRoute(routeSceneId);
-    prepareSceneNavigate?.(routeSceneId);
 
     void viewerRef.current
       ?.navigateToScene(routeSceneId, scene.defaultView)
@@ -121,7 +118,6 @@ export function useTourRouteSync({
     tour.id,
     tour.scenes,
     viewerRef,
-    prepareSceneNavigate,
     pendingNamingSelectionRef,
     searchParams,
   ]);

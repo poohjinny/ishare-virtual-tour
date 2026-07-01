@@ -8,6 +8,7 @@ export const namingPriceFilterVariants = cva('naming-price-filter', {
       true: cn(
         'naming-price-filter--active',
         '[&_.naming-price-filter__icon]:text-primary',
+        '[&_.naming-price-filter__thumb-label]:text-primary',
       ),
       false: '',
     },
@@ -42,11 +43,11 @@ export const namingPriceFilterTrackClassName = cn(
 );
 
 export const namingPriceFilterRailClassName = cn(
-  'naming-price-filter__rail absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-[rgba(15,23,42,0.08)]',
+  'naming-price-filter__rail absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-[rgba(15,23,42,0.05)]',
 );
 
 export const namingPriceFilterFillClassName = cn(
-  'naming-price-filter__fill absolute inset-y-0 rounded-full bg-[rgba(15,23,42,0.14)] transition-colors duration-200',
+  'naming-price-filter__fill absolute inset-y-0 rounded-full bg-[rgba(15,23,42,0.09)] transition-colors duration-200',
 );
 
 export const namingPriceFilterInputClassName = cn(
@@ -68,13 +69,29 @@ export const namingPriceFilterRootClassName = cn(
 );
 
 export const namingPriceFilterRootEmbeddedClassName = cn(
-  'flex flex-col gap-2 px-1 py-0.5',
+  'min-w-0 rounded-lg py-0.5',
 );
 
-export const namingPriceFilterEmbeddedHeaderClassName = cn(
-  'flex items-center justify-between gap-3',
+export const namingPriceFilterEmbeddedGridClassName = cn(
+  'grid min-w-0 grid-cols-[auto_minmax(9rem,1fr)] items-start gap-x-0.5',
 );
 
 export const namingPriceFilterEmbeddedLabelClassName = cn(
-  'font-display text-xs font-semibold text-foreground',
+  'font-body text-sm leading-snug text-body',
+);
+
+export const namingPriceFilterEmbeddedLabelCellClassName = cn(
+  'shrink-0 px-3 py-1.5',
+);
+
+export const namingPriceFilterEmbeddedTrackWrapClassName = cn(
+  'relative min-w-0 px-2.5 pb-0.5',
+);
+
+export const namingPriceFilterEmbeddedThumbLabelsClassName = cn(
+  'naming-price-filter__thumb-labels relative mt-px h-3',
+);
+
+export const namingPriceFilterEmbeddedThumbLabelClassName = cn(
+  'naming-price-filter__thumb-label absolute top-0 whitespace-nowrap font-body text-2xs font-medium leading-none text-muted transition-colors duration-200',
 );

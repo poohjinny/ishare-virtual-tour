@@ -4,20 +4,28 @@ import {
   TOUR_TOOLBAR_TOGGLE_COLLAPSE_LABEL,
   TOUR_TOOLBAR_TOGGLE_EXPAND_LABEL,
 } from '../constants/tourToolbar';
-import { applyIshareTooltipDom, setIshareTooltipLabel } from '../utils/ishareTooltipDom';
+import {
+  applyIshareTooltipDom,
+  setIshareTooltipLabel,
+} from '../utils/ishareTooltipDom';
 
 export const TOUR_TOOLBAR_TOGGLE_BUTTON_ID = 'tour-toolbar-toggle';
 
-const TOOLBAR_EXPAND_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M7 14l5-5 5 5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+const TOOLBAR_TOGGLE_MATERIAL_SYMBOL_CLASS =
+  'material-symbols-rounded psv-toolbar-toggle-material-symbol';
 
-const TOOLBAR_COLLAPSE_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+function toolbarMaterialSymbolIcon(name: string): string {
+  return `<span class="${TOOLBAR_TOGGLE_MATERIAL_SYMBOL_CLASS}" aria-hidden="true">${name}</span>`;
+}
+
+const TOOLBAR_EXPAND_ICON = toolbarMaterialSymbolIcon('unfold_more');
+
+const TOOLBAR_COLLAPSE_ICON = toolbarMaterialSymbolIcon('unfold_less');
 
 interface NavbarButtonWithContainer {
   container: HTMLElement;
+  show: (refresh?: boolean) => void;
+  hide: (refresh?: boolean) => void;
 }
 
 function autoSizeNavbar(viewer: Viewer) {
@@ -96,5 +104,25 @@ export function syncTourToolbarToggleNavbarButton(
     button.container.classList.remove('ishare-tooltip-host');
   }
   button.container.innerHTML = resolveToolbarIcon(collapsed);
+  autoSizeNavbar(viewer);
+}
+
+export function syncTourToolbarToggleNavbarButtonVisibility(
+  viewer: Viewer,
+  visible: boolean,
+): void {
+  const button = viewer.navbar.getButton(
+    TOUR_TOOLBAR_TOGGLE_BUTTON_ID,
+    false,
+  ) as NavbarButtonWithContainer | undefined;
+
+  if (!button) return;
+
+  if (visible) {
+    button.show(false);
+  } else {
+    button.hide(false);
+  }
+
   autoSizeNavbar(viewer);
 }

@@ -1021,7 +1021,7 @@ export function buildAnchoredNavPreviewHtml(
     <div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
       <button
         type="button"
-        class="${GLASS_PANEL.cta}"
+        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-trailing-icon"
         data-nav-panel-go="true"
         aria-label="${escapeHtml(visitAriaLabel)}"
       >${buildGlassPanelCtaTextHtml(ctaLabel)}${glassPanelCtaArrowIconHtml()}</button>

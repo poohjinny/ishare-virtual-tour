@@ -1,6 +1,9 @@
 import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
 
+/** Shared corner radius — text fields, selects, file inputs, action buttons, tab chips. */
+export const devViewPanelControlRadiusClassName = 'rounded-md';
+
 /** Same chrome insets as nav dock; ≤1023px anchors bottom-left (mobile + compact). */
 export const devToolsStackClassName = cn(
   'pointer-events-none absolute left-[var(--tour-chrome-inset-left)] z-[100]',
@@ -71,7 +74,8 @@ export const devViewPanelTourSwitchAnchorClassName = cn(
 );
 
 export const devViewPanelTourSwitchTriggerClassName = cn(
-  'flex w-full min-w-0 items-center gap-2 rounded border border-transparent px-0 py-0.5 text-left',
+  'flex w-full min-w-0 items-center gap-2 border border-transparent px-0 py-0.5 text-left',
+  devViewPanelControlRadiusClassName,
   'text-xs font-semibold leading-snug text-[#f0fdf4]',
   'hover:border-[rgba(100,116,139,0.35)] hover:bg-[rgba(15,23,42,0.45)]',
   'focus-visible:border-[#38bdf8] focus-visible:outline-none',
@@ -82,7 +86,8 @@ export const devViewPanelTourSwitchChevronClassName = cn(
 );
 
 export const devViewPanelTourSwitchMenuClassName = cn(
-  'absolute left-0 right-0 top-[calc(100%+4px)] z-[5] max-h-52 overflow-y-auto rounded border border-[rgba(100,116,139,0.45)] bg-[rgba(15,23,42,0.98)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.55)]',
+  'absolute left-0 right-0 top-[calc(100%+4px)] z-[5] max-h-52 overflow-y-auto border border-[rgba(100,116,139,0.45)] bg-[rgba(15,23,42,0.98)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.55)]',
+  devViewPanelControlRadiusClassName,
   '[scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.55)_transparent]',
 );
 
@@ -142,7 +147,8 @@ export const devViewPanelSectionContentClassName = cn(
 );
 
 export const devViewPanelFormGroupClassName = cn(
-  'flex flex-col gap-3 rounded-md border border-[rgba(100,116,139,0.28)] bg-[rgba(15,23,42,0.35)] p-3',
+  'flex flex-col gap-3 border border-[rgba(100,116,139,0.28)] bg-[rgba(15,23,42,0.35)] p-3',
+  devViewPanelControlRadiusClassName,
 );
 
 /** Form group whose children (subsections) supply their own vertical rhythm. */
@@ -152,12 +158,13 @@ export const devViewPanelFormGroupStackedClassName = cn(
 );
 
 export const devViewPanelInlineFormGroupClassName = cn(
-  'mt-2 flex flex-col gap-3 rounded-md border border-[rgba(100,116,139,0.22)] bg-[rgba(0,0,0,0.2)] p-2.5',
+  'mt-2 flex flex-col gap-3 border border-[rgba(100,116,139,0.22)] bg-[rgba(0,0,0,0.2)] p-2.5',
+  devViewPanelControlRadiusClassName,
 );
 
-/** Manage-tab inline edit — inset from list row on all sides. */
+/** Manage-tab inline edit — flows inside active list row (no nested card). */
 export const devViewPanelManageEditFormClassName = cn(
-  'mx-2.5 mt-2.5 mb-2.5 flex flex-col gap-3 rounded-md border border-[rgba(100,116,139,0.22)] bg-[rgba(0,0,0,0.2)] p-2.5',
+  'flex flex-col gap-3 border-t border-[rgba(100,116,139,0.22)] pt-3',
 );
 
 export const devViewPanelFormRowClassName = cn(
@@ -189,7 +196,8 @@ export const devViewPanelSectionLeadClassName = cn(
 );
 
 export const devViewPanelCoordsClassName = cn(
-  'm-0 break-all rounded-md bg-[rgba(0,0,0,0.35)] px-2 py-1.5 text-2xs leading-[1.4] text-[#f0fdf4]',
+  'm-0 break-all bg-[rgba(0,0,0,0.35)] px-2 py-1.5 text-2xs leading-[1.4] text-[#f0fdf4]',
+  devViewPanelControlRadiusClassName,
 );
 
 export const devViewPanelFieldClassName = cn('flex flex-col gap-1.5');
@@ -197,12 +205,70 @@ export const devViewPanelFieldClassName = cn('flex flex-col gap-1.5');
 export const devViewPanelFieldLabelClassName = cn('text-2xs text-[#94a3b8]');
 
 export const devViewPanelInputClassName = cn(
-  'box-border w-full rounded-md border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)] px-2.5 py-1.5 font-[inherit] text-2xs text-[#f0fdf4] placeholder:text-[#64748b] focus:border-[#38bdf8] focus:outline-none',
+  'box-border w-full border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)] px-2.5 py-1.5 font-[inherit] text-2xs text-[#f0fdf4] placeholder:text-[#64748b] focus:border-[#38bdf8] focus:outline-none',
+  devViewPanelControlRadiusClassName,
 );
 
+export const devViewPanelFileFieldClassName = cn(
+  'flex flex-col overflow-hidden border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)]',
+  devViewPanelControlRadiusClassName,
+  'focus-within:border-[#38bdf8]',
+);
+
+export const devViewPanelFileFieldPreviewClassName = cn(
+  'border-t border-[rgba(100,116,139,0.35)] bg-[rgba(0,0,0,0.2)] px-2.5 py-2',
+);
+
+export const devViewPanelFilePreviewStackClassName = cn('flex flex-col gap-2');
+
+export const devViewPanelFilePreviewRowClassName = cn(
+  'flex items-start justify-end gap-2',
+);
+
+export const devViewPanelFilePreviewContentClassName = cn('min-w-0 flex-1');
+
+export const devViewPanelPanoramaPreviewImageClassName = cn(
+  'block aspect-[2/1] w-full object-cover object-center',
+);
+
+export const devViewPanelBrandLogoClassName = cn(
+  'block max-h-10 max-w-full w-auto shrink-0 object-contain object-left',
+);
+
+export const devViewPanelBrandFaviconClassName = cn(
+  'block max-h-10 max-w-full w-auto shrink-0 object-contain object-left',
+);
+
+/** @deprecated Use {@link devViewPanelBrandLogoClassName} or {@link devViewPanelPanoramaPreviewImageClassName}. */
+export const devViewPanelFilePreviewImageClassName =
+  devViewPanelBrandLogoClassName;
+
+export const devViewPanelFilePreviewClearClassName = cn(
+  'shrink-0 cursor-pointer border border-[#64748b] bg-[#1e293b] px-1.5 py-0.5 font-[inherit] text-[0.625rem] text-[#f0fdf4] hover:bg-[#334155]',
+  devViewPanelControlRadiusClassName,
+);
+
+export const devViewPanelFileInputRowClassName = cn(
+  'flex min-w-0 items-center gap-2 px-2.5 py-1.5',
+);
+
+export const devViewPanelFileChooseBtnClassName = cn(
+  'shrink-0 cursor-pointer border border-[#64748b] bg-[#1e293b] px-2 py-1 font-[inherit] text-2xs text-[#f0fdf4] hover:enabled:bg-[#334155]',
+  devViewPanelControlRadiusClassName,
+);
+
+export const devViewPanelFileNameClassName = cn(
+  'min-w-0 flex-1 truncate font-[inherit] text-2xs text-[#f0fdf4]',
+);
+
+/** @deprecated Use {@link DevPanelFileInput}. */
+export const devViewPanelFileInputInnerClassName =
+  devViewPanelFileInputRowClassName;
+
+/** @deprecated Use {@link DevPanelFileField} + {@link devViewPanelFileInputInnerClassName}. */
 export const devViewPanelFileInputClassName = cn(
-  devViewPanelInputClassName,
-  'cursor-pointer py-1.5 file:mr-2 file:cursor-pointer file:rounded-md file:border-0 file:bg-[rgba(74,222,128,0.18)] file:px-2 file:py-1 file:font-[inherit] file:text-2xs file:text-[#86efac] hover:file:bg-[rgba(74,222,128,0.28)]',
+  devViewPanelFileFieldClassName,
+  devViewPanelFileInputInnerClassName,
 );
 
 export const devViewPanelSelectClassName = cn(
@@ -231,39 +297,53 @@ export const devViewPanelSlugPreviewClassName = cn(
 
 export const devViewPanelActionsClassName = cn('flex flex-wrap gap-2');
 
-export const devViewPanelColorFieldClassName = cn('flex items-center gap-2');
+export const devViewPanelColorFieldClassName = cn(
+  'flex items-center gap-1.5 py-1.5 pl-1.5 pr-2 overflow-hidden border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)]',
+  devViewPanelControlRadiusClassName,
+  'focus-within:border-[#38bdf8]',
+);
+
+export const devViewPanelColorInputInnerClassName = cn(
+  'min-w-0 flex-1 border-none bg-transparent px-0.5 py-0.5 font-[inherit] text-2xs text-[#f0fdf4] placeholder:text-[#64748b] outline-none',
+);
 
 export const devViewPanelColorPickerClassName = cn(
-  'size-6 shrink-0 cursor-pointer overflow-hidden rounded-full border border-[rgba(100,116,139,0.55)] bg-transparent p-0',
+  'size-5 shrink-0 cursor-pointer overflow-hidden rounded-full border-0 bg-transparent p-0',
   '[&::-webkit-color-swatch-wrapper]:p-0',
   '[&::-webkit-color-swatch]:size-full [&::-webkit-color-swatch]:rounded-full [&::-webkit-color-swatch]:border-0',
   '[&::-moz-color-swatch]:size-full [&::-moz-color-swatch]:rounded-full [&::-moz-color-swatch]:border-0',
 );
 
-export const devViewPanelBrandPreviewWrapClassName = cn(
-  'mt-2 flex h-12 max-w-[220px] items-center justify-start rounded-md border border-[rgba(100,116,139,0.35)] bg-[rgba(15,23,42,0.55)] px-2 py-1',
-);
+/** @deprecated Preview sits inside {@link DevPanelFileField}. */
+export const devViewPanelPanoramaPreviewWrapClassName =
+  devViewPanelFileFieldPreviewClassName;
 
-export const devViewPanelBrandLogoClassName = cn(
-  'block max-h-10 max-w-full w-auto shrink-0 object-contain object-left',
-);
+/** @deprecated Preview sits inside {@link DevPanelFileField}. */
+export const devViewPanelBrandPreviewWrapClassName =
+  devViewPanelFileFieldPreviewClassName;
 
-export const devViewPanelBrandFaviconWrapClassName = cn(
-  'mt-2 flex h-8 w-8 items-center justify-center rounded-md border border-[rgba(100,116,139,0.35)] bg-[rgba(15,23,42,0.55)] p-0.5',
-);
-
-export const devViewPanelBrandFaviconClassName = cn(
-  'block h-full w-full object-contain object-center',
-);
+/** @deprecated Preview sits inside {@link DevPanelFileField}. */
+export const devViewPanelBrandFaviconWrapClassName =
+  devViewPanelFileFieldPreviewClassName;
 
 export const devViewPanelBtnVariants = cva(
-  'cursor-pointer rounded-md border px-2.5 py-1.5 font-[inherit] text-2xs text-[#f0fdf4] disabled:cursor-not-allowed disabled:opacity-40',
+  cn(
+    'cursor-pointer border px-2.5 py-1.5 font-[inherit] text-2xs text-[#f0fdf4] disabled:cursor-not-allowed disabled:opacity-40',
+    devViewPanelControlRadiusClassName,
+  ),
   {
     variants: {
       tone: {
-        primary: 'border-[#4ade80] bg-[#166534] hover:enabled:bg-[#15803d]',
-        secondary: 'border-[#64748b] bg-[#1e293b] hover:enabled:bg-[#334155]',
-        danger: 'border-[#f87171] bg-[#7f1d1d] hover:enabled:bg-[#991b1b]',
+        primary:
+          'border-[#4ade80] bg-[#166534] text-[#f0fdf4] hover:enabled:bg-[#15803d]',
+        secondary:
+          'border-[#64748b] bg-[#1e293b] text-[#f0fdf4] hover:enabled:bg-[#334155]',
+        danger:
+          'border-[#f87171] bg-[#7f1d1d] text-[#f0fdf4] hover:enabled:bg-[#991b1b]',
+        nav: 'border-[#38bdf8] bg-[rgba(56,189,248,0.28)] text-[#bae6fd] hover:enabled:bg-[rgba(56,189,248,0.38)]',
+        naming:
+          'border-[#f472b6] bg-[rgba(244,114,182,0.28)] text-[#fbcfe8] hover:enabled:bg-[rgba(244,114,182,0.38)]',
+        info: 'border-[#facc15] bg-[rgba(250,204,21,0.28)] text-[#fef08a] hover:enabled:bg-[rgba(250,204,21,0.38)]',
       },
     },
     defaultVariants: { tone: 'primary' },
@@ -283,12 +363,14 @@ export const devViewPanelTabHintClassName = cn(
 export const devViewPanelHotspotSectionClassName = cn('flex flex-col gap-1.5');
 
 export const devViewPanelPrimaryTabsClassName = cn(
-  'flex gap-1 rounded-md border border-[rgba(0,255,128,0.35)] bg-[rgba(0,0,0,0.45)] p-1',
+  'flex gap-1 border border-[rgba(0,255,128,0.35)] bg-[rgba(0,0,0,0.45)] p-1',
+  devViewPanelControlRadiusClassName,
 );
 
 /** Section mode tabs — Manage / Create, Existing / New client. */
 export const devViewPanelSecondaryTabsClassName = cn(
-  'flex gap-0.5 rounded-md border border-[rgba(100,116,139,0.28)] bg-[rgba(15,23,42,0.35)] p-0.5',
+  'flex gap-0.5 border border-[rgba(100,116,139,0.28)] bg-[rgba(15,23,42,0.35)] p-0.5',
+  devViewPanelControlRadiusClassName,
 );
 
 export type DevPanelTertiaryTabKind =
@@ -343,12 +425,18 @@ export const devViewPanelTabVariants = cva(
   {
     variants: {
       depth: {
-        primary:
-          'flex-1 rounded-[5px] px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-[0.04em]',
-        secondary:
-          'flex-1 rounded-[4px] px-2 py-1 text-2xs font-medium uppercase tracking-[0.03em]',
-        tertiary:
-          'flex-1 rounded-[4px] border px-2 py-1 text-2xs font-semibold uppercase tracking-[0.03em]',
+        primary: cn(
+          'flex-1 px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-[0.04em]',
+          devViewPanelControlRadiusClassName,
+        ),
+        secondary: cn(
+          'flex-1 px-2 py-1 text-2xs font-medium uppercase tracking-[0.03em]',
+          devViewPanelControlRadiusClassName,
+        ),
+        tertiary: cn(
+          'flex-1 border px-2 py-1 text-2xs font-semibold uppercase tracking-[0.03em]',
+          devViewPanelControlRadiusClassName,
+        ),
       },
       kind: {
         nav: '',
@@ -462,7 +550,8 @@ export const devViewPanelToggleListClassName = cn(
 
 /** Checkbox row — grid keeps the input column aligned with label text. */
 export const devViewPanelToggleLabelClassName = cn(
-  'grid cursor-pointer grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0 rounded px-0.5 py-0.5 text-2xs text-[#cbd5e1] hover:text-[#f0fdf4]',
+  'grid cursor-pointer grid-cols-[auto_1fr] items-center gap-x-2 gap-y-0 px-0.5 py-0.5 text-2xs text-[#cbd5e1] hover:text-[#f0fdf4]',
+  devViewPanelControlRadiusClassName,
 );
 
 /** Multi-line toggle copy (e.g. debug URL flags with hint suffix). */
@@ -501,7 +590,23 @@ export const devViewPanelManageListClassName = cn(
   '[&>li:not(:first-child)]:mt-4 [&>li:not(:first-child)]:border-t [&>li:not(:first-child)]:border-[rgba(100,116,139,0.22)] [&>li:not(:first-child)]:pt-4',
 );
 
+/** Add action row below a manage list or empty state. */
+export const devViewPanelManageListFooterClassName = cn(
+  devViewPanelActionsClassName,
+  'border-t border-[rgba(100,116,139,0.22)] pt-4',
+);
+
 export const devViewPanelManageListItemClassName = cn('flex flex-col gap-2');
+
+export const devViewPanelManageListItemActiveClassName = cn(
+  'rounded-md border border-[rgba(56,189,248,0.55)] bg-[rgba(56,189,248,0.08)] px-2.5 py-2.5',
+  devViewPanelControlRadiusClassName,
+);
+
+export const devViewPanelManageListItemDescClassName = cn(
+  devViewPanelSectionHintClassName,
+  'line-clamp-2',
+);
 
 export type DevHotspotKindBadgeKind = 'nav' | 'naming' | 'info';
 
@@ -556,7 +661,8 @@ export const devViewPanelManageListItemBadgesClassName = cn(
 );
 
 export const devViewPanelHotspotRowClassName = cn(
-  'flex flex-col gap-2 rounded-md border border-[rgba(100,116,139,0.35)] bg-[rgba(0,0,0,0.25)] px-2.5 py-2',
+  'flex flex-col gap-2 border border-[rgba(100,116,139,0.35)] bg-[rgba(0,0,0,0.25)] px-2.5 py-2',
+  devViewPanelControlRadiusClassName,
 );
 
 export const devViewPanelHotspotRowSelectedClassName = cn(
@@ -565,7 +671,10 @@ export const devViewPanelHotspotRowSelectedClassName = cn(
 
 /** @deprecated Prefer DevPanelSection + devViewPanelSectionClassName */
 export const devViewPanelSectionVariants = cva(
-  'flex flex-col gap-1.5 rounded-md border bg-[rgba(15,23,42,0.45)] px-2.5 pb-2 pt-2.5',
+  cn(
+    'flex flex-col gap-1.5 border bg-[rgba(15,23,42,0.45)] px-2.5 pb-2 pt-2.5',
+    devViewPanelControlRadiusClassName,
+  ),
   {
     variants: {
       kind: {
