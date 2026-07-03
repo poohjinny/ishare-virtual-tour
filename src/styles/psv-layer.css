@@ -968,6 +968,11 @@ input::placeholder {
   line-height: 1;
 }
 
+.hotspot-nav--back .hotspot-nav__icon,
+.hotspot-nav--hub .hotspot-nav__icon {
+  color: color-mix(in srgb, var(--ishare-text-body) 72%, var(--ishare-text-muted));
+}
+
 .hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__pill {
   transition:
     box-shadow 0.22s ease,
@@ -1027,6 +1032,13 @@ input::placeholder {
 .hotspot-nav--active .hotspot-nav__icon,
 .hotspot-nav--active:hover .hotspot-nav__icon,
 .hotspot-nav--active:focus-visible .hotspot-nav__icon {
+  color: var(--ishare-primary);
+}
+
+.hotspot-nav--back:not(.hotspot-nav--active):hover .hotspot-nav__icon,
+.hotspot-nav--back:not(.hotspot-nav--active):focus-visible .hotspot-nav__icon,
+.hotspot-nav--hub:not(.hotspot-nav--active):hover .hotspot-nav__icon,
+.hotspot-nav--hub:not(.hotspot-nav--active):focus-visible .hotspot-nav__icon {
   color: var(--ishare-primary);
 }
 

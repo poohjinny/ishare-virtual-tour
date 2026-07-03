@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PopupContent, Tour } from '../types/tour';
 import {
   PopupBodyCopy,
+  PopupCtaArrowIcon,
   PopupHeaderMeta,
   NamingOpportunityPrice,
   PopupCtasFooter,
@@ -50,6 +51,7 @@ interface InfoPopupProps {
   namingHotspotId?: string | null;
   embed?: boolean;
   onClose: () => void;
+  onVisitScene?: (sceneId: string) => void;
 }
 
 export function InfoPopup({
@@ -60,6 +62,7 @@ export function InfoPopup({
   namingHotspotId = null,
   embed = false,
   onClose,
+  onVisitScene,
 }: InfoPopupProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [shown, setShown] = useState<PopupContent | null>(null);
@@ -102,7 +105,21 @@ export function InfoPopup({
     [shown, tour],
   );
 
-  const hasFooterCtas = resolvedCtas.length > 0;
+  const visitSceneId = shown?.visitScene;
+  const visitSceneTitle =
+    visitSceneId ? (tour.scenes[visitSceneId]?.title ?? visitSceneId) : null;
+  const visitCtaLabel = visitSceneTitle ? `Visit ${visitSceneTitle}` : null;
+  const canVisitScene = Boolean(
+    visitSceneId && visitCtaLabel && onVisitScene && visitSceneId !== sceneId,
+  );
+
+  const handleVisitScene = useCallback(() => {
+    if (!visitSceneId || !onVisitScene) return;
+    onClose();
+    onVisitScene(visitSceneId);
+  }, [visitSceneId, onVisitScene, onClose]);
+
+  const hasFooterCtas = resolvedCtas.length > 0 || canVisitScene;
 
   const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
   const namingName =
@@ -235,7 +252,34 @@ export function InfoPopup({
             )}
           </div>
 
-          {hasFooterCtas && <PopupCtasFooter ctas={resolvedCtas} />}
+          {hasFooterCtas && (
+            <>
+              {resolvedCtas.length > 0 && (
+                <PopupCtasFooter ctas={resolvedCtas} />
+              )}
+              {canVisitScene && (
+                <footer className='tour-glass-panel__footer'>
+                  <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
+                    <button
+                      type='button'
+                      className='tour-glass-panel__cta tour-glass-panel__cta--has-trailing-icon'
+                      data-visit-scene={visitSceneId}
+                      onClick={handleVisitScene}
+                      aria-label={visitCtaLabel!}
+                    >
+                      <span
+                        className='tour-glass-panel__cta-text'
+                        data-cta-label={visitCtaLabel!}
+                      >
+                        {visitCtaLabel}
+                      </span>
+                      <PopupCtaArrowIcon />
+                    </button>
+                  </div>
+                </footer>
+              )}
+            </>
+          )}
         </div>
       </article>
     </div>

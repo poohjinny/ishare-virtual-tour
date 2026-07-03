@@ -114,11 +114,13 @@ const MAX_FOV = 105;
 /** Drag release coast (0–1). Higher = softer, longer deceleration. PSV default: 0.8 */
 const MOVE_INERTIA = 0.92;
 
-export interface PanoramaLoadErrorInfo {
-  sceneId?: string;
-  panorama?: string;
-}
+export type { ViewerLoadErrorInfo as PanoramaLoadErrorInfo } from './viewerHandle';
+export type { TourViewerHandle } from './viewerHandle';
 
+/**
+ * PSV-specific viewer handle — extends the generic contract with
+ * `hidePsvPanel` (kept for backwards compat; maps to `hideOverlayPanel`).
+ */
 export interface PanoramaViewerHandle {
   navigateToScene: (
     sceneId: string,
@@ -128,6 +130,8 @@ export interface PanoramaViewerHandle {
   clearActiveInfoHotspot: () => void;
   /** Close any open PSV panel (legacy overflow menu — kept for panel stack). */
   hidePsvPanel: () => void;
+  /** Alias for `hidePsvPanel` — satisfies {@link TourViewerHandle}. */
+  hideOverlayPanel: () => void;
   /** Close anchored info / nav preview panels on the panorama. */
   closeAnchoredPanels: () => void;
   goToNamingOpportunity: (sceneId: string, hotspotId: string) => boolean;
@@ -545,6 +549,9 @@ export const PanoramaViewer = forwardRef<
       setActiveInfoHotspot(markers, null);
     },
     hidePsvPanel: () => {
+      viewerRef.current?.panel.hide();
+    },
+    hideOverlayPanel: () => {
       viewerRef.current?.panel.hide();
     },
     closeAnchoredPanels: () => {
@@ -1155,6 +1162,18 @@ export const PanoramaViewer = forwardRef<
         );
         if (shell instanceof HTMLElement) {
           mountPopupVideoPlayer(shell);
+        }
+        return;
+      }
+
+      const visitBtn = target.closest<HTMLElement>('[data-visit-scene]');
+      if (visitBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const targetSceneId = visitBtn.getAttribute('data-visit-scene');
+        if (targetSceneId) {
+          closeAnchoredInfoPanel(markers, false);
+          onNavigateToSceneRef.current?.(targetSceneId);
         }
         return;
       }

@@ -59,3 +59,7 @@ export const TOUR_DIRECTORY_SCENE_INFO_TOOLTIP = 'Location details';
 export function tourDirectorySceneInfoAriaLabel(sceneTitle: string): string {
   return `Location details for ${sceneTitle}`;
 }
+
+/** Pinned firstScene row — explains sort order in Explore locations. */
+export const TOUR_DIRECTORY_TOUR_START_TOOLTIP =
+  'Tour start · stays at top when sorting';

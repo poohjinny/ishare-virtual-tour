@@ -103,12 +103,18 @@ export function resolveUniqueHotspotId(existingIds, baseId) {
   return `${baseId}-${index}`;
 }
 
+function parseNavHotspotVariant(value) {
+  if (value === 'back' || value === 'hub') return value;
+  return undefined;
+}
+
 export function buildNavHotspotRecord({
   name,
   position,
   targetSceneId,
   targetView,
   instant,
+  navVariant,
   previewImage,
 }) {
   const label = name.trim();
@@ -132,6 +138,11 @@ export function buildNavHotspotRecord({
 
   if (instant) {
     record.instant = true;
+  }
+
+  const resolvedNavVariant = parseNavHotspotVariant(navVariant);
+  if (resolvedNavVariant) {
+    record.navVariant = resolvedNavVariant;
   }
 
   const previewPath = previewImage?.trim();
@@ -204,6 +215,7 @@ export function buildInfoHotspotRecord({
   display,
   videoUrl,
   image,
+  visitScene,
   tourTitle,
 }) {
   const titleValue = (title ?? name)?.trim();
@@ -219,6 +231,11 @@ export function buildInfoHotspotRecord({
 
   const popup = { display: displayValue, title: titleValue, body: bodyValue };
   applyPopupMediaFields(popup, { videoUrl, image });
+
+  const nextVisitScene = visitScene?.trim();
+  if (nextVisitScene) {
+    popup.visitScene = nextVisitScene;
+  }
 
   return {
     id: `info-${slug}`,
@@ -489,6 +506,7 @@ export async function createNavHotspot({
   position,
   targetSceneId,
   instant,
+  navVariant,
   previewImage,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
@@ -501,6 +519,7 @@ export async function createNavHotspot({
     targetSceneId,
     targetView: targetScene?.defaultView,
     instant,
+    navVariant,
     previewImage,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
@@ -548,6 +567,7 @@ export async function createInfoHotspot({
   display,
   videoUrl,
   image,
+  visitScene,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
@@ -559,6 +579,7 @@ export async function createInfoHotspot({
     display,
     videoUrl,
     image,
+    visitScene,
     tourTitle: tour.title,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
@@ -576,6 +597,7 @@ export function updateNavHotspot({
   targetView,
   syncTargetViewFromScene,
   instant,
+  navVariant,
   previewImage,
   clearPreviewImage,
 }) {
@@ -596,6 +618,7 @@ export function updateNavHotspot({
   const nextTargetSceneId = targetSceneId?.trim();
   const hasTargetView = targetView !== undefined && targetView !== null;
   const hasInstant = instant !== undefined;
+  const hasNavVariant = navVariant !== undefined;
   const hasPreviewImage = previewImage !== undefined;
   const wantsClearPreview = clearPreviewImage === true;
   const wantsSyncTargetView = syncTargetViewFromScene === true;
@@ -605,12 +628,13 @@ export function updateNavHotspot({
     !nextTargetSceneId &&
     !hasTargetView &&
     !hasInstant &&
+    !hasNavVariant &&
     !hasPreviewImage &&
     !wantsClearPreview &&
     !wantsSyncTargetView
   ) {
     throw new Error(
-      'At least one of label, targetSceneId, targetView, instant, previewImage, clearPreviewImage, or syncTargetViewFromScene is required',
+      'At least one of label, targetSceneId, targetView, instant, navVariant, previewImage, clearPreviewImage, or syncTargetViewFromScene is required',
     );
   }
 
@@ -646,6 +670,15 @@ export function updateNavHotspot({
       hotspot.instant = true;
     } else {
       delete hotspot.instant;
+    }
+  }
+
+  if (hasNavVariant) {
+    const resolvedNavVariant = parseNavHotspotVariant(navVariant);
+    if (resolvedNavVariant) {
+      hotspot.navVariant = resolvedNavVariant;
+    } else {
+      delete hotspot.navVariant;
     }
   }
 
@@ -761,6 +794,7 @@ export function updateInfoHotspot({
   display,
   videoUrl,
   image,
+  visitScene,
 }) {
   const resolvedHotspotId = hotspotId?.trim();
   if (!resolvedHotspotId) {
@@ -815,16 +849,26 @@ export function updateInfoHotspot({
       delete hotspot.popup.image;
     }
   }
+  const hasVisitScene = visitScene !== undefined;
+  if (hasVisitScene) {
+    const nextVisitScene = visitScene?.trim();
+    if (nextVisitScene) {
+      hotspot.popup.visitScene = nextVisitScene;
+    } else {
+      delete hotspot.popup.visitScene;
+    }
+  }
 
   if (
     !nextTitle &&
     body === undefined &&
     !nextDisplay &&
     !hasVideoUrl &&
-    !hasImage
+    !hasImage &&
+    !hasVisitScene
   ) {
     throw new Error(
-      'At least one of title, body, display, videoUrl, or image is required',
+      'At least one of title, body, display, videoUrl, image, or visitScene is required',
     );
   }
 

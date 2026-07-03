@@ -2,6 +2,7 @@ import type {
   FaqEntry,
   Hotspot,
   NamingOpportunityStatus,
+  NavHotspotVariant,
   PopupDisplay,
   SceneMapPosition,
   Tour,
@@ -38,6 +39,7 @@ interface DevHotspotBasePayload {
 export interface DevNavHotspotPayload extends DevHotspotBasePayload {
   targetSceneId: string;
   instant?: boolean;
+  navVariant?: NavHotspotVariant;
   previewImage?: string;
 }
 
@@ -55,6 +57,7 @@ export interface DevInfoHotspotPayload extends DevHotspotBasePayload {
   display?: PopupDisplay;
   videoUrl?: string;
   image?: string;
+  visitScene?: string;
 }
 
 async function patchDevTourJson<T>(path: string, payload: unknown): Promise<T> {
@@ -615,6 +618,7 @@ export interface DevUpdateNavHotspotPayload extends DevHotspotIdPayload {
   targetView?: ViewPosition;
   syncTargetViewFromScene?: boolean;
   instant?: boolean;
+  navVariant?: NavHotspotVariant;
   previewImage?: string;
   clearPreviewImage?: boolean;
 }
@@ -634,6 +638,7 @@ export interface DevUpdateInfoHotspotPayload extends DevHotspotIdPayload {
   display?: PopupDisplay;
   videoUrl?: string;
   image?: string;
+  visitScene?: string;
 }
 
 export function devUpdateNavHotspot(payload: DevUpdateNavHotspotPayload) {

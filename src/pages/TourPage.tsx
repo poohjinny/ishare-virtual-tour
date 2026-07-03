@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   useNavigate,
   useParams,
@@ -81,11 +89,17 @@ import {
 import { resolveSceneLandingView } from '../utils/tourDirectory';
 import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
 import { useViewerControlsVisible } from '../hooks/useViewerControlsVisible';
-import {
-  PanoramaViewer,
-  type PanoramaLoadErrorInfo,
-  type PanoramaViewerHandle,
-} from '../viewer/PanoramaViewer';
+import type {
+  TourViewerHandle,
+  ViewerLoadErrorInfo as PanoramaLoadErrorInfo,
+} from '../viewer/viewerHandle';
+
+const PanoramaViewer = lazy(() =>
+  import('../viewer/PanoramaViewer').then((m) => ({
+    default: m.PanoramaViewer,
+  })),
+);
+const ThreeDViewer = lazy(() => import('../viewer-3d/ThreeDViewer'));
 import { resetLandingTransitionState } from '../viewer/landingTransition';
 import { resolveTourSceneOpenGraph } from '../utils/tourOpenGraph';
 
@@ -399,7 +413,7 @@ function TourExperience() {
     return resolveSceneLandingView(tour, initialScene, resolved.hotspotId);
   }, [initialScene, tour, urlSearchParams]);
 
-  const viewerRef = useRef<PanoramaViewerHandle>(null);
+  const viewerRef = useRef<TourViewerHandle>(null);
   const viewerAreaRef = useRef<HTMLDivElement>(null);
   const pendingNamingSelectionRef = useRef<{
     sceneId: string;
@@ -529,12 +543,15 @@ function TourExperience() {
     syncSceneFromRoute,
   } = useTourState(initialScene);
 
+  const transitioningRef = useRef(false);
+
   const { showBack, showForward, goBack, goForward } = useHistoryNavControls();
 
   const { syncSceneToUrl } = useTourRouteSync({
     tour: bootstrapTour,
     currentSceneId,
     isTransitioning,
+    transitioningRef,
     viewerRef,
     syncSceneFromRoute,
     pendingNamingSelectionRef,
@@ -782,8 +799,12 @@ function TourExperience() {
     [bootstrapTour.scenes, currentSceneId, syncSceneToUrl],
   );
 
-  const handleTransitionStart = useCallback(() => setIsTransitioning(true), []);
+  const handleTransitionStart = useCallback(() => {
+    transitioningRef.current = true;
+    setIsTransitioning(true);
+  }, []);
   const handleTransitionEnd = useCallback(() => {
+    transitioningRef.current = false;
     setIsTransitioning(false);
   }, []);
 
@@ -794,6 +815,7 @@ function TourExperience() {
   const handlePanoramaError = useCallback(
     (info: PanoramaLoadErrorInfo) => {
       setPanoramaError(info);
+      transitioningRef.current = false;
       setIsTransitioning(false);
     },
     [setIsTransitioning],
@@ -853,46 +875,71 @@ function TourExperience() {
       }
     >
       <div ref={viewerAreaRef} className='viewer-area viewer-area--fullscreen'>
-        <PanoramaViewer
-          key={tour.id}
-          ref={viewerRef}
-          tour={viewerTour}
-          initialSceneId={initialScene}
-          fullscreenRootRef={viewerAreaRef}
-          controlsVisible={viewerControlsVisible}
-          onControlsToggle={
-            searchParams.embed ? undefined : toggleControlsVisible
+        <Suspense fallback={null}>
+          {bootstrapTour.viewerType === 'model3d' ?
+            <ThreeDViewer
+              key={tour.id}
+              ref={viewerRef}
+              tour={viewerTour}
+              initialSceneId={initialScene}
+              disabled={isTransitioning}
+              onSceneChange={handleSceneChange}
+              onInfoHotspot={setActivePopup}
+              onNavigateToScene={handleNavigate}
+              onTransitionStart={handleTransitionStart}
+              onTransitionEnd={handleTransitionEnd}
+              onLoadStart={handleLoadStart}
+              onLoadProgress={handleLoadProgress}
+              onLoadComplete={handleLoadComplete}
+              onInitialTourReveal={onInitialTourReveal}
+              immersiveBackgroundController={immersiveBackgroundController}
+            />
+          : <PanoramaViewer
+              key={tour.id}
+              ref={viewerRef}
+              tour={viewerTour}
+              initialSceneId={initialScene}
+              fullscreenRootRef={viewerAreaRef}
+              controlsVisible={viewerControlsVisible}
+              onControlsToggle={
+                searchParams.embed ? undefined : toggleControlsVisible
+              }
+              skipLanding={searchParams.skipLanding}
+              landingTargetView={landingTargetView}
+              splashDone={splashRevealReady}
+              immersiveBackgroundController={immersiveBackgroundController}
+              immersiveNavbarAvailable={Boolean(
+                bootstrapTour.immersiveBackground,
+              )}
+              toolbarToggleAvailable={isDesktop}
+              activeNamingHotspotId={activeNamingHotspotId}
+              embed={searchParams.embed}
+              disabled={isTransitioning}
+              onSceneChange={handleSceneChange}
+              onInfoHotspot={setActivePopup}
+              onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
+              onDismissModalPopups={handleDismissModalPopups}
+              onAnchoredPanelVisibilityChange={
+                handleAnchoredPanelVisibilityChange
+              }
+              onNavigateToScene={handleNavigate}
+              onTransitionStart={handleTransitionStart}
+              onTransitionEnd={handleTransitionEnd}
+              onDevClick={searchParams.dev ? setDevClickCoords : undefined}
+              onDevViewUpdate={searchParams.dev ? setDevViewCoords : undefined}
+              onViewUpdate={tour.floorPlan ? handleViewUpdate : undefined}
+              onLoadStart={handleLoadStart}
+              onLoadProgress={handleLoadProgress}
+              onLoadComplete={handleLoadComplete}
+              onLandingStart={handleLandingStart}
+              onInitialTourReveal={onInitialTourReveal}
+              onFirstPanoramaInteract={onFirstPanoramaInteract}
+              onPanoramaError={handlePanoramaError}
+              onPanoramaRecovered={handlePanoramaRecovered}
+              onNamingOpportunityBusyChange={setNamingOpportunityBusy}
+            />
           }
-          skipLanding={searchParams.skipLanding}
-          landingTargetView={landingTargetView}
-          splashDone={splashRevealReady}
-          immersiveBackgroundController={immersiveBackgroundController}
-          immersiveNavbarAvailable={Boolean(bootstrapTour.immersiveBackground)}
-          toolbarToggleAvailable={isDesktop}
-          activeNamingHotspotId={activeNamingHotspotId}
-          embed={searchParams.embed}
-          disabled={isTransitioning}
-          onSceneChange={handleSceneChange}
-          onInfoHotspot={setActivePopup}
-          onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
-          onDismissModalPopups={handleDismissModalPopups}
-          onAnchoredPanelVisibilityChange={handleAnchoredPanelVisibilityChange}
-          onNavigateToScene={handleNavigate}
-          onTransitionStart={handleTransitionStart}
-          onTransitionEnd={handleTransitionEnd}
-          onDevClick={searchParams.dev ? setDevClickCoords : undefined}
-          onDevViewUpdate={searchParams.dev ? setDevViewCoords : undefined}
-          onViewUpdate={tour.floorPlan ? handleViewUpdate : undefined}
-          onLoadStart={handleLoadStart}
-          onLoadProgress={handleLoadProgress}
-          onLoadComplete={handleLoadComplete}
-          onLandingStart={handleLandingStart}
-          onInitialTourReveal={onInitialTourReveal}
-          onFirstPanoramaInteract={onFirstPanoramaInteract}
-          onPanoramaError={handlePanoramaError}
-          onPanoramaRecovered={handlePanoramaRecovered}
-          onNamingOpportunityBusyChange={setNamingOpportunityBusy}
-        />
+        </Suspense>
 
         {showLoadError && (
           <PanoramaLoadError
@@ -984,6 +1031,7 @@ function TourExperience() {
         namingHotspotId={activeNamingHotspotId}
         embed={searchParams.embed}
         onClose={closeInfoPopup}
+        onVisitScene={handleNavigate}
       />
     </div>
   );

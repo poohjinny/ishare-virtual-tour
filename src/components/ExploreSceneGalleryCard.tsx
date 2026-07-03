@@ -6,6 +6,7 @@ import { useScenePreview } from '../hooks/useScenePreview';
 import type { Scene } from '../types/tour';
 import { Badge } from './ui/Badge';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
+import { ExploreTourStartPin } from './ExploreTourStartPin';
 import {
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
@@ -22,6 +23,7 @@ import {
   tourNavLocationGalleryHeroTitleActionsClassName,
   tourNavLocationGalleryHeroTitleOverlayClassName,
   tourNavLocationGalleryHeroTitleRowClassName,
+  tourNavLocationGalleryHeroTitleWithPinClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
@@ -30,6 +32,7 @@ interface ExploreSceneGalleryCardProps {
   tourId: string;
   scene: Scene;
   active: boolean;
+  isTourStart?: boolean;
   disabled?: boolean;
   onSelect: () => void;
   onShowDescription?: () => void;
@@ -39,6 +42,7 @@ export function ExploreSceneGalleryCard({
   tourId,
   scene,
   active,
+  isTourStart = false,
   disabled = false,
   onSelect,
   onShowDescription,
@@ -58,12 +62,14 @@ export function ExploreSceneGalleryCard({
     previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
   const description = scene.description?.trim();
   const showInfo = Boolean(description && onShowDescription);
+  const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const ariaLabel =
     active ?
-      description ? `${scene.title}, current location. ${description}`
-      : `${scene.title}, current location`
-    : description ? `Go to ${scene.title}. ${description}`
-    : `Go to ${scene.title}`;
+      description ?
+        `${tourStartPrefix}${scene.title}, current location. ${description}`
+      : `${tourStartPrefix}${scene.title}, current location`
+    : description ? `${tourStartPrefix}Go to ${scene.title}. ${description}`
+    : `${tourStartPrefix}Go to ${scene.title}`;
 
   return (
     <li
@@ -133,9 +139,16 @@ export function ExploreSceneGalleryCard({
             <span className={tourNavLocationGalleryHeroOverlayInnerClassName}>
               <span className={tourNavLocationGalleryHeroTitleRowClassName}>
                 <span
-                  className={tourNavLocationGalleryHeroTitleOverlayClassName}
+                  className={tourNavLocationGalleryHeroTitleWithPinClassName}
                 >
-                  {scene.title}
+                  <span
+                    className={tourNavLocationGalleryHeroTitleOverlayClassName}
+                  >
+                    {scene.title}
+                  </span>
+                  {isTourStart ?
+                    <ExploreTourStartPin variant='galleryHero' />
+                  : null}
                 </span>
                 {showInfo || !active ?
                   <span

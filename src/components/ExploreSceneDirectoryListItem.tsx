@@ -3,7 +3,9 @@ import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import type { Scene } from '../types/tour';
 import { Badge } from './ui/Badge';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
+import { ExploreTourStartPin } from './ExploreTourStartPin';
 import {
+  tourNavDirectoryItemTitleRowClassName,
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBadgeColumnClassName,
   tourNavDirectoryListItemSelectClassName,
@@ -18,6 +20,7 @@ import { cn } from '../lib/cn';
 interface ExploreSceneDirectoryListItemProps {
   scene: Scene;
   active: boolean;
+  isTourStart?: boolean;
   disabled?: boolean;
   onSelect: () => void;
   onShowDescription?: () => void;
@@ -27,6 +30,7 @@ interface ExploreSceneDirectoryListItemProps {
 export function ExploreSceneDirectoryListItem({
   scene,
   active,
+  isTourStart = false,
   disabled = false,
   onSelect,
   onShowDescription,
@@ -34,12 +38,14 @@ export function ExploreSceneDirectoryListItem({
 }: ExploreSceneDirectoryListItemProps) {
   const description = scene.description?.trim();
   const showInfo = Boolean(description && onShowDescription);
+  const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const ariaLabel =
     active ?
-      description ? `${scene.title}, current location. ${description}`
-      : `${scene.title}, current location`
-    : description ? `Go to ${scene.title}. ${description}`
-    : `Go to ${scene.title}`;
+      description ?
+        `${tourStartPrefix}${scene.title}, current location. ${description}`
+      : `${tourStartPrefix}${scene.title}, current location`
+    : description ? `${tourStartPrefix}Go to ${scene.title}. ${description}`
+    : `${tourStartPrefix}Go to ${scene.title}`;
 
   return (
     <li role='presentation' {...{ [FLIP_LIST_KEY_ATTR]: scene.id }}>
@@ -63,7 +69,12 @@ export function ExploreSceneDirectoryListItem({
             {locationIcon}
           </span>
           <span className={tourNavItemTextClassName}>
-            <span className={tourNavItemLabelClassName}>{scene.title}</span>
+            <span className={tourNavDirectoryItemTitleRowClassName}>
+              <span className={tourNavItemLabelClassName}>{scene.title}</span>
+              {isTourStart ?
+                <ExploreTourStartPin variant='list' />
+              : null}
+            </span>
             {description ?
               <span className={tourNavItemDescriptionClassName}>
                 {description}

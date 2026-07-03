@@ -45,6 +45,12 @@ import {
   type DevHotspotTab,
 } from '../constants/devHotspot';
 import {
+  NAV_HOTSPOT_VARIANT_DEFAULT,
+  NAV_HOTSPOT_VARIANT_OPTIONS,
+  resolveNavHotspotVariant,
+  serializeNavHotspotVariant,
+} from '../constants/navHotspotVariant';
+import {
   DEV_CRUD_MODE_TABS,
   DEV_PANEL_TABS,
   DEV_CATALOG_VISIBILITY_OPTIONS,
@@ -57,6 +63,7 @@ import type {
   FaqEntry,
   Hotspot,
   NamingOpportunityStatus,
+  NavHotspotVariant,
   PopupDisplay,
   Scene,
   Tour,
@@ -229,7 +236,13 @@ function isNamingInfoHotspot(hotspot: Hotspot): boolean {
 }
 
 function hotspotKindLabel(hotspot: Hotspot): string {
-  if (hotspot.type === 'nav') return 'Nav';
+  if (hotspot.type === 'nav') {
+    const variant = resolveNavHotspotVariant(hotspot);
+    const variantLabel =
+      NAV_HOTSPOT_VARIANT_OPTIONS.find((option) => option.value === variant)
+        ?.label ?? 'Discover';
+    return `Nav · ${variantLabel}`;
+  }
   if (isNamingInfoHotspot(hotspot)) return 'NO';
   if (hotspot.type === 'info') return 'Info';
   return hotspot.type;
@@ -330,6 +343,9 @@ export function DevViewPanel({
   const [editNavLabel, setEditNavLabel] = useState('');
   const [editNavTarget, setEditNavTarget] = useState('');
   const [editNavInstant, setEditNavInstant] = useState(false);
+  const [editNavVariant, setEditNavVariant] = useState<NavHotspotVariant>(
+    NAV_HOTSPOT_VARIANT_DEFAULT,
+  );
   const [editNoTitle, setEditNoTitle] = useState('');
   const [editNoPrice, setEditNoPrice] = useState('');
   const [editNoStatus, setEditNoStatus] = useState<
@@ -344,6 +360,7 @@ export function DevViewPanel({
     useState<PopupDisplay>('anchored');
   const [editInfoVideoUrl, setEditInfoVideoUrl] = useState('');
   const [editInfoImage, setEditInfoImage] = useState('');
+  const [editInfoVisitScene, setEditInfoVisitScene] = useState('');
   const [editingSceneId, setEditingSceneId] = useState<string | null>(null);
   const [editSceneTitle, setEditSceneTitle] = useState('');
   const [editSceneDescription, setEditSceneDescription] = useState('');
@@ -554,6 +571,9 @@ export function DevViewPanel({
     null,
   );
   const [navInstant, setNavInstant] = useState(false);
+  const [navVariant, setNavVariant] = useState<NavHotspotVariant>(
+    NAV_HOTSPOT_VARIANT_DEFAULT,
+  );
 
   const [noName, setNoName] = useState(() =>
     readSessionValue(DEV_NO_NAME_STORAGE_KEY),
@@ -568,6 +588,7 @@ export function DevViewPanel({
   const [infoDisplay, setInfoDisplay] = useState<PopupDisplay>('anchored');
   const [infoVideoUrl, setInfoVideoUrl] = useState('');
   const [infoImage, setInfoImage] = useState('');
+  const [infoVisitScene, setInfoVisitScene] = useState('');
   const [infoStatus, setInfoStatus] = useState<ActionStatus>('idle');
   const [infoError, setInfoError] = useState<string | null>(null);
   const [panelTab, setPanelTab] = useState<DevPanelTab>('scene');
@@ -973,6 +994,7 @@ export function DevViewPanel({
     setNavTargetSceneStatus('idle');
     setNavTargetSceneError(null);
     setNavInstant(false);
+    setNavVariant(NAV_HOTSPOT_VARIANT_DEFAULT);
     setNoName('');
     setNoPrice('');
     setNoStatus('');
@@ -1047,6 +1069,7 @@ export function DevViewPanel({
         position,
         targetSceneId: navTargetSceneId,
         instant: navInstant || undefined,
+        navVariant: serializeNavHotspotVariant(navVariant),
       });
       await onTourMutated?.();
       setNavStatus('done');
@@ -1054,6 +1077,7 @@ export function DevViewPanel({
       setNavTargetSceneId('');
       setNavTargetTouched(false);
       setNavInstant(false);
+      setNavVariant(NAV_HOTSPOT_VARIANT_DEFAULT);
     } catch (error) {
       setNavStatus('error');
       setNavError(
@@ -1066,6 +1090,7 @@ export function DevViewPanel({
     buildHotspotPosition,
     navTargetSceneId,
     navInstant,
+    navVariant,
     scene.id,
     scene.tourId,
     trimmedNavName,
@@ -1146,6 +1171,7 @@ export function DevViewPanel({
         display: infoDisplay,
         videoUrl: infoVideoUrl.trim() || undefined,
         image: infoImage.trim() || undefined,
+        visitScene: infoVisitScene.trim() || undefined,
       });
       await onTourMutated?.();
       setInfoStatus('done');
@@ -1153,6 +1179,7 @@ export function DevViewPanel({
       setInfoBody('');
       setInfoVideoUrl('');
       setInfoImage('');
+      setInfoVisitScene('');
     } catch (error) {
       setInfoStatus('error');
       setInfoError(
@@ -1753,6 +1780,7 @@ export function DevViewPanel({
       setEditNavLabel(hotspot.label ?? '');
       setEditNavTarget(hotspot.targetScene ?? '');
       setEditNavInstant(Boolean(hotspot.instant));
+      setEditNavVariant(resolveNavHotspotVariant(hotspot));
       return;
     }
     if (isNamingInfoHotspot(hotspot)) {
@@ -1769,6 +1797,7 @@ export function DevViewPanel({
     setEditInfoDisplay(hotspot.popup?.display ?? 'anchored');
     setEditInfoVideoUrl(hotspot.popup?.videoUrl ?? '');
     setEditInfoImage(hotspot.popup?.image ?? '');
+    setEditInfoVisitScene(hotspot.popup?.visitScene ?? '');
   }, []);
 
   const openNavTargetScene = useCallback(
@@ -1806,6 +1835,7 @@ export function DevViewPanel({
           targetSceneId: editNavTarget.trim() || undefined,
           syncTargetViewFromScene: true,
           instant: editNavInstant,
+          navVariant: editNavVariant,
         });
       } else if (isNamingInfoHotspot(hotspot)) {
         await devUpdateNamingHotspot({
@@ -1829,6 +1859,7 @@ export function DevViewPanel({
           display: editInfoDisplay,
           videoUrl: editInfoVideoUrl,
           image: editInfoImage,
+          visitScene: editInfoVisitScene,
         });
       }
       setEditingHotspotId(null);
@@ -1849,7 +1880,9 @@ export function DevViewPanel({
     editInfoImage,
     editInfoTitle,
     editInfoVideoUrl,
+    editInfoVisitScene,
     editNavInstant,
+    editNavVariant,
     editNavLabel,
     editNavTarget,
     editNoBody,
@@ -2723,17 +2756,19 @@ export function DevViewPanel({
                                   <button
                                     type='button'
                                     className={devViewPanelBtnVariants({
-                                      tone: isMoving ? 'primary' : 'secondary',
+                                      tone: 'secondary',
                                     })}
                                     onClick={() => {
+                                      if (isMoving) return;
                                       setEditingHotspotId(null);
-                                      setMovingHotspotId(
-                                        isMoving ? null : hotspot.id,
-                                      );
+                                      setMovingHotspotId(hotspot.id);
                                     }}
-                                    disabled={hotspotManageStatus === 'working'}
+                                    disabled={
+                                      hotspotManageStatus === 'working' ||
+                                      isMoving
+                                    }
                                   >
-                                    {isMoving ? 'Cancel move' : 'Move'}
+                                    Move
                                   </button>
                                   <button
                                     type='button'
@@ -2762,6 +2797,62 @@ export function DevViewPanel({
                                   </button>
                                 </div>
 
+                                {isMoving ?
+                                  <DevPanelFormGroup inline manageEdit>
+                                    <label
+                                      className={devViewPanelFieldClassName}
+                                    >
+                                      <span
+                                        className={
+                                          devViewPanelFieldLabelClassName
+                                        }
+                                      >
+                                        Marker position
+                                      </span>
+                                      <input
+                                        className={devViewPanelInputClassName}
+                                        type='text'
+                                        readOnly
+                                        tabIndex={-1}
+                                        value={clickCoords ? markerCoords : ''}
+                                        placeholder='Click the panorama…'
+                                      />
+                                    </label>
+                                    <div
+                                      className={devViewPanelActionsClassName}
+                                    >
+                                      <button
+                                        type='button'
+                                        className={devViewPanelBtnVariants({
+                                          tone: 'secondary',
+                                        })}
+                                        onClick={() => setMovingHotspotId(null)}
+                                        disabled={
+                                          hotspotManageStatus === 'working'
+                                        }
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        type='button'
+                                        className={devViewPanelBtnVariants({
+                                          tone: 'primary',
+                                        })}
+                                        onClick={() =>
+                                          void moveHotspotToClick()
+                                        }
+                                        disabled={
+                                          !canMoveHotspot ||
+                                          hotspotManageStatus === 'working'
+                                        }
+                                      >
+                                        {hotspotManageStatus === 'working' ?
+                                          'Moving…'
+                                        : 'Apply click position'}
+                                      </button>
+                                    </div>
+                                  </DevPanelFormGroup>
+                                : null}
                                 {isEditing ?
                                   hotspot.type === 'nav' ?
                                     <DevPanelFormGroup inline manageEdit>
@@ -2816,6 +2907,60 @@ export function DevViewPanel({
                                           ))}
                                         </select>
                                       </label>
+                                      <label
+                                        className={devViewPanelFieldClassName}
+                                      >
+                                        <span
+                                          className={
+                                            devViewPanelFieldLabelClassName
+                                          }
+                                        >
+                                          Nav role
+                                        </span>
+                                        <select
+                                          className={
+                                            devViewPanelSelectClassName
+                                          }
+                                          value={editNavVariant}
+                                          onChange={(e) => {
+                                            const nextVariant = e.target
+                                              .value as NavHotspotVariant;
+                                            setEditNavVariant(nextVariant);
+                                            if (
+                                              nextVariant === 'back' ||
+                                              nextVariant === 'hub'
+                                            ) {
+                                              setEditNavInstant(true);
+                                            }
+                                            if (nextVariant === 'hub') {
+                                              setEditNavTarget(tour.firstScene);
+                                            }
+                                          }}
+                                        >
+                                          {NAV_HOTSPOT_VARIANT_OPTIONS.map(
+                                            (option) => (
+                                              <option
+                                                key={option.value}
+                                                value={option.value}
+                                              >
+                                                {option.label}
+                                              </option>
+                                            ),
+                                          )}
+                                        </select>
+                                      </label>
+                                      <p
+                                        className={
+                                          devViewPanelSectionHintClassName
+                                        }
+                                      >
+                                        {
+                                          NAV_HOTSPOT_VARIANT_OPTIONS.find(
+                                            (option) =>
+                                              option.value === editNavVariant,
+                                          )?.hint
+                                        }
+                                      </p>
                                       <p
                                         className={
                                           devViewPanelSectionHintClassName
@@ -3171,6 +3316,38 @@ export function DevViewPanel({
                                           placeholder='/assets/…/photo.webp'
                                         />
                                       </label>
+                                      <label
+                                        className={devViewPanelFieldClassName}
+                                      >
+                                        <span
+                                          className={
+                                            devViewPanelFieldLabelClassName
+                                          }
+                                        >
+                                          Visit scene (optional)
+                                        </span>
+                                        <select
+                                          className={
+                                            devViewPanelSelectClassName
+                                          }
+                                          value={editInfoVisitScene}
+                                          onChange={(e) =>
+                                            setEditInfoVisitScene(
+                                              e.target.value,
+                                            )
+                                          }
+                                        >
+                                          <option value=''>None</option>
+                                          {sortedSceneOptions.map((entry) => (
+                                            <option
+                                              key={entry.id}
+                                              value={entry.id}
+                                            >
+                                              {entry.title} ({entry.id})
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </label>
                                       <div
                                         className={devViewPanelActionsClassName}
                                       >
@@ -3216,30 +3393,6 @@ export function DevViewPanel({
                           No hotspots on this scene yet.
                         </p>
                       }
-                      {movingHotspotId ?
-                        <>
-                          <p className={devViewPanelCoordsClassName}>
-                            click {markerCoords}
-                          </p>
-                          <div className={devViewPanelActionsClassName}>
-                            <button
-                              type='button'
-                              className={devViewPanelBtnVariants({
-                                tone: 'primary',
-                              })}
-                              onClick={() => void moveHotspotToClick()}
-                              disabled={
-                                !canMoveHotspot ||
-                                hotspotManageStatus === 'working'
-                              }
-                            >
-                              {hotspotManageStatus === 'working' ?
-                                'Moving…'
-                              : 'Apply click position'}
-                            </button>
-                          </div>
-                        </>
-                      : null}
                       {hotspotManageError ?
                         <p className={devViewPanelSectionHintClassName}>
                           {hotspotManageError}
@@ -3506,6 +3659,46 @@ export function DevViewPanel({
                                 create and save
                               </p>
                             : null}
+
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Nav role
+                              </span>
+                              <select
+                                className={devViewPanelSelectClassName}
+                                value={navVariant}
+                                onChange={(e) => {
+                                  const nextVariant = e.target
+                                    .value as NavHotspotVariant;
+                                  setNavVariant(nextVariant);
+                                  if (
+                                    nextVariant === 'back' ||
+                                    nextVariant === 'hub'
+                                  ) {
+                                    setNavInstant(true);
+                                  }
+                                  if (nextVariant === 'hub') {
+                                    setNavTargetSceneId(tour.firstScene);
+                                  }
+                                }}
+                              >
+                                {NAV_HOTSPOT_VARIANT_OPTIONS.map((option) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            <p className={devViewPanelSectionHintClassName}>
+                              {
+                                NAV_HOTSPOT_VARIANT_OPTIONS.find(
+                                  (option) => option.value === navVariant,
+                                )?.hint
+                              }
+                            </p>
 
                             <label className={devViewPanelToggleLabelClassName}>
                               <input
@@ -3834,6 +4027,26 @@ export function DevViewPanel({
                                 spellCheck={false}
                                 autoComplete='off'
                               />
+                            </label>
+
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Visit scene (optional)
+                              </span>
+                              <select
+                                className={devViewPanelSelectClassName}
+                                value={infoVisitScene}
+                                onChange={(e) =>
+                                  setInfoVisitScene(e.target.value)
+                                }
+                              >
+                                <option value=''>None</option>
+                                {sortedSceneOptions.map((entry) => (
+                                  <option key={entry.id} value={entry.id}>
+                                    {entry.title} ({entry.id})
+                                  </option>
+                                ))}
+                              </select>
                             </label>
 
                             {infoHotspotIdPreview ?

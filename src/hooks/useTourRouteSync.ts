@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type MutableRefObject,
+  type RefObject,
+} from 'react';
 import {
   useLocation,
   useNavigate,
@@ -6,7 +13,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import type { Tour } from '../types/tour';
-import type { PanoramaViewerHandle } from '../viewer/PanoramaViewer';
+import type { TourViewerHandle } from '../viewer/viewerHandle';
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
@@ -26,7 +33,9 @@ interface UseTourRouteSyncOptions {
   tour: Tour;
   currentSceneId: string;
   isTransitioning: boolean;
-  viewerRef: RefObject<PanoramaViewerHandle | null>;
+  /** Synchronous ref — immune to React batching delays unlike `isTransitioning` state. */
+  transitioningRef?: MutableRefObject<boolean>;
+  viewerRef: RefObject<TourViewerHandle | null>;
   syncSceneFromRoute: (sceneId: string) => void;
   pendingNamingSelectionRef?: RefObject<{
     sceneId: string;
@@ -38,6 +47,7 @@ export function useTourRouteSync({
   tour,
   currentSceneId,
   isTransitioning,
+  transitioningRef,
   viewerRef,
   syncSceneFromRoute,
   pendingNamingSelectionRef,
@@ -81,6 +91,7 @@ export function useTourRouteSync({
     if (
       routeSceneId === currentSceneId ||
       isTransitioning ||
+      transitioningRef?.current ||
       syncingToUrlRef.current ||
       syncingFromUrlRef.current
     ) {

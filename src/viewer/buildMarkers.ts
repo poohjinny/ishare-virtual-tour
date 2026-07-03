@@ -1,4 +1,9 @@
 import { materialSymbolHtml } from '../components/glassPanelCtaIcons';
+import {
+  buildNavHotspotAriaLabel,
+  navHotspotVariantModifierClass,
+  resolveNavHotspotVariant,
+} from '../constants/navHotspotVariant';
 import { isGeneralInfoHotspot } from '../data/generalInfoHotspot';
 import type { Hotspot } from '../types/tour';
 import {
@@ -14,11 +19,44 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function buildNavHtml(label: string): string {
+const NAV_HOTSPOT_ICON_SIZE_PX = 16;
+
+function buildNavLeadingHtml(hotspot: Hotspot): string {
+  const variant = resolveNavHotspotVariant(hotspot);
+
+  if (variant === 'back') {
+    return `<span class="hotspot-nav__icon" aria-hidden="true">${materialSymbolHtml(
+      'arrow_back',
+      {
+        className: 'hotspot-nav__icon-symbol',
+        sizePx: NAV_HOTSPOT_ICON_SIZE_PX,
+      },
+    )}</span>`;
+  }
+
+  if (variant === 'hub') {
+    return `<span class="hotspot-nav__icon" aria-hidden="true">${materialSymbolHtml(
+      'home',
+      {
+        className: 'hotspot-nav__icon-symbol',
+        sizePx: NAV_HOTSPOT_ICON_SIZE_PX,
+      },
+    )}</span>`;
+  }
+
+  return '<span class="hotspot-nav__dot" aria-hidden="true"></span>';
+}
+
+function buildNavHtml(hotspot: Hotspot): string {
+  const label = hotspot.label?.trim() || 'Go';
+  const variant = resolveNavHotspotVariant(hotspot);
+  const variantClass = navHotspotVariantModifierClass(variant);
+  const ariaLabel = buildNavHotspotAriaLabel(label, variant);
+
   return `
-    <button type="button" class="hotspot-nav" data-hotspot-type="nav" aria-expanded="false">
+    <button type="button" class="hotspot-nav${variantClass ? ` ${variantClass}` : ''}" data-hotspot-type="nav" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}">
       <span class="hotspot-nav__pill">
-        <span class="hotspot-nav__dot" aria-hidden="true"></span>
+        ${buildNavLeadingHtml(hotspot)}
         <span class="hotspot-nav__label">${escapeHtml(label)}</span>
       </span>
     </button>
@@ -79,7 +117,7 @@ function buildInfoHtml(hotspot: Hotspot): string {
 
 export function hotspotToMarkerConfig(hotspot: Hotspot) {
   const html =
-    hotspot.type === 'nav' ? buildNavHtml(hotspot.label ?? 'Go')
+    hotspot.type === 'nav' ? buildNavHtml(hotspot)
     : isGeneralInfoHotspot(hotspot) ? buildGeneralInfoHtml(hotspot)
     : buildInfoHtml(hotspot);
 

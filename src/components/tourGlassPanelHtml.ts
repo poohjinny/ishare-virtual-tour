@@ -697,10 +697,33 @@ export function buildAnchoredPopupHtml(
         )
       : undefined,
   });
-  const footerHtml =
+
+  const visitSceneId = popup.visitScene;
+  const visitSceneTitle =
+    visitSceneId && options?.tour ?
+      (options.tour.scenes[visitSceneId]?.title ?? visitSceneId)
+    : null;
+  const visitCtaLabel = visitSceneTitle ? `Visit ${visitSceneTitle}` : null;
+  const visitFooterHtml =
+    visitSceneId && visitCtaLabel ?
+      `<footer class="${GLASS_PANEL.footer}">
+    <div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
+      <button
+        type="button"
+        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-trailing-icon"
+        data-visit-scene="${escapeHtml(visitSceneId)}"
+        aria-label="${escapeHtml(visitCtaLabel)}"
+      >${buildGlassPanelCtaTextHtml(visitCtaLabel)}${glassPanelCtaArrowIconHtml()}</button>
+    </div>
+  </footer>`
+    : '';
+
+  const ctaFooterHtml =
     ctas.length > 0 ?
       `<footer class="${GLASS_PANEL.footer}">${buildPopupFooterInnerHtml(ctas)}</footer>`
     : buildPopupFooterHtml(popup, options?.tour);
+
+  const footerHtml = ctaFooterHtml + visitFooterHtml;
 
   return buildTourGlassPanelHtml({
     title: popup.title,

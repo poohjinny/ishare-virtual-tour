@@ -187,6 +187,7 @@ function compareScenesByNamingCount(
 export function sortTourScenes(
   scenes: Scene[],
   sort: ExploreDirectorySort,
+  firstSceneId?: string,
 ): Scene[] {
   const sorted = [...scenes];
 
@@ -208,7 +209,13 @@ export function sortTourScenes(
       break;
   }
 
-  return sorted;
+  if (!firstSceneId) return sorted;
+
+  const firstIndex = sorted.findIndex((scene) => scene.id === firstSceneId);
+  if (firstIndex <= 0) return sorted;
+
+  const [firstScene] = sorted.splice(firstIndex, 1);
+  return [firstScene, ...sorted];
 }
 
 export function sortTourNamingDirectory(

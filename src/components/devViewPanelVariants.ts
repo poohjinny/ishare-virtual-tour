@@ -328,7 +328,7 @@ export const devViewPanelBrandFaviconWrapClassName =
 
 export const devViewPanelBtnVariants = cva(
   cn(
-    'cursor-pointer border px-2.5 py-1.5 font-[inherit] text-2xs text-[#f0fdf4] disabled:cursor-not-allowed disabled:opacity-40',
+    'cursor-pointer whitespace-nowrap border px-2.5 py-1.5 font-[inherit] text-2xs leading-[1.35] text-[#f0fdf4] disabled:cursor-not-allowed disabled:opacity-40',
     devViewPanelControlRadiusClassName,
   ),
   {

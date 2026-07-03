@@ -771,6 +771,24 @@
     transform: translateY(-50%) translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
   }
 
+  /* Visit-scene CTA — same hover as nav-preview CTA */
+  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] {
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] .tour-glass-panel__cta-icon {
+    font-size: 20px;
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:hover .tour-glass-panel__cta-icon,
+  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:focus-visible .tour-glass-panel__cta-icon {
+    transform: translateY(-50%) translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
+  }
+
   /* NO panel primary CTA icon — Material Symbols fill on hover */
   .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,
   .tour-glass-panel--modal[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon {
@@ -2293,6 +2311,15 @@
 
     .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):hover .tour-glass-panel__cta-icon,
     .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):focus-visible .tour-glass-panel__cta-icon {
+      transform: translateY(-50%);
+    }
+
+    .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] .tour-glass-panel__cta-icon {
+      transition: none;
+    }
+
+    .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:hover .tour-glass-panel__cta-icon,
+    .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:focus-visible .tour-glass-panel__cta-icon {
       transform: translateY(-50%);
     }
 

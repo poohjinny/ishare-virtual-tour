@@ -242,6 +242,15 @@ until Admin app exists; then port endpoints and retire duplicate UI.
   ```
   tour/scene; client-side sync for share previews (see `useTourOpenGraph`)
   ```
+- [x] **Share panel link preview** — in-panel card (image, host, title,
+  ```
+  description) aligned with OG meta before copy / Share via; scene thumbnail or
+  client logo
+  ```
+- [x] **Share via Email** — Gmail web compose (reliable in browsers where
+  ```
+  `mailto:` handlers are blocked)
+  ```
 
 ### AI guide (Phase 1 — mock)
 
@@ -544,6 +553,7 @@ data — no duplicate content per format.
 
 | Date       | Note                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------ |
+| 2026-07-03 | Share panel link preview + Gmail web compose for Share via Email                           |
 | 2026-07-03 | Share link OG meta — per tour/scene Open Graph + Twitter Card tags                         |
 | 2026-07-03 | AI guide section (Phase 1 mock) — move voice-input backlog out of Sprint C                 |
 | 2026-07-03 | Drop visit-progress; thumbnail auto-bake note; trim naming backlog (priceLabel, name sync) |

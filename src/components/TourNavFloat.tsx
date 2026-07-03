@@ -564,8 +564,8 @@ export function TourNavFloat({
   }, [namingPriceBounds, namingPriceMax, namingPriceMin]);
 
   const exploreSortedScenes = useMemo(
-    () => sortTourScenes(scenes, exploreLocationsSort),
-    [exploreLocationsSort, scenes],
+    () => sortTourScenes(scenes, exploreLocationsSort, firstSceneId),
+    [exploreLocationsSort, firstSceneId, scenes],
   );
 
   const exploreSortedNamingItems = useMemo(
@@ -574,8 +574,9 @@ export function TourNavFloat({
   );
 
   const exploreSortedFilteredScenes = useMemo(
-    () => sortTourScenes(exploreFilteredScenes, exploreLocationsSort),
-    [exploreFilteredScenes, exploreLocationsSort],
+    () =>
+      sortTourScenes(exploreFilteredScenes, exploreLocationsSort, firstSceneId),
+    [exploreFilteredScenes, exploreLocationsSort, firstSceneId],
   );
 
   const exploreSortedFilteredNamingItems = useMemo(
@@ -987,6 +988,7 @@ export function TourNavFloat({
                   tourId={tourId}
                   scene={scene}
                   active={scene.id === currentSceneId}
+                  isTourStart={scene.id === firstSceneId}
                   disabled={disabled}
                   onSelect={() => handleSelect(scene.id)}
                   onShowDescription={
@@ -1010,6 +1012,7 @@ export function TourNavFloat({
                 key={scene.id}
                 scene={scene}
                 active={scene.id === currentSceneId}
+                isTourStart={scene.id === firstSceneId}
                 disabled={disabled}
                 onSelect={() => handleSelect(scene.id)}
                 onShowDescription={

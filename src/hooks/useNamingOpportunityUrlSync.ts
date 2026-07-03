@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Tour } from '../types/tour';
-import type { PanoramaViewerHandle } from '../viewer/PanoramaViewer';
+import type { TourViewerHandle } from '../viewer/viewerHandle';
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
@@ -14,7 +14,7 @@ interface UseNamingOpportunityUrlSyncOptions {
   currentSceneId: string;
   isTransitioning: boolean;
   splashDone: boolean;
-  viewerRef: RefObject<PanoramaViewerHandle | null>;
+  viewerRef: RefObject<TourViewerHandle | null>;
   pendingNamingSelectionRef: RefObject<{
     sceneId: string;
     hotspotId: string;

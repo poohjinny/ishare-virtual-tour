@@ -447,7 +447,7 @@ export const clientIntroGalleryCardClassName = cn(
 
 export const tourNavLocationGalleryCardClassName = cva(
   cn(
-    'group/card flex w-full flex-col overflow-hidden rounded-lg p-0 text-left font-[inherit]',
+    'group/card flex w-full flex-col rounded-lg p-0 text-left font-[inherit]',
     'transition-[transform,color] duration-150',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
     'disabled:cursor-not-allowed disabled:opacity-50',
@@ -475,7 +475,7 @@ export const tourNavLocationGalleryCardClassName = cva(
 );
 
 export const tourNavLocationGalleryCardHeroClassName = cn(
-  'tour-nav-gallery-card-hero relative block aspect-[16/10] overflow-hidden',
+  'tour-nav-gallery-card-hero relative block aspect-[16/10] overflow-hidden rounded-lg',
 );
 
 export const tourNavLocationGalleryCardHeroSkeletonClassName =
@@ -527,6 +527,16 @@ export const tourNavLocationGalleryFeaturedBadgeClassName = cn(
 export const tourNavLocationGalleryCurrentBadgeClassName = cn(
   tourNavLocationGalleryHeroBadgeClassName,
   'gap-0.5 bg-primary/70 text-white',
+);
+
+/** Pin next to title on gallery hero — no chip; blends with dark scrim. */
+export const tourNavLocationGalleryTourStartPinClassName = cn(
+  'inline-flex size-[22px] shrink-0 items-center justify-center text-white/75',
+  'transition-colors duration-150 hover:text-white',
+);
+
+export const tourNavDirectoryTourStartPinClassName = cn(
+  'inline-flex size-[22px] shrink-0 items-center justify-center text-muted',
 );
 
 export const tourNavLocationGalleryStatusBadgeVariants = cva(
@@ -612,7 +622,12 @@ export const tourNavLocationGalleryHeroCtaOverlayClassName = cn(
 );
 
 export const tourNavLocationGalleryHeroTitleOverlayClassName = cn(
-  'min-w-0 flex-1 truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
+  'min-w-0 truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
+);
+
+/** Wraps title + optional tour-start pin so the pin sits directly beside the label. */
+export const tourNavLocationGalleryHeroTitleWithPinClassName = cn(
+  'flex min-w-0 flex-1 items-end gap-1',
 );
 
 export const tourNavLocationGalleryHeroNamingTitleRowClassName = cn(
@@ -744,7 +759,7 @@ export const tourNavItemLocationIconClassName = cn(
 );
 
 export const tourNavItemLabelClassName = cn(
-  'tour-nav-item-label min-w-0 flex-1 font-medium transition-colors duration-150',
+  'tour-nav-item-label min-w-0 font-medium transition-colors duration-150',
 );
 
 export const tourNavItemNamingLabelClassName = cn(
@@ -767,6 +782,11 @@ export const tourNavItemNamingLocationClassName = cn(
 
 export const tourNavItemTextClassName = cn(
   'flex min-w-0 flex-1 flex-col gap-1.5',
+);
+
+/** Wraps directory row label + optional pin so the pin sits beside the title. */
+export const tourNavDirectoryItemTitleRowClassName = cn(
+  'flex min-w-0 items-end gap-1.5',
 );
 
 export const tourNavItemMetaClassName = cn(
@@ -868,7 +888,7 @@ export const tourNavSceneInfoButtonClassName = cva(
         /** Hero overlay — outlined chip matching visit CTA outer size. */
         galleryHero: cn(
           tourNavLocationGalleryHeroActionChipClassName,
-          'border-[1.5px] border-solid border-white/65 bg-white/8 text-white/85 shadow-none',
+          'border-2 border-solid border-white/65 bg-white/8 text-white/85 shadow-none',
           'hover:border-white/75 hover:bg-white/12 hover:text-white/95',
         ),
         list: cn(

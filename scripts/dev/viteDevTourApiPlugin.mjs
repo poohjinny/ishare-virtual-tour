@@ -106,6 +106,8 @@ function validateHotspotPayload(body) {
     position,
     targetSceneId: body.targetSceneId,
     instant: typeof body.instant === 'boolean' ? body.instant : undefined,
+    navVariant:
+      typeof body.navVariant === 'string' ? body.navVariant : undefined,
     previewImage:
       typeof body.previewImage === 'string' ? body.previewImage : undefined,
   };
@@ -264,6 +266,7 @@ function validateNavHotspotUpdatePayload(body) {
     targetView,
     syncTargetViewFromScene,
     instant,
+    navVariant,
     previewImage,
     clearPreviewImage,
   } = body ?? {};
@@ -276,11 +279,12 @@ function validateNavHotspotUpdatePayload(body) {
     targetView === undefined &&
     syncTargetViewFromScene !== true &&
     instant === undefined &&
+    navVariant === undefined &&
     previewImage === undefined &&
     clearPreviewImage !== true
   ) {
     throw new Error(
-      'At least one of label, targetSceneId, targetView, instant, previewImage, clearPreviewImage, or syncTargetViewFromScene is required',
+      'At least one of label, targetSceneId, targetView, instant, navVariant, previewImage, clearPreviewImage, or syncTargetViewFromScene is required',
     );
   }
   return {
@@ -292,6 +296,7 @@ function validateNavHotspotUpdatePayload(body) {
     targetView: validateOptionalViewPayload(targetView, 'targetView'),
     syncTargetViewFromScene: syncTargetViewFromScene === true,
     instant: typeof instant === 'boolean' ? instant : undefined,
+    navVariant: typeof navVariant === 'string' ? navVariant : undefined,
     previewImage: typeof previewImage === 'string' ? previewImage : undefined,
     clearPreviewImage: clearPreviewImage === true,
   };
@@ -596,6 +601,7 @@ function validateInfoHotspotUpdatePayload(body) {
     display,
     videoUrl,
     image,
+    visitScene,
   } = body ?? {};
   if (!tourId || !sceneId || !hotspotId?.trim()) {
     throw new Error('tourId, sceneId, and hotspotId are required');
@@ -605,7 +611,8 @@ function validateInfoHotspotUpdatePayload(body) {
     !copy?.trim() &&
     !display?.trim() &&
     videoUrl === undefined &&
-    image === undefined
+    image === undefined &&
+    visitScene === undefined
   ) {
     throw new Error(
       'At least one of title, body, display, videoUrl, or image is required',
@@ -623,6 +630,7 @@ function validateInfoHotspotUpdatePayload(body) {
     display,
     videoUrl,
     image,
+    visitScene,
   };
 }
 
@@ -656,6 +664,7 @@ function validateCreateInfoHotspotPayload(body) {
   const { tourId, sceneId, name, position, title, display, videoUrl, image } =
     validateHotspotPayload(body);
   const copy = body?.body;
+  const visitScene = body?.visitScene;
   if (display?.trim() && !['modal', 'anchored'].includes(display.trim())) {
     throw new Error('display must be modal or anchored');
   }
@@ -669,6 +678,7 @@ function validateCreateInfoHotspotPayload(body) {
     display,
     videoUrl,
     image,
+    visitScene,
   };
 }
 
@@ -1170,6 +1180,7 @@ export function viteDevTourApiPlugin() {
               targetView,
               syncTargetViewFromScene,
               instant,
+              navVariant,
               previewImage,
               clearPreviewImage,
             } = validateNavHotspotUpdatePayload(body);
@@ -1183,6 +1194,7 @@ export function viteDevTourApiPlugin() {
               targetView,
               syncTargetViewFromScene,
               instant,
+              navVariant,
               previewImage,
               clearPreviewImage,
             });
@@ -1240,6 +1252,7 @@ export function viteDevTourApiPlugin() {
               display,
               videoUrl,
               image,
+              visitScene,
             } = validateInfoHotspotUpdatePayload(body);
             const result = updateInfoHotspot({
               toursDir,
@@ -1251,6 +1264,7 @@ export function viteDevTourApiPlugin() {
               display,
               videoUrl,
               image,
+              visitScene,
             });
             sendJson(res, 200, {
               ok: true,
@@ -1309,6 +1323,7 @@ export function viteDevTourApiPlugin() {
               position,
               targetSceneId,
               instant,
+              navVariant,
               previewImage,
             } = validateHotspotPayload(body);
             if (!targetSceneId) {
@@ -1322,6 +1337,7 @@ export function viteDevTourApiPlugin() {
               position,
               targetSceneId,
               instant,
+              navVariant,
               previewImage,
             });
             sendJson(res, 200, {
@@ -1379,6 +1395,7 @@ export function viteDevTourApiPlugin() {
               display,
               videoUrl,
               image,
+              visitScene,
             } = validateCreateInfoHotspotPayload(body);
             const result = await createInfoHotspot({
               toursDir,
@@ -1391,6 +1408,7 @@ export function viteDevTourApiPlugin() {
               display,
               videoUrl,
               image,
+              visitScene,
             });
             sendJson(res, 200, {
               ok: true,

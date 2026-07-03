@@ -1,9 +1,33 @@
 export type HotspotType = 'nav' | 'info';
 
+/** Viewer renderer — determines which viewer component loads for the tour. */
+export type TourViewerType = 'panorama' | 'model3d';
+
+/** Nav hotspot role — controls marker chrome (dot vs back/home icon). */
+export type NavHotspotVariant = 'discover' | 'back' | 'hub';
+
 export interface ViewPosition {
   yaw: number;
   pitch: number;
   zoom?: number;
+}
+
+/** 3D world-space position for model3d scenes (GLTF / Three.js). */
+export interface WorldPosition {
+  x: number;
+  y: number;
+  z: number;
+}
+
+/**
+ * Hotspot position — spherical for panorama scenes, world-space for 3D scenes.
+ * Each viewer interprets the relevant coordinate system.
+ */
+export type HotspotPosition3D = ViewPosition | WorldPosition;
+
+/** Type guard — true when position uses 3D world coordinates. */
+export function isWorldPosition(pos: HotspotPosition3D): pos is WorldPosition {
+  return 'x' in pos && 'y' in pos && 'z' in pos;
 }
 
 export type PopupDisplay = 'modal' | 'anchored';
@@ -61,6 +85,8 @@ export interface PopupContent {
   /** Full footer CTA override (replaces status defaults) */
   ctas?: PopupCta[];
   sponsor?: PopupSponsor;
+  /** Navigate to another scene from the popup footer — depth-safe alternative to nav hotspot. */
+  visitScene?: string;
 }
 
 export interface Hotspot {
@@ -73,6 +99,8 @@ export interface Hotspot {
   popup?: PopupContent;
   /** Skip preview card and navigate immediately (e.g. back links). */
   instant?: boolean;
+  /** Nav marker + default UX — discover (dot), back, or hub (firstScene). */
+  navVariant?: NavHotspotVariant;
   /** Optional overrides for nav preview card */
   preview?: { image?: string };
 }
@@ -130,7 +158,10 @@ export interface Scene {
   id: string;
   title: string;
   description?: string;
+  /** Equirectangular panorama URL (panorama tours). */
   panorama: string;
+  /** GLTF / GLB model URL (model3d tours). */
+  model?: string;
   /** Baked rectilinear preview at defaultView — Explore location cards; from `npm run generate-thumbnails`. */
   thumbnail?: string;
   defaultView: ViewPosition;
@@ -186,6 +217,8 @@ export interface TourImmersiveBackground {
 export interface Tour {
   /** Tour id — unique per experience; used in URL paths and `loadTour()`. */
   id: string;
+  /** Viewer renderer — `'panorama'` (default) or `'model3d'` (Three.js walkthrough). */
+  viewerType?: TourViewerType;
   /** Owning client id — defaults to `id` when one tour per client. */
   clientId?: string;
   /** Platform category — e.g. Healthcare, Education. */
