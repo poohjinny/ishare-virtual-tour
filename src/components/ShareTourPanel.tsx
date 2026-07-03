@@ -12,6 +12,7 @@ import {
   TOUR_SHARE_LEAD,
   TOUR_SHARE_LINKEDIN_LABEL,
   TOUR_SHARE_NATIVE_LABEL,
+  TOUR_SHARE_PREVIEW_LABEL,
   TOUR_SHARE_URL_LABEL,
   TOUR_SHARE_WHATSAPP_LABEL,
   TOUR_SHARE_X_LABEL,
@@ -20,10 +21,12 @@ import {
 import type { ShareMessage } from '../utils/buildShareUrl';
 import {
   buildShareFacebookUrl,
+  buildShareGmailComposeUrl,
   buildShareLinkedInUrl,
-  buildShareMailtoUrl,
   buildShareWhatsAppUrl,
   buildShareXUrl,
+  openShareAppLink,
+  resolveShareLinkHost,
 } from '../utils/buildShareUrl';
 import { copyToClipboard } from '../utils/clipboard';
 import { ShareIcon } from './icons/ShareIcon';
@@ -51,6 +54,16 @@ import {
   shareTourPanelDividerLineClassName,
   shareTourPanelLeadClassName,
   shareTourPanelRootClassName,
+  shareTourPreviewBodyClassName,
+  shareTourPreviewCardClassName,
+  shareTourPreviewDescriptionClassName,
+  shareTourPreviewHostClassName,
+  shareTourPreviewImageClassName,
+  shareTourPreviewImageWrapClassName,
+  shareTourPreviewLabelClassName,
+  shareTourPreviewPlaceholderClassName,
+  shareTourPreviewSectionClassName,
+  shareTourPreviewTitleClassName,
   shareTourPanelUrlFieldClassName,
   shareTourPanelUrlInputClassName,
   shareTourPanelUrlRowClassName,
@@ -60,6 +73,7 @@ interface ShareTourPanelProps {
   contextLabel: string;
   shareUrl: string;
   message: ShareMessage;
+  previewImageUrl?: string;
 }
 
 type CopyState = 'idle' | 'copied' | 'failed';
@@ -88,6 +102,7 @@ export function ShareTourPanel({
   contextLabel,
   shareUrl,
   message,
+  previewImageUrl,
 }: ShareTourPanelProps) {
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const [channelFeedback, setChannelFeedback] = useState<{
@@ -156,7 +171,8 @@ export function ShareTourPanel({
         label: TOUR_SHARE_EMAIL_LABEL,
         iconVariant: 'email',
         icon: <EmailBrandIcon />,
-        href: buildShareMailtoUrl(shareUrl, message),
+        href: buildShareGmailComposeUrl(shareUrl, message),
+        external: true,
       },
       {
         id: 'whatsapp',
@@ -214,6 +230,12 @@ export function ShareTourPanel({
       <p className={shareTourPanelLeadClassName}>
         {TOUR_SHARE_LEAD}: <strong>{contextLabel}</strong>.
       </p>
+
+      <ShareLinkPreview
+        shareUrl={shareUrl}
+        message={message}
+        previewImageUrl={previewImageUrl}
+      />
 
       <label className={shareTourPanelUrlFieldClassName}>
         <div className={shareTourPanelUrlRowClassName}>
@@ -284,6 +306,59 @@ export function ShareTourPanel({
   );
 }
 
+function ShareLinkPreview({
+  shareUrl,
+  message,
+  previewImageUrl,
+}: {
+  shareUrl: string;
+  message: ShareMessage;
+  previewImageUrl?: string;
+}) {
+  const linkHost = useMemo(() => resolveShareLinkHost(shareUrl), [shareUrl]);
+
+  return (
+    <section
+      className={shareTourPreviewSectionClassName}
+      aria-label={TOUR_SHARE_PREVIEW_LABEL}
+    >
+      <h3 className={shareTourPreviewLabelClassName}>
+        {TOUR_SHARE_PREVIEW_LABEL}
+      </h3>
+      <div className={shareTourPreviewCardClassName}>
+        <div className={shareTourPreviewImageWrapClassName}>
+          {previewImageUrl ?
+            <img
+              className={shareTourPreviewImageClassName}
+              src={previewImageUrl}
+              alt=''
+              loading='lazy'
+              decoding='async'
+            />
+          : <div
+              className={shareTourPreviewPlaceholderClassName}
+              aria-hidden='true'
+            >
+              <MaterialSymbol
+                name='image'
+                className='leading-none opacity-70'
+                sizePx={32}
+              />
+            </div>
+          }
+        </div>
+        <div className={shareTourPreviewBodyClassName}>
+          {linkHost ?
+            <p className={shareTourPreviewHostClassName}>{linkHost}</p>
+          : null}
+          <p className={shareTourPreviewTitleClassName}>{message.title}</p>
+          <p className={shareTourPreviewDescriptionClassName}>{message.text}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ShareAppTile({
   channel,
   feedbackLabel = null,
@@ -313,11 +388,21 @@ function ShareAppTile({
   );
 
   if (channel.href) {
+    const isMailto = channel.href.startsWith('mailto:');
+
     return (
       <a
         className={shareTourAppTileClassName}
         href={channel.href}
         aria-label={ariaLabel}
+        onClick={
+          isMailto ? undefined : (
+            (event) => {
+              event.preventDefault();
+              openShareAppLink(channel.href!);
+            }
+          )
+        }
         {...(channel.external ?
           { target: '_blank', rel: 'noopener noreferrer' }
         : {})}

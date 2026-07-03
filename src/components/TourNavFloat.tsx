@@ -7,6 +7,7 @@ import {
   useFlipListReorder,
 } from '../hooks/useFlipListReorder';
 import { isTypingTarget } from '../utils/isTypingTarget';
+import { withBaseUrl } from '../utils/assetUrl';
 import {
   TOUR_DIRECTORY_PANEL_TITLE,
   TOUR_DIRECTORY_SECTION_LOCATIONS,
@@ -447,6 +448,14 @@ export function TourNavFloat({
       buildShareMessage(tourTitle, currentSceneTitle, activeNamingItem?.name),
     [activeNamingItem?.name, currentSceneTitle, tourTitle],
   );
+
+  const sharePreviewImageUrl = useMemo(() => {
+    const scene = scenes.find((entry) => entry.id === currentSceneId);
+    const thumbnail = scene?.thumbnail?.trim();
+    if (thumbnail) return withBaseUrl(thumbnail);
+    if (clientLogo?.trim()) return withBaseUrl(clientLogo);
+    return undefined;
+  }, [clientLogo, currentSceneId, scenes]);
 
   const shareContextLabel = activeNamingItem?.name ?? currentSceneTitle;
 
@@ -1600,6 +1609,7 @@ export function TourNavFloat({
                 contextLabel={shareContextLabel}
                 shareUrl={shareUrl}
                 message={shareMessage}
+                previewImageUrl={sharePreviewImageUrl}
               />
             </TourGlassPanel>
           </div>

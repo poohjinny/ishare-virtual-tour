@@ -14,6 +14,44 @@ export const shareTourPanelLeadClassName = cn(
 
 export const shareTourPanelUrlFieldClassName = cn('mt-2.5 block min-w-0');
 
+export const shareTourPreviewSectionClassName = cn(
+  'flex min-w-0 flex-col gap-2',
+);
+
+export const shareTourPreviewLabelClassName = cn(
+  'm-0 font-display text-xs font-semibold uppercase tracking-[0.04em] text-muted',
+);
+
+export const shareTourPreviewCardClassName = cn(
+  'overflow-hidden rounded-xl border border-[color:var(--ishare-border)] bg-white/72',
+);
+
+export const shareTourPreviewImageWrapClassName = cn(
+  'relative aspect-[1.91/1] w-full overflow-hidden bg-[rgba(15,23,42,0.06)]',
+);
+
+export const shareTourPreviewImageClassName = cn('size-full object-cover');
+
+export const shareTourPreviewPlaceholderClassName = cn(
+  'flex size-full items-center justify-center text-muted',
+);
+
+export const shareTourPreviewBodyClassName = cn(
+  'flex flex-col gap-1 px-3.5 py-3',
+);
+
+export const shareTourPreviewHostClassName = cn(
+  'text-[11px] font-medium uppercase tracking-[0.04em] text-muted',
+);
+
+export const shareTourPreviewTitleClassName = cn(
+  'line-clamp-2 font-display text-sm font-semibold leading-[1.35] text-foreground',
+);
+
+export const shareTourPreviewDescriptionClassName = cn(
+  'line-clamp-2 text-xs leading-[1.45] text-muted',
+);
+
 export const shareTourPanelUrlRowClassName = cn(
   'flex min-w-0 items-center gap-1.5 rounded-full border border-[color:var(--ishare-border)] bg-white/72 py-1 pr-1 pl-3.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary-light focus-within:shadow-[inset_0_0_0_3px_rgba(var(--ishare-primary-rgb),0.12)]',
 );

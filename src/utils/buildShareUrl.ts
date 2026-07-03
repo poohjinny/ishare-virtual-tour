@@ -93,9 +93,7 @@ function escapeHtmlAttribute(value: string): string {
 
 /** Ready-to-paste iframe markup for client host pages (see docs/EMBED.md). */
 export function buildEmbedIframeHtml(
-  options: Omit<BuildShareUrlOptions, 'namingHotspotId'> & {
-    title?: string;
-  },
+  options: Omit<BuildShareUrlOptions, 'namingHotspotId'> & { title?: string },
 ): string {
   const tour = loadTour(options.tourId);
   const src = buildAbsoluteEmbedUrl(options);
@@ -164,15 +162,43 @@ export function buildShareMessage(
   };
 }
 
+function encodeMailtoQueryValue(value: string): string {
+  // RFC 6068 — use %20 for spaces (URLSearchParams would emit "+").
+  return encodeURIComponent(value);
+}
+
 export function buildShareMailtoUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
+  const subject = encodeMailtoQueryValue(message.title);
+  const body = encodeMailtoQueryValue(`${message.text}\n\n${shareUrl}`);
+  return `mailto:?subject=${subject}&body=${body}`;
+}
+
+/** Gmail web compose — reliable in browsers where `mailto:` handlers are blocked. */
+export function buildShareGmailComposeUrl(
+  shareUrl: string,
+  message: ShareMessage,
+): string {
   const params = new URLSearchParams({
-    subject: message.title,
+    view: 'cm',
+    fs: '1',
+    su: message.title,
     body: `${message.text}\n\n${shareUrl}`,
   });
-  return `mailto:?${params.toString()}`;
+  return `https://mail.google.com/mail/?${params.toString()}`;
+}
+
+/** Opens https share intents in a new tab (not for `mailto:` — use native navigation). */
+export function openShareAppLink(url: string): void {
+  const link = document.createElement('a');
+  link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 
 export function buildShareWhatsAppUrl(
@@ -199,4 +225,13 @@ export function buildShareXUrl(
 export function buildShareLinkedInUrl(shareUrl: string): string {
   const params = new URLSearchParams({ url: shareUrl });
   return `https://www.linkedin.com/sharing/share-offsite/?${params.toString()}`;
+}
+
+/** Hostname shown in the share-panel link preview (e.g. `tour.ishare.ca`). */
+export function resolveShareLinkHost(shareUrl: string): string {
+  try {
+    return new URL(shareUrl).host.replace(/^www\./i, '');
+  } catch {
+    return '';
+  }
 }

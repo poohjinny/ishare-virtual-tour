@@ -33,6 +33,8 @@ export const TOUR_SHARE_URL_LABEL = 'Copy link';
 
 export const TOUR_SHARE_APPS_HEADING = 'Share via';
 
+export const TOUR_SHARE_PREVIEW_LABEL = 'Link preview';
+
 export const TOUR_SHARE_LOCATION_LABEL = 'Share this location';
 
 export const TOUR_SHARE_OPPORTUNITY_LABEL = 'Share opportunity';

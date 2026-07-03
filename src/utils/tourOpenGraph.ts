@@ -82,17 +82,27 @@ function resolveNamingOpportunityName(
   return hotspot.popup.namingOpportunity.name ?? hotspot.popup.title ?? null;
 }
 
-function resolveSceneShareImageUrl(
+function resolveSceneShareImagePath(
   tour: Tour,
   sceneId: string,
   logoPath?: string | null,
 ): string | undefined {
   const thumbnail = tour.scenes[sceneId]?.thumbnail?.trim();
-  if (thumbnail) return toAbsoluteTourAssetUrl(thumbnail);
+  if (thumbnail) return thumbnail;
 
-  if (logoPath?.trim()) return toAbsoluteTourAssetUrl(logoPath);
+  if (logoPath?.trim()) return logoPath;
 
   return undefined;
+}
+
+/** Relative asset URL for in-app share preview thumbnails. */
+export function resolveSceneShareImageUrl(
+  tour: Tour,
+  sceneId: string,
+  logoPath?: string | null,
+): string | undefined {
+  const path = resolveSceneShareImagePath(tour, sceneId, logoPath);
+  return path ? withBaseUrl(path) : undefined;
 }
 
 /** Share-preview metadata aligned with {@link buildShareMessage}. */
@@ -116,11 +126,12 @@ export function resolveTourSceneOpenGraph({
     namingHotspotId,
   );
   const message = buildShareMessage(tourTitle, sceneTitle, namingName);
+  const imagePath = resolveSceneShareImagePath(tour, sceneId, logoPath);
 
   return {
     title: message.title,
     description: message.text,
-    imageUrl: resolveSceneShareImageUrl(tour, sceneId, logoPath),
+    imageUrl: imagePath ? toAbsoluteTourAssetUrl(imagePath) : undefined,
     pageUrl: buildAbsoluteShareUrl({
       tourId: tour.id,
       sceneId,
