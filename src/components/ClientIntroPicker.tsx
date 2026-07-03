@@ -19,6 +19,9 @@ import {
 } from '../data/tourCatalog';
 import { loadTour } from '../data/loadTour';
 import { buildTourLocation } from '../utils/tourPaths';
+import { toAbsoluteTourAssetUrl } from '../utils/tourOpenGraph';
+import { resolveTourPublicOrigin } from '../constants/tourOrigin';
+import { useTourOpenGraph } from '../hooks/useTourOpenGraph';
 import { SegmentedTabs } from './ui/SegmentedTabs';
 import {
   segmentedTabsScrollableItemsClassName,
@@ -116,9 +119,17 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
     return sortCatalogToursForGallery(filtered);
   }, [allTours, categoryFilter, featuredOnly]);
 
-  useEffect(() => {
-    document.title = CLIENT_INTRO_TITLE;
-  }, []);
+  useTourOpenGraph(
+    useMemo(
+      () => ({
+        title: CLIENT_INTRO_TITLE,
+        description: CLIENT_INTRO_LEAD,
+        imageUrl: toAbsoluteTourAssetUrl('/assets/brand/logo_ishare.png'),
+        pageUrl: resolveTourPublicOrigin(),
+      }),
+      [],
+    ),
+  );
 
   useEffect(() => {
     const video = videoRef.current;

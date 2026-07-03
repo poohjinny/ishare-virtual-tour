@@ -47,6 +47,7 @@ import { useClientTheme } from '../hooks/useClientTheme';
 import { useClientFavicon } from '../hooks/useClientFavicon';
 import { useClientFont } from '../hooks/useClientFont';
 import { useImmersiveBackground } from '../hooks/useImmersiveBackground';
+import { useTourOpenGraph } from '../hooks/useTourOpenGraph';
 import { toggleImmersiveBackgroundPlayback } from '../viewer/immersiveBackgroundNavbarButton';
 import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
 import { useTourEmbedMessaging } from '../hooks/useTourEmbedMessaging';
@@ -86,6 +87,7 @@ import {
   type PanoramaViewerHandle,
 } from '../viewer/PanoramaViewer';
 import { resetLandingTransitionState } from '../viewer/landingTransition';
+import { resolveTourSceneOpenGraph } from '../utils/tourOpenGraph';
 
 /** Fallback if transitionend does not fire (e.g. reduced motion). */
 const SPLASH_UNMOUNT_FALLBACK_PADDING_MS = 150;
@@ -381,10 +383,6 @@ function TourExperience() {
     return { ...bootstrapTour, immersiveBackground: undefined };
   }, [bootstrapTour, searchParams.embed, tour]);
 
-  useEffect(() => {
-    document.title = productFullName;
-  }, [productFullName]);
-
   const initialScene = useMemo(() => {
     if (tour) {
       return resolveSceneId(route.tourId, route.sceneId);
@@ -555,6 +553,26 @@ function TourExperience() {
     pendingNamingSelectionRef,
     setActiveNamingHotspotId,
   });
+
+  const openGraphMeta = useMemo(() => {
+    if (!tour) return null;
+
+    return resolveTourSceneOpenGraph({
+      tour,
+      tourTitle: productFullName,
+      sceneId: currentSceneId,
+      namingHotspotId: activeNamingHotspotId,
+      logoPath: tourBranding?.logo,
+    });
+  }, [
+    activeNamingHotspotId,
+    currentSceneId,
+    productFullName,
+    tour,
+    tourBranding?.logo,
+  ]);
+
+  useTourOpenGraph(openGraphMeta);
 
   const handleDevTourMutated = useCallback(
     async (options?: DevTourMutateOptions) => {

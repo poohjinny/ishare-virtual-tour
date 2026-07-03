@@ -1,12 +1,15 @@
-import { useEffect } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ISHARE_PLATFORM,
   ISHARE_VIRTUAL_TOUR_NAME,
   PLATFORM_PRODUCT_LOGO,
 } from '../constants/branding';
+import { resolveTourPublicOrigin } from '../constants/tourOrigin';
 import { listPublicTourIds, loadTour } from '../data/loadTour';
+import { useTourOpenGraph } from '../hooks/useTourOpenGraph';
 import { getTourProductFullName } from '../utils/tourProductName';
+import { toAbsoluteTourAssetUrl } from '../utils/tourOpenGraph';
 import {
   buildTourLocation,
   preservedSearchStringFrom,
@@ -34,9 +37,18 @@ export function TourNotFound({
   const publicTourIds = listPublicTourIds();
   const fallbackTourId = publicTourIds[0];
 
-  useEffect(() => {
-    document.title = `Tour not found · ${ISHARE_VIRTUAL_TOUR_NAME}`;
-  }, []);
+  useTourOpenGraph(
+    useMemo(
+      () => ({
+        title: `Tour not found · ${ISHARE_VIRTUAL_TOUR_NAME}`,
+        description: `No tour matches ${requestedTourId}.`,
+        imageUrl: toAbsoluteTourAssetUrl('/assets/brand/logo_ishare.png'),
+        pageUrl: new URL(window.location.pathname, resolveTourPublicOrigin())
+          .href,
+      }),
+      [requestedTourId],
+    ),
+  );
 
   const handleBrowseTours = () => {
     navigate('/' + preservedSearchStringFrom(searchParams), { replace: true });
