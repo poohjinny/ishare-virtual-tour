@@ -2,7 +2,7 @@
   "id": "mental-health-emergency-services-unit",
   "clientId": "qchfoundation",
   "category": "Healthcare",
-  "title": "Mental Health Emergency Services Unit",
+  "title": "Emergency Department",
   "firstScene": "overview",
   "defaultTransition": {
     "speed": "500ms",
@@ -12,12 +12,12 @@
     "overview": {
       "id": "overview",
       "title": "Overview",
-      "description": "Explore Overview at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/overview.webp",
       "defaultView": {
-        "yaw": 90.2,
-        "pitch": -60.3,
-        "zoom": 46
+        "yaw": 179.1,
+        "pitch": -62,
+        "zoom": 25
       },
       "hotspots": [
         {
@@ -38,40 +38,44 @@
         {
           "id": "nav-to-mh-2",
           "type": "nav",
-          "label": "Emergency Department Walk in Entrance",
+          "label": "Walk-in Entrance",
           "position": {
-            "yaw": 60.6,
-            "pitch": -69.9
+            "yaw": 257.9,
+            "pitch": -53.1
           },
           "targetScene": "mh-2",
           "targetView": {
-            "yaw": 78.5,
-            "pitch": -7.9,
+            "yaw": 79,
+            "pitch": -7.6,
             "zoom": 0
           }
         },
         {
           "id": "nav-to-mh-3",
           "type": "nav",
-          "label": "MH - 3",
+          "label": "Waiting Area",
           "position": {
-            "yaw": 76.2,
-            "pitch": -56.4
+            "yaw": 214,
+            "pitch": -55.7
           },
           "targetScene": "mh-3",
           "targetView": {
             "yaw": 77.9,
             "pitch": -5.2,
             "zoom": 43
+          },
+          "preview": {
+            "videoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA"
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/overview.webp"
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/overview.webp",
+      "videoUrl": "https://share.synthesia.io/embeds/videos/c299f173-bd3c-4ac9-bc10-03f17e8814f3"
     },
     "mh-1": {
       "id": "mh-1",
       "title": "MH - 1",
-      "description": "Explore MH - 1 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore MH - 1 as part of the MH virtual tour.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-1.webp",
       "defaultView": {
         "yaw": 59,
@@ -83,8 +87,8 @@
     },
     "mh-2": {
       "id": "mh-2",
-      "title": "Emergency Department Walk in Entrance",
-      "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
+      "title": "Walk-in Entrance",
+      "description": "Explore Walk in Entrance as part of the Emergency Department virtual tour.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-2.webp",
       "defaultView": {
         "yaw": 79,
@@ -96,16 +100,37 @@
     },
     "mh-3": {
       "id": "mh-3",
-      "title": "MH - 3",
-      "description": "Explore MH - 3 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "title": "Waiting Area",
+      "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-3.webp",
       "defaultView": {
-        "yaw": 77.9,
-        "pitch": -5.2,
-        "zoom": 43
+        "yaw": 127.4,
+        "pitch": -6,
+        "zoom": 1
       },
-      "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-3.webp"
+      "hotspots": [
+        {
+          "id": "info-emergency-department-waiting-area",
+          "type": "info",
+          "position": {
+            "yaw": 129,
+            "pitch": 1.1
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Emergency Department Waiting Area",
+            "namingOpportunity": {
+              "name": "Emergency Department Waiting Area Naming Opportunity",
+              "price": 10000000,
+              "status": "open"
+            },
+            "body": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-3.webp",
+      "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
     }
   }
 }

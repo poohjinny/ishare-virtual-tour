@@ -38,8 +38,14 @@
       "website": "https://cancerresearchsociety.ca",
       "email": "mboustani@src-crs.ca",
       "phones": [
-        { "number": "514-861-9227", "label": "Telephone" },
-        { "number": "1-888-766-2262", "label": "Toll free" }
+        {
+          "number": "514-861-9227",
+          "label": "Telephone"
+        },
+        {
+          "number": "1-888-766-2262",
+          "label": "Toll free"
+        }
       ],
       "fax": "514-861-9220",
       "faxLabel": "Fax",
@@ -64,7 +70,12 @@
       "name": "Holodomor Research and Education Consortium",
       "website": "https://holodomor.ca",
       "email": "hrec@ualberta.ca",
-      "phones": [{ "number": "416-923-4732", "label": "Telephone" }],
+      "phones": [
+        {
+          "number": "416-923-4732",
+          "label": "Telephone"
+        }
+      ],
       "address": "620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4",
       "branding": {
         "logo": "/assets/holodomor/brand/logo.png",
@@ -88,7 +99,12 @@
       "name": "Queensway Carleton Hospital Foundation",
       "website": "https://qchfoundation.ca",
       "email": "info@qchfoundation.ca",
-      "phones": [{ "number": "613-721-4731", "label": "Telephone" }],
+      "phones": [
+        {
+          "number": "613-721-4731",
+          "label": "Telephone"
+        }
+      ],
       "address": "3045 Baseline Road, Ottawa, ON K2H 8P4",
       "branding": {
         "logo": "/assets/qchfoundation/brand/logo.png",
@@ -114,10 +130,10 @@
         {
           "id": "mental-health-emergency-services-unit",
           "category": "Healthcare",
-          "name": "Mental Health Emergency Services Unit",
+          "name": "Emergency Department",
           "visibility": "public",
-          "featured": false,
-          "summary": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most."
+          "featured": true,
+          "summary": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end."
         }
       ]
     }

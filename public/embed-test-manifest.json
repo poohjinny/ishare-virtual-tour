@@ -1,18 +1,6 @@
 {
   "tours": [
     {
-      "id": "3d-demo",
-      "name": "3D Walkthrough Demo",
-      "clientName": "iShare Demos",
-      "firstScene": "sponza",
-      "scenes": [
-        {
-          "id": "sponza",
-          "title": "Sponza Atrium"
-        }
-      ]
-    },
-    {
       "id": "cancer-research",
       "name": "Cancer Research",
       "clientName": "Cancer Research Society",
@@ -29,22 +17,26 @@
       ]
     },
     {
-      "id": "3d-room",
-      "name": "Cozy Room",
-      "clientName": "iShare Demos",
-      "firstScene": "living-area",
+      "id": "mental-health-emergency-services-unit",
+      "name": "Emergency Department",
+      "clientName": "Queensway Carleton Hospital Foundation",
+      "firstScene": "overview",
       "scenes": [
         {
-          "id": "bedroom",
-          "title": "Bedroom"
+          "id": "mh-1",
+          "title": "MH - 1"
         },
         {
-          "id": "living-area",
-          "title": "Living Area"
+          "id": "overview",
+          "title": "Overview"
         },
         {
-          "id": "workspace",
-          "title": "Workspace"
+          "id": "mh-3",
+          "title": "Waiting Area"
+        },
+        {
+          "id": "mh-2",
+          "title": "Walk-in Entrance"
         }
       ]
     },
@@ -89,18 +81,6 @@
         {
           "id": "reception",
           "title": "Reception"
-        }
-      ]
-    },
-    {
-      "id": "london-skyscraper",
-      "name": "London Skyscraper",
-      "clientName": "iShare Demos",
-      "firstScene": "exterior",
-      "scenes": [
-        {
-          "id": "exterior",
-          "title": "Exterior View"
         }
       ]
     },
@@ -153,42 +133,6 @@
         {
           "id": "staff-facility-lounge",
           "title": "Staff Facility / Lounge"
-        }
-      ]
-    },
-    {
-      "id": "mental-health-emergency-services-unit",
-      "name": "Mental Health Emergency Services Unit",
-      "clientName": "Queensway Carleton Hospital Foundation",
-      "firstScene": "overview",
-      "scenes": [
-        {
-          "id": "mh-2",
-          "title": "Emergency Department Walk in Entrance"
-        },
-        {
-          "id": "mh-1",
-          "title": "MH - 1"
-        },
-        {
-          "id": "mh-3",
-          "title": "MH - 3"
-        },
-        {
-          "id": "overview",
-          "title": "Overview"
-        }
-      ]
-    },
-    {
-      "id": "3d-qch",
-      "name": "QCH Unreal (SketchUp)",
-      "clientName": "iShare Demos",
-      "firstScene": "scene",
-      "scenes": [
-        {
-          "id": "scene",
-          "title": "QCH Unreal"
         }
       ]
     },
