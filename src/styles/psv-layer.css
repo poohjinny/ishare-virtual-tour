@@ -58,7 +58,8 @@
   /* Scene HTML overlays (PSV markers, 3D CSS2D) stay below tour chrome. */
   --tour-scene-overlay-z-index: 1;
   --tour-chrome-z-index: 100;
-  --tour-chrome-menu-z-index: 200;
+  /* --tour-chrome-menu-z-index (200) lives on :root in globals.css so
+     body-portaled menus can resolve it. */
 }
 
 @media (max-width: 1023px) {

@@ -425,6 +425,13 @@
     --ishare-body-font: var(--ishare-font);
     --ishare-display-font: var(--ishare-font-display);
 
+    /*
+     * Tour chrome menu layer — defined globally (not only .tour-page) so
+     * body-portaled popovers (e.g. Explore refine menu) resolve it. Sits above
+     * --tour-chrome-z-index (100, scoped to .tour-page).
+     */
+    --tour-chrome-menu-z-index: 200;
+
     /* Legacy color shims → @theme tokens */
     --ishare-primary: var(--color-primary);
     --ishare-primary-dark: var(--color-primary-dark);
