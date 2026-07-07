@@ -28,37 +28,6 @@ const tourNavDockBtnHoverClassName = cn(
   'focus-visible:bg-white/[0.78] focus-visible:text-foreground',
 );
 
-/** Scroll-into-view target for active directory items */
-export const tourNavDirectoryActiveSelector =
-  '[role="option"][aria-selected="true"]';
-
-export const tourNavDirectoryActiveNamingSelector =
-  '[data-tour-nav-directory-kind="naming"][role="option"][aria-selected="true"]';
-
-export const tourNavDirectoryActiveLocationSelector =
-  '[data-tour-nav-directory-kind="location"][role="option"][aria-selected="true"]';
-
-export function scrollTourNavDirectoryToActiveItem(
-  scrollRoot: HTMLElement,
-  options: { preferNaming: boolean },
-): void {
-  const namingItem = scrollRoot.querySelector<HTMLElement>(
-    tourNavDirectoryActiveNamingSelector,
-  );
-  const locationItem = scrollRoot.querySelector<HTMLElement>(
-    tourNavDirectoryActiveLocationSelector,
-  );
-
-  const activeItem =
-    options.preferNaming && namingItem ?
-      namingItem
-    : (locationItem ??
-      namingItem ??
-      scrollRoot.querySelector<HTMLElement>(tourNavDirectoryActiveSelector));
-
-  activeItem?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-}
-
 /* ── Breadcrumb ── */
 
 export const tourNavBreadcrumbClassName = cn(
@@ -464,7 +433,7 @@ export const tourNavLocationGalleryCardClassName = cva(
           '[&_.tour-nav-gallery-card-hero]:after:inset-0',
           '[&_.tour-nav-gallery-card-hero]:after:z-[5]',
           '[&_.tour-nav-gallery-card-hero]:after:rounded-lg',
-          '[&_.tour-nav-gallery-card-hero]:after:border-3',
+          '[&_.tour-nav-gallery-card-hero]:after:border-[4px]',
           '[&_.tour-nav-gallery-card-hero]:after:border-primary',
           '[&_.tour-nav-gallery-card-hero]:after:content-[""]',
         ),
@@ -522,11 +491,6 @@ export const tourNavLocationGalleryHeroBadgeClassName = cn('font-normal');
 export const tourNavLocationGalleryFeaturedBadgeClassName = cn(
   tourNavLocationGalleryHeroBadgeClassName,
   'gap-0.5 bg-gold/70 text-white',
-);
-
-export const tourNavLocationGalleryCurrentBadgeClassName = cn(
-  tourNavLocationGalleryHeroBadgeClassName,
-  'gap-0.5 bg-primary/70 text-white',
 );
 
 /** Pin next to title on gallery hero — no chip; blends with dark scrim. */
@@ -1005,6 +969,32 @@ export const tourNavDirectoryPanelClassName = cn('flex flex-col gap-0');
 
 export const tourNavDirectorySectionClassName = cn(
   '[&+&]:mt-[var(--tour-directory-divider-space)] [&+&]:border-t [&+&]:border-[rgba(15,23,42,0.08)] [&+&]:pt-[var(--tour-directory-divider-space)]',
+);
+
+/** Collapsible department group in the grouped locations list. */
+export const tourNavLocationGroupClassName = cn(
+  'flex flex-col [&+&]:mt-[var(--tour-directory-space,16px)]',
+);
+
+export const tourNavLocationGroupHeaderClassName = cn(
+  'flex w-full items-center gap-1.5 border-none bg-transparent p-0 text-left',
+  'mb-[var(--tour-directory-space)] cursor-pointer',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+  'disabled:cursor-not-allowed disabled:opacity-50',
+);
+
+export const tourNavLocationGroupChevronClassName = cn(
+  'shrink-0 text-muted transition-transform duration-200 ease-out',
+);
+
+export const tourNavLocationGroupChevronOpenClassName = cn('rotate-90');
+
+export const tourNavLocationGroupTitleClassName = cn(
+  'min-w-0 flex-1 truncate font-display text-lg font-semibold text-foreground',
+);
+
+export const tourNavLocationGroupCountClassName = cn(
+  'shrink-0 text-xs font-medium tabular-nums text-muted',
 );
 
 export const tourNavItemBadgeClassName = cn(

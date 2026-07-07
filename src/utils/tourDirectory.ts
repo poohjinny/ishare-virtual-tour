@@ -9,6 +9,7 @@ import {
   resolveModel3dNamingTargetView,
 } from './findTourHotspot';
 import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
+import { buildSceneVisitOrder } from '../viewer/sceneDepth';
 
 export interface TourDirectoryNamingItem {
   sceneId: string;
@@ -198,6 +199,17 @@ export function sortTourScenes(
   const sorted = [...scenes];
 
   switch (sort) {
+    case 'tour-order': {
+      if (firstSceneId) {
+        const sceneMap = Object.fromEntries(
+          sorted.map((scene) => [scene.id, scene]),
+        );
+        const order = buildSceneVisitOrder(tour, sceneMap, firstSceneId);
+        const rank = new Map(order.map((id, index) => [id, index]));
+        sorted.sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+      }
+      break;
+    }
     case 'name-asc':
       sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, 1));
       break;

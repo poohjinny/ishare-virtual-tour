@@ -6,14 +6,12 @@ import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
 import type { Scene, Tour, TourViewerType } from '../types/tour';
 import type { NamingStatusModifier } from './ui/Badge';
-import { Badge } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import {
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
   tourNavLocationGalleryCardHeroSkeletonClassName,
-  tourNavLocationGalleryCurrentBadgeClassName,
   tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryHeroBottomOverlayClassName,
   tourNavLocationGalleryHeroCtaInActionsClassName,
@@ -41,7 +39,10 @@ interface ExploreNamingGalleryCardProps {
   tourId: string;
   tourViewerType?: TourViewerType;
   /** Hotspot lookup for model3d preview pose — from TourNavFloat tourDirectoryContext. */
-  directoryTour?: Pick<Tour, 'viewerType' | 'scenes' | 'hotspots' | 'firstScene'>;
+  directoryTour?: Pick<
+    Tour,
+    'viewerType' | 'scenes' | 'hotspots' | 'firstScene'
+  >;
   scenes: Scene[];
   item: TourDirectoryNamingItem;
   active: boolean;
@@ -65,14 +66,13 @@ export function ExploreNamingGalleryCard({
     [item.sceneId, scenes],
   );
   const previewScene = useMemo((): Scene => {
-    const base: Scene =
-      scene ?? {
-        id: item.sceneId,
-        title: item.sceneTitle,
-        panorama: '',
-        defaultView: { yaw: 0, pitch: 0, zoom: 50 },
-        hotspots: [],
-      };
+    const base: Scene = scene ?? {
+      id: item.sceneId,
+      title: item.sceneTitle,
+      panorama: '',
+      defaultView: { yaw: 0, pitch: 0, zoom: 50 },
+      hotspots: [],
+    };
     if (tourViewerType === 'model3d' && item.previewImage) {
       return {
         ...base,
@@ -184,17 +184,6 @@ export function ExploreNamingGalleryCard({
             />
           : null}
           <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
-            {active ?
-              <Badge
-                variant='fill'
-                size='sm'
-                tone='primary'
-                uppercase
-                className={tourNavLocationGalleryCurrentBadgeClassName}
-              >
-                Current
-              </Badge>
-            : null}
             <NamingStatusBadge
               statusModifier={item.statusModifier as NamingStatusModifier}
               label={item.statusShortLabel}

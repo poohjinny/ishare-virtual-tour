@@ -4,7 +4,6 @@ import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
 import type { Scene } from '../types/tour';
-import { Badge } from './ui/Badge';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { ExploreTourStartPin } from './ExploreTourStartPin';
 import {
@@ -12,8 +11,6 @@ import {
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
   tourNavLocationGalleryCardHeroSkeletonClassName,
-  tourNavLocationGalleryCurrentBadgeClassName,
-  tourNavLocationGalleryHeroBadgePlacementClassName,
   tourNavLocationGalleryHeroBottomOverlayClassName,
   tourNavLocationGalleryHeroCtaInActionsClassName,
   tourNavLocationGalleryHeroDescriptionClassName,
@@ -130,20 +127,6 @@ export function ExploreSceneGalleryCard({
               className='pointer-events-none absolute inset-0 z-[1] block bg-[#e2e8f0]'
               aria-hidden='true'
             />
-          : null}
-          {active ?
-            <Badge
-              variant='fill'
-              size='sm'
-              tone='primary'
-              uppercase
-              className={cn(
-                tourNavLocationGalleryHeroBadgePlacementClassName,
-                tourNavLocationGalleryCurrentBadgeClassName,
-              )}
-            >
-              Current
-            </Badge>
           : null}
           <span className={tourNavLocationGalleryHeroBottomOverlayClassName}>
             <span className={tourNavLocationGalleryHeroOverlayInnerClassName}>

@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import type { Scene } from '../types/tour';
-import { Badge } from './ui/Badge';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { ExploreTourStartPin } from './ExploreTourStartPin';
 import {
@@ -9,7 +8,6 @@ import {
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBadgeColumnClassName,
   tourNavDirectoryListItemSelectClassName,
-  tourNavItemBadgeClassName,
   tourNavItemDescriptionClassName,
   tourNavItemLabelClassName,
   tourNavItemLeadingLocationClassName,
@@ -82,30 +80,16 @@ export function ExploreSceneDirectoryListItem({
             : null}
           </span>
         </button>
-        <div
-          className={tourNavDirectoryListItemBadgeColumnClassName}
-          aria-hidden={!active && !showInfo ? true : undefined}
-        >
-          {showInfo ?
+        {showInfo ?
+          <div className={tourNavDirectoryListItemBadgeColumnClassName}>
             <ExploreSceneInfoButton
               variant='list'
               sceneTitle={scene.title}
               disabled={disabled}
               onShow={onShowDescription!}
             />
-          : null}
-          {active ?
-            <Badge
-              variant='fill'
-              size='sm'
-              tone='primary'
-              uppercase
-              className={cn(tourNavItemBadgeClassName, 'ml-0')}
-            >
-              Current
-            </Badge>
-          : null}
-        </div>
+          </div>
+        : null}
       </div>
     </li>
   );

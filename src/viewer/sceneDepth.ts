@@ -26,6 +26,124 @@ export function getSceneDepth(tour: Tour, sceneId: string): number {
   return buildSceneDepths(tour)[sceneId] ?? 0;
 }
 
+/** Group id for scenes not reachable from firstScene via the nav graph. */
+export const SCENE_GROUP_OTHER_ID = '__other';
+
+/** A department-style grouping of scenes, derived from the nav graph. */
+export interface SceneGroup {
+  /** Group root scene id (the level-1 scene), or {@link SCENE_GROUP_OTHER_ID}. */
+  id: string;
+  title: string;
+  scenes: Scene[];
+}
+
+/**
+ * Groups scenes by their level-1 ancestor in the nav graph — each scene the
+ * firstScene links to directly becomes a department header, and every scene
+ * reachable beneath it (that isn't itself a level-1 branch) joins that group.
+ * The firstScene is excluded (callers render it standalone). Scenes unreachable
+ * via nav hotspots are collected into an "other" group.
+ */
+export function buildSceneGroups(
+  tour: Pick<Tour, 'hotspots'>,
+  scenes: Record<string, Scene>,
+  firstSceneId: string,
+  otherGroupTitle: string,
+): SceneGroup[] {
+  const groupRootOf = new Map<string, string>();
+  const visited = new Set<string>();
+  const queue: string[] = [];
+  const rootOrder: string[] = [];
+  const membersByRoot = new Map<string, string[]>();
+
+  if (scenes[firstSceneId]) {
+    queue.push(firstSceneId);
+    visited.add(firstSceneId);
+  }
+
+  while (queue.length > 0) {
+    const sceneId = queue.shift()!;
+    const scene = scenes[sceneId];
+    if (!scene) continue;
+
+    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
+      const target = hotspot.targetScene!;
+      if (visited.has(target) || !scenes[target]) continue;
+      visited.add(target);
+
+      // firstScene's direct targets start a new group; deeper scenes inherit.
+      const root =
+        sceneId === firstSceneId ? target : groupRootOf.get(sceneId)!;
+      groupRootOf.set(target, root);
+      if (!membersByRoot.has(root)) {
+        membersByRoot.set(root, []);
+        rootOrder.push(root);
+      }
+      membersByRoot.get(root)!.push(target);
+      queue.push(target);
+    }
+  }
+
+  const groups: SceneGroup[] = rootOrder.map((rootId) => ({
+    id: rootId,
+    title: scenes[rootId]?.title ?? rootId,
+    scenes: (membersByRoot.get(rootId) ?? []).map((id) => scenes[id]),
+  }));
+
+  const orphans = Object.keys(scenes).filter(
+    (id) => id !== firstSceneId && !visited.has(id),
+  );
+  if (orphans.length > 0) {
+    groups.push({
+      id: SCENE_GROUP_OTHER_ID,
+      title: otherGroupTitle,
+      scenes: orphans.map((id) => scenes[id]),
+    });
+  }
+
+  return groups;
+}
+
+/**
+ * BFS visit order from firstScene along nav hotspots — overview first, then its
+ * level-1 targets, then their children. Scenes unreachable via the nav graph are
+ * appended in declaration order so nothing is dropped.
+ */
+export function buildSceneVisitOrder(
+  tour: Pick<Tour, 'hotspots'>,
+  scenes: Record<string, Scene>,
+  firstSceneId: string,
+): string[] {
+  const order: string[] = [];
+  const visited = new Set<string>();
+  const queue: string[] = [];
+
+  if (scenes[firstSceneId]) {
+    queue.push(firstSceneId);
+    visited.add(firstSceneId);
+  }
+
+  while (queue.length > 0) {
+    const sceneId = queue.shift()!;
+    const scene = scenes[sceneId];
+    if (!scene) continue;
+    order.push(sceneId);
+
+    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
+      const target = hotspot.targetScene!;
+      if (visited.has(target) || !scenes[target]) continue;
+      visited.add(target);
+      queue.push(target);
+    }
+  }
+
+  for (const sceneId of Object.keys(scenes)) {
+    if (!visited.has(sceneId)) order.push(sceneId);
+  }
+
+  return order;
+}
+
 export function isGoingDeeper(
   tour: Tour,
   fromSceneId: string,

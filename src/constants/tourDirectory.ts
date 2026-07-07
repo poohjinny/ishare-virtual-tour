@@ -7,6 +7,9 @@ export const TOUR_DIRECTORY_SECTION_LOCATIONS = 'Locations';
 
 export const TOUR_DIRECTORY_SECTION_NAMING = 'Naming opportunities';
 
+/** Header for scenes not reachable from the tour start via nav hotspots. */
+export const TOUR_DIRECTORY_GROUP_OTHER = 'More locations';
+
 export type TourDirectoryTab = 'all' | 'locations' | 'naming';
 
 export const TOUR_DIRECTORY_TABS: { id: TourDirectoryTab; label: string }[] = [

@@ -10,6 +10,7 @@ export const EXPLORE_DIRECTORY_TAB_MATERIAL_ICONS: Record<
 > = { all: 'layers', locations: 'location_on', naming: 'favorite' };
 
 export type ExploreDirectorySort =
+  | 'tour-order'
   | 'name-asc'
   | 'name-desc'
   | 'naming-count-desc'
@@ -21,6 +22,7 @@ export type ExploreDirectorySort =
   | 'price-desc';
 
 export type ExploreLocationsSort =
+  | 'tour-order'
   | 'name-asc'
   | 'name-desc'
   | 'naming-count-desc'
@@ -28,7 +30,8 @@ export type ExploreLocationsSort =
 
 export type ExploreDirectorySortGroup = 'locations' | 'naming';
 
-export const EXPLORE_LOCATIONS_SORT_DEFAULT: ExploreLocationsSort = 'name-asc';
+export const EXPLORE_LOCATIONS_SORT_DEFAULT: ExploreLocationsSort =
+  'tour-order';
 export const EXPLORE_NAMING_SORT_DEFAULT: ExploreDirectorySort = 'status-asc';
 
 /** @deprecated Use {@link EXPLORE_LOCATIONS_SORT_DEFAULT}. */
@@ -39,6 +42,7 @@ export function isExploreNameSort(
   sort: ExploreDirectorySort,
 ): sort is ExploreLocationsSort {
   return (
+    sort === 'tour-order' ||
     sort === 'name-asc' ||
     sort === 'name-desc' ||
     sort === 'naming-count-desc' ||
@@ -49,6 +53,7 @@ export function isExploreNameSort(
 export function normalizeLocationsSort(
   sort: ExploreDirectorySort,
 ): ExploreLocationsSort {
+  if (sort === 'tour-order') return 'tour-order';
   if (sort === 'name-desc') return 'name-desc';
   if (sort === 'naming-count-desc') return 'naming-count-desc';
   if (sort === 'naming-count-asc') return 'naming-count-asc';
@@ -58,6 +63,7 @@ export function normalizeLocationsSort(
 export type ExploreDirectorySortContext = 'locations' | 'naming' | 'mixed';
 
 export type ExploreSortFieldId =
+  | 'tour-order'
   | 'name'
   | 'naming-count'
   | 'location'
@@ -97,6 +103,13 @@ export const EXPLORE_DIRECTORY_SORT_GROUP_LABELS: Record<
 };
 
 export const EXPLORE_DIRECTORY_SORT_FIELDS: ExploreDirectorySortField[] = [
+  {
+    id: 'tour-order',
+    label: 'Tour order',
+    group: 'locations',
+    asc: 'tour-order',
+    defaultDirection: 'asc',
+  },
   {
     id: 'name',
     label: 'Name',
@@ -173,6 +186,7 @@ export const EXPLORE_DIRECTORY_SORT_MATERIAL_ICONS: Record<
   ExploreDirectorySort,
   { name: string; flip?: 'vertical' | 'horizontal' }
 > = {
+  'tour-order': { name: 'route' },
   'name-asc': { name: 'sort_by_alpha' },
   'name-desc': { name: 'sort_by_alpha', flip: 'vertical' },
   'naming-count-desc': { name: 'favorite' },
@@ -233,6 +247,8 @@ export function exploreSortDirectionLabel(
   direction: ExploreSortDirection,
 ): string {
   switch (field.id) {
+    case 'tour-order':
+      return 'Default order';
     case 'name':
       return direction === 'asc' ? 'A–Z' : 'Z–A';
     case 'naming-count':

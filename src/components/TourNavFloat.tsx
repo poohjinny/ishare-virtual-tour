@@ -18,6 +18,7 @@ import {
   TOUR_DIRECTORY_EMPTY_NAMING,
   TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
   TOUR_DIRECTORY_EMPTY_SEARCH,
+  TOUR_DIRECTORY_GROUP_OTHER,
   type TourDirectoryTab,
 } from '../constants/tourDirectory';
 import {
@@ -59,7 +60,12 @@ import {
   buildShareMessage,
 } from '../utils/buildShareUrl';
 import { ShareTourPanel } from './ShareTourPanel';
-import { buildScenePath } from '../viewer/sceneDepth';
+import { ExploreLocationGroup } from './ExploreLocationGroup';
+import {
+  buildScenePath,
+  buildSceneGroups,
+  SCENE_GROUP_OTHER_ID,
+} from '../viewer/sceneDepth';
 import type { Hotspot, Scene, TourClient, TourViewerType } from '../types/tour';
 import {
   buildTourNamingDirectory,
@@ -112,7 +118,6 @@ import {
   tourNavCircleIconClassName,
   tourNavDockOverflowItemClassName,
   tourNavDockOverflowMenuClassName,
-  scrollTourNavDirectoryToActiveItem,
   tourNavDirectoryItemVariants,
   tourNavDirectoryPanelClassName,
   tourNavDirectorySectionClassName,
@@ -632,6 +637,60 @@ export function TourNavFloat({
     [exploreFilteredNamingItems, exploreNamingSort],
   );
 
+  const scenesById = useMemo(
+    () => Object.fromEntries(scenes.map((scene) => [scene.id, scene])),
+    [scenes],
+  );
+
+  const firstScene = scenesById[firstSceneId];
+
+  // Department groups from the nav graph — only when sorted by tour order.
+  const locationGroups = useMemo(() => {
+    if (exploreLocationsSort !== 'tour-order') return null;
+    return buildSceneGroups(
+      tourDirectoryContext,
+      scenesById,
+      firstSceneId,
+      TOUR_DIRECTORY_GROUP_OTHER,
+    );
+  }, [exploreLocationsSort, firstSceneId, scenesById, tourDirectoryContext]);
+
+  const isLocationsGroupingActive =
+    !isExploreSearchActive &&
+    locationGroups !== null &&
+    locationGroups.some((group) => group.id !== SCENE_GROUP_OTHER_ID);
+
+  const currentGroupId = useMemo(() => {
+    if (!locationGroups) return null;
+    return (
+      locationGroups.find((group) =>
+        group.scenes.some((scene) => scene.id === currentSceneId),
+      )?.id ?? null
+    );
+  }, [locationGroups, currentSceneId]);
+
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Keep the current scene's group open (initial mount + on scene change).
+  useEffect(() => {
+    if (!currentGroupId) return;
+    setExpandedGroups((prev) => {
+      if (prev.has(currentGroupId)) return prev;
+      const next = new Set(prev);
+      next.add(currentGroupId);
+      return next;
+    });
+  }, [currentGroupId]);
+
+  const toggleGroup = useCallback((groupId: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupId)) next.delete(groupId);
+      else next.add(groupId);
+      return next;
+    });
+  }, []);
+
   const locationsGalleryListRef = useRef<HTMLUListElement>(null);
   const locationsListRef = useRef<HTMLUListElement>(null);
   const namingGalleryListRef = useRef<HTMLUListElement>(null);
@@ -811,40 +870,6 @@ export function TourNavFloat({
   }, [panelMode]);
 
   useEffect(() => {
-    if (panelMode !== 'explore') return;
-
-    const scrollRoot = exploreScrollRef.current;
-    if (!scrollRoot) return;
-
-    scrollTourNavDirectoryToActiveItem(scrollRoot, {
-      preferNaming: activeNamingItem !== null,
-    });
-  }, [
-    activeNamingItem,
-    currentSceneId,
-    directoryTab,
-    exploreLayout,
-    panelMode,
-  ]);
-
-  useEffect(() => {
-    if (!isExploreSearchActive) return;
-
-    const scrollRoot = exploreSearchScrollRef.current;
-    if (!scrollRoot) return;
-
-    scrollTourNavDirectoryToActiveItem(scrollRoot, {
-      preferNaming: activeNamingItem !== null,
-    });
-  }, [
-    activeNamingItem,
-    currentSceneId,
-    isExploreSearchActive,
-    exploreFilteredScenes,
-    exploreFilteredNamingItems,
-  ]);
-
-  useEffect(() => {
     if (exploreSearchOpen) return;
 
     setExploreSearch('');
@@ -906,11 +931,8 @@ export function TourNavFloat({
   ]);
 
   const handleExploreClick = useCallback(() => {
-    if (activeNamingItem) {
-      setDirectoryTab('naming');
-    }
     activatePanel('explore');
-  }, [activatePanel, activeNamingItem]);
+  }, [activatePanel]);
 
   const handleHelpClick = useCallback(() => {
     activatePanel('help');
@@ -1016,6 +1038,8 @@ export function TourNavFloat({
       listBodyOnly?: boolean;
       /** Search results — list rows only (no gallery cards). */
       listOnly?: boolean;
+      /** Grouped mode renders many lists — skip the shared FLIP reorder refs. */
+      suppressReorderRef?: boolean;
     },
   ) => {
     const listBody =
@@ -1023,7 +1047,11 @@ export function TourNavFloat({
         <>
           {!options?.listOnly ?
             <ul
-              ref={locationsGalleryListRef}
+              ref={
+                options?.suppressReorderRef ? undefined : (
+                  locationsGalleryListRef
+                )
+              }
               hidden={exploreLayout !== 'gallery'}
               className={tourNavLocationGalleryListClassName}
               role='listbox'
@@ -1048,7 +1076,7 @@ export function TourNavFloat({
             </ul>
           : null}
           <ul
-            ref={locationsListRef}
+            ref={options?.suppressReorderRef ? undefined : locationsListRef}
             hidden={!options?.listOnly && exploreLayout !== 'list'}
             className={tourNavListClassName}
             role='listbox'
@@ -1271,6 +1299,41 @@ export function TourNavFloat({
     return renderExploreDirectory();
   };
 
+  const renderGroupedLocations = () => (
+    <>
+      {firstScene ?
+        <ExploreLayoutPanel
+          layout={exploreLayout}
+          className='mb-[var(--tour-directory-space,16px)]'
+        >
+          {renderLocationsList([firstScene], {
+            listBodyOnly: true,
+            suppressReorderRef: true,
+          })}
+        </ExploreLayoutPanel>
+      : null}
+      {locationGroups?.map((group) => (
+        <ExploreLocationGroup
+          key={group.id}
+          title={group.title}
+          count={group.scenes.length}
+          expanded={expandedGroups.has(group.id)}
+          regionId={`tour-nav-loc-group-${group.id}`}
+          headingId={`tour-nav-loc-group-heading-${group.id}`}
+          disabled={disabled}
+          onToggle={() => toggleGroup(group.id)}
+        >
+          <ExploreLayoutPanel layout={exploreLayout}>
+            {renderLocationsList(group.scenes, {
+              listBodyOnly: true,
+              suppressReorderRef: true,
+            })}
+          </ExploreLayoutPanel>
+        </ExploreLocationGroup>
+      ))}
+    </>
+  );
+
   const renderExploreDirectory = () => {
     const showLocations =
       directoryTab === 'all' || directoryTab === 'locations';
@@ -1303,12 +1366,15 @@ export function TourNavFloat({
                 {TOUR_DIRECTORY_SECTION_LOCATIONS}
               </h3>
             )}
-            <ExploreLayoutPanel layout={exploreLayout}>
-              {renderLocationsList(exploreSortedScenes, {
-                listBodyOnly: true,
-                emptyMessage: TOUR_DIRECTORY_EMPTY_LOCATIONS,
-              })}
-            </ExploreLayoutPanel>
+            {isLocationsGroupingActive ?
+              renderGroupedLocations()
+            : <ExploreLayoutPanel layout={exploreLayout}>
+                {renderLocationsList(exploreSortedScenes, {
+                  listBodyOnly: true,
+                  emptyMessage: TOUR_DIRECTORY_EMPTY_LOCATIONS,
+                })}
+              </ExploreLayoutPanel>
+            }
           </section>
         )}
 
