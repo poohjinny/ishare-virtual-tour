@@ -131,7 +131,7 @@
     "walk-in-entrace": {
       "id": "walk-in-entrace",
       "title": "Zone - 1: Walk In Entrace",
-      "description": "Explore Walk In Entrace at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Walk In Entrace as part of the Queensway Carleton Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-hospital/panoramas/walk-in-entrace.webp",
       "defaultView": { "yaw": 42.1, "pitch": -4.2, "zoom": 35 },
       "hotspots": [],
@@ -140,7 +140,7 @@
     "ambulance-of-load": {
       "id": "ambulance-of-load",
       "title": "Ambulance of Load",
-      "description": "Explore Ambulance of Load at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Ambulance of Load as part of the Queensway Carleton Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-hospital/panoramas/ambulance-of-load.webp",
       "defaultView": { "yaw": 109.7, "pitch": 1.3, "zoom": 15 },
       "hotspots": [],
@@ -149,7 +149,7 @@
     "satalite-imaging-waiting-area": {
       "id": "satalite-imaging-waiting-area",
       "title": "Satalite Imaging Waiting Area",
-      "description": "Explore Satalite Imaging Waiting Area at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Satalite Imaging Waiting Area as part of the Queensway Carleton Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-hospital/panoramas/satalite-imaging-waiting-area.webp",
       "defaultView": { "yaw": 73, "pitch": 3.3, "zoom": 20 },
       "hotspots": [],
@@ -158,7 +158,7 @@
     "corridor": {
       "id": "corridor",
       "title": "Corridor",
-      "description": "Explore Corridor at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Corridor as part of the Queensway Carleton Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-hospital/panoramas/corridor.webp",
       "defaultView": { "yaw": 110.6, "pitch": 1.2, "zoom": 5 },
       "hotspots": [],
@@ -167,7 +167,7 @@
     "waiting-room": {
       "id": "waiting-room",
       "title": "Waiting Area",
-      "description": "Explore Waiting Room at Queensway Carleton Hospital. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Waiting Room as part of the Queensway Carleton Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-hospital/panoramas/waiting-room.webp",
       "defaultView": { "yaw": 355.3, "pitch": -4.9, "zoom": 5 },
       "hotspots": [],

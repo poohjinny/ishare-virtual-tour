@@ -3,7 +3,7 @@
 export function defaultSceneDescription(tourTitle, sceneTitle) {
   const tour = tourTitle?.trim() || 'this facility';
   const scene = sceneTitle?.trim() || 'this area';
-  return `Explore ${scene} at ${tour}. Scene description and donor content can be updated in the dev panel or tour JSON.`;
+  return `Explore ${scene} as part of the ${tour} virtual tour.`;
 }
 
 export function defaultNamingBody(opportunityTitle, tourTitle) {
@@ -15,7 +15,7 @@ export function defaultNamingBody(opportunityTitle, tourTitle) {
 export function defaultInfoBody(infoTitle, tourTitle) {
   const title = infoTitle?.trim() || 'this topic';
   const tour = tourTitle?.trim() || 'this virtual tour';
-  return `Learn more about ${title} at ${tour}. Additional text, images, or video can be added in the dev panel.`;
+  return `Learn more about ${title} at ${tour}.`;
 }
 
 export function defaultKnowledgeGlobalSummary(tourTitle) {
@@ -38,7 +38,7 @@ export function buildKnowledgeSceneEntry(
     description,
     facts: [
       `${title} is part of the ${tour} virtual tour.`,
-      'Add facility-specific facts in the knowledge editor or tours/*-knowledge.json.',
+      `Use navigation markers to move between areas of ${tour}.`,
     ],
     faqs: [
       { q: `What can I see in ${title}?`, a: description },

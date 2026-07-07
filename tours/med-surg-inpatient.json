@@ -144,7 +144,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/inpatient-suites.webp",
-      "description": "Explore Inpatient Suites at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+      "description": "Explore Inpatient Suites as part of the Med/Surg Inpatient virtual tour."
     },
     "nursing-station": {
       "id": "nursing-station",
@@ -153,7 +153,7 @@
       "defaultView": { "yaw": 84.5, "pitch": -17.2, "zoom": 10 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/nursing-station.webp",
-      "description": "Explore Nursing Station at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+      "description": "Explore Nursing Station as part of the Med/Surg Inpatient virtual tour."
     },
     "multi-use-lounge-activity-room": {
       "id": "multi-use-lounge-activity-room",
@@ -162,7 +162,7 @@
       "defaultView": { "yaw": 181.7, "pitch": -18.3, "zoom": 10 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/multi-use-lounge-activity-room.webp",
-      "description": "Explore Multi Use Lounge / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+      "description": "Explore Multi Use Lounge / Activity Room as part of the Med/Surg Inpatient virtual tour."
     },
     "reception-centre": {
       "id": "reception-centre",
@@ -188,7 +188,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/reception-centre.webp",
-      "description": "Explore Reception Centre at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+      "description": "Explore Reception Centre as part of the Med/Surg Inpatient virtual tour."
     },
     "quiet-consultant": {
       "id": "quiet-consultant",
@@ -197,7 +197,7 @@
       "defaultView": { "yaw": 231.7, "pitch": -29.9, "zoom": 10 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/quiet-consultant.webp",
-      "description": "Explore Quiet / Consultant at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+      "description": "Explore Quiet / Consultant as part of the Med/Surg Inpatient virtual tour."
     },
     "allied-health-team-room": {
       "id": "allied-health-team-room",
@@ -206,12 +206,12 @@
       "defaultView": { "yaw": 81, "pitch": -41.3, "zoom": 14 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/allied-health-team-room.webp",
-      "description": "Explore Allied Health Team Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+      "description": "Explore Allied Health Team Room as part of the Med/Surg Inpatient virtual tour."
     },
     "report-meeting-room": {
       "id": "report-meeting-room",
       "title": "Report Meeting Room",
-      "description": "Explore Report Meeting Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Report Meeting Room as part of the Med/Surg Inpatient virtual tour.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/report-meeting-room.webp",
       "defaultView": { "yaw": 91.4, "pitch": -19.3, "zoom": 32 },
       "hotspots": [],
@@ -220,7 +220,7 @@
     "galley-servery": {
       "id": "galley-servery",
       "title": "Galley / Servery",
-      "description": "Explore Galley / Servery at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Galley / Servery as part of the Med/Surg Inpatient virtual tour.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/galley-servery.webp",
       "defaultView": { "yaw": 293.6, "pitch": -13.6, "zoom": 4 },
       "hotspots": [],
@@ -229,7 +229,7 @@
     "dining-activity-room": {
       "id": "dining-activity-room",
       "title": "Dining / Activity Room",
-      "description": "Explore Dining / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Dining / Activity Room as part of the Med/Surg Inpatient virtual tour.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/dining-activity-room.webp",
       "defaultView": { "yaw": 73.6, "pitch": -29.2, "zoom": 14 },
       "hotspots": [],
@@ -238,7 +238,7 @@
     "staff-facility-lounge": {
       "id": "staff-facility-lounge",
       "title": "Staff Facility / Lounge",
-      "description": "Explore Staff Facility / Lounge at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Staff Facility / Lounge as part of the Med/Surg Inpatient virtual tour.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/staff-facility-lounge.webp",
       "defaultView": { "yaw": 329.3, "pitch": -22.6, "zoom": 19 },
       "hotspots": [],

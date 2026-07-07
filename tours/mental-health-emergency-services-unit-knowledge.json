@@ -8,15 +8,15 @@
   "scenes": {
     "overview": {
       "title": "Overview",
-      "description": "Explore Overview at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Overview as part of the MH virtual tour.",
       "facts": [
         "Overview is part of the MH virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Overview?",
-          "a": "Explore Overview at MH. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Overview as part of the MH virtual tour."
         },
         {
           "q": "What is MH?",
@@ -30,60 +30,69 @@
     },
     "mh-1": {
       "title": "MH - 1",
-      "description": "Explore MH - 1 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore MH - 1 as part of the MH virtual tour.",
       "facts": [
         "MH - 1 is part of the MH virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in MH - 1?",
-          "a": "Explore MH - 1 at MH. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore MH - 1 as part of the MH virtual tour."
         },
         {
           "q": "What is MH?",
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": ["Tell me about MH - 1", "What is available at MH?"]
+      "suggestedQuestions": [
+        "Tell me about MH - 1",
+        "What is available at MH?"
+      ]
     },
     "mh-2": {
       "title": "MH - 2",
-      "description": "Explore MH - 2 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore MH - 2 as part of the MH virtual tour.",
       "facts": [
         "MH - 2 is part of the MH virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in MH - 2?",
-          "a": "Explore MH - 2 at MH. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore MH - 2 as part of the MH virtual tour."
         },
         {
           "q": "What is MH?",
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": ["Tell me about MH - 2", "What is available at MH?"]
+      "suggestedQuestions": [
+        "Tell me about MH - 2",
+        "What is available at MH?"
+      ]
     },
     "mh-3": {
       "title": "MH - 3",
-      "description": "Explore MH - 3 at MH. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore MH - 3 as part of the MH virtual tour.",
       "facts": [
         "MH - 3 is part of the MH virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in MH - 3?",
-          "a": "Explore MH - 3 at MH. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore MH - 3 as part of the MH virtual tour."
         },
         {
           "q": "What is MH?",
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": ["Tell me about MH - 3", "What is available at MH?"]
+      "suggestedQuestions": [
+        "Tell me about MH - 3",
+        "What is available at MH?"
+      ]
     }
   }
 }

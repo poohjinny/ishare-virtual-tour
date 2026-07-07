@@ -25,15 +25,15 @@
     },
     "inpatient-suites": {
       "title": "Inpatient Suites",
-      "description": "Explore Inpatient Suites at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Inpatient Suites as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Inpatient Suites is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Inpatient Suites?",
-          "a": "Explore Inpatient Suites at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Inpatient Suites as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -47,15 +47,15 @@
     },
     "nursing-station": {
       "title": "Nursing Station",
-      "description": "Explore Nursing Station at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Nursing Station as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Nursing Station is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Nursing Station?",
-          "a": "Explore Nursing Station at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Nursing Station as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -69,15 +69,15 @@
     },
     "multi-use-lounge-activity-room": {
       "title": "Multi Use Lounge / Activity Room",
-      "description": "Explore Multi Use Lounge / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Multi Use Lounge / Activity Room as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Multi Use Lounge / Activity Room is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Multi Use Lounge / Activity Room?",
-          "a": "Explore Multi Use Lounge / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Multi Use Lounge / Activity Room as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -91,15 +91,15 @@
     },
     "reception-centre": {
       "title": "Reception Centre",
-      "description": "Explore Reception Centre at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Reception Centre as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Reception Centre is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Reception Centre?",
-          "a": "Explore Reception Centre at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Reception Centre as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -113,15 +113,15 @@
     },
     "quiet-consultant": {
       "title": "Quiet / Consultant",
-      "description": "Explore Quiet / Consultant at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Quiet / Consultant as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Quiet / Consultant is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Quiet / Consultant?",
-          "a": "Explore Quiet / Consultant at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Quiet / Consultant as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -135,15 +135,15 @@
     },
     "allied-health-team-room": {
       "title": "Allied Health Team Room",
-      "description": "Explore Allied Health Team Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Allied Health Team Room as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Allied Health Team Room is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Allied Health Team Room?",
-          "a": "Explore Allied Health Team Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Allied Health Team Room as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -157,15 +157,15 @@
     },
     "report-meeting-room": {
       "title": "Report Meeting Room",
-      "description": "Explore Report Meeting Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Report Meeting Room as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Report Meeting Room is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Report Meeting Room?",
-          "a": "Explore Report Meeting Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Report Meeting Room as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -179,15 +179,15 @@
     },
     "galley-servery": {
       "title": "Galley / Servery",
-      "description": "Explore Galley / Servery at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Galley / Servery as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Galley / Servery is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Galley / Servery?",
-          "a": "Explore Galley / Servery at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Galley / Servery as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -201,15 +201,15 @@
     },
     "dining-activity-room": {
       "title": "Dining / Activity Room",
-      "description": "Explore Dining / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Dining / Activity Room as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Dining / Activity Room is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Dining / Activity Room?",
-          "a": "Explore Dining / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Dining / Activity Room as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
@@ -223,15 +223,15 @@
     },
     "staff-facility-lounge": {
       "title": "Staff Facility / Lounge",
-      "description": "Explore Staff Facility / Lounge at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Explore Staff Facility / Lounge as part of the Med/Surg Inpatient virtual tour.",
       "facts": [
         "Staff Facility / Lounge is part of the Med/Surg Inpatient virtual tour.",
-        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+        "Use navigation markers to explore other areas of this tour."
       ],
       "faqs": [
         {
           "q": "What can I see in Staff Facility / Lounge?",
-          "a": "Explore Staff Facility / Lounge at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
+          "a": "Explore Staff Facility / Lounge as part of the Med/Surg Inpatient virtual tour."
         },
         {
           "q": "What is Med/Surg Inpatient?",
