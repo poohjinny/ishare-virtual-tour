@@ -117,7 +117,7 @@
           "id": "queensway-carleton-hospital",
           "category": "Healthcare",
           "name": "Queensway Carleton Hospital",
-          "visibility": "unlisted",
+          "visibility": "public",
           "featured": false
         },
         {
