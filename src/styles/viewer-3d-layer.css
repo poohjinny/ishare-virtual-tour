@@ -1,0 +1,418 @@
+/*
+ * Three.js 3D viewer — CSS2DRenderer overlay styling.
+ * Imported via globals.css.
+ */
+
+/*
+ * Provide glass hotspot CSS variables within the 3D viewer scope.
+ * These are defined on .viewer-container in psv-layer.css for PSV;
+ * the 3D container is a sibling, so we duplicate the relevant tokens here.
+ */
+.viewer-3d-container {
+  --ishare-hotspot-glass-padding-block: 1px;
+  --ishare-hotspot-glass-border-width: 1.5px;
+  --ishare-hotspot-glass-block-size: max(26px,
+      calc(2 * var(--ishare-hotspot-glass-padding-block) + 2 * var(--ishare-hotspot-glass-border-width) + 2 * var(--ishare-font-size-sm)));
+  --ishare-hotspot-glass-bg: rgba(255, 255, 255, 0.72);
+  --ishare-hotspot-glass-bg-hover: rgba(255, 255, 255, 0.86);
+  --ishare-hotspot-glass-blur: blur(8px) saturate(120%);
+  --psv-toolbar-collapse-duration: 0.45s;
+  --psv-toolbar-collapse-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --psv-nav-icon-size: 16px;
+  /* Sketchfab-style navigation cursors on the canvas */
+  cursor: grab;
+}
+
+.viewer-3d-container canvas {
+  cursor: inherit;
+}
+
+.viewer-3d-container.viewer-3d-container--orbit-drag,
+.viewer-3d-container.viewer-3d-container--orbit-drag canvas {
+  cursor: grabbing;
+}
+
+.viewer-3d-container.viewer-3d-container--pan-drag,
+.viewer-3d-container.viewer-3d-container--pan-drag canvas {
+  cursor: move;
+}
+
+.viewer-3d-container.viewer-3d-container--dolly-drag,
+.viewer-3d-container.viewer-3d-container--dolly-drag canvas {
+  cursor: ns-resize;
+}
+
+/*
+ * CSS2DRenderer overlay — sits above the WebGL canvas.
+ * pointer-events: none on the layer so only hotspot buttons are interactive.
+ */
+.viewer-3d-label-overlay {
+  pointer-events: none;
+  overflow: visible;
+  z-index: var(--tour-scene-overlay-z-index, 1);
+}
+
+/*
+ * CSS2DObject wrapper — CSS2DRenderer positions each child with
+ * position: absolute + transform: translate(-50%, -50%).
+ * We just enable pointer-events on the hotspot elements inside.
+ */
+.hotspot-3d-wrap {
+  pointer-events: auto;
+  font-size: 16px;
+  line-height: 1.2;
+  isolation: isolate;
+}
+
+/* Pill on the anchor; panel stacks above when they overlap. */
+.hotspot-3d-wrap>.hotspot-nav,
+.hotspot-3d-wrap>.hotspot-info {
+  position: relative;
+  z-index: 1;
+}
+
+.hotspot-3d-wrap--panel-open>.hotspot-nav,
+.hotspot-3d-wrap--panel-open>.hotspot-info {
+  pointer-events: none;
+}
+
+/* Open panel above sibling hotspots — stays within scene overlay layer. */
+.hotspot-3d-wrap--panel-open {
+  z-index: 10;
+}
+
+/* Match PSV marker box model — PSV markers render pills as content-box */
+.hotspot-3d-wrap .hotspot-nav__pill,
+.hotspot-3d-wrap .hotspot-info__pill {
+  box-sizing: content-box;
+}
+
+/*
+ * Anchored glass panel within a 3D hotspot.
+ * Positioned above the hotspot pill, centered horizontally.
+ *
+ * Re-creates the PSV-scoped .viewer-container .psv-marker styles
+ * so the glass panel looks identical in the 3D viewer.
+ */
+.hotspot-3d-anchored-panel {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(440px, calc(100vw - 48px));
+  max-width: min(440px, calc(100vw - 48px));
+  max-height: min(88vh, 720px);
+  margin-bottom: 8px;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+/* Fill the anchored wrapper — base .tour-glass-panel defaults to 320px (PSV marker sets size). */
+.hotspot-3d-anchored-panel .tour-glass-panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Panel root — same as .viewer-container .psv-marker .tour-glass-panel--anchored */
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored {
+  width: 100%;
+  max-height: none;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Info panel root — dock-style glass (matches PSV .psv-marker info panel) */
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored[data-info-panel='true'] {
+  --ishare-panel-radius: 18px;
+  --ishare-panel-header-btn-size: 38px;
+  --ishare-panel-header-icon-size: 16px;
+  --ishare-panel-inline-padding: 28px;
+  --ishare-panel-header-padding-y: 18px;
+  --ishare-panel-footer-padding-y: 22px;
+  border-radius: var(--ishare-panel-radius);
+  box-shadow: var(--ishare-glass-dock-shadow);
+  overflow: hidden;
+  backdrop-filter: var(--ishare-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-glass-blur);
+  height: auto;
+  max-height: 100%;
+}
+
+/* Shell — border/shadow handled by the outer panel, not the shell */
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__shell {
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(88vh, 720px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__header {
+  padding: var(--ishare-panel-header-padding-y) var(--ishare-panel-inline-padding);
+  gap: 12px;
+}
+
+/* Close button — explicit sizing */
+.hotspot-3d-anchored-panel .tour-glass-panel__close {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ishare-panel-header-btn-size, 38px);
+  height: var(--ishare-panel-header-btn-size, 38px);
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ishare-text-muted, rgba(15, 23, 42, 0.45));
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.hotspot-3d-anchored-panel .tour-glass-panel__close:hover,
+.hotspot-3d-anchored-panel .tour-glass-panel__close:focus-visible {
+  color: var(--ishare-text);
+  background: rgba(15, 23, 42, 0.06);
+  outline: none;
+}
+
+.hotspot-3d-anchored-panel .tour-glass-panel__close-icon {
+  font-size: var(--ishare-panel-header-icon-size, 16px);
+  line-height: 1;
+}
+
+/* Body — scrollable content area (PSV: flex + overflow, no fixed cap) */
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  min-width: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+  padding-left: var(--ishare-panel-inline-padding);
+  padding-right: var(--ishare-panel-inline-padding);
+}
+
+/* Meta row (naming badge group) — full-width like PSV anchored panels */
+.hotspot-3d-anchored-panel .tour-glass-panel__header>.tour-glass-panel__meta {
+  width: 100%;
+}
+
+/* Footer */
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer {
+  padding: var(--ishare-panel-footer-padding-y) var(--ishare-panel-inline-padding);
+}
+
+/* -- Post-landing hotspot enter animation (mirrors PSV stagger pattern) -- */
+
+.viewer-3d-container--hotspots-hold .hotspot-3d-wrap {
+  opacity: 0 !important;
+}
+
+.viewer-3d-container--hotspots-enter .hotspot-3d-wrap .hotspot-nav,
+.viewer-3d-container--hotspots-enter .hotspot-3d-wrap .hotspot-info {
+  animation: hotspot-enter 420ms cubic-bezier(0.34, 1.25, 0.64, 1) both;
+}
+
+/* Control pill — mirrors PSV bottom navbar (see psv-layer.css) */
+.viewer-3d-container .psv-navbar {
+  position: absolute;
+  z-index: var(--tour-chrome-z-index);
+  top: auto;
+  left: 50%;
+  right: auto;
+  bottom: 18px;
+  width: auto;
+  height: auto;
+  display: flex;
+  transform: translateX(-50%) translateY(0);
+  flex-direction: row;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.52);
+  backdrop-filter: blur(6px) saturate(120%);
+  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  border: none;
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+  font-family: var(--ishare-body-font);
+  align-items: center;
+  gap: 0;
+  overflow: visible;
+  max-width: min(520px, calc(100vw - 48px));
+  pointer-events: auto;
+}
+
+.viewer-3d-container .psv-button:not(.psv-zoom-range) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  box-sizing: border-box;
+  color: var(--ishare-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.viewer-3d-container .psv-button:not(.psv-zoom-range) .psv-button-svg {
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+}
+
+.viewer-3d-container .psv-navbar .psv-zoom-in-button+.psv-zoom-out-button {
+  margin-left: 4px;
+}
+
+.viewer-3d-container .psv-navbar .psv-zoom-out-button+.psv-recenter-button {
+  margin-left: 24px;
+}
+
+.viewer-3d-container .psv-navbar .psv-recenter-button+.psv-immersive-bg-button {
+  margin-left: 24px;
+}
+
+.viewer-3d-container .psv-navbar .psv-recenter-button+.psv-fullscreen-button {
+  margin-left: 24px;
+}
+
+.viewer-3d-container .psv-navbar .psv-immersive-bg-button+.psv-fullscreen-button {
+  margin-left: 4px;
+}
+
+.viewer-3d-container .psv-navbar .psv-fullscreen-button+.psv-tour-toolbar-toggle {
+  margin-left: 4px;
+}
+
+.viewer-3d-container .psv-toolbar-toggle-icon-stack {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+}
+
+.viewer-3d-container .psv-toolbar-toggle-material-symbol {
+  display: block;
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+  font-size: var(--psv-nav-icon-size);
+  line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+}
+
+.viewer-3d-container .psv-navbar-material-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+  font-size: var(--psv-nav-icon-size);
+  line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+}
+
+.viewer-3d-container .psv-navbar-material-symbol--filled {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+}
+
+.viewer-3d-container .psv-button:not(.psv-zoom-range):not(:disabled):hover,
+.viewer-3d-container .psv-button:not(.psv-zoom-range):not(:disabled):focus-visible {
+  color: var(--ishare-text);
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.viewer-3d-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
+  color: var(--ishare-primary);
+}
+
+@media (min-width: 1024px) {
+  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    max-width: 46px;
+    padding: 0;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-button:not(.psv-tour-toolbar-toggle) {
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    margin: 0 !important;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol {
+    display: block;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    font-size: 22px;
+  }
+
+  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewer-3d-container--hotspots-hold .hotspot-3d-wrap {
+    opacity: 1 !important;
+  }
+
+  .viewer-3d-container--hotspots-enter .hotspot-3d-wrap .hotspot-nav,
+  .viewer-3d-container--hotspots-enter .hotspot-3d-wrap .hotspot-info {
+    animation: none;
+  }
+}

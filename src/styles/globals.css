@@ -3,6 +3,7 @@
 @import './components-layer.css';
 @import './glass-panels-layer.css';
 @import './psv-layer.css';
+@import './viewer-3d-layer.css';
 
 /*
  * Tailwind-first design system — @theme is the single source of hex/rgb values.
@@ -42,6 +43,7 @@
   --color-category-aid: #c2410c;
   --color-category-social: #4338ca;
   --color-category-tourism: #0369a1;
+  --color-category-demo: #6d28d9;
 
   --color-category-healthcare-bg: #e0eff1;
   --color-category-education-bg: #e4eefe;
@@ -50,6 +52,7 @@
   --color-category-aid-bg: #feebde;
   --color-category-social-bg: #e9eafd;
   --color-category-tourism-bg: #ddf2fc;
+  --color-category-demo-bg: #ede9fe;
 
   /* Fonts — resolved on .tour-page when --client-font is set (layout.css) */
   --font-display: var(--ishare-display-font);
@@ -538,6 +541,8 @@
     --ishare-tour-category-social-services-color: var(--color-category-social);
     --ishare-tour-category-tourism-bg: var(--color-category-tourism-bg);
     --ishare-tour-category-tourism-color: var(--color-category-tourism);
+    --ishare-tour-category-demo-bg: var(--color-category-demo-bg);
+    --ishare-tour-category-demo-color: var(--color-category-demo);
 
     /* Badge layout tokens */
     --ishare-badge-outline-gap: 7px;

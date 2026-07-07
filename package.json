@@ -17,12 +17,14 @@
     "@photo-sphere-viewer/core": "^5.11.0",
     "@photo-sphere-viewer/markers-plugin": "^5.11.0",
     "@photo-sphere-viewer/virtual-tour-plugin": "^5.11.0",
+    "@types/three": "^0.185.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.17.0",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
