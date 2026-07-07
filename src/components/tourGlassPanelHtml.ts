@@ -971,8 +971,13 @@ export function buildAnchoredNavPreviewHtml(
 
   const titleHtml = `<h3 id="${escapeHtml(titleId)}" class="${GLASS_PANEL.title} nav-preview-panel__title">${escapeHtml(preview.title)}</h3>`;
 
+  const trimmedVideoUrl = preview.videoUrl?.trim();
+  const hasVideo = Boolean(trimmedVideoUrl);
+  const hasPanorama = Boolean(preview.panorama) && !hasVideo;
+  const hasHero = hasVideo || hasPanorama;
+
   const heroTitleOverlayHtml =
-    preview.panorama ?
+    hasHero ?
       `<div class="nav-preview-panel__hero-title">${titleHtml}</div>`
     : '';
 
@@ -981,8 +986,25 @@ export function buildAnchoredNavPreviewHtml(
   const hideShare = options?.hideShare ?? false;
   const navShareHtml = hideShare ? '' : navPreviewShareButtonHtml();
 
+  const heroActionsHtml = `<div class="nav-preview-panel__hero-actions">
+          ${navShareHtml}
+          <button
+            type="button"
+            class="nav-preview-panel__close"
+            data-nav-panel-close="true"
+            aria-label="Close"
+          >${navPreviewCloseIconHtml()}</button>
+        </div>`;
+
   const heroHtml =
-    preview.panorama ?
+    hasVideo ?
+      `<div class="nav-preview-panel__hero nav-preview-panel__hero--video nav-preview-panel__hero--loading" style="height:${heroHeight}px" aria-busy="true">
+        <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
+        ${buildPopupVideoHtml({ title: preview.title, body: '', videoUrl: trimmedVideoUrl! })}
+        ${heroTitleOverlayHtml}
+        ${heroActionsHtml}
+      </div>`
+    : hasPanorama ?
       `<div class="nav-preview-panel__hero nav-preview-panel__hero--loading" style="height:${heroHeight}px" aria-busy="true">
         <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
         <div class="nav-preview-panel__hero-viewer"></div>
@@ -998,20 +1020,12 @@ export function buildAnchoredNavPreviewHtml(
           : ''
         }
         ${heroTitleOverlayHtml}
-        <div class="nav-preview-panel__hero-actions">
-          ${navShareHtml}
-          <button
-            type="button"
-            class="nav-preview-panel__close"
-            data-nav-panel-close="true"
-            aria-label="Close"
-          >${navPreviewCloseIconHtml()}</button>
-        </div>
+        ${heroActionsHtml}
       </div>`
     : '';
 
   const closeInBodyHtml =
-    preview.panorama ? '' : (
+    hasHero ? '' : (
       `<div class="nav-preview-panel__body-toolbar">
         <div class="nav-preview-panel__toolbar-actions">
           ${hideShare ? '' : navPreviewShareButtonHtml(true)}
@@ -1025,7 +1039,7 @@ export function buildAnchoredNavPreviewHtml(
       </div>`
     );
 
-  const bodyTitleHtml = preview.panorama ? '' : titleHtml;
+  const bodyTitleHtml = hasHero ? '' : titleHtml;
 
   const descriptionHtml =
     preview.description ?

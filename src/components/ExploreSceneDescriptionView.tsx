@@ -7,6 +7,7 @@ import {
 } from '../constants/tourDirectory';
 import { cn } from '../lib/cn';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
+import { PopupVideoEmbed } from './popupContentUi';
 import { Badge } from './ui/Badge';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
@@ -45,6 +46,7 @@ export function ExploreSceneDescriptionView({
   onVisit,
 }: ExploreSceneDescriptionViewProps) {
   const description = scene.description?.trim();
+  const videoUrl = scene.videoUrl?.trim();
   const {
     src: previewSrc,
     failed: previewFailed,
@@ -113,6 +115,10 @@ export function ExploreSceneDescriptionView({
               No description for this location yet.
             </p>
           }
+
+          {videoUrl ?
+            <PopupVideoEmbed videoUrl={videoUrl} title={scene.title} />
+          : null}
         </div>
       </div>
 

@@ -11,6 +11,7 @@ import {
   dismissNavPreviewHero,
   isNavPreviewMiniViewerEnabled,
   mountNavPreviewMiniViewer,
+  mountNavPreviewVideoHero,
 } from './navPreviewMiniViewer';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import {
@@ -230,7 +231,9 @@ export function openAnchoredNavPreviewPanel(
           const panelMarker = markers.getMarker(id);
           if (!(panelMarker?.domElement instanceof HTMLElement)) return;
           refreshGlassPanelCtaOverflowTitles(panelMarker.domElement);
-          if (isNavPreviewMiniViewerEnabled()) {
+          if (preview.videoUrl?.trim()) {
+            mountNavPreviewVideoHero(panelMarker.domElement);
+          } else if (isNavPreviewMiniViewerEnabled()) {
             mountNavPreviewMiniViewer(id, panelMarker.domElement, preview);
           } else {
             dismissNavPreviewHero(panelMarker.domElement);

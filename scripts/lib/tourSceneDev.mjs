@@ -149,6 +149,38 @@ function parseNavHotspotVariant(value) {
   return undefined;
 }
 
+function applyNavHotspotPreviewFields(
+  record,
+  { previewImage, previewVideoUrl },
+) {
+  const image = previewImage?.trim();
+  const videoUrl = previewVideoUrl?.trim();
+  if (!image && !videoUrl) return;
+
+  record.preview = {};
+  if (image) record.preview.image = image;
+  if (videoUrl) record.preview.videoUrl = videoUrl;
+}
+
+function mergeNavHotspotPreview(hotspot, { previewImage, previewVideoUrl }) {
+  const preview = { ...(hotspot.preview ?? {}) };
+
+  if (previewImage !== undefined) {
+    const image = previewImage?.trim();
+    if (image) preview.image = image;
+    else delete preview.image;
+  }
+
+  if (previewVideoUrl !== undefined) {
+    const videoUrl = previewVideoUrl?.trim();
+    if (videoUrl) preview.videoUrl = videoUrl;
+    else delete preview.videoUrl;
+  }
+
+  if (Object.keys(preview).length) hotspot.preview = preview;
+  else delete hotspot.preview;
+}
+
 export function buildNavHotspotRecord({
   name,
   position,
@@ -157,6 +189,7 @@ export function buildNavHotspotRecord({
   instant,
   navVariant,
   previewImage,
+  previewVideoUrl,
 }) {
   const label = name.trim();
   const slug = slugifyHotspotName(label);
@@ -186,10 +219,7 @@ export function buildNavHotspotRecord({
     record.navVariant = resolvedNavVariant;
   }
 
-  const previewPath = previewImage?.trim();
-  if (previewPath) {
-    record.preview = { image: previewPath };
-  }
+  applyNavHotspotPreviewFields(record, { previewImage, previewVideoUrl });
 
   return record;
 }
@@ -201,6 +231,16 @@ function applyPopupMediaFields(popup, { videoUrl, image }) {
   const nextImage = image?.trim();
   if (nextVideoUrl) popup.videoUrl = nextVideoUrl;
   if (nextImage) popup.image = nextImage;
+}
+
+function applySceneVideoField(scene, videoUrl) {
+  if (videoUrl === undefined) return;
+  const nextVideoUrl = videoUrl?.trim();
+  if (nextVideoUrl) {
+    scene.videoUrl = nextVideoUrl;
+  } else {
+    delete scene.videoUrl;
+  }
 }
 
 export function buildNamingHotspotRecord({
@@ -511,6 +551,7 @@ export function buildSceneRecord({
   panorama,
   defaultView,
   description,
+  videoUrl,
   tourTitle,
 }) {
   const label = title.trim();
@@ -522,7 +563,7 @@ export function buildSceneRecord({
   if (!id) throw new Error('Scene title must contain letters or numbers');
   if (!panoramaPath) throw new Error('Panorama path is required');
 
-  return {
+  const record = {
     id,
     title: label,
     description: description?.trim() || defaultSceneDescription(tour, label),
@@ -532,6 +573,8 @@ export function buildSceneRecord({
     ),
     hotspots: [],
   };
+  applySceneVideoField(record, videoUrl);
+  return record;
 }
 
 export function buildDefaultModelWebPath(tour, sceneId, ext = 'glb') {
@@ -752,6 +795,7 @@ export async function createScene({
   thumbnailFileBuffer,
   defaultView,
   description,
+  videoUrl,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
@@ -831,6 +875,7 @@ export async function createScene({
     panorama: panoramaWebPath,
     defaultView,
     description,
+    videoUrl,
     tourTitle: tour.title,
   });
 
@@ -862,6 +907,7 @@ export async function createNavHotspot({
   instant,
   navVariant,
   previewImage,
+  previewVideoUrl,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
@@ -875,6 +921,7 @@ export async function createNavHotspot({
     instant,
     navVariant,
     previewImage,
+    previewVideoUrl,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
   writeTourJson(tourPath, tour);
@@ -977,6 +1024,7 @@ export function updateNavHotspot({
   instant,
   navVariant,
   previewImage,
+  previewVideoUrl,
   clearPreviewImage,
 }) {
   const resolvedHotspotId = hotspotId?.trim();
@@ -998,6 +1046,7 @@ export function updateNavHotspot({
   const hasInstant = instant !== undefined;
   const hasNavVariant = navVariant !== undefined;
   const hasPreviewImage = previewImage !== undefined;
+  const hasPreviewVideoUrl = previewVideoUrl !== undefined;
   const wantsClearPreview = clearPreviewImage === true;
   const wantsSyncTargetView = syncTargetViewFromScene === true;
 
@@ -1008,11 +1057,12 @@ export function updateNavHotspot({
     !hasInstant &&
     !hasNavVariant &&
     !hasPreviewImage &&
+    !hasPreviewVideoUrl &&
     !wantsClearPreview &&
     !wantsSyncTargetView
   ) {
     throw new Error(
-      'At least one of label, targetSceneId, targetView, instant, navVariant, previewImage, clearPreviewImage, or syncTargetViewFromScene is required',
+      'At least one of label, targetSceneId, targetView, instant, navVariant, previewImage, previewVideoUrl, clearPreviewImage, or syncTargetViewFromScene is required',
     );
   }
 
@@ -1062,13 +1112,8 @@ export function updateNavHotspot({
 
   if (wantsClearPreview) {
     delete hotspot.preview;
-  } else if (hasPreviewImage) {
-    const previewPath = previewImage?.trim();
-    if (previewPath) {
-      hotspot.preview = { image: previewPath };
-    } else {
-      delete hotspot.preview;
-    }
+  } else if (hasPreviewImage || hasPreviewVideoUrl) {
+    mergeNavHotspotPreview(hotspot, { previewImage, previewVideoUrl });
   }
 
   writeTourJson(tourPath, tour);
@@ -1286,6 +1331,7 @@ export function updateScene({
   sceneId,
   title,
   description,
+  videoUrl,
   setAsFirstScene,
   map,
   clearMap,
@@ -1305,6 +1351,7 @@ export function updateScene({
   const nextTitle = title?.trim();
   const hasDescription = description !== undefined;
   const nextDescription = description?.trim();
+  const hasVideoUrl = videoUrl !== undefined;
   const wantsFirstScene = Boolean(setAsFirstScene);
   const hasMap = map !== undefined && map !== null;
   const wantsClearMap = clearMap === true;
@@ -1312,12 +1359,13 @@ export function updateScene({
   if (
     !nextTitle &&
     !hasDescription &&
+    !hasVideoUrl &&
     !wantsFirstScene &&
     !hasMap &&
     !wantsClearMap
   ) {
     throw new Error(
-      'At least one of title, description, setAsFirstScene, map, or clearMap is required',
+      'At least one of title, description, videoUrl, setAsFirstScene, map, or clearMap is required',
     );
   }
 
@@ -1329,6 +1377,10 @@ export function updateScene({
     scene.description =
       nextDescription ||
       defaultSceneDescription(tour.title, scene.title ?? resolvedSceneId);
+  }
+
+  if (hasVideoUrl) {
+    applySceneVideoField(scene, videoUrl);
   }
 
   if (wantsFirstScene) {

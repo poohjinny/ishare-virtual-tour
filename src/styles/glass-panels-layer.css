@@ -1697,6 +1697,25 @@
     background: #e2e8f0;
   }
 
+  .nav-preview-panel__hero--video .tour-glass-panel__video {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+
+  .nav-preview-panel__hero--video:not(.nav-preview-panel__hero--loading) .tour-glass-panel__video {
+    opacity: 1;
+  }
+
+  .nav-preview-panel__hero--video:not(.nav-preview-panel__hero--loading) .preview-hero-skeleton {
+    opacity: 0;
+  }
+
   @media (prefers-reduced-motion: reduce) {
 
     .nav-preview-panel__hero-image,

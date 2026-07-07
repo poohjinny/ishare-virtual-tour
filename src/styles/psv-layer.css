@@ -187,6 +187,7 @@ input::placeholder {
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__cta,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__close,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__header-btn,
+.viewer-container .psv-marker:has([data-nav-panel='true']) .tour-glass-panel__video-play,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .tour-glass-panel__cta {
   cursor: pointer;
 }

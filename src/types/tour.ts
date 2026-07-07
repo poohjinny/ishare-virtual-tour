@@ -104,7 +104,7 @@ export interface Hotspot {
   /** Nav marker + default UX — discover (dot), back, or hub (firstScene). */
   navVariant?: NavHotspotVariant;
   /** Optional overrides for nav preview card */
-  preview?: { image?: string };
+  preview?: { image?: string; videoUrl?: string };
   /**
    * For `model3d` tour-level info / naming hotspots — viewpoint scene id.
    * Per-hotspot camera + Explore thumbnail live on `targetView` / `preview.image`.
@@ -136,6 +136,8 @@ export interface NavPreviewContent {
   panorama?: string;
   /** Static fallback for reduced-motion / load errors — defaults to target panorama */
   image?: string;
+  /** Custom preview video — nav `preview.videoUrl`, else target scene `videoUrl` */
+  videoUrl?: string;
   description?: string;
   namingItems?: NavPreviewNamingItem[];
   targetView?: ViewPosition;
@@ -167,6 +169,10 @@ export interface Scene {
   id: string;
   title: string;
   description?: string;
+  /** Optional scene intro video — YouTube, Synthesia embed, or hosted mp4/webm. */
+  videoUrl?: string;
+  /** Optional poster for local `videoUrl` (mp4/webm). */
+  videoPoster?: string;
   /** Equirectangular panorama URL (panorama tours). */
   panorama: string;
   /** GLTF / GLB model URL (model3d tours). Optional per-scene override of {@link Tour.model}. */

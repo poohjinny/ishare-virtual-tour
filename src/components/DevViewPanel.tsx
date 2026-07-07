@@ -375,6 +375,7 @@ export function DevViewPanel({
   const [editNavVariant, setEditNavVariant] = useState<NavHotspotVariant>(
     NAV_HOTSPOT_VARIANT_DEFAULT,
   );
+  const [editNavPreviewVideoUrl, setEditNavPreviewVideoUrl] = useState('');
   const [editNoTitle, setEditNoTitle] = useState('');
   const [editNoPrice, setEditNoPrice] = useState('');
   const [editNoStatus, setEditNoStatus] = useState<
@@ -394,6 +395,7 @@ export function DevViewPanel({
   const [editingSceneId, setEditingSceneId] = useState<string | null>(null);
   const [editSceneTitle, setEditSceneTitle] = useState('');
   const [editSceneDescription, setEditSceneDescription] = useState('');
+  const [editSceneVideoUrl, setEditSceneVideoUrl] = useState('');
   const [editSceneAsFirst, setEditSceneAsFirst] = useState(false);
   const [editSceneMapEnabled, setEditSceneMapEnabled] = useState(false);
   const [editSceneMapX, setEditSceneMapX] = useState('');
@@ -579,6 +581,7 @@ export function DevViewPanel({
   );
   const [scenePanoramaFile, setScenePanoramaFile] = useState<File | null>(null);
   const [sceneDescription, setSceneDescription] = useState('');
+  const [sceneVideoUrl, setSceneVideoUrl] = useState('');
 
   const [navName, setNavName] = useState(() =>
     readSessionValue(DEV_NAV_NAME_STORAGE_KEY),
@@ -600,6 +603,7 @@ export function DevViewPanel({
   const [navVariant, setNavVariant] = useState<NavHotspotVariant>(
     NAV_HOTSPOT_VARIANT_DEFAULT,
   );
+  const [navPreviewVideoUrl, setNavPreviewVideoUrl] = useState('');
 
   const [noName, setNoName] = useState(() =>
     readSessionValue(DEV_NO_NAME_STORAGE_KEY),
@@ -1214,6 +1218,7 @@ export function DevViewPanel({
         targetSceneId: navTargetSceneId,
         instant: navInstant || undefined,
         navVariant: serializeNavHotspotVariant(navVariant),
+        previewVideoUrl: navPreviewVideoUrl.trim() || undefined,
       });
       await onTourMutated?.();
       setNavStatus('done');
@@ -1222,6 +1227,7 @@ export function DevViewPanel({
       setNavTargetTouched(false);
       setNavInstant(false);
       setNavVariant(NAV_HOTSPOT_VARIANT_DEFAULT);
+      setNavPreviewVideoUrl('');
     } catch (error) {
       setNavStatus('error');
       setNavError(
@@ -1235,6 +1241,7 @@ export function DevViewPanel({
     navTargetSceneId,
     navInstant,
     navVariant,
+    navPreviewVideoUrl,
     scene.id,
     scene.tourId,
     trimmedNavName,
@@ -1417,9 +1424,13 @@ export function DevViewPanel({
               : undefined,
           }),
         description: sceneDescription.trim() || undefined,
+        ...(!isModel3dTour ?
+          { videoUrl: sceneVideoUrl.trim() || undefined }
+        : {}),
       });
       setSceneTitle('');
       setSceneDescription('');
+      setSceneVideoUrl('');
       setScenePanoramaFile(null);
       setSceneStatus('done');
       await onTourMutated?.({ navigateToScene: result.scene.id });
@@ -1437,6 +1448,7 @@ export function DevViewPanel({
     resolveModel3dSceneCreatePayload,
     scene.tourId,
     sceneDescription,
+    sceneVideoUrl,
     scenePanoramaFile,
     trimmedSceneTitle,
     view,
@@ -1997,6 +2009,7 @@ export function DevViewPanel({
       setEditNavTarget(hotspot.targetScene ?? '');
       setEditNavInstant(Boolean(hotspot.instant));
       setEditNavVariant(resolveNavHotspotVariant(hotspot));
+      setEditNavPreviewVideoUrl(hotspot.preview?.videoUrl ?? '');
       return;
     }
     if (isNamingInfoHotspot(hotspot)) {
@@ -2054,6 +2067,7 @@ export function DevViewPanel({
           syncTargetViewFromScene: true,
           instant: editNavInstant,
           navVariant: editNavVariant,
+          previewVideoUrl: editNavPreviewVideoUrl,
         });
       } else if (isNamingInfoHotspot(hotspot)) {
         if (editNoSyncPosition) {
@@ -2123,6 +2137,7 @@ export function DevViewPanel({
     editInfoVisitScene,
     editNavInstant,
     editNavVariant,
+    editNavPreviewVideoUrl,
     editNavLabel,
     editNavTarget,
     editNoBody,
@@ -2201,6 +2216,7 @@ export function DevViewPanel({
       setEditingSceneId(entry.id);
       setEditSceneTitle(entry.title);
       setEditSceneDescription(entry.description ?? '');
+      setEditSceneVideoUrl(entry.videoUrl ?? '');
       setEditSceneAsFirst(entry.id === tour.firstScene);
       setEditSceneMapEnabled(Boolean(entry.map));
       setEditSceneMapX(String(entry.map?.x ?? 0.5));
@@ -2226,6 +2242,7 @@ export function DevViewPanel({
         sceneId: editingSceneId,
         title: editSceneTitle.trim() || undefined,
         description: editSceneDescription,
+        ...(!isModel3dTour ? { videoUrl: editSceneVideoUrl } : {}),
         setAsFirstScene: editSceneAsFirst && !isAlreadyFirst,
         ...(isModel3dTour ?
           {}
@@ -2255,6 +2272,7 @@ export function DevViewPanel({
   }, [
     editSceneAsFirst,
     editSceneDescription,
+    editSceneVideoUrl,
     editSceneMapEnabled,
     editSceneMapHeading,
     editSceneMapX,
@@ -2950,6 +2968,29 @@ export function DevViewPanel({
                                 Apply landing view, then Save nav to copy it
                                 into <code>targetView</code>.
                               </p>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Nav preview video URL (optional)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='url'
+                                  value={editNavPreviewVideoUrl}
+                                  onChange={(e) =>
+                                    setEditNavPreviewVideoUrl(e.target.value)
+                                  }
+                                  placeholder='https://youtube.com/… or Synthesia embed'
+                                  spellCheck={false}
+                                  autoComplete='off'
+                                />
+                              </label>
+                              <p className={devViewPanelSectionHintClassName}>
+                                Overrides the target scene video and panorama
+                                preview on the nav card. Leave empty to use the
+                                scene video URL, then panorama.
+                              </p>
                               <label
                                 className={devViewPanelToggleLabelClassName}
                               >
@@ -3629,6 +3670,26 @@ export function DevViewPanel({
                       }
                     </p>
 
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Nav preview video URL (optional)
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='url'
+                        value={navPreviewVideoUrl}
+                        onChange={(e) => setNavPreviewVideoUrl(e.target.value)}
+                        placeholder='https://youtube.com/… or Synthesia embed'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+                    <p className={devViewPanelSectionHintClassName}>
+                      Overrides the target scene video and panorama preview on
+                      the nav card. Leave empty to use the scene video URL, then
+                      panorama.
+                    </p>
+
                     <label className={devViewPanelToggleLabelClassName}>
                       <input
                         className={devViewPanelToggleInputClassName}
@@ -4184,6 +4245,29 @@ export function DevViewPanel({
                               placeholder='Optional — leave empty to remove'
                             />
                           </label>
+                          {!isModel3dTour ?
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Video URL (optional)
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='url'
+                                value={editSceneVideoUrl}
+                                onChange={(e) =>
+                                  setEditSceneVideoUrl(e.target.value)
+                                }
+                                placeholder='https://youtube.com/… or Synthesia embed'
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                              <p className={devViewPanelSectionHintClassName}>
+                                Explore scene detail and nav preview hero for
+                                links to this scene. Nav preview video URL on
+                                the hotspot overrides this.
+                              </p>
+                            </label>
+                          : null}
                           <div className={devViewPanelToggleListClassName}>
                             {!isFirst ?
                               <label
@@ -4406,6 +4490,27 @@ export function DevViewPanel({
                 spellCheck={true}
               />
             </label>
+
+            {!isModel3dTour ?
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Video URL (optional)
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='url'
+                  value={sceneVideoUrl}
+                  onChange={(e) => setSceneVideoUrl(e.target.value)}
+                  placeholder='https://youtube.com/… or Synthesia embed'
+                  spellCheck={false}
+                  autoComplete='off'
+                />
+                <p className={devViewPanelSectionHintClassName}>
+                  Explore scene detail and nav preview hero. Nav preview video
+                  URL on a hotspot to this scene overrides this.
+                </p>
+              </label>
+            : null}
 
             {sceneSlug ?
               <p className={devViewPanelSlugPreviewClassName}>

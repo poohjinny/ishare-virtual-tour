@@ -13,6 +13,7 @@ import {
   subscribeTourPerfPause,
   type TourPerfPauseState,
 } from './viewerPerfPause';
+import { initPopupVideoPlayers } from '../utils/popupVideo';
 
 /** Nav preview hero — on by default; `?disableNavPreview=1` disables (debug). */
 export function isNavPreviewMiniViewerEnabled(
@@ -296,6 +297,46 @@ export function mountNavPreviewMiniViewer(
     syncHeroHeight(hero);
     mountPanoramaViewer(markerId, hero, container, preview);
   });
+}
+
+const NAV_PREVIEW_VIDEO_HERO_LOAD_MS = 4000;
+
+export function mountNavPreviewVideoHero(root: ParentNode): void {
+  const hero = root.querySelector('.nav-preview-panel__hero--video');
+  if (!(hero instanceof HTMLElement)) return;
+
+  syncHeroHeight(hero);
+  initPopupVideoPlayers(root);
+
+  const videoShell = hero.querySelector('.tour-glass-panel__video--preview');
+  const finish = () => markHeroLoaded(hero);
+
+  if (!(videoShell instanceof HTMLElement)) {
+    finish();
+    return;
+  }
+
+  if (videoShell.classList.contains('tour-glass-panel__video--thumb-loaded')) {
+    finish();
+    return;
+  }
+
+  const observer = new MutationObserver(() => {
+    if (
+      videoShell.classList.contains('tour-glass-panel__video--thumb-loaded')
+    ) {
+      observer.disconnect();
+      finish();
+    }
+  });
+  observer.observe(videoShell, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+  window.setTimeout(() => {
+    observer.disconnect();
+    finish();
+  }, NAV_PREVIEW_VIDEO_HERO_LOAD_MS);
 }
 
 export function destroyNavPreviewMiniViewer(markerId: string): void {

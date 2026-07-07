@@ -127,6 +127,10 @@ function validateHotspotPayload(body) {
       typeof body.navVariant === 'string' ? body.navVariant : undefined,
     previewImage:
       typeof body.previewImage === 'string' ? body.previewImage : undefined,
+    previewVideoUrl:
+      typeof body.previewVideoUrl === 'string' ?
+        body.previewVideoUrl
+      : undefined,
   };
 }
 
@@ -143,6 +147,7 @@ function validateCreateScenePayload(body, toursDir) {
     defaultView,
     description,
     sceneId,
+    videoUrl,
   } = body ?? {};
   if (!tourId || !title) {
     throw new Error('tourId and title are required');
@@ -226,6 +231,7 @@ function validateCreateScenePayload(body, toursDir) {
     defaultView,
     description,
     sceneId,
+    videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
   };
 }
 
@@ -304,6 +310,7 @@ function validateUpdateScenePayload(body) {
     sceneId,
     title,
     description,
+    videoUrl,
     setAsFirstScene,
     map,
     clearMap,
@@ -314,12 +321,13 @@ function validateUpdateScenePayload(body) {
   if (
     !title?.trim() &&
     description === undefined &&
+    videoUrl === undefined &&
     setAsFirstScene !== true &&
     map === undefined &&
     clearMap !== true
   ) {
     throw new Error(
-      'At least one of title, description, setAsFirstScene, map, or clearMap is required',
+      'At least one of title, description, videoUrl, setAsFirstScene, map, or clearMap is required',
     );
   }
 
@@ -336,6 +344,7 @@ function validateUpdateScenePayload(body) {
     sceneId: sceneId.trim(),
     title,
     description,
+    videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
     setAsFirstScene: setAsFirstScene === true,
     map: normalizedMap,
     clearMap: clearMap === true,
@@ -368,6 +377,7 @@ function validateNavHotspotUpdatePayload(body) {
     instant,
     navVariant,
     previewImage,
+    previewVideoUrl,
     clearPreviewImage,
   } = body ?? {};
   if (!tourId || !sceneId || !hotspotId?.trim()) {
@@ -381,10 +391,11 @@ function validateNavHotspotUpdatePayload(body) {
     instant === undefined &&
     navVariant === undefined &&
     previewImage === undefined &&
+    previewVideoUrl === undefined &&
     clearPreviewImage !== true
   ) {
     throw new Error(
-      'At least one of label, targetSceneId, targetView, instant, navVariant, previewImage, clearPreviewImage, or syncTargetViewFromScene is required',
+      'At least one of label, targetSceneId, targetView, instant, navVariant, previewImage, previewVideoUrl, clearPreviewImage, or syncTargetViewFromScene is required',
     );
   }
   return {
@@ -398,6 +409,8 @@ function validateNavHotspotUpdatePayload(body) {
     instant: typeof instant === 'boolean' ? instant : undefined,
     navVariant: typeof navVariant === 'string' ? navVariant : undefined,
     previewImage: typeof previewImage === 'string' ? previewImage : undefined,
+    previewVideoUrl:
+      typeof previewVideoUrl === 'string' ? previewVideoUrl : undefined,
     clearPreviewImage: clearPreviewImage === true,
   };
 }
@@ -1287,6 +1300,7 @@ export function viteDevTourApiPlugin() {
               defaultView,
               description,
               sceneId,
+              videoUrl,
             } = validateCreateScenePayload(body, toursDir);
             const result = await createScene({
               root,
@@ -1301,6 +1315,7 @@ export function viteDevTourApiPlugin() {
               thumbnailFileBuffer,
               defaultView,
               description,
+              videoUrl,
             });
             sendJson(res, 200, {
               ok: true,
@@ -1359,6 +1374,7 @@ export function viteDevTourApiPlugin() {
               sceneId,
               title,
               description,
+              videoUrl,
               setAsFirstScene,
               map,
               clearMap,
@@ -1369,6 +1385,7 @@ export function viteDevTourApiPlugin() {
               sceneId,
               title,
               description,
+              videoUrl,
               setAsFirstScene,
               map,
               clearMap,
@@ -1408,6 +1425,7 @@ export function viteDevTourApiPlugin() {
               instant,
               navVariant,
               previewImage,
+              previewVideoUrl,
               clearPreviewImage,
             } = validateNavHotspotUpdatePayload(body);
             const result = updateNavHotspot({
@@ -1422,6 +1440,7 @@ export function viteDevTourApiPlugin() {
               instant,
               navVariant,
               previewImage,
+              previewVideoUrl,
               clearPreviewImage,
             });
             sendJson(res, 200, {
@@ -1557,6 +1576,7 @@ export function viteDevTourApiPlugin() {
               instant,
               navVariant,
               previewImage,
+              previewVideoUrl,
             } = validateHotspotPayload(body);
             if (!targetSceneId) {
               throw new Error('targetSceneId is required for nav hotspots');
@@ -1571,6 +1591,7 @@ export function viteDevTourApiPlugin() {
               instant,
               navVariant,
               previewImage,
+              previewVideoUrl,
             });
             sendJson(res, 200, {
               ok: true,
