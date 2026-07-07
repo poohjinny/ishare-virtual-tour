@@ -15,8 +15,8 @@
       "description": "Explore Overview as part of the Queensway Carleton General Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/overview.webp",
       "defaultView": {
-        "yaw": 86.9,
-        "pitch": -15.8,
+        "yaw": 83.2,
+        "pitch": -8.2,
         "zoom": 45
       },
       "hotspots": [
@@ -62,26 +62,11 @@
       "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/overview.webp",
       "defaultView": {
-        "yaw": 126,
-        "pitch": -58,
-        "zoom": 30
+        "yaw": 133.5,
+        "pitch": -76,
+        "zoom": 2
       },
       "hotspots": [
-        {
-          "id": "nav-to-mh-1",
-          "type": "nav",
-          "label": "MH - 1",
-          "position": {
-            "yaw": 117.6,
-            "pitch": -49.4
-          },
-          "targetScene": "ed-mh-1",
-          "targetView": {
-            "yaw": 59,
-            "pitch": -3.2,
-            "zoom": 0
-          }
-        },
         {
           "id": "nav-to-mh-2",
           "type": "nav",
