@@ -49,13 +49,13 @@ canonical `/{tourId}/{sceneId}` form.
 
 ## Query flags
 
-| Parameter           | Example                | Description                                                            |
-| ------------------- | ---------------------- | ---------------------------------------------------------------------- |
-| `embed`             | `?embed=1`             | Minimal chrome for iShare iframe embed                                 |
-| `dev`               | `?dev=1`               | Click panorama to log yaw/pitch for hotspot tuning                     |
-| `no`                | `?no=reception-desk`   | Open a naming-opportunity panel (kebab-case NO name; survives refresh) |
-| `notFoundTest`      | `?notFoundTest=1`      | Force tour not-found (404) screen                                      |
-| `panoramaErrorTest` | `?panoramaErrorTest=1` | Show panorama load-error overlay for layout debugging                  |
+| Parameter       | Example              | Description                                                                  |
+| --------------- | -------------------- | ---------------------------------------------------------------------------- |
+| `embed`         | `?embed=1`           | Minimal chrome for iShare iframe embed                                       |
+| `dev`           | `?dev=1`             | Click panorama to log yaw/pitch for hotspot tuning                           |
+| `no`            | `?no=reception-desk` | Open a naming-opportunity panel (kebab-case NO name; survives refresh)       |
+| `notFoundTest`  | `?notFoundTest=1`    | Force tour not-found (404) screen                                            |
+| `loadErrorTest` | `?loadErrorTest=1`   | Force viewer load-error overlay (panorama + 3D; legacy: `panoramaErrorTest`) |
 
 **Examples:**
 

@@ -47,11 +47,22 @@ linked specs.
 
 ## Project principles
 
-### React + PSV HTML (two rendering paths)
+### React + PSV HTML + Three.js (rendering paths)
 
-UI renders in **React** (dock panels, modals) and as **HTML strings** in PSV
-markers (nav preview, NO popups). Shared visuals must work in **both** paths —
-see [COMPONENTS.md](./COMPONENTS.md).
+UI renders in **React** (dock panels, modals), as **HTML strings** in PSV
+markers (nav preview, NO popups), and via **Three.js** for 3D model tours.
+Shared visuals must work in **both** HTML paths — see
+[COMPONENTS.md](./COMPONENTS.md).
+
+`TourPage` selects the viewer at runtime based on `tour.viewerType`:
+
+| `viewerType`       | Viewer component          | Loaded via   |
+| ------------------ | ------------------------- | ------------ |
+| `'panorama'` (def) | `PanoramaViewer` (PSV)    | `React.lazy` |
+| `'model3d'`        | `ThreeDViewer` (Three.js) | `React.lazy` |
+
+Both implement `TourViewerHandle` (`src/viewer/viewerHandle.ts`) — the
+imperative contract between orchestrator and renderer.
 
 ### Data over hard-coding
 
@@ -93,7 +104,8 @@ ishare-virtual-tour/
 │   ├── styles/          globals.css (@theme), layout, hotspots
 │   ├── types/           tour.ts — canonical tour schema
 │   ├── utils/           Paths, directory, popup layout, preferences
-│   └── viewer/          PSV, markers, transitions, panel markers
+│   ├── viewer/          PSV, markers, transitions, viewerHandle
+│   └── viewer-3d/       Three.js GLTF walkthrough (lazy-loaded)
 └── docs/
 ```
 
@@ -101,7 +113,8 @@ ishare-virtual-tour/
 | --------------- | ------------------------------------------------- |
 | `types/tour.ts` | Shapes only — no runtime logic                    |
 | `data/`         | Load, normalize, naming opportunity rules         |
-| `viewer/`       | Photo Sphere Viewer, markers, camera, transitions |
+| `viewer/`       | PSV, markers, camera, transitions, `viewerHandle` |
+| `viewer-3d/`    | Three.js GLTF viewer (lazy-loaded for `model3d`)  |
 | `components/`   | React trees + colocated feature CSS               |
 | `utils/`        | Stateless helpers shared across layers            |
 
@@ -119,7 +132,7 @@ ishare-virtual-tour/
 - **No path aliases** — relative imports within `src/`.
 - Import marker-shared CSS from [`main.tsx`](../src/main.tsx).
 - Hooks: `useTourState`, `useViewerControlsVisible`, `useTourRouteSync`.
-- Viewer API: `PanoramaViewer` ref.
+- Viewer API: `TourViewerHandle` ref (`PanoramaViewer` or `ThreeDViewer`).
 - FAB labels: `src/constants/tourNavActions.ts` (`aria-label` + `title`).
 
 ---
@@ -178,8 +191,8 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 - Preload → `setCurrentNode()` — [`transition.ts`](../src/viewer/transition.ts)
 - URL sync — `useTourRouteSync` + [`tourPaths.ts`](../src/utils/tourPaths.ts)
 - Paths: `/`, `/{sceneId}`, `/{tourId}`, `/{tourId}/{sceneId}`
-- Preserved query: `embed`, `dev`, `chatTest`, `notFoundTest`,
-  `panoramaErrorTest`, `navPreview`
+- Preserved query: `embed`, `dev`, `chatTest`, `notFoundTest`, `loadErrorTest`,
+  `navPreview`
 - Legacy `?tour=` / `?scene=` → path redirect
 
 ### Fullscreen

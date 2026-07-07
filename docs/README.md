@@ -25,18 +25,18 @@ Project documentation for the iShare virtual tour platform.
 | [EMBED.md](./EMBED.md)                                             | Embed mode — iframe URL, chrome, postMessage, QA                       |
 | [DEPLOY.md](./DEPLOY.md)                                           | Production deploy — `tour.ishare.ca`, DNS, GitHub Pages, ishare iframe |
 | [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)                         | SeekBeak context, stakeholder demo script                              |
-| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)                     | Engineering reference — structure, PSV, styling, tour content          |
+| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)                     | Engineering reference — structure, PSV/Three.js, styling, tour content |
 | [DEV_PANEL.md](./DEV_PANEL.md)                                     | Dev panel (`?dev=1`) — authoring, URL flags, embed QA                  |
 | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                               | Git commit/push guidelines — one task per commit                       |
 | [STYLING.md](./STYLING.md)                                         | Tailwind + custom CSS hybrid — migration rules                         |
-| [TECH_STACK.md](./TECH_STACK.md)                                   | Technology choices, library comparison, dependencies, deployment       |
+| [TECH_STACK.md](./TECH_STACK.md)                                   | Technology choices (PSV + Three.js), dependencies, deployment          |
 | [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md)                     | Scene transition UX, zoom semantics, tuning                            |
 | [COMPONENTS.md](./COMPONENTS.md)                                   | Shared UI components — React and HTML marker popups                    |
 | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)                           | Naming hierarchy — platform vs client tour vs facility                 |
 | [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md)               | Naming status values and status-driven popup CTAs                      |
 | [PERFORMANCE.md](./PERFORMANCE.md)                                 | Performance playbook — P0–P5 guidance (tasks only in ROADMAP)          |
 | [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client intake — full tour onboarding checklist (sales)                 |
-| [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)           | 3D production handoff — panoramas & spatial package (architect → dev)  |
+| [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)           | 3D handoff — panoramas, GLTF models, spatial package (architect → dev) |
 
 ## Quick links
 
