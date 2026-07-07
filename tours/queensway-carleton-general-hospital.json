@@ -1,0 +1,647 @@
+{
+  "id": "queensway-carleton-general-hospital",
+  "clientId": "qchfoundation",
+  "category": "Healthcare",
+  "title": "Queensway Carleton General Hospital",
+  "firstScene": "overview",
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
+  "scenes": {
+    "overview": {
+      "id": "overview",
+      "title": "Overview",
+      "description": "Explore Overview as part of the Queensway Carleton General Hospital virtual tour.",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/overview.webp",
+      "defaultView": {
+        "yaw": 86.9,
+        "pitch": -15.8,
+        "zoom": 45
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-emergency-department",
+          "type": "nav",
+          "label": "Emergency Department",
+          "position": {
+            "yaw": 113.8,
+            "pitch": -9.4
+          },
+          "targetScene": "ed-overview",
+          "targetView": {
+            "yaw": 0,
+            "pitch": 0,
+            "zoom": 17
+          },
+          "preview": {
+            "videoUrl": "https://www.youtube.com/watch?v=UhIAhTf_4L0&t=2s"
+          }
+        },
+        {
+          "id": "nav-to-med-surg-inpatient",
+          "type": "nav",
+          "label": "Med / surg Inpatient",
+          "position": {
+            "yaw": 80.3,
+            "pitch": 0.1
+          },
+          "targetScene": "msi-overview",
+          "targetView": {
+            "yaw": 0,
+            "pitch": 0,
+            "zoom": 17
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/overview.webp"
+    },
+    "ed-overview": {
+      "id": "ed-overview",
+      "title": "Emergency Department",
+      "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/overview.webp",
+      "defaultView": {
+        "yaw": 126,
+        "pitch": -58,
+        "zoom": 30
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-mh-1",
+          "type": "nav",
+          "label": "MH - 1",
+          "position": {
+            "yaw": 117.6,
+            "pitch": -49.4
+          },
+          "targetScene": "ed-mh-1",
+          "targetView": {
+            "yaw": 59,
+            "pitch": -3.2,
+            "zoom": 0
+          }
+        },
+        {
+          "id": "nav-to-mh-2",
+          "type": "nav",
+          "label": "Walk-in Entrance",
+          "position": {
+            "yaw": 257.9,
+            "pitch": -53.1
+          },
+          "targetScene": "ed-mh-2",
+          "targetView": {
+            "yaw": 79,
+            "pitch": -7.6,
+            "zoom": 0
+          }
+        },
+        {
+          "id": "nav-to-mh-3",
+          "type": "nav",
+          "label": "Waiting Area",
+          "position": {
+            "yaw": 214,
+            "pitch": -55.7
+          },
+          "targetScene": "ed-mh-3",
+          "targetView": {
+            "yaw": 77.9,
+            "pitch": -5.2,
+            "zoom": 43
+          },
+          "preview": {
+            "videoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA"
+          }
+        },
+        {
+          "id": "nav-to-ambulance-offload",
+          "type": "nav",
+          "label": "Ambulance Offload",
+          "position": {
+            "yaw": 170.1,
+            "pitch": -42.7
+          },
+          "targetScene": "ed-ambulance-offload",
+          "targetView": {
+            "yaw": 88.4,
+            "pitch": 2.1,
+            "zoom": 10
+          }
+        },
+        {
+          "id": "nav-to-mental-health-emergency-services-unit",
+          "type": "nav",
+          "label": "Mental Health Emergency Services Unit",
+          "position": {
+            "yaw": 75.5,
+            "pitch": -23.2
+          },
+          "targetScene": "mental-health-emergency-services-unit",
+          "targetView": {
+            "yaw": 0,
+            "pitch": 0,
+            "zoom": 17
+          },
+          "preview": {
+            "videoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/ed-overview.webp",
+      "videoUrl": "https://share.synthesia.io/embeds/videos/c299f173-bd3c-4ac9-bc10-03f17e8814f3"
+    },
+    "ed-mh-1": {
+      "id": "ed-mh-1",
+      "title": "MH - 1",
+      "description": "Explore MH - 1 as part of the MH virtual tour.",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-1.webp",
+      "defaultView": {
+        "yaw": 59,
+        "pitch": -3.2,
+        "zoom": 0
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-1.webp"
+    },
+    "ed-mh-2": {
+      "id": "ed-mh-2",
+      "title": "Walk-in Entrance",
+      "description": "Explore Walk in Entrance as part of the Emergency Department virtual tour.",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-mh-2.webp",
+      "defaultView": {
+        "yaw": 79,
+        "pitch": -7.6,
+        "zoom": 29
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-mh-2.webp"
+    },
+    "ed-mh-3": {
+      "id": "ed-mh-3",
+      "title": "Waiting Area",
+      "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-3.webp",
+      "defaultView": {
+        "yaw": 127.4,
+        "pitch": -6,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "info-emergency-department-waiting-area",
+          "type": "info",
+          "position": {
+            "yaw": 129,
+            "pitch": 1.1
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Emergency Department Waiting Area",
+            "namingOpportunity": {
+              "name": "Emergency Department Waiting Area Naming Opportunity",
+              "price": 10000000,
+              "status": "open"
+            },
+            "body": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-3.webp",
+      "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
+    },
+    "ed-ambulance-offload": {
+      "id": "ed-ambulance-offload",
+      "title": "Ambulance Offload",
+      "description": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawa’s west end — one that supports patients, families, paramedics, and hospital staff when time matters most.",
+      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/ambulance-offload.webp",
+      "defaultView": {
+        "yaw": 88.4,
+        "pitch": 2.1,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "info-ambulance-offload",
+          "type": "info",
+          "position": {
+            "yaw": 33.8,
+            "pitch": -8.5
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Ambulance Offload",
+            "namingOpportunity": {
+              "name": "Ambulance Offload Naming Opportunity",
+              "price": 500000,
+              "status": "open"
+            },
+            "body": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawa’s west end — one that supports patients, families, paramedics, and hospital staff when time matters most.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7"
+          }
+        }
+      ],
+      "videoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7",
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/ambulance-offload.webp"
+    },
+    "msi-overview": {
+      "id": "msi-overview",
+      "title": "Med / surg Inpatient",
+      "description": "Explore Med / surg Inpatient as part of the Queensway Carleton General Hospital virtual tour.",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/overview.webp",
+      "defaultView": {
+        "yaw": 102.2,
+        "pitch": -62.8,
+        "zoom": 7
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-inpatien-suites",
+          "type": "nav",
+          "label": "Inpatien Suites",
+          "position": {
+            "yaw": 337.3,
+            "pitch": -62.9
+          },
+          "targetScene": "msi-inpatient-suites",
+          "targetView": {
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
+          }
+        },
+        {
+          "id": "nav-to-reception-centre",
+          "type": "nav",
+          "label": "Reception Centre",
+          "position": {
+            "yaw": 140.7,
+            "pitch": -34.7
+          },
+          "targetScene": "msi-reception-centre",
+          "targetView": {
+            "yaw": 101.6,
+            "pitch": -2.8,
+            "zoom": 55
+          }
+        },
+        {
+          "id": "nav-to-nursing-station",
+          "type": "nav",
+          "label": "Nursing Station",
+          "position": {
+            "yaw": 33.1,
+            "pitch": -60.9
+          },
+          "targetScene": "msi-nursing-station",
+          "targetView": {
+            "yaw": 84.5,
+            "pitch": -17.2,
+            "zoom": 10
+          }
+        },
+        {
+          "id": "nav-to-multi-use-lounge-activity-room",
+          "type": "nav",
+          "label": "Multi Use Lounge / Activity Room",
+          "position": {
+            "yaw": 157.7,
+            "pitch": -30.1
+          },
+          "targetScene": "msi-multi-use-lounge-activity-room",
+          "targetView": {
+            "yaw": 181.7,
+            "pitch": -18.3,
+            "zoom": 10
+          }
+        },
+        {
+          "id": "nav-to-quiet-consultant",
+          "type": "nav",
+          "label": "Quiet/ Consultant",
+          "position": {
+            "yaw": 134.5,
+            "pitch": -22.3
+          },
+          "targetScene": "msi-quiet-consultant",
+          "targetView": {
+            "yaw": 231.7,
+            "pitch": -29.9,
+            "zoom": 10
+          }
+        },
+        {
+          "id": "nav-to-dining-activity-room",
+          "type": "nav",
+          "label": "Dining /Activity Room",
+          "position": {
+            "yaw": 126.9,
+            "pitch": -21.7
+          },
+          "targetScene": "msi-dining-activity-room",
+          "targetView": {
+            "yaw": 73.6,
+            "pitch": -29.2,
+            "zoom": 14
+          }
+        },
+        {
+          "id": "nav-to-allied-health-team-room",
+          "type": "nav",
+          "label": "Allied Health Team Room",
+          "position": {
+            "yaw": 122.9,
+            "pitch": -25.6
+          },
+          "targetScene": "msi-allied-health-team-room",
+          "targetView": {
+            "yaw": 81,
+            "pitch": -41.3,
+            "zoom": 14
+          }
+        },
+        {
+          "id": "nav-to-galley-servery",
+          "type": "nav",
+          "label": "Galley/ Servery",
+          "position": {
+            "yaw": 120.9,
+            "pitch": -19.7
+          },
+          "targetScene": "msi-galley-servery",
+          "targetView": {
+            "yaw": 86.7,
+            "pitch": -29.2,
+            "zoom": 4
+          }
+        },
+        {
+          "id": "nav-to-report-meeting-room",
+          "type": "nav",
+          "label": "Report Meeting Room",
+          "position": {
+            "yaw": 112.1,
+            "pitch": -28.5
+          },
+          "targetScene": "msi-report-meeting-room",
+          "targetView": {
+            "yaw": 91.4,
+            "pitch": -19.3,
+            "zoom": 32
+          }
+        },
+        {
+          "id": "nav-to-staff-facility-lounge",
+          "type": "nav",
+          "label": "Staff Facility / Lounge",
+          "position": {
+            "yaw": 114.9,
+            "pitch": -18.4
+          },
+          "targetScene": "msi-staff-facility-lounge",
+          "targetView": {
+            "yaw": 329.3,
+            "pitch": -22.6,
+            "zoom": 19
+          }
+        },
+        {
+          "id": "nav-to-inpatient-suites",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 50,
+            "pitch": -45.3
+          },
+          "targetScene": "msi-inpatient-suites",
+          "targetView": {
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
+          }
+        },
+        {
+          "id": "nav-to-inpatient-suites-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 63.5,
+            "pitch": -47.9
+          },
+          "targetScene": "msi-inpatient-suites",
+          "targetView": {
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
+          }
+        },
+        {
+          "id": "nav-to-inpatient-suites-3",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -47.6
+          },
+          "targetScene": "msi-inpatient-suites",
+          "targetView": {
+            "yaw": 100.4,
+            "pitch": -13,
+            "zoom": 15
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/msi-overview.webp"
+    },
+    "msi-inpatient-suites": {
+      "id": "msi-inpatient-suites",
+      "title": "Inpatient Suites",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/inpatient-suites.webp",
+      "defaultView": {
+        "yaw": 100.4,
+        "pitch": -13,
+        "zoom": 15
+      },
+      "hotspots": [
+        {
+          "id": "info-inpatient-bed-rooms",
+          "type": "info",
+          "position": {
+            "yaw": 101.7,
+            "pitch": 6.7
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Inpatient Bed Rooms",
+            "namingOpportunity": {
+              "name": "Inpatient Bed Rooms Naming Opportunity",
+              "price": 25000,
+              "status": "open"
+            },
+            "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/inpatient-suites.webp",
+      "description": "Explore Inpatient Suites as part of the Med/Surg Inpatient virtual tour."
+    },
+    "msi-nursing-station": {
+      "id": "msi-nursing-station",
+      "title": "Nursing Station",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/nursing-station.webp",
+      "defaultView": {
+        "yaw": 84.5,
+        "pitch": -17.2,
+        "zoom": 10
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/nursing-station.webp",
+      "description": "Explore Nursing Station as part of the Med/Surg Inpatient virtual tour."
+    },
+    "msi-multi-use-lounge-activity-room": {
+      "id": "msi-multi-use-lounge-activity-room",
+      "title": "Multi Use Lounge / Activity Room",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/multi-use-lounge-activity-room.webp",
+      "defaultView": {
+        "yaw": 181.7,
+        "pitch": -18.3,
+        "zoom": 10
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/multi-use-lounge-activity-room.webp",
+      "description": "Explore Multi Use Lounge / Activity Room as part of the Med/Surg Inpatient virtual tour."
+    },
+    "msi-reception-centre": {
+      "id": "msi-reception-centre",
+      "title": "Reception Centre",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/reception-centre.webp",
+      "defaultView": {
+        "yaw": 101.6,
+        "pitch": -2.8,
+        "zoom": 55
+      },
+      "hotspots": [
+        {
+          "id": "info-reception-centre",
+          "type": "info",
+          "position": {
+            "yaw": 84.9,
+            "pitch": -9.1
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Reception Centre",
+            "namingOpportunity": {
+              "name": "Reception Centre Naming Opportunity",
+              "price": 500000,
+              "status": "reserved"
+            },
+            "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/reception-centre.webp",
+      "description": "Explore Reception Centre as part of the Med/Surg Inpatient virtual tour."
+    },
+    "msi-quiet-consultant": {
+      "id": "msi-quiet-consultant",
+      "title": "Quiet / Consultant",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/quiet-consultant.webp",
+      "defaultView": {
+        "yaw": 231.7,
+        "pitch": -29.9,
+        "zoom": 10
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/quiet-consultant.webp",
+      "description": "Explore Quiet / Consultant as part of the Med/Surg Inpatient virtual tour."
+    },
+    "msi-allied-health-team-room": {
+      "id": "msi-allied-health-team-room",
+      "title": "Allied Health Team Room",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/allied-health-team-room.webp",
+      "defaultView": {
+        "yaw": 81,
+        "pitch": -41.3,
+        "zoom": 14
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/allied-health-team-room.webp",
+      "description": "Explore Allied Health Team Room as part of the Med/Surg Inpatient virtual tour."
+    },
+    "msi-report-meeting-room": {
+      "id": "msi-report-meeting-room",
+      "title": "Report Meeting Room",
+      "description": "Explore Report Meeting Room as part of the Med/Surg Inpatient virtual tour.",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/report-meeting-room.webp",
+      "defaultView": {
+        "yaw": 91.4,
+        "pitch": -19.3,
+        "zoom": 32
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/report-meeting-room.webp"
+    },
+    "msi-galley-servery": {
+      "id": "msi-galley-servery",
+      "title": "Galley / Servery",
+      "description": "Explore Galley / Servery as part of the Med/Surg Inpatient virtual tour.",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/galley-servery.webp",
+      "defaultView": {
+        "yaw": 293.6,
+        "pitch": -13.6,
+        "zoom": 4
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/galley-servery.webp"
+    },
+    "msi-dining-activity-room": {
+      "id": "msi-dining-activity-room",
+      "title": "Dining / Activity Room",
+      "description": "Explore Dining / Activity Room as part of the Med/Surg Inpatient virtual tour.",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/dining-activity-room.webp",
+      "defaultView": {
+        "yaw": 73.6,
+        "pitch": -29.2,
+        "zoom": 14
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/dining-activity-room.webp"
+    },
+    "msi-staff-facility-lounge": {
+      "id": "msi-staff-facility-lounge",
+      "title": "Staff Facility / Lounge",
+      "description": "Explore Staff Facility / Lounge as part of the Med/Surg Inpatient virtual tour.",
+      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/staff-facility-lounge.webp",
+      "defaultView": {
+        "yaw": 329.3,
+        "pitch": -22.6,
+        "zoom": 19
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/staff-facility-lounge.webp"
+    },
+    "mental-health-emergency-services-unit": {
+      "id": "mental-health-emergency-services-unit",
+      "title": "Mental Health Emergency Services Unit",
+      "description": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most.",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/mental-health-emergency-services-unit.webp",
+      "defaultView": {
+        "yaw": 89.9,
+        "pitch": -3.8,
+        "zoom": 0
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/mental-health-emergency-services-unit.webp"
+    }
+  },
+  "floorPlan": {
+    "image": "/assets/qchfoundation/med-surg-inpatient/maps/floorplan.svg",
+    "width": 324,
+    "height": 216
+  }
+}
