@@ -1,4 +1,5 @@
 import type { Hotspot, Scene, Tour } from '../types/tour';
+import { resolveSceneNavHotspots } from '../utils/resolveSceneHotspots';
 
 /** BFS depth from firstScene along nav hotspots (overview = 0). */
 export function buildSceneDepths(tour: Tour): Record<string, number> {
@@ -11,16 +12,10 @@ export function buildSceneDepths(tour: Tour): Record<string, number> {
     const scene = tour.scenes[sceneId];
     if (!scene) continue;
 
-    for (const hotspot of scene.hotspots) {
-      if (
-        hotspot.type !== 'nav' ||
-        !hotspot.targetScene ||
-        depths[hotspot.targetScene] !== undefined
-      ) {
-        continue;
-      }
-      depths[hotspot.targetScene] = depths[sceneId] + 1;
-      queue.push(hotspot.targetScene);
+    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
+      if (depths[hotspot.targetScene!] !== undefined) continue;
+      depths[hotspot.targetScene!] = depths[sceneId] + 1;
+      queue.push(hotspot.targetScene!);
     }
   }
 
@@ -44,6 +39,7 @@ export function buildScenePath(
   firstSceneId: string,
   scenes: Record<string, Scene>,
   targetSceneId: string,
+  tourHotspots?: Tour['hotspots'],
 ): string[] {
   if (targetSceneId === firstSceneId) {
     return [firstSceneId];
@@ -52,6 +48,7 @@ export function buildScenePath(
   const parent = new Map<string, string>();
   const queue = [firstSceneId];
   const visited = new Set<string>([firstSceneId]);
+  const tour = { hotspots: tourHotspots };
 
   while (queue.length > 0) {
     const sceneId = queue.shift()!;
@@ -60,17 +57,11 @@ export function buildScenePath(
     const scene = scenes[sceneId];
     if (!scene) continue;
 
-    for (const hotspot of scene.hotspots) {
-      if (
-        hotspot.type !== 'nav' ||
-        !hotspot.targetScene ||
-        visited.has(hotspot.targetScene)
-      ) {
-        continue;
-      }
-      visited.add(hotspot.targetScene);
-      parent.set(hotspot.targetScene, sceneId);
-      queue.push(hotspot.targetScene);
+    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
+      if (visited.has(hotspot.targetScene!)) continue;
+      visited.add(hotspot.targetScene!);
+      parent.set(hotspot.targetScene!, sceneId);
+      queue.push(hotspot.targetScene!);
     }
   }
 
@@ -89,20 +80,22 @@ export function buildScenePath(
 
 /** Nav hotspot on target that links back toward the scene we came from. */
 export function findIngressHotspot(
+  tour: Pick<Tour, 'hotspots'>,
   targetScene: Scene,
   fromSceneId: string,
 ): Hotspot | undefined {
-  return targetScene.hotspots.find(
-    (h) => h.type === 'nav' && h.targetScene === fromSceneId,
+  return resolveSceneNavHotspots(tour, targetScene).find(
+    (hotspot) => hotspot.targetScene === fromSceneId,
   );
 }
 
 /** Nav hotspot on current scene that points to the shallower target. */
 export function findEgressHotspot(
+  tour: Pick<Tour, 'hotspots'>,
   scene: Scene,
   targetSceneId: string,
 ): Hotspot | undefined {
-  return scene.hotspots.find(
-    (h) => h.type === 'nav' && h.targetScene === targetSceneId,
+  return resolveSceneNavHotspots(tour, scene).find(
+    (hotspot) => hotspot.targetScene === targetSceneId,
   );
 }

@@ -148,7 +148,11 @@ export function openAnchoredInfoPanel(
       hideShare,
     }),
     size: glassPanelMarkerSize(hotspot.popup, hotspot.id, tour, hideShare),
-    position: anchoredPanelMarkerPosition(viewer, hotspot.position, halfHeight),
+    position: anchoredPanelMarkerPosition(
+      viewer,
+      hotspot.position as ViewPosition,
+      halfHeight,
+    ),
     anchor: 'bottom center',
     data: { infoPanel: true, hostHotspotId: hotspot.id },
   });
@@ -156,7 +160,7 @@ export function openAnchoredInfoPanel(
   infoPanelPositionTrack = {
     panelId: id,
     hostHotspotId: hotspot.id,
-    hostPosition: hotspot.position,
+    hostPosition: hotspot.position as ViewPosition,
   };
 
   const marker = markers.getMarker(id);

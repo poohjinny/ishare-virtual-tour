@@ -4,26 +4,17 @@ import type {
   ImmersiveBgButtonState,
 } from './immersiveBackgroundController';
 import { applyIshareTooltipDom } from '../utils/ishareTooltipDom';
+import { tourNavbarMaterialSymbolHtml } from './tourNavbarMaterialSymbol';
 
 export const IMMERSIVE_BG_NAVBAR_BUTTON_ID = 'immersive-bg';
 
-/** Ambience off / paused — music note (play on hover). */
-const IMMERSIVE_BG_OFF_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M14.5 4.5v11.8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-  <path d="M14.5 4.5c2.8-.9 5.2-1.4 6.5-1.8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-  <circle cx="11" cy="18.5" r="2.75" fill="currentColor" stroke="currentColor" stroke-width="1.75"/>
-</svg>`;
-
-/** Shown on hover while off — play (click to start). */
-const IMMERSIVE_BG_PLAY_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M8 5.5v13l11-6.5L8 5.5z" fill="currentColor"/>
-</svg>`;
-
-/** Ambience playing — pause (shown on hover while playing). */
-const IMMERSIVE_BG_PAUSE_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <rect x="7" y="5" width="3.5" height="14" rx="1" fill="currentColor"/>
-  <rect x="13.5" y="5" width="3.5" height="14" rx="1" fill="currentColor"/>
-</svg>`;
+const IMMERSIVE_BG_OFF_ICON = tourNavbarMaterialSymbolHtml('music_note');
+const IMMERSIVE_BG_PLAY_ICON = tourNavbarMaterialSymbolHtml('play_arrow', {
+  filled: true,
+});
+const IMMERSIVE_BG_PAUSE_ICON = tourNavbarMaterialSymbolHtml('pause', {
+  filled: true,
+});
 
 const IMMERSIVE_BG_VOLUME_BARS = `<rect class="psv-immersive-bg-bar psv-immersive-bg-bar--1" x="5" y="9" width="2.75" height="6" rx="1.375" fill="currentColor"/>
   <rect class="psv-immersive-bg-bar psv-immersive-bg-bar--2" x="9.125" y="6" width="2.75" height="12" rx="1.375" fill="currentColor"/>

@@ -5,18 +5,57 @@ import {
   resolveNavHotspotVariant,
 } from '../constants/navHotspotVariant';
 import { isGeneralInfoHotspot } from '../data/generalInfoHotspot';
-import type { Hotspot } from '../types/tour';
+import type { Hotspot, ViewPosition } from '../types/tour';
 import {
   namingOpportunityStatusConfig,
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
 
-function escapeHtml(text: string): string {
+export function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/** NO pill: name · status (status in muted tone via CSS). */
+export function buildNamingHotspotPillLabelHtml(hotspot: Hotspot): string {
+  const naming = hotspot.popup?.namingOpportunity;
+  if (!naming) {
+    const fallback =
+      hotspot.popup?.title?.trim() ?? hotspot.label?.trim() ?? 'Learn more';
+    return escapeHtml(fallback);
+  }
+
+  const statusConfig = namingOpportunityStatusConfig(naming.status);
+  const name =
+    naming.name?.trim() ?
+      stripNamingOpportunitySuffix(naming.name)
+    : (hotspot.popup?.title?.trim() ??
+      hotspot.label?.trim() ??
+      statusConfig.hotspotLabel);
+
+  return `<span class="hotspot-info__name">${escapeHtml(name)}</span><span class="hotspot-info__label-sep" aria-hidden="true">·</span><span class="hotspot-info__status">${escapeHtml(statusConfig.label)}</span>`;
+}
+
+export function buildNamingHotspotAriaLabel(hotspot: Hotspot): string {
+  const naming = hotspot.popup?.namingOpportunity;
+  if (!naming) {
+    return (
+      hotspot.popup?.title?.trim() ?? hotspot.label?.trim() ?? 'Information'
+    );
+  }
+
+  const statusConfig = namingOpportunityStatusConfig(naming.status);
+  const name =
+    naming.name?.trim() ?
+      stripNamingOpportunitySuffix(naming.name)
+    : (hotspot.popup?.title?.trim() ??
+      hotspot.label?.trim() ??
+      statusConfig.hotspotLabel);
+
+  return `${name} · ${statusConfig.label}`;
 }
 
 const NAV_HOTSPOT_ICON_SIZE_PX = 16;
@@ -87,15 +126,11 @@ const INFO_HEART_SVG = `<svg class="hotspot-info__icon" viewBox="0 0 24 24" aria
 </svg>`;
 
 function buildInfoHtml(hotspot: Hotspot): string {
-  const title = hotspot.popup?.title?.trim() ?? hotspot.label?.trim();
-  const ariaLabel = title ?? 'Naming opportunity';
   const naming = hotspot.popup?.namingOpportunity;
-  const statusConfig =
-    naming ? namingOpportunityStatusConfig(naming.status) : null;
-  const pillLabel =
-    naming?.name?.trim() ? stripNamingOpportunitySuffix(naming.name)
-    : statusConfig ? statusConfig.hotspotLabel
-    : (hotspot.label?.trim() ?? 'Learn more');
+  const ariaLabel =
+    naming ?
+      buildNamingHotspotAriaLabel(hotspot)
+    : (hotspot.popup?.title?.trim() ?? hotspot.label?.trim() ?? 'Information');
   const statusClass =
     (
       naming &&
@@ -109,7 +144,7 @@ function buildInfoHtml(hotspot: Hotspot): string {
       <span class="hotspot-info__pulse" aria-hidden="true"></span>
       <span class="hotspot-info__pill">
         <span class="hotspot-info__icon-wrap">${INFO_HEART_SVG}</span>
-        <span class="hotspot-info__label">${escapeHtml(pillLabel)}</span>
+        <span class="hotspot-info__label">${buildNamingHotspotPillLabelHtml(hotspot)}</span>
       </span>
     </button>
   `;
@@ -121,12 +156,10 @@ export function hotspotToMarkerConfig(hotspot: Hotspot) {
     : isGeneralInfoHotspot(hotspot) ? buildGeneralInfoHtml(hotspot)
     : buildInfoHtml(hotspot);
 
+  const pos = hotspot.position as ViewPosition;
   return {
     id: hotspot.id,
-    position: {
-      yaw: `${hotspot.position.yaw}deg`,
-      pitch: `${hotspot.position.pitch}deg`,
-    },
+    position: { yaw: `${pos.yaw}deg`, pitch: `${pos.pitch}deg` },
     html,
     anchor: 'center center' as const,
     data: { hotspot },

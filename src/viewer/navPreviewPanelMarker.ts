@@ -184,7 +184,11 @@ export function openAnchoredNavPreviewPanel(
     id,
     html: buildAnchoredNavPreviewHtml(preview, hotspot.id, { hideShare }),
     size: navPreviewPanelMarkerSize(preview, hotspot.id, hideShare),
-    position: anchoredPanelMarkerPosition(viewer, hotspot.position, halfHeight),
+    position: anchoredPanelMarkerPosition(
+      viewer,
+      hotspot.position as ViewPosition,
+      halfHeight,
+    ),
     anchor: 'bottom center',
     data: {
       navPanel: true,
@@ -199,7 +203,7 @@ export function openAnchoredNavPreviewPanel(
   navPanelPositionTrack = {
     panelId: id,
     hostHotspotId: hotspot.id,
-    hostPosition: hotspot.position,
+    hostPosition: hotspot.position as ViewPosition,
   };
 
   const marker = markers.getMarker(id);
