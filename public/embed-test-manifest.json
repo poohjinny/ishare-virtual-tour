@@ -17,30 +17,6 @@
       ]
     },
     {
-      "id": "mental-health-emergency-services-unit",
-      "name": "Emergency Department",
-      "clientName": "Queensway Carleton Hospital Foundation",
-      "firstScene": "overview",
-      "scenes": [
-        {
-          "id": "mh-1",
-          "title": "MH - 1"
-        },
-        {
-          "id": "overview",
-          "title": "Overview"
-        },
-        {
-          "id": "mh-3",
-          "title": "Waiting Area"
-        },
-        {
-          "id": "mh-2",
-          "title": "Walk-in Entrance"
-        }
-      ]
-    },
-    {
       "id": "holodomor-museum",
       "name": "Holodomor Museum",
       "clientName": "Holodomor Research and Education Consortium",
@@ -85,33 +61,53 @@
       ]
     },
     {
-      "id": "med-surg-inpatient",
-      "name": "Med/Surg Inpatient",
+      "id": "queensway-carleton-general-hospital",
+      "name": "Queensway Carleton General Hospital",
       "clientName": "Queensway Carleton Hospital Foundation",
       "firstScene": "overview",
       "scenes": [
         {
-          "id": "allied-health-team-room",
+          "id": "msi-allied-health-team-room",
           "title": "Allied Health Team Room"
         },
         {
-          "id": "dining-activity-room",
+          "id": "ed-ambulance-offload",
+          "title": "Ambulance Offload"
+        },
+        {
+          "id": "msi-dining-activity-room",
           "title": "Dining / Activity Room"
         },
         {
-          "id": "galley-servery",
+          "id": "ed-overview",
+          "title": "Emergency Department"
+        },
+        {
+          "id": "msi-galley-servery",
           "title": "Galley / Servery"
         },
         {
-          "id": "inpatient-suites",
+          "id": "msi-inpatient-suites",
           "title": "Inpatient Suites"
         },
         {
-          "id": "multi-use-lounge-activity-room",
+          "id": "msi-overview",
+          "title": "Med / surg Inpatient"
+        },
+        {
+          "id": "mental-health-emergency-services-unit",
+          "title": "Mental Health Emergency Services Unit"
+        },
+        {
+          "id": "ed-mh-1",
+          "title": "MH - 1"
+        },
+        {
+          "id": "msi-multi-use-lounge-activity-room",
           "title": "Multi Use Lounge / Activity Room"
         },
         {
-          "id": "nursing-station",
+          "id": "msi-nursing-station",
           "title": "Nursing Station"
         },
         {
@@ -119,20 +115,28 @@
           "title": "Overview"
         },
         {
-          "id": "quiet-consultant",
+          "id": "msi-quiet-consultant",
           "title": "Quiet / Consultant"
         },
         {
-          "id": "reception-centre",
+          "id": "msi-reception-centre",
           "title": "Reception Centre"
         },
         {
-          "id": "report-meeting-room",
+          "id": "msi-report-meeting-room",
           "title": "Report Meeting Room"
         },
         {
-          "id": "staff-facility-lounge",
+          "id": "msi-staff-facility-lounge",
           "title": "Staff Facility / Lounge"
+        },
+        {
+          "id": "ed-mh-3",
+          "title": "Waiting Area"
+        },
+        {
+          "id": "ed-mh-2",
+          "title": "Walk-in Entrance"
         }
       ]
     },

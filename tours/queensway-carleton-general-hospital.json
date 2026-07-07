@@ -30,9 +30,9 @@
           },
           "targetScene": "ed-overview",
           "targetView": {
-            "yaw": 0,
-            "pitch": 0,
-            "zoom": 17
+            "yaw": 119.5,
+            "pitch": -78,
+            "zoom": 1
           },
           "preview": {
             "videoUrl": "https://www.youtube.com/watch?v=UhIAhTf_4L0&t=2s"
@@ -48,9 +48,9 @@
           },
           "targetScene": "msi-overview",
           "targetView": {
-            "yaw": 0,
-            "pitch": 0,
-            "zoom": 17
+            "yaw": 102.2,
+            "pitch": -62.8,
+            "zoom": 7
           }
         }
       ],
@@ -60,11 +60,11 @@
       "id": "ed-overview",
       "title": "Emergency Department",
       "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
-      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/overview.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-overview.webp",
       "defaultView": {
-        "yaw": 133.5,
-        "pitch": -76,
-        "zoom": 2
+        "yaw": 119.5,
+        "pitch": -78,
+        "zoom": 1
       },
       "hotspots": [
         {
@@ -105,7 +105,7 @@
           "type": "nav",
           "label": "Ambulance Offload",
           "position": {
-            "yaw": 170.1,
+            "yaw": 170.2,
             "pitch": -42.7
           },
           "targetScene": "ed-ambulance-offload",
@@ -134,7 +134,7 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/ed-overview.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-overview.webp",
       "videoUrl": "https://share.synthesia.io/embeds/videos/c299f173-bd3c-4ac9-bc10-03f17e8814f3"
     },
     "ed-mh-1": {
@@ -169,8 +169,8 @@
       "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-3.webp",
       "defaultView": {
-        "yaw": 127.4,
-        "pitch": -6,
+        "yaw": 129,
+        "pitch": 45,
         "zoom": 1
       },
       "hotspots": [
@@ -194,7 +194,7 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-3.webp",
+      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/ed-mh-3.webp",
       "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
     },
     "ed-ambulance-offload": {
