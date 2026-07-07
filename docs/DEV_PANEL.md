@@ -17,7 +17,7 @@
 
 3. Open the panel:
    - Click the **Dev** FAB, or
-   - Press **`D`** (when focus is not in an input)
+   - Press the backtick key (`` ` ``) when focus is not in an input
 
 `dev` is a **preserved query param** — it stays on the URL as you navigate
 scenes. See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) for the full URL contract.
@@ -123,10 +123,10 @@ save, add tours from Tour → Create (existing client picker only).
 
 ## Keyboard shortcuts
 
-| Key | Action                                              |
-| --- | --------------------------------------------------- |
-| `D` | Toggle dev panel open/closed                        |
-| `L` | Apply landing view (`defaultView` + thumbnail bake) |
+| Key     | Action                                              |
+| ------- | --------------------------------------------------- |
+| `` ` `` | Toggle dev panel open/closed                        |
+| `L`     | Apply landing view (`defaultView` + thumbnail bake) |
 
 Shortcuts are ignored while typing in inputs (`isTypingTarget`).
 
@@ -247,7 +247,7 @@ Single accordion card: **URL flags**. Toggles apply immediately via URL
 | `intro`             | `?intro=1                                                      | 0`— force or skip client tour picker at`/` (tri-state select + Open button) |
 | `chatTest`          | AI chat scroll test messages                                   |
 | `notFoundTest`      | Force tour not-found (404) screen                              |
-| `panoramaErrorTest` | Force panorama load-error overlay                              |
+| `loadErrorTest`     | Force viewer load-error overlay (panorama + 3D)                |
 | `disableNavPreview` | Disable nav hotspot mini viewer                                |
 | `skipLanding`       | Skip landing zoom — start at `defaultView`                     |
 | `splashHold`        | Hold load splash longer (loader UX test)                       |

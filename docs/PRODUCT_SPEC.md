@@ -29,12 +29,20 @@
 
 ## Core behavior
 
-### Panorama viewer
+### Panorama viewer (`viewerType: 'panorama'`)
 
 - Photo Sphere Viewer with Virtual Tour and Markers plugins.
 - Custom HTML markers: nav (pulse ring + arrow), info (`i`), nav-preview,
   naming.
 - No default PSV navbar — custom overlay UI.
+
+### 3D model viewer (`viewerType: 'model3d'`)
+
+- Three.js with GLTFLoader and OrbitControls.
+- Loads GLTF/GLB from `scene.model` URL.
+- Lazy-loaded via `React.lazy` — zero bundle cost for panorama-only tours.
+- Shares `TourViewerHandle` interface with `PanoramaViewer`.
+- Prototype: hotspot rendering and panel integration are stubs.
 
 ### Navigation
 
@@ -77,8 +85,10 @@ Engineering notes: [CODING_GUIDELINES.md](./CODING_GUIDELINES.md).
 
 ### Tour (`tours/{tourId}.json`)
 
+- `viewerType` — `'panorama'` (default) or `'model3d'`.
 - `firstScene` — starting scene id.
 - Per scene: `title`, `panorama`, `defaultView`, `hotspots[]`.
+- For 3D tours: `scene.model` — GLTF/GLB URL (used instead of `panorama`).
 - Hotspot types: `nav` | `info` | `nav-preview` | naming (see tour JSON).
 - Nav hotspots: `targetScene`, `targetView` (orientation after transition).
 

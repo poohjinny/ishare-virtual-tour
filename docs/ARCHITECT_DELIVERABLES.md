@@ -283,9 +283,56 @@ You do **not** need to deliver:
 | `tours/{tourId}-knowledge.json` | From client copy                               |
 | Hotspot yaw/pitch/zoom          | Dev panel `?dev=1`                             |
 | Catalog entry                   | `tours/catalog.json`                           |
+| 3D model optimization           | Mesh merging, LOD if needed (model3d tours)    |
+| `viewerType` in tour JSON       | Set to `'model3d'` for GLTF tours              |
 
 Typical turnaround: panoramas in repo → first walkable tour → hotspot polish →
 client review.
+
+---
+
+## 3D model tours (GLTF/GLB)
+
+Some tours use **3D model walkthroughs** instead of equirectangular panoramas.
+The viewer loads GLTF/GLB files directly via Three.js.
+
+### When this applies
+
+If the tour JSON specifies `"viewerType": "model3d"`, scenes reference a `model`
+URL instead of (or in addition to) a `panorama`. Engineering will confirm
+whether a tour requires panoramas, 3D models, or both.
+
+### Technical spec
+
+| Property          | Requirement                                            |
+| ----------------- | ------------------------------------------------------ |
+| Format            | **GLTF** (`.gltf` + `.bin` + textures) or **GLB**      |
+| Coordinate system | Y-up, meters (Three.js default)                        |
+| Max file size     | **~20 MB** GLB recommended (web download budget)       |
+| Textures          | Embedded in GLB or relative paths in GLTF              |
+| Materials         | PBR (metallic-roughness); avoid custom shaders         |
+| Mesh count        | Keep draw calls reasonable (< 500 meshes preferred)    |
+| Lighting          | Baked lightmaps or emissive; viewer adds ambient light |
+
+### Delivery
+
+```text
+{clientId}/
+└── {tourId}/
+    ├── models/              # REQUIRED for model3d tours
+    │   └── {sceneId}.glb    # One GLB per scene (or .gltf + assets)
+    ├── panoramas/           # OPTIONAL — thumbnail or fallback
+    ├── thumbnails/          # Placeholder card image for catalog
+    └── delivery-notes.md
+```
+
+### Per-scene model checklist
+
+- [ ] Model exports cleanly in glTF Validator (no errors)
+- [ ] Camera / spawn position documented (x, y, z in meters)
+- [ ] Textures packed (no missing references)
+- [ ] File size noted (flag any > 20 MB)
+- [ ] Navigation targets documented (doorways, corridors for future hotspots)
 
 ---
 

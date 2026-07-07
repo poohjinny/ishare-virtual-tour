@@ -271,6 +271,22 @@ Scene-aware assistant over static `tours/*-knowledge.json`. Live LLM backend is
 
 - [ ] **Voice input** — hide or clearly disable “coming soon” mic in chat
 
+### 3D viewer prototype
+
+- [x] `TourViewerHandle` abstraction — renderer-agnostic interface for
+  ```
+  TourPage ↔ viewer communication (`src/viewer/viewerHandle.ts`)
+  ```
+- [x] `ThreeDViewer` — GLTF loader + OrbitControls + render loop
+  ```
+  (`src/viewer-3d/ThreeDViewer.tsx`, lazy-loaded)
+  ```
+- [x] `tour.viewerType` discriminator — `'panorama' | 'model3d'` on Tour type
+- [x] `scene.model` field — GLTF/GLB URL per scene
+- [x] `HotspotPosition` 3D extension — `WorldPosition { x, y, z }` union
+- [x] Demo tour (`tours/3d-demo.json`) — Sponza atrium test scene
+- [x] Catalog integration — Demo category badge, placeholder thumbnail
+
 ### Platform (Phase 1 exit)
 
 - [x] Catalog `visibility` + intro gallery filter
@@ -394,10 +410,17 @@ API), then move to Admin when auth and publish exist — same payload shapes.
 | Use                          | Approach                                            |
 | ---------------------------- | --------------------------------------------------- |
 | 360 panorama tour            | **PSV** (current)                                   |
-| Custom 3D / floor plan depth | `packages/viewer-3d` or `viewer/extensions/`        |
-| VR / XR (Phase 3)            | WebXR + Three **or** PSV plugin — decide at Phase 3 |
+| 3D model walkthrough (GLTF)  | **ThreeDViewer** (`src/viewer-3d/`) — **shipped**   |
+| Custom 3D / floor plan depth | Extend `ThreeDViewer` or `viewer/extensions/`       |
+| VR / XR (Phase 3)            | WebXR session on `ThreeDViewer` — decide at Phase 3 |
 
-Do not replace PSV wholesale unless product requires walk mode beyond 360°.
+Both viewers conform to `TourViewerHandle` (`src/viewer/viewerHandle.ts`).
+`TourPage` switches via `React.lazy` based on `tour.viewerType` — panorama tours
+never load the Three.js viewer chunk.
+
+**Current state:** ThreeDViewer prototype loads GLTF models with OrbitControls.
+Hotspot rendering and panel integration are placeholder stubs — wire these when
+a production 3D tour is onboarded.
 
 ### 9 — What to avoid
 
@@ -496,11 +519,23 @@ live pricing updates become urgent.
 
 ### VR / XR support
 
-Immersive viewing on supported headsets; reuse panoramas, hotspots, and naming
-data — no duplicate content per format.
+Immersive viewing on supported headsets; `ThreeDViewer` is the natural WebXR
+entry point (Three.js + `XRSession`). Reuse panoramas, hotspots, and naming data
+— no duplicate content per format.
 
 **Open questions:** Which headsets/browsers for v1? Full walk mode vs seated
 360°?
+
+### 3D model tours (production)
+
+Prototype shipped in Phase 1. Production-readiness requires:
+
+- [ ] 3D hotspot rendering — raycasting + world-position markers
+- [ ] Anchored panels in 3D — CSS2DRenderer or HTML overlay
+- [ ] Multi-room GLTF navigation — camera path transitions between rooms
+- [ ] 3D scene thumbnails — auto-capture from Three.js renderer
+- [ ] Dev panel support for 3D tours — model upload, world-position hotspot
+      placement
 
 ### Deeper platform
 
@@ -553,6 +588,7 @@ data — no duplicate content per format.
 
 | Date       | Note                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------ |
+| 2026-07-03 | 3D viewer prototype — ThreeDViewer, TourViewerHandle, lazy-load, demo tour + catalog       |
 | 2026-07-03 | Share panel link preview + Gmail web compose for Share via Email                           |
 | 2026-07-03 | Share link OG meta — per tour/scene Open Graph + Twitter Card tags                         |
 | 2026-07-03 | AI guide section (Phase 1 mock) — move voice-input backlog out of Sprint C                 |
