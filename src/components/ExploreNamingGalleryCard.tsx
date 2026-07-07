@@ -64,12 +64,15 @@ export function ExploreNamingGalleryCard({
     () => scenes.find((entry) => entry.id === item.sceneId),
     [item.sceneId, scenes],
   );
-  const previewScene = useMemo(() => {
-    const base = scene ?? {
-      id: item.sceneId,
-      panorama: '',
-      defaultView: { yaw: 0, pitch: 0, zoom: 50 },
-    };
+  const previewScene = useMemo((): Scene => {
+    const base: Scene =
+      scene ?? {
+        id: item.sceneId,
+        title: item.sceneTitle,
+        panorama: '',
+        defaultView: { yaw: 0, pitch: 0, zoom: 50 },
+        hotspots: [],
+      };
     if (tourViewerType === 'model3d' && item.previewImage) {
       return {
         ...base,
@@ -78,16 +81,26 @@ export function ExploreNamingGalleryCard({
       };
     }
     return base;
-  }, [item.previewImage, item.sceneId, scene, tourViewerType]);
+  }, [item.previewImage, item.sceneId, item.sceneTitle, scene, tourViewerType]);
+  const previewTour = useMemo(
+    (): Pick<Tour, 'viewerType' | 'scenes' | 'hotspots' | 'firstScene'> =>
+      directoryTour ?? {
+        viewerType: tourViewerType,
+        scenes: Object.fromEntries(scenes.map((entry) => [entry.id, entry])),
+        firstScene: scenes[0]?.id ?? item.sceneId,
+        hotspots: [],
+      },
+    [directoryTour, item.sceneId, scenes, tourViewerType],
+  );
   const previewView = useMemo(
     () =>
       resolveNamingDirectoryPreviewView(
-        directoryTour ?? { viewerType: tourViewerType },
+        previewTour,
         scenes,
         item.sceneId,
         item.hotspotId,
       ),
-    [directoryTour, item.hotspotId, item.sceneId, scenes, tourViewerType],
+    [item.hotspotId, item.sceneId, previewTour, scenes],
   );
   const previewOptions = useMemo(() => {
     if (tourViewerType === 'model3d') {

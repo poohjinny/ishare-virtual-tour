@@ -117,33 +117,17 @@ function toPsvPosition(view: ViewPosition) {
 /** Drag release coast (0–1). Higher = softer, longer deceleration. PSV default: 0.8 */
 const MOVE_INERTIA = 0.92;
 
-import type { ViewerLoadErrorInfo } from './viewerHandle';
+import type { TourViewerHandle, ViewerLoadErrorInfo } from './viewerHandle';
 
-export type { ViewerLoadErrorInfo } from './viewerHandle';
-export type { TourViewerHandle } from './viewerHandle';
+export type { ViewerLoadErrorInfo, TourViewerHandle } from './viewerHandle';
 
 /**
  * PSV-specific viewer handle — extends the generic contract with
  * `hidePsvPanel` (kept for backwards compat; maps to `hideOverlayPanel`).
  */
-export interface PanoramaViewerHandle {
-  navigateToScene: (
-    sceneId: string,
-    targetView?: ViewPosition,
-  ) => Promise<boolean>;
-  retryScene: (sceneId?: string) => Promise<boolean>;
-  clearActiveInfoHotspot: () => void;
+export interface PanoramaViewerHandle extends TourViewerHandle {
   /** Close any open PSV panel (legacy overflow menu — kept for panel stack). */
   hidePsvPanel: () => void;
-  /** Alias for `hidePsvPanel` — satisfies {@link TourViewerHandle}. */
-  hideOverlayPanel: () => void;
-  /** Close anchored info / nav preview panels on the panorama. */
-  closeAnchoredPanels: () => void;
-  goToNamingOpportunity: (sceneId: string, hotspotId: string) => boolean;
-  /** Animate to the scene default view (navbar recenter button). */
-  recenterToDefaultView: () => void;
-  /** Dev — apply fresh tour JSON without remounting the viewer. */
-  applyTourUpdate: (tour: Tour) => Promise<void>;
 }
 
 interface PanoramaViewerProps {
@@ -218,7 +202,7 @@ function useLatestRef<T>(value: T) {
 }
 
 export const PanoramaViewer = forwardRef<
-  PanoramaViewerHandle,
+  TourViewerHandle,
   PanoramaViewerProps
 >(function PanoramaViewer(
   {

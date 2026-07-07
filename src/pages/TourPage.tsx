@@ -93,7 +93,7 @@ import {
 } from '../utils/findTourHotspot';
 import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
 import { useViewerControlsVisible } from '../hooks/useViewerControlsVisible';
-import type { PanoramaViewerHandle } from '../viewer/PanoramaViewer';
+import type { TourViewerHandle } from '../viewer/viewerHandle';
 import type { ViewerLoadErrorInfo } from '../viewer/viewerHandle';
 
 const PanoramaViewer = lazy(() =>
@@ -414,7 +414,7 @@ function TourExperience() {
     return resolveSceneLandingView(tour, initialScene, resolved.hotspotId);
   }, [initialScene, tour, urlSearchParams]);
 
-  const viewerRef = useRef<PanoramaViewerHandle>(null);
+  const viewerRef = useRef<TourViewerHandle>(null);
   const viewerAreaRef = useRef<HTMLDivElement>(null);
   const pendingNamingSelectionRef = useRef<{
     sceneId: string;

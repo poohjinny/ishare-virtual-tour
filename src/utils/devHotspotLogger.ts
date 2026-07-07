@@ -242,14 +242,16 @@ export function logHotspotClick(
   console.log(
     `[dev] Hotspot click${tourLabel}${sceneLabel} — ${formatCoords(coords)}`,
   );
-  console.log(
-    '[dev] Nav hotspot JSON:\n',
-    formatNavHotspotJson(coords.yaw, coords.pitch, scene, nameOptions),
-  );
-  console.log(
-    '[dev] NO hotspot JSON:\n',
-    formatNamingHotspotJson(coords.yaw, coords.pitch, scene, nameOptions),
-  );
+  if (!isWorldClickCoords(coords)) {
+    console.log(
+      '[dev] Nav hotspot JSON:\n',
+      formatNavHotspotJson(coords.yaw, coords.pitch, scene, nameOptions),
+    );
+    console.log(
+      '[dev] NO hotspot JSON:\n',
+      formatNamingHotspotJson(coords.yaw, coords.pitch, scene, nameOptions),
+    );
+  }
 }
 
 export function logLandingView(scene: DevSceneRef, view: ViewPosition): void {

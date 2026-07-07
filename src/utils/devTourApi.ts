@@ -112,7 +112,7 @@ async function blobToBase64(blob: Blob): Promise<string> {
   return btoa(binary);
 }
 
-async function fileToBase64(file: File): Promise<string> {
+async function fileToBase64(file: Blob): Promise<string> {
   return blobToBase64(file);
 }
 

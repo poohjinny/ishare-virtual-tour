@@ -1100,18 +1100,6 @@ export function DevViewPanel({
     }
   }, [navSlug, navTargetTouched, sortedSceneOptions]);
 
-  const buildScenePayload = useCallback(() => {
-    if (!scene.tourId || !view) return null;
-    return {
-      tourId: scene.tourId,
-      sceneId: scene.id,
-      defaultView:
-        isModel3dTour ? view : (
-          toViewPosition(view.yaw, view.pitch, view.zoom ?? 0)
-        ),
-    };
-  }, [isModel3dTour, scene.id, scene.tourId, view]);
-
   const buildHotspotPosition = useCallback(() => {
     if (!clickCoords) return null;
     if (isWorldClickCoords(clickCoords)) {
