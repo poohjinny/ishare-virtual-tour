@@ -209,7 +209,9 @@ function mountPanoramaViewer(
     minFov: 24,
     maxFov: 120,
     moveInertia: 0.75,
-    canvasBackground: '#0f172a',
+    // Match the skeleton tone (not navy) so the first fade-in frame — before the
+    // sphere paints — never flashes dark during the skeleton → panorama swap.
+    canvasBackground: '#e2e8f0',
     rendererParameters: { alpha: false, antialias: true },
     ...toPreviewDefaultView(view),
   });

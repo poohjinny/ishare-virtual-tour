@@ -103,6 +103,8 @@ import {
   tourNavActionsDockClassName,
   tourNavActionsRootClassName,
   tourNavDockOverflowWrapClassName,
+  TOUR_BREADCRUMB_ATTR,
+  tourExploreRefineMenuSelector,
   tourNavBreadcrumbAlignVariants,
   tourNavBreadcrumbBarClassName,
   tourNavBreadcrumbClassName,
@@ -178,6 +180,8 @@ interface TourNavFloatProps {
   /** `?embed=1` — hide Share/Help FAB; PSV control pill stays on. */
   embed?: boolean;
   panelStack?: TourPanelStack;
+  /** Close in-scene anchored nav/info panels (e.g. when opening explore chrome). */
+  onDismissAnchoredPanels?: () => void;
 }
 
 type PanelMode = 'explore' | 'help' | 'share' | null;
@@ -340,6 +344,7 @@ export function TourNavFloat({
   activeNamingHotspotId = null,
   embed = false,
   panelStack,
+  onDismissAnchoredPanels,
 }: TourNavFloatProps) {
   const { isMobile, isDesktop } = useTourChromeLayout();
   /** Location picks stay clickable during scene transitions (disabled only blocks chrome). */
@@ -748,12 +753,13 @@ export function TourNavFloat({
           return null;
         }
 
+        onDismissAnchoredPanels?.();
         if (current) panelStack?.closePanel(current);
         panelStack?.openPanel(next);
         return next;
       });
     },
-    [panelStack],
+    [onDismissAnchoredPanels, panelStack],
   );
 
   useEffect(() => {
@@ -852,22 +858,26 @@ export function TourNavFloat({
   }, [closeExploreSearch, embed, panelStack]);
 
   useEffect(() => {
-    if (panelMode !== 'help' && panelMode !== 'share') return;
+    if (panelMode === null) return;
 
-    const handleClickOutside = (e: MouseEvent) => {
+    const handlePointerDownOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node)) return;
+      if (actionsRef.current?.contains(target)) return;
       if (
-        actionsRef.current &&
-        !actionsRef.current.contains(e.target as Node)
+        target instanceof Element &&
+        target.closest(tourExploreRefineMenuSelector)
       ) {
-        if (panelMode === 'help' || panelMode === 'share') {
-          setPanelMode(null);
-        }
+        return;
       }
+
+      closePanel();
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [panelMode]);
+    document.addEventListener('pointerdown', handlePointerDownOutside);
+    return () =>
+      document.removeEventListener('pointerdown', handlePointerDownOutside);
+  }, [closePanel, panelMode]);
 
   useEffect(() => {
     if (exploreSearchOpen) return;
@@ -1595,6 +1605,7 @@ export function TourNavFloat({
   return (
     <>
       <nav
+        {...{ [TOUR_BREADCRUMB_ATTR]: '' }}
         className={cn(
           tourNavBreadcrumbClassName,
           tourNavBreadcrumbAlignVariants({

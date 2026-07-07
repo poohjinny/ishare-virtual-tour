@@ -25,7 +25,10 @@ import {
   NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
 } from './anchoredPanelPosition';
 import { bindNavPreviewNamingAccordion } from './navPreviewNamingAccordion';
-import { scheduleNudgeCameraForClippedPanel } from './anchoredPanelCameraNudge';
+import {
+  scheduleNudgeCameraForClippedPanel,
+  waitForAnchoredPanelEnter,
+} from './anchoredPanelCameraNudge';
 import { notifyAnchoredPanelOpened } from './anchoredPanelVisibility';
 
 const PANEL_ID_SUFFIX = '-nav-panel';
@@ -101,20 +104,24 @@ export function closeAnchoredNavPreviewPanel(
       continue;
     }
 
-    const shell = marker.domElement.querySelector('.tour-glass-panel__shell');
-    if (!(shell instanceof HTMLElement)) {
+    const article = marker.domElement.querySelector(
+      '.tour-glass-panel--anchored',
+    );
+    if (!(article instanceof HTMLElement)) {
       markers.removeMarker(id);
       continue;
     }
 
     closingPanelIds.add(id);
-    destroyNavPreviewMiniViewer(id);
     clearNavPreviewNamingAccordion(id);
-    shell.classList.remove('tour-glass-panel__shell--enter');
-    shell.classList.add('tour-glass-panel__shell--exit');
+    article.classList.remove('tour-glass-panel--anchored-enter');
+    article.classList.add('tour-glass-panel--anchored-exit');
 
+    // Keep the mini viewer rendering through the exit animation — destroying it
+    // early empties the hero and flashes its navy background as the panel closes.
     window.setTimeout(() => {
       closingPanelIds.delete(id);
+      destroyNavPreviewMiniViewer(id);
       try {
         if (markers.getMarker(id)) {
           markers.removeMarker(id);
@@ -210,6 +217,32 @@ export function openAnchoredNavPreviewPanel(
       id,
       bindNavPreviewNamingAccordion(marker.domElement),
     );
+
+    // Serialize the expensive work: reveal the heavy hero (WebGL mini viewer /
+    // video) only once BOTH the entrance scale has finished AND the camera has
+    // settled (nudge done, or none). Running the hero mount alongside either
+    // animation caused the panel-open jank. Text content is already in the
+    // markup and shows immediately behind the skeleton.
+    let cameraSettled = false;
+    let enterDone = false;
+    const revealHero = () => {
+      if (!cameraSettled || !enterDone) return;
+      const panelMarker = markers.getMarker(id);
+      if (!(panelMarker?.domElement instanceof HTMLElement)) return;
+      if (preview.videoUrl?.trim()) {
+        mountNavPreviewVideoHero(panelMarker.domElement);
+      } else if (isNavPreviewMiniViewerEnabled()) {
+        mountNavPreviewMiniViewer(id, panelMarker.domElement, preview);
+      } else {
+        dismissNavPreviewHero(panelMarker.domElement);
+      }
+    };
+
+    void waitForAnchoredPanelEnter(marker.domElement).then(() => {
+      enterDone = true;
+      revealHero();
+    });
+
     scheduleNudgeCameraForClippedPanel(
       viewer,
       () => {
@@ -219,21 +252,13 @@ export function openAnchoredNavPreviewPanel(
           : null;
       },
       {
-        yawDeg: (hotspot.position as ViewPosition).yaw,
-        pitchDeg: (hotspot.position as ViewPosition).pitch,
-      },
-      {
         afterSettled: () => {
+          cameraSettled = true;
           const panelMarker = markers.getMarker(id);
-          if (!(panelMarker?.domElement instanceof HTMLElement)) return;
-          refreshGlassPanelCtaOverflowTitles(panelMarker.domElement);
-          if (preview.videoUrl?.trim()) {
-            mountNavPreviewVideoHero(panelMarker.domElement);
-          } else if (isNavPreviewMiniViewerEnabled()) {
-            mountNavPreviewMiniViewer(id, panelMarker.domElement, preview);
-          } else {
-            dismissNavPreviewHero(panelMarker.domElement);
+          if (panelMarker?.domElement instanceof HTMLElement) {
+            refreshGlassPanelCtaOverflowTitles(panelMarker.domElement);
           }
+          revealHero();
         },
       },
     );

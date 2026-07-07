@@ -1,13 +1,17 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 
 import { ANCHORED_PANEL_GAP_PX } from './anchoredPanelPosition';
+import { tourBreadcrumbSelector } from '../components/tourNavFloatVariants';
 
 const NUDGE_DURATION_MS = 600;
 const MAX_MEASURE_ATTEMPTS = 36;
 const PANEL_ENTER_ANIM_MS = 220;
 
-/** Treat the panel as clipped when it comes within this margin of an edge. */
-const EDGE_MARGIN_PX = 8;
+/** Breathing room a clipped panel is shifted to (generous, per side). */
+const NUDGE_TARGET_MARGIN_PX = 24;
+
+/** Extra gap kept below the floating breadcrumb so a nudged panel clears it. */
+const BREADCRUMB_CLEARANCE_PX = 12;
 
 export interface PanelScreenRect {
   left: number;
@@ -52,23 +56,32 @@ async function stopActiveViewerAnimation(viewer: Viewer): Promise<void> {
   }
 }
 
-function waitForPanelEnterShell(panelEl: HTMLElement): Promise<void> {
+/**
+ * Resolves once the panel's entrance scale animation finishes — or immediately
+ * under reduced-motion / when no entrance animation is present. Anchored panels
+ * (nav preview + info) scale the article; dock panels scale the shell. Callers
+ * gate heavy work (camera nudge, WebGL/video mount) on this so it never competes
+ * with the entrance animation.
+ */
+export function waitForAnchoredPanelEnter(panelEl: HTMLElement): Promise<void> {
   if (prefersReducedMotion()) return Promise.resolve();
 
-  const shell = panelEl.querySelector('.tour-glass-panel__shell--enter');
-  if (!(shell instanceof HTMLElement)) return Promise.resolve();
+  const enterEl =
+    panelEl.querySelector('.tour-glass-panel--anchored-enter') ??
+    panelEl.querySelector('.tour-glass-panel__shell--enter');
+  if (!(enterEl instanceof HTMLElement)) return Promise.resolve();
 
   return new Promise((resolve) => {
     let settled = false;
     const finish = () => {
       if (settled) return;
       settled = true;
-      shell.removeEventListener('animationend', onEnd);
+      enterEl.removeEventListener('animationend', onEnd);
       resolve();
     };
 
     const onEnd = (event: AnimationEvent) => {
-      if (event.target !== shell) return;
+      if (event.target !== enterEl) return;
       if (
         event.animationName !== 'tour-glass-panel-in' &&
         event.animationName !== 'tour-glass-panel-anchored-in'
@@ -78,7 +91,7 @@ function waitForPanelEnterShell(panelEl: HTMLElement): Promise<void> {
       finish();
     };
 
-    shell.addEventListener('animationend', onEnd);
+    enterEl.addEventListener('animationend', onEnd);
     window.setTimeout(finish, PANEL_ENTER_ANIM_MS);
   });
 }
@@ -111,40 +124,76 @@ function normalizeYawDeltaDeg(deg: number): number {
   return ((((deg + 180) % 360) + 360) % 360) - 180;
 }
 
-function isPanelClipped(
-  rect: PanelScreenRect,
-  vw: number,
-  vh: number,
-): boolean {
-  return (
-    rect.top < EDGE_MARGIN_PX ||
-    rect.left < EDGE_MARGIN_PX ||
-    rect.right > vw - EDGE_MARGIN_PX ||
-    rect.bottom > vh - EDGE_MARGIN_PX
-  );
+/**
+ * Top safe inset (px, in viewer-container space): the greater of the base margin
+ * and the floating breadcrumb's bottom edge + clearance, so a nudged panel never
+ * tucks under the breadcrumb. Falls back to the base margin when the breadcrumb
+ * is absent/hidden.
+ */
+function resolveTopMarginPx(viewer: Viewer): number {
+  if (typeof document === 'undefined') return NUDGE_TARGET_MARGIN_PX;
+
+  const breadcrumb = document.querySelector(tourBreadcrumbSelector);
+  if (!(breadcrumb instanceof HTMLElement) || breadcrumb.offsetHeight <= 0) {
+    return NUDGE_TARGET_MARGIN_PX;
+  }
+
+  const containerTop = viewer.container.getBoundingClientRect().top;
+  const breadcrumbBottom =
+    breadcrumb.getBoundingClientRect().bottom -
+    containerTop +
+    BREADCRUMB_CLEARANCE_PX;
+
+  return Math.max(NUDGE_TARGET_MARGIN_PX, breadcrumbBottom);
 }
 
 /**
- * Absolute target camera orientation (deg) to bring a clipped anchored panel
- * fully into view.
+ * Camera pitch (deg) that seats a panel of `panelHeightPx`, anchored directly
+ * above its hotspot, centered on screen at the given PSV zoom.
  *
- * The panel is rigidly anchored directly above its hotspot, so we aim the
- * camera at the hotspot's yaw (stable — no yaw blow-up near the poles) and tilt
- * up by the exact angle that drops the hotspot below center far enough for the
- * panel to sit on-screen. This uses the rectilinear center-column relation
- * (y = f·tan θ) instead of a linear pixel→angle approximation, which overshoots
- * at extreme pitch and sent the camera somewhere unexpected.
+ * Drops the hotspot below center by half the (panel + gap) using the rectilinear
+ * center-column relation (y = f·tan θ), not a linear pixel→angle approximation
+ * which overshoots at extreme pitch. Returns null when the viewport/FOV is
+ * degenerate.
+ */
+function panelFitCameraPitchDeg(
+  viewer: Viewer,
+  anchorPitchDeg: number,
+  panelHeightPx: number,
+  psvZoom: number,
+): number | null {
+  const vh = viewer.container.clientHeight;
+  if (vh <= 0) return null;
+
+  const vFov = degToRad(viewer.dataHelper.zoomLevelToFov(psvZoom));
+  if (!(vFov > 0)) return null;
+  const focalPx = vh / 2 / Math.tan(vFov / 2);
+  if (!(focalPx > 0)) return null;
+
+  const hotspotDropPx = (panelHeightPx + ANCHORED_PANEL_GAP_PX) / 2;
+  const cameraPitchDeg =
+    anchorPitchDeg + radToDeg(Math.atan(hotspotDropPx / focalPx));
+
+  return clamp(cameraPitchDeg, -89, 89);
+}
+
+/**
+ * Absolute target camera orientation (deg) that shifts a clipped anchored panel
+ * just far enough to clear the viewport edge plus a small margin — a minimal
+ * "scroll into view" nudge, not a re-center. The view stays close to where the
+ * user clicked; only clipped axes move. Returns null when nothing is clipped.
+ *
+ * Shifts are overflow-sized (small), so the local linear px→angle scale at the
+ * center column is accurate and avoids the yaw blow-up a full re-center hit near
+ * the poles.
  */
 export function computeAnchoredPanelNudgeTarget(
   viewer: Viewer,
   rect: PanelScreenRect,
-  anchor: AnchoredPanelNudgeAnchor,
 ): { yawDeg: number; pitchDeg: number } | null {
   const vw = viewer.container.clientWidth;
   const vh = viewer.container.clientHeight;
   if (vw <= 0 || vh <= 0) return null;
-
-  if (!isPanelClipped(rect, vw, vh)) return null;
 
   const vFov = degToRad(
     viewer.dataHelper.zoomLevelToFov(viewer.getZoomLevel()),
@@ -153,28 +202,60 @@ export function computeAnchoredPanelNudgeTarget(
   const focalPx = vh / 2 / Math.tan(vFov / 2);
   if (!(focalPx > 0)) return null;
 
-  // Drop the hotspot below center by half the (panel + gap) so the combo of
-  // panel-above-hotspot lands centered.
-  const panelHeight = rect.bottom - rect.top;
-  const hotspotDropPx = (panelHeight + ANCHORED_PANEL_GAP_PX) / 2;
+  const m = NUDGE_TARGET_MARGIN_PX;
+  // Top uses a breadcrumb-aware inset so the panel never tucks under it.
+  const topMargin = resolveTopMarginPx(viewer);
+  const topOver = Math.max(0, topMargin - rect.top);
+  const bottomOver = Math.max(0, rect.bottom - (vh - m));
+  const leftOver = Math.max(0, m - rect.left);
+  const rightOver = Math.max(0, rect.right - (vw - m));
 
-  const cameraPitchDeg =
-    anchor.pitchDeg + radToDeg(Math.atan(hotspotDropPx / focalPx));
+  if (topOver === 0 && bottomOver === 0 && leftOver === 0 && rightOver === 0) {
+    return null;
+  }
 
-  return { yawDeg: anchor.yawDeg, pitchDeg: clamp(cameraPitchDeg, -89, 89) };
+  // Push down/right to clear top/left; up/left to clear bottom/right.
+  const pitchShiftDeg = radToDeg((topOver - bottomOver) / focalPx);
+  const yawShiftDeg = radToDeg((rightOver - leftOver) / focalPx);
+
+  const pos = viewer.getPosition();
+  return {
+    yawDeg: radToDeg(pos.yaw) + yawShiftDeg,
+    pitchDeg: clamp(radToDeg(pos.pitch) + pitchShiftDeg, -89, 89),
+  };
+}
+
+/**
+ * Absolute camera orientation (deg) that frames an anchored panel of the given
+ * rendered height above its hotspot — computed ahead of render so the entry
+ * animation can land pre-framed in one move (no follow-up nudge).
+ */
+export function computeAnchoredPanelFramedView(
+  viewer: Viewer,
+  anchor: AnchoredPanelNudgeAnchor,
+  panelHeightPx: number,
+  psvZoom: number,
+): { yawDeg: number; pitchDeg: number } | null {
+  const pitchDeg = panelFitCameraPitchDeg(
+    viewer,
+    anchor.pitchDeg,
+    panelHeightPx,
+    psvZoom,
+  );
+  if (pitchDeg === null) return null;
+
+  return { yawDeg: anchor.yawDeg, pitchDeg };
 }
 
 export async function nudgeCameraForClippedPanel(
   viewer: Viewer,
   panelEl: HTMLElement,
-  anchor: AnchoredPanelNudgeAnchor,
 ): Promise<boolean> {
   if (prefersReducedMotion()) return false;
 
   const target = computeAnchoredPanelNudgeTarget(
     viewer,
     measurePanelScreenRect(viewer, panelEl),
-    anchor,
   );
   if (!target) return false;
 
@@ -215,14 +296,12 @@ export async function nudgeCameraForClippedPanel(
 export function willNudgeCameraForPanel(
   viewer: Viewer,
   panelEl: HTMLElement,
-  anchor: AnchoredPanelNudgeAnchor,
 ): boolean {
   if (prefersReducedMotion()) return false;
   return (
     computeAnchoredPanelNudgeTarget(
       viewer,
       measurePanelScreenRect(viewer, panelEl),
-      anchor,
     ) !== null
   );
 }
@@ -230,7 +309,6 @@ export function willNudgeCameraForPanel(
 export function scheduleNudgeCameraForClippedPanel(
   viewer: Viewer,
   getPanelEl: () => HTMLElement | null | undefined,
-  anchor: AnchoredPanelNudgeAnchor,
   options?: SchedulePanelCameraNudgeOptions,
 ): void {
   let attempts = 0;
@@ -246,13 +324,13 @@ export function scheduleNudgeCameraForClippedPanel(
       return;
     }
 
-    if (!willNudgeCameraForPanel(viewer, panelEl, anchor)) {
+    if (!willNudgeCameraForPanel(viewer, panelEl)) {
       options?.afterSettled?.({ nudged: false });
       return;
     }
 
-    void waitForPanelEnterShell(panelEl).then(async () => {
-      await nudgeCameraForClippedPanel(viewer, panelEl, anchor);
+    void waitForAnchoredPanelEnter(panelEl).then(async () => {
+      await nudgeCameraForClippedPanel(viewer, panelEl);
       options?.afterSettled?.({ nudged: true });
     });
   };

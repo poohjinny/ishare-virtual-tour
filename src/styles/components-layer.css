@@ -531,29 +531,38 @@
 
   /* ── Preview hero skeleton (HTML markers + intro gallery) ── */
   .preview-hero-skeleton {
-    background: linear-gradient(110deg,
-        #e2e8f0 8%,
-        #f1f5f9 18%,
-        #e2e8f0 33%);
-    background-size: 200% 100%;
-    animation: preview-hero-shimmer 1.4s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+    background: #e2e8f0;
     transition: opacity 0.22s ease;
   }
 
-  @keyframes preview-hero-shimmer {
-    0% {
-      background-position: 100% 0;
-    }
+  /* Shimmer runs on a transform (compositor thread) so it keeps animating even
+     while the panorama mini-viewer's WebGL init blocks the main thread — a
+     background-position sweep froze there and read as a static white box. */
+  .preview-hero-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg,
+        transparent 25%,
+        rgba(255, 255, 255, 0.75) 50%,
+        transparent 75%);
+    transform: translateX(-100%);
+    animation: preview-hero-shimmer 1.4s ease-in-out infinite;
+    will-change: transform;
+  }
 
+  @keyframes preview-hero-shimmer {
     100% {
-      background-position: -100% 0;
+      transform: translateX(100%);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .preview-hero-skeleton {
+    .preview-hero-skeleton::after {
       animation: none;
-      background: #e2e8f0;
+      display: none;
     }
   }
 

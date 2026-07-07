@@ -30,6 +30,14 @@ const tourNavDockBtnHoverClassName = cn(
 
 /* ── Breadcrumb ── */
 
+/** Marks the floating breadcrumb nav so the camera nudge can measure/clear it. */
+export const TOUR_BREADCRUMB_ATTR = 'data-tour-breadcrumb';
+export const tourBreadcrumbSelector = `[${TOUR_BREADCRUMB_ATTR}]`;
+
+/** Portaled refine dropdown — excluded from explore panel outside-click dismiss. */
+export const TOUR_EXPLORE_REFINE_MENU_ATTR = 'data-tour-explore-refine-menu';
+export const tourExploreRefineMenuSelector = `[${TOUR_EXPLORE_REFINE_MENU_ATTR}]`;
+
 export const tourNavBreadcrumbClassName = cn(
   'absolute top-[var(--tour-chrome-inset-top)] z-[var(--tour-chrome-z-index)]',
   'max-w-[min(680px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)-var(--tour-chrome-top-dock-width)))]',

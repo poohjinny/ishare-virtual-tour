@@ -38,6 +38,7 @@ import {
   tourGlassPanelCloseClassName,
   tourGlassPanelCloseIconClassName,
 } from './tourGlassPanelVariants';
+import { TOUR_EXPLORE_REFINE_MENU_ATTR } from './tourNavFloatVariants';
 import { NamingPriceRangeFilter } from './NamingPriceRangeFilter';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
@@ -365,6 +366,7 @@ export function ExplorePanelRefine({
           <div
             ref={menuRef}
             id={menuId}
+            {...{ [TOUR_EXPLORE_REFINE_MENU_ATTR]: '' }}
             role='dialog'
             aria-label='Refine explore list'
             aria-hidden={!open}

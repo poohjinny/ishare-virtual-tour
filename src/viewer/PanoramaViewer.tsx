@@ -68,6 +68,7 @@ import {
   isNamingHotspotInViewport,
   scheduleOpenPendingNamingInfoHotspot,
   resolveNamingOpportunityView,
+  resolveNamingOpportunityFramedView,
   resolveSceneRecenterView,
 } from './pendingNamingInfoHotspot';
 import {
@@ -1032,12 +1033,23 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       });
 
       goToNamingOpportunityRef.current = (sceneId, hotspotId) => {
+        // targetView = raw hotspot pose (for "is it already visible?" checks).
+        // framedView = same pose pre-tilted so the panel above the hotspot lands
+        // fully on screen in a single camera move (no follow-up nudge).
         const targetView = resolveNamingOpportunityView(
           tourRef.current,
           sceneId,
           hotspotId,
         );
         if (!targetView) return false;
+
+        const framedView =
+          resolveNamingOpportunityFramedView(
+            viewer,
+            tourRef.current,
+            sceneId,
+            hotspotId,
+          ) ?? targetView;
 
         const currentSceneId = virtualTour.getCurrentNode()?.id;
         const openHostId = getOpenAnchoredPanelHostId(markers);
@@ -1050,7 +1062,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           }
 
           if (!beginNamingOpportunityGo()) return false;
-          void animateViewerToView(viewer, targetView).finally(
+          void animateViewerToView(viewer, framedView).finally(
             releaseNamingOpportunityBusy,
           );
           return true;
@@ -1074,17 +1086,23 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           if (
             isNamingHotspotInViewport(viewer, markers, hotspotId, targetView)
           ) {
+            // Already on screen — open in place and let the nudge catch any
+            // clip. No pre-frame happened, so keep the nudge.
             openPending();
             return true;
           }
 
-          void animateViewerToView(viewer, targetView)
+          // Pre-frame in one move, then open without the redundant nudge.
+          pending.skipCameraNudge = true;
+          void animateViewerToView(viewer, framedView)
             .then(openPending)
             .catch(finishNamingOpportunityGo);
           return true;
         }
 
-        onNavigateToSceneRef.current?.(sceneId, targetView);
+        // Different scene: land pre-framed, then open without the nudge.
+        pending.skipCameraNudge = true;
+        onNavigateToSceneRef.current?.(sceneId, framedView);
         return true;
       };
 
@@ -1160,75 +1178,95 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         }
 
         const panel = target.closest('[data-info-panel="true"]');
-        if (!panel) return;
-
-        if (target.closest('[data-info-panel-close]')) {
-          event.preventDefault();
-          closeAnchoredInfoPanel(markers);
-          onAnchoredPanelVisibilityChangeRef.current?.(false);
-          return;
-        }
-
-        const infoShareButton = target.closest('[data-info-panel-share]');
-        if (infoShareButton instanceof HTMLButtonElement) {
-          event.preventDefault();
-          event.stopPropagation();
-
-          const hotspotId = panel.getAttribute('data-info-panel-for');
-          const tour = tourRef.current;
-          const sceneId = virtualTour.getCurrentNode()?.id ?? tour.firstScene;
-          const namingHotspotId =
-            panel.hasAttribute('data-info-panel-naming') ? hotspotId : null;
-          const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
-          const shareUrl = buildAbsoluteShareUrl({
-            tourId: tour.id,
-            sceneId,
-            firstSceneId: tour.firstScene,
-            namingHotspotId,
-          });
-          const message = buildShareMessage(tour.title, sceneTitle);
-
-          void shareTourView({ shareUrl, message, preferNative: true }).then(
-            (result) => {
-              applyShareButtonFeedback(
-                infoShareButton,
-                result,
-                namingHotspotId ?
-                  TOUR_SHARE_OPPORTUNITY_LABEL
-                : TOUR_SHARE_LOCATION_LABEL,
-                namingHotspotId ? TOUR_SHARE_OPPORTUNITY_ARIA : undefined,
-              );
-            },
-          );
-          return;
-        }
-
-        const videoPlayButton = target.closest('.tour-glass-panel__video-play');
-        if (videoPlayButton instanceof HTMLButtonElement) {
-          event.preventDefault();
-          event.stopPropagation();
-          const shell = videoPlayButton.closest(
-            '.tour-glass-panel__video--preview',
-          );
-          if (shell instanceof HTMLElement) {
-            mountPopupVideoPlayer(shell);
+        if (panel) {
+          if (target.closest('[data-info-panel-close]')) {
+            event.preventDefault();
+            closeAnchoredInfoPanel(markers);
+            onAnchoredPanelVisibilityChangeRef.current?.(false);
+            return;
           }
-          return;
-        }
 
-        const visitBtn = target.closest<HTMLElement>('[data-visit-scene]');
-        if (visitBtn) {
-          event.preventDefault();
-          event.stopPropagation();
-          const targetSceneId = visitBtn.getAttribute('data-visit-scene');
-          if (targetSceneId) {
-            closeAnchoredInfoPanel(markers, false);
-            onNavigateToSceneRef.current?.(targetSceneId);
+          const infoShareButton = target.closest('[data-info-panel-share]');
+          if (infoShareButton instanceof HTMLButtonElement) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const hotspotId = panel.getAttribute('data-info-panel-for');
+            const tour = tourRef.current;
+            const sceneId = virtualTour.getCurrentNode()?.id ?? tour.firstScene;
+            const namingHotspotId =
+              panel.hasAttribute('data-info-panel-naming') ? hotspotId : null;
+            const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
+            const shareUrl = buildAbsoluteShareUrl({
+              tourId: tour.id,
+              sceneId,
+              firstSceneId: tour.firstScene,
+              namingHotspotId,
+            });
+            const message = buildShareMessage(tour.title, sceneTitle);
+
+            void shareTourView({ shareUrl, message, preferNative: true }).then(
+              (result) => {
+                applyShareButtonFeedback(
+                  infoShareButton,
+                  result,
+                  namingHotspotId ?
+                    TOUR_SHARE_OPPORTUNITY_LABEL
+                  : TOUR_SHARE_LOCATION_LABEL,
+                  namingHotspotId ? TOUR_SHARE_OPPORTUNITY_ARIA : undefined,
+                );
+              },
+            );
+            return;
           }
+
+          const videoPlayButton = target.closest(
+            '.tour-glass-panel__video-play',
+          );
+          if (videoPlayButton instanceof HTMLButtonElement) {
+            event.preventDefault();
+            event.stopPropagation();
+            const shell = videoPlayButton.closest(
+              '.tour-glass-panel__video--preview',
+            );
+            if (shell instanceof HTMLElement) {
+              mountPopupVideoPlayer(shell);
+            }
+            return;
+          }
+
+          const visitBtn = target.closest<HTMLElement>('[data-visit-scene]');
+          if (visitBtn) {
+            event.preventDefault();
+            event.stopPropagation();
+            const targetSceneId = visitBtn.getAttribute('data-visit-scene');
+            if (targetSceneId) {
+              closeAnchoredInfoPanel(markers, false);
+              onNavigateToSceneRef.current?.(targetSceneId);
+            }
+            return;
+          }
+
+          event.stopPropagation();
           return;
         }
 
-        event.stopPropagation();
+        // Panorama background — dismiss anchored panels; hotspot clicks are
+        // left to select-marker so toggle/open still works.
+        if (
+          target.closest('.hotspot-nav, .hotspot-info, .hotspot-general-info')
+        ) {
+          return;
+        }
+
+        const hasOpenAnchoredPanel = markers
+          .getMarkers()
+          .some((marker) => marker.data?.infoPanel || marker.data?.navPanel);
+        if (!hasOpenAnchoredPanel) return;
+
+        closeAnchoredNavPreviewPanel(markers, true);
+        closeAnchoredInfoPanel(markers, true);
+        onAnchoredPanelVisibilityChangeRef.current?.(false);
       };
 
       const handlePanelWheel = (event: WheelEvent) => {

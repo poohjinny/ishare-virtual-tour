@@ -718,6 +718,38 @@ function TourExperience() {
   }, [immersiveBackgroundController]);
 
   useTourEscapeClose(panelStack, { disabled: isTransitioning });
+
+  // Close in-scene anchored panels when focus moves to tour chrome outside the
+  // viewer (breadcrumb, explore dock, minimap, etc.). PanoramaViewer handles
+  // dismiss inside the viewer area.
+  useEffect(() => {
+    const dismissAnchoredPanelsOnChromePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (viewerAreaRef.current?.contains(target)) return;
+      if (target.closest('[data-nav-panel="true"], [data-info-panel="true"]')) {
+        return;
+      }
+      if (
+        target.closest('.hotspot-nav, .hotspot-info, .hotspot-general-info')
+      ) {
+        return;
+      }
+
+      viewerRef.current?.closeAnchoredPanels();
+    };
+
+    document.addEventListener(
+      'pointerdown',
+      dismissAnchoredPanelsOnChromePointerDown,
+    );
+    return () =>
+      document.removeEventListener(
+        'pointerdown',
+        dismissAnchoredPanelsOnChromePointerDown,
+      );
+  }, []);
+
   useTourViewerShortcuts(viewerAreaRef, {
     disabled: isTransitioning,
     onRecenter: handleRecenterToDefaultView,
@@ -993,6 +1025,9 @@ function TourExperience() {
           activeNamingHotspotId={activeNamingHotspotId}
           embed={searchParams.embed}
           panelStack={panelStack}
+          onDismissAnchoredPanels={() =>
+            viewerRef.current?.closeAnchoredPanels()
+          }
         />
 
         {splashPhase !== 'done' && (

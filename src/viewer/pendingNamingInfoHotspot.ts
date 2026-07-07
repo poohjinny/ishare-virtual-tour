@@ -7,12 +7,14 @@ import {
   resolveModel3dNamingTargetView,
 } from '../utils/findTourHotspot';
 import { toPsvZoom } from '../utils/psvZoom';
+import { glassPanelMarkerSize } from '../components/tourGlassPanelHtml';
 import {
   getOpenAnchoredPanelHostId,
   isAnchoredPopup,
   openAnchoredInfoPanel,
 } from './infoPanelMarker';
 import { setActiveInfoHotspot } from './infoHotspotActive';
+import { computeAnchoredPanelFramedView } from './anchoredPanelCameraNudge';
 
 const NAMING_VIEW_ANIMATION_MS = 800;
 
@@ -129,6 +131,39 @@ export function resolveNamingOpportunityView(
   };
 }
 
+/**
+ * NO target view pre-tilted so the anchored panel above the hotspot lands fully
+ * framed in one camera move — lets the entry animation replace the old
+ * "aim at hotspot, then nudge up" two-step. Falls back to the plain hotspot view
+ * for model3d tours and modal (non-anchored) popups, which aren't camera-framed.
+ */
+export function resolveNamingOpportunityFramedView(
+  viewer: Viewer,
+  tour: Tour,
+  sceneId: string,
+  hotspotId: string,
+): ViewPosition | undefined {
+  const base = resolveNamingOpportunityView(tour, sceneId, hotspotId);
+  if (!base) return undefined;
+
+  if (isModel3dTour(tour)) return base;
+
+  const found = findNamingHotspotInTour(tour, hotspotId);
+  const popup = found?.hotspot.popup;
+  if (!popup || !isAnchoredPopup(popup)) return base;
+
+  const { height } = glassPanelMarkerSize(popup, hotspotId, tour);
+  const framed = computeAnchoredPanelFramedView(
+    viewer,
+    { yawDeg: base.yaw, pitchDeg: base.pitch },
+    height,
+    toPsvZoom(base.zoom),
+  );
+  if (!framed) return base;
+
+  return { yaw: framed.yawDeg, pitch: framed.pitchDeg, zoom: base.zoom };
+}
+
 /** Naming hotspot with an open panel on this scene, if any. */
 export function resolveOpenNamingHotspotOnScene(
   tour: Tour,
@@ -188,6 +223,12 @@ export function resolveSceneRecenterView(
 export interface PendingNamingInfoTarget {
   sceneId: string;
   hotspotId: string;
+  /**
+   * Skip the panel's clip-correcting camera nudge on open. Set when the camera
+   * was already pre-framed (single-move NO entry) so the panel doesn't get a
+   * second, redundant camera move.
+   */
+  skipCameraNudge?: boolean;
 }
 
 const MAX_OPEN_ATTEMPTS = 120;
@@ -202,6 +243,7 @@ export function openNamingInfoHotspot(
   hotspotId: string,
   onModalPopup?: (popup: PopupContent) => void,
   hideShare = false,
+  skipCameraNudge = false,
 ): boolean {
   const hotspot = tour.scenes[sceneId]?.hotspots.find(
     (h) => h.id === hotspotId,
@@ -209,7 +251,9 @@ export function openNamingInfoHotspot(
   if (!hotspot?.popup) return false;
 
   if (isAnchoredPopup(hotspot.popup)) {
-    openAnchoredInfoPanel(viewer, markers, hotspot, tour, hideShare);
+    openAnchoredInfoPanel(viewer, markers, hotspot, tour, hideShare, {
+      skipCameraNudge,
+    });
   } else {
     setActiveInfoHotspot(markers, hotspot.id);
     onModalPopup?.(hotspot.popup);
@@ -254,6 +298,7 @@ export function scheduleOpenPendingNamingInfoHotspot(
         pending.hotspotId,
         onModalPopup,
         hideShare,
+        pending.skipCameraNudge ?? false,
       )
     ) {
       onOpened?.();

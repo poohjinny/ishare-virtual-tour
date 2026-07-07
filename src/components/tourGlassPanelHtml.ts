@@ -188,6 +188,8 @@ export const GLASS_PANEL = {
   rootAnchored: `tour-glass-panel tour-glass-panel--anchored ${PSV_CAPTURE_EVENTS_CLASS}`,
   shell: 'tour-glass-panel__shell',
   shellEnter: 'tour-glass-panel__shell--enter',
+  anchoredEnter: 'tour-glass-panel--anchored-enter',
+  anchoredExit: 'tour-glass-panel--anchored-exit',
   header: 'tour-glass-panel__header',
   titleRow: 'tour-glass-panel__title-row',
   headerLeading: 'tour-glass-panel__header-leading',
@@ -602,13 +604,23 @@ export function buildTourGlassPanelHtml(
     rootDataAttrs = {},
   } = options;
 
-  const rootClass =
+  // Anchored panels scale the article (ancestor of the glass shell). Animating
+  // the shell — which carries backdrop-filter — hits a Chromium bug where the
+  // glass renders at final size while only the content scales, so the container
+  // "pops" before the content unfolds. Dock panels keep the shell-level entrance.
+  const animateArticle = variant === 'anchored' && animate;
+
+  const rootBaseClass =
     variant === 'anchored' ?
       GLASS_PANEL.rootAnchored
     : `${GLASS_PANEL.root} tour-glass-panel--dock`;
+  const rootClass =
+    animateArticle ?
+      `${rootBaseClass} ${GLASS_PANEL.anchoredEnter}`
+    : rootBaseClass;
 
   const shellClass =
-    animate ?
+    animate && variant !== 'anchored' ?
       `${GLASS_PANEL.shell} ${GLASS_PANEL.shellEnter}`
     : GLASS_PANEL.shell;
 
@@ -962,10 +974,12 @@ export function buildAnchoredNavPreviewHtml(
   options?: { animate?: boolean; hideShare?: boolean },
 ): string {
   const titleId = `nav-panel-title-${hotspotId}`;
-  const shellClass =
-    options?.animate === false ?
-      GLASS_PANEL.shell
-    : `${GLASS_PANEL.shell} ${GLASS_PANEL.shellEnter}`;
+  // Entrance scale runs on the article (ancestor of the glass shell), not the
+  // shell itself. backdrop-filter + transform on the same element hits a
+  // Chromium bug where the glass renders at final size immediately while only
+  // the content scales, making the container "pop" then the content unfold.
+  const articleEnterClass =
+    options?.animate === false ? '' : ` ${GLASS_PANEL.anchoredEnter}`;
 
   const titleHtml = `<h3 id="${escapeHtml(titleId)}" class="${GLASS_PANEL.title} nav-preview-panel__title">${escapeHtml(preview.title)}</h3>`;
 
@@ -1073,13 +1087,13 @@ export function buildAnchoredNavPreviewHtml(
 
   return `
     <article
-      class="${GLASS_PANEL.rootAnchored} tour-glass-panel--nav-preview"
+      class="${GLASS_PANEL.rootAnchored} tour-glass-panel--nav-preview${articleEnterClass}"
       role="dialog"
       aria-labelledby="${escapeHtml(titleId)}"
       data-nav-panel="true"
       data-nav-panel-for="${escapeHtml(hotspotId)}"
     >
-      <div class="${shellClass}">
+      <div class="${GLASS_PANEL.shell}">
         ${heroHtml}
         <div class="nav-preview-panel__main">
           ${bodyHtml}

@@ -17,7 +17,10 @@ import {
   INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
   measureHotspotHalfHeightPx,
 } from './anchoredPanelPosition';
-import { scheduleNudgeCameraForClippedPanel } from './anchoredPanelCameraNudge';
+import {
+  scheduleNudgeCameraForClippedPanel,
+  waitForAnchoredPanelEnter,
+} from './anchoredPanelCameraNudge';
 import { notifyAnchoredPanelOpened } from './anchoredPanelVisibility';
 
 const PANEL_ID_SUFFIX = '-panel';
@@ -82,15 +85,20 @@ export function closeAnchoredInfoPanel(
       continue;
     }
 
-    const shell = marker.domElement.querySelector('.tour-glass-panel__shell');
-    if (!(shell instanceof HTMLElement)) {
+    // Exit scale runs on the article (ancestor of the glass shell), matching the
+    // entrance — animating the backdrop-filter shell directly hits a Chromium
+    // bug where the glass detaches from the content scale.
+    const article = marker.domElement.querySelector(
+      '.tour-glass-panel--anchored',
+    );
+    if (!(article instanceof HTMLElement)) {
       markers.removeMarker(id);
       continue;
     }
 
     closingPanelIds.add(id);
-    shell.classList.remove('tour-glass-panel__shell--enter');
-    shell.classList.add('tour-glass-panel__shell--exit');
+    article.classList.remove('tour-glass-panel--anchored-enter');
+    article.classList.add('tour-glass-panel--anchored-exit');
 
     window.setTimeout(() => {
       closingPanelIds.delete(id);
@@ -121,6 +129,7 @@ export function openAnchoredInfoPanel(
   hotspot: Hotspot,
   tour: Tour,
   hideShare = false,
+  options?: { skipCameraNudge?: boolean },
 ): void {
   if (!hotspot.popup) return;
 
@@ -159,16 +168,35 @@ export function openAnchoredInfoPanel(
   if (marker?.domElement instanceof HTMLElement) {
     enableGlassPanelTextSelection(marker.domElement);
     bindGlassPanelCtaOverflowTitles(marker.domElement);
-    requestAnimationFrame(() => {
-      const live = markers.getMarker(id);
-      if (live?.domElement instanceof HTMLElement) {
-        initPopupVideoPlayers(live.domElement);
-      }
-    });
   }
 
   setActiveInfoHotspot(markers, hotspot.id);
   notifyAnchoredPanelOpened();
+
+  if (!(marker?.domElement instanceof HTMLElement)) return;
+
+  // Serialize the expensive work: wire the video preview only once BOTH the
+  // entrance scale has finished AND the camera has settled, so it never competes
+  // with those animations. A pre-framed (skipCameraNudge) open already moved the
+  // camera before open, so only the entrance gate remains.
+  let cameraSettled = options?.skipCameraNudge ?? false;
+  let enterDone = false;
+  const revealMedia = () => {
+    if (!cameraSettled || !enterDone) return;
+    const live = markers.getMarker(id);
+    if (live?.domElement instanceof HTMLElement) {
+      initPopupVideoPlayers(live.domElement);
+    }
+  };
+
+  void waitForAnchoredPanelEnter(marker.domElement).then(() => {
+    enterDone = true;
+    revealMedia();
+  });
+
+  // NO entries pre-frame the camera in one move, so their panel open skips this
+  // follow-up clip-correcting nudge to avoid a second, redundant camera move.
+  if (options?.skipCameraNudge) return;
 
   scheduleNudgeCameraForClippedPanel(
     viewer,
@@ -179,8 +207,10 @@ export function openAnchoredInfoPanel(
         : null;
     },
     {
-      yawDeg: (hotspot.position as ViewPosition).yaw,
-      pitchDeg: (hotspot.position as ViewPosition).pitch,
+      afterSettled: () => {
+        cameraSettled = true;
+        revealMedia();
+      },
     },
   );
 }
