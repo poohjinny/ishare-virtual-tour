@@ -650,13 +650,9 @@ export const PanoramaViewer = forwardRef<
         );
         if (!patch) continue;
 
-        // Passing panorama to updateNode always force-reloads the scene (async).
-        // Only include changed VT fields — defaultView/thumbnail saves are no-ops here.
+        // updateNode with panorama reloads the texture; forceUpdate ensures same-node refresh in dev.
         if (patch.panorama && patch.id === currentId) {
-          const { panorama: _panorama, ...metaPatch } = patch;
-          if (Object.keys(metaPatch).length > 1) {
-            virtualTour.updateNode(metaPatch);
-          }
+          virtualTour.updateNode(patch);
           reloadPromise = virtualTour.setCurrentNode(patch.id, {
             forceUpdate: true,
             effect: resolveTourSceneTransitionEffect(nextTour),

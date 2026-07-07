@@ -100,7 +100,7 @@ export function normalizeTourAssets(tour: Tour): Tour {
   };
 }
 
-/** Bust baked scene thumbnail URLs after dev rebake (same path, new file bytes). */
+/** Bust scene media URLs after dev rebake/replace (same path, new file bytes). */
 export function bustSceneThumbnailUrls(tour: Tour, version: number): Tour {
   if (version <= 0) return tour;
 
@@ -108,18 +108,21 @@ export function bustSceneThumbnailUrls(tour: Tour, version: number): Tour {
     ...tour,
     scenes: Object.fromEntries(
       Object.entries(tour.scenes).map(([id, scene]) => {
-        if (!scene.thumbnail) return [id, scene];
+        const bustedThumbnail =
+          scene.thumbnail ?
+            appendCacheBust(scene.thumbnail, version)
+          : undefined;
+        const bustedPanorama =
+          scene.panorama ? appendCacheBust(scene.panorama, version) : undefined;
 
-        const bustedThumbnail = appendCacheBust(scene.thumbnail, version);
-        const bustPanorama =
-          scene.panorama === scene.thumbnail || tour.viewerType === 'model3d';
+        if (!bustedThumbnail && !bustedPanorama) return [id, scene];
 
         return [
           id,
           {
             ...scene,
-            thumbnail: bustedThumbnail,
-            ...(bustPanorama ? { panorama: bustedThumbnail } : {}),
+            ...(bustedThumbnail ? { thumbnail: bustedThumbnail } : {}),
+            ...(bustedPanorama ? { panorama: bustedPanorama } : {}),
           },
         ];
       }),

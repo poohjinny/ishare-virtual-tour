@@ -612,9 +612,11 @@ function TourExperience() {
   const handleDevTourMutated = useCallback(
     async (options?: DevTourMutateOptions) => {
       const fresh = normalizeTourAssets(await devFetchTour(route.tourId));
+      const nextMediaVersion = devThumbnailVersion + 1;
+      const bustedFresh = bustSceneThumbnailUrls(fresh, nextMediaVersion);
       setDevTourSnapshot(fresh);
       setDevTourCache(fresh);
-      setDevThumbnailVersion((version) => version + 1);
+      setDevThumbnailVersion(nextMediaVersion);
 
       const targetSceneId =
         options?.keepCurrentScene ? currentSceneId : (
@@ -625,7 +627,7 @@ function TourExperience() {
       const shouldNavigate =
         !options?.keepCurrentScene && targetSceneId !== currentSceneId;
 
-      await viewerRef.current?.applyTourUpdate(fresh);
+      await viewerRef.current?.applyTourUpdate(bustedFresh);
 
       if (shouldNavigate) {
         const targetView = fresh.scenes[targetSceneId]?.defaultView;
@@ -640,7 +642,7 @@ function TourExperience() {
         setDevKnowledgeSnapshot(freshKnowledge);
       }
     },
-    [currentSceneId, route.tourId, syncSceneToUrl],
+    [currentSceneId, devThumbnailVersion, route.tourId, syncSceneToUrl],
   );
 
   const handleSceneChange = useCallback(
@@ -899,48 +901,48 @@ function TourExperience() {
       <div ref={viewerAreaRef} className='viewer-area viewer-area--fullscreen'>
         <Suspense fallback={null}>
           <PanoramaViewer
-              key={tour.id}
-              ref={viewerRef}
-              tour={viewerTour}
-              initialSceneId={initialScene}
-              fullscreenRootRef={viewerAreaRef}
-              controlsVisible={viewerControlsVisible}
-              onControlsToggle={
-                searchParams.embed ? undefined : toggleControlsVisible
-              }
-              skipLanding={searchParams.skipLanding}
-              landingTargetView={landingTargetView}
-              splashDone={splashRevealReady}
-              immersiveBackgroundController={immersiveBackgroundController}
-              immersiveNavbarAvailable={Boolean(
-                bootstrapTour.immersiveBackground,
-              )}
-              toolbarToggleAvailable={isDesktop}
-              activeNamingHotspotId={activeNamingHotspotId}
-              embed={searchParams.embed}
-              disabled={isTransitioning}
-              onSceneChange={handleSceneChange}
-              onInfoHotspot={setActivePopup}
-              onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
-              onDismissModalPopups={handleDismissModalPopups}
-              onAnchoredPanelVisibilityChange={
-                handleAnchoredPanelVisibilityChange
-              }
-              onNavigateToScene={handleNavigate}
-              onTransitionStart={handleTransitionStart}
-              onTransitionEnd={handleTransitionEnd}
-              onDevClick={searchParams.dev ? setDevClickCoords : undefined}
-              onDevViewUpdate={searchParams.dev ? setDevViewCoords : undefined}
-              onViewUpdate={tour.floorPlan ? handleViewUpdate : undefined}
-              onLoadStart={handleLoadStart}
-              onLoadProgress={handleLoadProgress}
-              onLoadComplete={handleLoadComplete}
-              onLandingStart={handleLandingStart}
-              onInitialTourReveal={onInitialTourReveal}
-              onFirstPanoramaInteract={onFirstPanoramaInteract}
-              onViewerLoadError={handleViewerLoadError}
-              onViewerLoadRecovered={handleViewerLoadRecovered}
-              onNamingOpportunityBusyChange={setNamingOpportunityBusy}
+            key={tour.id}
+            ref={viewerRef}
+            tour={viewerTour}
+            initialSceneId={initialScene}
+            fullscreenRootRef={viewerAreaRef}
+            controlsVisible={viewerControlsVisible}
+            onControlsToggle={
+              searchParams.embed ? undefined : toggleControlsVisible
+            }
+            skipLanding={searchParams.skipLanding}
+            landingTargetView={landingTargetView}
+            splashDone={splashRevealReady}
+            immersiveBackgroundController={immersiveBackgroundController}
+            immersiveNavbarAvailable={Boolean(
+              bootstrapTour.immersiveBackground,
+            )}
+            toolbarToggleAvailable={isDesktop}
+            activeNamingHotspotId={activeNamingHotspotId}
+            embed={searchParams.embed}
+            disabled={isTransitioning}
+            onSceneChange={handleSceneChange}
+            onInfoHotspot={setActivePopup}
+            onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
+            onDismissModalPopups={handleDismissModalPopups}
+            onAnchoredPanelVisibilityChange={
+              handleAnchoredPanelVisibilityChange
+            }
+            onNavigateToScene={handleNavigate}
+            onTransitionStart={handleTransitionStart}
+            onTransitionEnd={handleTransitionEnd}
+            onDevClick={searchParams.dev ? setDevClickCoords : undefined}
+            onDevViewUpdate={searchParams.dev ? setDevViewCoords : undefined}
+            onViewUpdate={tour.floorPlan ? handleViewUpdate : undefined}
+            onLoadStart={handleLoadStart}
+            onLoadProgress={handleLoadProgress}
+            onLoadComplete={handleLoadComplete}
+            onLandingStart={handleLandingStart}
+            onInitialTourReveal={onInitialTourReveal}
+            onFirstPanoramaInteract={onFirstPanoramaInteract}
+            onViewerLoadError={handleViewerLoadError}
+            onViewerLoadRecovered={handleViewerLoadRecovered}
+            onNamingOpportunityBusyChange={setNamingOpportunityBusy}
           />
         </Suspense>
 
