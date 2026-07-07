@@ -1,0 +1,99 @@
+{
+  "id": "3d-room",
+  "clientId": "ishare-demos",
+  "viewerType": "model3d",
+  "model": "/assets/ishare-demos/3d-room/models/scene.glb",
+  "title": "Cozy Room",
+  "category": "Demo",
+  "firstScene": "living-area",
+  "hotspots": [
+    {
+      "id": "nav-to-workspace",
+      "type": "nav",
+      "label": "Workspace",
+      "position": { "x": 0.43, "y": 8.47, "z": 5.51 },
+      "targetScene": "workspace",
+      "targetView": {
+        "yaw": -89.7,
+        "pitch": -25.1,
+        "zoom": 7.49,
+        "target": { "x": 7.22, "y": 10.38, "z": 5.57 }
+      }
+    },
+    {
+      "id": "nav-to-bedroom",
+      "type": "nav",
+      "label": "Bedroom",
+      "position": { "x": 14.47, "y": 3.04, "z": 8.94 },
+      "targetScene": "bedroom"
+    },
+    {
+      "id": "nav-to-living-area",
+      "type": "nav",
+      "label": "Living Area",
+      "position": { "x": 6, "y": 2, "z": 6 },
+      "targetScene": "living-area",
+      "navVariant": "hub"
+    },
+    {
+      "id": "monitor-screen",
+      "type": "info",
+      "label": "Monitor Station",
+      "sceneId": "living-area",
+      "position": { "x": -0.95, "y": 10.79, "z": 6.01 },
+      "popup": {
+        "title": "Monitor Station",
+        "body": "A dual-screen workstation setup for productive remote work sessions.",
+        "namingOpportunity": {
+          "status": "open",
+          "name": "Monitor Station Naming Opportunity",
+          "price": 5000
+        }
+      }
+    }
+  ],
+  "scenes": {
+    "living-area": {
+      "id": "living-area",
+      "title": "Living Area",
+      "description": "A cozy seating area with a plush sofa and warm lighting.",
+      "panorama": "/assets/ishare-demos/3d-room/thumbnails/living-area.webp",
+      "thumbnail": "/assets/ishare-demos/3d-room/thumbnails/living-area.webp",
+      "defaultView": {
+        "yaw": -134.9,
+        "pitch": -15.1,
+        "zoom": 29.62,
+        "target": { "x": 7.48, "y": 6.64, "z": 7.51 }
+      },
+      "hotspots": []
+    },
+    "workspace": {
+      "id": "workspace",
+      "title": "Workspace",
+      "description": "A compact workspace tucked into the corner — ideal for remote work.",
+      "panorama": "/assets/ishare-demos/3d-room/thumbnails/workspace.webp",
+      "thumbnail": "/assets/ishare-demos/3d-room/thumbnails/workspace.webp",
+      "defaultView": {
+        "yaw": -89.7,
+        "pitch": -25.1,
+        "zoom": 7.49,
+        "target": { "x": 7.22, "y": 10.38, "z": 5.57 }
+      },
+      "hotspots": []
+    },
+    "bedroom": {
+      "id": "bedroom",
+      "title": "Bedroom",
+      "description": "A warm and inviting bedroom with a comfortable bed and soft lighting.",
+      "panorama": "/assets/ishare-demos/3d-room/thumbnails/bedroom.webp",
+      "thumbnail": "/assets/ishare-demos/3d-room/thumbnails/bedroom.webp",
+      "defaultView": {
+        "yaw": 94,
+        "pitch": -48.7,
+        "zoom": 7.49,
+        "target": { "x": 7.05, "y": 10.66, "z": 7.12 }
+      },
+      "hotspots": []
+    }
+  }
+}

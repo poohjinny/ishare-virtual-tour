@@ -1,0 +1,25 @@
+{
+  "id": "london-skyscraper",
+  "clientId": "ishare-demos",
+  "viewerType": "model3d",
+  "model": "/assets/ishare-demos/london-skyscraper/models/free_london_skyscraper.glb",
+  "title": "London Skyscraper",
+  "category": "Demo",
+  "firstScene": "exterior",
+  "scenes": {
+    "exterior": {
+      "id": "exterior",
+      "title": "Exterior View",
+      "description": "A sweeping exterior view of a modern London skyscraper.",
+      "panorama": "/assets/ishare-demos/london-skyscraper/thumbnails/exterior.webp",
+      "thumbnail": "/assets/ishare-demos/london-skyscraper/thumbnails/exterior.webp",
+      "defaultView": {
+        "yaw": 53.3,
+        "pitch": -21.2,
+        "zoom": 157.56,
+        "target": { "x": -15.82, "y": 94.07, "z": -17.93 }
+      },
+      "hotspots": []
+    }
+  }
+}

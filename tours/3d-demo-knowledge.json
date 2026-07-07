@@ -1,0 +1,208 @@
+{
+  "id": "3d-demo",
+  "url": "https://example.com",
+  "global": {
+    "facilityName": "3D Walkthrough Demo",
+    "summary": "A demonstration of the Three.js 3D walkthrough viewer using the classic Sponza atrium test scene."
+  },
+  "scenes": {
+    "sponza": {
+      "title": "Sponza Atrium",
+      "description": "Classic architecture test scene with arches, columns, and an open courtyard.",
+      "facts": [
+        "The Sponza model is a standard benchmark scene in 3D graphics.",
+        "Originally based on the Sponza Palace in Dubrovnik, Croatia."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Sponza Atrium?",
+          "a": "Classic Sponza architecture test scene — open atrium with arches and columns."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Sponza Atrium",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "1st-floor": {
+      "title": "1st Floor",
+      "description": "Explore 1st Floor at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "1st Floor is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in 1st Floor?",
+          "a": "Explore 1st Floor at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about 1st Floor",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "1st-floor-2-2": {
+      "title": "1st Floor 2- 2",
+      "description": "Explore 1st Floor 2- 2 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "1st Floor 2- 2 is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in 1st Floor 2- 2?",
+          "a": "Explore 1st Floor 2- 2 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about 1st Floor 2- 2",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "test": {
+      "title": "test",
+      "description": "Explore test at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "test is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in test?",
+          "a": "Explore test at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about test",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "agent-test-scene": {
+      "title": "Agent Test Scene",
+      "description": "Explore Agent Test Scene at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "Agent Test Scene is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Agent Test Scene?",
+          "a": "Explore Agent Test Scene at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Agent Test Scene",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "test1": {
+      "title": "test1",
+      "description": "Explore test1 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "test1 is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in test1?",
+          "a": "Explore test1 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about test1",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "test4": {
+      "title": "test4",
+      "description": "Explore test4 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "test4 is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in test4?",
+          "a": "Explore test4 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about test4",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "test2": {
+      "title": "test2",
+      "description": "Explore test2 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "test2 is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in test2?",
+          "a": "Explore test2 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about test2",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    },
+    "test3": {
+      "title": "test3",
+      "description": "Explore test3 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "facts": [
+        "test3 is part of the 3D Walkthrough Demo virtual tour.",
+        "Add facility-specific facts in the knowledge editor or tours/*-knowledge.json."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in test3?",
+          "a": "Explore test3 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON."
+        },
+        {
+          "q": "What is 3D Walkthrough Demo?",
+          "a": "3D Walkthrough Demo is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about test3",
+        "What is available at 3D Walkthrough Demo?"
+      ]
+    }
+  }
+}

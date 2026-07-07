@@ -1,0 +1,168 @@
+{
+  "id": "3d-demo",
+  "clientId": "ishare-demos",
+  "viewerType": "model3d",
+  "model": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf",
+  "title": "3D Walkthrough Demo",
+  "category": "Demo",
+  "firstScene": "sponza",
+  "scenes": {
+    "sponza": {
+      "id": "sponza",
+      "title": "Overall",
+      "description": "Classic Sponza architecture test scene — open atrium with arches and columns.",
+      "panorama": "/assets/ishare-demos/3d-demo/thumbnails/sponza.webp",
+      "thumbnail": "/assets/ishare-demos/3d-demo/thumbnails/sponza.webp",
+      "defaultView": {
+        "yaw": -80.9,
+        "pitch": 67.9,
+        "zoom": 1.35,
+        "target": {
+          "x": -9.39,
+          "y": 1.58,
+          "z": -0.27
+        }
+      },
+      "hotspots": []
+    },
+    "test1": {
+      "id": "test1",
+      "title": "1st Floor",
+      "description": "Explore test1 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/ishare-demos/3d-demo/thumbnails/test1.webp",
+      "thumbnail": "/assets/ishare-demos/3d-demo/thumbnails/test1.webp",
+      "defaultView": {
+        "yaw": -90.7,
+        "pitch": -0.6,
+        "zoom": 1.35,
+        "target": {
+          "x": 8.41,
+          "y": 1.58,
+          "z": -0.36
+        }
+      },
+      "hotspots": []
+    },
+    "test2": {
+      "id": "test2",
+      "title": "2nd Floor",
+      "description": "Explore test2 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "panorama": "/assets/ishare-demos/3d-demo/thumbnails/test2.webp",
+      "thumbnail": "/assets/ishare-demos/3d-demo/thumbnails/test2.webp",
+      "defaultView": {
+        "yaw": -104.7,
+        "pitch": -8.8,
+        "zoom": 1.35,
+        "target": {
+          "x": -0.93,
+          "y": 1.58,
+          "z": -4.89
+        }
+      },
+      "hotspots": []
+    }
+  },
+  "hotspots": [
+    {
+      "id": "info-naming-opportunity-2",
+      "type": "info",
+      "position": {
+        "x": -11.33,
+        "y": 1.98,
+        "z": -0.28
+      },
+      "popup": {
+        "display": "anchored",
+        "title": "Naming Opportunity",
+        "namingOpportunity": {
+          "name": "Naming Opportunity Naming Opportunity",
+          "price": 75000,
+          "status": "open"
+        },
+        "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments.\n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together.",
+        "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+      },
+      "sceneId": "sponza",
+      "targetView": {
+        "yaw": -90.1,
+        "pitch": 0,
+        "zoom": 1.35,
+        "target": {
+          "x": -9.39,
+          "y": 1.58,
+          "z": -0.27
+        }
+      },
+      "preview": {
+        "image": "/assets/ishare-demos/3d-demo/previews/info-naming-opportunity-2.webp"
+      }
+    },
+    {
+      "id": "info-test",
+      "type": "info",
+      "position": {
+        "x": 2.44,
+        "y": 1.29,
+        "z": 1.56
+      },
+      "popup": {
+        "display": "anchored",
+        "title": "Naming Opportunity - 3",
+        "namingOpportunity": {
+          "name": "Naming Opportunity - 3 Naming Opportunity",
+          "price": 10000,
+          "status": "reserved"
+        },
+        "body": "test is a naming opportunity at 3D Walkthrough Demo. Recognition details, donor benefits, and placement copy will be confirmed with the foundation team."
+      },
+      "sceneId": "sponza",
+      "targetView": {
+        "yaw": 3.4,
+        "pitch": -1,
+        "zoom": 1.35,
+        "target": {
+          "x": 2.29,
+          "y": 1.26,
+          "z": -0.01
+        }
+      },
+      "preview": {
+        "image": "/assets/ishare-demos/3d-demo/previews/info-test.webp"
+      }
+    },
+    {
+      "id": "info-naming-opportunity-2-2",
+      "type": "info",
+      "position": {
+        "x": -11.39,
+        "y": 5.09,
+        "z": -0.31
+      },
+      "popup": {
+        "display": "anchored",
+        "title": "Naming Opportunity - 2",
+        "namingOpportunity": {
+          "name": "Naming Opportunity - 2 Naming Opportunity",
+          "price": 25000,
+          "status": "closed"
+        },
+        "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments.",
+        "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+      },
+      "targetView": {
+        "yaw": -89.5,
+        "pitch": -6.8,
+        "zoom": 2.51,
+        "target": {
+          "x": -11.39,
+          "y": 5.09,
+          "z": -0.31
+        }
+      },
+      "preview": {
+        "image": "/assets/ishare-demos/3d-demo/previews/info-naming-opportunity-2-2.webp"
+      },
+      "sceneId": "sponza"
+    }
+  ]
+}

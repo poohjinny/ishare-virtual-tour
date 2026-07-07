@@ -1,0 +1,24 @@
+{
+  "tourId": "3d-room",
+  "overview": {
+    "facilityName": "Cozy Room",
+    "summary": "A stylish modern room interior — CC0 licensed 3D demo scene."
+  },
+  "scenes": {
+    "living-area": {
+      "title": "Living Area",
+      "description": "A cozy seating area with a plush sofa and warm lighting.",
+      "suggestedQuestions": []
+    },
+    "workspace": {
+      "title": "Workspace",
+      "description": "A compact workspace tucked into the corner — ideal for remote work.",
+      "suggestedQuestions": []
+    },
+    "bedroom": {
+      "title": "Bedroom",
+      "description": "A warm and inviting bedroom with a comfortable bed and soft lighting.",
+      "suggestedQuestions": []
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "tourId": "3d-qch",
+  "overview": {
+    "facilityName": "QCH Unreal",
+    "summary": "SketchUp 3D model test scene — QCH."
+  },
+  "scenes": {
+    "scene": {
+      "title": "QCH Unreal",
+      "description": "SketchUp export test scene.",
+      "suggestedQuestions": []
+    }
+  }
+}

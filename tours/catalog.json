@@ -6,7 +6,8 @@
     "Sporting Venues",
     "International Aid",
     "Social Services",
-    "Tourism"
+    "Tourism",
+    "Demo"
   ],
   "clients": [
     {
@@ -118,6 +119,37 @@
           "visibility": "public",
           "featured": false,
           "summary": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most."
+        }
+      ]
+    },
+    {
+      "id": "ishare-demos",
+      "name": "iShare Demos",
+      "website": "https://ishare.ca",
+      "tours": [
+        {
+          "id": "3d-demo",
+          "category": "Demo",
+          "name": "3D Walkthrough Demo",
+          "visibility": "public"
+        },
+        {
+          "id": "3d-qch",
+          "category": "Demo",
+          "name": "QCH Unreal (SketchUp)",
+          "visibility": "public"
+        },
+        {
+          "id": "3d-room",
+          "category": "Demo",
+          "name": "Cozy Room",
+          "visibility": "public"
+        },
+        {
+          "id": "london-skyscraper",
+          "category": "Demo",
+          "name": "London Skyscraper",
+          "visibility": "public"
         }
       ]
     }

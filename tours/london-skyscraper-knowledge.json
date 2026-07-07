@@ -1,0 +1,14 @@
+{
+  "tourId": "london-skyscraper",
+  "overview": {
+    "facilityName": "London Skyscraper",
+    "summary": "A modern London skyscraper — free 3D model demo scene."
+  },
+  "scenes": {
+    "exterior": {
+      "title": "Exterior View",
+      "description": "A sweeping exterior view of a modern London skyscraper.",
+      "suggestedQuestions": []
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "3d-qch",
+  "clientId": "ishare-demos",
+  "viewerType": "model3d",
+  "model": "/assets/ishare-demos/3d-qch/models/scene.glb",
+  "title": "QCH Unreal (SketchUp)",
+  "category": "Demo",
+  "firstScene": "scene",
+  "scenes": {
+    "scene": {
+      "id": "scene",
+      "title": "QCH Unreal",
+      "description": "SketchUp export — QCHUnreal1.glb test scene.",
+      "panorama": "/assets/ishare-demos/3d-qch/thumbnails/scene.webp",
+      "thumbnail": "/assets/ishare-demos/3d-qch/thumbnails/scene.webp",
+      "defaultView": {
+        "yaw": 49.9,
+        "pitch": -42,
+        "zoom": 66.77,
+        "target": { "x": -38.21, "y": -5.84, "z": -4.74 }
+      },
+      "hotspots": []
+    }
+  }
+}
