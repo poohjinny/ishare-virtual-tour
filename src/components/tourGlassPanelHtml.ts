@@ -748,8 +748,6 @@ export function buildAnchoredPopupHtml(
 }
 
 const NAV_PREVIEW_HERO_ASPECT = 8 / 16;
-const NAV_PREVIEW_MAX_HEIGHT = 960;
-const NAV_PREVIEW_MAX_HEIGHT_RATIO = 0.96;
 
 export function resolveNavPreviewPanelWidth(): number {
   return Math.round(Math.min(TOUR_DOCK_PANEL_WIDTH, viewportMaxPanelWidth()));
@@ -763,8 +761,8 @@ export function resolveNavPreviewHeroHeight(
 
 export function resolveNavPreviewPanelMaxHeight(): number {
   return Math.min(
-    Math.round(window.innerHeight * NAV_PREVIEW_MAX_HEIGHT_RATIO),
-    NAV_PREVIEW_MAX_HEIGHT,
+    Math.round(window.innerHeight * GLASS_PANEL_SIZE.maxHeightRatio),
+    GLASS_PANEL_SIZE.maxHeight,
   );
 }
 
