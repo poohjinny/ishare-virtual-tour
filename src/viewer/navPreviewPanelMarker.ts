@@ -219,6 +219,10 @@ export function openAnchoredNavPreviewPanel(
           : null;
       },
       {
+        yawDeg: (hotspot.position as ViewPosition).yaw,
+        pitchDeg: (hotspot.position as ViewPosition).pitch,
+      },
+      {
         afterSettled: () => {
           const panelMarker = markers.getMarker(id);
           if (!(panelMarker?.domElement instanceof HTMLElement)) return;

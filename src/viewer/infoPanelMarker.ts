@@ -170,12 +170,19 @@ export function openAnchoredInfoPanel(
   setActiveInfoHotspot(markers, hotspot.id);
   notifyAnchoredPanelOpened();
 
-  scheduleNudgeCameraForClippedPanel(viewer, () => {
-    const panelMarker = markers.getMarker(id);
-    return panelMarker?.domElement instanceof HTMLElement ?
-        panelMarker.domElement
-      : null;
-  });
+  scheduleNudgeCameraForClippedPanel(
+    viewer,
+    () => {
+      const panelMarker = markers.getMarker(id);
+      return panelMarker?.domElement instanceof HTMLElement ?
+          panelMarker.domElement
+        : null;
+    },
+    {
+      yawDeg: (hotspot.position as ViewPosition).yaw,
+      pitchDeg: (hotspot.position as ViewPosition).pitch,
+    },
+  );
 }
 
 export function toggleAnchoredInfoPanel(

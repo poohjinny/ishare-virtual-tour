@@ -1,17 +1,25 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 
+import { ANCHORED_PANEL_GAP_PX } from './anchoredPanelPosition';
+
 const NUDGE_DURATION_MS = 600;
 const MAX_MEASURE_ATTEMPTS = 36;
 const PANEL_ENTER_ANIM_MS = 220;
 
-/** Skip nudge when panel center is already near viewport center. */
-const MIN_CENTER_OFFSET_PX = 12;
+/** Treat the panel as clipped when it comes within this margin of an edge. */
+const EDGE_MARGIN_PX = 8;
 
 export interface PanelScreenRect {
   left: number;
   top: number;
   right: number;
   bottom: number;
+}
+
+/** Hotspot (panel host) spherical position in degrees. */
+export interface AnchoredPanelNudgeAnchor {
+  yawDeg: number;
+  pitchDeg: number;
 }
 
 export interface PanelCameraNudgeSettled {
@@ -90,58 +98,100 @@ export function measurePanelScreenRect(
   };
 }
 
+function degToRad(deg: number): number {
+  return (deg * Math.PI) / 180;
+}
+
+function radToDeg(rad: number): number {
+  return (rad * 180) / Math.PI;
+}
+
+/** Normalize a yaw delta to the shortest rotation in [-180, 180]. */
+function normalizeYawDeltaDeg(deg: number): number {
+  return ((((deg + 180) % 360) + 360) % 360) - 180;
+}
+
+function isPanelClipped(
+  rect: PanelScreenRect,
+  vw: number,
+  vh: number,
+): boolean {
+  return (
+    rect.top < EDGE_MARGIN_PX ||
+    rect.left < EDGE_MARGIN_PX ||
+    rect.right > vw - EDGE_MARGIN_PX ||
+    rect.bottom > vh - EDGE_MARGIN_PX
+  );
+}
+
 /**
- * Camera correction to move the panel bbox center toward the viewport center.
+ * Absolute target camera orientation (deg) to bring a clipped anchored panel
+ * fully into view.
+ *
+ * The panel is rigidly anchored directly above its hotspot, so we aim the
+ * camera at the hotspot's yaw (stable — no yaw blow-up near the poles) and tilt
+ * up by the exact angle that drops the hotspot below center far enough for the
+ * panel to sit on-screen. This uses the rectilinear center-column relation
+ * (y = f·tan θ) instead of a linear pixel→angle approximation, which overshoots
+ * at extreme pitch and sent the camera somewhere unexpected.
  */
-export function computePanelCenterCorrection(
+export function computeAnchoredPanelNudgeTarget(
   viewer: Viewer,
   rect: PanelScreenRect,
+  anchor: AnchoredPanelNudgeAnchor,
 ): { yawDeg: number; pitchDeg: number } | null {
   const vw = viewer.container.clientWidth;
   const vh = viewer.container.clientHeight;
   if (vw <= 0 || vh <= 0) return null;
 
-  const panelCenterX = (rect.left + rect.right) / 2;
-  const panelCenterY = (rect.top + rect.bottom) / 2;
-  const shiftX = vw / 2 - panelCenterX;
-  const shiftY = vh / 2 - panelCenterY;
+  if (!isPanelClipped(rect, vw, vh)) return null;
 
-  if (
-    Math.abs(shiftX) < MIN_CENTER_OFFSET_PX &&
-    Math.abs(shiftY) < MIN_CENTER_OFFSET_PX
-  ) {
-    return null;
-  }
+  const vFov = degToRad(
+    viewer.dataHelper.zoomLevelToFov(viewer.getZoomLevel()),
+  );
+  if (!(vFov > 0)) return null;
+  const focalPx = vh / 2 / Math.tan(vFov / 2);
+  if (!(focalPx > 0)) return null;
 
-  const vFov = viewer.dataHelper.zoomLevelToFov(viewer.getZoomLevel());
-  const hFov = viewer.dataHelper.vFovToHFov(vFov);
+  // Drop the hotspot below center by half the (panel + gap) so the combo of
+  // panel-above-hotspot lands centered.
+  const panelHeight = rect.bottom - rect.top;
+  const hotspotDropPx = (panelHeight + ANCHORED_PANEL_GAP_PX) / 2;
 
-  const yawDeg = (-shiftX / vw) * hFov;
-  const pitchDeg = (shiftY / vh) * vFov;
+  const cameraPitchDeg =
+    anchor.pitchDeg + radToDeg(Math.atan(hotspotDropPx / focalPx));
 
-  if (Math.abs(yawDeg) < 0.25 && Math.abs(pitchDeg) < 0.25) return null;
-
-  return { yawDeg, pitchDeg };
+  return { yawDeg: anchor.yawDeg, pitchDeg: clamp(cameraPitchDeg, -89, 89) };
 }
 
 export async function nudgeCameraForClippedPanel(
   viewer: Viewer,
   panelEl: HTMLElement,
+  anchor: AnchoredPanelNudgeAnchor,
 ): Promise<boolean> {
   if (prefersReducedMotion()) return false;
 
-  const correction = computePanelCenterCorrection(
+  const target = computeAnchoredPanelNudgeTarget(
     viewer,
     measurePanelScreenRect(viewer, panelEl),
+    anchor,
   );
-  if (!correction) return false;
+  if (!target) return false;
 
   const position = viewer.getPosition();
-  const currentYaw = (position.yaw * 180) / Math.PI;
-  const currentPitch = (position.pitch * 180) / Math.PI;
+  const currentYaw = radToDeg(position.yaw);
+  const currentPitch = radToDeg(position.pitch);
 
-  const targetYaw = currentYaw + correction.yawDeg;
-  const targetPitch = clamp(currentPitch + correction.pitchDeg, -89, 89);
+  const yawDelta = normalizeYawDeltaDeg(target.yawDeg - currentYaw);
+  const targetYaw = currentYaw + yawDelta;
+  const targetPitch = target.pitchDeg;
+
+  if (
+    Math.abs(yawDelta) < 0.25 &&
+    Math.abs(targetPitch - currentPitch) < 0.25
+  ) {
+    return false;
+  }
 
   try {
     await stopActiveViewerAnimation(viewer);
@@ -165,12 +215,14 @@ export async function nudgeCameraForClippedPanel(
 export function willNudgeCameraForPanel(
   viewer: Viewer,
   panelEl: HTMLElement,
+  anchor: AnchoredPanelNudgeAnchor,
 ): boolean {
   if (prefersReducedMotion()) return false;
   return (
-    computePanelCenterCorrection(
+    computeAnchoredPanelNudgeTarget(
       viewer,
       measurePanelScreenRect(viewer, panelEl),
+      anchor,
     ) !== null
   );
 }
@@ -178,6 +230,7 @@ export function willNudgeCameraForPanel(
 export function scheduleNudgeCameraForClippedPanel(
   viewer: Viewer,
   getPanelEl: () => HTMLElement | null | undefined,
+  anchor: AnchoredPanelNudgeAnchor,
   options?: SchedulePanelCameraNudgeOptions,
 ): void {
   let attempts = 0;
@@ -193,13 +246,13 @@ export function scheduleNudgeCameraForClippedPanel(
       return;
     }
 
-    if (!willNudgeCameraForPanel(viewer, panelEl)) {
+    if (!willNudgeCameraForPanel(viewer, panelEl, anchor)) {
       options?.afterSettled?.({ nudged: false });
       return;
     }
 
     void waitForPanelEnterShell(panelEl).then(async () => {
-      await nudgeCameraForClippedPanel(viewer, panelEl);
+      await nudgeCameraForClippedPanel(viewer, panelEl, anchor);
       options?.afterSettled?.({ nudged: true });
     });
   };
