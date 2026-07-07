@@ -16,6 +16,8 @@ interface DevToolsProps {
   sceneOptions: DevSceneOption[];
   view: ViewPosition | null;
   clickCoords: ClickCoords | null;
+  captureSceneThumbnail?: () => Promise<Blob | null>;
+  getCurrentView?: () => ViewPosition | null;
   panelStack?: TourPanelStack;
 }
 
@@ -27,6 +29,8 @@ export function DevTools({
   sceneOptions,
   view,
   clickCoords,
+  captureSceneThumbnail,
+  getCurrentView,
   panelStack,
 }: DevToolsProps) {
   const [panelOpen, setPanelOpen] = useState(() => !prefersMobileTourChrome());
@@ -45,7 +49,7 @@ export function DevTools({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'd' && event.key !== 'D') return;
+      if (event.code !== 'Backquote') return;
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (isTypingTarget(event.target)) return;
 
@@ -63,7 +67,7 @@ export function DevTools({
         className={devFabVariants({ open: panelOpen })}
         aria-expanded={panelOpen}
         aria-controls='dev-view-panel'
-        aria-label={panelOpen ? 'Hide dev panel (D)' : 'Show dev panel (D)'}
+        aria-label={panelOpen ? 'Hide dev panel (`)' : 'Show dev panel (`)'}
         onClick={() => setPanelOpen((open) => !open)}
       >
         Dev
@@ -79,6 +83,8 @@ export function DevTools({
           sceneOptions={sceneOptions}
           view={view}
           clickCoords={clickCoords}
+          captureSceneThumbnail={captureSceneThumbnail}
+          getCurrentView={getCurrentView}
         />
       : null}
     </div>

@@ -161,6 +161,9 @@ export async function updateTourFloorPlan({
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
+  if (tour.viewerType === 'model3d') {
+    throw new Error('Floor plan is not supported for model3d tours');
+  }
   const clientId = tour.clientId ?? tour.id;
   const mapsDir = join(assetsRoot, clientId, tourId, 'maps');
 
@@ -205,6 +208,9 @@ export async function updateTourFloorPlan({
 export function clearTourFloorPlan({ root, toursDir, assetsRoot, tourId }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
+  if (tour.viewerType === 'model3d') {
+    throw new Error('Floor plan is not supported for model3d tours');
+  }
   const clientId = tour.clientId ?? tour.id;
   const mapsDir = join(assetsRoot, clientId, tourId, 'maps');
 

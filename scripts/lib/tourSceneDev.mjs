@@ -25,17 +25,48 @@ const THUMBNAIL_QUALITY = Number(process.env.THUMBNAIL_QUALITY ?? 85);
 const MAX_PANORAMA_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 const PANORAMA_UPLOAD_EXTENSIONS = new Set(['webp', 'jpg', 'jpeg', 'png']);
+const MODEL_UPLOAD_EXTENSIONS = new Set(['glb', 'gltf']);
+const MAX_MODEL_UPLOAD_BYTES = 100 * 1024 * 1024;
+/** Orbit distance when no camera pose is captured (see ThreeDViewer computeViewCameraState). */
+const DEFAULT_3D_VIEW = { yaw: 0, pitch: 0, zoom: 2 };
 
 function roundCoord(value) {
   return +Number(value).toFixed(1);
 }
 
+function isWorldHotspotPosition(position) {
+  return (
+    typeof position?.x === 'number' &&
+    typeof position?.y === 'number' &&
+    typeof position?.z === 'number'
+  );
+}
+
+function isViewHotspotPosition(position) {
+  return (
+    typeof position?.yaw === 'number' && typeof position?.pitch === 'number'
+  );
+}
+
 export function normalizeDefaultView(view) {
-  return {
+  const normalized = {
     yaw: roundCoord(view.yaw),
     pitch: roundCoord(view.pitch),
     zoom: view.zoom ?? 0,
   };
+  if (
+    view.target &&
+    typeof view.target.x === 'number' &&
+    typeof view.target.y === 'number' &&
+    typeof view.target.z === 'number'
+  ) {
+    normalized.target = {
+      x: +Number(view.target.x).toFixed(2),
+      y: +Number(view.target.y).toFixed(2),
+      z: +Number(view.target.z).toFixed(2),
+    };
+  }
+  return normalized;
 }
 
 function roundMapCoord(value) {
@@ -79,7 +110,17 @@ function validateOptionalViewPosition(view, label) {
 }
 
 export function normalizeHotspotPosition(position) {
-  return { yaw: roundCoord(position.yaw), pitch: roundCoord(position.pitch) };
+  if (isWorldHotspotPosition(position)) {
+    return {
+      x: +Number(position.x).toFixed(2),
+      y: +Number(position.y).toFixed(2),
+      z: +Number(position.z).toFixed(2),
+    };
+  }
+  if (isViewHotspotPosition(position)) {
+    return { yaw: roundCoord(position.yaw), pitch: roundCoord(position.pitch) };
+  }
+  throw new Error('position must have {yaw, pitch} or {x, y, z}');
 }
 
 /** "Parking Lot" → `parking-lot` (matches tour scene / hotspot id convention). */
@@ -180,7 +221,7 @@ export function buildNamingHotspotRecord({
 
   if (!title) throw new Error('Hotspot name is required');
   if (!slug) throw new Error('Hotspot name must contain letters or numbers');
-  if (!priceValue) throw new Error('Price is required');
+  if (!Number.isFinite(priceValue)) throw new Error('Price is required');
   if (!NAMING_STATUSES.has(statusValue)) {
     throw new Error(`Invalid naming status: ${statusValue}`);
   }
@@ -245,7 +286,26 @@ export function buildInfoHotspotRecord({
   };
 }
 
+function appendTourHotspot(tour, sceneId, hotspot) {
+  if (!Array.isArray(tour.hotspots)) {
+    tour.hotspots = [];
+  }
+  const ids = new Set(tour.hotspots.map((entry) => entry.id));
+  const uniqueId = resolveUniqueHotspotId(ids, hotspot.id);
+  const record =
+    uniqueId === hotspot.id ? { ...hotspot } : { ...hotspot, id: uniqueId };
+  if (record.type !== 'nav' && !record.sceneId) {
+    record.sceneId = sceneId;
+  }
+  tour.hotspots.push(record);
+  return record;
+}
+
 function appendSceneHotspot(tour, sceneId, hotspot) {
+  if (tour.viewerType === 'model3d') {
+    return appendTourHotspot(tour, sceneId, hotspot);
+  }
+
   const scene = tour.scenes?.[sceneId];
   if (!scene) {
     throw new Error(`Scene not found: ${sceneId}`);
@@ -266,6 +326,14 @@ function findSceneHotspot(tour, sceneId, hotspotId) {
   if (!scene) {
     throw new Error(`Scene not found: ${sceneId}`);
   }
+
+  if (tour.viewerType === 'model3d') {
+    const tourHotspot = tour.hotspots?.find((entry) => entry.id === hotspotId);
+    if (tourHotspot) {
+      return { scene, hotspot: tourHotspot };
+    }
+  }
+
   const hotspot = scene.hotspots?.find((entry) => entry.id === hotspotId);
   if (!hotspot) {
     throw new Error(`Hotspot not found: ${hotspotId}`);
@@ -281,10 +349,19 @@ export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
 
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
-  const { scene, hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
-  scene.hotspots = scene.hotspots.filter(
-    (entry) => entry.id !== resolvedHotspotId,
-  );
+  const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+
+  if (tour.viewerType === 'model3d') {
+    tour.hotspots = (tour.hotspots ?? []).filter(
+      (entry) => entry.id !== resolvedHotspotId,
+    );
+  } else {
+    const { scene } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+    scene.hotspots = scene.hotspots.filter(
+      (entry) => entry.id !== resolvedHotspotId,
+    );
+  }
+
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
 }
@@ -302,10 +379,9 @@ export function updateHotspotPosition({
   }
   if (
     !position ||
-    typeof position.yaw !== 'number' ||
-    typeof position.pitch !== 'number'
+    (!isViewHotspotPosition(position) && !isWorldHotspotPosition(position))
   ) {
-    throw new Error('position.yaw and position.pitch must be numbers');
+    throw new Error('position must have {yaw, pitch} or {x, y, z}');
   }
 
   const tourPath = resolveTourJsonPath(toursDir, tourId);
@@ -335,6 +411,25 @@ export async function replaceScenePanorama({
     throw new Error(`Scene not found: ${sceneId}`);
   }
 
+  if (tour.viewerType === 'model3d') {
+    const thumbnailWebPath = await saveUploadedSceneThumbnailWebp({
+      assetsRoot,
+      root,
+      tour,
+      sceneId,
+      fileBuffer: panoramaFileBuffer,
+    });
+    scene.panorama = thumbnailWebPath;
+    scene.thumbnail = thumbnailWebPath;
+    writeTourJson(tourPath, tour);
+    return {
+      tourPath,
+      sceneId,
+      panorama: thumbnailWebPath,
+      thumbnail: thumbnailWebPath,
+    };
+  }
+
   const panoramaWebPath = await saveUploadedPanoramaWebp({
     assetsRoot,
     root,
@@ -354,6 +449,49 @@ export async function replaceScenePanorama({
 
   writeTourJson(tourPath, tour);
   return { tourPath, sceneId, panorama: panoramaWebPath, thumbnail };
+}
+
+export async function replaceTourModel({
+  root,
+  toursDir,
+  assetsRoot,
+  tourId,
+  modelFileBuffer,
+  modelFileName,
+}) {
+  if (!modelFileBuffer?.length) {
+    throw new Error('modelFile is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  if (tour.viewerType !== 'model3d') {
+    throw new Error('Tour is not a 3D model tour');
+  }
+
+  const modelWebPath = await saveUploadedTourModel({
+    assetsRoot,
+    root,
+    tour,
+    fileBuffer: modelFileBuffer,
+    fileName: modelFileName,
+  });
+  tour.model = `${modelWebPath}?v=${Date.now()}`;
+
+  for (const scene of Object.values(tour.scenes ?? {})) {
+    if (scene.model) {
+      delete scene.model;
+    }
+  }
+
+  writeTourJson(tourPath, tour);
+  return { tourPath, tourId, model: modelWebPath };
+}
+
+/** @deprecated Use {@link replaceTourModel} — sceneId is ignored. */
+export async function replaceSceneModel(payload) {
+  const { sceneId: _sceneId, ...rest } = payload;
+  return replaceTourModel(rest);
 }
 
 function assertTargetSceneExists(tour, targetSceneId) {
@@ -394,6 +532,170 @@ export function buildSceneRecord({
     ),
     hotspots: [],
   };
+}
+
+export function buildDefaultModelWebPath(tour, sceneId, ext = 'glb') {
+  const clientId = tour.clientId ?? tour.id;
+  return `/assets/${clientId}/${tour.id}/models/${sceneId}.${ext}`;
+}
+
+/** Shared GLB path for model3d tours — one file per tour. */
+export function buildDefaultTourModelWebPath(tour, ext = 'glb') {
+  const clientId = tour.clientId ?? tour.id;
+  return `/assets/${clientId}/${tour.id}/models/${tour.id}.${ext}`;
+}
+
+export function buildDefaultSceneThumbnailWebPath(tour, sceneId) {
+  const clientId = tour.clientId ?? tour.id;
+  return `/assets/${clientId}/${tour.id}/thumbnails/${sceneId}.webp`;
+}
+
+export function buildDefaultHotspotPreviewWebPath(tour, hotspotId) {
+  const clientId = tour.clientId ?? tour.id;
+  return `/assets/${clientId}/${tour.id}/previews/${hotspotId}.webp`;
+}
+
+export function assertModelUploadFileName(fileName) {
+  const trimmed = fileName?.trim();
+  if (!trimmed) throw new Error('Model file is required');
+  const ext = trimmed.toLowerCase().split('.').pop();
+  if (!ext || !MODEL_UPLOAD_EXTENSIONS.has(ext)) {
+    throw new Error('Model must be .glb or .gltf');
+  }
+  return trimmed;
+}
+
+function modelExtensionFromFileName(fileName) {
+  return assertModelUploadFileName(fileName).split('.').pop().toLowerCase();
+}
+
+export function buildSceneRecord3D({
+  title,
+  sceneId,
+  model,
+  thumbnail,
+  defaultView,
+  description,
+  tourTitle,
+  tour,
+}) {
+  const label = title.trim();
+  const id = sceneId?.trim() || slugifyHotspotName(label);
+  const modelPath = model?.trim();
+  const tourLabel = tourTitle?.trim() || 'this facility';
+  const cardImage =
+    thumbnail?.trim() || buildDefaultSceneThumbnailWebPath(tour, id);
+
+  if (!label) throw new Error('Scene title is required');
+  if (!id) throw new Error('Scene title must contain letters or numbers');
+
+  const record = {
+    id,
+    title: label,
+    description:
+      description?.trim() || defaultSceneDescription(tourLabel, label),
+    panorama: cardImage,
+    thumbnail: cardImage,
+    defaultView: normalizeDefaultView(defaultView ?? DEFAULT_3D_VIEW),
+    hotspots: [],
+  };
+
+  if (modelPath) {
+    record.model = modelPath;
+  }
+
+  return record;
+}
+
+export async function saveUploadedTourModel({
+  assetsRoot,
+  root,
+  tour,
+  fileBuffer,
+  fileName,
+}) {
+  if (!fileBuffer?.length) {
+    throw new Error('Model file is empty');
+  }
+  if (fileBuffer.length > MAX_MODEL_UPLOAD_BYTES) {
+    throw new Error('Model file is too large (max 100 MB)');
+  }
+
+  const ext = modelExtensionFromFileName(fileName);
+  const webPath = buildDefaultTourModelWebPath(tour, ext);
+  const filePath = resolvePanoramaFilePath(assetsRoot, webPath);
+  mkdirSync(dirname(filePath), { recursive: true });
+  writeFileSync(filePath, fileBuffer);
+  syncAssetToPublic(root, filePath, webPath);
+  return webPath;
+}
+
+export async function saveUploadedModel({
+  assetsRoot,
+  root,
+  tour,
+  sceneId,
+  fileBuffer,
+  fileName,
+}) {
+  if (!fileBuffer?.length) {
+    throw new Error('Model file is empty');
+  }
+  if (fileBuffer.length > MAX_MODEL_UPLOAD_BYTES) {
+    throw new Error('Model file is too large (max 100 MB)');
+  }
+
+  const ext = modelExtensionFromFileName(fileName);
+  const webPath = buildDefaultModelWebPath(tour, sceneId, ext);
+  const filePath = resolvePanoramaFilePath(assetsRoot, webPath);
+  mkdirSync(dirname(filePath), { recursive: true });
+  writeFileSync(filePath, fileBuffer);
+  syncAssetToPublic(root, filePath, webPath);
+  return webPath;
+}
+
+export async function saveUploadedSceneThumbnailWebp({
+  assetsRoot,
+  root,
+  tour,
+  sceneId,
+  fileBuffer,
+}) {
+  if (!fileBuffer?.length) {
+    throw new Error('Thumbnail file is empty');
+  }
+  if (fileBuffer.length > MAX_PANORAMA_UPLOAD_BYTES) {
+    throw new Error('Thumbnail file is too large (max 50 MB)');
+  }
+
+  const webPath = buildDefaultSceneThumbnailWebPath(tour, sceneId);
+  const filePath = resolvePanoramaFilePath(assetsRoot, webPath);
+  mkdirSync(dirname(filePath), { recursive: true });
+  await sharp(fileBuffer).webp({ quality: 85 }).toFile(filePath);
+  syncAssetToPublic(root, filePath, webPath);
+  return webPath;
+}
+
+export async function saveUploadedHotspotPreviewWebp({
+  assetsRoot,
+  root,
+  tour,
+  hotspotId,
+  fileBuffer,
+}) {
+  if (!fileBuffer?.length) {
+    throw new Error('Preview file is empty');
+  }
+  if (fileBuffer.length > MAX_PANORAMA_UPLOAD_BYTES) {
+    throw new Error('Preview file is too large (max 50 MB)');
+  }
+
+  const webPath = buildDefaultHotspotPreviewWebPath(tour, hotspotId);
+  const filePath = resolvePanoramaFilePath(assetsRoot, webPath);
+  mkdirSync(dirname(filePath), { recursive: true });
+  await sharp(fileBuffer).webp({ quality: 85 }).toFile(filePath);
+  syncAssetToPublic(root, filePath, webPath);
+  return webPath;
 }
 
 function syncAssetToPublic(root, assetsFilePath, webPath) {
@@ -445,6 +747,9 @@ export async function createScene({
   title,
   sceneId,
   panoramaFileBuffer,
+  modelFileBuffer,
+  modelFileName,
+  thumbnailFileBuffer,
   defaultView,
   description,
 }) {
@@ -459,6 +764,55 @@ export async function createScene({
   if (tour.scenes?.[resolvedSceneId]) {
     throw new Error(`Scene id already exists: ${resolvedSceneId}`);
   }
+
+  if (tour.viewerType === 'model3d') {
+    if (!tour.model?.trim() && !modelFileBuffer?.length) {
+      throw new Error(
+        'Tour has no model — upload a GLB when creating the tour, or pass modelFile once',
+      );
+    }
+
+    if (modelFileBuffer?.length) {
+      const modelWebPath = await saveUploadedTourModel({
+        assetsRoot,
+        root,
+        tour,
+        fileBuffer: modelFileBuffer,
+        fileName: modelFileName,
+      });
+      tour.model = modelWebPath;
+    }
+
+    let thumbnailWebPath;
+    if (thumbnailFileBuffer?.length) {
+      thumbnailWebPath = await saveUploadedSceneThumbnailWebp({
+        assetsRoot,
+        root,
+        tour,
+        sceneId: resolvedSceneId,
+        fileBuffer: thumbnailFileBuffer,
+      });
+    }
+
+    const record = buildSceneRecord3D({
+      title,
+      sceneId: resolvedSceneId,
+      thumbnail: thumbnailWebPath,
+      defaultView,
+      description,
+      tourTitle: tour.title,
+      tour,
+    });
+
+    if (!tour.scenes) {
+      tour.scenes = {};
+    }
+    tour.scenes[record.id] = record;
+    writeTourJson(tourPath, tour);
+    persistTourContentPlaceholders(toursDir, tourId);
+    return { tourPath, scene: record };
+  }
+
   if (!panoramaFileBuffer?.length) {
     throw new Error('panoramaFile is required');
   }
@@ -528,6 +882,8 @@ export async function createNavHotspot({
 }
 
 export async function createNamingHotspot({
+  root,
+  assetsRoot,
   toursDir,
   tourId,
   sceneId,
@@ -538,6 +894,8 @@ export async function createNamingHotspot({
   body,
   videoUrl,
   image,
+  targetView,
+  previewFileBuffer,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
@@ -551,6 +909,26 @@ export async function createNamingHotspot({
     image,
     tourTitle: tour.title,
   });
+
+  if (tour.viewerType === 'model3d') {
+    if (targetView) {
+      hotspot.targetView = normalizeDefaultView(targetView);
+    }
+    if (previewFileBuffer?.length) {
+      if (!root || !assetsRoot) {
+        throw new Error('Preview capture requires dev asset paths');
+      }
+      const previewWebPath = await saveUploadedHotspotPreviewWebp({
+        assetsRoot,
+        root,
+        tour,
+        hotspotId: hotspot.id,
+        fileBuffer: previewFileBuffer,
+      });
+      hotspot.preview = { image: previewWebPath };
+    }
+  }
+
   appendSceneHotspot(tour, sceneId, hotspot);
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
@@ -697,7 +1075,9 @@ export function updateNavHotspot({
   return { tourPath, hotspot };
 }
 
-export function updateNamingHotspot({
+export async function updateNamingHotspot({
+  root,
+  assetsRoot,
   toursDir,
   tourId,
   sceneId,
@@ -708,6 +1088,8 @@ export function updateNamingHotspot({
   body,
   videoUrl,
   image,
+  targetView,
+  previewFileBuffer,
 }) {
   const resolvedHotspotId = hotspotId?.trim();
   if (!resolvedHotspotId) {
@@ -725,7 +1107,7 @@ export function updateNamingHotspot({
   }
 
   const nextTitle = title?.trim();
-  const nextPrice = price?.trim();
+  const hasPrice = price !== undefined;
   const nextStatus = status?.trim();
   const nextBody = body?.trim();
   const hasVideoUrl = videoUrl !== undefined;
@@ -735,9 +1117,8 @@ export function updateNamingHotspot({
     hotspot.popup.title = nextTitle;
     hotspot.popup.namingOpportunity.name = `${nextTitle} Naming Opportunity`;
   }
-  if (nextPrice) {
-    hotspot.popup.namingOpportunity.price =
-      normalizeNamingPriceStorage(nextPrice);
+  if (hasPrice) {
+    hotspot.popup.namingOpportunity.price = normalizeNamingPriceStorage(price);
   }
   if (nextStatus) {
     if (!NAMING_STATUSES.has(nextStatus)) {
@@ -767,16 +1148,39 @@ export function updateNamingHotspot({
     }
   }
 
+  const hasTargetView = targetView !== undefined && targetView !== null;
+  const hasPreviewFile = previewFileBuffer !== undefined;
+
+  if (targetView) {
+    hotspot.targetView = normalizeDefaultView(targetView);
+  }
+
+  if (previewFileBuffer?.length) {
+    if (!root || !assetsRoot) {
+      throw new Error('Preview capture requires dev asset paths');
+    }
+    const previewWebPath = await saveUploadedHotspotPreviewWebp({
+      assetsRoot,
+      root,
+      tour,
+      hotspotId: resolvedHotspotId,
+      fileBuffer: previewFileBuffer,
+    });
+    hotspot.preview = { image: previewWebPath };
+  }
+
   if (
     !nextTitle &&
-    !nextPrice &&
+    !hasPrice &&
     !nextStatus &&
     body === undefined &&
     !hasVideoUrl &&
-    !hasImage
+    !hasImage &&
+    !hasTargetView &&
+    !hasPreviewFile
   ) {
     throw new Error(
-      'At least one of title, price, status, body, videoUrl, or image is required',
+      'At least one of title, price, status, body, videoUrl, image, targetView, or preview is required',
     );
   }
 
@@ -931,6 +1335,10 @@ export function updateScene({
     tour.firstScene = resolvedSceneId;
   }
 
+  if (tour.viewerType === 'model3d' && (hasMap || wantsClearMap)) {
+    throw new Error('Scene map pins are not supported for model3d tours');
+  }
+
   if (wantsClearMap) {
     delete scene.map;
   } else if (hasMap) {
@@ -966,6 +1374,18 @@ export function deleteScene({ toursDir, tourId, sceneId }) {
       (hotspot) =>
         !(hotspot.type === 'nav' && hotspot.targetScene === resolvedSceneId),
     );
+  }
+
+  if (Array.isArray(tour.hotspots)) {
+    tour.hotspots = tour.hotspots.filter((hotspot) => {
+      if (hotspot.type === 'nav' && hotspot.targetScene === resolvedSceneId) {
+        return false;
+      }
+      if (hotspot.sceneId === resolvedSceneId && hotspot.type !== 'nav') {
+        return false;
+      }
+      return true;
+    });
   }
 
   delete tour.scenes[resolvedSceneId];
@@ -1065,19 +1485,47 @@ export async function applySceneLanding({
   tourId,
   sceneId,
   view,
+  thumbnailFileBuffer,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
+  const scene = tour.scenes?.[sceneId];
+  if (!scene) {
+    throw new Error(`Scene not found: ${sceneId}`);
+  }
+
   const defaultView = updateSceneDefaultView(tour, sceneId, view);
-  const { thumbnail } = await bakeSceneThumbnail({
-    root,
-    assetsRoot,
-    tour,
-    sceneId,
-    view: defaultView,
-  });
+
+  const is3D = tour.viewerType === 'model3d';
+  let thumbnail;
+  if (is3D) {
+    if (!thumbnailFileBuffer?.length) {
+      throw new Error(
+        '3D thumbnail capture is required — save landing view from the dev panel while the model is visible',
+      );
+    }
+    const thumbnailWebPath = await saveUploadedSceneThumbnailWebp({
+      assetsRoot,
+      root,
+      tour,
+      sceneId,
+      fileBuffer: thumbnailFileBuffer,
+    });
+    scene.panorama = thumbnailWebPath;
+    scene.thumbnail = thumbnailWebPath;
+    thumbnail = thumbnailWebPath;
+  } else {
+    ({ thumbnail } = await bakeSceneThumbnail({
+      root,
+      assetsRoot,
+      tour,
+      sceneId,
+      view: defaultView,
+    }));
+  }
+
   writeTourJson(tourPath, tour);
-  return { tourPath, defaultView, thumbnail };
+  return { tourPath, defaultView, thumbnail: thumbnail ?? null };
 }
 
 export async function applySceneThumbnail({
