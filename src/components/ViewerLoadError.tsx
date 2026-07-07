@@ -1,18 +1,18 @@
 import { TourErrorState, tourErrorEmphasisClassName } from './TourErrorState';
 
-interface PanoramaLoadErrorProps {
+interface ViewerLoadErrorProps {
   sceneTitle?: string;
   canGoHome: boolean;
   onRetry: () => void;
   onGoHome?: () => void;
 }
 
-export function PanoramaLoadError({
+export function ViewerLoadError({
   sceneTitle,
   canGoHome,
   onRetry,
   onGoHome,
-}: PanoramaLoadErrorProps) {
+}: ViewerLoadErrorProps) {
   return (
     <TourErrorState
       title='Could not load this view'
@@ -22,7 +22,7 @@ export function PanoramaLoadError({
             <span className={tourErrorEmphasisClassName}>{sceneTitle}</span>
             {" didn't load. Check your connection and try again."}
           </>
-        : "The panorama didn't load. Check your connection and try again."
+        : "This view didn't load. Check your connection and try again."
       }
       primaryAction={{ label: 'Try again', onClick: onRetry }}
       secondaryAction={

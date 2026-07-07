@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
+import { isLoadErrorTestEnabled } from '../utils/loadErrorTestParam';
 export interface AppSearchParams {
   embed: boolean;
   /**
@@ -13,8 +13,8 @@ export interface AppSearchParams {
   chatTest: boolean;
   /** Force tour not-found (404) screen — `?notFoundTest=1`. */
   notFoundTest: boolean;
-  /** Force panorama load-error overlay — `?panoramaErrorTest=1`. */
-  panoramaErrorTest: boolean;
+  /** Force viewer load-error overlay — `?loadErrorTest=1` (legacy: `panoramaErrorTest`). */
+  loadErrorTest: boolean;
   /** Disable nav preview mini PSV hero — `?disableNavPreview=1` (debug). */
   disableNavPreview: boolean;
   /** Skip landing zoom animation — start at scene `defaultView`. */
@@ -36,7 +36,7 @@ export function useAppSearchParams(): AppSearchParams {
       dev: searchParams.get('dev') === '1',
       chatTest: searchParams.get('chatTest') === '1',
       notFoundTest: searchParams.get('notFoundTest') === '1',
-      panoramaErrorTest: searchParams.get('panoramaErrorTest') === '1',
+      loadErrorTest: isLoadErrorTestEnabled(searchParams),
       disableNavPreview: searchParams.get('disableNavPreview') === '1',
       skipLanding: searchParams.get('skipLanding') === '1',
       splashHold: searchParams.get('splashHold') === '1',

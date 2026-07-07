@@ -30,4 +30,8 @@ export interface TourViewerHandle {
   recenterToDefaultView: () => void;
   /** Dev — apply fresh tour JSON without remounting the viewer. */
   applyTourUpdate: (tour: Tour) => Promise<void>;
+  /** Dev — capture current WebGL frame for 3D scene thumbnail bake (panorama: null). */
+  captureSceneThumbnail: () => Promise<Blob | null>;
+  /** Dev — read the live camera/view (avoids stale React state when saving defaultView). */
+  getCurrentView: () => ViewPosition | null;
 }

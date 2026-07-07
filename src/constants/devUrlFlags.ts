@@ -38,11 +38,14 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     urlPatch: (enabled) => ({ notFoundTest: enabled ? '1' : null }),
   },
   {
-    key: 'panoramaErrorTest',
-    label: 'panoramaErrorTest',
-    hint: 'Force panorama load-error overlay',
-    isOn: (params) => params.panoramaErrorTest,
-    urlPatch: (enabled) => ({ panoramaErrorTest: enabled ? '1' : null }),
+    key: 'loadErrorTest',
+    label: 'loadErrorTest',
+    hint: 'Force load-error overlay (panorama + 3D)',
+    isOn: (params) => params.loadErrorTest,
+    urlPatch: (enabled) => ({
+      loadErrorTest: enabled ? '1' : null,
+      panoramaErrorTest: null,
+    }),
   },
   {
     key: 'disableNavPreview',
