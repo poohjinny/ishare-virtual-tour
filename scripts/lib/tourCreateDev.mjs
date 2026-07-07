@@ -3,7 +3,10 @@ import { join } from 'node:path';
 import {
   bakeSceneThumbnail,
   buildSceneRecord,
+  buildSceneRecord3D,
+  saveUploadedTourModel,
   saveUploadedPanoramaWebp,
+  saveUploadedSceneThumbnailWebp,
   slugifyHotspotName,
   writeTourJson,
 } from './tourSceneDev.mjs';
@@ -21,6 +24,7 @@ import {
 
 const DEFAULT_TRANSITION = { speed: '500ms', effect: 'fade' };
 const DEFAULT_VIEW = { yaw: 0, pitch: 0, zoom: 17 };
+const DEFAULT_3D_VIEW = { yaw: 0, pitch: 0, zoom: 50 };
 const DEFAULT_PRIMARY_COLOR = '#007078';
 
 function assertSlug(value, label) {
@@ -39,6 +43,8 @@ function buildTourRecord({
   scene,
   brandingMode,
   branding,
+  viewerType,
+  model,
 }) {
   const record = {
     id: tourId,
@@ -49,6 +55,13 @@ function buildTourRecord({
     defaultTransition: DEFAULT_TRANSITION,
     scenes: { [scene.id]: scene },
   };
+
+  if (viewerType === 'model3d') {
+    record.viewerType = 'model3d';
+    if (model?.trim()) {
+      record.model = model.trim();
+    }
+  }
 
   if (brandingMode === 'custom' && branding) {
     record.branding = branding;
@@ -180,6 +193,10 @@ export async function createTour({
   category,
   firstSceneTitle,
   panoramaFileBuffer,
+  modelFileBuffer,
+  modelFileName,
+  thumbnailFileBuffer,
+  viewerType = 'panorama',
   logoFileBuffer,
   faviconFileBuffer,
   primaryColor,
@@ -205,9 +222,16 @@ export async function createTour({
   if (!firstSceneTitle?.trim()) {
     throw new Error('firstSceneTitle is required');
   }
-  if (!panoramaFileBuffer?.length) {
+
+  const isModel3d = viewerType === 'model3d';
+  if (isModel3d) {
+    if (!modelFileBuffer?.length) {
+      throw new Error('modelFile is required');
+    }
+  } else if (!panoramaFileBuffer?.length) {
     throw new Error('panoramaFile is required');
   }
+
   if (brandingMode !== 'client' && brandingMode !== 'custom') {
     throw new Error('brandingMode must be client or custom');
   }
@@ -239,29 +263,70 @@ export async function createTour({
 
   const tourStub = { id: tourId, clientId };
 
-  const panoramaWebPath = await saveUploadedPanoramaWebp({
-    assetsRoot,
-    root,
-    tour: tourStub,
-    sceneId,
-    fileBuffer: panoramaFileBuffer,
-  });
+  let scene;
+  let tourModelWebPath;
+  if (isModel3d) {
+    mkdirSync(join(assetsRoot, clientId, tourId, 'models'), {
+      recursive: true,
+    });
+    mkdirSync(join(assetsRoot, clientId, tourId, 'thumbnails'), {
+      recursive: true,
+    });
 
-  const scene = buildSceneRecord({
-    title: sceneTitleValue,
-    sceneId,
-    panorama: panoramaWebPath,
-    defaultView: defaultView ?? DEFAULT_VIEW,
-    tourTitle: tourTitleValue,
-  });
+    tourModelWebPath = await saveUploadedTourModel({
+      assetsRoot,
+      root,
+      tour: tourStub,
+      fileBuffer: modelFileBuffer,
+      fileName: modelFileName,
+    });
+
+    let thumbnailWebPath;
+    if (thumbnailFileBuffer?.length) {
+      thumbnailWebPath = await saveUploadedSceneThumbnailWebp({
+        assetsRoot,
+        root,
+        tour: tourStub,
+        sceneId,
+        fileBuffer: thumbnailFileBuffer,
+      });
+    }
+
+    scene = buildSceneRecord3D({
+      title: sceneTitleValue,
+      sceneId,
+      thumbnail: thumbnailWebPath,
+      defaultView: defaultView ?? DEFAULT_3D_VIEW,
+      tourTitle: tourTitleValue,
+      tour: tourStub,
+    });
+  } else {
+    const panoramaWebPath = await saveUploadedPanoramaWebp({
+      assetsRoot,
+      root,
+      tour: tourStub,
+      sceneId,
+      fileBuffer: panoramaFileBuffer,
+    });
+
+    scene = buildSceneRecord({
+      title: sceneTitleValue,
+      sceneId,
+      panorama: panoramaWebPath,
+      defaultView: defaultView ?? DEFAULT_VIEW,
+      tourTitle: tourTitleValue,
+    });
+  }
 
   mkdirSync(join(assetsRoot, clientId, tourId, 'brand'), { recursive: true });
-  mkdirSync(join(assetsRoot, clientId, tourId, 'panoramas'), {
-    recursive: true,
-  });
-  mkdirSync(join(assetsRoot, clientId, tourId, 'thumbnails'), {
-    recursive: true,
-  });
+  if (!isModel3d) {
+    mkdirSync(join(assetsRoot, clientId, tourId, 'panoramas'), {
+      recursive: true,
+    });
+    mkdirSync(join(assetsRoot, clientId, tourId, 'thumbnails'), {
+      recursive: true,
+    });
+  }
 
   const brandingResult = await applyCreateTourBranding({
     root,
@@ -285,13 +350,11 @@ export async function createTour({
     scene,
     brandingMode: brandingResult.brandingMode,
     branding: brandingResult.branding,
+    viewerType: isModel3d ? 'model3d' : 'panorama',
+    model: isModel3d ? tourModelWebPath : undefined,
   });
 
-  applyDefaultTransition({
-    tour,
-    transitionEffect,
-    transitionSpeed,
-  });
+  applyDefaultTransition({ tour, transitionEffect, transitionSpeed });
   applyImmersiveBackground({
     tour,
     immersiveAudio,
@@ -301,13 +364,15 @@ export async function createTour({
     clearImmersiveBackground,
   });
 
-  await bakeSceneThumbnail({
-    root,
-    assetsRoot,
-    tour,
-    sceneId: scene.id,
-    view: scene.defaultView,
-  });
+  if (!isModel3d) {
+    await bakeSceneThumbnail({
+      root,
+      assetsRoot,
+      tour,
+      sceneId: scene.id,
+      view: scene.defaultView,
+    });
+  }
 
   const tourPath = join(toursDir, `${tourId}.json`);
   const knowledgePath = join(toursDir, `${tourId}-knowledge.json`);

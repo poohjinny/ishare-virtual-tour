@@ -33,7 +33,9 @@ interface DevHotspotBasePayload {
   tourId: string;
   sceneId: string;
   name: string;
-  position: { yaw: number; pitch: number };
+  position:
+    | { yaw: number; pitch: number }
+    | { x: number; y: number; z: number };
 }
 
 export interface DevNavHotspotPayload extends DevHotspotBasePayload {
@@ -44,11 +46,13 @@ export interface DevNavHotspotPayload extends DevHotspotBasePayload {
 }
 
 export interface DevNamingHotspotPayload extends DevHotspotBasePayload {
-  price: string;
+  price: number;
   status: NamingOpportunityStatus;
   body?: string;
   videoUrl?: string;
   image?: string;
+  targetView?: ViewPosition;
+  previewFile?: Blob | File | null;
 }
 
 export interface DevInfoHotspotPayload extends DevHotspotBasePayload {
@@ -94,8 +98,8 @@ async function postDevTourJson<T>(path: string, payload: unknown): Promise<T> {
   return data;
 }
 
-async function fileToBase64(file: File): Promise<string> {
-  const buffer = await file.arrayBuffer();
+async function blobToBase64(blob: Blob): Promise<string> {
+  const buffer = await blob.arrayBuffer();
   const bytes = new Uint8Array(buffer);
   let binary = '';
   const chunkSize = 0x8000;
@@ -107,31 +111,61 @@ async function fileToBase64(file: File): Promise<string> {
   return btoa(binary);
 }
 
+async function fileToBase64(file: File): Promise<string> {
+  return blobToBase64(file);
+}
+
 export interface DevCreateScenePayload {
   tourId: string;
   title: string;
-  panoramaFile: File;
+  panoramaFile?: File;
+  modelFile?: File;
+  thumbnailFile?: Blob | File;
   defaultView?: ViewPosition;
   description?: string;
+  sceneId?: string;
 }
 
-export function devApplySceneDefaultView(payload: DevScenePayload) {
+export async function devApplySceneDefaultView({
+  thumbnailFile,
+  ...payload
+}: DevScenePayload & { thumbnailFile?: Blob | File | null }) {
+  const body: Record<string, unknown> = { ...payload };
+  if (thumbnailFile) {
+    body.thumbnailFileBase64 = await fileToBase64(thumbnailFile);
+  }
+
   return postDevTourJson<{
     ok: true;
     defaultView: ViewPosition;
-    thumbnail: string;
-  }>('/scene/default-view', payload);
+    thumbnail: string | null;
+  }>('/scene/default-view', body);
 }
 
 export async function devCreateScene({
   panoramaFile,
+  modelFile,
+  thumbnailFile,
   ...payload
 }: DevCreateScenePayload) {
-  const panoramaFileBase64 = await fileToBase64(panoramaFile);
+  const body: Record<string, unknown> = { ...payload };
+  if (panoramaFile) {
+    body.panoramaFileBase64 = await fileToBase64(panoramaFile);
+    body.panoramaFileName = panoramaFile.name;
+  }
+  if (modelFile) {
+    body.modelFileBase64 = await fileToBase64(modelFile);
+    body.modelFileName = modelFile.name;
+  }
+  if (thumbnailFile) {
+    body.thumbnailFileBase64 = await blobToBase64(thumbnailFile);
+    body.thumbnailFileName =
+      thumbnailFile instanceof File ? thumbnailFile.name : 'capture.png';
+  }
 
   return postDevTourJson<{ ok: true; scene: { id: string; title: string } }>(
     '/scene/create',
-    { ...payload, panoramaFileName: panoramaFile.name, panoramaFileBase64 },
+    body,
   );
 }
 
@@ -142,10 +176,18 @@ export function devCreateNavHotspot(payload: DevNavHotspotPayload) {
   );
 }
 
-export function devCreateNamingHotspot(payload: DevNamingHotspotPayload) {
+export async function devCreateNamingHotspot({
+  previewFile,
+  ...payload
+}: DevNamingHotspotPayload) {
+  const body: Record<string, unknown> = { ...payload };
+  if (previewFile) {
+    body.previewFileBase64 = await fileToBase64(previewFile);
+  }
+
   return postDevTourJson<{ ok: true; hotspot: Hotspot }>(
     '/hotspot/naming',
-    payload,
+    body,
   );
 }
 
@@ -163,13 +205,20 @@ export interface DevHotspotIdPayload {
 }
 
 export interface DevHotspotPositionPayload extends DevHotspotIdPayload {
-  position: { yaw: number; pitch: number };
+  position:
+    | { yaw: number; pitch: number }
+    | { x: number; y: number; z: number };
 }
 
 export interface DevReplacePanoramaPayload {
   tourId: string;
   sceneId: string;
   panoramaFile: File;
+}
+
+export interface DevReplaceModelPayload {
+  tourId: string;
+  modelFile: File;
 }
 
 export function devDeleteHotspot(payload: DevHotspotIdPayload) {
@@ -197,6 +246,22 @@ export async function devReplaceScenePanorama({
     { ...payload, panoramaFileName: panoramaFile.name, panoramaFileBase64 },
   );
 }
+
+export async function devReplaceTourModel({
+  modelFile,
+  ...payload
+}: DevReplaceModelPayload) {
+  const modelFileBase64 = await fileToBase64(modelFile);
+
+  return postDevTourJson<{ ok: true; model: string }>('/scene/replace-model', {
+    ...payload,
+    modelFileName: modelFile.name,
+    modelFileBase64,
+  });
+}
+
+/** @deprecated Use {@link devReplaceTourModel} */
+export const devReplaceSceneModel = devReplaceTourModel;
 
 export interface DevTourMutateOptions {
   navigateToScene?: string;
@@ -320,8 +385,11 @@ export interface DevCreateTourPayload {
   tourSummary?: string;
   category: string;
   brandingMode?: DevTourBrandingMode;
+  viewerType?: 'panorama' | 'model3d';
   firstSceneTitle: string;
-  panoramaFile: File;
+  panoramaFile?: File;
+  modelFile?: File;
+  thumbnailFile?: File;
   logoFile?: File | null;
   faviconFile?: File | null;
   primaryColor?: string;
@@ -463,14 +531,31 @@ export async function devSuggestContact(
 
 export async function devCreateTour({
   panoramaFile,
+  modelFile,
+  thumbnailFile,
   logoFile,
   faviconFile,
   ...payload
 }: DevCreateTourPayload) {
-  const panoramaFileBase64 = await fileToBase64(panoramaFile);
-  const logoFileBase64 = logoFile ? await fileToBase64(logoFile) : undefined;
-  const faviconFileBase64 =
-    faviconFile ? await fileToBase64(faviconFile) : undefined;
+  const body: Record<string, unknown> = { ...payload };
+  if (panoramaFile) {
+    body.panoramaFileBase64 = await fileToBase64(panoramaFile);
+    body.panoramaFileName = panoramaFile.name;
+  }
+  if (modelFile) {
+    body.modelFileBase64 = await fileToBase64(modelFile);
+    body.modelFileName = modelFile.name;
+  }
+  if (thumbnailFile) {
+    body.thumbnailFileBase64 = await fileToBase64(thumbnailFile);
+    body.thumbnailFileName = thumbnailFile.name;
+  }
+  if (logoFile) {
+    body.logoFileBase64 = await fileToBase64(logoFile);
+  }
+  if (faviconFile) {
+    body.faviconFileBase64 = await fileToBase64(faviconFile);
+  }
 
   return postDevTourJson<{
     ok: true;
@@ -478,13 +563,7 @@ export async function devCreateTour({
     clientId: string;
     firstSceneId: string;
     tour: Tour;
-  }>('/tour/create', {
-    ...payload,
-    panoramaFileName: panoramaFile.name,
-    panoramaFileBase64,
-    logoFileBase64,
-    faviconFileBase64,
-  });
+  }>('/tour/create', body);
 }
 
 export async function devFetchTourRecord(
@@ -625,11 +704,14 @@ export interface DevUpdateNavHotspotPayload extends DevHotspotIdPayload {
 
 export interface DevUpdateNamingHotspotPayload extends DevHotspotIdPayload {
   title?: string;
-  price?: string;
+  price?: number;
   status?: NamingOpportunityStatus;
   body?: string;
   videoUrl?: string;
   image?: string;
+  targetView?: ViewPosition;
+  previewFile?: Blob | File | null;
+  syncPreviewFromCurrentView?: boolean;
 }
 
 export interface DevUpdateInfoHotspotPayload extends DevHotspotIdPayload {
@@ -648,10 +730,19 @@ export function devUpdateNavHotspot(payload: DevUpdateNavHotspotPayload) {
   );
 }
 
-export function devUpdateNamingHotspot(payload: DevUpdateNamingHotspotPayload) {
+export async function devUpdateNamingHotspot({
+  previewFile,
+  syncPreviewFromCurrentView: _syncPreviewFromCurrentView,
+  ...payload
+}: DevUpdateNamingHotspotPayload) {
+  const body: Record<string, unknown> = { ...payload };
+  if (previewFile) {
+    body.previewFileBase64 = await fileToBase64(previewFile);
+  }
+
   return postDevTourJson<{ ok: true; hotspot: Hotspot }>(
     '/hotspot/naming/update',
-    payload,
+    body,
   );
 }
 

@@ -1,5 +1,6 @@
 import {
   Children,
+  Fragment,
   cloneElement,
   isValidElement,
   useState,
@@ -14,20 +15,43 @@ type DevPanelSectionAccordionProps = {
   defaultOpenIndex?: number;
 };
 
+function collectDevPanelSections(
+  nodes: ReactNode,
+  out: ReactElement<DevPanelSectionProps>[] = [],
+): ReactElement<DevPanelSectionProps>[] {
+  Children.forEach(nodes, (child) => {
+    if (!isValidElement(child)) return;
+
+    if (child.type === DevPanelSection) {
+      out.push(child as ReactElement<DevPanelSectionProps>);
+      return;
+    }
+
+    if (child.type === Fragment) {
+      collectDevPanelSections(
+        (child as ReactElement<{ children: ReactNode }>).props.children,
+        out,
+      );
+    }
+  });
+
+  return out;
+}
+
 export function DevPanelSectionAccordion({
   children,
   defaultOpenIndex = 0,
 }: DevPanelSectionAccordionProps) {
+  const sections = collectDevPanelSections(children);
   const [openIndices, setOpenIndices] = useState<Set<number>>(
     () => new Set([defaultOpenIndex]),
   );
 
   return (
     <>
-      {Children.map(children, (child, index) => {
-        if (!isValidElement<DevPanelSectionProps>(child)) return child;
-
-        return cloneElement(child as ReactElement<DevPanelSectionProps>, {
+      {sections.map((section, index) =>
+        cloneElement(section, {
+          key: section.key ?? section.props.title,
           collapsible: true,
           open: openIndices.has(index),
           onToggle: () => {
@@ -38,8 +62,8 @@ export function DevPanelSectionAccordion({
               return next;
             });
           },
-        });
-      })}
+        }),
+      )}
     </>
   );
 }

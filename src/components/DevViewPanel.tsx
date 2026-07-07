@@ -39,10 +39,15 @@ import {
 } from '../utils/resolveTourBranding';
 import { getTourProductFullName } from '../utils/tourProductName';
 import {
-  DEV_HOTSPOT_TABS,
+  formatNamingPriceInput,
+  parseNamingPriceInput,
+} from '../utils/namingPrice';
+import {
   DEV_INFO_DISPLAY_OPTIONS,
   DEV_NAMING_STATUS_OPTIONS,
   type DevHotspotTab,
+  getDevHotspotSectionConfig,
+  type DevHotspotManageScope,
 } from '../constants/devHotspot';
 import {
   NAV_HOTSPOT_VARIANT_DEFAULT,
@@ -70,12 +75,15 @@ import type {
   TourKnowledge,
   ViewPosition,
 } from '../types/tour';
+import { isWorldPosition } from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import {
   DEV_NAV_NAME_STORAGE_KEY,
   DEV_NO_NAME_STORAGE_KEY,
   DEV_SCENE_TITLE_STORAGE_KEY,
+  formatCoords,
   formatViewPosition,
+  isWorldClickCoords,
   logLandingView,
   previewHotspotId,
   slugifyHotspotName,
@@ -116,11 +124,18 @@ import {
 import {
   buildDefaultPanoramaRelativePath,
   buildDefaultPanoramaWebPath,
+  buildDefaultSceneThumbnailRelativePath,
+  buildDefaultSceneThumbnailWebPath,
 } from '../utils/devScenePanoramaPath';
 import {
   sceneKnowledgeFromForm,
   sceneKnowledgeToForm,
 } from '../utils/devKnowledgeForm';
+import {
+  findHotspotInTour,
+  listAllTourHotspotIds,
+  listDevTourHotspots,
+} from '../utils/findTourHotspot';
 import { cn } from '../lib/cn';
 import {
   devViewPanelActionsClassName,
@@ -227,6 +242,8 @@ interface DevViewPanelProps {
   sceneOptions: DevSceneOption[];
   view: ViewPosition | null;
   clickCoords: ClickCoords | null;
+  captureSceneThumbnail?: () => Promise<Blob | null>;
+  getCurrentView?: () => ViewPosition | null;
 }
 
 type ActionStatus = 'idle' | 'working' | 'done' | 'error';
@@ -264,7 +281,10 @@ function confirmDevPanelDelete(message: string): boolean {
 }
 
 function formatHotspotPosition(hotspot: Hotspot): string {
-  return formatViewPosition({ ...hotspot.position, zoom: 0 });
+  if (isWorldPosition(hotspot.position)) {
+    return formatCoords(hotspot.position);
+  }
+  return formatViewPosition(hotspot.position);
 }
 
 function hotspotManageKindOrder(hotspot: Hotspot): number {
@@ -311,6 +331,8 @@ export function DevViewPanel({
   sceneOptions,
   view,
   clickCoords,
+  captureSceneThumbnail,
+  getCurrentView,
 }: DevViewPanelProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -325,6 +347,13 @@ export function DevViewPanel({
 
   const tourOptions = useMemo(() => listTours(), [catalogTick]);
   const currentTourId = scene.tourId ?? '';
+  const isModel3dTour = tour.viewerType === 'model3d';
+  const devViewerClickPlaceholder =
+    isModel3dTour ? 'Click the 3D viewer…' : 'Click the panorama…';
+  const devViewerClickHint =
+    isModel3dTour ?
+      'Click the 3D viewer to set position'
+    : 'Click the panorama to set position';
   const [landingStatus, setLandingStatus] = useState<ActionStatus>('idle');
   const [landingError, setLandingError] = useState<string | null>(null);
   const [navStatus, setNavStatus] = useState<ActionStatus>('idle');
@@ -354,6 +383,7 @@ export function DevViewPanel({
   const [editNoBody, setEditNoBody] = useState('');
   const [editNoVideoUrl, setEditNoVideoUrl] = useState('');
   const [editNoImage, setEditNoImage] = useState('');
+  const [editNoSyncPosition, setEditNoSyncPosition] = useState(false);
   const [editInfoTitle, setEditInfoTitle] = useState('');
   const [editInfoBody, setEditInfoBody] = useState('');
   const [editInfoDisplay, setEditInfoDisplay] =
@@ -501,10 +531,6 @@ export function DevViewPanel({
     string | null
   >(null);
 
-  const currentSceneHotspots = useMemo(
-    () => sortSceneHotspotsForManage(tour.scenes[scene.id]?.hotspots ?? []),
-    [scene.id, tour],
-  );
   const tourScenes = useMemo(
     () =>
       Object.values(tour.scenes).sort((a, b) => a.title.localeCompare(b.title)),
@@ -601,6 +627,37 @@ export function DevViewPanel({
   const panelScrollTopRequestRef = useRef(false);
   const [hotspotTab, setHotspotTab] = useState<DevHotspotTab>('nav');
 
+  const hotspotManageScope = useMemo((): DevHotspotManageScope => {
+    return isModel3dTour ? 'model3d-tour' : 'panorama-scene';
+  }, [isModel3dTour]);
+
+  const hotspotSectionConfig = useMemo(
+    () => getDevHotspotSectionConfig(hotspotManageScope),
+    [hotspotManageScope],
+  );
+
+  const managedHotspots = useMemo(() => {
+    if (isModel3dTour) {
+      return sortSceneHotspotsForManage(listDevTourHotspots(tour));
+    }
+    return sortSceneHotspotsForManage(tour.scenes[scene.id]?.hotspots ?? []);
+  }, [isModel3dTour, scene.id, tour]);
+
+  const showHotspotDevPanel =
+    !isModel3dTour ?
+      panelTab === 'scene'
+    : panelTab === 'tour' && tourModeTab === 'manage';
+
+  const hotspotCreateTabs = hotspotSectionConfig.createTabs;
+
+  const canCreateNavHotspot = hotspotCreateTabs.some((tab) => tab.id === 'nav');
+  const canCreateNamingHotspot = hotspotCreateTabs.some(
+    (tab) => tab.id === 'naming',
+  );
+  const canCreateInfoHotspot = hotspotCreateTabs.some(
+    (tab) => tab.id === 'info',
+  );
+
   const canWriteTour = Boolean(scene.tourId && view);
   const trimmedNavName = navName.trim();
   const trimmedNoName = noName.trim();
@@ -618,8 +675,11 @@ export function DevViewPanel({
     [trimmedInfoName],
   );
   const existingHotspotIds = useMemo(
-    () => currentSceneHotspots.map((hotspot) => hotspot.id),
-    [currentSceneHotspots],
+    () =>
+      isModel3dTour ?
+        listAllTourHotspotIds(tour)
+      : managedHotspots.map((hotspot) => hotspot.id),
+    [isModel3dTour, managedHotspots, tour],
   );
   const navHotspotIdPreview = useMemo(
     () =>
@@ -669,11 +729,17 @@ export function DevViewPanel({
     scene.tourId && clickCoords && trimmedNavName && navTargetSceneId,
   );
   const canCreateNaming = Boolean(
-    scene.tourId && clickCoords && trimmedNoName && noPrice.trim() && noStatus,
+    scene.tourId &&
+    clickCoords &&
+    trimmedNoName &&
+    parseNamingPriceInput(noPrice) != null &&
+    noStatus,
   );
   const canCreateInfo = Boolean(scene.tourId && clickCoords && trimmedInfoName);
   const canCreateScene = Boolean(
-    scene.tourId && trimmedSceneTitle && scenePanoramaFile,
+    scene.tourId &&
+    trimmedSceneTitle &&
+    (isModel3dTour ? view : scenePanoramaFile),
   );
   const canCreateNewTour = Boolean(
     newTourSlug && newFirstSceneSlug && newTourPanoramaFile && newTourClientId,
@@ -736,8 +802,9 @@ export function DevViewPanel({
   const openCreateHotspotTab = useCallback(() => {
     setEditingHotspotId(null);
     setMovingHotspotId(null);
+    setHotspotTab(hotspotSectionConfig.createTabs[0]?.id ?? 'nav');
     setHotspotModeTab('create');
-  }, []);
+  }, [hotspotSectionConfig.createTabs]);
 
   const openCreateSceneTab = useCallback(() => {
     setEditingSceneId(null);
@@ -776,7 +843,17 @@ export function DevViewPanel({
   );
   const scenePanoramaAutoPath =
     sceneSlug ?
-      buildDefaultPanoramaWebPath(tour.clientId ?? tour.id, tour.id, sceneSlug)
+      isModel3dTour ?
+        buildDefaultSceneThumbnailWebPath(
+          tour.clientId ?? tour.id,
+          tour.id,
+          sceneSlug,
+        )
+      : buildDefaultPanoramaWebPath(
+          tour.clientId ?? tour.id,
+          tour.id,
+          sceneSlug,
+        )
     : '';
 
   const sortedSceneOptions = useMemo(
@@ -798,7 +875,9 @@ export function DevViewPanel({
     [trimmedNavTargetSceneTitle],
   );
   const canCreateNavTargetScene = Boolean(
-    scene.tourId && trimmedNavTargetSceneTitle && navTargetSceneFile,
+    scene.tourId &&
+    trimmedNavTargetSceneTitle &&
+    (isModel3dTour ? view : navTargetSceneFile),
   );
 
   useEffect(() => {
@@ -1022,36 +1101,101 @@ export function DevViewPanel({
     return {
       tourId: scene.tourId,
       sceneId: scene.id,
-      defaultView: toViewPosition(view.yaw, view.pitch, view.zoom ?? 0),
+      defaultView:
+        isModel3dTour ? view : (
+          toViewPosition(view.yaw, view.pitch, view.zoom ?? 0)
+        ),
     };
-  }, [scene.id, scene.tourId, view]);
+  }, [isModel3dTour, scene.id, scene.tourId, view]);
 
   const buildHotspotPosition = useCallback(() => {
     if (!clickCoords) return null;
+    if (isWorldClickCoords(clickCoords)) {
+      return { x: clickCoords.x, y: clickCoords.y, z: clickCoords.z };
+    }
     return { yaw: clickCoords.yaw, pitch: clickCoords.pitch };
   }, [clickCoords]);
 
+  const captureModel3dNamingPreview = useCallback(async () => {
+    const liveView = getCurrentView?.() ?? view;
+    if (!liveView) {
+      throw new Error('Current view is not available');
+    }
+
+    const previewFile = (await captureSceneThumbnail?.()) ?? null;
+    if (!previewFile) {
+      throw new Error(
+        'Could not capture 3D preview — ensure the model is loaded and visible in the viewer',
+      );
+    }
+
+    return { targetView: liveView, previewFile };
+  }, [captureSceneThumbnail, getCurrentView, view]);
+
+  const applyModel3dViewpointLanding = useCallback(
+    async (sceneId: string) => {
+      const liveView = getCurrentView?.() ?? view;
+      if (!scene.tourId || !liveView) {
+        throw new Error('Current view is not available');
+      }
+
+      const thumbnailFile = (await captureSceneThumbnail?.()) ?? null;
+      if (!thumbnailFile) {
+        throw new Error(
+          'Could not capture 3D thumbnail — ensure the model is loaded and visible in the viewer',
+        );
+      }
+
+      await devApplySceneDefaultView({
+        tourId: scene.tourId,
+        sceneId,
+        defaultView: liveView,
+        thumbnailFile,
+      });
+    },
+    [captureSceneThumbnail, getCurrentView, scene.tourId, view],
+  );
+
   const applyDefaultView = useCallback(async () => {
-    const payload = buildScenePayload();
-    if (!payload || !view) return;
+    const liveView = getCurrentView?.() ?? view;
+    if (!scene.tourId || !liveView) return;
 
     setLandingStatus('working');
     setLandingError(null);
-    logLandingView(scene, view);
+    logLandingView(scene, liveView);
 
     try {
-      await devApplySceneDefaultView(payload);
+      if (isModel3dTour) {
+        await applyModel3dViewpointLanding(scene.id);
+      } else {
+        await devApplySceneDefaultView({
+          tourId: scene.tourId,
+          sceneId: scene.id,
+          defaultView: toViewPosition(
+            liveView.yaw,
+            liveView.pitch,
+            liveView.zoom ?? 0,
+          ),
+        });
+      }
       await onTourMutated?.();
       setLandingStatus('done');
     } catch (error) {
       setLandingStatus('error');
       setLandingError(
-        error instanceof DevTourApiError ?
-          error.message
+        error instanceof DevTourApiError ? error.message
+        : error instanceof Error ? error.message
         : 'Could not save defaultView',
       );
     }
-  }, [buildScenePayload, onTourMutated, scene, view]);
+  }, [
+    applyModel3dViewpointLanding,
+    getCurrentView,
+    isModel3dTour,
+    onTourMutated,
+    scene,
+    view,
+  ]);
 
   const createNavHotspot = useCallback(async () => {
     const position = buildHotspotPosition();
@@ -1099,11 +1243,12 @@ export function DevViewPanel({
 
   const createNamingHotspot = useCallback(async () => {
     const position = buildHotspotPosition();
+    const priceAmount = parseNamingPriceInput(noPrice);
     if (
       !scene.tourId ||
       !position ||
       !trimmedNoName ||
-      !noPrice.trim() ||
+      priceAmount == null ||
       !noStatus
     ) {
       return;
@@ -1113,18 +1258,26 @@ export function DevViewPanel({
     setNamingError(null);
 
     try {
+      let targetView: ViewPosition | undefined;
+      let previewFile: Blob | null = null;
+      if (isModel3dTour) {
+        ({ targetView, previewFile } = await captureModel3dNamingPreview());
+      }
+
       await devCreateNamingHotspot({
         tourId: scene.tourId,
         sceneId: scene.id,
         name: trimmedNoName,
         position,
-        price: noPrice.trim(),
+        price: priceAmount,
         status: noStatus,
         body: noBody.trim() || undefined,
         videoUrl: noVideoUrl.trim() || undefined,
         image: noImage.trim() || undefined,
+        targetView,
+        previewFile,
       });
-      await onTourMutated?.();
+      await onTourMutated?.({ keepCurrentScene: true });
       setNamingStatus('done');
       setNoName('');
       setNoPrice('');
@@ -1141,6 +1294,8 @@ export function DevViewPanel({
     }
   }, [
     buildHotspotPosition,
+    captureModel3dNamingPreview,
+    isModel3dTour,
     noBody,
     noImage,
     noPrice,
@@ -1200,22 +1355,68 @@ export function DevViewPanel({
     onTourMutated,
   ]);
 
+  const resolveModel3dSceneCreatePayload = useCallback(
+    async (title: string, manualThumbnailFile?: File | null) => {
+      const liveView = getCurrentView?.() ?? view;
+      if (!liveView) {
+        throw new Error(
+          'Current camera view is not available — load the model and orbit to the desired viewpoint first',
+        );
+      }
+
+      let thumbnailFile: Blob | File | undefined =
+        manualThumbnailFile ?? scenePanoramaFile ?? undefined;
+
+      if (!thumbnailFile && captureSceneThumbnail) {
+        const captured = await captureSceneThumbnail();
+        if (captured) {
+          const slug = slugifyHotspotName(title) || 'scene';
+          thumbnailFile = new File([captured], `${slug}.png`, {
+            type: captured.type || 'image/png',
+          });
+        }
+      }
+
+      if (!thumbnailFile) {
+        throw new Error(
+          'Could not capture 3D thumbnail — ensure the model is loaded and visible, or upload a card image',
+        );
+      }
+
+      return { defaultView: liveView, thumbnailFile };
+    },
+    [captureSceneThumbnail, getCurrentView, scenePanoramaFile, view],
+  );
+
   const createScene = useCallback(async () => {
-    if (!scene.tourId || !trimmedSceneTitle || !scenePanoramaFile) return;
+    if (!scene.tourId || !trimmedSceneTitle) return;
+    if (!isModel3dTour && !scenePanoramaFile) return;
 
     setSceneStatus('working');
     setSceneError(null);
 
     try {
+      const model3dPayload =
+        isModel3dTour ?
+          await resolveModel3dSceneCreatePayload(trimmedSceneTitle)
+        : null;
+
       const result = await devCreateScene({
         tourId: scene.tourId,
         title: trimmedSceneTitle,
-        panoramaFile: scenePanoramaFile,
+        ...(isModel3dTour ?
+          {
+            thumbnailFile: model3dPayload?.thumbnailFile,
+            defaultView: model3dPayload?.defaultView,
+          }
+        : {
+            panoramaFile: scenePanoramaFile!,
+            defaultView:
+              view ?
+                toViewPosition(view.yaw, view.pitch, view.zoom ?? 0)
+              : undefined,
+          }),
         description: sceneDescription.trim() || undefined,
-        defaultView:
-          view ?
-            toViewPosition(view.yaw, view.pitch, view.zoom ?? 0)
-          : undefined,
       });
       setSceneTitle('');
       setSceneDescription('');
@@ -1231,7 +1432,9 @@ export function DevViewPanel({
       );
     }
   }, [
+    isModel3dTour,
     onTourMutated,
+    resolveModel3dSceneCreatePayload,
     scene.tourId,
     sceneDescription,
     scenePanoramaFile,
@@ -1240,19 +1443,30 @@ export function DevViewPanel({
   ]);
 
   const createNavTargetScene = useCallback(async () => {
-    if (!scene.tourId || !trimmedNavTargetSceneTitle || !navTargetSceneFile) {
-      return;
-    }
+    if (!scene.tourId || !trimmedNavTargetSceneTitle) return;
+    if (!isModel3dTour && !navTargetSceneFile) return;
 
     setNavTargetSceneStatus('working');
     setNavTargetSceneError(null);
 
     try {
       const createdTitle = trimmedNavTargetSceneTitle;
+      const model3dPayload =
+        isModel3dTour ?
+          await resolveModel3dSceneCreatePayload(
+            trimmedNavTargetSceneTitle,
+            navTargetSceneFile,
+          )
+        : null;
       const result = await devCreateScene({
         tourId: scene.tourId,
         title: createdTitle,
-        panoramaFile: navTargetSceneFile,
+        ...(isModel3dTour ?
+          {
+            thumbnailFile: model3dPayload?.thumbnailFile,
+            defaultView: model3dPayload?.defaultView,
+          }
+        : { panoramaFile: navTargetSceneFile! }),
       });
       setNavTargetSceneTitle('');
       setNavTargetSceneFile(null);
@@ -1273,8 +1487,10 @@ export function DevViewPanel({
       );
     }
   }, [
+    isModel3dTour,
     navTargetSceneFile,
     onTourMutated,
+    resolveModel3dSceneCreatePayload,
     scene.tourId,
     trimmedNavName,
     trimmedNavTargetSceneTitle,
@@ -1692,13 +1908,12 @@ export function DevViewPanel({
     async (hotspotId: string) => {
       if (!scene.tourId) return;
 
-      const hotspot = tour.scenes[scene.id]?.hotspots?.find(
-        (entry) => entry.id === hotspotId,
-      );
-      const label = hotspot ? hotspotDisplayLabel(hotspot) : hotspotId;
+      const found = findHotspotInTour(tour, hotspotId);
+      const label = found ? hotspotDisplayLabel(found.hotspot) : hotspotId;
+      const deleteScopeLabel = isModel3dTour ? 'tour' : `scene “${scene.id}”`;
       if (
         !confirmDevPanelDelete(
-          `Delete hotspot “${label}” (${hotspotId}) from scene “${scene.id}”?`,
+          `Delete hotspot “${label}” (${hotspotId}) from ${deleteScopeLabel}?`,
         )
       ) {
         return;
@@ -1732,11 +1947,12 @@ export function DevViewPanel({
     },
     [
       editingHotspotId,
+      isModel3dTour,
       movingHotspotId,
       onTourMutated,
       scene.id,
       scene.tourId,
-      tour.scenes,
+      tour,
     ],
   );
 
@@ -1785,11 +2001,14 @@ export function DevViewPanel({
     }
     if (isNamingInfoHotspot(hotspot)) {
       setEditNoTitle(hotspot.popup?.title ?? '');
-      setEditNoPrice(hotspot.popup?.namingOpportunity?.price ?? '');
+      setEditNoPrice(
+        formatNamingPriceInput(hotspot.popup?.namingOpportunity?.price),
+      );
       setEditNoStatus(hotspot.popup?.namingOpportunity?.status ?? '');
       setEditNoBody(hotspot.popup?.body ?? '');
       setEditNoVideoUrl(hotspot.popup?.videoUrl ?? '');
       setEditNoImage(hotspot.popup?.image ?? '');
+      setEditNoSyncPosition(false);
       return;
     }
     setEditInfoTitle(hotspot.popup?.title ?? '');
@@ -1817,9 +2036,8 @@ export function DevViewPanel({
 
   const saveHotspotEdit = useCallback(async () => {
     if (!scene.tourId || !editingHotspotId) return;
-    const hotspot = currentSceneHotspots.find(
-      (entry) => entry.id === editingHotspotId,
-    );
+    const found = findHotspotInTour(tour, editingHotspotId);
+    const hotspot = found?.hotspot;
     if (!hotspot) return;
 
     setHotspotManageStatus('working');
@@ -1838,16 +2056,39 @@ export function DevViewPanel({
           navVariant: editNavVariant,
         });
       } else if (isNamingInfoHotspot(hotspot)) {
+        if (editNoSyncPosition) {
+          const position = buildHotspotPosition();
+          if (!position) {
+            throw new Error(
+              `Click the ${isModel3dTour ? 'model' : 'panorama'} to set a new position first`,
+            );
+          }
+          await devUpdateHotspotPosition({
+            tourId: scene.tourId,
+            sceneId: scene.id,
+            hotspotId: editingHotspotId,
+            position,
+          });
+        }
+
+        let targetView: ViewPosition | undefined;
+        let previewFile: Blob | null = null;
+        if (isModel3dTour) {
+          ({ targetView, previewFile } = await captureModel3dNamingPreview());
+        }
+
         await devUpdateNamingHotspot({
           tourId: scene.tourId,
           sceneId: scene.id,
           hotspotId: editingHotspotId,
           title: editNoTitle.trim() || undefined,
-          price: editNoPrice.trim() || undefined,
+          price: parseNamingPriceInput(editNoPrice) ?? undefined,
           status: editNoStatus || undefined,
           body: editNoBody.trim() || undefined,
           videoUrl: editNoVideoUrl,
           image: editNoImage,
+          targetView,
+          previewFile,
         });
       } else {
         await devUpdateInfoHotspot({
@@ -1874,7 +2115,6 @@ export function DevViewPanel({
       );
     }
   }, [
-    currentSceneHotspots,
     editInfoBody,
     editInfoDisplay,
     editInfoImage,
@@ -1891,10 +2131,15 @@ export function DevViewPanel({
     editNoStatus,
     editNoTitle,
     editNoVideoUrl,
+    editNoSyncPosition,
+    buildHotspotPosition,
     editingHotspotId,
+    captureModel3dNamingPreview,
+    isModel3dTour,
     onTourMutated,
     scene.id,
     scene.tourId,
+    tour,
   ]);
 
   const deleteTourScene = useCallback(
@@ -1982,15 +2227,19 @@ export function DevViewPanel({
         title: editSceneTitle.trim() || undefined,
         description: editSceneDescription,
         setAsFirstScene: editSceneAsFirst && !isAlreadyFirst,
-        clearMap: !editSceneMapEnabled && hadMap,
-        map:
-          editSceneMapEnabled ?
-            {
-              x: Number(editSceneMapX),
-              y: Number(editSceneMapY),
-              heading: Number(editSceneMapHeading),
-            }
-          : undefined,
+        ...(isModel3dTour ?
+          {}
+        : {
+            clearMap: !editSceneMapEnabled && hadMap,
+            map:
+              editSceneMapEnabled ?
+                {
+                  x: Number(editSceneMapX),
+                  y: Number(editSceneMapY),
+                  heading: Number(editSceneMapHeading),
+                }
+              : undefined,
+          }),
       });
       setEditingSceneId(null);
       await onTourMutated?.();
@@ -2012,6 +2261,7 @@ export function DevViewPanel({
     editSceneMapY,
     editSceneTitle,
     editingSceneId,
+    isModel3dTour,
     onTourMutated,
     scene.tourId,
     tour.firstScene,
@@ -2131,8 +2381,7 @@ export function DevViewPanel({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [applyDefaultView]);
 
-  const markerCoords =
-    clickCoords ? formatViewPosition({ ...clickCoords, zoom: 0 }) : '—';
+  const markerCoords = clickCoords ? formatCoords(clickCoords) : '—';
 
   const stickyTourBranding = useMemo(
     () => resolveTourBranding(tour),
@@ -2236,6 +2485,13 @@ export function DevViewPanel({
     },
     [openCreateTourTab],
   );
+
+  useLayoutEffect(() => {
+    setEditingHotspotId(null);
+    setMovingHotspotId(null);
+    setHotspotManageError(null);
+    setHotspotManageStatus('idle');
+  }, [hotspotManageScope]);
 
   useLayoutEffect(() => {
     if (!panelScrollTopRequestRef.current) return;
@@ -2394,6 +2650,1815 @@ export function DevViewPanel({
     </DevPanelFormSection>
   );
 
+  const renderHotspotDevSection = () => {
+    if (!showHotspotDevPanel) return null;
+
+    return (
+      <DevPanelSection
+        title={hotspotSectionConfig.title}
+        description={hotspotSectionConfig.description}
+      >
+        <div
+          className={devViewPanelSecondaryTabsClassName}
+          role='tablist'
+          aria-label='Hotspot actions'
+        >
+          {DEV_CRUD_MODE_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type='button'
+              role='tab'
+              id={`dev-hotspot-mode-tab-${tab.id}`}
+              aria-selected={hotspotModeTab === tab.id}
+              aria-controls={`dev-hotspot-mode-panel-${tab.id}`}
+              className={devViewPanelTabVariants({
+                depth: 'secondary',
+                kind: tab.id,
+                active: hotspotModeTab === tab.id,
+              })}
+              onClick={() => setHotspotModeTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {isModel3dTour ?
+          <p className={devViewPanelSectionHintClassName}>
+            Stored in <code>tour.json → hotspots[]</code>. Info / naming
+            hotspots use <code>sceneId</code> (defaults to the scene you are
+            viewing: <code>{scene.id}</code>).
+          </p>
+        : null}
+
+        {hotspotModeTab === 'manage' ?
+          <>
+            <p className={devViewPanelTabHintClassName}>
+              {hotspotSectionConfig.manageHint}
+            </p>
+            <DevPanelFormGroup>
+              {managedHotspots.length > 0 ?
+                <ul className={devViewPanelManageListClassName}>
+                  {managedHotspots.map((hotspot) => {
+                    const isMoving = movingHotspotId === hotspot.id;
+                    const isEditing = editingHotspotId === hotspot.id;
+
+                    return (
+                      <li
+                        key={hotspot.id}
+                        className={cn(
+                          devViewPanelManageListItemClassName,
+                          (isMoving || isEditing) &&
+                            devViewPanelManageListItemActiveClassName,
+                        )}
+                      >
+                        <div
+                          className={devViewPanelManageListItemHeadClassName}
+                        >
+                          <div
+                            className={
+                              devViewPanelManageListItemHeadMainClassName
+                            }
+                          >
+                            <span
+                              className={
+                                devViewPanelManageListItemTitleClassName
+                              }
+                            >
+                              {hotspotDisplayLabel(hotspot)}
+                            </span>
+                            <span
+                              className={
+                                devViewPanelManageListItemBulletClassName
+                              }
+                              aria-hidden='true'
+                            >
+                              ·
+                            </span>
+                            <code
+                              className={devViewPanelManageListItemIdClassName}
+                            >
+                              {hotspot.id}
+                            </code>
+                          </div>
+                          <Badge
+                            variant='fill'
+                            size='sm'
+                            tone='none'
+                            className={devHotspotKindBadgeVariants({
+                              kind: hotspotKindBadgeKind(hotspot),
+                            })}
+                          >
+                            {hotspotKindLabel(hotspot)}
+                          </Badge>
+                        </div>
+                        <p className={devViewPanelSectionHintClassName}>
+                          {formatHotspotPosition(hotspot)}
+                          {(
+                            isModel3dTour &&
+                            hotspot.type === 'info' &&
+                            hotspot.sceneId
+                          ) ?
+                            <>
+                              {' '}
+                              · viewpoint <code>{hotspot.sceneId}</code>
+                            </>
+                          : null}
+                        </p>
+                        <div className={devViewPanelActionsClassName}>
+                          {hotspot.type === 'nav' && hotspot.targetScene ?
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              onClick={() =>
+                                openNavTargetScene(hotspot.targetScene!)
+                              }
+                              disabled={hotspotManageStatus === 'working'}
+                            >
+                              Open
+                            </button>
+                          : null}
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'secondary',
+                            })}
+                            onClick={() => {
+                              if (isMoving) return;
+                              setEditingHotspotId(null);
+                              setMovingHotspotId(hotspot.id);
+                            }}
+                            disabled={
+                              hotspotManageStatus === 'working' || isMoving
+                            }
+                          >
+                            Move
+                          </button>
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'secondary',
+                            })}
+                            onClick={() => startEditHotspot(hotspot)}
+                            disabled={
+                              hotspotManageStatus === 'working' || isEditing
+                            }
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'danger',
+                            })}
+                            onClick={() => void deleteHotspot(hotspot.id)}
+                            disabled={hotspotManageStatus === 'working'}
+                          >
+                            Delete
+                          </button>
+                        </div>
+
+                        {isMoving ?
+                          <DevPanelFormGroup inline manageEdit>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Hotspot position
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='text'
+                                readOnly
+                                tabIndex={-1}
+                                value={clickCoords ? markerCoords : ''}
+                                placeholder={devViewerClickPlaceholder}
+                              />
+                            </label>
+                            <div className={devViewPanelActionsClassName}>
+                              <button
+                                type='button'
+                                className={devViewPanelBtnVariants({
+                                  tone: 'secondary',
+                                })}
+                                onClick={() => setMovingHotspotId(null)}
+                                disabled={hotspotManageStatus === 'working'}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type='button'
+                                className={devViewPanelBtnVariants({
+                                  tone: 'primary',
+                                })}
+                                onClick={() => void moveHotspotToClick()}
+                                disabled={
+                                  !canMoveHotspot ||
+                                  hotspotManageStatus === 'working'
+                                }
+                              >
+                                {hotspotManageStatus === 'working' ?
+                                  'Moving…'
+                                : 'Apply click position'}
+                              </button>
+                            </div>
+                          </DevPanelFormGroup>
+                        : null}
+                        {isEditing ?
+                          hotspot.type === 'nav' ?
+                            <DevPanelFormGroup inline manageEdit>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Label
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={editNavLabel}
+                                  onChange={(e) =>
+                                    setEditNavLabel(e.target.value)
+                                  }
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Target scene
+                                </span>
+                                <select
+                                  className={devViewPanelSelectClassName}
+                                  value={editNavTarget}
+                                  onChange={(e) =>
+                                    setEditNavTarget(e.target.value)
+                                  }
+                                >
+                                  <option value=''>Select scene…</option>
+                                  {sortedSceneOptions.map((entry) => (
+                                    <option key={entry.id} value={entry.id}>
+                                      {entry.title} ({entry.id})
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Nav role
+                                </span>
+                                <select
+                                  className={devViewPanelSelectClassName}
+                                  value={editNavVariant}
+                                  onChange={(e) => {
+                                    const nextVariant = e.target
+                                      .value as NavHotspotVariant;
+                                    setEditNavVariant(nextVariant);
+                                    if (
+                                      nextVariant === 'back' ||
+                                      nextVariant === 'hub'
+                                    ) {
+                                      setEditNavInstant(true);
+                                    }
+                                    if (nextVariant === 'hub') {
+                                      setEditNavTarget(tour.firstScene);
+                                    }
+                                  }}
+                                >
+                                  {NAV_HOTSPOT_VARIANT_OPTIONS.map((option) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <p className={devViewPanelSectionHintClassName}>
+                                {
+                                  NAV_HOTSPOT_VARIANT_OPTIONS.find(
+                                    (option) => option.value === editNavVariant,
+                                  )?.hint
+                                }
+                              </p>
+                              <p className={devViewPanelSectionHintClassName}>
+                                Arrival camera uses the target scene landing
+                                view. Open the target scene, frame the shot,
+                                Apply landing view, then Save nav to copy it
+                                into <code>targetView</code>.
+                              </p>
+                              <label
+                                className={devViewPanelToggleLabelClassName}
+                              >
+                                <input
+                                  className={devViewPanelToggleInputClassName}
+                                  type='checkbox'
+                                  checked={editNavInstant}
+                                  onChange={(e) =>
+                                    setEditNavInstant(e.target.checked)
+                                  }
+                                />
+                                <span
+                                  className={devViewPanelToggleNameClassName}
+                                >
+                                  Instant (skip preview card)
+                                </span>
+                              </label>
+                              <div className={devViewPanelActionsClassName}>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'secondary',
+                                  })}
+                                  onClick={() => setEditingHotspotId(null)}
+                                  disabled={hotspotManageStatus === 'working'}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'primary',
+                                  })}
+                                  onClick={() => void saveHotspotEdit()}
+                                  disabled={hotspotManageStatus === 'working'}
+                                >
+                                  Save nav
+                                </button>
+                              </div>
+                            </DevPanelFormGroup>
+                          : isNamingInfoHotspot(hotspot) ?
+                            <DevPanelFormGroup inline manageEdit>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Title
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={editNoTitle}
+                                  onChange={(e) =>
+                                    setEditNoTitle(e.target.value)
+                                  }
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Price
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={editNoPrice}
+                                  onChange={(e) =>
+                                    setEditNoPrice(e.target.value)
+                                  }
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Status
+                                </span>
+                                <select
+                                  className={devViewPanelSelectClassName}
+                                  value={editNoStatus}
+                                  onChange={(e) =>
+                                    setEditNoStatus(
+                                      e.target.value as
+                                        | NamingOpportunityStatus
+                                        | '',
+                                    )
+                                  }
+                                >
+                                  <option value=''>Select status…</option>
+                                  {DEV_NAMING_STATUS_OPTIONS.map((option) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Body
+                                </span>
+                                <textarea
+                                  className={devViewPanelTextareaClassName}
+                                  value={editNoBody}
+                                  onChange={(e) =>
+                                    setEditNoBody(e.target.value)
+                                  }
+                                  rows={3}
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Video URL (optional)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='url'
+                                  value={editNoVideoUrl}
+                                  onChange={(e) =>
+                                    setEditNoVideoUrl(e.target.value)
+                                  }
+                                  placeholder='https://youtube.com/… or Synthesia embed'
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Image path (optional)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={editNoImage}
+                                  onChange={(e) =>
+                                    setEditNoImage(e.target.value)
+                                  }
+                                  placeholder='/assets/…/photo.webp'
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Hotspot position
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  readOnly
+                                  tabIndex={-1}
+                                  value={formatHotspotPosition(hotspot)}
+                                />
+                              </label>
+                              <label
+                                className={devViewPanelToggleLabelClassName}
+                              >
+                                <input
+                                  className={devViewPanelToggleInputClassName}
+                                  type='checkbox'
+                                  checked={editNoSyncPosition}
+                                  onChange={(e) =>
+                                    setEditNoSyncPosition(e.target.checked)
+                                  }
+                                />
+                                <span
+                                  className={devViewPanelToggleNameClassName}
+                                >
+                                  Update position from latest click
+                                </span>
+                              </label>
+                              {editNoSyncPosition ?
+                                <label className={devViewPanelFieldClassName}>
+                                  <span
+                                    className={devViewPanelFieldLabelClassName}
+                                  >
+                                    New position
+                                  </span>
+                                  <input
+                                    className={devViewPanelInputClassName}
+                                    type='text'
+                                    readOnly
+                                    tabIndex={-1}
+                                    value={
+                                      clickCoords ? markerCoords : (
+                                        devViewerClickPlaceholder
+                                      )
+                                    }
+                                  />
+                                </label>
+                              : null}
+                              {isModel3dTour ?
+                                <label className={devViewPanelFieldClassName}>
+                                  <span
+                                    className={devViewPanelFieldLabelClassName}
+                                  >
+                                    targetView
+                                  </span>
+                                  <p
+                                    className={devViewPanelSectionHintClassName}
+                                  >
+                                    Orbit to frame the opening shot — saved on
+                                    Save NO with Explore{' '}
+                                    <code>preview.image</code>. Scene landing
+                                    unchanged.
+                                  </p>
+                                  <input
+                                    className={devViewPanelInputClassName}
+                                    type='text'
+                                    readOnly
+                                    tabIndex={-1}
+                                    value={view ? formatViewPosition(view) : ''}
+                                    placeholder='Orbit the 3D viewer…'
+                                  />
+                                </label>
+                              : null}
+                              <div className={devViewPanelActionsClassName}>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'secondary',
+                                  })}
+                                  onClick={() => setEditingHotspotId(null)}
+                                  disabled={hotspotManageStatus === 'working'}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'primary',
+                                  })}
+                                  onClick={() => void saveHotspotEdit()}
+                                  disabled={
+                                    hotspotManageStatus === 'working' ||
+                                    (!editNoTitle.trim() &&
+                                      parseNamingPriceInput(editNoPrice) ==
+                                        null &&
+                                      !editNoStatus &&
+                                      !editNoBody.trim() &&
+                                      !editNoVideoUrl.trim() &&
+                                      !editNoImage.trim())
+                                  }
+                                >
+                                  Save NO
+                                </button>
+                              </div>
+                            </DevPanelFormGroup>
+                          : <DevPanelFormGroup inline manageEdit>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Title
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={editInfoTitle}
+                                  onChange={(e) =>
+                                    setEditInfoTitle(e.target.value)
+                                  }
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Display
+                                </span>
+                                <select
+                                  className={devViewPanelSelectClassName}
+                                  value={editInfoDisplay}
+                                  onChange={(e) =>
+                                    setEditInfoDisplay(
+                                      e.target.value as PopupDisplay,
+                                    )
+                                  }
+                                >
+                                  {DEV_INFO_DISPLAY_OPTIONS.map((option) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Body
+                                </span>
+                                <textarea
+                                  className={devViewPanelTextareaClassName}
+                                  value={editInfoBody}
+                                  onChange={(e) =>
+                                    setEditInfoBody(e.target.value)
+                                  }
+                                  rows={3}
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Video URL (optional)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='url'
+                                  value={editInfoVideoUrl}
+                                  onChange={(e) =>
+                                    setEditInfoVideoUrl(e.target.value)
+                                  }
+                                  placeholder='https://youtube.com/…'
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Image path (optional)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='text'
+                                  value={editInfoImage}
+                                  onChange={(e) =>
+                                    setEditInfoImage(e.target.value)
+                                  }
+                                  placeholder='/assets/…/photo.webp'
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Visit scene (optional)
+                                </span>
+                                <select
+                                  className={devViewPanelSelectClassName}
+                                  value={editInfoVisitScene}
+                                  onChange={(e) =>
+                                    setEditInfoVisitScene(e.target.value)
+                                  }
+                                >
+                                  <option value=''>None</option>
+                                  {sortedSceneOptions.map((entry) => (
+                                    <option key={entry.id} value={entry.id}>
+                                      {entry.title} ({entry.id})
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <div className={devViewPanelActionsClassName}>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'secondary',
+                                  })}
+                                  onClick={() => setEditingHotspotId(null)}
+                                  disabled={hotspotManageStatus === 'working'}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'primary',
+                                  })}
+                                  onClick={() => void saveHotspotEdit()}
+                                  disabled={
+                                    hotspotManageStatus === 'working' ||
+                                    (!editInfoTitle.trim() &&
+                                      !editInfoBody.trim() &&
+                                      !editInfoVideoUrl.trim() &&
+                                      !editInfoImage.trim())
+                                  }
+                                >
+                                  Save info
+                                </button>
+                              </div>
+                            </DevPanelFormGroup>
+
+                        : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              : <p className={devViewPanelSectionHintClassName}>
+                  {hotspotSectionConfig.emptyMessage}
+                </p>
+              }
+              {hotspotManageError ?
+                <p className={devViewPanelSectionHintClassName}>
+                  {hotspotManageError}
+                </p>
+              : null}
+
+              <div className={devViewPanelManageListFooterClassName}>
+                <button
+                  type='button'
+                  className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                  onClick={openCreateHotspotTab}
+                >
+                  {hotspotSectionConfig.addButtonLabel}
+                </button>
+              </div>
+            </DevPanelFormGroup>
+          </>
+        : <>
+            <p className={devViewPanelTabHintClassName}>
+              {hotspotSectionConfig.createHint}{' '}
+              {isModel3dTour ?
+                devViewerClickHint
+              : 'Click the panorama to set position.'}
+            </p>
+            <div className={devViewPanelTabPanelBodyClassName}>
+              <DevPanelTertiaryTabs
+                aria-label='Hotspot type'
+                value={hotspotTab}
+                onChange={setHotspotTab}
+                tabs={hotspotCreateTabs.map((tab) => ({
+                  id: tab.id,
+                  label: tab.label,
+                  kind: tab.id,
+                  htmlId: `dev-hotspot-tab-${tab.id}`,
+                  ariaControls: `dev-hotspot-panel-${tab.id}`,
+                }))}
+              />
+
+              {canCreateNavHotspot && hotspotTab === 'nav' ?
+                <div
+                  id='dev-hotspot-panel-nav'
+                  role='tabpanel'
+                  aria-labelledby='dev-hotspot-tab-nav'
+                >
+                  <DevPanelFormGroup>
+                    <div className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Hotspot position
+                      </span>
+                      <p className={devViewPanelSectionHintClassName}>
+                        {devViewerClickHint} — navigation to another scene.
+                      </p>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        readOnly
+                        tabIndex={-1}
+                        value={clickCoords ? formatCoords(clickCoords) : ''}
+                        placeholder={devViewerClickPlaceholder}
+                      />
+                    </div>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Name
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        value={navName}
+                        onChange={(e) => setNavName(e.target.value)}
+                        placeholder='e.g. Main Entrance'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Target scene
+                      </span>
+                      <select
+                        className={devViewPanelSelectClassName}
+                        value={navTargetSceneId}
+                        onChange={(e) => {
+                          setNavTargetTouched(true);
+                          const nextId = e.target.value;
+                          setNavTargetSceneId(nextId);
+                          const matchedScene = sortedSceneOptions.find(
+                            (entry) => entry.id === nextId,
+                          );
+                          if (matchedScene) {
+                            setNavName(matchedScene.title);
+                          }
+                        }}
+                      >
+                        <option value=''>Select scene…</option>
+                        {sortedSceneOptions.map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.title} ({entry.id})
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    {otherNavTargetSceneOptions.length === 0 ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        No other scenes yet — create a target scene below, then
+                        finish this nav hotspot.
+                      </p>
+                    : null}
+
+                    {showNavTargetQuickCreate ?
+                      <DevPanelFormGroup
+                        title='Create target scene'
+                        hint={
+                          <p className={devViewPanelSectionHintClassName}>
+                            Stays on this scene — hotspot position is kept. New
+                            scene is selected as the nav target.
+                          </p>
+                        }
+                      >
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Title
+                          </span>
+                          <input
+                            className={devViewPanelInputClassName}
+                            type='text'
+                            value={navTargetSceneTitle}
+                            onChange={(e) =>
+                              setNavTargetSceneTitle(e.target.value)
+                            }
+                            placeholder='e.g. Main Entrance'
+                            spellCheck={false}
+                            autoComplete='off'
+                          />
+                        </label>
+
+                        {!isModel3dTour ?
+                          <label className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
+                              Panorama file
+                            </span>
+                            <DevPanelFileField
+                              file={navTargetSceneFile}
+                              preview={
+                                navTargetSceneFile ?
+                                  <DevPanoramaFilePreview
+                                    file={navTargetSceneFile}
+                                  />
+                                : null
+                              }
+                              onClearPreview={() => setNavTargetSceneFile(null)}
+                              showClear={Boolean(navTargetSceneFile)}
+                            >
+                              <DevPanelFileInput
+                                accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
+                                file={navTargetSceneFile}
+                                onChange={setNavTargetSceneFile}
+                              />
+                            </DevPanelFileField>
+                          </label>
+                        : null}
+
+                        {navTargetSceneSlug ?
+                          <p className={devViewPanelSlugPreviewClassName}>
+                            id <code>{navTargetSceneSlug}</code>
+                          </p>
+                        : null}
+
+                        {navTargetSceneError ?
+                          <p className={devViewPanelSectionHintClassName}>
+                            {navTargetSceneError}
+                          </p>
+                        : null}
+
+                        <div className={devViewPanelActionsClassName}>
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'primary',
+                            })}
+                            onClick={() => void createNavTargetScene()}
+                            disabled={
+                              !canCreateNavTargetScene ||
+                              navTargetSceneStatus === 'working'
+                            }
+                          >
+                            {navTargetSceneStatus === 'working' ?
+                              'Creating…'
+                            : navTargetSceneStatus === 'done' ?
+                              'Scene created!'
+                            : 'Create target scene'}
+                          </button>
+                          {otherNavTargetSceneOptions.length > 0 ?
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              onClick={() => {
+                                setNavTargetQuickCreateOpen(false);
+                                setNavTargetSceneTitle('');
+                                setNavTargetSceneFile(null);
+                                setNavTargetSceneError(null);
+                                setNavTargetSceneStatus('idle');
+                              }}
+                              disabled={navTargetSceneStatus === 'working'}
+                            >
+                              Cancel
+                            </button>
+                          : null}
+                        </div>
+                      </DevPanelFormGroup>
+                    : <button
+                        type='button'
+                        className={cn(
+                          devViewPanelBtnVariants({ tone: 'secondary' }),
+                          'w-fit',
+                        )}
+                        onClick={() => setNavTargetQuickCreateOpen(true)}
+                      >
+                        + Create target scene
+                      </button>
+                    }
+
+                    {navHotspotIdPreview ?
+                      <p className={devViewPanelSlugPreviewClassName}>
+                        id <code>{navHotspotIdPreview}</code>
+                        {navHotspotIdPreview !== `nav-to-${navSlug}` ?
+                          <>
+                            {' '}
+                            · suffix added — name slug already used on this
+                            scene
+                          </>
+                        : null}{' '}
+                        · copies target <code>defaultView</code> on create and
+                        save
+                      </p>
+                    : null}
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Nav role
+                      </span>
+                      <select
+                        className={devViewPanelSelectClassName}
+                        value={navVariant}
+                        onChange={(e) => {
+                          const nextVariant = e.target
+                            .value as NavHotspotVariant;
+                          setNavVariant(nextVariant);
+                          if (nextVariant === 'back' || nextVariant === 'hub') {
+                            setNavInstant(true);
+                          }
+                          if (nextVariant === 'hub') {
+                            setNavTargetSceneId(tour.firstScene);
+                          }
+                        }}
+                      >
+                        {NAV_HOTSPOT_VARIANT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <p className={devViewPanelSectionHintClassName}>
+                      {
+                        NAV_HOTSPOT_VARIANT_OPTIONS.find(
+                          (option) => option.value === navVariant,
+                        )?.hint
+                      }
+                    </p>
+
+                    <label className={devViewPanelToggleLabelClassName}>
+                      <input
+                        className={devViewPanelToggleInputClassName}
+                        type='checkbox'
+                        checked={navInstant}
+                        onChange={(e) => setNavInstant(e.target.checked)}
+                      />
+                      <span className={devViewPanelToggleNameClassName}>
+                        Instant (skip preview card)
+                      </span>
+                    </label>
+
+                    <div className={devViewPanelActionsClassName}>
+                      <button
+                        type='button'
+                        className={devViewPanelBtnVariants({ tone: 'primary' })}
+                        onClick={() => void createNavHotspot()}
+                        disabled={!canCreateNav || navStatus === 'working'}
+                      >
+                        {navStatus === 'working' ?
+                          'Creating…'
+                        : navStatus === 'done' ?
+                          'Nav created!'
+                        : 'Create nav'}
+                      </button>
+                    </div>
+                    {navError ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        {navError}
+                      </p>
+                    : null}
+                  </DevPanelFormGroup>
+                </div>
+              : canCreateNamingHotspot && hotspotTab === 'naming' ?
+                <div
+                  id='dev-hotspot-panel-naming'
+                  role='tabpanel'
+                  aria-labelledby='dev-hotspot-tab-naming'
+                >
+                  <DevPanelFormGroup>
+                    <div className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Hotspot position
+                      </span>
+                      <p className={devViewPanelSectionHintClassName}>
+                        {devViewerClickHint} — naming opportunity popup on this
+                        scene.
+                        {isModel3dTour ?
+                          <>
+                            {' '}
+                            Saves the current camera on this NO as{' '}
+                            <code>targetView</code> + Explore{' '}
+                            <code>preview.image</code> — scene landing is
+                            unchanged.
+                          </>
+                        : null}
+                      </p>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        readOnly
+                        tabIndex={-1}
+                        value={clickCoords ? formatCoords(clickCoords) : ''}
+                        placeholder={devViewerClickPlaceholder}
+                      />
+                    </div>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Name
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        value={noName}
+                        onChange={(e) => setNoName(e.target.value)}
+                        placeholder='e.g. Parking Lot'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Price
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        value={noPrice}
+                        onChange={(e) => setNoPrice(e.target.value)}
+                        placeholder='e.g. 75000'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Status
+                      </span>
+                      <select
+                        className={devViewPanelSelectClassName}
+                        value={noStatus}
+                        onChange={(e) =>
+                          setNoStatus(
+                            e.target.value as NamingOpportunityStatus | '',
+                          )
+                        }
+                      >
+                        <option value=''>Select status…</option>
+                        {DEV_NAMING_STATUS_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Body (optional)
+                      </span>
+                      <textarea
+                        className={devViewPanelTextareaClassName}
+                        value={noBody}
+                        onChange={(e) => setNoBody(e.target.value)}
+                        placeholder='Leave empty for placeholder copy from the title…'
+                        rows={3}
+                        spellCheck={true}
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Video URL (optional)
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='url'
+                        value={noVideoUrl}
+                        onChange={(e) => setNoVideoUrl(e.target.value)}
+                        placeholder='https://youtube.com/… or Synthesia embed'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Image path (optional)
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        value={noImage}
+                        onChange={(e) => setNoImage(e.target.value)}
+                        placeholder='/assets/…/photo.webp'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    {noHotspotIdPreview ?
+                      <p className={devViewPanelSlugPreviewClassName}>
+                        id <code>{noHotspotIdPreview}</code>
+                        {noHotspotIdPreview !== `info-${noSlug}` ?
+                          <>
+                            {' '}
+                            · suffix added — name slug already used on this
+                            scene
+                          </>
+                        : null}{' '}
+                        · deep link{' '}
+                        <code>
+                          ?no=
+                          {noHotspotIdPreview.replace(/^info-/, '')}
+                        </code>
+                      </p>
+                    : null}
+
+                    <div className={devViewPanelActionsClassName}>
+                      <button
+                        type='button'
+                        className={devViewPanelBtnVariants({ tone: 'primary' })}
+                        onClick={() => void createNamingHotspot()}
+                        disabled={
+                          !canCreateNaming || namingStatus === 'working'
+                        }
+                      >
+                        {namingStatus === 'working' ?
+                          'Creating…'
+                        : namingStatus === 'done' ?
+                          'NO created!'
+                        : 'Create NO'}
+                      </button>
+                    </div>
+                    {namingError ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        {namingError}
+                      </p>
+                    : null}
+                  </DevPanelFormGroup>
+                </div>
+              : canCreateInfoHotspot ?
+                <div
+                  id='dev-hotspot-panel-info'
+                  role='tabpanel'
+                  aria-labelledby='dev-hotspot-tab-info'
+                >
+                  <DevPanelFormGroup>
+                    <div className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Hotspot position
+                      </span>
+                      <p className={devViewPanelSectionHintClassName}>
+                        {devViewerClickHint} — general info popup (not a naming
+                        opportunity).
+                      </p>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        readOnly
+                        tabIndex={-1}
+                        value={clickCoords ? formatCoords(clickCoords) : ''}
+                        placeholder={devViewerClickPlaceholder}
+                      />
+                    </div>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Title
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        value={infoName}
+                        onChange={(e) => setInfoName(e.target.value)}
+                        placeholder='e.g. Welcome Desk'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Display
+                      </span>
+                      <select
+                        className={devViewPanelSelectClassName}
+                        value={infoDisplay}
+                        onChange={(e) =>
+                          setInfoDisplay(e.target.value as PopupDisplay)
+                        }
+                      >
+                        {DEV_INFO_DISPLAY_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Body (optional)
+                      </span>
+                      <textarea
+                        className={devViewPanelTextareaClassName}
+                        value={infoBody}
+                        onChange={(e) => setInfoBody(e.target.value)}
+                        placeholder='Leave empty for placeholder copy from the title…'
+                        rows={3}
+                        spellCheck={true}
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Video URL (optional)
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='url'
+                        value={infoVideoUrl}
+                        onChange={(e) => setInfoVideoUrl(e.target.value)}
+                        placeholder='https://youtube.com/…'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Image path (optional)
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        value={infoImage}
+                        onChange={(e) => setInfoImage(e.target.value)}
+                        placeholder='/assets/…/photo.webp'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Visit scene (optional)
+                      </span>
+                      <select
+                        className={devViewPanelSelectClassName}
+                        value={infoVisitScene}
+                        onChange={(e) => setInfoVisitScene(e.target.value)}
+                      >
+                        <option value=''>None</option>
+                        {sortedSceneOptions.map((entry) => (
+                          <option key={entry.id} value={entry.id}>
+                            {entry.title} ({entry.id})
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    {infoHotspotIdPreview ?
+                      <p className={devViewPanelSlugPreviewClassName}>
+                        id <code>{infoHotspotIdPreview}</code>
+                        {infoHotspotIdPreview !== `info-${infoSlug}` ?
+                          <>
+                            {' '}
+                            · suffix added — name slug already used on this
+                            scene
+                          </>
+                        : null}
+                      </p>
+                    : null}
+
+                    <div className={devViewPanelActionsClassName}>
+                      <button
+                        type='button'
+                        className={devViewPanelBtnVariants({ tone: 'primary' })}
+                        onClick={() => void createInfoHotspotHandler()}
+                        disabled={!canCreateInfo || infoStatus === 'working'}
+                      >
+                        {infoStatus === 'working' ?
+                          'Creating…'
+                        : infoStatus === 'done' ?
+                          'Info created!'
+                        : 'Create info'}
+                      </button>
+                    </div>
+                    {infoError ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        {infoError}
+                      </p>
+                    : null}
+                  </DevPanelFormGroup>
+                </div>
+              : null}
+            </div>
+          </>
+        }
+      </DevPanelSection>
+    );
+  };
+  const renderScenesDevSection = () => (
+    <DevPanelSection
+      title='Scenes'
+      description={
+        isModel3dTour ?
+          'Open and edit viewpoints, or add a new scene on the shared 3D model.'
+        : 'Open and edit tour scenes, or upload a new panorama.'
+      }
+    >
+      <div
+        className={devViewPanelSecondaryTabsClassName}
+        role='tablist'
+        aria-label='Scene actions'
+      >
+        {DEV_CRUD_MODE_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type='button'
+            role='tab'
+            id={`dev-scene-mode-tab-${tab.id}`}
+            aria-selected={sceneModeTab === tab.id}
+            aria-controls={`dev-scene-mode-panel-${tab.id}`}
+            className={devViewPanelTabVariants({
+              depth: 'secondary',
+              kind: tab.id,
+              active: sceneModeTab === tab.id,
+            })}
+            onClick={() => setSceneModeTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {sceneModeTab === 'manage' ?
+        <>
+          <p className={devViewPanelTabHintClassName}>
+            Open scenes on this tour, edit metadata, or delete.
+          </p>
+          <DevPanelFormGroup>
+            {tourScenes.length > 0 ?
+              <ul className={devViewPanelManageListClassName}>
+                {tourScenes.map((entry) => {
+                  const isCurrent = entry.id === scene.id;
+                  const isFirst = entry.id === tour.firstScene;
+                  const isEditing = editingSceneId === entry.id;
+                  const canDelete = entry.id !== tour.firstScene;
+
+                  return (
+                    <li
+                      key={entry.id}
+                      className={cn(
+                        devViewPanelManageListItemClassName,
+                        (isEditing || isCurrent) &&
+                          devViewPanelManageListItemActiveClassName,
+                      )}
+                    >
+                      <div className={devViewPanelManageListItemHeadClassName}>
+                        <div
+                          className={
+                            devViewPanelManageListItemHeadMainClassName
+                          }
+                        >
+                          <span
+                            className={devViewPanelManageListItemTitleClassName}
+                          >
+                            {entry.title}
+                          </span>
+                          <span
+                            className={
+                              devViewPanelManageListItemBulletClassName
+                            }
+                            aria-hidden='true'
+                          >
+                            ·
+                          </span>
+                          <code
+                            className={devViewPanelManageListItemIdClassName}
+                          >
+                            {entry.id}
+                          </code>
+                        </div>
+                        {isFirst || isCurrent ?
+                          <div
+                            className={
+                              devViewPanelManageListItemBadgesClassName
+                            }
+                          >
+                            {isFirst ?
+                              <Badge
+                                variant='fill'
+                                size='sm'
+                                tone='none'
+                                className={devSceneManageBadgeVariants({
+                                  kind: 'first',
+                                })}
+                              >
+                                First
+                              </Badge>
+                            : null}
+                            {isCurrent ?
+                              <Badge
+                                variant='fill'
+                                size='sm'
+                                tone='none'
+                                className={devSceneManageBadgeVariants({
+                                  kind: 'current',
+                                })}
+                              >
+                                Current
+                              </Badge>
+                            : null}
+                          </div>
+                        : null}
+                      </div>
+                      {entry.description ?
+                        <p
+                          className={devViewPanelManageListItemDescClassName}
+                          title={entry.description}
+                        >
+                          {entry.description}
+                        </p>
+                      : null}
+                      <div className={devViewPanelActionsClassName}>
+                        <button
+                          type='button'
+                          className={devViewPanelBtnVariants({
+                            tone: 'secondary',
+                          })}
+                          onClick={() => void openTourScene(entry.id)}
+                          disabled={sceneManageStatus === 'working'}
+                        >
+                          Open
+                        </button>
+                        <button
+                          type='button'
+                          className={devViewPanelBtnVariants({
+                            tone: 'secondary',
+                          })}
+                          onClick={() => startEditScene(entry)}
+                          disabled={
+                            sceneManageStatus === 'working' || isEditing
+                          }
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type='button'
+                          className={devViewPanelBtnVariants({
+                            tone: 'danger',
+                          })}
+                          onClick={() => void deleteTourScene(entry.id)}
+                          disabled={
+                            !canDelete || sceneManageStatus === 'working'
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      {isEditing ?
+                        <DevPanelFormGroup inline manageEdit>
+                          <label className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
+                              Title
+                            </span>
+                            <input
+                              className={devViewPanelInputClassName}
+                              type='text'
+                              value={editSceneTitle}
+                              onChange={(e) =>
+                                setEditSceneTitle(e.target.value)
+                              }
+                            />
+                          </label>
+                          <label className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
+                              Description
+                            </span>
+                            <textarea
+                              className={devViewPanelTextareaClassName}
+                              value={editSceneDescription}
+                              onChange={(e) =>
+                                setEditSceneDescription(e.target.value)
+                              }
+                              rows={2}
+                              placeholder='Optional — leave empty to remove'
+                            />
+                          </label>
+                          <div className={devViewPanelToggleListClassName}>
+                            {!isFirst ?
+                              <label
+                                className={devViewPanelToggleLabelClassName}
+                              >
+                                <input
+                                  type='checkbox'
+                                  className={devViewPanelToggleInputClassName}
+                                  checked={editSceneAsFirst}
+                                  onChange={(e) =>
+                                    setEditSceneAsFirst(e.currentTarget.checked)
+                                  }
+                                />
+                                <span
+                                  className={devViewPanelToggleTextClassName}
+                                >
+                                  Set as firstScene
+                                </span>
+                              </label>
+                            : null}
+                            {!isModel3dTour ?
+                              <>
+                                <label
+                                  className={devViewPanelToggleLabelClassName}
+                                >
+                                  <input
+                                    type='checkbox'
+                                    className={devViewPanelToggleInputClassName}
+                                    checked={editSceneMapEnabled}
+                                    onChange={(e) =>
+                                      setEditSceneMapEnabled(
+                                        e.currentTarget.checked,
+                                      )
+                                    }
+                                  />
+                                  <span
+                                    className={devViewPanelToggleTextClassName}
+                                  >
+                                    Floor plan map position
+                                  </span>
+                                </label>
+                              </>
+                            : null}
+                          </div>
+                          {!isModel3dTour && editSceneMapEnabled ?
+                            <DevPanelFormRow cols={3}>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Map X (0–1)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='number'
+                                  min='0'
+                                  max='1'
+                                  step='0.001'
+                                  value={editSceneMapX}
+                                  onChange={(e) =>
+                                    setEditSceneMapX(e.target.value)
+                                  }
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Map Y (0–1)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='number'
+                                  min='0'
+                                  max='1'
+                                  step='0.001'
+                                  value={editSceneMapY}
+                                  onChange={(e) =>
+                                    setEditSceneMapY(e.target.value)
+                                  }
+                                />
+                              </label>
+                              <label className={devViewPanelFieldClassName}>
+                                <span
+                                  className={devViewPanelFieldLabelClassName}
+                                >
+                                  Map heading (°)
+                                </span>
+                                <input
+                                  className={devViewPanelInputClassName}
+                                  type='number'
+                                  step='0.1'
+                                  value={editSceneMapHeading}
+                                  onChange={(e) =>
+                                    setEditSceneMapHeading(e.target.value)
+                                  }
+                                />
+                              </label>
+                            </DevPanelFormRow>
+                          : null}
+                          <div className={devViewPanelActionsClassName}>
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              onClick={() => setEditingSceneId(null)}
+                              disabled={sceneManageStatus === 'working'}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'primary',
+                              })}
+                              onClick={() => void saveSceneEdit()}
+                              disabled={
+                                sceneManageStatus === 'working' ||
+                                !editSceneTitle.trim()
+                              }
+                            >
+                              Save scene
+                            </button>
+                          </div>
+                        </DevPanelFormGroup>
+                      : null}
+                    </li>
+                  );
+                })}
+              </ul>
+            : <p className={devViewPanelSectionHintClassName}>
+                No scenes on this tour yet.
+              </p>
+            }
+            {sceneManageError ?
+              <p className={devViewPanelSectionHintClassName}>
+                {sceneManageError}
+              </p>
+            : null}
+
+            <div className={devViewPanelManageListFooterClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                onClick={openCreateSceneTab}
+              >
+                Add scene to this tour
+              </button>
+            </div>
+          </DevPanelFormGroup>
+        </>
+      : <>
+          <p className={devViewPanelTabHintClassName}>
+            {isModel3dTour ?
+              <>
+                Add a viewpoint on the tour&apos;s shared model — orbit to the
+                desired camera pose first (saved as <code>defaultView</code>{' '}
+                with orbit <code>target</code>). Card image captures from the
+                current view, or upload manually to{' '}
+                <code>
+                  assets/&lt;client&gt;/{currentTourId}
+                  /thumbnails/&lt;id&gt;.webp
+                </code>
+                .
+              </>
+            : <>
+                Upload a panorama — title becomes scene id, image converts to{' '}
+                <code>
+                  assets/&lt;client&gt;/{currentTourId}
+                  /panoramas/&lt;id&gt;.webp
+                </code>{' '}
+                automatically.
+              </>
+            }
+          </p>
+          <DevPanelFormGroup>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>Title</span>
+              <input
+                className={devViewPanelInputClassName}
+                type='text'
+                value={sceneTitle}
+                onChange={(e) => setSceneTitle(e.target.value)}
+                placeholder='e.g. Main Entrance'
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                {isModel3dTour ?
+                  'Card thumbnail (optional — auto-captures from view)'
+                : 'Panorama file'}
+              </span>
+              <DevPanelFileField
+                file={scenePanoramaFile}
+                preview={<DevPanoramaFilePreview file={scenePanoramaFile} />}
+                onClearPreview={() => setScenePanoramaFile(null)}
+                showClear={Boolean(scenePanoramaFile)}
+              >
+                <DevPanelFileInput
+                  accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
+                  file={scenePanoramaFile}
+                  onChange={setScenePanoramaFile}
+                />
+              </DevPanelFileField>
+            </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Description (optional)
+              </span>
+              <textarea
+                className={devViewPanelTextareaClassName}
+                value={sceneDescription}
+                onChange={(e) => setSceneDescription(e.target.value)}
+                rows={2}
+                spellCheck={true}
+              />
+            </label>
+
+            {sceneSlug ?
+              <p className={devViewPanelSlugPreviewClassName}>
+                id <code>{sceneSlug}</code> ·{' '}
+                <code>
+                  {isModel3dTour ?
+                    buildDefaultSceneThumbnailRelativePath(sceneSlug)
+                  : buildDefaultPanoramaRelativePath(sceneSlug)}
+                </code>
+                {view ?
+                  <> · defaultView {formatViewPosition(view)}</>
+                : isModel3dTour ?
+                  ' · orbit the model to set defaultView before creating'
+                : ' · defaultView 0, 0, 17'}
+              </p>
+            : null}
+            {scenePanoramaAutoPath ?
+              <p className={devViewPanelSectionHintClassName}>
+                {isModel3dTour ?
+                  <>
+                    card image path <code>{scenePanoramaAutoPath}</code>
+                  </>
+                : <>
+                    saves to <code>{scenePanoramaAutoPath}</code>
+                  </>
+                }
+              </p>
+            : null}
+
+            {sceneError ?
+              <p className={devViewPanelSectionHintClassName}>{sceneError}</p>
+            : null}
+
+            <div className={devViewPanelActionsClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'primary' })}
+                onClick={() => void createScene()}
+                disabled={!canCreateScene || sceneStatus === 'working'}
+              >
+                {sceneStatus === 'working' ?
+                  'Creating…'
+                : sceneStatus === 'done' ?
+                  'Created!'
+                : 'Create scene'}
+              </button>
+            </div>
+          </DevPanelFormGroup>
+        </>
+      }
+    </DevPanelSection>
+  );
+
   return (
     <div id={id} className={devViewPanelRootClassName}>
       <div className={devViewPanelStickyHeaderClassName}>
@@ -2541,15 +4606,29 @@ export function DevViewPanel({
           >
             <DevPanelSectionAccordion>
               <DevPanelSection
-                title='Panorama'
-                description='Set the landing view and thumbnail, or replace the scene image.'
+                title={isModel3dTour ? 'Viewpoint' : 'Panorama'}
+                description={
+                  isModel3dTour ?
+                    'Camera pose for this scene — landing view and card thumbnail.'
+                  : 'Set the landing view and thumbnail, or replace the scene image.'
+                }
               >
                 <DevPanelFormGroup
                   title='Landing view'
                   hint={
                     <p className={devViewPanelSectionHintClassName}>
-                      Pan the scene — saves <code>defaultView</code> + bakes{' '}
-                      <code>thumbnail</code>
+                      {isModel3dTour ?
+                        <>
+                          Orbit, pan, and zoom — saves <code>defaultView</code>{' '}
+                          and bakes <code>thumbnail</code> from the current 3D
+                          view. <code>zoom</code> is orbit distance (lower =
+                          closer; unlike PSV zoom level).
+                        </>
+                      : <>
+                          Pan the scene — saves <code>defaultView</code> + bakes{' '}
+                          <code>thumbnail</code>
+                        </>
+                      }
                     </p>
                   }
                 >
@@ -2579,1519 +4658,67 @@ export function DevViewPanel({
                   </div>
                 </DevPanelFormGroup>
 
-                <DevPanelFormGroup
-                  title='Replace panorama'
-                  hint={
-                    <p className={devViewPanelSectionHintClassName}>
-                      Overwrites <code>{scene.id}.webp</code> for this scene and
-                      rebakes the thumbnail.
-                    </p>
-                  }
-                >
-                  <label className={devViewPanelFieldClassName}>
-                    <span className={devViewPanelFieldLabelClassName}>
-                      Panorama file
-                    </span>
-                    <DevPanelFileField
-                      file={replacePanoramaFile}
-                      preview={
-                        replacePanoramaFile ?
-                          <DevPanoramaFilePreview file={replacePanoramaFile} />
-                        : null
-                      }
-                      onClearPreview={() => setReplacePanoramaFile(null)}
-                      showClear={Boolean(replacePanoramaFile)}
-                    >
-                      <DevPanelFileInput
-                        accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
+                {!isModel3dTour ?
+                  <DevPanelFormGroup
+                    title='Replace panorama'
+                    hint={
+                      <p className={devViewPanelSectionHintClassName}>
+                        Overwrites <code>{scene.id}.webp</code> for this scene
+                        and rebakes the thumbnail.
+                      </p>
+                    }
+                  >
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Panorama file
+                      </span>
+                      <DevPanelFileField
                         file={replacePanoramaFile}
-                        onChange={setReplacePanoramaFile}
-                      />
-                    </DevPanelFileField>
-                  </label>
+                        preview={
+                          replacePanoramaFile ?
+                            <DevPanoramaFilePreview
+                              file={replacePanoramaFile}
+                            />
+                          : null
+                        }
+                        onClearPreview={() => setReplacePanoramaFile(null)}
+                        showClear={Boolean(replacePanoramaFile)}
+                      >
+                        <DevPanelFileInput
+                          accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
+                          file={replacePanoramaFile}
+                          onChange={setReplacePanoramaFile}
+                        />
+                      </DevPanelFileField>
+                    </label>
 
-                  {replacePanoramaError ?
-                    <p className={devViewPanelSectionHintClassName}>
-                      {replacePanoramaError}
-                    </p>
-                  : null}
+                    {replacePanoramaError ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        {replacePanoramaError}
+                      </p>
+                    : null}
 
-                  <div className={devViewPanelActionsClassName}>
-                    <button
-                      type='button'
-                      className={devViewPanelBtnVariants({ tone: 'primary' })}
-                      onClick={() => void replacePanorama()}
-                      disabled={
-                        !canReplacePanorama ||
-                        replacePanoramaStatus === 'working'
-                      }
-                    >
-                      {replacePanoramaStatus === 'working' ?
-                        'Replacing…'
-                      : replacePanoramaStatus === 'done' ?
-                        'Replaced!'
-                      : 'Replace panorama'}
-                    </button>
-                  </div>
-                </DevPanelFormGroup>
-              </DevPanelSection>
-
-              <DevPanelSection
-                title='Hotspots'
-                description='Manage markers on this scene or add nav, naming, and info hotspots.'
-              >
-                <div
-                  className={devViewPanelSecondaryTabsClassName}
-                  role='tablist'
-                  aria-label='Hotspot actions'
-                >
-                  {DEV_CRUD_MODE_TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      type='button'
-                      role='tab'
-                      id={`dev-hotspot-mode-tab-${tab.id}`}
-                      aria-selected={hotspotModeTab === tab.id}
-                      aria-controls={`dev-hotspot-mode-panel-${tab.id}`}
-                      className={devViewPanelTabVariants({
-                        depth: 'secondary',
-                        kind: tab.id,
-                        active: hotspotModeTab === tab.id,
-                      })}
-                      onClick={() => setHotspotModeTab(tab.id)}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                {hotspotModeTab === 'manage' ?
-                  <>
-                    <p className={devViewPanelTabHintClassName}>
-                      Move, edit, or delete existing markers on this scene.
-                    </p>
-                    <DevPanelFormGroup>
-                      {currentSceneHotspots.length > 0 ?
-                        <ul className={devViewPanelManageListClassName}>
-                          {currentSceneHotspots.map((hotspot) => {
-                            const isMoving = movingHotspotId === hotspot.id;
-                            const isEditing = editingHotspotId === hotspot.id;
-
-                            return (
-                              <li
-                                key={hotspot.id}
-                                className={cn(
-                                  devViewPanelManageListItemClassName,
-                                  (isMoving || isEditing) &&
-                                    devViewPanelManageListItemActiveClassName,
-                                )}
-                              >
-                                <div
-                                  className={
-                                    devViewPanelManageListItemHeadClassName
-                                  }
-                                >
-                                  <div
-                                    className={
-                                      devViewPanelManageListItemHeadMainClassName
-                                    }
-                                  >
-                                    <span
-                                      className={
-                                        devViewPanelManageListItemTitleClassName
-                                      }
-                                    >
-                                      {hotspotDisplayLabel(hotspot)}
-                                    </span>
-                                    <span
-                                      className={
-                                        devViewPanelManageListItemBulletClassName
-                                      }
-                                      aria-hidden='true'
-                                    >
-                                      ·
-                                    </span>
-                                    <code
-                                      className={
-                                        devViewPanelManageListItemIdClassName
-                                      }
-                                    >
-                                      {hotspot.id}
-                                    </code>
-                                  </div>
-                                  <Badge
-                                    variant='fill'
-                                    size='sm'
-                                    tone='none'
-                                    className={devHotspotKindBadgeVariants({
-                                      kind: hotspotKindBadgeKind(hotspot),
-                                    })}
-                                  >
-                                    {hotspotKindLabel(hotspot)}
-                                  </Badge>
-                                </div>
-                                <p className={devViewPanelSectionHintClassName}>
-                                  {formatHotspotPosition(hotspot)}
-                                </p>
-                                <div className={devViewPanelActionsClassName}>
-                                  {(
-                                    hotspot.type === 'nav' &&
-                                    hotspot.targetScene
-                                  ) ?
-                                    <button
-                                      type='button'
-                                      className={devViewPanelBtnVariants({
-                                        tone: 'secondary',
-                                      })}
-                                      onClick={() =>
-                                        openNavTargetScene(hotspot.targetScene!)
-                                      }
-                                      disabled={
-                                        hotspotManageStatus === 'working'
-                                      }
-                                    >
-                                      Open
-                                    </button>
-                                  : null}
-                                  <button
-                                    type='button'
-                                    className={devViewPanelBtnVariants({
-                                      tone: 'secondary',
-                                    })}
-                                    onClick={() => {
-                                      if (isMoving) return;
-                                      setEditingHotspotId(null);
-                                      setMovingHotspotId(hotspot.id);
-                                    }}
-                                    disabled={
-                                      hotspotManageStatus === 'working' ||
-                                      isMoving
-                                    }
-                                  >
-                                    Move
-                                  </button>
-                                  <button
-                                    type='button'
-                                    className={devViewPanelBtnVariants({
-                                      tone: 'secondary',
-                                    })}
-                                    onClick={() => startEditHotspot(hotspot)}
-                                    disabled={
-                                      hotspotManageStatus === 'working' ||
-                                      isEditing
-                                    }
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    type='button'
-                                    className={devViewPanelBtnVariants({
-                                      tone: 'danger',
-                                    })}
-                                    onClick={() =>
-                                      void deleteHotspot(hotspot.id)
-                                    }
-                                    disabled={hotspotManageStatus === 'working'}
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-
-                                {isMoving ?
-                                  <DevPanelFormGroup inline manageEdit>
-                                    <label
-                                      className={devViewPanelFieldClassName}
-                                    >
-                                      <span
-                                        className={
-                                          devViewPanelFieldLabelClassName
-                                        }
-                                      >
-                                        Marker position
-                                      </span>
-                                      <input
-                                        className={devViewPanelInputClassName}
-                                        type='text'
-                                        readOnly
-                                        tabIndex={-1}
-                                        value={clickCoords ? markerCoords : ''}
-                                        placeholder='Click the panorama…'
-                                      />
-                                    </label>
-                                    <div
-                                      className={devViewPanelActionsClassName}
-                                    >
-                                      <button
-                                        type='button'
-                                        className={devViewPanelBtnVariants({
-                                          tone: 'secondary',
-                                        })}
-                                        onClick={() => setMovingHotspotId(null)}
-                                        disabled={
-                                          hotspotManageStatus === 'working'
-                                        }
-                                      >
-                                        Cancel
-                                      </button>
-                                      <button
-                                        type='button'
-                                        className={devViewPanelBtnVariants({
-                                          tone: 'primary',
-                                        })}
-                                        onClick={() =>
-                                          void moveHotspotToClick()
-                                        }
-                                        disabled={
-                                          !canMoveHotspot ||
-                                          hotspotManageStatus === 'working'
-                                        }
-                                      >
-                                        {hotspotManageStatus === 'working' ?
-                                          'Moving…'
-                                        : 'Apply click position'}
-                                      </button>
-                                    </div>
-                                  </DevPanelFormGroup>
-                                : null}
-                                {isEditing ?
-                                  hotspot.type === 'nav' ?
-                                    <DevPanelFormGroup inline manageEdit>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Label
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='text'
-                                          value={editNavLabel}
-                                          onChange={(e) =>
-                                            setEditNavLabel(e.target.value)
-                                          }
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Target scene
-                                        </span>
-                                        <select
-                                          className={
-                                            devViewPanelSelectClassName
-                                          }
-                                          value={editNavTarget}
-                                          onChange={(e) =>
-                                            setEditNavTarget(e.target.value)
-                                          }
-                                        >
-                                          <option value=''>
-                                            Select scene…
-                                          </option>
-                                          {sortedSceneOptions.map((entry) => (
-                                            <option
-                                              key={entry.id}
-                                              value={entry.id}
-                                            >
-                                              {entry.title} ({entry.id})
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Nav role
-                                        </span>
-                                        <select
-                                          className={
-                                            devViewPanelSelectClassName
-                                          }
-                                          value={editNavVariant}
-                                          onChange={(e) => {
-                                            const nextVariant = e.target
-                                              .value as NavHotspotVariant;
-                                            setEditNavVariant(nextVariant);
-                                            if (
-                                              nextVariant === 'back' ||
-                                              nextVariant === 'hub'
-                                            ) {
-                                              setEditNavInstant(true);
-                                            }
-                                            if (nextVariant === 'hub') {
-                                              setEditNavTarget(tour.firstScene);
-                                            }
-                                          }}
-                                        >
-                                          {NAV_HOTSPOT_VARIANT_OPTIONS.map(
-                                            (option) => (
-                                              <option
-                                                key={option.value}
-                                                value={option.value}
-                                              >
-                                                {option.label}
-                                              </option>
-                                            ),
-                                          )}
-                                        </select>
-                                      </label>
-                                      <p
-                                        className={
-                                          devViewPanelSectionHintClassName
-                                        }
-                                      >
-                                        {
-                                          NAV_HOTSPOT_VARIANT_OPTIONS.find(
-                                            (option) =>
-                                              option.value === editNavVariant,
-                                          )?.hint
-                                        }
-                                      </p>
-                                      <p
-                                        className={
-                                          devViewPanelSectionHintClassName
-                                        }
-                                      >
-                                        Arrival camera uses the target scene
-                                        landing view. Open the target scene,
-                                        frame the shot, Apply landing view, then
-                                        Save nav to copy it into{' '}
-                                        <code>targetView</code>.
-                                      </p>
-                                      <label
-                                        className={
-                                          devViewPanelToggleLabelClassName
-                                        }
-                                      >
-                                        <input
-                                          className={
-                                            devViewPanelToggleInputClassName
-                                          }
-                                          type='checkbox'
-                                          checked={editNavInstant}
-                                          onChange={(e) =>
-                                            setEditNavInstant(e.target.checked)
-                                          }
-                                        />
-                                        <span
-                                          className={
-                                            devViewPanelToggleNameClassName
-                                          }
-                                        >
-                                          Instant (skip preview card)
-                                        </span>
-                                      </label>
-                                      <div
-                                        className={devViewPanelActionsClassName}
-                                      >
-                                        <button
-                                          type='button'
-                                          className={devViewPanelBtnVariants({
-                                            tone: 'secondary',
-                                          })}
-                                          onClick={() =>
-                                            setEditingHotspotId(null)
-                                          }
-                                          disabled={
-                                            hotspotManageStatus === 'working'
-                                          }
-                                        >
-                                          Cancel
-                                        </button>
-                                        <button
-                                          type='button'
-                                          className={devViewPanelBtnVariants({
-                                            tone: 'primary',
-                                          })}
-                                          onClick={() => void saveHotspotEdit()}
-                                          disabled={
-                                            hotspotManageStatus === 'working'
-                                          }
-                                        >
-                                          Save nav
-                                        </button>
-                                      </div>
-                                    </DevPanelFormGroup>
-                                  : isNamingInfoHotspot(hotspot) ?
-                                    <DevPanelFormGroup inline manageEdit>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Title
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='text'
-                                          value={editNoTitle}
-                                          onChange={(e) =>
-                                            setEditNoTitle(e.target.value)
-                                          }
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Price
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='text'
-                                          value={editNoPrice}
-                                          onChange={(e) =>
-                                            setEditNoPrice(e.target.value)
-                                          }
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Status
-                                        </span>
-                                        <select
-                                          className={
-                                            devViewPanelSelectClassName
-                                          }
-                                          value={editNoStatus}
-                                          onChange={(e) =>
-                                            setEditNoStatus(
-                                              e.target.value as
-                                                | NamingOpportunityStatus
-                                                | '',
-                                            )
-                                          }
-                                        >
-                                          <option value=''>
-                                            Select status…
-                                          </option>
-                                          {DEV_NAMING_STATUS_OPTIONS.map(
-                                            (option) => (
-                                              <option
-                                                key={option.value}
-                                                value={option.value}
-                                              >
-                                                {option.label}
-                                              </option>
-                                            ),
-                                          )}
-                                        </select>
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Body
-                                        </span>
-                                        <textarea
-                                          className={
-                                            devViewPanelTextareaClassName
-                                          }
-                                          value={editNoBody}
-                                          onChange={(e) =>
-                                            setEditNoBody(e.target.value)
-                                          }
-                                          rows={3}
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Video URL (optional)
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='url'
-                                          value={editNoVideoUrl}
-                                          onChange={(e) =>
-                                            setEditNoVideoUrl(e.target.value)
-                                          }
-                                          placeholder='https://youtube.com/… or Synthesia embed'
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Image path (optional)
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='text'
-                                          value={editNoImage}
-                                          onChange={(e) =>
-                                            setEditNoImage(e.target.value)
-                                          }
-                                          placeholder='/assets/…/photo.webp'
-                                        />
-                                      </label>
-                                      <div
-                                        className={devViewPanelActionsClassName}
-                                      >
-                                        <button
-                                          type='button'
-                                          className={devViewPanelBtnVariants({
-                                            tone: 'secondary',
-                                          })}
-                                          onClick={() =>
-                                            setEditingHotspotId(null)
-                                          }
-                                          disabled={
-                                            hotspotManageStatus === 'working'
-                                          }
-                                        >
-                                          Cancel
-                                        </button>
-                                        <button
-                                          type='button'
-                                          className={devViewPanelBtnVariants({
-                                            tone: 'primary',
-                                          })}
-                                          onClick={() => void saveHotspotEdit()}
-                                          disabled={
-                                            hotspotManageStatus === 'working' ||
-                                            (!editNoTitle.trim() &&
-                                              !editNoPrice.trim() &&
-                                              !editNoStatus &&
-                                              !editNoBody.trim() &&
-                                              !editNoVideoUrl.trim() &&
-                                              !editNoImage.trim())
-                                          }
-                                        >
-                                          Save NO
-                                        </button>
-                                      </div>
-                                    </DevPanelFormGroup>
-                                  : <DevPanelFormGroup inline manageEdit>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Title
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='text'
-                                          value={editInfoTitle}
-                                          onChange={(e) =>
-                                            setEditInfoTitle(e.target.value)
-                                          }
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Display
-                                        </span>
-                                        <select
-                                          className={
-                                            devViewPanelSelectClassName
-                                          }
-                                          value={editInfoDisplay}
-                                          onChange={(e) =>
-                                            setEditInfoDisplay(
-                                              e.target.value as PopupDisplay,
-                                            )
-                                          }
-                                        >
-                                          {DEV_INFO_DISPLAY_OPTIONS.map(
-                                            (option) => (
-                                              <option
-                                                key={option.value}
-                                                value={option.value}
-                                              >
-                                                {option.label}
-                                              </option>
-                                            ),
-                                          )}
-                                        </select>
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Body
-                                        </span>
-                                        <textarea
-                                          className={
-                                            devViewPanelTextareaClassName
-                                          }
-                                          value={editInfoBody}
-                                          onChange={(e) =>
-                                            setEditInfoBody(e.target.value)
-                                          }
-                                          rows={3}
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Video URL (optional)
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='url'
-                                          value={editInfoVideoUrl}
-                                          onChange={(e) =>
-                                            setEditInfoVideoUrl(e.target.value)
-                                          }
-                                          placeholder='https://youtube.com/…'
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Image path (optional)
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='text'
-                                          value={editInfoImage}
-                                          onChange={(e) =>
-                                            setEditInfoImage(e.target.value)
-                                          }
-                                          placeholder='/assets/…/photo.webp'
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          Visit scene (optional)
-                                        </span>
-                                        <select
-                                          className={
-                                            devViewPanelSelectClassName
-                                          }
-                                          value={editInfoVisitScene}
-                                          onChange={(e) =>
-                                            setEditInfoVisitScene(
-                                              e.target.value,
-                                            )
-                                          }
-                                        >
-                                          <option value=''>None</option>
-                                          {sortedSceneOptions.map((entry) => (
-                                            <option
-                                              key={entry.id}
-                                              value={entry.id}
-                                            >
-                                              {entry.title} ({entry.id})
-                                            </option>
-                                          ))}
-                                        </select>
-                                      </label>
-                                      <div
-                                        className={devViewPanelActionsClassName}
-                                      >
-                                        <button
-                                          type='button'
-                                          className={devViewPanelBtnVariants({
-                                            tone: 'secondary',
-                                          })}
-                                          onClick={() =>
-                                            setEditingHotspotId(null)
-                                          }
-                                          disabled={
-                                            hotspotManageStatus === 'working'
-                                          }
-                                        >
-                                          Cancel
-                                        </button>
-                                        <button
-                                          type='button'
-                                          className={devViewPanelBtnVariants({
-                                            tone: 'primary',
-                                          })}
-                                          onClick={() => void saveHotspotEdit()}
-                                          disabled={
-                                            hotspotManageStatus === 'working' ||
-                                            (!editInfoTitle.trim() &&
-                                              !editInfoBody.trim() &&
-                                              !editInfoVideoUrl.trim() &&
-                                              !editInfoImage.trim())
-                                          }
-                                        >
-                                          Save info
-                                        </button>
-                                      </div>
-                                    </DevPanelFormGroup>
-
-                                : null}
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      : <p className={devViewPanelSectionHintClassName}>
-                          No hotspots on this scene yet.
-                        </p>
-                      }
-                      {hotspotManageError ?
-                        <p className={devViewPanelSectionHintClassName}>
-                          {hotspotManageError}
-                        </p>
-                      : null}
-
-                      <div className={devViewPanelManageListFooterClassName}>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'secondary',
-                          })}
-                          onClick={openCreateHotspotTab}
-                        >
-                          Add hotspot on this scene
-                        </button>
-                      </div>
-                    </DevPanelFormGroup>
-                  </>
-                : <>
-                    <p className={devViewPanelTabHintClassName}>
-                      Add nav, naming opportunity, or info hotspots from a
-                      panorama click.
-                    </p>
-                    <div className={devViewPanelTabPanelBodyClassName}>
-                      <DevPanelTertiaryTabs
-                        aria-label='Hotspot type'
-                        value={hotspotTab}
-                        onChange={setHotspotTab}
-                        tabs={DEV_HOTSPOT_TABS.map((tab) => ({
-                          id: tab.id,
-                          label: tab.label,
-                          kind: tab.id,
-                          htmlId: `dev-hotspot-tab-${tab.id}`,
-                          ariaControls: `dev-hotspot-panel-${tab.id}`,
-                        }))}
-                      />
-
-                      {hotspotTab === 'nav' ?
-                        <div
-                          id='dev-hotspot-panel-nav'
-                          role='tabpanel'
-                          aria-labelledby='dev-hotspot-tab-nav'
-                        >
-                          <DevPanelFormGroup>
-                            <div className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Marker position
-                              </span>
-                              <p className={devViewPanelSectionHintClassName}>
-                                Click the panorama for marker position —
-                                navigation to another scene.
-                              </p>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                readOnly
-                                tabIndex={-1}
-                                value={
-                                  clickCoords ?
-                                    formatViewPosition({
-                                      ...clickCoords,
-                                      zoom: 0,
-                                    })
-                                  : ''
-                                }
-                                placeholder='Click the panorama…'
-                              />
-                            </div>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Name
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={navName}
-                                onChange={(e) => setNavName(e.target.value)}
-                                placeholder='e.g. Main Entrance'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Target scene
-                              </span>
-                              <select
-                                className={devViewPanelSelectClassName}
-                                value={navTargetSceneId}
-                                onChange={(e) => {
-                                  setNavTargetTouched(true);
-                                  const nextId = e.target.value;
-                                  setNavTargetSceneId(nextId);
-                                  const matchedScene = sortedSceneOptions.find(
-                                    (entry) => entry.id === nextId,
-                                  );
-                                  if (matchedScene) {
-                                    setNavName(matchedScene.title);
-                                  }
-                                }}
-                              >
-                                <option value=''>Select scene…</option>
-                                {sortedSceneOptions.map((entry) => (
-                                  <option key={entry.id} value={entry.id}>
-                                    {entry.title} ({entry.id})
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-
-                            {otherNavTargetSceneOptions.length === 0 ?
-                              <p className={devViewPanelSectionHintClassName}>
-                                No other scenes yet — create a target scene
-                                below, then finish this nav hotspot.
-                              </p>
-                            : null}
-
-                            {showNavTargetQuickCreate ?
-                              <DevPanelFormGroup
-                                title='Create target scene'
-                                hint={
-                                  <p
-                                    className={devViewPanelSectionHintClassName}
-                                  >
-                                    Stays on this scene — marker position is
-                                    kept. New scene is selected as the nav
-                                    target.
-                                  </p>
-                                }
-                              >
-                                <label className={devViewPanelFieldClassName}>
-                                  <span
-                                    className={devViewPanelFieldLabelClassName}
-                                  >
-                                    Title
-                                  </span>
-                                  <input
-                                    className={devViewPanelInputClassName}
-                                    type='text'
-                                    value={navTargetSceneTitle}
-                                    onChange={(e) =>
-                                      setNavTargetSceneTitle(e.target.value)
-                                    }
-                                    placeholder='e.g. Main Entrance'
-                                    spellCheck={false}
-                                    autoComplete='off'
-                                  />
-                                </label>
-
-                                <label className={devViewPanelFieldClassName}>
-                                  <span
-                                    className={devViewPanelFieldLabelClassName}
-                                  >
-                                    Panorama file
-                                  </span>
-                                  <DevPanelFileField
-                                    file={navTargetSceneFile}
-                                    preview={
-                                      navTargetSceneFile ?
-                                        <DevPanoramaFilePreview
-                                          file={navTargetSceneFile}
-                                        />
-                                      : null
-                                    }
-                                    onClearPreview={() =>
-                                      setNavTargetSceneFile(null)
-                                    }
-                                    showClear={Boolean(navTargetSceneFile)}
-                                  >
-                                    <DevPanelFileInput
-                                      accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
-                                      file={navTargetSceneFile}
-                                      onChange={setNavTargetSceneFile}
-                                    />
-                                  </DevPanelFileField>
-                                </label>
-
-                                {navTargetSceneSlug ?
-                                  <p
-                                    className={devViewPanelSlugPreviewClassName}
-                                  >
-                                    id <code>{navTargetSceneSlug}</code>
-                                  </p>
-                                : null}
-
-                                {navTargetSceneError ?
-                                  <p
-                                    className={devViewPanelSectionHintClassName}
-                                  >
-                                    {navTargetSceneError}
-                                  </p>
-                                : null}
-
-                                <div className={devViewPanelActionsClassName}>
-                                  <button
-                                    type='button'
-                                    className={devViewPanelBtnVariants({
-                                      tone: 'primary',
-                                    })}
-                                    onClick={() => void createNavTargetScene()}
-                                    disabled={
-                                      !canCreateNavTargetScene ||
-                                      navTargetSceneStatus === 'working'
-                                    }
-                                  >
-                                    {navTargetSceneStatus === 'working' ?
-                                      'Creating…'
-                                    : navTargetSceneStatus === 'done' ?
-                                      'Scene created!'
-                                    : 'Create target scene'}
-                                  </button>
-                                  {otherNavTargetSceneOptions.length > 0 ?
-                                    <button
-                                      type='button'
-                                      className={devViewPanelBtnVariants({
-                                        tone: 'secondary',
-                                      })}
-                                      onClick={() => {
-                                        setNavTargetQuickCreateOpen(false);
-                                        setNavTargetSceneTitle('');
-                                        setNavTargetSceneFile(null);
-                                        setNavTargetSceneError(null);
-                                        setNavTargetSceneStatus('idle');
-                                      }}
-                                      disabled={
-                                        navTargetSceneStatus === 'working'
-                                      }
-                                    >
-                                      Cancel
-                                    </button>
-                                  : null}
-                                </div>
-                              </DevPanelFormGroup>
-                            : <button
-                                type='button'
-                                className={cn(
-                                  devViewPanelBtnVariants({
-                                    tone: 'secondary',
-                                  }),
-                                  'w-fit',
-                                )}
-                                onClick={() =>
-                                  setNavTargetQuickCreateOpen(true)
-                                }
-                              >
-                                + Create target scene
-                              </button>
-                            }
-
-                            {navHotspotIdPreview ?
-                              <p className={devViewPanelSlugPreviewClassName}>
-                                id <code>{navHotspotIdPreview}</code>
-                                {navHotspotIdPreview !== `nav-to-${navSlug}` ?
-                                  <>
-                                    {' '}
-                                    · suffix added — name slug already used on
-                                    this scene
-                                  </>
-                                : null}{' '}
-                                · copies target <code>defaultView</code> on
-                                create and save
-                              </p>
-                            : null}
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Nav role
-                              </span>
-                              <select
-                                className={devViewPanelSelectClassName}
-                                value={navVariant}
-                                onChange={(e) => {
-                                  const nextVariant = e.target
-                                    .value as NavHotspotVariant;
-                                  setNavVariant(nextVariant);
-                                  if (
-                                    nextVariant === 'back' ||
-                                    nextVariant === 'hub'
-                                  ) {
-                                    setNavInstant(true);
-                                  }
-                                  if (nextVariant === 'hub') {
-                                    setNavTargetSceneId(tour.firstScene);
-                                  }
-                                }}
-                              >
-                                {NAV_HOTSPOT_VARIANT_OPTIONS.map((option) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            <p className={devViewPanelSectionHintClassName}>
-                              {
-                                NAV_HOTSPOT_VARIANT_OPTIONS.find(
-                                  (option) => option.value === navVariant,
-                                )?.hint
-                              }
-                            </p>
-
-                            <label className={devViewPanelToggleLabelClassName}>
-                              <input
-                                className={devViewPanelToggleInputClassName}
-                                type='checkbox'
-                                checked={navInstant}
-                                onChange={(e) =>
-                                  setNavInstant(e.target.checked)
-                                }
-                              />
-                              <span className={devViewPanelToggleNameClassName}>
-                                Instant (skip preview card)
-                              </span>
-                            </label>
-
-                            <div className={devViewPanelActionsClassName}>
-                              <button
-                                type='button'
-                                className={devViewPanelBtnVariants({
-                                  tone: 'primary',
-                                })}
-                                onClick={() => void createNavHotspot()}
-                                disabled={
-                                  !canCreateNav || navStatus === 'working'
-                                }
-                              >
-                                {navStatus === 'working' ?
-                                  'Creating…'
-                                : navStatus === 'done' ?
-                                  'Nav created!'
-                                : 'Create nav'}
-                              </button>
-                            </div>
-                            {navError ?
-                              <p className={devViewPanelSectionHintClassName}>
-                                {navError}
-                              </p>
-                            : null}
-                          </DevPanelFormGroup>
-                        </div>
-                      : hotspotTab === 'naming' ?
-                        <div
-                          id='dev-hotspot-panel-naming'
-                          role='tabpanel'
-                          aria-labelledby='dev-hotspot-tab-naming'
-                        >
-                          <DevPanelFormGroup>
-                            <div className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Marker position
-                              </span>
-                              <p className={devViewPanelSectionHintClassName}>
-                                Click the panorama for marker position — naming
-                                opportunity popup on this scene.
-                              </p>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                readOnly
-                                tabIndex={-1}
-                                value={
-                                  clickCoords ?
-                                    formatViewPosition({
-                                      ...clickCoords,
-                                      zoom: 0,
-                                    })
-                                  : ''
-                                }
-                                placeholder='Click the panorama…'
-                              />
-                            </div>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Name
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={noName}
-                                onChange={(e) => setNoName(e.target.value)}
-                                placeholder='e.g. Parking Lot'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Price
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={noPrice}
-                                onChange={(e) => setNoPrice(e.target.value)}
-                                placeholder='e.g. 75000'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Status
-                              </span>
-                              <select
-                                className={devViewPanelSelectClassName}
-                                value={noStatus}
-                                onChange={(e) =>
-                                  setNoStatus(
-                                    e.target.value as
-                                      | NamingOpportunityStatus
-                                      | '',
-                                  )
-                                }
-                              >
-                                <option value=''>Select status…</option>
-                                {DEV_NAMING_STATUS_OPTIONS.map((option) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Body (optional)
-                              </span>
-                              <textarea
-                                className={devViewPanelTextareaClassName}
-                                value={noBody}
-                                onChange={(e) => setNoBody(e.target.value)}
-                                placeholder='Leave empty for placeholder copy from the title…'
-                                rows={3}
-                                spellCheck={true}
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Video URL (optional)
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='url'
-                                value={noVideoUrl}
-                                onChange={(e) => setNoVideoUrl(e.target.value)}
-                                placeholder='https://youtube.com/… or Synthesia embed'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Image path (optional)
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={noImage}
-                                onChange={(e) => setNoImage(e.target.value)}
-                                placeholder='/assets/…/photo.webp'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            {noHotspotIdPreview ?
-                              <p className={devViewPanelSlugPreviewClassName}>
-                                id <code>{noHotspotIdPreview}</code>
-                                {noHotspotIdPreview !== `info-${noSlug}` ?
-                                  <>
-                                    {' '}
-                                    · suffix added — name slug already used on
-                                    this scene
-                                  </>
-                                : null}{' '}
-                                · deep link{' '}
-                                <code>
-                                  ?no=
-                                  {noHotspotIdPreview.replace(/^info-/, '')}
-                                </code>
-                              </p>
-                            : null}
-
-                            <div className={devViewPanelActionsClassName}>
-                              <button
-                                type='button'
-                                className={devViewPanelBtnVariants({
-                                  tone: 'primary',
-                                })}
-                                onClick={() => void createNamingHotspot()}
-                                disabled={
-                                  !canCreateNaming || namingStatus === 'working'
-                                }
-                              >
-                                {namingStatus === 'working' ?
-                                  'Creating…'
-                                : namingStatus === 'done' ?
-                                  'NO created!'
-                                : 'Create NO'}
-                              </button>
-                            </div>
-                            {namingError ?
-                              <p className={devViewPanelSectionHintClassName}>
-                                {namingError}
-                              </p>
-                            : null}
-                          </DevPanelFormGroup>
-                        </div>
-                      : <div
-                          id='dev-hotspot-panel-info'
-                          role='tabpanel'
-                          aria-labelledby='dev-hotspot-tab-info'
-                        >
-                          <DevPanelFormGroup>
-                            <div className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Marker position
-                              </span>
-                              <p className={devViewPanelSectionHintClassName}>
-                                Click the panorama for marker position — general
-                                info popup (not a naming opportunity).
-                              </p>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                readOnly
-                                tabIndex={-1}
-                                value={
-                                  clickCoords ?
-                                    formatViewPosition({
-                                      ...clickCoords,
-                                      zoom: 0,
-                                    })
-                                  : ''
-                                }
-                                placeholder='Click the panorama…'
-                              />
-                            </div>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Title
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={infoName}
-                                onChange={(e) => setInfoName(e.target.value)}
-                                placeholder='e.g. Welcome Desk'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Display
-                              </span>
-                              <select
-                                className={devViewPanelSelectClassName}
-                                value={infoDisplay}
-                                onChange={(e) =>
-                                  setInfoDisplay(e.target.value as PopupDisplay)
-                                }
-                              >
-                                {DEV_INFO_DISPLAY_OPTIONS.map((option) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Body (optional)
-                              </span>
-                              <textarea
-                                className={devViewPanelTextareaClassName}
-                                value={infoBody}
-                                onChange={(e) => setInfoBody(e.target.value)}
-                                placeholder='Leave empty for placeholder copy from the title…'
-                                rows={3}
-                                spellCheck={true}
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Video URL (optional)
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='url'
-                                value={infoVideoUrl}
-                                onChange={(e) =>
-                                  setInfoVideoUrl(e.target.value)
-                                }
-                                placeholder='https://youtube.com/…'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Image path (optional)
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={infoImage}
-                                onChange={(e) => setInfoImage(e.target.value)}
-                                placeholder='/assets/…/photo.webp'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Visit scene (optional)
-                              </span>
-                              <select
-                                className={devViewPanelSelectClassName}
-                                value={infoVisitScene}
-                                onChange={(e) =>
-                                  setInfoVisitScene(e.target.value)
-                                }
-                              >
-                                <option value=''>None</option>
-                                {sortedSceneOptions.map((entry) => (
-                                  <option key={entry.id} value={entry.id}>
-                                    {entry.title} ({entry.id})
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-
-                            {infoHotspotIdPreview ?
-                              <p className={devViewPanelSlugPreviewClassName}>
-                                id <code>{infoHotspotIdPreview}</code>
-                                {infoHotspotIdPreview !== `info-${infoSlug}` ?
-                                  <>
-                                    {' '}
-                                    · suffix added — name slug already used on
-                                    this scene
-                                  </>
-                                : null}
-                              </p>
-                            : null}
-
-                            <div className={devViewPanelActionsClassName}>
-                              <button
-                                type='button'
-                                className={devViewPanelBtnVariants({
-                                  tone: 'primary',
-                                })}
-                                onClick={() => void createInfoHotspotHandler()}
-                                disabled={
-                                  !canCreateInfo || infoStatus === 'working'
-                                }
-                              >
-                                {infoStatus === 'working' ?
-                                  'Creating…'
-                                : infoStatus === 'done' ?
-                                  'Info created!'
-                                : 'Create info'}
-                              </button>
-                            </div>
-                            {infoError ?
-                              <p className={devViewPanelSectionHintClassName}>
-                                {infoError}
-                              </p>
-                            : null}
-                          </DevPanelFormGroup>
-                        </div>
-                      }
+                    <div className={devViewPanelActionsClassName}>
+                      <button
+                        type='button'
+                        className={devViewPanelBtnVariants({ tone: 'primary' })}
+                        onClick={() => void replacePanorama()}
+                        disabled={
+                          !canReplacePanorama ||
+                          replacePanoramaStatus === 'working'
+                        }
+                      >
+                        {replacePanoramaStatus === 'working' ?
+                          'Replacing…'
+                        : replacePanoramaStatus === 'done' ?
+                          'Replaced!'
+                        : 'Replace panorama'}
+                      </button>
                     </div>
-                  </>
-                }
+                  </DevPanelFormGroup>
+                : null}
               </DevPanelSection>
+              {renderHotspotDevSection()}
             </DevPanelSectionAccordion>
           </div>
         : panelTab === 'client' ?
@@ -4129,6 +4756,16 @@ export function DevViewPanel({
             className={devViewPanelTabPanelClassName}
           >
             <DevPanelSectionAccordion>
+              {isModel3dTour ?
+                <>
+                  {renderHotspotDevSection()}
+                  {renderScenesDevSection()}
+                </>
+              : <>
+                  {renderScenesDevSection()}
+                  {renderHotspotDevSection()}
+                </>
+              }
               <DevPanelSection
                 title='Tour'
                 description='Edit the open tour or create a new one under a client.'
@@ -4876,116 +5513,120 @@ export function DevViewPanel({
                 }
               </DevPanelSection>
 
-              <DevPanelSection
-                title='Floor plan'
-                description={
-                  <>
-                    <p className={devViewPanelSectionLeadClassName}>
-                      Tour-level minimap image and coordinate space for scene{' '}
-                      <code>map</code> pins.
-                    </p>
-                    {tour.floorPlan ?
-                      <p className={devViewPanelSectionHintClassName}>
-                        Current: <code>{tour.floorPlan.image}</code> ·{' '}
-                        {tour.floorPlan.width}×{tour.floorPlan.height}
+              {!isModel3dTour ?
+                <DevPanelSection
+                  title='Floor plan'
+                  description={
+                    <>
+                      <p className={devViewPanelSectionLeadClassName}>
+                        Tour-level minimap image and coordinate space for scene{' '}
+                        <code>map</code> pins.
                       </p>
-                    : <p className={devViewPanelSectionHintClassName}>
-                        No floor plan configured yet.
-                      </p>
-                    }
-                  </>
-                }
-              >
-                <DevPanelFormGroup hint='Raster images auto-detect dimensions. SVG needs width/height here (or a viewBox in the file).'>
-                  <label className={devViewPanelFieldClassName}>
-                    <span className={devViewPanelFieldLabelClassName}>
-                      Floor plan image
-                    </span>
-                    <DevPanelFileField
-                      file={floorPlanFile}
-                      preview={
-                        <DevLocalFilePreview
-                          file={floorPlanFile}
-                          className={devViewPanelBrandLogoClassName}
-                          alt='Floor plan preview'
-                        />
+                      {tour.floorPlan ?
+                        <p className={devViewPanelSectionHintClassName}>
+                          Current: <code>{tour.floorPlan.image}</code> ·{' '}
+                          {tour.floorPlan.width}×{tour.floorPlan.height}
+                        </p>
+                      : <p className={devViewPanelSectionHintClassName}>
+                          No floor plan configured yet.
+                        </p>
                       }
-                      onClearPreview={() => setFloorPlanFile(null)}
-                      showClear={Boolean(floorPlanFile)}
-                    >
-                      <DevPanelFileInput
-                        accept='image/svg+xml,image/png,image/jpeg,image/webp,.svg,.png,.jpg,.jpeg,.webp'
+                    </>
+                  }
+                >
+                  <DevPanelFormGroup hint='Raster images auto-detect dimensions. SVG needs width/height here (or a viewBox in the file).'>
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Floor plan image
+                      </span>
+                      <DevPanelFileField
                         file={floorPlanFile}
-                        onChange={setFloorPlanFile}
-                      />
-                    </DevPanelFileField>
-                  </label>
-
-                  <DevPanelFormRow>
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Width
-                      </span>
-                      <input
-                        className={devViewPanelInputClassName}
-                        type='number'
-                        min='1'
-                        step='1'
-                        value={floorPlanWidth}
-                        onChange={(e) => setFloorPlanWidth(e.target.value)}
-                        placeholder='324'
-                      />
+                        preview={
+                          <DevLocalFilePreview
+                            file={floorPlanFile}
+                            className={devViewPanelBrandLogoClassName}
+                            alt='Floor plan preview'
+                          />
+                        }
+                        onClearPreview={() => setFloorPlanFile(null)}
+                        showClear={Boolean(floorPlanFile)}
+                      >
+                        <DevPanelFileInput
+                          accept='image/svg+xml,image/png,image/jpeg,image/webp,.svg,.png,.jpg,.jpeg,.webp'
+                          file={floorPlanFile}
+                          onChange={setFloorPlanFile}
+                        />
+                      </DevPanelFileField>
                     </label>
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Height
-                      </span>
-                      <input
-                        className={devViewPanelInputClassName}
-                        type='number'
-                        min='1'
-                        step='1'
-                        value={floorPlanHeight}
-                        onChange={(e) => setFloorPlanHeight(e.target.value)}
-                        placeholder='216'
-                      />
-                    </label>
-                  </DevPanelFormRow>
 
-                  {floorPlanError ?
-                    <p className={devViewPanelSectionHintClassName}>
-                      {floorPlanError}
-                    </p>
-                  : null}
+                    <DevPanelFormRow>
+                      <label className={devViewPanelFieldClassName}>
+                        <span className={devViewPanelFieldLabelClassName}>
+                          Width
+                        </span>
+                        <input
+                          className={devViewPanelInputClassName}
+                          type='number'
+                          min='1'
+                          step='1'
+                          value={floorPlanWidth}
+                          onChange={(e) => setFloorPlanWidth(e.target.value)}
+                          placeholder='324'
+                        />
+                      </label>
+                      <label className={devViewPanelFieldClassName}>
+                        <span className={devViewPanelFieldLabelClassName}>
+                          Height
+                        </span>
+                        <input
+                          className={devViewPanelInputClassName}
+                          type='number'
+                          min='1'
+                          step='1'
+                          value={floorPlanHeight}
+                          onChange={(e) => setFloorPlanHeight(e.target.value)}
+                          placeholder='216'
+                        />
+                      </label>
+                    </DevPanelFormRow>
 
-                  <div className={devViewPanelActionsClassName}>
-                    <button
-                      type='button'
-                      className={devViewPanelBtnVariants({ tone: 'primary' })}
-                      onClick={() => void saveFloorPlan()}
-                      disabled={
-                        !canSaveFloorPlan || floorPlanStatus === 'working'
-                      }
-                    >
-                      {floorPlanStatus === 'working' ?
-                        'Saving…'
-                      : floorPlanStatus === 'done' ?
-                        'Floor plan saved!'
-                      : 'Save floor plan'}
-                    </button>
-                    {canClearFloorPlan ?
+                    {floorPlanError ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        {floorPlanError}
+                      </p>
+                    : null}
+
+                    <div className={devViewPanelActionsClassName}>
                       <button
                         type='button'
-                        className={devViewPanelBtnVariants({ tone: 'danger' })}
-                        onClick={() => void clearFloorPlan()}
-                        disabled={floorPlanStatus === 'working'}
+                        className={devViewPanelBtnVariants({ tone: 'primary' })}
+                        onClick={() => void saveFloorPlan()}
+                        disabled={
+                          !canSaveFloorPlan || floorPlanStatus === 'working'
+                        }
                       >
-                        Remove floor plan
+                        {floorPlanStatus === 'working' ?
+                          'Saving…'
+                        : floorPlanStatus === 'done' ?
+                          'Floor plan saved!'
+                        : 'Save floor plan'}
                       </button>
-                    : null}
-                  </div>
-                </DevPanelFormGroup>
-              </DevPanelSection>
+                      {canClearFloorPlan ?
+                        <button
+                          type='button'
+                          className={devViewPanelBtnVariants({
+                            tone: 'danger',
+                          })}
+                          onClick={() => void clearFloorPlan()}
+                          disabled={floorPlanStatus === 'working'}
+                        >
+                          Remove floor plan
+                        </button>
+                      : null}
+                    </div>
+                  </DevPanelFormGroup>
+                </DevPanelSection>
+              : null}
 
               <DevPanelSection
                 title='Knowledge (AI assistant)'
@@ -5278,517 +5919,6 @@ export function DevViewPanel({
                     </div>
                   </div>
                 </DevPanelFormGroup>
-              </DevPanelSection>
-
-              <DevPanelSection
-                title='Scenes'
-                description='Open and edit tour scenes, or upload a new panorama.'
-              >
-                <div
-                  className={devViewPanelSecondaryTabsClassName}
-                  role='tablist'
-                  aria-label='Scene actions'
-                >
-                  {DEV_CRUD_MODE_TABS.map((tab) => (
-                    <button
-                      key={tab.id}
-                      type='button'
-                      role='tab'
-                      id={`dev-scene-mode-tab-${tab.id}`}
-                      aria-selected={sceneModeTab === tab.id}
-                      aria-controls={`dev-scene-mode-panel-${tab.id}`}
-                      className={devViewPanelTabVariants({
-                        depth: 'secondary',
-                        kind: tab.id,
-                        active: sceneModeTab === tab.id,
-                      })}
-                      onClick={() => setSceneModeTab(tab.id)}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-
-                {sceneModeTab === 'manage' ?
-                  <>
-                    <p className={devViewPanelTabHintClassName}>
-                      Open scenes on this tour, edit metadata, or delete.
-                    </p>
-                    <DevPanelFormGroup>
-                      {tourScenes.length > 0 ?
-                        <ul className={devViewPanelManageListClassName}>
-                          {tourScenes.map((entry) => {
-                            const isCurrent = entry.id === scene.id;
-                            const isFirst = entry.id === tour.firstScene;
-                            const isEditing = editingSceneId === entry.id;
-                            const canDelete = entry.id !== tour.firstScene;
-
-                            return (
-                              <li
-                                key={entry.id}
-                                className={cn(
-                                  devViewPanelManageListItemClassName,
-                                  (isEditing || isCurrent) &&
-                                    devViewPanelManageListItemActiveClassName,
-                                )}
-                              >
-                                <div
-                                  className={
-                                    devViewPanelManageListItemHeadClassName
-                                  }
-                                >
-                                  <div
-                                    className={
-                                      devViewPanelManageListItemHeadMainClassName
-                                    }
-                                  >
-                                    <span
-                                      className={
-                                        devViewPanelManageListItemTitleClassName
-                                      }
-                                    >
-                                      {entry.title}
-                                    </span>
-                                    <span
-                                      className={
-                                        devViewPanelManageListItemBulletClassName
-                                      }
-                                      aria-hidden='true'
-                                    >
-                                      ·
-                                    </span>
-                                    <code
-                                      className={
-                                        devViewPanelManageListItemIdClassName
-                                      }
-                                    >
-                                      {entry.id}
-                                    </code>
-                                  </div>
-                                  {isFirst || isCurrent ?
-                                    <div
-                                      className={
-                                        devViewPanelManageListItemBadgesClassName
-                                      }
-                                    >
-                                      {isFirst ?
-                                        <Badge
-                                          variant='fill'
-                                          size='sm'
-                                          tone='none'
-                                          className={devSceneManageBadgeVariants(
-                                            { kind: 'first' },
-                                          )}
-                                        >
-                                          First
-                                        </Badge>
-                                      : null}
-                                      {isCurrent ?
-                                        <Badge
-                                          variant='fill'
-                                          size='sm'
-                                          tone='none'
-                                          className={devSceneManageBadgeVariants(
-                                            { kind: 'current' },
-                                          )}
-                                        >
-                                          Current
-                                        </Badge>
-                                      : null}
-                                    </div>
-                                  : null}
-                                </div>
-                                {entry.description ?
-                                  <p
-                                    className={
-                                      devViewPanelManageListItemDescClassName
-                                    }
-                                    title={entry.description}
-                                  >
-                                    {entry.description}
-                                  </p>
-                                : null}
-                                <div className={devViewPanelActionsClassName}>
-                                  <button
-                                    type='button'
-                                    className={devViewPanelBtnVariants({
-                                      tone: 'secondary',
-                                    })}
-                                    onClick={() => void openTourScene(entry.id)}
-                                    disabled={sceneManageStatus === 'working'}
-                                  >
-                                    Open
-                                  </button>
-                                  <button
-                                    type='button'
-                                    className={devViewPanelBtnVariants({
-                                      tone: 'secondary',
-                                    })}
-                                    onClick={() => startEditScene(entry)}
-                                    disabled={
-                                      sceneManageStatus === 'working' ||
-                                      isEditing
-                                    }
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    type='button'
-                                    className={devViewPanelBtnVariants({
-                                      tone: 'danger',
-                                    })}
-                                    onClick={() =>
-                                      void deleteTourScene(entry.id)
-                                    }
-                                    disabled={
-                                      !canDelete ||
-                                      sceneManageStatus === 'working'
-                                    }
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-
-                                {isEditing ?
-                                  <DevPanelFormGroup inline manageEdit>
-                                    <label
-                                      className={devViewPanelFieldClassName}
-                                    >
-                                      <span
-                                        className={
-                                          devViewPanelFieldLabelClassName
-                                        }
-                                      >
-                                        Title
-                                      </span>
-                                      <input
-                                        className={devViewPanelInputClassName}
-                                        type='text'
-                                        value={editSceneTitle}
-                                        onChange={(e) =>
-                                          setEditSceneTitle(e.target.value)
-                                        }
-                                      />
-                                    </label>
-                                    <label
-                                      className={devViewPanelFieldClassName}
-                                    >
-                                      <span
-                                        className={
-                                          devViewPanelFieldLabelClassName
-                                        }
-                                      >
-                                        Description
-                                      </span>
-                                      <textarea
-                                        className={
-                                          devViewPanelTextareaClassName
-                                        }
-                                        value={editSceneDescription}
-                                        onChange={(e) =>
-                                          setEditSceneDescription(
-                                            e.target.value,
-                                          )
-                                        }
-                                        rows={2}
-                                        placeholder='Optional — leave empty to remove'
-                                      />
-                                    </label>
-                                    <div
-                                      className={
-                                        devViewPanelToggleListClassName
-                                      }
-                                    >
-                                      {!isFirst ?
-                                        <label
-                                          className={
-                                            devViewPanelToggleLabelClassName
-                                          }
-                                        >
-                                          <input
-                                            type='checkbox'
-                                            className={
-                                              devViewPanelToggleInputClassName
-                                            }
-                                            checked={editSceneAsFirst}
-                                            onChange={(e) =>
-                                              setEditSceneAsFirst(
-                                                e.currentTarget.checked,
-                                              )
-                                            }
-                                          />
-                                          <span
-                                            className={
-                                              devViewPanelToggleTextClassName
-                                            }
-                                          >
-                                            Set as firstScene
-                                          </span>
-                                        </label>
-                                      : null}
-                                      <label
-                                        className={
-                                          devViewPanelToggleLabelClassName
-                                        }
-                                      >
-                                        <input
-                                          type='checkbox'
-                                          className={
-                                            devViewPanelToggleInputClassName
-                                          }
-                                          checked={editSceneMapEnabled}
-                                          onChange={(e) =>
-                                            setEditSceneMapEnabled(
-                                              e.currentTarget.checked,
-                                            )
-                                          }
-                                        />
-                                        <span
-                                          className={
-                                            devViewPanelToggleTextClassName
-                                          }
-                                        >
-                                          Floor plan map position
-                                        </span>
-                                      </label>
-                                    </div>
-                                    {editSceneMapEnabled ?
-                                      <DevPanelFormRow cols={3}>
-                                        <label
-                                          className={devViewPanelFieldClassName}
-                                        >
-                                          <span
-                                            className={
-                                              devViewPanelFieldLabelClassName
-                                            }
-                                          >
-                                            Map X (0–1)
-                                          </span>
-                                          <input
-                                            className={
-                                              devViewPanelInputClassName
-                                            }
-                                            type='number'
-                                            min='0'
-                                            max='1'
-                                            step='0.001'
-                                            value={editSceneMapX}
-                                            onChange={(e) =>
-                                              setEditSceneMapX(e.target.value)
-                                            }
-                                          />
-                                        </label>
-                                        <label
-                                          className={devViewPanelFieldClassName}
-                                        >
-                                          <span
-                                            className={
-                                              devViewPanelFieldLabelClassName
-                                            }
-                                          >
-                                            Map Y (0–1)
-                                          </span>
-                                          <input
-                                            className={
-                                              devViewPanelInputClassName
-                                            }
-                                            type='number'
-                                            min='0'
-                                            max='1'
-                                            step='0.001'
-                                            value={editSceneMapY}
-                                            onChange={(e) =>
-                                              setEditSceneMapY(e.target.value)
-                                            }
-                                          />
-                                        </label>
-                                        <label
-                                          className={devViewPanelFieldClassName}
-                                        >
-                                          <span
-                                            className={
-                                              devViewPanelFieldLabelClassName
-                                            }
-                                          >
-                                            Map heading (°)
-                                          </span>
-                                          <input
-                                            className={
-                                              devViewPanelInputClassName
-                                            }
-                                            type='number'
-                                            step='0.1'
-                                            value={editSceneMapHeading}
-                                            onChange={(e) =>
-                                              setEditSceneMapHeading(
-                                                e.target.value,
-                                              )
-                                            }
-                                          />
-                                        </label>
-                                      </DevPanelFormRow>
-                                    : null}
-                                    <div
-                                      className={devViewPanelActionsClassName}
-                                    >
-                                      <button
-                                        type='button'
-                                        className={devViewPanelBtnVariants({
-                                          tone: 'secondary',
-                                        })}
-                                        onClick={() => setEditingSceneId(null)}
-                                        disabled={
-                                          sceneManageStatus === 'working'
-                                        }
-                                      >
-                                        Cancel
-                                      </button>
-                                      <button
-                                        type='button'
-                                        className={devViewPanelBtnVariants({
-                                          tone: 'primary',
-                                        })}
-                                        onClick={() => void saveSceneEdit()}
-                                        disabled={
-                                          sceneManageStatus === 'working' ||
-                                          !editSceneTitle.trim()
-                                        }
-                                      >
-                                        Save scene
-                                      </button>
-                                    </div>
-                                  </DevPanelFormGroup>
-                                : null}
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      : <p className={devViewPanelSectionHintClassName}>
-                          No scenes on this tour yet.
-                        </p>
-                      }
-                      {sceneManageError ?
-                        <p className={devViewPanelSectionHintClassName}>
-                          {sceneManageError}
-                        </p>
-                      : null}
-
-                      <div className={devViewPanelManageListFooterClassName}>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'secondary',
-                          })}
-                          onClick={openCreateSceneTab}
-                        >
-                          Add scene to this tour
-                        </button>
-                      </div>
-                    </DevPanelFormGroup>
-                  </>
-                : <>
-                    <p className={devViewPanelTabHintClassName}>
-                      Upload a panorama — title becomes scene id, image converts
-                      to{' '}
-                      <code>
-                        assets/&lt;client&gt;/{currentTourId}
-                        /panoramas/&lt;id&gt;.webp
-                      </code>{' '}
-                      automatically.
-                    </p>
-                    <DevPanelFormGroup>
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Title
-                        </span>
-                        <input
-                          className={devViewPanelInputClassName}
-                          type='text'
-                          value={sceneTitle}
-                          onChange={(e) => setSceneTitle(e.target.value)}
-                          placeholder='e.g. Main Entrance'
-                          spellCheck={false}
-                          autoComplete='off'
-                        />
-                      </label>
-
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Panorama file
-                        </span>
-                        <DevPanelFileField
-                          file={scenePanoramaFile}
-                          preview={
-                            <DevPanoramaFilePreview file={scenePanoramaFile} />
-                          }
-                          onClearPreview={() => setScenePanoramaFile(null)}
-                          showClear={Boolean(scenePanoramaFile)}
-                        >
-                          <DevPanelFileInput
-                            accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
-                            file={scenePanoramaFile}
-                            onChange={setScenePanoramaFile}
-                          />
-                        </DevPanelFileField>
-                      </label>
-
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Description (optional)
-                        </span>
-                        <textarea
-                          className={devViewPanelTextareaClassName}
-                          value={sceneDescription}
-                          onChange={(e) => setSceneDescription(e.target.value)}
-                          rows={2}
-                          spellCheck={true}
-                        />
-                      </label>
-
-                      {sceneSlug ?
-                        <p className={devViewPanelSlugPreviewClassName}>
-                          id <code>{sceneSlug}</code> ·{' '}
-                          <code>
-                            {buildDefaultPanoramaRelativePath(sceneSlug)}
-                          </code>
-                          {view ?
-                            <> · defaultView {formatViewPosition(view)}</>
-                          : ' · defaultView 0, 0, 17'}
-                        </p>
-                      : null}
-                      {scenePanoramaAutoPath ?
-                        <p className={devViewPanelSectionHintClassName}>
-                          saves to <code>{scenePanoramaAutoPath}</code>
-                        </p>
-                      : null}
-
-                      {sceneError ?
-                        <p className={devViewPanelSectionHintClassName}>
-                          {sceneError}
-                        </p>
-                      : null}
-
-                      <div className={devViewPanelActionsClassName}>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'primary',
-                          })}
-                          onClick={() => void createScene()}
-                          disabled={
-                            !canCreateScene || sceneStatus === 'working'
-                          }
-                        >
-                          {sceneStatus === 'working' ?
-                            'Creating…'
-                          : sceneStatus === 'done' ?
-                            'Created!'
-                          : 'Create scene'}
-                        </button>
-                      </div>
-                    </DevPanelFormGroup>
-                  </>
-                }
               </DevPanelSection>
             </DevPanelSectionAccordion>
           </div>

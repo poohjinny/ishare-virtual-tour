@@ -1,6 +1,18 @@
 {
   "tours": [
     {
+      "id": "3d-demo",
+      "name": "3D Walkthrough Demo",
+      "clientName": "iShare Demos",
+      "firstScene": "sponza",
+      "scenes": [
+        {
+          "id": "sponza",
+          "title": "Sponza Atrium"
+        }
+      ]
+    },
+    {
       "id": "cancer-research",
       "name": "Cancer Research",
       "clientName": "Cancer Research Society",
@@ -13,6 +25,26 @@
         {
           "id": "reception",
           "title": "Reception"
+        }
+      ]
+    },
+    {
+      "id": "3d-room",
+      "name": "Cozy Room",
+      "clientName": "iShare Demos",
+      "firstScene": "living-area",
+      "scenes": [
+        {
+          "id": "bedroom",
+          "title": "Bedroom"
+        },
+        {
+          "id": "living-area",
+          "title": "Living Area"
+        },
+        {
+          "id": "workspace",
+          "title": "Workspace"
         }
       ]
     },
@@ -57,6 +89,18 @@
         {
           "id": "reception",
           "title": "Reception"
+        }
+      ]
+    },
+    {
+      "id": "london-skyscraper",
+      "name": "London Skyscraper",
+      "clientName": "iShare Demos",
+      "firstScene": "exterior",
+      "scenes": [
+        {
+          "id": "exterior",
+          "title": "Exterior View"
         }
       ]
     },
@@ -133,6 +177,18 @@
         {
           "id": "overview",
           "title": "Overview"
+        }
+      ]
+    },
+    {
+      "id": "3d-qch",
+      "name": "QCH Unreal (SketchUp)",
+      "clientName": "iShare Demos",
+      "firstScene": "scene",
+      "scenes": [
+        {
+          "id": "scene",
+          "title": "QCH Unreal"
         }
       ]
     },

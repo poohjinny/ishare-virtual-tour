@@ -12,6 +12,8 @@ import {
   deleteScene,
   readTourJson,
   replaceScenePanorama,
+  replaceTourModel,
+  assertModelUploadFileName,
   resolveTourJsonPath,
   updateHotspotPosition,
   updateInfoHotspot,
@@ -19,7 +21,7 @@ import {
   updateNamingHotspot,
   updateScene,
 } from '../lib/tourSceneDev.mjs';
-import { createTour, listCatalogClients } from '../lib/tourCreateDev.mjs';
+import { normalizeNamingPriceStorage } from '../lib/namingPrice.mjs';
 import { createClient, updateClient } from '../lib/clientDev.mjs';
 import { updateTour, findCatalogTourEntry } from '../lib/tourUpdateDev.mjs';
 import {
@@ -42,6 +44,7 @@ import {
   validateUpdateKnowledgePayload,
   buildKnowledgeStub,
 } from '../lib/tourKnowledgeDev.mjs';
+import { createTour, listCatalogClients } from '../lib/tourCreateDev.mjs';
 
 const RESERVED_TOUR_API_IDS = new Set([
   'create',
@@ -88,6 +91,14 @@ function validateScenePayload(body) {
   ) {
     throw new Error('defaultView.yaw and defaultView.pitch must be numbers');
   }
+  if (
+    defaultView.target &&
+    (typeof defaultView.target.x !== 'number' ||
+      typeof defaultView.target.y !== 'number' ||
+      typeof defaultView.target.z !== 'number')
+  ) {
+    throw new Error('defaultView.target must have numeric x, y, z');
+  }
   return { tourId, sceneId, defaultView };
 }
 
@@ -96,8 +107,14 @@ function validateHotspotPayload(body) {
   if (!tourId || !sceneId || !name || !position) {
     throw new Error('tourId, sceneId, name, and position are required');
   }
-  if (typeof position.yaw !== 'number' || typeof position.pitch !== 'number') {
-    throw new Error('position.yaw and position.pitch must be numbers');
+  const isView =
+    typeof position.yaw === 'number' && typeof position.pitch === 'number';
+  const isWorld =
+    typeof position.x === 'number' &&
+    typeof position.y === 'number' &&
+    typeof position.z === 'number';
+  if (!isView && !isWorld) {
+    throw new Error('position must have {yaw, pitch} or {x, y, z}');
   }
   return {
     tourId,
@@ -113,21 +130,22 @@ function validateHotspotPayload(body) {
   };
 }
 
-function validateCreateScenePayload(body) {
+function validateCreateScenePayload(body, toursDir) {
   const {
     tourId,
     title,
     panoramaFileBase64,
     panoramaFileName,
+    modelFileBase64,
+    modelFileName,
+    thumbnailFileBase64,
+    thumbnailFileName,
     defaultView,
     description,
     sceneId,
   } = body ?? {};
   if (!tourId || !title) {
     throw new Error('tourId and title are required');
-  }
-  if (!panoramaFileBase64) {
-    throw new Error('panoramaFile is required');
   }
   if (
     defaultView &&
@@ -136,17 +154,75 @@ function validateCreateScenePayload(body) {
   ) {
     throw new Error('defaultView.yaw and defaultView.pitch must be numbers');
   }
+  if (
+    defaultView?.target &&
+    (typeof defaultView.target.x !== 'number' ||
+      typeof defaultView.target.y !== 'number' ||
+      typeof defaultView.target.z !== 'number')
+  ) {
+    throw new Error('defaultView.target must have numeric x, y, z');
+  }
 
-  assertPanoramaUploadFileName(panoramaFileName);
-  const panoramaFileBuffer = Buffer.from(panoramaFileBase64, 'base64');
-  if (!panoramaFileBuffer.length) {
-    throw new Error('Panorama file is empty');
+  const tour = readTourJson(resolveTourJsonPath(toursDir, tourId));
+  const isModel3d = tour.viewerType === 'model3d';
+
+  let panoramaFileBuffer;
+  let modelFileBuffer;
+  let thumbnailFileBuffer;
+
+  if (isModel3d) {
+    if (modelFileBase64) {
+      assertModelUploadFileName(modelFileName);
+      modelFileBuffer = Buffer.from(modelFileBase64, 'base64');
+      if (!modelFileBuffer.length) {
+        throw new Error('Model file is empty');
+      }
+    } else if (!tour.model?.trim()) {
+      throw new Error(
+        'Tour has no model — upload a GLB when creating the tour, or pass modelFile once',
+      );
+    }
+    if (!defaultView) {
+      throw new Error(
+        'defaultView is required for model3d scenes — orbit to the desired viewpoint in the viewer first',
+      );
+    }
+    if (
+      typeof defaultView.yaw !== 'number' ||
+      typeof defaultView.pitch !== 'number'
+    ) {
+      throw new Error('defaultView.yaw and defaultView.pitch must be numbers');
+    }
+    if (!thumbnailFileBase64) {
+      throw new Error(
+        'thumbnailFile is required for model3d scenes — capture from the viewer or upload a card image',
+      );
+    }
+    if (thumbnailFileBase64) {
+      assertPanoramaUploadFileName(thumbnailFileName);
+      thumbnailFileBuffer = Buffer.from(thumbnailFileBase64, 'base64');
+      if (!thumbnailFileBuffer.length) {
+        throw new Error('Thumbnail file is empty');
+      }
+    }
+  } else {
+    if (!panoramaFileBase64) {
+      throw new Error('panoramaFile is required');
+    }
+    assertPanoramaUploadFileName(panoramaFileName);
+    panoramaFileBuffer = Buffer.from(panoramaFileBase64, 'base64');
+    if (!panoramaFileBuffer.length) {
+      throw new Error('Panorama file is empty');
+    }
   }
 
   return {
     tourId,
     title,
     panoramaFileBuffer,
+    modelFileBuffer,
+    modelFileName,
+    thumbnailFileBuffer,
     defaultView,
     description,
     sceneId,
@@ -166,8 +242,14 @@ function validateHotspotPositionPayload(body) {
   if (!tourId || !sceneId || !hotspotId?.trim() || !position) {
     throw new Error('tourId, sceneId, hotspotId, and position are required');
   }
-  if (typeof position.yaw !== 'number' || typeof position.pitch !== 'number') {
-    throw new Error('position.yaw and position.pitch must be numbers');
+  const isView =
+    typeof position.yaw === 'number' && typeof position.pitch === 'number';
+  const isWorld =
+    typeof position.x === 'number' &&
+    typeof position.y === 'number' &&
+    typeof position.z === 'number';
+  if (!isView && !isWorld) {
+    throw new Error('position must have {yaw, pitch} or {x, y, z}');
   }
   return { tourId, sceneId, hotspotId: hotspotId.trim(), position };
 }
@@ -188,6 +270,24 @@ function validateReplacePanoramaPayload(body) {
   }
 
   return { tourId, sceneId, panoramaFileBuffer };
+}
+
+function validateReplaceModelPayload(body) {
+  const { tourId, modelFileBase64, modelFileName } = body ?? {};
+  if (!tourId) {
+    throw new Error('tourId is required');
+  }
+  if (!modelFileBase64) {
+    throw new Error('modelFile is required');
+  }
+
+  assertModelUploadFileName(modelFileName);
+  const modelFileBuffer = Buffer.from(modelFileBase64, 'base64');
+  if (!modelFileBuffer.length) {
+    throw new Error('Model file is empty');
+  }
+
+  return { tourId, modelFileBuffer, modelFileName };
 }
 
 function validateSceneIdPayload(body) {
@@ -313,20 +413,45 @@ function validateNamingHotspotUpdatePayload(body) {
     body: copy,
     videoUrl,
     image,
+    targetView,
   } = body ?? {};
+  const hasPrice = price !== undefined;
   if (!tourId || !sceneId || !hotspotId?.trim()) {
     throw new Error('tourId, sceneId, and hotspotId are required');
   }
   if (
+    targetView &&
+    (typeof targetView.yaw !== 'number' || typeof targetView.pitch !== 'number')
+  ) {
+    throw new Error('targetView.yaw and targetView.pitch must be numbers');
+  }
+  if (
+    targetView?.target &&
+    (typeof targetView.target.x !== 'number' ||
+      typeof targetView.target.y !== 'number' ||
+      typeof targetView.target.z !== 'number')
+  ) {
+    throw new Error('targetView.target must have numeric x, y, z');
+  }
+  let previewFileBuffer;
+  if (body?.previewFileBase64) {
+    previewFileBuffer = Buffer.from(body.previewFileBase64, 'base64');
+    if (!previewFileBuffer.length) {
+      throw new Error('Preview capture is empty');
+    }
+  }
+  if (
     !title?.trim() &&
-    !price?.trim() &&
+    !hasPrice &&
     !status?.trim() &&
     !copy?.trim() &&
     videoUrl === undefined &&
-    image === undefined
+    image === undefined &&
+    !targetView &&
+    previewFileBuffer === undefined
   ) {
     throw new Error(
-      'At least one of title, price, status, body, videoUrl, or image is required',
+      'At least one of title, price, status, body, videoUrl, image, targetView, or preview is required',
     );
   }
   return {
@@ -334,11 +459,13 @@ function validateNamingHotspotUpdatePayload(body) {
     sceneId,
     hotspotId: hotspotId.trim(),
     title,
-    price,
+    price: hasPrice ? normalizeNamingPriceStorage(price) : undefined,
     status,
     body: copy,
     videoUrl,
     image,
+    targetView,
+    previewFileBuffer,
   };
 }
 
@@ -487,8 +614,13 @@ function validateCreateTourPayload(body) {
     category,
     tourSummary,
     firstSceneTitle,
+    viewerType,
     panoramaFileBase64,
     panoramaFileName,
+    modelFileBase64,
+    modelFileName,
+    thumbnailFileBase64,
+    thumbnailFileName,
     logoFileBase64,
     faviconFileBase64,
     primaryColor,
@@ -515,9 +647,39 @@ function validateCreateTourPayload(body) {
   if (!firstSceneTitle?.trim()) {
     throw new Error('firstSceneTitle is required');
   }
-  if (!panoramaFileBase64) {
-    throw new Error('panoramaFile is required');
+
+  const isModel3d = viewerType === 'model3d';
+  let panoramaFileBuffer;
+  let modelFileBuffer;
+  let thumbnailFileBuffer;
+
+  if (isModel3d) {
+    if (!modelFileBase64) {
+      throw new Error('modelFile is required');
+    }
+    assertModelUploadFileName(modelFileName);
+    modelFileBuffer = Buffer.from(modelFileBase64, 'base64');
+    if (!modelFileBuffer.length) {
+      throw new Error('Model file is empty');
+    }
+    if (thumbnailFileBase64) {
+      assertPanoramaUploadFileName(thumbnailFileName);
+      thumbnailFileBuffer = Buffer.from(thumbnailFileBase64, 'base64');
+      if (!thumbnailFileBuffer.length) {
+        throw new Error('Thumbnail file is empty');
+      }
+    }
+  } else {
+    if (!panoramaFileBase64) {
+      throw new Error('panoramaFile is required');
+    }
+    assertPanoramaUploadFileName(panoramaFileName);
+    panoramaFileBuffer = Buffer.from(panoramaFileBase64, 'base64');
+    if (!panoramaFileBuffer.length) {
+      throw new Error('Panorama file is empty');
+    }
   }
+
   if (
     defaultView &&
     (typeof defaultView.yaw !== 'number' ||
@@ -525,11 +687,13 @@ function validateCreateTourPayload(body) {
   ) {
     throw new Error('defaultView.yaw and defaultView.pitch must be numbers');
   }
-
-  assertPanoramaUploadFileName(panoramaFileName);
-  const panoramaFileBuffer = Buffer.from(panoramaFileBase64, 'base64');
-  if (!panoramaFileBuffer.length) {
-    throw new Error('Panorama file is empty');
+  if (
+    defaultView?.target &&
+    (typeof defaultView.target.x !== 'number' ||
+      typeof defaultView.target.y !== 'number' ||
+      typeof defaultView.target.z !== 'number')
+  ) {
+    throw new Error('defaultView.target must have numeric x, y, z');
   }
 
   const normalizedPrimaryColor =
@@ -559,7 +723,11 @@ function validateCreateTourPayload(body) {
     category,
     tourSummary: typeof tourSummary === 'string' ? tourSummary : undefined,
     firstSceneTitle,
+    viewerType: isModel3d ? 'model3d' : 'panorama',
     panoramaFileBuffer,
+    modelFileBuffer,
+    modelFileName,
+    thumbnailFileBuffer,
     logoFileBuffer: decodeOptionalImageBuffer(logoFileBase64, 'Logo file'),
     faviconFileBuffer: decodeOptionalImageBuffer(
       faviconFileBase64,
@@ -636,16 +804,35 @@ function validateInfoHotspotUpdatePayload(body) {
 
 function validateCreateNamingHotspotPayload(body) {
   const { tourId, sceneId, name, position } = validateHotspotPayload(body);
-  const price = body?.price;
   const status = body?.status;
   const copy = body?.body;
   const videoUrl = body?.videoUrl;
   const image = body?.image;
-  if (!price?.trim()) {
-    throw new Error('price is required');
-  }
+  const targetView = body?.targetView;
+  const price = normalizeNamingPriceStorage(body?.price);
   if (!status?.trim()) {
     throw new Error('status is required');
+  }
+  if (
+    targetView &&
+    (typeof targetView.yaw !== 'number' || typeof targetView.pitch !== 'number')
+  ) {
+    throw new Error('targetView.yaw and targetView.pitch must be numbers');
+  }
+  if (
+    targetView?.target &&
+    (typeof targetView.target.x !== 'number' ||
+      typeof targetView.target.y !== 'number' ||
+      typeof targetView.target.z !== 'number')
+  ) {
+    throw new Error('targetView.target must have numeric x, y, z');
+  }
+  let previewFileBuffer;
+  if (body?.previewFileBase64) {
+    previewFileBuffer = Buffer.from(body.previewFileBase64, 'base64');
+    if (!previewFileBuffer.length) {
+      throw new Error('Preview capture is empty');
+    }
   }
   return {
     tourId,
@@ -657,6 +844,8 @@ function validateCreateNamingHotspotPayload(body) {
     body: copy,
     videoUrl,
     image,
+    targetView,
+    previewFileBuffer,
   };
 }
 
@@ -1057,6 +1246,16 @@ export function viteDevTourApiPlugin() {
 
           if (req.url === '/__dev/api/scene/default-view') {
             const { tourId, sceneId, defaultView } = validateScenePayload(body);
+            let thumbnailFileBuffer;
+            if (body?.thumbnailFileBase64) {
+              thumbnailFileBuffer = Buffer.from(
+                body.thumbnailFileBase64,
+                'base64',
+              );
+              if (!thumbnailFileBuffer.length) {
+                throw new Error('Thumbnail capture is empty');
+              }
+            }
             const result = await applySceneLanding({
               root,
               toursDir,
@@ -1064,6 +1263,7 @@ export function viteDevTourApiPlugin() {
               tourId,
               sceneId,
               view: defaultView,
+              thumbnailFileBuffer,
             });
             sendJson(res, 200, {
               ok: true,
@@ -1081,10 +1281,13 @@ export function viteDevTourApiPlugin() {
               tourId,
               title,
               panoramaFileBuffer,
+              modelFileBuffer,
+              modelFileName,
+              thumbnailFileBuffer,
               defaultView,
               description,
               sceneId,
-            } = validateCreateScenePayload(body);
+            } = validateCreateScenePayload(body, toursDir);
             const result = await createScene({
               root,
               toursDir,
@@ -1093,6 +1296,9 @@ export function viteDevTourApiPlugin() {
               title,
               sceneId,
               panoramaFileBuffer,
+              modelFileBuffer,
+              modelFileName,
+              thumbnailFileBuffer,
               defaultView,
               description,
             });
@@ -1100,6 +1306,26 @@ export function viteDevTourApiPlugin() {
               ok: true,
               tourId,
               scene: result.scene,
+              tourPath: result.tourPath,
+            });
+            return;
+          }
+
+          if (req.url === '/__dev/api/scene/replace-model') {
+            const { tourId, modelFileBuffer, modelFileName } =
+              validateReplaceModelPayload(body);
+            const result = await replaceTourModel({
+              root,
+              toursDir,
+              assetsRoot,
+              tourId,
+              modelFileBuffer,
+              modelFileName,
+            });
+            sendJson(res, 200, {
+              ok: true,
+              tourId,
+              model: result.model,
               tourPath: result.tourPath,
             });
             return;
@@ -1219,8 +1445,12 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              targetView,
+              previewFileBuffer,
             } = validateNamingHotspotUpdatePayload(body);
-            const result = updateNamingHotspot({
+            const result = await updateNamingHotspot({
+              root,
+              assetsRoot,
               toursDir,
               tourId,
               sceneId,
@@ -1231,6 +1461,8 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              targetView,
+              previewFileBuffer,
             });
             sendJson(res, 200, {
               ok: true,
@@ -1361,8 +1593,12 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              targetView,
+              previewFileBuffer,
             } = validateCreateNamingHotspotPayload(body);
             const result = await createNamingHotspot({
+              root,
+              assetsRoot,
               toursDir,
               tourId,
               sceneId,
@@ -1373,6 +1609,8 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              targetView,
+              previewFileBuffer,
             });
             sendJson(res, 200, {
               ok: true,
