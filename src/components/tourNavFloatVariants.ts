@@ -62,7 +62,7 @@ export function scrollTourNavDirectoryToActiveItem(
 /* ── Breadcrumb ── */
 
 export const tourNavBreadcrumbClassName = cn(
-  'absolute top-[var(--tour-chrome-inset-top)] z-[90]',
+  'absolute top-[var(--tour-chrome-inset-top)] z-[var(--tour-chrome-z-index)]',
   'max-w-[min(680px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)-var(--tour-chrome-top-dock-width)))]',
 );
 
@@ -156,7 +156,7 @@ export const tourNavBreadcrumbPulseDotClassName = cn(
 /* ── Actions root ── */
 
 export const tourNavActionsRootClassName = cn(
-  'absolute top-[var(--tour-chrome-inset-top)] right-[var(--tour-chrome-inset-right)] z-[90] flex flex-col-reverse items-end',
+  'absolute top-[var(--tour-chrome-inset-top)] right-[var(--tour-chrome-inset-right)] z-[var(--tour-chrome-z-index)] flex flex-col-reverse items-end',
   '[--tour-directory-space:16px] [--tour-directory-divider-space:24px]',
 );
 
@@ -259,7 +259,7 @@ export const tourNavExploreSearchCloseClassName = cn(
 export const tourNavExploreSortRootClassName = cn('relative shrink-0');
 
 export const tourNavExploreRefineMenuClassName = cn(
-  'fixed z-[200] m-0 w-max max-w-[min(280px,calc(100vw-96px))] rounded-lg origin-top-right',
+  'fixed z-[var(--tour-chrome-menu-z-index)] m-0 w-max max-w-[min(280px,calc(100vw-96px))] rounded-lg origin-top-right',
   'border border-[color:var(--ishare-border)] bg-white/92 p-2 shadow-[var(--ishare-glass-dock-shadow)]',
   'backdrop-blur-[8px] backdrop-saturate-[120%]',
 );
@@ -483,7 +483,7 @@ export const tourNavLocationGalleryCardHeroSkeletonClassName =
 
 export const tourNavLocationGalleryCardHeroImageClassName = cva(
   cn(
-    'tour-nav-gallery-card-hero-media relative z-[1] block h-full w-full object-cover object-center opacity-0',
+    'tour-nav-gallery-card-hero-media pointer-events-none relative z-[1] block h-full w-full object-cover object-center opacity-0',
   ),
   {
     variants: {
@@ -507,7 +507,7 @@ export const tourNavLocationGalleryCardMetaClassName = cn(
 
 /** Hero badge placement — shared by location + naming gallery cards. */
 export const tourNavLocationGalleryHeroBadgePlacementClassName = cn(
-  'absolute top-2 right-2 z-[2] max-w-[calc(100%-16px)]',
+  'pointer-events-none absolute top-2 right-2 z-[2] max-w-[calc(100%-16px)]',
 );
 
 /** Inline row for current + status chips on naming gallery heroes. */
@@ -613,8 +613,6 @@ export const tourNavLocationGalleryHeroCtaClassName = cn(
 export const tourNavLocationGalleryHeroCtaInActionsClassName = cn(
   tourNavLocationGalleryHeroCtaClassName,
   'pointer-events-none',
-  'group-hover/card:pointer-events-auto group-focus-within/card:pointer-events-auto',
-  'pointer-coarse:pointer-events-auto',
 );
 
 export const tourNavLocationGalleryHeroCtaOverlayClassName = cn(
@@ -872,7 +870,7 @@ export const tourNavDirectoryLeadToggleClassName = cn(
 
 export const tourNavSceneInfoButtonClassName = cva(
   cn(
-    'inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full p-0 transition-[background,color] duration-150',
+    'pointer-events-auto inline-flex shrink-0 cursor-pointer items-center justify-center rounded-full p-0 transition-[background,color] duration-150',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
     'disabled:pointer-events-none disabled:opacity-45',
     'motion-reduce:transition-none',
@@ -990,8 +988,6 @@ export const tourNavLocationGalleryHeroTitleActionsClassName = cn(
   tourNavSceneInfoRevealClassName,
   'pointer-events-none flex shrink-0 items-center gap-1.5',
   'transition-opacity duration-[var(--tour-gallery-hover-duration)] ease-[var(--tour-gallery-hover-ease)]',
-  'group-hover/card:pointer-events-auto group-focus-within/card:pointer-events-auto',
-  'pointer-coarse:pointer-events-auto',
   'motion-reduce:transition-none',
 );
 

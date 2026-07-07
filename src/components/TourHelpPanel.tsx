@@ -5,20 +5,21 @@ import {
   VIRTUAL_TOUR_GUIDE_NAME,
 } from '../constants/branding';
 
-import type { TourClient } from '../types/tour';
+import type { TourClient, TourViewerType } from '../types/tour';
 
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 
 import {
-  TOUR_HELP_FAQ,
   TOUR_HELP_SECTION_CONTACT,
   TOUR_HELP_SECTION_CONTROLS,
   TOUR_HELP_SECTION_FAQ,
   TOUR_HELP_SECTION_SHORTCUTS,
   TOUR_HELP_SECTION_USING,
-  TOUR_HELP_KEYBOARD_SHORTCUTS,
   TOUR_HELP_TOUR_SUPPORT_LEAD,
-  TOUR_HELP_VIEWER_CONTROLS,
+  tourHelpFaq,
+  tourHelpKeyboardShortcuts,
+  tourHelpLeadText,
+  tourHelpViewerControls,
 } from '../constants/tourHelp';
 
 import { PLATFORM_TOUR_SUPPORT } from '../data/platformContact';
@@ -49,6 +50,8 @@ interface TourHelpPanelProps {
   client?: TourClient;
 
   logo?: ReactNode;
+
+  viewerType?: TourViewerType;
 }
 
 export function TourHelpPanel({
@@ -57,11 +60,17 @@ export function TourHelpPanel({
   client,
 
   logo,
+
+  viewerType,
 }: TourHelpPanelProps) {
   const { isCoarsePointer } = useTourChromeLayout();
   const showClientContact = hasClientContact(client);
   const showTourSupport = hasClientContact(PLATFORM_TOUR_SUPPORT);
   const showContact = showClientContact || showTourSupport;
+  const keyboardShortcuts = tourHelpKeyboardShortcuts(viewerType);
+  const viewerControls = tourHelpViewerControls(viewerType);
+  const faqItems = tourHelpFaq(viewerType);
+  const isModel3d = viewerType === 'model3d';
 
   const tourSupportLogo = (
     <a
@@ -81,9 +90,7 @@ export function TourHelpPanel({
   return (
     <>
       <p className={tourNavHelpLeadClassName}>
-        Welcome to {tourTitle}. Explore each location in 360°, move between
-        scenes with hotspots, and use the sections below to find your way
-        around.
+        {tourHelpLeadText(tourTitle, viewerType)}
       </p>
 
       <Accordion gap='default'>
@@ -101,7 +108,8 @@ export function TourHelpPanel({
             </li>
 
             <li>
-              Tap hotspots in the scene for info or to move to a new area.
+              Tap hotspots {isModel3d ? 'on the model' : 'in the scene'} for
+              info or to move to a new area.
             </li>
 
             <li>
@@ -122,7 +130,7 @@ export function TourHelpPanel({
             iconPosition='right'
           >
             <ul className={tourNavHelpListClassName}>
-              {TOUR_HELP_KEYBOARD_SHORTCUTS.map((item) => (
+              {keyboardShortcuts.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
@@ -131,7 +139,7 @@ export function TourHelpPanel({
 
         <AccordionItem title={TOUR_HELP_SECTION_CONTROLS} iconPosition='right'>
           <ul className={tourNavControlsListClassName}>
-            {TOUR_HELP_VIEWER_CONTROLS.map((item) => (
+            {viewerControls.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
@@ -139,7 +147,7 @@ export function TourHelpPanel({
 
         <AccordionItem title={TOUR_HELP_SECTION_FAQ} iconPosition='right'>
           <dl className={tourNavHelpFaqListClassName}>
-            {TOUR_HELP_FAQ.map((item) => (
+            {faqItems.map((item) => (
               <div key={item.id} className={tourNavHelpFaqItemClassName}>
                 <dt className={tourNavHelpFaqQuestionClassName}>
                   {item.question}

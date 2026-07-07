@@ -55,6 +55,10 @@
   --tour-chrome-inset-left: max(var(--tour-chrome-inset), env(safe-area-inset-left, 0px));
   --tour-explore-panel-width: 580px;
   --tour-explore-panel-width-mobile-max: 380px;
+  /* Scene HTML overlays (PSV markers, 3D CSS2D) stay below tour chrome. */
+  --tour-scene-overlay-z-index: 1;
+  --tour-chrome-z-index: 100;
+  --tour-chrome-menu-z-index: 200;
 }
 
 @media (max-width: 1023px) {
@@ -122,6 +126,30 @@ input::placeholder {
   width: 100%;
   height: 100%;
   background: #000;
+}
+
+/* Fullscreen enter/exit icons — button modifier (PSV + 3D) */
+.psv-fullscreen-button .psv-fullscreen-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.psv-fullscreen-button .psv-fullscreen-icon--exit {
+  display: none;
+}
+
+.psv-fullscreen-button.psv-fullscreen-button--active .psv-fullscreen-icon--enter {
+  display: none;
+}
+
+.psv-fullscreen-button.psv-fullscreen-button--active .psv-fullscreen-icon--exit {
+  display: flex;
+}
+
+.psv-fullscreen-button.psv-fullscreen-button--active {
+  background: transparent;
+  color: var(--ishare-text-muted);
 }
 
 .viewer-container {
@@ -270,7 +298,7 @@ input::placeholder {
 /* PSV navbar — horizontal glass pill (bottom center) */
 .viewer-container .psv-navbar {
   position: absolute;
-  z-index: 90;
+  z-index: var(--tour-chrome-z-index);
   top: auto;
   left: 50%;
   right: auto;
@@ -583,6 +611,21 @@ input::placeholder {
   font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 }
 
+.viewer-container .psv-navbar-material-symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--psv-nav-icon-size);
+  height: var(--psv-nav-icon-size);
+  font-size: var(--psv-nav-icon-size);
+  line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+}
+
+.viewer-container .psv-navbar-material-symbol--filled {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+}
+
 .viewer-container .psv-immersive-bg-volume {
   overflow: visible;
 }
@@ -719,15 +762,12 @@ input::placeholder {
   color: var(--ishare-primary);
 }
 
-/* Toggle-on — fullscreen (exit); immersive bg highlighted while enabled */
-.viewer-container .psv-fullscreen-button.psv-button--active,
+/* Toggle-on — immersive bg highlighted while enabled */
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
   background: transparent;
   color: var(--ishare-primary);
 }
 
-.viewer-container .psv-fullscreen-button.psv-button--active:hover,
-.viewer-container .psv-fullscreen-button.psv-button--active:focus-visible,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
 .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible {
   color: var(--ishare-primary);
@@ -748,22 +788,12 @@ input::placeholder {
   fill: var(--ishare-primary);
 }
 
-.viewer-container .psv-fullscreen-button.psv-button--active .psv-button-svg {
-  color: var(--ishare-primary);
-}
-
-.viewer-area:fullscreen .viewer-container .psv-fullscreen-button,
-.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button,
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled,
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled {
   color: var(--ishare-primary);
   background: transparent;
 }
 
-.viewer-area:fullscreen .viewer-container .psv-fullscreen-button:hover,
-.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:hover,
-.viewer-area:fullscreen .viewer-container .psv-fullscreen-button:focus-visible,
-.viewer-area:-webkit-full-screen .viewer-container .psv-fullscreen-button:focus-visible,
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
 .viewer-area:-webkit-full-screen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:hover,
 .viewer-area:fullscreen .viewer-container .psv-immersive-bg-button.psv-immersive-bg-button--enabled:focus-visible,
@@ -856,13 +886,15 @@ input::placeholder {
   transform: rotate(90deg) scale(1.2);
 }
 
-/* Zoom, default view, fullscreen ? scale icon on hover (move uses ::before above) */
-.viewer-container .psv-button:not(.psv-zoom-range):not(.psv-move-button) .psv-button-svg {
+/* Zoom, default view, fullscreen — scale icon on hover (move uses ::before above) */
+.viewer-container .psv-button:not(.psv-zoom-range):not(.psv-move-button) .psv-button-svg,
+.viewer-container .psv-button:not(.psv-zoom-range):not(.psv-move-button) .psv-navbar-material-symbol {
   transform: scale(1);
   transition: transform 0.2s ease;
 }
 
-.viewer-container .psv-container:not(.psv--is-touch) .psv-button:not(.psv-zoom-range):not(.psv-move-button):not(.psv-button--disabled):hover .psv-button-svg {
+.viewer-container .psv-container:not(.psv--is-touch) .psv-button:not(.psv-zoom-range):not(.psv-move-button):not(.psv-button--disabled):hover .psv-button-svg,
+.viewer-container .psv-container:not(.psv--is-touch) .psv-button:not(.psv-zoom-range):not(.psv-move-button):not(.psv-button--disabled):hover .psv-navbar-material-symbol {
   transform: scale(1.2);
 }
 
@@ -1196,6 +1228,9 @@ input::placeholder {
 }
 
 .hotspot-info__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
   font-family: var(--ishare-display-font);
   font-size: var(--ishare-font-size-sm);
   font-weight: 600;
@@ -1203,9 +1238,28 @@ input::placeholder {
   letter-spacing: -0.01em;
   color: #fff;
   white-space: nowrap;
-  max-width: 11rem;
+  max-width: 14rem;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.hotspot-info__name {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hotspot-info__label-sep,
+.hotspot-info__status {
+  flex-shrink: 0;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.hotspot-info__label-sep {
+  opacity: 0.85;
 }
 
 .hotspot-info:hover .hotspot-info__pill,
@@ -1255,7 +1309,16 @@ input::placeholder {
 }
 
 .hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__label {
+  color: inherit;
+}
+
+.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__name {
   color: var(--ishare-primary);
+}
+
+.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__label-sep,
+.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__status {
+  color: rgba(var(--ishare-primary-rgb), 0.52);
 }
 
 .hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__pulse {
@@ -1278,7 +1341,16 @@ input::placeholder {
 }
 
 .hotspot-info--active.hotspot-info--status-closed .hotspot-info__label {
+  color: inherit;
+}
+
+.hotspot-info--active.hotspot-info--status-closed .hotspot-info__name {
   color: var(--ishare-text);
+}
+
+.hotspot-info--active.hotspot-info--status-closed .hotspot-info__label-sep,
+.hotspot-info--active.hotspot-info--status-closed .hotspot-info__status {
+  color: rgba(100, 116, 139, 0.72);
 }
 
 .hotspot-info--active.hotspot-info--status-closed .hotspot-info__icon-wrap {

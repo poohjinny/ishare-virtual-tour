@@ -6,7 +6,7 @@ export const devViewPanelControlRadiusClassName = 'rounded-md';
 
 /** Same chrome insets as nav dock; ≤1023px anchors bottom-left (mobile + compact). */
 export const devToolsStackClassName = cn(
-  'pointer-events-none absolute left-[var(--tour-chrome-inset-left)] z-[100]',
+  'pointer-events-none absolute left-[var(--tour-chrome-inset-left)] z-[var(--tour-chrome-z-index)]',
   'top-[var(--tour-chrome-inset-top)]',
   'flex w-[min(440px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)))] flex-col gap-2',
   '[&>*]:pointer-events-auto',
