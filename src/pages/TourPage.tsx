@@ -17,7 +17,6 @@ import { AiAssistant } from '../components/ai/AiAssistant';
 import { ClientIntroPicker } from '../components/ClientIntroPicker';
 import { DEV_NOT_FOUND_SAMPLE_TOUR_ID } from '../constants/devUrlFlags';
 import { DevTools } from '../components/DevTools';
-import { useTourFullscreen } from '../hooks/useTourFullscreen';
 import { InfoPopup } from '../components/InfoPopup';
 import { LoadProgressBar } from '../components/LoadProgressBar';
 import { ViewerLoadError } from '../components/ViewerLoadError';
@@ -104,7 +103,6 @@ const PanoramaViewer = lazy(() =>
     default: m.PanoramaViewer,
   })),
 );
-const ThreeDViewer = lazy(() => import('../viewer-3d/ThreeDViewer'));
 import { resetLandingTransitionState } from '../viewer/landingTransition';
 import { resolveTourSceneOpenGraph } from '../utils/tourOpenGraph';
 
@@ -420,8 +418,6 @@ function TourExperience() {
 
   const viewerRef = useRef<TourViewerHandle>(null);
   const viewerAreaRef = useRef<HTMLDivElement>(null);
-  const { active: viewerFullscreen, toggle: toggleViewerFullscreen } =
-    useTourFullscreen(viewerAreaRef);
   const pendingNamingSelectionRef = useRef<{
     sceneId: string;
     hotspotId: string;
@@ -904,46 +900,7 @@ function TourExperience() {
     >
       <div ref={viewerAreaRef} className='viewer-area viewer-area--fullscreen'>
         <Suspense fallback={null}>
-          {bootstrapTour.viewerType === 'model3d' ?
-            <ThreeDViewer
-              key={tour.id}
-              ref={viewerRef}
-              tour={viewerTour}
-              initialSceneId={initialScene}
-              fullscreenActive={viewerFullscreen}
-              onFullscreenToggle={toggleViewerFullscreen}
-              controlsVisible={viewerControlsVisible}
-              onControlsToggle={
-                searchParams.embed ? undefined : toggleControlsVisible
-              }
-              toolbarToggleAvailable={isDesktop}
-              immersiveNavbarAvailable={Boolean(
-                bootstrapTour.immersiveBackground,
-              )}
-              disabled={isTransitioning}
-              onSceneChange={handleSceneChange}
-              onInfoHotspot={setActivePopup}
-              onNavigateToScene={handleNavigate}
-              onTransitionStart={handleTransitionStart}
-              onTransitionEnd={handleTransitionEnd}
-              onLoadStart={handleLoadStart}
-              onLoadProgress={handleLoadProgress}
-              onLoadComplete={handleLoadComplete}
-              onInitialTourReveal={onInitialTourReveal}
-              skipLanding={searchParams.skipLanding}
-              splashDone={splashRevealReady}
-              onLandingStart={handleLandingStart}
-              onDevClick={searchParams.dev ? setDevClickCoords : undefined}
-              onDevViewUpdate={searchParams.dev ? setDevViewCoords : undefined}
-              onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
-              onAnchoredPanelVisibilityChange={
-                handleAnchoredPanelVisibilityChange
-              }
-              immersiveBackgroundController={immersiveBackgroundController}
-              onViewerLoadError={handleViewerLoadError}
-              onViewerLoadRecovered={handleViewerLoadRecovered}
-            />
-          : <PanoramaViewer
+          <PanoramaViewer
               key={tour.id}
               ref={viewerRef}
               tour={viewerTour}
@@ -986,8 +943,7 @@ function TourExperience() {
               onViewerLoadError={handleViewerLoadError}
               onViewerLoadRecovered={handleViewerLoadRecovered}
               onNamingOpportunityBusyChange={setNamingOpportunityBusy}
-            />
-          }
+          />
         </Suspense>
 
         {showLoadError && (
@@ -999,7 +955,7 @@ function TourExperience() {
           />
         )}
 
-        {tour.floorPlan && bootstrapTour.viewerType !== 'model3d' && (
+        {tour.floorPlan && (
           <FloorPlanMinimap
             floorPlan={tour.floorPlan}
             tour={tour}
