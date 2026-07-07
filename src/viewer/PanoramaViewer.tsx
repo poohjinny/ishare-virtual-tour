@@ -40,7 +40,12 @@ import { mountPopupVideoPlayer } from '../utils/popupVideo';
 import { releaseAllTourMedia } from '../utils/tourMediaCoordinator';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import { logHotspotClick, toViewPosition } from '../utils/devHotspotLogger';
-import { fromPsvZoom, toPsvZoom } from '../utils/psvZoom';
+import {
+  fromPsvZoom,
+  PSV_MAX_FOV,
+  PSV_MIN_FOV,
+  toPsvZoom,
+} from '../utils/psvZoom';
 import { VIEWER_CONTROLS_VISIBLE_DEFAULT } from '../utils/viewerControlsPreference';
 import { bindViewerPerfPause } from './viewerPerfPause';
 import {
@@ -71,6 +76,7 @@ import {
 } from './infoHotspotActive';
 import { setAnchoredPanelVisibilityListener } from './anchoredPanelVisibility';
 import { navigateToScene, preloadOtherScenes } from './transition';
+import { bindVirtualTourLifecycleGuard } from './virtualTourLifecycle';
 import { createRecenterViewNavbarButton } from './recenterViewNavbarButton';
 import {
   bindTourFullscreenNavbarButton,
@@ -108,13 +114,12 @@ function toPsvPosition(view: ViewPosition) {
   return { yaw: deg(view.yaw), pitch: deg(view.pitch) };
 }
 
-/** PSV FOV limits (°). Lower minFov = tighter zoom in; higher maxFov = wider zoom out. */
-const MIN_FOV = 18;
-const MAX_FOV = 105;
 /** Drag release coast (0–1). Higher = softer, longer deceleration. PSV default: 0.8 */
 const MOVE_INERTIA = 0.92;
 
-export type { ViewerLoadErrorInfo as PanoramaLoadErrorInfo } from './viewerHandle';
+import type { ViewerLoadErrorInfo } from './viewerHandle';
+
+export type { ViewerLoadErrorInfo } from './viewerHandle';
 export type { TourViewerHandle } from './viewerHandle';
 
 /**
@@ -191,8 +196,8 @@ interface PanoramaViewerProps {
   onInitialTourReveal?: () => void;
   /** Fires once on the first panorama drag or hotspot tap (first-visit hint dismiss). */
   onFirstPanoramaInteract?: () => void;
-  onPanoramaError?: (info: PanoramaLoadErrorInfo) => void;
-  onPanoramaRecovered?: () => void;
+  onViewerLoadError?: (info: ViewerLoadErrorInfo) => void;
+  onViewerLoadRecovered?: () => void;
   /** True while a naming-opportunity go (animate / navigate / open panel) is in flight. */
   onNamingOpportunityBusyChange?: (busy: boolean) => void;
 }
@@ -249,8 +254,8 @@ export const PanoramaViewer = forwardRef<
     onLandingStart,
     onInitialTourReveal,
     onFirstPanoramaInteract,
-    onPanoramaError,
-    onPanoramaRecovered,
+    onViewerLoadError,
+    onViewerLoadRecovered,
     onNamingOpportunityBusyChange,
   },
   ref,
@@ -268,8 +273,10 @@ export const PanoramaViewer = forwardRef<
     (sceneId: string, hotspotId: string) => boolean
   >(() => false);
   const namingOpportunityBusyRef = useRef(false);
-  const deferredErrorRef = useRef<PanoramaLoadErrorInfo | null>(null);
+  const deferredErrorRef = useRef<ViewerLoadErrorInfo | null>(null);
   const transitioningRef = useRef(false);
+  /** Scene nav called onLoadStart — skip duplicate panorama-load start; balance on fail. */
+  const navLoadProgressArmedRef = useRef(false);
   const disabledRef = useRef(disabled);
   const suppressKeyboardRef = useLatestRef(suppressKeyboard);
   const tourRef = useLatestRef(tour);
@@ -312,8 +319,8 @@ export const PanoramaViewer = forwardRef<
   const onLandingStartRef = useLatestRef(onLandingStart);
   const onInitialTourRevealRef = useLatestRef(onInitialTourReveal);
   const onFirstPanoramaInteractRef = useLatestRef(onFirstPanoramaInteract);
-  const onPanoramaErrorRef = useLatestRef(onPanoramaError);
-  const onPanoramaRecoveredRef = useLatestRef(onPanoramaRecovered);
+  const onViewerLoadErrorRef = useLatestRef(onViewerLoadError);
+  const onViewerLoadRecoveredRef = useLatestRef(onViewerLoadRecovered);
   const onNamingOpportunityBusyChangeRef = useLatestRef(
     onNamingOpportunityBusyChange,
   );
@@ -330,9 +337,11 @@ export const PanoramaViewer = forwardRef<
   const hotspotEnterRef = useRef<ReturnType<
     typeof createHotspotEnterController
   > | null>(null);
-  const reportPanoramaErrorRef = useRef<(info: PanoramaLoadErrorInfo) => void>(
+  const reportViewerLoadErrorRef = useRef<(info: ViewerLoadErrorInfo) => void>(
     () => {},
   );
+  /** Cleared before viewer.destroy() so in-flight VT node loads abort cleanly. */
+  const viewerActiveRef = useRef(true);
 
   const releaseNamingOpportunityBusy = () => {
     if (!namingOpportunityBusyRef.current) return;
@@ -385,6 +394,12 @@ export const PanoramaViewer = forwardRef<
     transitioningRef.current = false;
     onTransitionEndRef.current();
 
+    const releaseFailedNavProgress = () => {
+      if (!navLoadProgressArmedRef.current) return;
+      navLoadProgressArmedRef.current = false;
+      onLoadCompleteRef.current?.();
+    };
+
     if (navOk) {
       hotspotEnterRef.current?.schedule();
       requestAnimationFrame(() => {
@@ -403,7 +418,8 @@ export const PanoramaViewer = forwardRef<
     if (navOk || (targetId && currentId === targetId)) {
       pendingSceneIdRef.current = null;
       if (!navOk) {
-        onPanoramaRecoveredRef.current?.();
+        onViewerLoadRecoveredRef.current?.();
+        releaseFailedNavProgress();
       }
       return;
     }
@@ -413,8 +429,10 @@ export const PanoramaViewer = forwardRef<
 
     if (deferred) {
       viewerRef.current?.hideError();
-      onPanoramaErrorRef.current?.(deferred);
+      onViewerLoadErrorRef.current?.(deferred);
     }
+
+    releaseFailedNavProgress();
   };
 
   useEffect(() => {
@@ -474,6 +492,7 @@ export const PanoramaViewer = forwardRef<
       const viewer = viewerRef.current;
       const virtualTour = virtualTourRef.current;
       if (
+        !viewerActiveRef.current ||
         !viewer ||
         !virtualTour ||
         transitioningRef.current ||
@@ -486,6 +505,7 @@ export const PanoramaViewer = forwardRef<
       deferredErrorRef.current = null;
       transitioningRef.current = true;
       hotspotEnterRef.current?.hold();
+      navLoadProgressArmedRef.current = true;
       onLoadStartRef.current?.();
       onTransitionStartRef.current();
 
@@ -497,9 +517,10 @@ export const PanoramaViewer = forwardRef<
           tourRef.current,
           sceneId,
           targetView,
+          () => viewerActiveRef.current,
         );
         if (navOk) {
-          onPanoramaRecoveredRef.current?.();
+          onViewerLoadRecoveredRef.current?.();
         } else {
           finishNamingOpportunityGo();
         }
@@ -511,7 +532,7 @@ export const PanoramaViewer = forwardRef<
     retryScene: async (sceneId) => {
       const viewer = viewerRef.current;
       const virtualTour = virtualTourRef.current;
-      if (!viewer || !virtualTour) return false;
+      if (!viewerActiveRef.current || !viewer || !virtualTour) return false;
 
       const targetSceneId =
         sceneId ??
@@ -521,7 +542,7 @@ export const PanoramaViewer = forwardRef<
 
       pendingSceneIdRef.current = targetSceneId;
       viewer.hideError();
-      onPanoramaRecoveredRef.current?.();
+      onViewerLoadRecoveredRef.current?.();
 
       try {
         const ok =
@@ -530,11 +551,11 @@ export const PanoramaViewer = forwardRef<
           })) !== false;
         if (ok) {
           pendingSceneIdRef.current = null;
-          onPanoramaRecoveredRef.current?.();
+          onViewerLoadRecoveredRef.current?.();
         }
         return ok;
       } catch {
-        reportPanoramaErrorRef.current({ sceneId: targetSceneId });
+        reportViewerLoadErrorRef.current({ sceneId: targetSceneId });
         return false;
       }
     },
@@ -592,7 +613,7 @@ export const PanoramaViewer = forwardRef<
     },
     applyTourUpdate: async (nextTour) => {
       const virtualTour = virtualTourRef.current;
-      if (!virtualTour) return;
+      if (!viewerActiveRef.current || !virtualTour) return;
 
       const previousTour = tourRef.current;
       const currentId =
@@ -657,11 +678,22 @@ export const PanoramaViewer = forwardRef<
         hotspotEnterRef.current?.schedule();
       }
     },
+    captureSceneThumbnail: async () => null,
+    getCurrentView: () => {
+      const viewer = viewerRef.current;
+      if (!viewer) return null;
+      const position = viewer.getPosition();
+      const yaw = (position.yaw * 180) / Math.PI;
+      const pitch = (position.pitch * 180) / Math.PI;
+      const zoom = fromPsvZoom(viewer.getZoomLevel());
+      return toViewPosition(yaw, pitch, zoom);
+    },
   }));
 
   useEffect(() => {
     if (!containerRef.current) return;
 
+    viewerActiveRef.current = true;
     let active = true;
 
     const hotspotEnter = createHotspotEnterController(
@@ -677,7 +709,7 @@ export const PanoramaViewer = forwardRef<
       )?.id;
     };
 
-    const isStaleLoadError = (info: PanoramaLoadErrorInfo) => {
+    const isStaleLoadError = (info: ViewerLoadErrorInfo) => {
       const currentNodeId = virtualTour.getCurrentNode()?.id;
       if (!currentNodeId) return false;
 
@@ -705,7 +737,7 @@ export const PanoramaViewer = forwardRef<
       return false;
     };
 
-    const reportPanoramaError = (info: PanoramaLoadErrorInfo) => {
+    const reportViewerLoadError = (info: ViewerLoadErrorInfo) => {
       if (!active) return;
       viewer.hideError();
 
@@ -718,10 +750,10 @@ export const PanoramaViewer = forwardRef<
         return;
       }
 
-      onPanoramaErrorRef.current?.(info);
+      onViewerLoadErrorRef.current?.(info);
     };
 
-    reportPanoramaErrorRef.current = reportPanoramaError;
+    reportViewerLoadErrorRef.current = reportViewerLoadError;
 
     const tourData = tourRef.current;
     const startSceneId = initialSceneIdAtMount.current;
@@ -797,8 +829,8 @@ export const PanoramaViewer = forwardRef<
 
     const viewer = new Viewer({
       container: containerRef.current,
-      minFov: MIN_FOV,
-      maxFov: MAX_FOV,
+      minFov: PSV_MIN_FOV,
+      maxFov: PSV_MAX_FOV,
       moveInertia: MOVE_INERTIA,
       canvasBackground: '#000000',
       rendererParameters: { alpha: false, antialias: true },
@@ -829,8 +861,6 @@ export const PanoramaViewer = forwardRef<
                       : (randomStart.zoom ?? LANDING_ZOOM_OUT),
                   };
             },
-            nodes: buildVirtualTourNodes(tourData),
-            startNodeId: startSceneId,
           },
         ],
       ],
@@ -846,7 +876,15 @@ export const PanoramaViewer = forwardRef<
     patchZoomSliderSmoothZoom(viewer);
     const unbindDesktopNavbarControls = bindPsvNavbarChromeControls(viewer);
     const virtualTour = viewer.getPlugin<VirtualTourPlugin>(VirtualTourPlugin);
+    bindVirtualTourLifecycleGuard(virtualTour, () => viewerActiveRef.current);
     virtualTourRef.current = virtualTour;
+
+    const tourNodes = buildVirtualTourNodes(tourData);
+    const resolvedStartSceneId =
+      tourData.scenes[startSceneId] ? startSceneId : tourData.firstScene;
+    if (tourNodes.length > 0) {
+      virtualTour.setNodes(tourNodes, resolvedStartSceneId);
+    }
 
     const tryStartLanding = () => {
       const tourId = tourRef.current.id;
@@ -907,6 +945,8 @@ export const PanoramaViewer = forwardRef<
 
     viewer.addEventListener('panorama-load', () => {
       if (landingSuppressLoadProgress) return;
+      // navigateToScene already armed TourPage progress for scene transitions.
+      if (transitioningRef.current) return;
       onLoadStartRef.current?.();
     });
 
@@ -916,7 +956,7 @@ export const PanoramaViewer = forwardRef<
     });
 
     viewer.addEventListener('panorama-error', (e) => {
-      reportPanoramaError({
+      reportViewerLoadError({
         panorama: String(e.panorama),
         sceneId:
           pendingSceneIdRef.current ??
@@ -927,7 +967,7 @@ export const PanoramaViewer = forwardRef<
 
     viewer.addEventListener('show-overlay', (e) => {
       if (e.overlayId !== 'error') return;
-      reportPanoramaError({
+      reportViewerLoadError({
         sceneId: pendingSceneIdRef.current ?? startSceneId,
       });
     });
@@ -951,6 +991,7 @@ export const PanoramaViewer = forwardRef<
       }
 
       onLoadCompleteRef.current?.();
+      navLoadProgressArmedRef.current = false;
     });
 
     viewer.addEventListener('ready', () => {
@@ -972,7 +1013,7 @@ export const PanoramaViewer = forwardRef<
       onAnchoredPanelVisibilityChangeRef.current?.(false);
       onSceneChangeRef.current(e.node.id);
       deferredErrorRef.current = null;
-      onPanoramaRecoveredRef.current?.();
+      onViewerLoadRecoveredRef.current?.();
       preloadOtherScenes(viewer, virtualTour, tourRef.current, e.node.id);
 
       const pending = pendingNamingInfoHotspotRef.current;
@@ -1388,10 +1429,11 @@ export const PanoramaViewer = forwardRef<
 
     return () => {
       active = false;
+      viewerActiveRef.current = false;
       deferredErrorRef.current = null;
       pendingNamingInfoHotspotRef.current = null;
       setNavPreviewNamingPanelHandlers(null);
-      reportPanoramaErrorRef.current = () => {};
+      reportViewerLoadErrorRef.current = () => {};
       tryStartLandingRef.current = null;
       hotspotEnter.destroy();
       hotspotEnterRef.current = null;

@@ -46,6 +46,9 @@ export const TOUR_SHARE_OPPORTUNITY_ARIA =
 
 export const TOUR_NAV_ACTION_SHARE = 'Share';
 
+/** Keyboard shortcut — `U` for **U**RL / link share (all viewer types). */
+export const TOUR_SHARE_KEYBOARD_KEY = 'u';
+
 export function canUseNativeShare(): boolean {
   return (
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
