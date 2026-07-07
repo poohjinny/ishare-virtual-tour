@@ -4,7 +4,7 @@ import { cn } from '../lib/cn';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
-import type { Scene } from '../types/tour';
+import type { Scene, Tour, TourViewerType } from '../types/tour';
 import type { NamingStatusModifier } from './ui/Badge';
 import { Badge } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
@@ -39,6 +39,9 @@ import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
 
 interface ExploreNamingGalleryCardProps {
   tourId: string;
+  tourViewerType?: TourViewerType;
+  /** Hotspot lookup for model3d preview pose — from TourNavFloat tourDirectoryContext. */
+  directoryTour?: Pick<Tour, 'viewerType' | 'scenes' | 'hotspots' | 'firstScene'>;
   scenes: Scene[];
   item: TourDirectoryNamingItem;
   active: boolean;
@@ -48,6 +51,8 @@ interface ExploreNamingGalleryCardProps {
 
 export function ExploreNamingGalleryCard({
   tourId,
+  tourViewerType,
+  directoryTour,
   scenes,
   item,
   active,
@@ -59,24 +64,46 @@ export function ExploreNamingGalleryCard({
     () => scenes.find((entry) => entry.id === item.sceneId),
     [item.sceneId, scenes],
   );
+  const previewScene = useMemo(() => {
+    const base = scene ?? {
+      id: item.sceneId,
+      panorama: '',
+      defaultView: { yaw: 0, pitch: 0, zoom: 50 },
+    };
+    if (tourViewerType === 'model3d' && item.previewImage) {
+      return {
+        ...base,
+        thumbnail: item.previewImage,
+        panorama: item.previewImage,
+      };
+    }
+    return base;
+  }, [item.previewImage, item.sceneId, scene, tourViewerType]);
   const previewView = useMemo(
     () =>
-      resolveNamingDirectoryPreviewView(scenes, item.sceneId, item.hotspotId),
-    [item.hotspotId, item.sceneId, scenes],
+      resolveNamingDirectoryPreviewView(
+        directoryTour ?? { viewerType: tourViewerType },
+        scenes,
+        item.sceneId,
+        item.hotspotId,
+      ),
+    [directoryTour, item.hotspotId, item.sceneId, scenes, tourViewerType],
   );
+  const previewOptions = useMemo(() => {
+    if (tourViewerType === 'model3d') {
+      return undefined;
+    }
+    return { view: previewView, cacheKeySuffix: `no:${item.hotspotId}` };
+  }, [item.hotspotId, previewView, tourViewerType]);
   const {
     src: previewSrc,
     failed: previewFailed,
     loading: previewLoading,
   } = useScenePreview(
     tourId,
-    scene ?? {
-      id: item.sceneId,
-      panorama: '',
-      defaultView: { yaw: 0, pitch: 0, zoom: 50 },
-    },
-    inView && Boolean(scene?.panorama),
-    { view: previewView, cacheKeySuffix: `no:${item.hotspotId}` },
+    previewScene,
+    inView && Boolean(previewScene.panorama || previewScene.thumbnail),
+    previewOptions,
   );
   const {
     imgRef,

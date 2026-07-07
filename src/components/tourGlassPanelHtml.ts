@@ -448,7 +448,7 @@ export function buildGlassPanelParagraphsHtml(body: string): string {
     .join('');
 }
 
-function buildNamingPriceInlineHtml(price: string, closed: boolean): string {
+function buildNamingPriceInlineHtml(price: number, closed: boolean): string {
   const priceClass =
     closed ? GLASS_PANEL.priceInlineClosed : GLASS_PANEL.priceInline;
   const displayPrice = formatNamingPriceDisplay(price);
@@ -460,7 +460,7 @@ function buildNamingPriceInlineHtml(price: string, closed: boolean): string {
 }
 
 export function buildNamingPriceUnderTitleHtml(
-  price: string,
+  price: number,
   closed: boolean,
 ): string {
   const priceClass =

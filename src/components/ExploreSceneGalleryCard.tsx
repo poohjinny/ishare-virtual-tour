@@ -78,15 +78,12 @@ export function ExploreSceneGalleryCard({
       role='presentation'
       {...{ [FLIP_LIST_KEY_ATTR]: scene.id }}
     >
-      <button
-        type='button'
-        role='option'
-        aria-selected={active}
-        data-tour-nav-directory-kind='location'
-        disabled={disabled}
-        className={tourNavLocationGalleryCardClassName({ active })}
-        onClick={onSelect}
-        aria-label={ariaLabel}
+      <div
+        className={cn(
+          tourNavLocationGalleryCardClassName({ active }),
+          'relative w-full',
+          disabled && 'pointer-events-none opacity-50',
+        )}
       >
         <span
           className={cn(
@@ -95,9 +92,22 @@ export function ExploreSceneGalleryCard({
           )}
           aria-busy={heroLoading || undefined}
         >
+          <button
+            type='button'
+            role='option'
+            aria-selected={active}
+            data-tour-nav-directory-kind='location'
+            disabled={disabled}
+            className='absolute inset-0 z-[1] block h-full w-full cursor-pointer rounded-lg border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light disabled:cursor-not-allowed'
+            onClick={onSelect}
+            aria-label={ariaLabel}
+          />
           {heroLoading ?
             <span
-              className={tourNavLocationGalleryCardHeroSkeletonClassName}
+              className={cn(
+                tourNavLocationGalleryCardHeroSkeletonClassName,
+                'pointer-events-none',
+              )}
               aria-hidden='true'
             />
           : null}
@@ -117,7 +127,7 @@ export function ExploreSceneGalleryCard({
           : null}
           {previewFailed ?
             <span
-              className='absolute inset-0 z-[1] block bg-[#e2e8f0]'
+              className='pointer-events-none absolute inset-0 z-[1] block bg-[#e2e8f0]'
               aria-hidden='true'
             />
           : null}
@@ -152,7 +162,10 @@ export function ExploreSceneGalleryCard({
                 </span>
                 {showInfo || !active ?
                   <span
-                    className={tourNavLocationGalleryHeroTitleActionsClassName}
+                    className={cn(
+                      tourNavLocationGalleryHeroTitleActionsClassName,
+                      'relative z-[3]',
+                    )}
                   >
                     {showInfo ?
                       <ExploreSceneInfoButton
@@ -195,7 +208,7 @@ export function ExploreSceneGalleryCard({
             </span>
           </span>
         </span>
-      </button>
+      </div>
     </li>
   );
 }

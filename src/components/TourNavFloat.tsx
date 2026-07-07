@@ -42,6 +42,7 @@ import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
   TOUR_NAV_ACTION_SHARE,
   TOUR_SHARE_PANEL_TITLE,
+  TOUR_SHARE_KEYBOARD_KEY,
 } from '../constants/tourShare';
 import {
   TOUR_NAV_ACTION_EXPLORE,
@@ -59,7 +60,7 @@ import {
 } from '../utils/buildShareUrl';
 import { ShareTourPanel } from './ShareTourPanel';
 import { buildScenePath } from '../viewer/sceneDepth';
-import type { Scene, TourClient } from '../types/tour';
+import type { Hotspot, Scene, TourClient, TourViewerType } from '../types/tour';
 import {
   buildTourNamingDirectory,
   filterTourNamingDirectory,
@@ -145,6 +146,9 @@ import {
 interface TourNavFloatProps {
   scenes: Scene[];
   tourId: string;
+  /** Tour-level hotspots — nav and info on `model3d` tours. */
+  tourHotspots?: Hotspot[];
+  tourViewerType?: TourViewerType;
   currentSceneId: string;
   firstSceneId: string;
   tourTitle?: string;
@@ -283,12 +287,18 @@ function buildBreadcrumbItems(
   firstSceneId: string,
   scenes: Scene[],
   currentSceneId: string,
+  tourHotspots?: Hotspot[],
 ): BreadcrumbItem[] {
   const sceneMap = new Map(scenes.map((scene) => [scene.id, scene]));
   const scenesById = Object.fromEntries(
     scenes.map((scene) => [scene.id, scene]),
   );
-  const pathIds = buildScenePath(firstSceneId, scenesById, currentSceneId);
+  const pathIds = buildScenePath(
+    firstSceneId,
+    scenesById,
+    currentSceneId,
+    tourHotspots,
+  );
 
   return pathIds.map((sceneId, index) => {
     const scene = sceneMap.get(sceneId);
@@ -303,6 +313,8 @@ function buildBreadcrumbItems(
 export function TourNavFloat({
   scenes,
   tourId,
+  tourHotspots,
+  tourViewerType,
   currentSceneId,
   firstSceneId,
   tourTitle = 'Virtual Tour',
@@ -325,6 +337,8 @@ export function TourNavFloat({
   panelStack,
 }: TourNavFloatProps) {
   const { isMobile, isDesktop } = useTourChromeLayout();
+  /** Location picks stay clickable during scene transitions (disabled only blocks chrome). */
+  const locationNavDisabled = namingOpportunityBusy;
   const [dockOverflowOpen, setDockOverflowOpen] = useState(false);
   const [panelMode, setPanelMode] = useState<PanelMode>(null);
   const [displayPanel, setDisplayPanel] = useState<DisplayPanel>(null);
@@ -353,12 +367,17 @@ export function TourNavFloat({
   const targetPanelRef = useRef<DisplayPanel>(null);
 
   const breadcrumbItems = useMemo(() => {
-    const items = buildBreadcrumbItems(firstSceneId, scenes, currentSceneId);
+    const items = buildBreadcrumbItems(
+      firstSceneId,
+      scenes,
+      currentSceneId,
+      tourHotspots,
+    );
     if (isMobile && items.length > 1) {
       return [items[items.length - 1]];
     }
     return items;
-  }, [isMobile, currentSceneId, firstSceneId, scenes]);
+  }, [isMobile, currentSceneId, firstSceneId, scenes, tourHotspots]);
 
   useEffect(() => {
     setDockOverflowOpen(false);
@@ -389,7 +408,19 @@ export function TourNavFloat({
     return () => window.removeEventListener('pointerdown', onPointerDown);
   }, [dockOverflowOpen]);
 
-  const namingItems = useMemo(() => buildTourNamingDirectory(scenes), [scenes]);
+  const tourDirectoryContext = useMemo(
+    () => ({
+      scenes: Object.fromEntries(scenes.map((scene) => [scene.id, scene])),
+      hotspots: tourHotspots,
+      viewerType: tourViewerType,
+    }),
+    [scenes, tourHotspots, tourViewerType],
+  );
+
+  const namingItems = useMemo(
+    () => buildTourNamingDirectory(tourDirectoryContext),
+    [tourDirectoryContext],
+  );
 
   const exploreSceneDetail = useMemo(() => {
     if (!exploreSceneDetailId) return null;
@@ -564,8 +595,14 @@ export function TourNavFloat({
   }, [namingPriceBounds, namingPriceMax, namingPriceMin]);
 
   const exploreSortedScenes = useMemo(
-    () => sortTourScenes(scenes, exploreLocationsSort, firstSceneId),
-    [exploreLocationsSort, firstSceneId, scenes],
+    () =>
+      sortTourScenes(
+        tourDirectoryContext,
+        scenes,
+        exploreLocationsSort,
+        firstSceneId,
+      ),
+    [exploreLocationsSort, firstSceneId, scenes, tourDirectoryContext],
   );
 
   const exploreSortedNamingItems = useMemo(
@@ -575,8 +612,18 @@ export function TourNavFloat({
 
   const exploreSortedFilteredScenes = useMemo(
     () =>
-      sortTourScenes(exploreFilteredScenes, exploreLocationsSort, firstSceneId),
-    [exploreFilteredScenes, exploreLocationsSort, firstSceneId],
+      sortTourScenes(
+        tourDirectoryContext,
+        exploreFilteredScenes,
+        exploreLocationsSort,
+        firstSceneId,
+      ),
+    [
+      exploreFilteredScenes,
+      exploreLocationsSort,
+      firstSceneId,
+      tourDirectoryContext,
+    ],
   );
 
   const exploreSortedFilteredNamingItems = useMemo(
@@ -886,7 +933,7 @@ export function TourNavFloat({
         handleExploreClick();
         return;
       }
-      if (!embed && key === 's') {
+      if (!embed && key === TOUR_SHARE_KEYBOARD_KEY) {
         event.preventDefault();
         handleShareClick();
         return;
@@ -989,7 +1036,7 @@ export function TourNavFloat({
                   scene={scene}
                   active={scene.id === currentSceneId}
                   isTourStart={scene.id === firstSceneId}
-                  disabled={disabled}
+                  disabled={locationNavDisabled}
                   onSelect={() => handleSelect(scene.id)}
                   onShowDescription={
                     scene.description?.trim() ?
@@ -1013,7 +1060,7 @@ export function TourNavFloat({
                 scene={scene}
                 active={scene.id === currentSceneId}
                 isTourStart={scene.id === firstSceneId}
-                disabled={disabled}
+                disabled={locationNavDisabled}
                 onSelect={() => handleSelect(scene.id)}
                 onShowDescription={
                   scene.description?.trim() ?
@@ -1083,6 +1130,11 @@ export function TourNavFloat({
                 <ExploreNamingGalleryCard
                   key={`${item.sceneId}:${item.hotspotId}`}
                   tourId={tourId}
+                  tourViewerType={tourViewerType}
+                  directoryTour={{
+                    ...tourDirectoryContext,
+                    firstScene: firstSceneId,
+                  }}
                   scenes={scenes}
                   item={item}
                   active={
@@ -1450,7 +1502,7 @@ export function TourNavFloat({
                   tourId={tourId}
                   scene={exploreSceneDetail}
                   active={exploreSceneDetail.id === currentSceneId}
-                  disabled={disabled}
+                  disabled={locationNavDisabled}
                   onBack={requestCloseExploreSceneDetail}
                   onVisit={handleExploreSceneDetailVisit}
                 />
@@ -1591,6 +1643,7 @@ export function TourNavFloat({
                 tourTitle={tourTitle}
                 client={client}
                 logo={logoNode}
+                viewerType={tourViewerType}
               />
             </TourGlassPanel>
           </div>
