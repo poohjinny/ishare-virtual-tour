@@ -4,16 +4,23 @@ export function parseNamingPrice(price) {
   if (!cleaned) return null;
 
   const value = Number.parseFloat(cleaned);
-  return Number.isFinite(value) ? value : null;
+  return Number.isFinite(value) ? Math.round(value) : null;
 }
 
-/** Persist numeric amounts only (no currency symbols or grouping). */
-export function normalizeNamingPriceStorage(price) {
-  const trimmed = String(price ?? '').trim();
-  if (!trimmed) return trimmed;
+/** Parse dev input or legacy JSON strings into a rounded numeric amount. */
+export function parseNamingPriceInput(value) {
+  if (value == null || value === '') return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? Math.round(value) : null;
+  }
+  return parseNamingPrice(value);
+}
 
-  const amount = parseNamingPrice(trimmed);
-  if (amount == null) return trimmed;
-
-  return String(Math.round(amount));
+/** Persist a rounded numeric amount — throws when missing or invalid. */
+export function normalizeNamingPriceStorage(value) {
+  const amount = parseNamingPriceInput(value);
+  if (amount == null) {
+    throw new Error('Price is required');
+  }
+  return amount;
 }

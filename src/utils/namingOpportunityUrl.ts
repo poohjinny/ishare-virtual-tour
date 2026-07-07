@@ -26,9 +26,9 @@ export function namingOpportunityNameToCamelCase(name: string): string {
   return words
     .map((word, index) => {
       const lower = word.toLowerCase();
-      return index === 0 ?
-          lower
-        : lower.charAt(0).toUpperCase() + lower.slice(1);
+      return index === 0 ? lower : (
+          lower.charAt(0).toUpperCase() + lower.slice(1)
+        );
     })
     .join('');
 }
@@ -40,8 +40,8 @@ function namingOpportunityDisplayName(hotspot: Hotspot): string | null {
 }
 
 function legacyKebabFromHotspotId(hotspotId: string): string {
-  return hotspotId.startsWith(NAMING_OPPORTUNITY_HOTSPOT_PREFIX)
-    ? hotspotId.slice(NAMING_OPPORTUNITY_HOTSPOT_PREFIX.length)
+  return hotspotId.startsWith(NAMING_OPPORTUNITY_HOTSPOT_PREFIX) ?
+      hotspotId.slice(NAMING_OPPORTUNITY_HOTSPOT_PREFIX.length)
     : hotspotId;
 }
 
@@ -57,19 +57,29 @@ interface NamingOpportunityLink {
 function listNamingOpportunityLinks(tour: Tour): NamingOpportunityLink[] {
   const items: NamingOpportunityLink[] = [];
 
+  const appendLink = (sceneId: string, hotspot: Hotspot) => {
+    const displayName = namingOpportunityDisplayName(hotspot);
+    if (hotspot.type !== 'info' || !displayName) return;
+
+    items.push({
+      sceneId,
+      hotspotId: hotspot.id,
+      searchValue: namingOpportunityNameToKebabCase(displayName),
+      legacyCamelCase: namingOpportunityNameToCamelCase(displayName),
+      legacyKebab: legacyKebabFromHotspotId(hotspot.id),
+      nameSlug: slugifyHotspotName(displayName),
+    });
+  };
+
+  for (const hotspot of tour.hotspots ?? []) {
+    if (hotspot.type !== 'info' || !hotspot.popup?.namingOpportunity) continue;
+    appendLink(hotspot.sceneId ?? tour.firstScene, hotspot);
+  }
+
   for (const scene of Object.values(tour.scenes)) {
     for (const hotspot of scene.hotspots) {
-      const displayName = namingOpportunityDisplayName(hotspot);
-      if (hotspot.type !== 'info' || !displayName) continue;
-
-      items.push({
-        sceneId: scene.id,
-        hotspotId: hotspot.id,
-        searchValue: namingOpportunityNameToKebabCase(displayName),
-        legacyCamelCase: namingOpportunityNameToCamelCase(displayName),
-        legacyKebab: legacyKebabFromHotspotId(hotspot.id),
-        nameSlug: slugifyHotspotName(displayName),
-      });
+      if (tour.hotspots?.some((entry) => entry.id === hotspot.id)) continue;
+      appendLink(scene.id, hotspot);
     }
   }
 

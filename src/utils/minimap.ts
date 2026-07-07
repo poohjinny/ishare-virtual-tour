@@ -1,13 +1,9 @@
 import type { Scene } from '../types/tour';
-import { toPsvZoom } from './psvZoom';
-
-/** Match PanoramaViewer FOV limits (°). */
-const MIN_FOV = 18;
-const MAX_FOV = 105;
+import { PSV_MAX_FOV, PSV_MIN_FOV, toPsvZoom } from './psvZoom';
 
 function psvZoomToVFov(psvZoom: number): number {
   const t = Math.min(100, Math.max(0, psvZoom)) / 100;
-  return MAX_FOV * (MIN_FOV / MAX_FOV) ** t;
+  return PSV_MAX_FOV * (PSV_MIN_FOV / PSV_MAX_FOV) ** t;
 }
 
 function vFovToHFov(vFov: number, aspect = 16 / 9): number {

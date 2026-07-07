@@ -3,6 +3,11 @@ import { compareNamingOpportunityStatusModifiers } from '../data/namingOpportuni
 import type { Scene, Tour, ViewPosition } from '../types/tour';
 import { parseNamingPrice } from './namingPrice';
 import { buildNavPreviewNamingItems } from './navPreview';
+import {
+  findNamingHotspotInTour,
+  isModel3dTour,
+  resolveModel3dNamingTargetView,
+} from './findTourHotspot';
 import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
 
 export interface TourDirectoryNamingItem {
@@ -10,22 +15,24 @@ export interface TourDirectoryNamingItem {
   sceneTitle: string;
   hotspotId: string;
   name: string;
-  price: string;
+  price: number;
   priceAmount: number | null;
   statusLabel: string;
   statusShortLabel: string;
   statusModifier: string;
   /** First paragraph from the naming opportunity popup body. */
   description?: string;
+  /** model3d — baked preview hero for Explore cards */
+  previewImage?: string;
 }
 
 export function buildTourNamingDirectory(
-  scenes: Scene[],
+  tour: Pick<Tour, 'scenes' | 'hotspots' | 'viewerType'>,
 ): TourDirectoryNamingItem[] {
   const items: TourDirectoryNamingItem[] = [];
 
-  for (const scene of scenes) {
-    for (const naming of buildNavPreviewNamingItems(scene)) {
+  for (const scene of Object.values(tour.scenes)) {
+    for (const naming of buildNavPreviewNamingItems(tour, scene)) {
       items.push({
         sceneId: scene.id,
         sceneTitle: scene.title,
@@ -37,6 +44,7 @@ export function buildTourNamingDirectory(
         statusShortLabel: naming.statusShortLabel,
         statusModifier: naming.statusModifier,
         description: naming.description,
+        previewImage: naming.previewImage,
       });
     }
   }
@@ -44,22 +52,7 @@ export function buildTourNamingDirectory(
   return items;
 }
 
-/** Scene containing a naming-opportunity info hotspot, if any. */
-export function findNamingHotspotInTour(
-  tour: Tour,
-  hotspotId: string,
-): { sceneId: string } | null {
-  for (const scene of Object.values(tour.scenes)) {
-    const hotspot = scene.hotspots.find(
-      (h) =>
-        h.id === hotspotId && h.type === 'info' && h.popup?.namingOpportunity,
-    );
-    if (hotspot) {
-      return { sceneId: scene.id };
-    }
-  }
-  return null;
-}
+export { findNamingHotspotInTour } from './findTourHotspot';
 
 /** Landing end pose — `defaultView`, or the NO hotspot view when `?no=` matches this scene. */
 export function resolveSceneLandingView(
@@ -77,6 +70,13 @@ export function resolveSceneLandingView(
   const loc = findNamingHotspotInTour(tour, namingHotspotId);
   if (!loc || loc.sceneId !== sceneId) {
     return scene.defaultView;
+  }
+
+  if (isModel3dTour(tour)) {
+    return (
+      resolveModel3dNamingTargetView(tour, loc.hotspot, loc.sceneId) ??
+      scene.defaultView
+    );
   }
 
   return (
@@ -167,17 +167,22 @@ function compareNamingPrices(
   return compareNamingDirectoryNames(a, b, 1);
 }
 
-function sceneNamingOpportunityCount(scene: Scene): number {
-  return buildNavPreviewNamingItems(scene).length;
+function sceneNamingOpportunityCount(
+  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
+  scene: Scene,
+): number {
+  return buildNavPreviewNamingItems(tour, scene).length;
 }
 
 function compareScenesByNamingCount(
+  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
   a: Scene,
   b: Scene,
   direction: 1 | -1,
 ): number {
   const countDiff =
-    (sceneNamingOpportunityCount(a) - sceneNamingOpportunityCount(b)) *
+    (sceneNamingOpportunityCount(tour, a) -
+      sceneNamingOpportunityCount(tour, b)) *
     direction;
   if (countDiff !== 0) return countDiff;
 
@@ -185,6 +190,7 @@ function compareScenesByNamingCount(
 }
 
 export function sortTourScenes(
+  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
   scenes: Scene[],
   sort: ExploreDirectorySort,
   firstSceneId?: string,
@@ -199,10 +205,10 @@ export function sortTourScenes(
       sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, -1));
       break;
     case 'naming-count-desc':
-      sorted.sort((a, b) => compareScenesByNamingCount(a, b, -1));
+      sorted.sort((a, b) => compareScenesByNamingCount(tour, a, b, -1));
       break;
     case 'naming-count-asc':
-      sorted.sort((a, b) => compareScenesByNamingCount(a, b, 1));
+      sorted.sort((a, b) => compareScenesByNamingCount(tour, a, b, 1));
       break;
     default:
       sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, 1));
@@ -261,6 +267,7 @@ export function sortTourNamingDirectory(
 
 /** Preview pose for a naming-opportunity card hero. */
 export function resolveNamingDirectoryPreviewView(
+  tour: Pick<Tour, 'viewerType' | 'scenes' | 'hotspots' | 'firstScene'>,
   scenes: Scene[],
   sceneId: string,
   hotspotId: string,
@@ -268,12 +275,32 @@ export function resolveNamingDirectoryPreviewView(
   const scene = scenes.find((entry) => entry.id === sceneId);
   if (!scene) return undefined;
 
+  if (isModel3dTour(tour)) {
+    const tourForLookup = {
+      ...tour,
+      scenes:
+        tour.scenes ??
+        Object.fromEntries(scenes.map((entry) => [entry.id, entry])),
+      firstScene: tour.firstScene ?? scenes[0]?.id ?? sceneId,
+    } as Tour;
+    const found = findNamingHotspotInTour(tourForLookup, hotspotId);
+    if (found) {
+      return resolveModel3dNamingTargetView(
+        tourForLookup,
+        found.hotspot,
+        found.sceneId ?? sceneId,
+      );
+    }
+    return scene.defaultView;
+  }
+
   const hotspot = scene.hotspots.find((entry) => entry.id === hotspotId);
   if (!hotspot?.popup) return scene.defaultView;
 
+  const pos = hotspot.position as ViewPosition;
   return {
-    yaw: hotspot.position.yaw,
-    pitch: hotspot.position.pitch,
-    zoom: hotspot.position.zoom ?? scene.defaultView?.zoom,
+    yaw: pos.yaw,
+    pitch: pos.pitch,
+    zoom: pos.zoom ?? scene.defaultView?.zoom,
   };
 }

@@ -143,6 +143,7 @@ export const PRESERVED_SEARCH_KEYS = [
   'dev',
   'chatTest',
   'notFoundTest',
+  'loadErrorTest',
   'panoramaErrorTest',
   'disableNavPreview',
   'skipLanding',
