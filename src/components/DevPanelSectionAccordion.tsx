@@ -11,7 +11,7 @@ import { DevPanelSection, type DevPanelSectionProps } from './DevPanelSection';
 
 type DevPanelSectionAccordionProps = {
   children: ReactNode;
-  /** Section index open on first render; others start collapsed. More can be opened without closing these. */
+  /** Optional section index open on first render; default is all collapsed. */
   defaultOpenIndex?: number;
 };
 
@@ -40,11 +40,11 @@ function collectDevPanelSections(
 
 export function DevPanelSectionAccordion({
   children,
-  defaultOpenIndex = 0,
+  defaultOpenIndex,
 }: DevPanelSectionAccordionProps) {
   const sections = collectDevPanelSections(children);
-  const [openIndices, setOpenIndices] = useState<Set<number>>(
-    () => new Set([defaultOpenIndex]),
+  const [openIndices, setOpenIndices] = useState<Set<number>>(() =>
+    defaultOpenIndex === undefined ? new Set() : new Set([defaultOpenIndex]),
   );
 
   return (

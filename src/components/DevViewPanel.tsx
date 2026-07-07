@@ -749,40 +749,37 @@ export function DevViewPanel({
     newTourSlug && newFirstSceneSlug && newTourPanoramaFile && newTourClientId,
   );
 
-  const resetNewTourForm = useCallback(
-    (preferredClientId?: string) => {
-      setNewTourTitle('');
-      setNewTourSummary('');
-      setNewTourIdInput('');
-      setNewTourCategory('Healthcare');
-      setNewTourVisibility('unlisted');
-      setNewTourFeatured(false);
-      setNewTourTransitionEffect(DEFAULT_DEV_EXPERIENCE_FORM.transitionEffect);
-      setNewTourTransitionSpeed(DEFAULT_DEV_EXPERIENCE_FORM.transitionSpeed);
-      setNewTourImmersiveMode(DEFAULT_DEV_EXPERIENCE_FORM.immersiveMode);
-      setNewTourImmersiveAudio(DEFAULT_DEV_EXPERIENCE_FORM.immersiveAudio);
-      setNewTourImmersivePlaylistText(
-        DEFAULT_DEV_EXPERIENCE_FORM.immersivePlaylistText,
-      );
-      setNewTourImmersivePlaylistManifest(
-        DEFAULT_DEV_EXPERIENCE_FORM.immersivePlaylistManifest,
-      );
-      setNewTourImmersiveVolume(DEFAULT_DEV_EXPERIENCE_FORM.immersiveVolume);
-      setNewTourPrimaryColor(DEFAULT_NEW_TOUR_PRIMARY_COLOR);
-      setNewTourBrandingMode('client');
-      setNewTourLogoAlt('');
-      setNewTourLogoFile(null);
-      setNewTourFaviconFile(null);
-      setNewFirstSceneTitle('Overview');
-      setNewTourPanoramaFile(null);
-      setSuggestBrandingNotes([]);
-      setSuggestBrandingStatus('idle');
-      setNewTourStatus('idle');
-      setNewTourError(null);
-      setNewTourClientId(preferredClientId ?? catalogClients[0]?.id ?? '');
-    },
-    [catalogClients],
-  );
+  const resetNewTourForm = useCallback((preferredClientId?: string) => {
+    setNewTourTitle('');
+    setNewTourSummary('');
+    setNewTourIdInput('');
+    setNewTourCategory('Healthcare');
+    setNewTourVisibility('unlisted');
+    setNewTourFeatured(false);
+    setNewTourTransitionEffect(DEFAULT_DEV_EXPERIENCE_FORM.transitionEffect);
+    setNewTourTransitionSpeed(DEFAULT_DEV_EXPERIENCE_FORM.transitionSpeed);
+    setNewTourImmersiveMode(DEFAULT_DEV_EXPERIENCE_FORM.immersiveMode);
+    setNewTourImmersiveAudio(DEFAULT_DEV_EXPERIENCE_FORM.immersiveAudio);
+    setNewTourImmersivePlaylistText(
+      DEFAULT_DEV_EXPERIENCE_FORM.immersivePlaylistText,
+    );
+    setNewTourImmersivePlaylistManifest(
+      DEFAULT_DEV_EXPERIENCE_FORM.immersivePlaylistManifest,
+    );
+    setNewTourImmersiveVolume(DEFAULT_DEV_EXPERIENCE_FORM.immersiveVolume);
+    setNewTourPrimaryColor(DEFAULT_NEW_TOUR_PRIMARY_COLOR);
+    setNewTourBrandingMode('client');
+    setNewTourLogoAlt('');
+    setNewTourLogoFile(null);
+    setNewTourFaviconFile(null);
+    setNewFirstSceneTitle('Overview');
+    setNewTourPanoramaFile(null);
+    setSuggestBrandingNotes([]);
+    setSuggestBrandingStatus('idle');
+    setNewTourStatus('idle');
+    setNewTourError(null);
+    setNewTourClientId(preferredClientId ?? '');
+  }, []);
 
   const openCreateTourTab = useCallback(
     (preferredClientId?: string) => {
@@ -890,7 +887,6 @@ export function DevViewPanel({
     void devFetchCatalogClients()
       .then((clients) => {
         setCatalogClients(clients);
-        setNewTourClientId((current) => current || clients[0]?.id || '');
         setManageClientId((current) => {
           if (current) return current;
           const openClientId = getTourClientId(tour);
@@ -2287,7 +2283,7 @@ export function DevViewPanel({
         panoramaFile: replacePanoramaFile,
       });
       setReplacePanoramaFile(null);
-      await onTourMutated?.();
+      await onTourMutated?.({ bustPanorama: true });
       setReplacePanoramaStatus('done');
     } catch (error) {
       setReplacePanoramaStatus('error');
@@ -5346,13 +5342,16 @@ export function DevViewPanel({
                           >
                             {catalogClients.length === 0 ?
                               <option value=''>Loading clients…</option>
-                            : catalogClients.map((client) => (
-                                <option key={client.id} value={client.id}>
-                                  {client.name} ({client.id}) ·{' '}
-                                  {client.tourCount} tour
-                                  {client.tourCount === 1 ? '' : 's'}
-                                </option>
-                              ))
+                            : <>
+                                <option value=''>Select client…</option>
+                                {catalogClients.map((client) => (
+                                  <option key={client.id} value={client.id}>
+                                    {client.name} ({client.id}) ·{' '}
+                                    {client.tourCount} tour
+                                    {client.tourCount === 1 ? '' : 's'}
+                                  </option>
+                                ))}
+                              </>
                             }
                           </select>
                         </label>

@@ -270,6 +270,8 @@ export interface DevTourMutateOptions {
   refreshKnowledge?: boolean;
   /** Reload tour JSON without leaving the open scene (e.g. quick-create nav target). */
   keepCurrentScene?: boolean;
+  /** Cache-bust panorama URLs — only set when a panorama file was replaced in place. */
+  bustPanorama?: boolean;
 }
 
 import type { TourBranding } from '../types/tour';
