@@ -62,10 +62,7 @@ function clearNavPanelPositionTrack(): void {
   navPanelPositionTrack = null;
 }
 
-export function syncNavPreviewPanelPosition(
-  viewer: Viewer,
-  markers: MarkersPlugin,
-): void {
+export function syncNavPreviewPanelPosition(markers: MarkersPlugin): void {
   if (
     navPanelPositionTrack &&
     !markers.getMarker(navPanelPositionTrack.panelId)
@@ -73,12 +70,7 @@ export function syncNavPreviewPanelPosition(
     clearNavPanelPositionTrack();
   }
 
-  correctAnchoredPanelPixelGap(
-    viewer,
-    markers,
-    navPanelPositionTrack,
-    NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
-  );
+  correctAnchoredPanelPixelGap(markers, navPanelPositionTrack);
 }
 
 export function closeAnchoredNavPreviewPanel(

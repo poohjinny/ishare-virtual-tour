@@ -41,10 +41,7 @@ function clearInfoPanelPositionTrack(): void {
   infoPanelPositionTrack = null;
 }
 
-export function syncInfoPanelPosition(
-  viewer: Viewer,
-  markers: MarkersPlugin,
-): void {
+export function syncInfoPanelPosition(markers: MarkersPlugin): void {
   if (
     infoPanelPositionTrack &&
     !markers.getMarker(infoPanelPositionTrack.panelId)
@@ -56,12 +53,7 @@ export function syncInfoPanelPosition(
     fitAnchoredPanelMarkerSize(markers, infoPanelPositionTrack.panelId);
   }
 
-  correctAnchoredPanelPixelGap(
-    viewer,
-    markers,
-    infoPanelPositionTrack,
-    INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
-  );
+  correctAnchoredPanelPixelGap(markers, infoPanelPositionTrack);
 }
 
 export function closeAnchoredInfoPanel(

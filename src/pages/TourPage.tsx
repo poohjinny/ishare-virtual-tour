@@ -613,7 +613,9 @@ function TourExperience() {
     async (options?: DevTourMutateOptions) => {
       const fresh = normalizeTourAssets(await devFetchTour(route.tourId));
       const nextMediaVersion = devThumbnailVersion + 1;
-      const bustedFresh = bustSceneThumbnailUrls(fresh, nextMediaVersion);
+      const bustedFresh = bustSceneThumbnailUrls(fresh, nextMediaVersion, {
+        bustPanorama: options?.bustPanorama,
+      });
       setDevTourSnapshot(fresh);
       setDevTourCache(fresh);
       setDevThumbnailVersion(nextMediaVersion);

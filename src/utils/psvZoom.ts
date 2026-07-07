@@ -7,7 +7,12 @@ export function toPsvZoom(zoom?: number): number {
 
 /** Tour JSON zoom (0 = default wide) from PSV zoom level (50 = default). */
 export function fromPsvZoom(psvZoom: number): number {
-  return Math.round(psvZoom) === 50 ? 0 : Math.round(psvZoom);
+  const rounded = Math.round(psvZoom);
+  // 50 → 0 is the "use default" sentinel; a real max zoom-out (PSV 0) must not
+  // collapse to 0 or it would round-trip back to the default (50) via toPsvZoom.
+  if (rounded === 50) return 0;
+  if (rounded <= 0) return 1;
+  return rounded;
 }
 
 /** Match {@link PanoramaViewer} FOV limits (degrees). */

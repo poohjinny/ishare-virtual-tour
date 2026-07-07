@@ -105,22 +105,6 @@ export function measureHotspotHalfHeightPx(
   return fallbackPx;
 }
 
-/** Visible panel bottom within the PSV marker box (px from marker top). */
-export function measureAnchoredPanelBottomOffsetPx(
-  panelMarkerEl: HTMLElement,
-): number | null {
-  const article = panelMarkerEl.querySelector('.tour-glass-panel--anchored');
-  if (!(article instanceof HTMLElement) || article.offsetHeight <= 0) {
-    return null;
-  }
-
-  const markerRect = panelMarkerEl.getBoundingClientRect();
-  const articleRect = article.getBoundingClientRect();
-  if (markerRect.height <= 0) return null;
-
-  return articleRect.bottom - markerRect.top;
-}
-
 /** Shrink the PSV marker box to match rendered panel height (content-height panels). */
 export function fitAnchoredPanelMarkerSize(
   markers: MarkersPlugin,
@@ -161,10 +145,8 @@ export function fitAnchoredPanelMarkerSize(
  * Does not change spherical position — avoids visibility flicker on drag.
  */
 export function correctAnchoredPanelPixelGap(
-  viewer: Viewer,
   markers: MarkersPlugin,
   track: AnchoredPanelPositionTrack | null,
-  hotspotHalfFallbackPx: number,
 ): void {
   if (!track) return;
 
@@ -188,29 +170,26 @@ export function correctAnchoredPanelPixelGap(
   const pos2d = panelMarker.state?.position2D;
   if (!pos2d) return;
 
-  const hostHalf = measureHotspotHalfHeightPx(hostEl, hotspotHalfFallbackPx);
+  const article = panelEl.querySelector('.tour-glass-panel--anchored');
+  if (!(article instanceof HTMLElement)) return;
 
-  const hostPoint = viewer.dataHelper.sphericalCoordsToViewerCoords({
-    yaw: toRad(track.hostPosition.yaw),
-    pitch: toRad(track.hostPosition.pitch),
-  });
+  // Pure screen-space placement: measure the rendered rects directly so the
+  // gap stays uniform regardless of zoom or pitch. Mixing viewer-projection
+  // coords with DOM measurements drifted at high pitch / high zoom because the
+  // projection scale differs from the fixed-size marker DOM.
+  const hostRect = hostEl.getBoundingClientRect();
+  const articleRect = article.getBoundingClientRect();
+  if (hostRect.height <= 0 || articleRect.height <= 0) return;
 
-  const targetPanelBottomY = hostPoint.y - hostHalf - ANCHORED_PANEL_GAP_PX;
-  const markerHeight =
-    panelMarker.state?.size?.height ??
-    (panelEl instanceof HTMLElement ? panelEl.offsetHeight : 0);
+  // Panel bottom sits a fixed gap above the hotspot top edge.
+  const deltaY = hostRect.top - ANCHORED_PANEL_GAP_PX - articleRect.bottom;
 
-  if (markerHeight <= 0) return;
+  // Panel horizontal center aligns with the hotspot center.
+  const hostCenterX = (hostRect.left + hostRect.right) / 2;
+  const articleCenterX = (articleRect.left + articleRect.right) / 2;
+  const deltaX = hostCenterX - articleCenterX;
 
-  const visibleBottomOffset =
-    panelEl instanceof HTMLElement ?
-      measureAnchoredPanelBottomOffsetPx(panelEl)
-    : null;
+  if (Math.abs(deltaY) < 0.5 && Math.abs(deltaX) < 0.5) return;
 
-  const currentPanelBottomY = pos2d.y + (visibleBottomOffset ?? markerHeight);
-  const deltaY = targetPanelBottomY - currentPanelBottomY;
-
-  if (Math.abs(deltaY) < 0.5) return;
-
-  panelEl.style.translate = `${Math.round(pos2d.x)}px ${Math.round(pos2d.y + deltaY)}px 0px`;
+  panelEl.style.translate = `${Math.round(pos2d.x + deltaX)}px ${Math.round(pos2d.y + deltaY)}px 0px`;
 }

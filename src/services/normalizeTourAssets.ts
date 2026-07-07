@@ -101,8 +101,14 @@ export function normalizeTourAssets(tour: Tour): Tour {
 }
 
 /** Bust scene media URLs after dev rebake/replace (same path, new file bytes). */
-export function bustSceneThumbnailUrls(tour: Tour, version: number): Tour {
+export function bustSceneThumbnailUrls(
+  tour: Tour,
+  version: number,
+  options: { bustPanorama?: boolean } = {},
+): Tour {
   if (version <= 0) return tour;
+
+  const { bustPanorama = false } = options;
 
   return {
     ...tour,
@@ -112,8 +118,13 @@ export function bustSceneThumbnailUrls(tour: Tour, version: number): Tour {
           scene.thumbnail ?
             appendCacheBust(scene.thumbnail, version)
           : undefined;
+        // Panorama busting forces a viewer node reload, so only apply it when a
+        // panorama was actually replaced — otherwise edits like defaultView would
+        // needlessly reload the scene and drop its hotspot markers.
         const bustedPanorama =
-          scene.panorama ? appendCacheBust(scene.panorama, version) : undefined;
+          bustPanorama && scene.panorama ?
+            appendCacheBust(scene.panorama, version)
+          : undefined;
 
         if (!bustedThumbnail && !bustedPanorama) return [id, scene];
 
