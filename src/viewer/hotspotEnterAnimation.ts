@@ -7,11 +7,30 @@ export const HOTSPOT_ENTER_DURATION_MS = 420;
 /** Per-marker delay — stamp-in sequence after landing / scene change. */
 export const HOTSPOT_ENTER_STAGGER_MS = 48;
 
-const HOLD_CLASS = 'viewer-container--hotspots-hold';
-const ENTER_CLASS = 'viewer-container--hotspots-enter';
+export interface HotspotEnterOptions {
+  holdClass?: string;
+  enterClass?: string;
+  enterTargetSelector?: string;
+  clearDelaySelector?: string;
+}
 
-const ENTER_TARGET_SELECTOR =
-  '.psv-marker--visible:has(.hotspot-nav) .hotspot-nav, .psv-marker--visible:has(.hotspot-info) .hotspot-info, .psv-marker--visible:has(.hotspot-general-info) .hotspot-general-info';
+const PSV_HOTSPOT_ENTER: Required<HotspotEnterOptions> = {
+  holdClass: 'viewer-container--hotspots-hold',
+  enterClass: 'viewer-container--hotspots-enter',
+  enterTargetSelector:
+    '.psv-marker--visible:has(.hotspot-nav) .hotspot-nav, .psv-marker--visible:has(.hotspot-info) .hotspot-info, .psv-marker--visible:has(.hotspot-general-info) .hotspot-general-info',
+  clearDelaySelector: '.hotspot-nav, .hotspot-info, .hotspot-general-info',
+};
+
+/** Hotspot enter classes/selectors for the Three.js CSS2D overlay. */
+export const HOTSPOT_ENTER_3D: Required<HotspotEnterOptions> = {
+  holdClass: 'viewer-3d-container--hotspots-hold',
+  enterClass: 'viewer-3d-container--hotspots-enter',
+  enterTargetSelector:
+    '.hotspot-3d-wrap .hotspot-nav, .hotspot-3d-wrap .hotspot-info',
+  clearDelaySelector:
+    '.hotspot-3d-wrap .hotspot-nav, .hotspot-3d-wrap .hotspot-info',
+};
 
 export interface HotspotEnterController {
   hold: () => void;
@@ -20,25 +39,32 @@ export interface HotspotEnterController {
   destroy: () => void;
 }
 
-function getEnterTargets(container: HTMLElement): HTMLElement[] {
+function getEnterTargets(
+  container: HTMLElement,
+  enterTargetSelector: string,
+): HTMLElement[] {
   return Array.from(
-    container.querySelectorAll<HTMLElement>(ENTER_TARGET_SELECTOR),
+    container.querySelectorAll<HTMLElement>(enterTargetSelector),
   );
 }
 
-function applyEnterStagger(container: HTMLElement): number {
-  const targets = getEnterTargets(container);
+function applyEnterStagger(
+  container: HTMLElement,
+  enterTargetSelector: string,
+): number {
+  const targets = getEnterTargets(container, enterTargetSelector);
   targets.forEach((target, index) => {
     target.style.animationDelay = `${index * HOTSPOT_ENTER_STAGGER_MS}ms`;
   });
   return targets.length;
 }
 
-function clearEnterStagger(container: HTMLElement): void {
+function clearEnterStagger(
+  container: HTMLElement,
+  clearDelaySelector: string,
+): void {
   container
-    .querySelectorAll<HTMLElement>(
-      '.hotspot-nav, .hotspot-info, .hotspot-general-info',
-    )
+    .querySelectorAll<HTMLElement>(clearDelaySelector)
     .forEach((target) => {
       target.style.animationDelay = '';
     });
@@ -52,7 +78,13 @@ function enterAnimationTotalMs(markerCount: number): number {
 
 export function createHotspotEnterController(
   getContainer: () => HTMLElement | null,
+  options: HotspotEnterOptions = PSV_HOTSPOT_ENTER,
 ): HotspotEnterController {
+  const { holdClass, enterClass, enterTargetSelector, clearDelaySelector } = {
+    ...PSV_HOTSPOT_ENTER,
+    ...options,
+  };
+
   let enterTimer: ReturnType<typeof setTimeout> | null = null;
   let clearEnterTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -70,17 +102,17 @@ export function createHotspotEnterController(
   const getEl = () => getContainer();
 
   const finishEnter = (el: HTMLElement) => {
-    clearEnterStagger(el);
-    el.classList.remove(ENTER_CLASS);
+    clearEnterStagger(el, clearDelaySelector);
+    el.classList.remove(enterClass);
   };
 
   return {
     hold() {
       clearTimers();
       const el = getEl();
-      el?.classList.add(HOLD_CLASS);
-      el?.classList.remove(ENTER_CLASS);
-      if (el) clearEnterStagger(el);
+      el?.classList.add(holdClass);
+      el?.classList.remove(enterClass);
+      if (el) clearEnterStagger(el, clearDelaySelector);
     },
 
     schedule() {
@@ -89,7 +121,7 @@ export function createHotspotEnterController(
       if (!el) return;
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        el.classList.remove(HOLD_CLASS);
+        el.classList.remove(holdClass);
         return;
       }
 
@@ -97,9 +129,9 @@ export function createHotspotEnterController(
       // before the enter animation restarted from opacity 0.
       enterTimer = window.setTimeout(() => {
         enterTimer = null;
-        el.classList.remove(HOLD_CLASS);
-        el.classList.add(ENTER_CLASS);
-        const markerCount = applyEnterStagger(el);
+        el.classList.remove(holdClass);
+        el.classList.add(enterClass);
+        const markerCount = applyEnterStagger(el, enterTargetSelector);
         clearEnterTimer = window.setTimeout(() => {
           clearEnterTimer = null;
           finishEnter(el);
@@ -110,8 +142,8 @@ export function createHotspotEnterController(
     release() {
       clearTimers();
       const el = getEl();
-      if (el) clearEnterStagger(el);
-      el?.classList.remove(HOLD_CLASS, ENTER_CLASS);
+      if (el) clearEnterStagger(el, clearDelaySelector);
+      el?.classList.remove(holdClass, enterClass);
     },
 
     destroy() {

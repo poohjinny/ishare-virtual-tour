@@ -1,33 +1,60 @@
 import type { NavbarCustomButton, Viewer } from '@photo-sphere-viewer/core';
 
 import { getTourFullscreenBlockHint } from '../utils/tourEmbedFullscreen';
+import { TOUR_FULLSCREEN_BUTTON_HTML } from './tourNavbarMaterialSymbol';
 
 export const TOUR_FULLSCREEN_NAVBAR_BUTTON_ID = 'tour-fullscreen';
 
-const FULLSCREEN_IN_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M9 4H5a1 1 0 0 0-1 1v4M20 9V5a1 1 0 0 0-1-1h-4M15 20h4a1 1 0 0 0 1-1v-4M4 15v4a1 1 0 0 0 1 1h4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
-const FULLSCREEN_OUT_ICON = `<svg class="psv-button-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-  <path d="M4 9V5a1 1 0 0 1 1-1h4M20 15v4a1 1 0 0 1-1 1h-4M15 4h4a1 1 0 0 1 1 1v4M9 20H5a1 1 0 0 1-1-1v-4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
 interface NavbarButtonWithContainer {
   container: HTMLElement;
-  toggleActive: (active?: boolean) => void;
 }
 
-function isTargetFullscreen(target: HTMLElement | null): boolean {
+/** True when `target` is the active tour fullscreen element. */
+export function isTourElementFullscreen(target: HTMLElement | null): boolean {
   if (!target) return false;
 
-  const webkitDocument = document as Document & {
+  const doc = document as Document & {
     webkitFullscreenElement?: Element | null;
+    mozFullScreenElement?: Element | null;
   };
 
-  return (
-    document.fullscreenElement === target ||
-    webkitDocument.webkitFullscreenElement === target
-  );
+  const fs =
+    document.fullscreenElement ??
+    doc.webkitFullscreenElement ??
+    doc.mozFullScreenElement;
+
+  if (fs === target) return true;
+
+  if (typeof target.matches !== 'function') return false;
+
+  try {
+    return (
+      target.matches(':fullscreen') ||
+      target.matches(':-webkit-full-screen') ||
+      target.matches(':-moz-full-screen')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function resolveFullscreenButtonEl(container: HTMLElement): HTMLElement {
+  if (container.classList.contains('psv-fullscreen-button')) {
+    return container;
+  }
+  const nested = container.querySelector('.psv-fullscreen-button');
+  return nested instanceof HTMLElement ? nested : container;
+}
+
+function applyFullscreenButtonState(
+  container: HTMLElement,
+  active: boolean,
+): void {
+  const button = resolveFullscreenButtonEl(container);
+  button.classList.toggle('psv-fullscreen-button--active', active);
+  const label = active ? 'Exit fullscreen' : 'Fullscreen';
+  button.setAttribute('aria-label', label);
+  button.setAttribute('title', label);
 }
 
 function requestElementFullscreen(target: HTMLElement): void {
@@ -69,7 +96,7 @@ function exitElementFullscreen(): void {
 export function toggleTourFullscreen(target: HTMLElement | null): void {
   if (!target) return;
 
-  if (isTargetFullscreen(target)) {
+  if (isTourElementFullscreen(target)) {
     exitElementFullscreen();
   } else {
     requestElementFullscreen(target);
@@ -83,7 +110,7 @@ export function createTourFullscreenNavbarButton(
     id: TOUR_FULLSCREEN_NAVBAR_BUTTON_ID,
     title: getTourFullscreenBlockHint() ?? 'Fullscreen',
     className: 'psv-fullscreen-button',
-    content: FULLSCREEN_IN_ICON,
+    content: TOUR_FULLSCREEN_BUTTON_HTML,
     collapsable: false,
     onClick() {
       toggleTourFullscreen(getFullscreenRoot());
@@ -102,20 +129,22 @@ export function bindTourFullscreenNavbarButton(
       false,
     ) as NavbarButtonWithContainer | undefined;
 
-    if (!button || !target) return;
+    if (!target) return;
 
-    const active = isTargetFullscreen(target);
-    button.toggleActive(active);
-    button.container.innerHTML =
-      active ? FULLSCREEN_OUT_ICON : FULLSCREEN_IN_ICON;
+    const active = isTourElementFullscreen(target);
+    if (!button) return;
+
+    applyFullscreenButtonState(button.container, active);
   };
 
   document.addEventListener('fullscreenchange', sync);
   document.addEventListener('webkitfullscreenchange', sync);
+  document.addEventListener('mozfullscreenchange', sync);
   sync();
 
   return () => {
     document.removeEventListener('fullscreenchange', sync);
     document.removeEventListener('webkitfullscreenchange', sync);
+    document.removeEventListener('mozfullscreenchange', sync);
   };
 }

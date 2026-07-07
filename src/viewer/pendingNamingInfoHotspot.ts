@@ -1,6 +1,11 @@
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import type { Viewer } from '@photo-sphere-viewer/core';
 import type { PopupContent, Tour, ViewPosition } from '../types/tour';
+import {
+  findNamingHotspotInTour,
+  isModel3dTour,
+  resolveModel3dNamingTargetView,
+} from '../utils/findTourHotspot';
 import { toPsvZoom } from '../utils/psvZoom';
 import {
   getOpenAnchoredPanelHostId,
@@ -104,16 +109,23 @@ export function resolveNamingOpportunityView(
   sceneId: string,
   hotspotId: string,
 ): ViewPosition | undefined {
-  const scene = tour.scenes[sceneId];
-  const infoHotspot = scene?.hotspots.find(
-    (hotspot) => hotspot.id === hotspotId,
-  );
-  if (!infoHotspot?.popup) return undefined;
+  const found = findNamingHotspotInTour(tour, hotspotId);
+  if (!found?.hotspot.popup) return undefined;
 
+  if (isModel3dTour(tour)) {
+    return resolveModel3dNamingTargetView(
+      tour,
+      found.hotspot,
+      found.sceneId ?? sceneId,
+    );
+  }
+
+  const pos = found.hotspot.position as ViewPosition;
+  const scene = tour.scenes[found.sceneId ?? sceneId];
   return {
-    yaw: infoHotspot.position.yaw,
-    pitch: infoHotspot.position.pitch,
-    zoom: infoHotspot.position.zoom ?? scene.defaultView?.zoom,
+    yaw: pos.yaw,
+    pitch: pos.pitch,
+    zoom: pos.zoom ?? scene?.defaultView?.zoom,
   };
 }
 

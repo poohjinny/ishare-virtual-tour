@@ -96,7 +96,12 @@ export async function navigateToScene(
   tour: Tour,
   targetSceneId: string,
   targetView?: ViewPosition,
+  isActive?: () => boolean,
 ): Promise<boolean> {
+  if (isActive && !isActive()) {
+    return false;
+  }
+
   const scene = tour.scenes[targetSceneId];
   if (!scene) return false;
 
@@ -110,6 +115,10 @@ export async function navigateToScene(
       scene.panorama,
     );
 
+    if (isActive && !isActive()) {
+      return false;
+    }
+
     return (
       (await virtualTour.setCurrentNode(targetSceneId, {
         showLoader: false,
@@ -119,6 +128,9 @@ export async function navigateToScene(
       })) !== false
     );
   } catch (err) {
+    if (isActive && !isActive()) {
+      return false;
+    }
     console.error('[navigateToScene]', targetSceneId, err);
     return false;
   }
