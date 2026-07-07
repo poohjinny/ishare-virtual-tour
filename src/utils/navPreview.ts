@@ -9,12 +9,7 @@ import {
   namingOpportunityStatusConfig,
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
-
-function findSceneInfoHotspots(scene: Scene): Hotspot[] {
-  return scene.hotspots.filter(
-    (hotspot) => hotspot.type === 'info' && hotspot.popup,
-  );
-}
+import { listSceneInfoHotspots } from './findTourHotspot';
 
 function navPreviewNamingDescription(body: string): string {
   const firstParagraph = body
@@ -26,11 +21,12 @@ function navPreviewNamingDescription(body: string): string {
 }
 
 export function buildNavPreviewNamingItems(
+  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
   scene: Scene,
 ): NavPreviewNamingItem[] {
   const items: NavPreviewNamingItem[] = [];
 
-  for (const hotspot of findSceneInfoHotspots(scene)) {
+  for (const hotspot of listSceneInfoHotspots(tour, scene)) {
     const popup = hotspot.popup;
     const naming = popup?.namingOpportunity;
     if (!naming) continue;
@@ -48,6 +44,7 @@ export function buildNavPreviewNamingItems(
       price: naming.price,
       priceLabel: naming.priceLabel,
       description,
+      previewImage: hotspot.preview?.image,
     });
   }
 
@@ -82,7 +79,7 @@ export function buildNavPreview(
     panorama: scene.panorama,
     image,
     description: scene.description?.trim() || undefined,
-    namingItems: buildNavPreviewNamingItems(scene),
+    namingItems: buildNavPreviewNamingItems(tour, scene),
     targetView: hotspot.targetView ?? scene.defaultView,
     ctaLabel: hotspotLabel || undefined,
     canNavigate,

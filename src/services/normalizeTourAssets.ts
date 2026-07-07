@@ -1,6 +1,32 @@
-import type { Hotspot, Tour, TourImmersiveBackground } from '../types/tour';
+import type {
+  Hotspot,
+  PopupContent,
+  Tour,
+  TourImmersiveBackground,
+} from '../types/tour';
 import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import { GLOBAL_IMMERSIVE_BACKGROUND } from '../constants/immersiveBackground';
+import { parseNamingPriceInput } from '../utils/namingPrice';
+
+function normalizePopupContent(popup: PopupContent): PopupContent {
+  let next = popup;
+
+  if (popup.image) {
+    next = { ...next, image: withBaseUrl(popup.image) };
+  }
+
+  if (popup.namingOpportunity) {
+    const price = parseNamingPriceInput(popup.namingOpportunity.price);
+    if (price != null && price !== popup.namingOpportunity.price) {
+      next = {
+        ...next,
+        namingOpportunity: { ...popup.namingOpportunity, price },
+      };
+    }
+  }
+
+  return next;
+}
 
 function normalizeHotspot(hotspot: Hotspot): Hotspot {
   const preview =
@@ -9,9 +35,7 @@ function normalizeHotspot(hotspot: Hotspot): Hotspot {
     : hotspot.preview;
 
   const popup =
-    hotspot.popup?.image ?
-      { ...hotspot.popup, image: withBaseUrl(hotspot.popup.image) }
-    : hotspot.popup;
+    hotspot.popup ? normalizePopupContent(hotspot.popup) : hotspot.popup;
 
   if (preview === hotspot.preview && popup === hotspot.popup) return hotspot;
 
@@ -40,6 +64,7 @@ function normalizeImmersiveBackground(
 export function normalizeTourAssets(tour: Tour): Tour {
   return {
     ...tour,
+    ...(tour.hotspots ? { hotspots: tour.hotspots.map(normalizeHotspot) } : {}),
     branding:
       tour.branding ?
         {
@@ -59,11 +84,13 @@ export function normalizeTourAssets(tour: Tour): Tour {
     immersiveBackground: normalizeImmersiveBackground(
       tour.immersiveBackground ?? GLOBAL_IMMERSIVE_BACKGROUND,
     ),
+    ...(tour.model ? { model: withBaseUrl(tour.model) } : {}),
     scenes: Object.fromEntries(
       Object.entries(tour.scenes).map(([id, scene]) => [
         id,
         {
           ...scene,
+          ...(scene.model ? { model: withBaseUrl(scene.model) } : {}),
           panorama: withBaseUrl(scene.panorama),
           thumbnail: scene.thumbnail ? withBaseUrl(scene.thumbnail) : undefined,
           hotspots: scene.hotspots.map(normalizeHotspot),
@@ -80,12 +107,22 @@ export function bustSceneThumbnailUrls(tour: Tour, version: number): Tour {
   return {
     ...tour,
     scenes: Object.fromEntries(
-      Object.entries(tour.scenes).map(([id, scene]) => [
-        id,
-        scene.thumbnail ?
-          { ...scene, thumbnail: appendCacheBust(scene.thumbnail, version) }
-        : scene,
-      ]),
+      Object.entries(tour.scenes).map(([id, scene]) => {
+        if (!scene.thumbnail) return [id, scene];
+
+        const bustedThumbnail = appendCacheBust(scene.thumbnail, version);
+        const bustPanorama =
+          scene.panorama === scene.thumbnail || tour.viewerType === 'model3d';
+
+        return [
+          id,
+          {
+            ...scene,
+            thumbnail: bustedThumbnail,
+            ...(bustPanorama ? { panorama: bustedThumbnail } : {}),
+          },
+        ];
+      }),
     ),
   };
 }

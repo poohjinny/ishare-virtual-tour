@@ -4,216 +4,118 @@
   "category": "Healthcare",
   "title": "Med/Surg Inpatient",
   "firstScene": "overview",
-  "defaultTransition": {
-    "speed": "500ms",
-    "effect": "fade"
-  },
+  "defaultTransition": { "speed": "500ms", "effect": "fade" },
   "scenes": {
     "overview": {
       "id": "overview",
       "title": "Overview",
       "description": "Welcome to Med/Surg Inpatient.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/overview.webp",
-      "defaultView": {
-        "yaw": 100.5,
-        "pitch": -62,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 100.5, "pitch": -62, "zoom": 15 },
       "hotspots": [
         {
           "id": "nav-to-inpatien-suites",
           "type": "nav",
           "label": "Inpatien Suites",
-          "position": {
-            "yaw": 337.3,
-            "pitch": -62.9
-          },
+          "position": { "yaw": 337.3, "pitch": -62.9 },
           "targetScene": "inpatient-suites",
-          "targetView": {
-            "yaw": 100.4,
-            "pitch": -13,
-            "zoom": 15
-          }
+          "targetView": { "yaw": 100.4, "pitch": -13, "zoom": 15 }
         },
         {
           "id": "nav-to-reception-centre",
           "type": "nav",
           "label": "Reception Centre",
-          "position": {
-            "yaw": 140.7,
-            "pitch": -34.7
-          },
+          "position": { "yaw": 140.7, "pitch": -34.7 },
           "targetScene": "reception-centre",
-          "targetView": {
-            "yaw": 101.6,
-            "pitch": -2.8,
-            "zoom": 55
-          }
+          "targetView": { "yaw": 101.6, "pitch": -2.8, "zoom": 55 }
         },
         {
           "id": "nav-to-nursing-station",
           "type": "nav",
           "label": "Nursing Station",
-          "position": {
-            "yaw": 33.1,
-            "pitch": -60.9
-          },
+          "position": { "yaw": 33.1, "pitch": -60.9 },
           "targetScene": "nursing-station",
-          "targetView": {
-            "yaw": 84.5,
-            "pitch": -17.2,
-            "zoom": 10
-          }
+          "targetView": { "yaw": 84.5, "pitch": -17.2, "zoom": 10 }
         },
         {
           "id": "nav-to-multi-use-lounge-activity-room",
           "type": "nav",
           "label": "Multi Use Lounge / Activity Room",
-          "position": {
-            "yaw": 157.7,
-            "pitch": -30.1
-          },
+          "position": { "yaw": 157.7, "pitch": -30.1 },
           "targetScene": "multi-use-lounge-activity-room",
-          "targetView": {
-            "yaw": 181.7,
-            "pitch": -18.3,
-            "zoom": 10
-          }
+          "targetView": { "yaw": 181.7, "pitch": -18.3, "zoom": 10 }
         },
         {
           "id": "nav-to-quiet-consultant",
           "type": "nav",
           "label": "Quiet/ Consultant",
-          "position": {
-            "yaw": 134.5,
-            "pitch": -22.3
-          },
+          "position": { "yaw": 134.5, "pitch": -22.3 },
           "targetScene": "quiet-consultant",
-          "targetView": {
-            "yaw": 231.7,
-            "pitch": -29.9,
-            "zoom": 10
-          }
+          "targetView": { "yaw": 231.7, "pitch": -29.9, "zoom": 10 }
         },
         {
           "id": "nav-to-dining-activity-room",
           "type": "nav",
           "label": "Dining /Activity Room",
-          "position": {
-            "yaw": 126.9,
-            "pitch": -21.7
-          },
+          "position": { "yaw": 126.9, "pitch": -21.7 },
           "targetScene": "dining-activity-room",
-          "targetView": {
-            "yaw": 73.6,
-            "pitch": -29.2,
-            "zoom": 14
-          }
+          "targetView": { "yaw": 73.6, "pitch": -29.2, "zoom": 14 }
         },
         {
           "id": "nav-to-allied-health-team-room",
           "type": "nav",
           "label": "Allied Health Team Room",
-          "position": {
-            "yaw": 122.9,
-            "pitch": -25.6
-          },
+          "position": { "yaw": 122.9, "pitch": -25.6 },
           "targetScene": "allied-health-team-room",
-          "targetView": {
-            "yaw": 81,
-            "pitch": -41.3,
-            "zoom": 14
-          }
+          "targetView": { "yaw": 81, "pitch": -41.3, "zoom": 14 }
         },
         {
           "id": "nav-to-galley-servery",
           "type": "nav",
           "label": "Galley/ Servery",
-          "position": {
-            "yaw": 120.9,
-            "pitch": -19.7
-          },
+          "position": { "yaw": 120.9, "pitch": -19.7 },
           "targetScene": "galley-servery",
-          "targetView": {
-            "yaw": 86.7,
-            "pitch": -29.2,
-            "zoom": 4
-          }
+          "targetView": { "yaw": 86.7, "pitch": -29.2, "zoom": 4 }
         },
         {
           "id": "nav-to-report-meeting-room",
           "type": "nav",
           "label": "Report Meeting Room",
-          "position": {
-            "yaw": 112.1,
-            "pitch": -28.5
-          },
+          "position": { "yaw": 112.1, "pitch": -28.5 },
           "targetScene": "report-meeting-room",
-          "targetView": {
-            "yaw": 91.4,
-            "pitch": -19.3,
-            "zoom": 32
-          }
+          "targetView": { "yaw": 91.4, "pitch": -19.3, "zoom": 32 }
         },
         {
           "id": "nav-to-staff-facility-lounge",
           "type": "nav",
           "label": "Staff Facility / Lounge",
-          "position": {
-            "yaw": 114.9,
-            "pitch": -18.4
-          },
+          "position": { "yaw": 114.9, "pitch": -18.4 },
           "targetScene": "staff-facility-lounge",
-          "targetView": {
-            "yaw": 329.3,
-            "pitch": -22.6,
-            "zoom": 19
-          }
+          "targetView": { "yaw": 329.3, "pitch": -22.6, "zoom": 19 }
         },
         {
           "id": "nav-to-inpatient-suites",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 50,
-            "pitch": -45.3
-          },
+          "position": { "yaw": 50, "pitch": -45.3 },
           "targetScene": "inpatient-suites",
-          "targetView": {
-            "yaw": 100.4,
-            "pitch": -13,
-            "zoom": 15
-          }
+          "targetView": { "yaw": 100.4, "pitch": -13, "zoom": 15 }
         },
         {
           "id": "nav-to-inpatient-suites-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 63.5,
-            "pitch": -47.9
-          },
+          "position": { "yaw": 63.5, "pitch": -47.9 },
           "targetScene": "inpatient-suites",
-          "targetView": {
-            "yaw": 100.4,
-            "pitch": -13,
-            "zoom": 15
-          }
+          "targetView": { "yaw": 100.4, "pitch": -13, "zoom": 15 }
         },
         {
           "id": "nav-to-inpatient-suites-3",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -47.6
-          },
+          "position": { "yaw": 79.5, "pitch": -47.6 },
           "targetScene": "inpatient-suites",
-          "targetView": {
-            "yaw": 100.4,
-            "pitch": -13,
-            "zoom": 15
-          }
+          "targetView": { "yaw": 100.4, "pitch": -13, "zoom": 15 }
         }
       ],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/overview.webp"
@@ -222,25 +124,18 @@
       "id": "inpatient-suites",
       "title": "Inpatient Suites",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/inpatient-suites.webp",
-      "defaultView": {
-        "yaw": 100.4,
-        "pitch": -13,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 100.4, "pitch": -13, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-inpatient-bed-rooms",
           "type": "info",
-          "position": {
-            "yaw": 101.7,
-            "pitch": 6.7
-          },
+          "position": { "yaw": 101.7, "pitch": 6.7 },
           "popup": {
             "display": "anchored",
             "title": "Inpatient Bed Rooms",
             "namingOpportunity": {
               "name": "Inpatient Bed Rooms Naming Opportunity",
-              "price": "25000",
+              "price": 25000,
               "status": "open"
             },
             "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together.",
@@ -255,11 +150,7 @@
       "id": "nursing-station",
       "title": "Nursing Station",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/nursing-station.webp",
-      "defaultView": {
-        "yaw": 84.5,
-        "pitch": -17.2,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 84.5, "pitch": -17.2, "zoom": 10 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/nursing-station.webp",
       "description": "Explore Nursing Station at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
@@ -268,11 +159,7 @@
       "id": "multi-use-lounge-activity-room",
       "title": "Multi Use Lounge / Activity Room",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/multi-use-lounge-activity-room.webp",
-      "defaultView": {
-        "yaw": 181.7,
-        "pitch": -18.3,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 181.7, "pitch": -18.3, "zoom": 10 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/multi-use-lounge-activity-room.webp",
       "description": "Explore Multi Use Lounge / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
@@ -281,25 +168,18 @@
       "id": "reception-centre",
       "title": "Reception Centre",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/reception-centre.webp",
-      "defaultView": {
-        "yaw": 101.6,
-        "pitch": -2.8,
-        "zoom": 55
-      },
+      "defaultView": { "yaw": 101.6, "pitch": -2.8, "zoom": 55 },
       "hotspots": [
         {
           "id": "info-reception-centre",
           "type": "info",
-          "position": {
-            "yaw": 84.9,
-            "pitch": -9.1
-          },
+          "position": { "yaw": 84.9, "pitch": -9.1 },
           "popup": {
             "display": "anchored",
             "title": "Reception Centre",
             "namingOpportunity": {
               "name": "Reception Centre Naming Opportunity",
-              "price": "500000",
+              "price": 500000,
               "status": "reserved"
             },
             "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey.",
@@ -314,11 +194,7 @@
       "id": "quiet-consultant",
       "title": "Quiet / Consultant",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/quiet-consultant.webp",
-      "defaultView": {
-        "yaw": 231.7,
-        "pitch": -29.9,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 231.7, "pitch": -29.9, "zoom": 10 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/quiet-consultant.webp",
       "description": "Explore Quiet / Consultant at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
@@ -327,11 +203,7 @@
       "id": "allied-health-team-room",
       "title": "Allied Health Team Room",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/allied-health-team-room.webp",
-      "defaultView": {
-        "yaw": 81,
-        "pitch": -41.3,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 81, "pitch": -41.3, "zoom": 14 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/allied-health-team-room.webp",
       "description": "Explore Allied Health Team Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON."
@@ -341,11 +213,7 @@
       "title": "Report Meeting Room",
       "description": "Explore Report Meeting Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/report-meeting-room.webp",
-      "defaultView": {
-        "yaw": 91.4,
-        "pitch": -19.3,
-        "zoom": 32
-      },
+      "defaultView": { "yaw": 91.4, "pitch": -19.3, "zoom": 32 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/report-meeting-room.webp"
     },
@@ -354,11 +222,7 @@
       "title": "Galley / Servery",
       "description": "Explore Galley / Servery at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/galley-servery.webp",
-      "defaultView": {
-        "yaw": 293.6,
-        "pitch": -13.6,
-        "zoom": 4
-      },
+      "defaultView": { "yaw": 293.6, "pitch": -13.6, "zoom": 4 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/galley-servery.webp"
     },
@@ -367,11 +231,7 @@
       "title": "Dining / Activity Room",
       "description": "Explore Dining / Activity Room at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/dining-activity-room.webp",
-      "defaultView": {
-        "yaw": 73.6,
-        "pitch": -29.2,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 73.6, "pitch": -29.2, "zoom": 14 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/dining-activity-room.webp"
     },
@@ -380,11 +240,7 @@
       "title": "Staff Facility / Lounge",
       "description": "Explore Staff Facility / Lounge at Med/Surg Inpatient. Scene description and donor content can be updated in the dev panel or tour JSON.",
       "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/staff-facility-lounge.webp",
-      "defaultView": {
-        "yaw": 329.3,
-        "pitch": -22.6,
-        "zoom": 19
-      },
+      "defaultView": { "yaw": 329.3, "pitch": -22.6, "zoom": 19 },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/staff-facility-lounge.webp"
     }

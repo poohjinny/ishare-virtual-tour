@@ -10,6 +10,8 @@ export interface ViewPosition {
   yaw: number;
   pitch: number;
   zoom?: number;
+  /** 3D orbit target (pan offset) — only used by model3d viewer. */
+  target?: { x: number; y: number; z: number };
 }
 
 /** 3D world-space position for model3d scenes (GLTF / Three.js). */
@@ -53,8 +55,8 @@ export type NamingOpportunityStatus = 'open' | 'reserved' | 'soon' | 'closed';
 export interface NamingOpportunity {
   /** Full naming opportunity title (e.g. "Reception Desk Naming Opportunity") */
   name: string;
-  /** Numeric amount only in tour JSON (e.g. "75000") — formatted at display time. */
-  price: string;
+  /** Numeric amount in tour JSON (e.g. 75000) — formatted at display time. */
+  price: number;
   priceLabel?: string;
   /** Availability — defaults to `open` when omitted */
   status?: NamingOpportunityStatus;
@@ -92,7 +94,7 @@ export interface PopupContent {
 export interface Hotspot {
   id: string;
   type: HotspotType;
-  position: ViewPosition;
+  position: HotspotPosition3D;
   label?: string;
   targetScene?: string;
   targetView?: ViewPosition;
@@ -103,6 +105,11 @@ export interface Hotspot {
   navVariant?: NavHotspotVariant;
   /** Optional overrides for nav preview card */
   preview?: { image?: string };
+  /**
+   * For `model3d` tour-level info / naming hotspots — viewpoint scene id.
+   * Per-hotspot camera + Explore thumbnail live on `targetView` / `preview.image`.
+   */
+  sceneId?: string;
 }
 
 /** Naming opportunity summary — accordion row in nav preview. */
@@ -113,10 +120,12 @@ export interface NavPreviewNamingItem {
   statusLabel: string;
   statusShortLabel: string;
   statusModifier: string;
-  price: string;
+  price: number;
   priceLabel?: string;
   /** First paragraph from info popup body */
   description?: string;
+  /** model3d — baked preview image for directory cards */
+  previewImage?: string;
 }
 
 /** Lightweight nav destination preview — shown before scene transition. */
@@ -160,12 +169,14 @@ export interface Scene {
   description?: string;
   /** Equirectangular panorama URL (panorama tours). */
   panorama: string;
-  /** GLTF / GLB model URL (model3d tours). */
+  /** GLTF / GLB model URL (model3d tours). Optional per-scene override of {@link Tour.model}. */
   model?: string;
   /** Baked rectilinear preview at defaultView — Explore location cards; from `npm run generate-thumbnails`. */
   thumbnail?: string;
   defaultView: ViewPosition;
+  /** Panorama / legacy 3D hotspots — `model3d` tours use {@link Tour.hotspots} instead. */
   hotspots: Hotspot[];
+  /** Panorama minimap pin — normalized position on {@link Tour.floorPlan}. */
   map?: SceneMapPosition;
 }
 
@@ -219,6 +230,13 @@ export interface Tour {
   id: string;
   /** Viewer renderer — `'panorama'` (default) or `'model3d'` (Three.js walkthrough). */
   viewerType?: TourViewerType;
+  /** Shared GLB/GLTF for all scenes on model3d tours. */
+  model?: string;
+  /**
+   * Tour-level hotspots on the shared model (`model3d` only) — nav, info, and
+   * naming opportunities. Panorama tours keep hotspots on each {@link Scene}.
+   */
+  hotspots?: Hotspot[];
   /** Owning client id — defaults to `id` when one tour per client. */
   clientId?: string;
   /** Platform category — e.g. Healthcare, Education. */
@@ -233,6 +251,7 @@ export interface Tour {
   branding?: TourBranding;
   /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
   immersiveBackground?: TourImmersiveBackground;
+  /** Panorama tours only — 2D minimap image and scene `map` pin coordinate space. */
   floorPlan?: FloorPlan;
   firstScene: string;
   defaultTransition?: { speed?: string; effect?: 'fade' | 'black' };

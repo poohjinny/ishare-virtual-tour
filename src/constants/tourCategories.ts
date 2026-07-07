@@ -7,6 +7,7 @@ export const TOUR_CATEGORIES = [
   'International Aid',
   'Social Services',
   'Tourism',
+  'Demo',
 ] as const;
 
 export type TourCategory = (typeof TOUR_CATEGORIES)[number];
@@ -19,6 +20,7 @@ const TOUR_CATEGORY_SLUG: Record<TourCategory, string> = {
   'International Aid': 'international-aid',
   'Social Services': 'social-services',
   Tourism: 'tourism',
+  Demo: 'demo',
 };
 
 export function tourCategorySlug(category: TourCategory): string {
@@ -33,4 +35,5 @@ export const TOUR_CATEGORY_MATERIAL_ICONS: Record<TourCategory, string> = {
   'International Aid': 'public',
   'Social Services': 'groups',
   Tourism: 'luggage',
+  Demo: 'science',
 };

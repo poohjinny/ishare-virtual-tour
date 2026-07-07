@@ -1,8 +1,13 @@
-import type { ViewPosition } from '../types/tour';
+import type { ViewPosition, WorldPosition } from '../types/tour';
 
-export interface ClickCoords {
-  yaw: number;
-  pitch: number;
+export type ClickCoords =
+  | { yaw: number; pitch: number }
+  | { x: number; y: number; z: number };
+
+export function isWorldClickCoords(
+  coords: ClickCoords,
+): coords is WorldPosition {
+  return 'x' in coords;
 }
 
 export function roundCoord(value: number): number {
@@ -10,12 +15,19 @@ export function roundCoord(value: number): number {
 }
 
 export function formatCoords(coords: ClickCoords): string {
+  if (isWorldClickCoords(coords)) {
+    return `x: ${coords.x.toFixed(2)}, y: ${coords.y.toFixed(2)}, z: ${coords.z.toFixed(2)}`;
+  }
   return `yaw: ${coords.yaw.toFixed(1)}, pitch: ${coords.pitch.toFixed(1)}`;
 }
 
 export function formatViewPosition(view: ViewPosition): string {
   const zoom = view.zoom ?? 0;
-  return `yaw: ${view.yaw.toFixed(1)}, pitch: ${view.pitch.toFixed(1)}, zoom: ${zoom}`;
+  let str = `yaw: ${view.yaw.toFixed(1)}, pitch: ${view.pitch.toFixed(1)}, zoom: ${zoom}`;
+  if (view.target) {
+    str += ` | target: (${view.target.x.toFixed(2)}, ${view.target.y.toFixed(2)}, ${view.target.z.toFixed(2)})`;
+  }
+  return str;
 }
 
 export function toViewPosition(

@@ -1,23 +1,35 @@
 import type { TourDirectoryNamingItem } from './tourDirectory';
 
-/** Parse display prices such as "$75,000" or "75000" into a numeric amount. */
-export function parseNamingPrice(price: string): number | null {
-  const cleaned = price.replace(/[^0-9.]/g, '');
+/** Parse dev input or legacy JSON strings into a rounded numeric amount. */
+export function parseNamingPriceInput(
+  value: string | number | null | undefined,
+): number | null {
+  if (value == null || value === '') return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? Math.round(value) : null;
+  }
+
+  const cleaned = String(value).replace(/[^0-9.]/g, '');
   if (!cleaned) return null;
 
-  const value = Number.parseFloat(cleaned);
-  return Number.isFinite(value) ? value : null;
+  const parsed = Number.parseFloat(cleaned);
+  return Number.isFinite(parsed) ? Math.round(parsed) : null;
 }
 
-/** Persist numeric amounts only (no currency symbols or grouping). */
-export function normalizeNamingPriceStorage(price: string): string {
-  const trimmed = price.trim();
-  if (!trimmed) return trimmed;
+/** Persist a rounded numeric amount — throws when missing or invalid. */
+export function normalizeNamingPriceStorage(
+  value: string | number | null | undefined,
+): number {
+  const amount = parseNamingPriceInput(value);
+  if (amount == null) {
+    throw new Error('Price is required');
+  }
+  return amount;
+}
 
-  const amount = parseNamingPrice(trimmed);
-  if (amount == null) return trimmed;
-
-  return String(Math.round(amount));
+/** Return the price as-is if finite, otherwise null. */
+export function parseNamingPrice(price: number): number | null {
+  return Number.isFinite(price) ? Math.round(price) : null;
 }
 
 export function formatNamingPriceAmount(amount: number): string {
@@ -26,15 +38,17 @@ export function formatNamingPriceAmount(amount: number): string {
   }).format(amount)}`;
 }
 
-/** Format stored price for UI — numeric storage → currency display. */
-export function formatNamingPriceDisplay(price: string): string {
-  const trimmed = price.trim();
-  if (!trimmed) return trimmed;
+/** Format stored price for UI — numeric → currency display. */
+export function formatNamingPriceDisplay(price: number): string {
+  return Number.isFinite(price) ? formatNamingPriceAmount(price) : '';
+}
 
-  const amount = parseNamingPrice(trimmed);
-  if (amount == null) return trimmed;
-
-  return formatNamingPriceAmount(amount);
+/** Plain string for dev panel inputs — accepts numeric JSON or text. */
+export function formatNamingPriceInput(
+  price: number | string | undefined | null,
+): string {
+  const amount = parseNamingPriceInput(price);
+  return amount == null ? '' : String(amount);
 }
 
 export interface NamingPriceBounds {
