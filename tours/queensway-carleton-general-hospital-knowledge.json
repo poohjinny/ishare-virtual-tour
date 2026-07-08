@@ -67,7 +67,10 @@
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": ["Tell me about MH - 2", "What is available at MH?"]
+      "suggestedQuestions": [
+        "Tell me about MH - 2",
+        "What is available at MH?"
+      ]
     },
     "ed-mh-3": {
       "title": "MH - 3",
@@ -86,7 +89,10 @@
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": ["Tell me about MH - 3", "What is available at MH?"]
+      "suggestedQuestions": [
+        "Tell me about MH - 3",
+        "What is available at MH?"
+      ]
     },
     "ed-ambulance-offload": {
       "title": "Ambulance Offload",
@@ -111,7 +117,7 @@
       ]
     },
     "msi-overview": {
-      "title": "Overview",
+      "title": "Med/Surg Inpatient",
       "description": "Welcome to Med/Surg Inpatient.",
       "facts": [
         "Med/Surg Inpatient is part of the Queensway Carleton General Hospital virtual tour."
@@ -123,7 +129,7 @@
         }
       ],
       "suggestedQuestions": [
-        "Tell me about Overview",
+        "Tell me about Med/Surg Inpatient",
         "What is available at Med/Surg Inpatient?"
       ]
     },
@@ -366,6 +372,94 @@
       ],
       "suggestedQuestions": [
         "Tell me about Mental Health Emergency Services Unit",
+        "What is available at Queensway Carleton General Hospital?"
+      ]
+    },
+    "acute-care-pod-a": {
+      "title": "Acute Care Pod A",
+      "description": "Acute Care Pod A is a vital part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery.\n\nAs emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providing dedicated spaces for patients who require urgent medical attention but may not need trauma or resuscitation-level care.\n\nThis pod will support faster clinical decision-making, better patient flow, and a calmer environment for both patients and frontline teams. Each treatment bay is planned to give staff clear visibility, efficient access to equipment, and enough space to provide safe, compassionate care.\n\nFor patients and families, Acute Care Pod A means less time waiting, more organized care, and a better experience during stressful and uncertain moments.\n\nThis is more than a group of treatment rooms. It is an essential part of a modern Emergency Department built to respond to the growing needs of Ottawa’s west end — with care that is faster, safer, and closer to where it is needed most.",
+      "facts": [
+        "Acute Care Pod A is part of the Queensway Carleton General Hospital virtual tour.",
+        "Use navigation markers to move between areas of Queensway Carleton General Hospital."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Acute Care Pod A?",
+          "a": "Acute Care Pod A is a vital part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery.\n\nAs emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providing dedicated spaces for patients who require urgent medical attention but may not need trauma or resuscitation-level care.\n\nThis pod will support faster clinical decision-making, better patient flow, and a calmer environment for both patients and frontline teams. Each treatment bay is planned to give staff clear visibility, efficient access to equipment, and enough space to provide safe, compassionate care.\n\nFor patients and families, Acute Care Pod A means less time waiting, more organized care, and a better experience during stressful and uncertain moments.\n\nThis is more than a group of treatment rooms. It is an essential part of a modern Emergency Department built to respond to the growing needs of Ottawa’s west end — with care that is faster, safer, and closer to where it is needed most."
+        },
+        {
+          "q": "What is Queensway Carleton General Hospital?",
+          "a": "Queensway Carleton General Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Acute Care Pod A",
+        "What is available at Queensway Carleton General Hospital?"
+      ]
+    },
+    "acute-care-pod-b": {
+      "title": "Acute Care Pod B",
+      "description": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospital’s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention.\n\nAs the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provide individual patient bays designed for privacy, visibility, and quick access to staff, equipment, and support services.\n\nFor patients and families, this means a more structured care experience during stressful moments. Instead of waiting in overcrowded areas, patients can be moved into appropriate treatment spaces sooner, where care teams can respond with greater focus and coordination.\n\nFor frontline staff, Acute Care Pod B will help reduce congestion, improve workflow, and create a safer environment for delivering urgent care. The pod layout supports better communication between nurses, physicians, and support teams, helping decisions happen faster when time matters.\n\nAcute Care Pod B is more than a collection of treatment bays. It is part of a modern Emergency Department designed for Ottawa’s growing west end — helping Queensway Carleton Hospital deliver care that is timely, compassionate, and ready for the needs of today and tomorrow.",
+      "facts": [
+        "Acute Care Pod B is part of the Queensway Carleton General Hospital virtual tour.",
+        "Use navigation markers to move between areas of Queensway Carleton General Hospital."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Acute Care Pod B?",
+          "a": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospital’s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention.\n\nAs the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provide individual patient bays designed for privacy, visibility, and quick access to staff, equipment, and support services.\n\nFor patients and families, this means a more structured care experience during stressful moments. Instead of waiting in overcrowded areas, patients can be moved into appropriate treatment spaces sooner, where care teams can respond with greater focus and coordination.\n\nFor frontline staff, Acute Care Pod B will help reduce congestion, improve workflow, and create a safer environment for delivering urgent care. The pod layout supports better communication between nurses, physicians, and support teams, helping decisions happen faster when time matters.\n\nAcute Care Pod B is more than a collection of treatment bays. It is part of a modern Emergency Department designed for Ottawa’s growing west end — helping Queensway Carleton Hospital deliver care that is timely, compassionate, and ready for the needs of today and tomorrow."
+        },
+        {
+          "q": "What is Queensway Carleton General Hospital?",
+          "a": "Queensway Carleton General Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Acute Care Pod B",
+        "What is available at Queensway Carleton General Hospital?"
+      ]
+    },
+    "acute-care-pod-c": {
+      "title": "Acute Care Pod C",
+      "description": "Acute Care Pod C is an important part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawa’s west end.\n\nAs patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patient bays that support faster movement through the department and better coordination between nurses, physicians, and support teams.\n\nThis pod is designed to improve both clinical efficiency and patient experience. Patients will have more appropriate treatment spaces, greater privacy, and easier access to the care team. For staff, the layout supports clearer workflows, better visibility, and faster access to equipment and nearby services.\n\nAcute Care Pod C will help reduce bottlenecks, support timely decision-making, and create a calmer, safer environment during urgent medical situations.\n\nThis is more than additional space. It is a critical investment in a stronger, more responsive Emergency Department — one that is better prepared to care for families across Ottawa’s west end when every minute matters.",
+      "facts": [
+        "Acute Care Pod C is part of the Queensway Carleton General Hospital virtual tour.",
+        "Use navigation markers to move between areas of Queensway Carleton General Hospital."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Acute Care Pod C?",
+          "a": "Acute Care Pod C is an important part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawa’s west end.\n\nAs patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patient bays that support faster movement through the department and better coordination between nurses, physicians, and support teams.\n\nThis pod is designed to improve both clinical efficiency and patient experience. Patients will have more appropriate treatment spaces, greater privacy, and easier access to the care team. For staff, the layout supports clearer workflows, better visibility, and faster access to equipment and nearby services.\n\nAcute Care Pod C will help reduce bottlenecks, support timely decision-making, and create a calmer, safer environment during urgent medical situations.\n\nThis is more than additional space. It is a critical investment in a stronger, more responsive Emergency Department — one that is better prepared to care for families across Ottawa’s west end when every minute matters."
+        },
+        {
+          "q": "What is Queensway Carleton General Hospital?",
+          "a": "Queensway Carleton General Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Acute Care Pod C",
+        "What is available at Queensway Carleton General Hospital?"
+      ]
+    },
+    "mental-health-emergency-services-unit-2": {
+      "title": "Mental Health Emergency Services Unit - 2",
+      "description": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most.",
+      "facts": [
+        "Mental Health Emergency Services Unit - 2 is part of the Queensway Carleton General Hospital virtual tour.",
+        "Use navigation markers to move between areas of Queensway Carleton General Hospital."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Mental Health Emergency Services Unit - 2?",
+          "a": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most."
+        },
+        {
+          "q": "What is Queensway Carleton General Hospital?",
+          "a": "Queensway Carleton General Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Mental Health Emergency Services Unit - 2",
         "What is available at Queensway Carleton General Hospital?"
       ]
     }

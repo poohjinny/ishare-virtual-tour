@@ -28,12 +28,7 @@
             "yaw": 157.5,
             "pitch": -31.2
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 78.3,
-            "pitch": -77.4,
-            "zoom": 10
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-satellite-imaging",
@@ -43,12 +38,7 @@
             "yaw": 125.9,
             "pitch": -68.3
           },
-          "targetScene": "satalite-imaging-waiting-area",
-          "targetView": {
-            "yaw": 73,
-            "pitch": 3.3,
-            "zoom": 20
-          }
+          "targetScene": "satalite-imaging-waiting-area"
         },
         {
           "id": "nav-to-ambulatory-care-shelled-in-expansion-area",
@@ -58,12 +48,7 @@
             "yaw": 332.6,
             "pitch": -57.3
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 78.3,
-            "pitch": -77.4,
-            "zoom": 10
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-zone-1-walk-in-entrance",
@@ -73,12 +58,7 @@
             "yaw": 160.5,
             "pitch": -43.7
           },
-          "targetScene": "walk-in-entrace",
-          "targetView": {
-            "yaw": 51.9,
-            "pitch": -0.4,
-            "zoom": 35
-          }
+          "targetScene": "walk-in-entrace"
         },
         {
           "id": "nav-to-zone-2-trauma-resuscitation",
@@ -88,12 +68,7 @@
             "yaw": 135.8,
             "pitch": -33.5
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-zone-3-acute-care-pod-d",
@@ -103,12 +78,7 @@
             "yaw": 86.2,
             "pitch": -54.5
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-zone-4-ambulatory-care",
@@ -118,12 +88,7 @@
             "yaw": 9.1,
             "pitch": -47.1
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-zone-5-mhesu",
@@ -133,12 +98,7 @@
             "yaw": 81.4,
             "pitch": -36.9
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-zone6-1-admin-education",
@@ -148,12 +108,7 @@
             "yaw": 43.8,
             "pitch": -38.2
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-zone-6-2-administration-educational-areas",
@@ -163,12 +118,7 @@
             "yaw": 109.2,
             "pitch": -36.5
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-zone-3-acute-care-pod-a",
@@ -178,12 +128,7 @@
             "yaw": 108.9,
             "pitch": -51.2
           },
-          "targetScene": "overview",
-          "targetView": {
-            "yaw": 75.9,
-            "pitch": -77.5,
-            "zoom": 1
-          }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-corridor",
@@ -193,12 +138,7 @@
             "yaw": 93.8,
             "pitch": -71
           },
-          "targetScene": "corridor",
-          "targetView": {
-            "yaw": 110.6,
-            "pitch": 1.2,
-            "zoom": 5
-          }
+          "targetScene": "corridor"
         },
         {
           "id": "nav-to-waiting-area",
@@ -208,12 +148,7 @@
             "yaw": 159.6,
             "pitch": -60.7
           },
-          "targetScene": "waiting-room",
-          "targetView": {
-            "yaw": 355.3,
-            "pitch": -4.9,
-            "zoom": 5
-          }
+          "targetScene": "waiting-room"
         },
         {
           "id": "nav-to-ambulance-of-load",
@@ -223,12 +158,7 @@
             "yaw": 151.3,
             "pitch": -49.5
           },
-          "targetScene": "ambulance-of-load",
-          "targetView": {
-            "yaw": 109.7,
-            "pitch": 1.3,
-            "zoom": 15
-          }
+          "targetScene": "ambulance-of-load"
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-hospital/thumbnails/overview.webp"

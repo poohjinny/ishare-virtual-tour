@@ -24,24 +24,21 @@
           "type": "nav",
           "label": "Main Entrance",
           "position": { "yaw": 117.3, "pitch": -62.5 },
-          "targetScene": "main-entrance",
-          "targetView": { "yaw": 104.6, "pitch": 6.5, "zoom": 35 }
+          "targetScene": "main-entrance"
         },
         {
           "id": "nav-to-comfort-corner",
           "type": "nav",
           "label": "Comfort Corner",
           "position": { "yaw": 100, "pitch": -17.7 },
-          "targetScene": "comfort-corner",
-          "targetView": { "yaw": 107.5, "pitch": -9.6, "zoom": 15 }
+          "targetScene": "comfort-corner"
         },
         {
           "id": "nav-to-entrance-to-the-base-level",
           "type": "nav",
           "label": "Entrance to the Base Level",
           "position": { "yaw": 26, "pitch": -38.8 },
-          "targetScene": "entrance-to-the-base-level",
-          "targetView": { "yaw": 78.6, "pitch": 1, "zoom": 17 }
+          "targetScene": "entrance-to-the-base-level"
         },
         {
           "id": "info-kitchen",
@@ -80,8 +77,7 @@
           "type": "nav",
           "label": "Reception",
           "position": { "yaw": 179.3, "pitch": 4.7 },
-          "targetScene": "reception",
-          "targetView": { "yaw": 89.6, "pitch": 2.1, "zoom": 17 }
+          "targetScene": "reception"
         },
         {
           "id": "nav-to-entrance-to-the-base-level",
@@ -89,7 +85,6 @@
           "label": "Entrance to the Base Level",
           "position": { "yaw": 234.5, "pitch": -3.8 },
           "targetScene": "entrance-to-the-base-level",
-          "targetView": { "yaw": 77.5, "pitch": -1.7, "zoom": 5 },
           "instant": true,
           "navVariant": "back"
         },
@@ -99,7 +94,6 @@
           "label": "Main Entrance",
           "position": { "yaw": 167.5, "pitch": -1.6 },
           "targetScene": "main-entrance",
-          "targetView": { "yaw": 108.3, "pitch": 10.6, "zoom": 20 },
           "instant": true,
           "navVariant": "back"
         }
@@ -120,16 +114,14 @@
           "instant": true,
           "navVariant": "hub",
           "position": { "yaw": 137, "pitch": 13.8 },
-          "targetScene": "overview",
-          "targetView": { "yaw": 80.8, "pitch": -57, "zoom": 14 }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-kitchen",
           "type": "nav",
           "label": "Kitchen",
           "position": { "yaw": 95.3, "pitch": 4.1 },
-          "targetScene": "kitchen",
-          "targetView": { "yaw": 156.5, "pitch": -13.3, "zoom": 35 }
+          "targetScene": "kitchen"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/entrance-to-the-base-level.webp"
@@ -148,8 +140,7 @@
           "instant": true,
           "navVariant": "hub",
           "position": { "yaw": 260.2, "pitch": -0.5 },
-          "targetScene": "overview",
-          "targetView": { "yaw": 80.8, "pitch": -57, "zoom": 14 }
+          "targetScene": "overview"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/comfort-corner.webp"
@@ -169,16 +160,14 @@
           "instant": true,
           "navVariant": "hub",
           "position": { "yaw": 268.7, "pitch": 4.9 },
-          "targetScene": "overview",
-          "targetView": { "yaw": 80.8, "pitch": -57, "zoom": 14 }
+          "targetScene": "overview"
         },
         {
           "id": "nav-to-reception",
           "type": "nav",
           "label": "Reception",
           "position": { "yaw": 105.9, "pitch": 3.8 },
-          "targetScene": "reception",
-          "targetView": { "yaw": 89.6, "pitch": 2.1, "zoom": 17 }
+          "targetScene": "reception"
         },
         {
           "id": "info-parking-lot",
@@ -213,8 +202,7 @@
           "instant": true,
           "navVariant": "back",
           "position": { "yaw": 170, "pitch": -5 },
-          "targetScene": "main-entrance",
-          "targetView": { "yaw": 104.6, "pitch": 6.5, "zoom": 35 }
+          "targetScene": "main-entrance"
         },
         {
           "id": "info-reception",
@@ -271,8 +259,7 @@
           "type": "nav",
           "label": "Kitchen",
           "position": { "yaw": 280, "pitch": -1.6 },
-          "targetScene": "kitchen",
-          "targetView": { "yaw": 156.5, "pitch": -13.3, "zoom": 35 }
+          "targetScene": "kitchen"
         },
         {
           "id": "nav-to-entrance-to-the-base-level",
@@ -280,7 +267,6 @@
           "label": "Entrance to the Base Level",
           "position": { "yaw": 235, "pitch": -1.8 },
           "targetScene": "entrance-to-the-base-level",
-          "targetView": { "yaw": 77.5, "pitch": -1.7, "zoom": 5 },
           "instant": true,
           "navVariant": "back"
         }

@@ -18,8 +18,7 @@
           "type": "nav",
           "label": "Reception",
           "position": { "yaw": 58.2, "pitch": -27.5 },
-          "targetScene": "reception",
-          "targetView": { "yaw": 90, "pitch": 0, "zoom": 0 }
+          "targetScene": "reception"
         }
       ],
       "thumbnail": "/assets/cancerresearchsociety/cancer-research/thumbnails/overview.webp"
@@ -38,8 +37,7 @@
           "instant": true,
           "navVariant": "hub",
           "position": { "yaw": 180, "pitch": -10 },
-          "targetScene": "overview",
-          "targetView": { "yaw": 74.2, "pitch": -62.7, "zoom": 10 }
+          "targetScene": "overview"
         },
         {
           "id": "info-reception",
