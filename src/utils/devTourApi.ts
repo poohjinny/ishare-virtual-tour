@@ -43,7 +43,6 @@ export interface DevNavHotspotPayload extends DevHotspotBasePayload {
   instant?: boolean;
   navVariant?: NavHotspotVariant;
   previewImage?: string;
-  previewVideoUrl?: string;
 }
 
 export interface DevNamingHotspotPayload extends DevHotspotBasePayload {
@@ -124,6 +123,7 @@ export interface DevCreateScenePayload {
   thumbnailFile?: Blob | File;
   defaultView?: ViewPosition;
   description?: string;
+  previewVideoUrl?: string;
   videoUrl?: string;
   sceneId?: string;
 }
@@ -682,6 +682,7 @@ export interface DevUpdateScenePayload {
   sceneId: string;
   title?: string;
   description?: string;
+  previewVideoUrl?: string;
   videoUrl?: string;
   setAsFirstScene?: boolean;
   map?: SceneMapPosition;
@@ -699,12 +700,9 @@ export function devUpdateScene(payload: DevUpdateScenePayload) {
 export interface DevUpdateNavHotspotPayload extends DevHotspotIdPayload {
   label?: string;
   targetSceneId?: string;
-  targetView?: ViewPosition;
-  syncTargetViewFromScene?: boolean;
   instant?: boolean;
   navVariant?: NavHotspotVariant;
   previewImage?: string;
-  previewVideoUrl?: string;
   clearPreviewImage?: boolean;
 }
 

@@ -7,6 +7,13 @@ import {
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 import sharp from 'sharp';
+
+// libvips keeps files it touches memory-mapped in its operation cache. On
+// Windows that mapping blocks re-opening the same path for writing, so a second
+// panorama/thumbnail re-upload to an existing file fails with an EINVAL
+// "unable to open for write". Disabling the cache releases the handle after each
+// write — negligible cost for dev-only image conversions.
+sharp.cache(false);
 import {
   renderEquirectPreviewToFile,
   resolveThumbnailFilePath,
@@ -95,20 +102,6 @@ export function normalizeMapPosition(map) {
   };
 }
 
-function validateOptionalViewPosition(view, label) {
-  if (view === undefined || view === null) return undefined;
-  if (typeof view !== 'object') {
-    throw new Error(`${label} must be an object`);
-  }
-  if (typeof view.yaw !== 'number' || typeof view.pitch !== 'number') {
-    throw new Error(`${label}.yaw and ${label}.pitch must be numbers`);
-  }
-  if (view.zoom !== undefined && typeof view.zoom !== 'number') {
-    throw new Error(`${label}.zoom must be a number`);
-  }
-  return normalizeDefaultView(view);
-}
-
 export function normalizeHotspotPosition(position) {
   if (isWorldHotspotPosition(position)) {
     return {
@@ -149,32 +142,20 @@ function parseNavHotspotVariant(value) {
   return undefined;
 }
 
-function applyNavHotspotPreviewFields(
-  record,
-  { previewImage, previewVideoUrl },
-) {
+function applyNavHotspotPreviewFields(record, { previewImage }) {
   const image = previewImage?.trim();
-  const videoUrl = previewVideoUrl?.trim();
-  if (!image && !videoUrl) return;
+  if (!image) return;
 
-  record.preview = {};
-  if (image) record.preview.image = image;
-  if (videoUrl) record.preview.videoUrl = videoUrl;
+  record.preview = { image };
 }
 
-function mergeNavHotspotPreview(hotspot, { previewImage, previewVideoUrl }) {
+function mergeNavHotspotPreview(hotspot, { previewImage }) {
   const preview = { ...(hotspot.preview ?? {}) };
 
   if (previewImage !== undefined) {
     const image = previewImage?.trim();
     if (image) preview.image = image;
     else delete preview.image;
-  }
-
-  if (previewVideoUrl !== undefined) {
-    const videoUrl = previewVideoUrl?.trim();
-    if (videoUrl) preview.videoUrl = videoUrl;
-    else delete preview.videoUrl;
   }
 
   if (Object.keys(preview).length) hotspot.preview = preview;
@@ -185,11 +166,9 @@ export function buildNavHotspotRecord({
   name,
   position,
   targetSceneId,
-  targetView,
   instant,
   navVariant,
   previewImage,
-  previewVideoUrl,
 }) {
   const label = name.trim();
   const slug = slugifyHotspotName(label);
@@ -205,9 +184,6 @@ export function buildNavHotspotRecord({
     label,
     position: normalizeHotspotPosition(position),
     targetScene,
-    targetView: normalizeDefaultView(
-      targetView ?? { yaw: 0, pitch: 0, zoom: 17 },
-    ),
   };
 
   if (instant) {
@@ -219,7 +195,7 @@ export function buildNavHotspotRecord({
     record.navVariant = resolvedNavVariant;
   }
 
-  applyNavHotspotPreviewFields(record, { previewImage, previewVideoUrl });
+  applyNavHotspotPreviewFields(record, { previewImage });
 
   return record;
 }
@@ -240,6 +216,16 @@ function applySceneVideoField(scene, videoUrl) {
     scene.videoUrl = nextVideoUrl;
   } else {
     delete scene.videoUrl;
+  }
+}
+
+function applyScenePreviewVideoField(scene, previewVideoUrl) {
+  if (previewVideoUrl === undefined) return;
+  const nextPreviewVideoUrl = previewVideoUrl?.trim();
+  if (nextPreviewVideoUrl) {
+    scene.previewVideoUrl = nextPreviewVideoUrl;
+  } else {
+    delete scene.previewVideoUrl;
   }
 }
 
@@ -551,6 +537,7 @@ export function buildSceneRecord({
   panorama,
   defaultView,
   description,
+  previewVideoUrl,
   videoUrl,
   tourTitle,
 }) {
@@ -573,6 +560,7 @@ export function buildSceneRecord({
     ),
     hotspots: [],
   };
+  applyScenePreviewVideoField(record, previewVideoUrl);
   applySceneVideoField(record, videoUrl);
   return record;
 }
@@ -795,6 +783,7 @@ export async function createScene({
   thumbnailFileBuffer,
   defaultView,
   description,
+  previewVideoUrl,
   videoUrl,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
@@ -875,6 +864,7 @@ export async function createScene({
     panorama: panoramaWebPath,
     defaultView,
     description,
+    previewVideoUrl,
     videoUrl,
     tourTitle: tour.title,
   });
@@ -907,21 +897,17 @@ export async function createNavHotspot({
   instant,
   navVariant,
   previewImage,
-  previewVideoUrl,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
   assertTargetSceneExists(tour, targetSceneId);
-  const targetScene = tour.scenes[targetSceneId];
   const hotspot = buildNavHotspotRecord({
     name,
     position,
     targetSceneId,
-    targetView: targetScene?.defaultView,
     instant,
     navVariant,
     previewImage,
-    previewVideoUrl,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
   writeTourJson(tourPath, tour);
@@ -1019,12 +1005,9 @@ export function updateNavHotspot({
   hotspotId,
   label,
   targetSceneId,
-  targetView,
-  syncTargetViewFromScene,
   instant,
   navVariant,
   previewImage,
-  previewVideoUrl,
   clearPreviewImage,
 }) {
   const resolvedHotspotId = hotspotId?.trim();
@@ -1042,27 +1025,21 @@ export function updateNavHotspot({
 
   const nextLabel = label?.trim();
   const nextTargetSceneId = targetSceneId?.trim();
-  const hasTargetView = targetView !== undefined && targetView !== null;
   const hasInstant = instant !== undefined;
   const hasNavVariant = navVariant !== undefined;
   const hasPreviewImage = previewImage !== undefined;
-  const hasPreviewVideoUrl = previewVideoUrl !== undefined;
   const wantsClearPreview = clearPreviewImage === true;
-  const wantsSyncTargetView = syncTargetViewFromScene === true;
 
   if (
     !nextLabel &&
     !nextTargetSceneId &&
-    !hasTargetView &&
     !hasInstant &&
     !hasNavVariant &&
     !hasPreviewImage &&
-    !hasPreviewVideoUrl &&
-    !wantsClearPreview &&
-    !wantsSyncTargetView
+    !wantsClearPreview
   ) {
     throw new Error(
-      'At least one of label, targetSceneId, targetView, instant, navVariant, previewImage, previewVideoUrl, clearPreviewImage, or syncTargetViewFromScene is required',
+      'At least one of label, targetSceneId, instant, navVariant, previewImage, or clearPreviewImage is required',
     );
   }
 
@@ -1073,24 +1050,12 @@ export function updateNavHotspot({
   if (nextTargetSceneId) {
     assertTargetSceneExists(tour, nextTargetSceneId);
     hotspot.targetScene = nextTargetSceneId;
-    if (!hasTargetView && !wantsSyncTargetView) {
-      hotspot.targetView = normalizeDefaultView(
-        tour.scenes[nextTargetSceneId].defaultView,
-      );
-    }
   }
 
-  if (wantsSyncTargetView) {
-    const resolvedTargetSceneId = hotspot.targetScene?.trim();
-    if (!resolvedTargetSceneId) {
-      throw new Error('Nav hotspot has no targetScene to sync targetView from');
-    }
-    assertTargetSceneExists(tour, resolvedTargetSceneId);
-    hotspot.targetView = normalizeDefaultView(
-      tour.scenes[resolvedTargetSceneId].defaultView,
-    );
-  } else if (hasTargetView) {
-    hotspot.targetView = validateOptionalViewPosition(targetView, 'targetView');
+  // Nav arrival follows the target scene defaultView at runtime; drop any
+  // legacy per-hotspot targetView so stale data doesn't linger.
+  if (hotspot.targetView) {
+    delete hotspot.targetView;
   }
 
   if (hasInstant) {
@@ -1112,8 +1077,8 @@ export function updateNavHotspot({
 
   if (wantsClearPreview) {
     delete hotspot.preview;
-  } else if (hasPreviewImage || hasPreviewVideoUrl) {
-    mergeNavHotspotPreview(hotspot, { previewImage, previewVideoUrl });
+  } else if (hasPreviewImage) {
+    mergeNavHotspotPreview(hotspot, { previewImage });
   }
 
   writeTourJson(tourPath, tour);
@@ -1331,6 +1296,7 @@ export function updateScene({
   sceneId,
   title,
   description,
+  previewVideoUrl,
   videoUrl,
   setAsFirstScene,
   map,
@@ -1351,6 +1317,7 @@ export function updateScene({
   const nextTitle = title?.trim();
   const hasDescription = description !== undefined;
   const nextDescription = description?.trim();
+  const hasPreviewVideoUrl = previewVideoUrl !== undefined;
   const hasVideoUrl = videoUrl !== undefined;
   const wantsFirstScene = Boolean(setAsFirstScene);
   const hasMap = map !== undefined && map !== null;
@@ -1359,13 +1326,14 @@ export function updateScene({
   if (
     !nextTitle &&
     !hasDescription &&
+    !hasPreviewVideoUrl &&
     !hasVideoUrl &&
     !wantsFirstScene &&
     !hasMap &&
     !wantsClearMap
   ) {
     throw new Error(
-      'At least one of title, description, videoUrl, setAsFirstScene, map, or clearMap is required',
+      'At least one of title, description, previewVideoUrl, videoUrl, setAsFirstScene, map, or clearMap is required',
     );
   }
 
@@ -1377,6 +1345,10 @@ export function updateScene({
     scene.description =
       nextDescription ||
       defaultSceneDescription(tour.title, scene.title ?? resolvedSceneId);
+  }
+
+  if (hasPreviewVideoUrl) {
+    applyScenePreviewVideoField(scene, previewVideoUrl);
   }
 
   if (hasVideoUrl) {
