@@ -123,6 +123,16 @@
             "pitch": -53.6
           },
           "targetScene": "acute-care-pod-c"
+        },
+        {
+          "id": "nav-to-acute-care-pod-d",
+          "type": "nav",
+          "label": "Acute Care Pod D",
+          "position": {
+            "yaw": 71.2,
+            "pitch": -39.4
+          },
+          "targetScene": "acute-care-pod-d"
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-overview.webp",
@@ -812,6 +822,79 @@
       "previewVideoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s",
       "videoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/mental-health-emergency-services-unit-2.webp"
+    },
+    "acute-care-pod-d": {
+      "id": "acute-care-pod-d",
+      "title": "Acute Care Pod D",
+      "description": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end.",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/acute-care-pod-d.webp",
+      "defaultView": {
+        "yaw": 33.6,
+        "pitch": -10.1,
+        "zoom": 15
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-emergency-department",
+          "type": "nav",
+          "label": "Emergency Department",
+          "position": {
+            "yaw": 296.9,
+            "pitch": -6.6
+          },
+          "targetScene": "ed-overview",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-acute-care-pod-d-2",
+          "type": "nav",
+          "label": "Acute Care Pod D - 2",
+          "position": {
+            "yaw": 34.6,
+            "pitch": -1.7
+          },
+          "targetScene": "acute-care-pod-d-2",
+          "instant": true
+        },
+        {
+          "id": "info-acute-care-pod-d",
+          "type": "info",
+          "position": {
+            "yaw": 34.1,
+            "pitch": -23.1
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Acute Care Pod D",
+            "namingOpportunity": {
+              "name": "Acute Care Pod D Naming Opportunity",
+              "price": 1000000,
+              "status": "open"
+            },
+            "body": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e"
+          }
+        }
+      ],
+      "previewVideoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
+      "videoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-d.webp"
+    },
+    "acute-care-pod-d-2": {
+      "id": "acute-care-pod-d-2",
+      "title": "Acute Care Pod D - 2",
+      "description": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end.",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/acute-care-pod-d-2.webp",
+      "defaultView": {
+        "yaw": 33.6,
+        "pitch": -10.1,
+        "zoom": 5
+      },
+      "hotspots": [],
+      "previewVideoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
+      "videoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-d-2.webp"
     }
   },
   "floorPlan": {
