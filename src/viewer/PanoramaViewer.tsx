@@ -146,6 +146,8 @@ interface PanoramaViewerProps {
   skipLanding?: boolean;
   /** Override landing end pose (e.g. `?no=` on the initial scene). */
   landingTargetView?: ViewPosition;
+  /** NO hotspot on the initial scene (`?no=`) — landing ends pre-framed for its panel. */
+  landingNamingHotspotId?: string | null;
   /** True once landing may start (splash exit) — gates first-load camera motion. */
   splashDone?: boolean;
   /** Tour-scoped controller — owned by TourPage so scene nav does not reset audio. */
@@ -215,6 +217,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       onControlsToggle,
       skipLanding = false,
       landingTargetView,
+      landingNamingHotspotId = null,
       splashDone = false,
       immersiveBackgroundController = null,
       immersiveNavbarAvailable = false,
@@ -271,6 +274,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     /** Fixed at mount — URL scene changes must not recreate the PSV viewer (causes black flash). */
     const initialSceneIdAtMount = useRef(initialSceneId);
     const landingTargetViewAtMount = useRef(landingTargetView);
+    const landingNamingHotspotIdAtMount = useRef(landingNamingHotspotId);
 
     const keyboardControlRef = useRef<ReturnType<
       typeof bindPanoramaKeyboardControl
@@ -915,13 +919,27 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         landingStarted = true;
         markLandingTransitionPlayed(tourId);
 
+        // With `?no=` on the initial scene, land pre-framed for the NO panel so
+        // the panel opens fully on screen (matches the in-tour "go to NO" move);
+        // the panel's follow-up clip nudge then becomes a no-op.
+        const namingHotspotId = landingNamingHotspotIdAtMount.current;
+        const landingEndView =
+          namingHotspotId ?
+            (resolveNamingOpportunityFramedView(
+              viewer,
+              tourRef.current,
+              resolvedStartSceneId,
+              namingHotspotId,
+            ) ?? landingView)
+          : landingView;
+
         void (async () => {
           landingSuppressLoadProgress = true;
           transitioningRef.current = true;
           onTransitionStartRef.current();
           try {
             onLandingStartRef.current?.();
-            await playLandingTransition(viewer, randomStart, landingView);
+            await playLandingTransition(viewer, randomStart, landingEndView);
           } finally {
             landingSuppressLoadProgress = false;
             transitioningRef.current = false;

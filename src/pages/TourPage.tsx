@@ -405,14 +405,19 @@ function TourExperience() {
     return route.sceneId ?? bootstrapTour.firstScene;
   }, [bootstrapTour.firstScene, route.sceneId, route.tourId, tour]);
 
-  const landingTargetView = useMemo(() => {
-    if (!tour) return undefined;
+  const landingNamingHotspotId = useMemo(() => {
+    if (!tour) return null;
     const noSearchValue = urlSearchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
-    if (!noSearchValue) return undefined;
+    if (!noSearchValue) return null;
     const resolved = resolveNamingOpportunityFromSearch(tour, noSearchValue);
-    if (!resolved || resolved.sceneId !== initialScene) return undefined;
-    return resolveSceneLandingView(tour, initialScene, resolved.hotspotId);
+    if (!resolved || resolved.sceneId !== initialScene) return null;
+    return resolved.hotspotId;
   }, [initialScene, tour, urlSearchParams]);
+
+  const landingTargetView = useMemo(() => {
+    if (!tour || !landingNamingHotspotId) return undefined;
+    return resolveSceneLandingView(tour, initialScene, landingNamingHotspotId);
+  }, [initialScene, landingNamingHotspotId, tour]);
 
   const viewerRef = useRef<TourViewerHandle>(null);
   const viewerAreaRef = useRef<HTMLDivElement>(null);
@@ -946,6 +951,7 @@ function TourExperience() {
             }
             skipLanding={searchParams.skipLanding}
             landingTargetView={landingTargetView}
+            landingNamingHotspotId={landingNamingHotspotId}
             splashDone={splashRevealReady}
             immersiveBackgroundController={immersiveBackgroundController}
             immersiveNavbarAvailable={Boolean(
