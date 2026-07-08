@@ -62,8 +62,8 @@
       "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-overview.webp",
       "defaultView": {
-        "yaw": 142.7,
-        "pitch": -68.8,
+        "yaw": 121.8,
+        "pitch": -78.7,
         "zoom": 1
       },
       "hotspots": [
@@ -125,9 +125,9 @@
           },
           "targetScene": "mental-health-emergency-services-unit",
           "targetView": {
-            "yaw": 0,
-            "pitch": 0,
-            "zoom": 17
+            "yaw": 89.9,
+            "pitch": -3.8,
+            "zoom": 0
           },
           "preview": {
             "videoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s"
@@ -136,19 +136,6 @@
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-overview.webp",
       "videoUrl": "https://share.synthesia.io/embeds/videos/c299f173-bd3c-4ac9-bc10-03f17e8814f3"
-    },
-    "ed-mh-1": {
-      "id": "ed-mh-1",
-      "title": "MH - 1",
-      "description": "Explore MH - 1 as part of the MH virtual tour.",
-      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-1.webp",
-      "defaultView": {
-        "yaw": 59,
-        "pitch": -3.2,
-        "zoom": 0
-      },
-      "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/mh-1.webp"
     },
     "ed-mh-2": {
       "id": "ed-mh-2",
@@ -167,7 +154,7 @@
       "id": "ed-mh-3",
       "title": "Waiting Area",
       "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
-      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/mh-3.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-mh-3.webp",
       "defaultView": {
         "yaw": 129,
         "pitch": 45,
@@ -194,14 +181,14 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/ed-mh-3.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-mh-3.webp",
       "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
     },
     "ed-ambulance-offload": {
       "id": "ed-ambulance-offload",
       "title": "Ambulance Offload",
       "description": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawa’s west end — one that supports patients, families, paramedics, and hospital staff when time matters most.",
-      "panorama": "/assets/qchfoundation/mental-health-emergency-services-unit/panoramas/ambulance-offload.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-ambulance-offload.webp",
       "defaultView": {
         "yaw": 88.4,
         "pitch": 2.1,
@@ -229,13 +216,13 @@
         }
       ],
       "videoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7",
-      "thumbnail": "/assets/qchfoundation/mental-health-emergency-services-unit/thumbnails/ambulance-offload.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-ambulance-offload.webp"
     },
     "msi-overview": {
       "id": "msi-overview",
       "title": "Med / surg Inpatient",
       "description": "Explore Med / surg Inpatient as part of the Queensway Carleton General Hospital virtual tour.",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/overview.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-overview.webp",
       "defaultView": {
         "yaw": 102.2,
         "pitch": -62.8,
@@ -438,12 +425,12 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/msi-overview.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-overview.webp"
     },
     "msi-inpatient-suites": {
       "id": "msi-inpatient-suites",
       "title": "Inpatient Suites",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/inpatient-suites.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-inpatient-suites.webp",
       "defaultView": {
         "yaw": 100.4,
         "pitch": -13,
@@ -470,39 +457,39 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/inpatient-suites.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-inpatient-suites.webp",
       "description": "Explore Inpatient Suites as part of the Med/Surg Inpatient virtual tour."
     },
     "msi-nursing-station": {
       "id": "msi-nursing-station",
       "title": "Nursing Station",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/nursing-station.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-nursing-station.webp",
       "defaultView": {
         "yaw": 84.5,
         "pitch": -17.2,
         "zoom": 10
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/nursing-station.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-nursing-station.webp",
       "description": "Explore Nursing Station as part of the Med/Surg Inpatient virtual tour."
     },
     "msi-multi-use-lounge-activity-room": {
       "id": "msi-multi-use-lounge-activity-room",
       "title": "Multi Use Lounge / Activity Room",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/multi-use-lounge-activity-room.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-multi-use-lounge-activity-room.webp",
       "defaultView": {
         "yaw": 181.7,
         "pitch": -18.3,
         "zoom": 10
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/multi-use-lounge-activity-room.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-multi-use-lounge-activity-room.webp",
       "description": "Explore Multi Use Lounge / Activity Room as part of the Med/Surg Inpatient virtual tour."
     },
     "msi-reception-centre": {
       "id": "msi-reception-centre",
       "title": "Reception Centre",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/reception-centre.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-reception-centre.webp",
       "defaultView": {
         "yaw": 101.6,
         "pitch": -2.8,
@@ -529,86 +516,86 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/reception-centre.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-reception-centre.webp",
       "description": "Explore Reception Centre as part of the Med/Surg Inpatient virtual tour."
     },
     "msi-quiet-consultant": {
       "id": "msi-quiet-consultant",
       "title": "Quiet / Consultant",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/quiet-consultant.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-quiet-consultant.webp",
       "defaultView": {
         "yaw": 231.7,
         "pitch": -29.9,
         "zoom": 10
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/quiet-consultant.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-quiet-consultant.webp",
       "description": "Explore Quiet / Consultant as part of the Med/Surg Inpatient virtual tour."
     },
     "msi-allied-health-team-room": {
       "id": "msi-allied-health-team-room",
       "title": "Allied Health Team Room",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/allied-health-team-room.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-allied-health-team-room.webp",
       "defaultView": {
         "yaw": 81,
         "pitch": -41.3,
         "zoom": 14
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/allied-health-team-room.webp",
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-allied-health-team-room.webp",
       "description": "Explore Allied Health Team Room as part of the Med/Surg Inpatient virtual tour."
     },
     "msi-report-meeting-room": {
       "id": "msi-report-meeting-room",
       "title": "Report Meeting Room",
       "description": "Explore Report Meeting Room as part of the Med/Surg Inpatient virtual tour.",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/report-meeting-room.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-report-meeting-room.webp",
       "defaultView": {
         "yaw": 91.4,
         "pitch": -19.3,
         "zoom": 32
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/report-meeting-room.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-report-meeting-room.webp"
     },
     "msi-galley-servery": {
       "id": "msi-galley-servery",
       "title": "Galley / Servery",
       "description": "Explore Galley / Servery as part of the Med/Surg Inpatient virtual tour.",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/galley-servery.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-galley-servery.webp",
       "defaultView": {
         "yaw": 293.6,
         "pitch": -13.6,
         "zoom": 4
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/galley-servery.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-galley-servery.webp"
     },
     "msi-dining-activity-room": {
       "id": "msi-dining-activity-room",
       "title": "Dining / Activity Room",
       "description": "Explore Dining / Activity Room as part of the Med/Surg Inpatient virtual tour.",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/dining-activity-room.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-dining-activity-room.webp",
       "defaultView": {
         "yaw": 73.6,
         "pitch": -29.2,
         "zoom": 14
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/dining-activity-room.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-dining-activity-room.webp"
     },
     "msi-staff-facility-lounge": {
       "id": "msi-staff-facility-lounge",
       "title": "Staff Facility / Lounge",
       "description": "Explore Staff Facility / Lounge as part of the Med/Surg Inpatient virtual tour.",
-      "panorama": "/assets/qchfoundation/med-surg-inpatient/panoramas/staff-facility-lounge.webp",
+      "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-staff-facility-lounge.webp",
       "defaultView": {
         "yaw": 329.3,
         "pitch": -22.6,
         "zoom": 19
       },
       "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/med-surg-inpatient/thumbnails/staff-facility-lounge.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-staff-facility-lounge.webp"
     },
     "mental-health-emergency-services-unit": {
       "id": "mental-health-emergency-services-unit",
@@ -618,14 +605,14 @@
       "defaultView": {
         "yaw": 89.9,
         "pitch": -3.8,
-        "zoom": 0
+        "zoom": 25
       },
       "hotspots": [],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/mental-health-emergency-services-unit.webp"
     }
   },
   "floorPlan": {
-    "image": "/assets/qchfoundation/med-surg-inpatient/maps/floorplan.svg",
+    "image": "/assets/qchfoundation/queensway-carleton-general-hospital/maps/floorplan.svg",
     "width": 324,
     "height": 216
   }

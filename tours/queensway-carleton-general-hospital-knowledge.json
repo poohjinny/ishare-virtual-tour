@@ -50,28 +50,6 @@
         "What is available at MH?"
       ]
     },
-    "ed-mh-1": {
-      "title": "MH - 1",
-      "description": "Explore MH - 1 as part of the MH virtual tour.",
-      "facts": [
-        "MH - 1 is part of the MH virtual tour.",
-        "Use navigation markers to explore other areas of this tour."
-      ],
-      "faqs": [
-        {
-          "q": "What can I see in MH - 1?",
-          "a": "Explore MH - 1 as part of the MH virtual tour."
-        },
-        {
-          "q": "What is MH?",
-          "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
-        }
-      ],
-      "suggestedQuestions": [
-        "Tell me about MH - 1",
-        "What is available at MH?"
-      ]
-    },
     "ed-mh-2": {
       "title": "MH - 2",
       "description": "Explore MH - 2 as part of the MH virtual tour.",
@@ -89,10 +67,7 @@
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": [
-        "Tell me about MH - 2",
-        "What is available at MH?"
-      ]
+      "suggestedQuestions": ["Tell me about MH - 2", "What is available at MH?"]
     },
     "ed-mh-3": {
       "title": "MH - 3",
@@ -111,10 +86,7 @@
           "a": "MH is an interactive virtual tour. Use navigation markers to move between scenes."
         }
       ],
-      "suggestedQuestions": [
-        "Tell me about MH - 3",
-        "What is available at MH?"
-      ]
+      "suggestedQuestions": ["Tell me about MH - 3", "What is available at MH?"]
     },
     "ed-ambulance-offload": {
       "title": "Ambulance Offload",
