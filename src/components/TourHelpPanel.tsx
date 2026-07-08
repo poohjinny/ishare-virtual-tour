@@ -103,7 +103,7 @@ export function TourHelpPanel({
             </li>
 
             <li>
-              Open Explore tour to browse locations and naming opportunities, or
+              Open Explore tour to browse places and naming opportunities, or
               use search to jump by name.
             </li>
 

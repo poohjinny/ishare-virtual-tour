@@ -1,12 +1,14 @@
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import { cn } from '../lib/cn';
 import { EXPLORE_GALLERY_NAMING_VIEW_LABEL } from '../constants/tourDirectory';
+import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { NamingHeartIcon } from './icons/NamingHeartIcon';
 import type { NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import {
+  tourNavCurrentInlineLabelClassName,
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBadgeColumnClassName,
   tourNavDirectoryListItemPrimaryCtaClassName,
@@ -29,6 +31,8 @@ interface ExploreNamingDirectoryListItemProps {
   active: boolean;
   priceLabel: string;
   disabled?: boolean;
+  /** Show the scene (place) name under the title. Off when a scene subheader already names it. */
+  showLocation?: boolean;
   onSelect: () => void;
 }
 
@@ -37,11 +41,12 @@ export function ExploreNamingDirectoryListItem({
   active,
   priceLabel,
   disabled = false,
+  showLocation = true,
   onSelect,
 }: ExploreNamingDirectoryListItemProps) {
   const isClosed = item.statusModifier === 'closed';
   const description = item.description?.trim();
-  const showActions = !active;
+  const showActions = true;
   const ariaLabel =
     active ?
       description ?
@@ -80,6 +85,11 @@ export function ExploreNamingDirectoryListItem({
             <NamingHeartIcon active={active} closed={isClosed} />
           </span>
           <span className={tourNavItemTextClassName}>
+            {active ?
+              <ExploreCurrentHereLabel
+                className={tourNavCurrentInlineLabelClassName}
+              />
+            : null}
             <span className={tourNavItemNamingHeaderClassName}>
               <span className={tourNavItemNamingTitleRowClassName}>
                 <span className={tourNavItemNamingNameClassName}>
@@ -91,9 +101,11 @@ export function ExploreNamingDirectoryListItem({
                   className={cn(tourNavItemBadgeClassName, 'ml-0 shrink-0')}
                 />
               </span>
-              <span className={tourNavItemNamingLocationClassName}>
-                {item.sceneTitle}
-              </span>
+              {showLocation ?
+                <span className={tourNavItemNamingLocationClassName}>
+                  {item.sceneTitle}
+                </span>
+              : null}
             </span>
             {description || showActions ?
               <span className='flex min-w-0 flex-col'>

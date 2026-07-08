@@ -1,11 +1,4 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { TOUR_CHROME_COMPACT_MAX_PX } from '../constants/tourChrome';
@@ -16,8 +9,6 @@ import {
   TOUR_DIRECTORY_PANEL_TITLE,
   TOUR_DIRECTORY_SECTION_LOCATIONS,
   TOUR_DIRECTORY_SECTION_NAMING,
-  TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
-  TOUR_DIRECTORY_OVERVIEW_LABEL,
   TOUR_DIRECTORY_TABS,
   TOUR_DIRECTORY_TAB_ORDER,
   TOUR_DIRECTORY_EMPTY_LOCATIONS,
@@ -82,6 +73,7 @@ import {
   filterTourScenes,
   sortTourNamingDirectory,
   sortTourScenes,
+  type NamingSceneSubgroup,
   type TourDirectoryNamingItem,
 } from '../utils/tourDirectory';
 import {
@@ -89,6 +81,7 @@ import {
   filterTourNamingByPriceRange,
   formatNamingItemDisplayPrice,
   formatNamingSectorGroupTotalLabel,
+  SHOW_SECTOR_NAMING_TOTAL,
 } from '../utils/namingPrice';
 import { SegmentedTabs } from './ui/SegmentedTabs';
 import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
@@ -96,7 +89,6 @@ import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
-  MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_20,
   MATERIAL_SYMBOL_SIZE_22,
 } from './ui/materialSymbolClasses';
@@ -144,9 +136,8 @@ import {
   tourNavLocationGalleryListClassName,
   tourNavLogoClassName,
   tourNavLogoLinkClassName,
-  tourNavCurrentPinnedClassName,
-  tourNavCurrentPinnedLabelClassName,
-  tourNavOverviewPinnedLabelClassName,
+  tourNavNamingSceneSubgroupsClassName,
+  tourNavNamingSceneSubheaderClassName,
   tourNavPanelScrollClassName,
   tourNavPanelScrollInnerClassName,
   tourNavPanelSlotVariants,
@@ -178,6 +169,8 @@ interface TourNavFloatProps {
   onSelectScene: (sceneId: string) => void;
   onSelectNamingOpportunity: (sceneId: string, hotspotId: string) => void;
   onBreadcrumbNavigate: (sceneId: string) => void;
+  /** Recenter the live scene to its default view — used when "Visiting" the current place. */
+  onRecenterCurrentScene?: () => void;
   /** Info hotspot id when a naming opportunity panel is open in-scene. */
   activeNamingHotspotId?: string | null;
   /** `?embed=1` — hide Share/Help FAB; PSV control pill stays on. */
@@ -326,6 +319,7 @@ export function TourNavFloat({
   onSelectScene,
   onSelectNamingOpportunity,
   onBreadcrumbNavigate,
+  onRecenterCurrentScene,
   activeNamingHotspotId = null,
   embed = false,
   panelStack,
@@ -644,8 +638,6 @@ export function TourNavFloat({
 
   const firstScene = scenesById[firstSceneId];
 
-  const currentScene = scenesById[currentSceneId];
-
   // Department groups from the nav graph — only when sorted by tour order.
   const locationGroups = useMemo(() => {
     if (exploreLocationsSort !== 'tour-order') return null;
@@ -673,16 +665,25 @@ export function TourNavFloat({
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
-  // Keep the current scene's group open (initial mount + on scene change).
+  const currentGroupIdRef = useRef(currentGroupId);
   useEffect(() => {
-    if (!currentGroupId) return;
+    currentGroupIdRef.current = currentGroupId;
+  }, [currentGroupId]);
+
+  // Expand the current scene's group only when Explore opens. Expanding on
+  // every scene change (while open) would reflow the list and jump the scroll.
+  const exploreOpen = panelMode === 'explore';
+  useEffect(() => {
+    if (!exploreOpen) return;
+    const groupId = currentGroupIdRef.current;
+    if (!groupId) return;
     setExpandedGroups((prev) => {
-      if (prev.has(currentGroupId)) return prev;
+      if (prev.has(groupId)) return prev;
       const next = new Set(prev);
-      next.add(currentGroupId);
+      next.add(groupId);
       return next;
     });
-  }, [currentGroupId]);
+  }, [exploreOpen]);
 
   const toggleGroup = useCallback((groupId: string) => {
     setExpandedGroups((prev) => {
@@ -884,9 +885,15 @@ export function TourNavFloat({
       closePanel();
     };
 
-    document.addEventListener('pointerdown', handlePointerDownOutside);
+    // Capture phase so anchored viewer panels (nav/NO popups) that
+    // stopPropagation on bubble still dismiss this panel like any outside click.
+    document.addEventListener('pointerdown', handlePointerDownOutside, true);
     return () =>
-      document.removeEventListener('pointerdown', handlePointerDownOutside);
+      document.removeEventListener(
+        'pointerdown',
+        handlePointerDownOutside,
+        true,
+      );
   }, [closePanel, panelMode]);
 
   useEffect(() => {
@@ -919,6 +926,10 @@ export function TourNavFloat({
   const handleSelect = (sceneId: string) => {
     if (sceneId !== currentSceneId) {
       onSelectScene(sceneId);
+    } else {
+      // Already here — "Visit" recenters to the default view and reveals it.
+      onRecenterCurrentScene?.();
+      closePanel();
     }
 
     if (exploreSearchOpen) {
@@ -934,6 +945,10 @@ export function TourNavFloat({
 
     if (exploreSceneDetailId !== currentSceneId) {
       onSelectScene(exploreSceneDetailId);
+    } else {
+      // Already here — "Visit" recenters to the default view and reveals it.
+      onRecenterCurrentScene?.();
+      closePanel();
     }
 
     if (exploreSearchOpen) {
@@ -943,10 +958,12 @@ export function TourNavFloat({
     setExploreSceneDetailExiting(false);
     setExploreSceneDetailId(null);
   }, [
+    closePanel,
     closeExploreSearch,
     currentSceneId,
     exploreSceneDetailId,
     exploreSearchOpen,
+    onRecenterCurrentScene,
     onSelectScene,
   ]);
 
@@ -1038,7 +1055,12 @@ export function TourNavFloat({
       aria-label='Tour directory filters'
       tabs={TOUR_DIRECTORY_TABS.map((tab) => ({
         id: tab.id,
-        label: <ExploreDirectoryTabLabel tab={tab.id} label={tab.label} />,
+        label: (
+          <ExploreDirectoryTabLabel
+            tab={tab.id}
+            label={isMobile && tab.shortLabel ? tab.shortLabel : tab.label}
+          />
+        ),
         htmlId: `tour-nav-directory-tab-${tab.id}`,
         ariaControls: `tour-nav-directory-panel-${tab.id}`,
       }))}
@@ -1162,8 +1184,62 @@ export function TourNavFloat({
       /** Search results — list rows only (no gallery cards). */
       listOnly?: boolean;
       suppressReorderRef?: boolean;
+      /** List view only: split rows under per-scene subheaders (place names). */
+      sceneSubgroups?: NamingSceneSubgroup[];
     },
   ) => {
+    const renderNamingRow = (
+      item: TourDirectoryNamingItem,
+      showLocation: boolean,
+    ) => (
+      <ExploreNamingDirectoryListItem
+        key={`${item.sceneId}:${item.hotspotId}`}
+        item={item}
+        active={
+          activeNamingHotspotId === item.hotspotId &&
+          currentSceneId === item.sceneId
+        }
+        priceLabel={formatNamingItemDisplayPrice(item)}
+        disabled={disabled || namingOpportunityBusy}
+        showLocation={showLocation}
+        onSelect={() => handleSelectNaming(item.sceneId, item.hotspotId)}
+      />
+    );
+
+    const listHidden = !options?.listOnly && exploreLayout !== 'list';
+    const subgroups = options?.sceneSubgroups;
+
+    const listView =
+      subgroups ?
+        <div
+          hidden={listHidden}
+          className={tourNavNamingSceneSubgroupsClassName}
+        >
+          {subgroups.map((subgroup) => (
+            <div key={subgroup.sceneId}>
+              <p className={tourNavNamingSceneSubheaderClassName}>
+                {subgroup.sceneTitle}
+              </p>
+              <ul
+                className={tourNavListClassName}
+                role='listbox'
+                aria-label={subgroup.sceneTitle}
+              >
+                {subgroup.items.map((item) => renderNamingRow(item, false))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      : <ul
+          ref={options?.suppressReorderRef ? undefined : namingListRef}
+          hidden={listHidden}
+          className={tourNavListClassName}
+          role='listbox'
+          aria-label={TOUR_DIRECTORY_SECTION_NAMING}
+        >
+          {items.map((item) => renderNamingRow(item, true))}
+        </ul>;
+
     const listBody =
       items.length > 0 ?
         <>
@@ -1200,32 +1276,7 @@ export function TourNavFloat({
               ))}
             </ul>
           : null}
-          <ul
-            ref={options?.suppressReorderRef ? undefined : namingListRef}
-            hidden={!options?.listOnly && exploreLayout !== 'list'}
-            className={tourNavListClassName}
-            role='listbox'
-            aria-label={TOUR_DIRECTORY_SECTION_NAMING}
-          >
-            {items.map((item) => {
-              const isActive =
-                activeNamingHotspotId === item.hotspotId &&
-                currentSceneId === item.sceneId;
-
-              return (
-                <ExploreNamingDirectoryListItem
-                  key={`${item.sceneId}:${item.hotspotId}`}
-                  item={item}
-                  active={isActive}
-                  priceLabel={formatNamingItemDisplayPrice(item)}
-                  disabled={disabled || namingOpportunityBusy}
-                  onSelect={() =>
-                    handleSelectNaming(item.sceneId, item.hotspotId)
-                  }
-                />
-              );
-            })}
-          </ul>
+          {listView}
         </>
       : options?.emptyMessage ?
         <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
@@ -1262,46 +1313,18 @@ export function TourNavFloat({
     return renderExploreDirectory();
   };
 
-  const renderPinnedSection = (
-    label: string,
-    body: ReactNode,
-    labelClassName: string = tourNavCurrentPinnedLabelClassName,
-    icon?: string,
-  ) => (
-    <section className={tourNavCurrentPinnedClassName} aria-label={label}>
-      <span className={labelClassName}>
-        {icon ?
-          <MaterialSymbol name={icon} sizePx={MATERIAL_SYMBOL_SIZE_16} />
-        : null}
-        {label}
-      </span>
-      <ExploreLayoutPanel layout={exploreLayout}>{body}</ExploreLayoutPanel>
-    </section>
-  );
-
   const renderGroupedLocations = (options?: { sectionGroupLead?: boolean }) => (
     <>
-      {currentScene ?
-        renderPinnedSection(
-          TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
-          renderLocationsList([currentScene], {
+      {firstScene ?
+        <ExploreLayoutPanel
+          layout={exploreLayout}
+          className='mb-[var(--tour-directory-space,16px)]'
+        >
+          {renderLocationsList([firstScene], {
             listBodyOnly: true,
             suppressReorderRef: true,
-          }),
-          tourNavCurrentPinnedLabelClassName,
-          'flag',
-        )
-      : null}
-      {firstScene && firstScene.id !== currentSceneId ?
-        renderPinnedSection(
-          TOUR_DIRECTORY_OVERVIEW_LABEL,
-          renderLocationsList([firstScene], {
-            listBodyOnly: true,
-            suppressReorderRef: true,
-          }),
-          tourNavOverviewPinnedLabelClassName,
-          'trip_origin',
-        )
+          })}
+        </ExploreLayoutPanel>
       : null}
       <div
         className={tourNavDirectoryGroupedListClassName({
@@ -1343,17 +1366,6 @@ export function TourNavFloat({
 
     return (
       <>
-        {activeNamingItem ?
-          renderPinnedSection(
-            TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
-            renderNamingList([activeNamingItem], {
-              listBodyOnly: true,
-              suppressReorderRef: true,
-            }),
-            tourNavCurrentPinnedLabelClassName,
-            'flag',
-          )
-        : null}
         <div
           className={tourNavDirectoryGroupedListClassName({
             sectionLead: options?.sectionGroupLead,
@@ -1363,7 +1375,11 @@ export function TourNavFloat({
             <ExploreLocationGroup
               key={group.id}
               title={group.title}
-              metaLabel={formatNamingSectorGroupTotalLabel(group.total)}
+              metaLabel={
+                SHOW_SECTOR_NAMING_TOTAL ?
+                  formatNamingSectorGroupTotalLabel(group.total)
+                : undefined
+              }
               expanded={!collapsedNamingGroups.has(group.id)}
               regionId={`tour-nav-naming-group-${group.id}`}
               headingId={`tour-nav-naming-group-heading-${group.id}`}
@@ -1374,6 +1390,7 @@ export function TourNavFloat({
                 {renderNamingList(group.items, {
                   listBodyOnly: true,
                   suppressReorderRef: true,
+                  sceneSubgroups: group.sceneSubgroups,
                 })}
               </ExploreLayoutPanel>
             </ExploreLocationGroup>
@@ -1656,46 +1673,6 @@ export function TourNavFloat({
         aria-label='Tour location'
       >
         <div className={tourNavBreadcrumbRowClassName}>
-          <div className={tourNavBreadcrumbBarClassName}>
-            <ol className={tourNavBreadcrumbListClassName}>
-              {breadcrumbItems.map((item, index) => (
-                <li key={item.id} className={tourNavBreadcrumbItemClassName}>
-                  {index > 0 && (
-                    <span
-                      className={tourNavBreadcrumbSepClassName}
-                      aria-hidden='true'
-                    >
-                      ›
-                    </span>
-                  )}
-                  {item.isCurrent ?
-                    <span
-                      className={tourNavBreadcrumbCurrentClassName}
-                      aria-current='location'
-                    >
-                      <span className={tourNavBreadcrumbCurrentLabelClassName}>
-                        {item.title}
-                      </span>
-                      <span
-                        key={currentSceneId}
-                        className={tourNavBreadcrumbPulseDotClassName}
-                        aria-hidden='true'
-                      />
-                    </span>
-                  : <button
-                      type='button'
-                      className={tourNavBreadcrumbLinkClassName}
-                      disabled={disabled}
-                      onClick={() => onBreadcrumbNavigate(item.id)}
-                    >
-                      {item.title}
-                    </button>
-                  }
-                </li>
-              ))}
-            </ol>
-          </div>
-
           {(showHistoryBack || showHistoryForward) && (
             <div
               className={tourNavHistoryGroupClassName}
@@ -1738,6 +1715,46 @@ export function TourNavFloat({
               : null}
             </div>
           )}
+
+          <div className={tourNavBreadcrumbBarClassName}>
+            <ol className={tourNavBreadcrumbListClassName}>
+              {breadcrumbItems.map((item, index) => (
+                <li key={item.id} className={tourNavBreadcrumbItemClassName}>
+                  {index > 0 && (
+                    <span
+                      className={tourNavBreadcrumbSepClassName}
+                      aria-hidden='true'
+                    >
+                      ›
+                    </span>
+                  )}
+                  {item.isCurrent ?
+                    <span
+                      className={tourNavBreadcrumbCurrentClassName}
+                      aria-current='location'
+                    >
+                      <span className={tourNavBreadcrumbCurrentLabelClassName}>
+                        {item.title}
+                      </span>
+                      <span
+                        key={currentSceneId}
+                        className={tourNavBreadcrumbPulseDotClassName}
+                        aria-hidden='true'
+                      />
+                    </span>
+                  : <button
+                      type='button'
+                      className={tourNavBreadcrumbLinkClassName}
+                      disabled={disabled}
+                      onClick={() => onBreadcrumbNavigate(item.id)}
+                    >
+                      {item.title}
+                    </button>
+                  }
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </nav>
 

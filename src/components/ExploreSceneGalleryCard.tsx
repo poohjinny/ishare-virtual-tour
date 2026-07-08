@@ -5,8 +5,10 @@ import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
 import type { Scene } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
+import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import {
+  tourNavCurrentHeroChipClassName,
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
@@ -58,7 +60,7 @@ export function ExploreSceneGalleryCard({
     previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
   const description = scene.description?.trim();
   const showInfo = Boolean(description && onShowDescription);
-  const showHoverBody = Boolean(description || showInfo || !active);
+  const showHoverBody = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const ariaLabel =
     active ?
@@ -128,6 +130,11 @@ export function ExploreSceneGalleryCard({
               aria-hidden='true'
             />
           : null}
+          {active ?
+            <ExploreCurrentHereLabel
+              className={tourNavCurrentHeroChipClassName}
+            />
+          : null}
           <span className={tourNavLocationGalleryHeroBottomOverlayClassName}>
             <span className={tourNavLocationGalleryHeroOverlayInnerClassName}>
               <span className={tourNavLocationGalleryHeroTitleRowClassName}>
@@ -153,39 +160,33 @@ export function ExploreSceneGalleryCard({
                         {description}
                       </span>
                     : null}
-                    {showInfo || !active ?
+                    <span
+                      className={cn(
+                        tourNavLocationGalleryHeroMetaRowClassName,
+                        'relative z-[3]',
+                      )}
+                    >
+                      {showInfo ?
+                        <ExploreSceneInfoButton
+                          sceneTitle={scene.title}
+                          disabled={disabled}
+                          variant='galleryHeroText'
+                          onShow={onShowDescription!}
+                        />
+                      : null}
                       <span
-                        className={cn(
-                          tourNavLocationGalleryHeroMetaRowClassName,
-                          'relative z-[3]',
-                        )}
+                        className={tourNavLocationGalleryHeroPillCtaClassName}
+                        aria-hidden='true'
                       >
-                        {showInfo ?
-                          <ExploreSceneInfoButton
-                            sceneTitle={scene.title}
-                            disabled={disabled}
-                            variant='galleryHeroText'
-                            onShow={onShowDescription!}
-                          />
-                        : null}
-                        {!active ?
-                          <span
-                            className={
-                              tourNavLocationGalleryHeroPillCtaClassName
-                            }
-                            aria-hidden='true'
-                          >
-                            <span className='min-w-0 truncate'>
-                              {EXPLORE_GALLERY_VISIT_LABEL}
-                            </span>
-                            <ExploreGalleryCtaArrowIcon
-                              variant='text'
-                              sizePx={MATERIAL_SYMBOL_SIZE_14}
-                            />
-                          </span>
-                        : null}
+                        <span className='min-w-0 truncate'>
+                          {EXPLORE_GALLERY_VISIT_LABEL}
+                        </span>
+                        <ExploreGalleryCtaArrowIcon
+                          variant='text'
+                          sizePx={MATERIAL_SYMBOL_SIZE_14}
+                        />
                       </span>
-                    : null}
+                    </span>
                   </span>
                 </span>
               : null}

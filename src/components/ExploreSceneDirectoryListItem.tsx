@@ -2,10 +2,12 @@ import { type ReactNode } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import type { Scene } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
+import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import {
+  tourNavCurrentInlineLabelClassName,
   tourNavDirectoryItemTitleRowClassName,
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemPrimaryCtaClassName,
@@ -39,7 +41,7 @@ export function ExploreSceneDirectoryListItem({
 }: ExploreSceneDirectoryListItemProps) {
   const description = scene.description?.trim();
   const showInfo = Boolean(description && onShowDescription);
-  const showActions = !active;
+  const showActions = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const ariaLabel =
     active ?
@@ -71,6 +73,11 @@ export function ExploreSceneDirectoryListItem({
             {locationIcon}
           </span>
           <span className={tourNavItemTextClassName}>
+            {active ?
+              <ExploreCurrentHereLabel
+                className={tourNavCurrentInlineLabelClassName}
+              />
+            : null}
             <span className={tourNavDirectoryItemTitleRowClassName}>
               <span className={tourNavItemLabelClassName}>{scene.title}</span>
             </span>

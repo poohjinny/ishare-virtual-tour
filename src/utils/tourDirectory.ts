@@ -33,10 +33,19 @@ export interface TourDirectoryNamingItem {
   previewImage?: string;
 }
 
+/** Naming items for one scene (place) within a sector group. */
+export interface NamingSceneSubgroup {
+  sceneId: string;
+  sceneTitle: string;
+  items: TourDirectoryNamingItem[];
+}
+
 export interface NamingSectorGroup {
   id: string;
   title: string;
   items: TourDirectoryNamingItem[];
+  /** Items regrouped by scene, in first-appearance (sorted) order. */
+  sceneSubgroups: NamingSceneSubgroup[];
   total: number;
 }
 
@@ -120,7 +129,29 @@ export function buildNamingSectorGroups(
         0,
       );
 
-      return { id: group.id, title: group.title, items, total };
+      // Regroup by scene, keeping the sorted items' first-appearance order so
+      // the subgroup order follows the active sort (e.g. price high → low).
+      const subgroupByScene = new Map<string, NamingSceneSubgroup>();
+      for (const item of items) {
+        let subgroup = subgroupByScene.get(item.sceneId);
+        if (!subgroup) {
+          subgroup = {
+            sceneId: item.sceneId,
+            sceneTitle: item.sceneTitle,
+            items: [],
+          };
+          subgroupByScene.set(item.sceneId, subgroup);
+        }
+        subgroup.items.push(item);
+      }
+
+      return {
+        id: group.id,
+        title: group.title,
+        items,
+        sceneSubgroups: [...subgroupByScene.values()],
+        total,
+      };
     })
     .filter((group): group is NamingSectorGroup => group != null);
 }

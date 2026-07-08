@@ -18,7 +18,10 @@ import { NamingStatusBadge } from './ui/NamingStatusBadge';
 
 import { EXPLORE_GALLERY_NAMING_VIEW_LABEL } from '../constants/tourDirectory';
 
+import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
+
 import {
+  tourNavCurrentHeroChipClassName,
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
@@ -191,7 +194,7 @@ export function ExploreNamingGalleryCard({
 
   const priceLabel = formatNamingGalleryItemPrice(item);
 
-  const showHoverBody = Boolean(description || !active);
+  const showHoverBody = true;
 
   const ariaLabel =
     active ?
@@ -254,6 +257,12 @@ export function ExploreNamingGalleryCard({
             <span
               className='absolute inset-0 z-[1] block bg-[#e2e8f0]'
               aria-hidden='true'
+            />
+          : null}
+
+          {active ?
+            <ExploreCurrentHereLabel
+              className={tourNavCurrentHeroChipClassName}
             />
           : null}
 
@@ -323,25 +332,23 @@ export function ExploreNamingGalleryCard({
                       </span>
                     : null}
 
-                    {!active ?
+                    <span
+                      className={tourNavLocationGalleryHeroMetaRowClassName}
+                    >
                       <span
-                        className={tourNavLocationGalleryHeroMetaRowClassName}
+                        className={tourNavLocationGalleryHeroPillCtaClassName}
+                        aria-hidden='true'
                       >
-                        <span
-                          className={tourNavLocationGalleryHeroPillCtaClassName}
-                          aria-hidden='true'
-                        >
-                          <span className='min-w-0 truncate'>
-                            {EXPLORE_GALLERY_NAMING_VIEW_LABEL}
-                          </span>
-
-                          <ExploreGalleryCtaArrowIcon
-                            variant='text'
-                            sizePx={MATERIAL_SYMBOL_SIZE_14}
-                          />
+                        <span className='min-w-0 truncate'>
+                          {EXPLORE_GALLERY_NAMING_VIEW_LABEL}
                         </span>
+
+                        <ExploreGalleryCtaArrowIcon
+                          variant='text'
+                          sizePx={MATERIAL_SYMBOL_SIZE_14}
+                        />
                       </span>
-                    : null}
+                    </span>
                   </span>
                 </span>
               : null}
