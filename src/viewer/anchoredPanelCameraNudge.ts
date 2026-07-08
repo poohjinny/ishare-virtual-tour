@@ -17,6 +17,9 @@ const OFF_VIEW_GRACE_FRAMES = 4;
 /** Breathing room a clipped panel is shifted to (generous, per side). */
 const NUDGE_TARGET_MARGIN_PX = 24;
 
+/** Cap per-axis camera correction so oversized panels never warp the view. */
+const MAX_NUDGE_SHIFT_DEG = 60;
+
 /** Extra gap kept below the floating breadcrumb so a nudged panel clears it. */
 const BREADCRUMB_CLEARANCE_PX = 12;
 
@@ -186,7 +189,11 @@ function panelFitCameraPitchDeg(
   const focalPx = vh / 2 / Math.tan(vFov / 2);
   if (!(focalPx > 0)) return null;
 
-  const hotspotDropPx = (panelHeightPx + ANCHORED_PANEL_GAP_PX) / 2;
+  const maxDropPx = Math.max(0, (vh - 2 * NUDGE_TARGET_MARGIN_PX) / 2);
+  const hotspotDropPx = Math.min(
+    (panelHeightPx + ANCHORED_PANEL_GAP_PX) / 2,
+    maxDropPx,
+  );
   const cameraPitchDeg =
     anchorPitchDeg + radToDeg(Math.atan(hotspotDropPx / focalPx));
 
@@ -230,9 +237,20 @@ export function computeAnchoredPanelNudgeTarget(
     return null;
   }
 
+  // Panel taller than the safe area — bias toward showing the top (title/hero).
+  const effectiveBottomOver = topOver > 0 && bottomOver > 0 ? 0 : bottomOver;
+
   // Push down/right to clear top/left; up/left to clear bottom/right.
-  const pitchShiftDeg = radToDeg((topOver - bottomOver) / focalPx);
-  const yawShiftDeg = radToDeg((rightOver - leftOver) / focalPx);
+  const pitchShiftDeg = clamp(
+    radToDeg((topOver - effectiveBottomOver) / focalPx),
+    -MAX_NUDGE_SHIFT_DEG,
+    MAX_NUDGE_SHIFT_DEG,
+  );
+  const yawShiftDeg = clamp(
+    radToDeg((rightOver - leftOver) / focalPx),
+    -MAX_NUDGE_SHIFT_DEG,
+    MAX_NUDGE_SHIFT_DEG,
+  );
 
   const pos = viewer.getPosition();
   return {

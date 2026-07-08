@@ -26,8 +26,12 @@ export interface TourViewerHandle {
   /** Close anchored info / nav preview panels on the scene. */
   closeAnchoredPanels: () => void;
   goToNamingOpportunity: (sceneId: string, hotspotId: string) => boolean;
-  /** Animate to the scene default view (navbar recenter button). */
-  recenterToDefaultView: () => void;
+  /**
+   * Animate to the scene default view (navbar recenter button). Normally frames
+   * an open naming opportunity if one is active; pass `forceDefault` to ignore
+   * it and go to the bare scene default (used when "Visiting" the current place).
+   */
+  recenterToDefaultView: (options?: { forceDefault?: boolean }) => void;
   /** Dev — apply fresh tour JSON without remounting the viewer. */
   applyTourUpdate: (tour: Tour) => Promise<void>;
   /** Dev — capture current WebGL frame for 3D scene thumbnail bake (panorama: null). */

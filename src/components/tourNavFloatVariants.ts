@@ -538,7 +538,7 @@ export const tourNavLocationGalleryHeroTitleRowClassName = cn(
 );
 
 export const tourNavLocationGalleryHeroDescriptionClassName = cn(
-  'tour-nav-gallery-card-hero-desc min-w-0 text-xs leading-[1.4] text-white/85 line-clamp-4',
+  'tour-nav-gallery-card-hero-desc min-w-0 text-xs leading-[1.4] text-white/85 line-clamp-3',
 );
 
 /** Shared arrow motion tokens — nudge is applied only on text CTAs via explore-cta-text-arrow. */
@@ -787,7 +787,7 @@ export const tourNavItemMetaClassName = cn(
 );
 
 export const tourNavItemDescriptionClassName = cn(
-  'tour-nav-item-description text-xs leading-[1.35] text-muted line-clamp-2',
+  'tour-nav-item-description mb-1.5 text-xs leading-[1.35] text-muted line-clamp-2',
 );
 
 export const tourNavItemBadgePlacementClassName = cn('shrink-0 self-center');
@@ -861,6 +861,19 @@ export const tourNavCurrentPinnedLabelClassName = cn(
 export const tourNavOverviewPinnedLabelClassName = cn(
   tourNavCurrentPinnedLabelClassName,
   'text-muted',
+);
+
+/** Inline "You are here" marker on the active list row (in place of the top pin). */
+export const tourNavCurrentInlineLabelClassName = cn(
+  'mb-0.5 flex items-center gap-1',
+  'font-display text-2xs font-bold uppercase tracking-[0.04em] text-primary',
+);
+
+/** "You are here" chip over the active gallery card hero image. */
+export const tourNavCurrentHeroChipClassName = cn(
+  'pointer-events-none absolute left-2 top-2 z-[2] inline-flex items-center gap-1',
+  'rounded-full bg-primary px-2 py-0.5 shadow-sm',
+  'font-display text-2xs font-bold uppercase tracking-[0.03em] text-white',
 );
 
 export const tourNavDirectoryLeadRootClassName = cn(
@@ -980,9 +993,16 @@ export const tourNavSceneDetailBackClassName = cn(
   'disabled:pointer-events-none disabled:opacity-45',
 );
 
-export const tourNavSceneDetailHeroClassName = cn(
-  'relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-[#e2e8f0]',
-);
+/**
+ * Hero shell aspect follows its content: a preview video embed is 16/9, so
+ * match it to avoid the container background peeking below the player. Static
+ * thumbnails use the taller 16/10 crop.
+ */
+export const tourNavSceneDetailHeroClassName = (hasVideo = false) =>
+  cn(
+    'relative w-full overflow-hidden rounded-xl bg-[#e2e8f0]',
+    hasVideo ? 'aspect-[16/9]' : 'aspect-[16/10]',
+  );
 
 export const tourNavSceneDetailHeroImageClassName = cn(
   'block h-full w-full object-cover object-center opacity-0 transition-opacity duration-300 motion-reduce:transition-none',
@@ -1003,7 +1023,7 @@ export const tourNavSceneDetailBodyClassName = cn(
   'm-0 font-body text-md leading-[1.55] text-[var(--ishare-glass-body-text)] whitespace-pre-wrap',
 );
 
-export const tourNavSceneDetailFooterClassName = cn('pt-1');
+export const tourNavSceneDetailFooterClassName = cn('flex justify-center pt-1');
 
 export const tourNavSceneDetailVisitClassName = cn(
   'group/visit inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border-none bg-primary px-5 py-2 font-display text-sm font-semibold text-white',
@@ -1099,6 +1119,15 @@ export const tourNavLocationGroupTitleClassName = cn(
 /** Muted meta on group header — location count or sector total. */
 export const tourNavLocationGroupMetaClassName = cn(
   'shrink-0 text-xs font-medium tabular-nums text-muted',
+);
+
+/** Wraps the per-scene naming subgroups inside a sector group (list view). */
+export const tourNavNamingSceneSubgroupsClassName = cn('flex flex-col gap-3');
+
+/** Scene (place) subheader above its naming items — smaller than the sector title.
+ *  pl-10 aligns the label with the item title (item px-3.5 + icon 16px + gap 10px). */
+export const tourNavNamingSceneSubheaderClassName = cn(
+  'mb-1 min-w-0 truncate pl-10 pr-1 font-display text-xs font-semibold text-foreground/75',
 );
 
 /** @deprecated Use {@link tourNavLocationGroupMetaClassName}. */

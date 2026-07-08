@@ -13,6 +13,7 @@ import {
   mountNavPreviewMiniViewer,
   mountNavPreviewVideoHero,
 } from './navPreviewMiniViewer';
+import { initPopupVideoPlayers } from '../utils/popupVideo';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import {
   bindGlassPanelCtaOverflowTitles,
@@ -240,6 +241,13 @@ export function openAnchoredNavPreviewPanel(
         mountNavPreviewMiniViewer(id, panelMarker.domElement, preview);
       } else {
         dismissNavPreviewHero(panelMarker.domElement);
+      }
+
+      // Body feature video lives outside the hero, so its play button needs
+      // wiring even when the hero is a mini viewer / dismissed (no hero video).
+      // Idempotent — safe when the hero video mount already ran this.
+      if (preview.featureVideoUrl?.trim()) {
+        initPopupVideoPlayers(panelMarker.domElement);
       }
     };
 

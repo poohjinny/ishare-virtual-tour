@@ -2,8 +2,9 @@ import { useScenePreview } from '../hooks/useScenePreview';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import type { Scene } from '../types/tour';
 import {
+  TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
   TOUR_DIRECTORY_SCENE_DETAIL_BACK,
-  TOUR_DIRECTORY_SCENE_DETAIL_VISIT,
+  tourDirectorySceneDetailVisitLabel,
 } from '../constants/tourDirectory';
 import { cn } from '../lib/cn';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
@@ -11,6 +12,7 @@ import { PopupVideoEmbed } from './popupContentUi';
 import { Badge } from './ui/Badge';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
+  MATERIAL_SYMBOL_SIZE_14,
   MATERIAL_SYMBOL_SIZE_18,
   MATERIAL_SYMBOL_SIZE_20,
 } from './ui/materialSymbolClasses';
@@ -46,19 +48,22 @@ export function ExploreSceneDescriptionView({
   onVisit,
 }: ExploreSceneDescriptionViewProps) {
   const description = scene.description?.trim();
-  const videoUrl = scene.videoUrl?.trim();
+  const previewVideoUrl = scene.previewVideoUrl?.trim();
+  const featureVideoUrl = scene.videoUrl?.trim();
+  const showThumbnailHero = !previewVideoUrl;
   const {
     src: previewSrc,
     failed: previewFailed,
     loading: previewLoading,
-  } = useScenePreview(tourId, scene, true);
+  } = useScenePreview(tourId, scene, showThumbnailHero);
   const {
     imgRef,
     revealed: previewLoaded,
     onLoad: onPreviewLoad,
   } = usePreviewHeroReveal(previewSrc);
   const heroLoading =
-    previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
+    showThumbnailHero &&
+    (previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed));
 
   return (
     <div className={tourNavSceneDetailLayoutClassName}>
@@ -74,37 +79,49 @@ export function ExploreSceneDescriptionView({
 
       <div className={tourNavSceneDetailHeroCopyStackClassName}>
         <div
-          className={tourNavSceneDetailHeroClassName}
+          className={tourNavSceneDetailHeroClassName(Boolean(previewVideoUrl))}
           aria-busy={heroLoading || undefined}
         >
-          {heroLoading ?
-            <span
-              className={tourNavSceneDetailHeroSkeletonClassName}
-              aria-hidden='true'
-            />
-          : null}
-          {previewSrc && !previewFailed ?
-            <img
-              ref={imgRef}
-              className={cn(
-                tourNavSceneDetailHeroImageClassName,
-                previewLoaded && 'opacity-100',
-              )}
-              src={previewSrc}
-              alt=''
-              aria-hidden='true'
-              draggable={false}
-              onLoad={onPreviewLoad}
-            />
-          : null}
+          {previewVideoUrl ?
+            <PopupVideoEmbed videoUrl={previewVideoUrl} title={scene.title} />
+          : <>
+              {heroLoading ?
+                <span
+                  className={tourNavSceneDetailHeroSkeletonClassName}
+                  aria-hidden='true'
+                />
+              : null}
+              {previewSrc && !previewFailed ?
+                <img
+                  ref={imgRef}
+                  className={cn(
+                    tourNavSceneDetailHeroImageClassName,
+                    previewLoaded && 'opacity-100',
+                  )}
+                  src={previewSrc}
+                  alt=''
+                  aria-hidden='true'
+                  draggable={false}
+                  onLoad={onPreviewLoad}
+                />
+              : null}
+            </>
+          }
         </div>
 
         <div className={tourNavSceneDetailCopyClassName}>
           <div className='flex min-w-0 items-start gap-2'>
             <h3 className={tourNavSceneDetailTitleClassName}>{scene.title}</h3>
             {active ?
-              <Badge variant='fill' size='sm' tone='primary' uppercase>
-                Current
+              <Badge
+                variant='fill'
+                size='sm'
+                tone='primary'
+                uppercase
+                className='gap-1'
+              >
+                <MaterialSymbol name='flag' sizePx={MATERIAL_SYMBOL_SIZE_14} />
+                {TOUR_DIRECTORY_CURRENT_LOCATION_LABEL}
               </Badge>
             : null}
           </div>
@@ -112,32 +129,34 @@ export function ExploreSceneDescriptionView({
           {description ?
             <p className={tourNavSceneDetailBodyClassName}>{description}</p>
           : <p className={tourNavSceneDetailBodyClassName}>
-              No description for this location yet.
+              No description for this place yet.
             </p>
           }
 
-          {videoUrl ?
-            <PopupVideoEmbed videoUrl={videoUrl} title={scene.title} />
+          {featureVideoUrl ?
+            <PopupVideoEmbed
+              videoUrl={featureVideoUrl}
+              title={scene.title}
+              poster={scene.videoPoster}
+            />
           : null}
         </div>
       </div>
 
-      {!active ?
-        <div className={tourNavSceneDetailFooterClassName}>
-          <button
-            type='button'
-            className={tourNavSceneDetailVisitClassName}
-            disabled={disabled}
-            onClick={onVisit}
-          >
-            {TOUR_DIRECTORY_SCENE_DETAIL_VISIT}
-            <ExploreGalleryCtaArrowIcon
-              sizePx={MATERIAL_SYMBOL_SIZE_18}
-              variant='text'
-            />
-          </button>
-        </div>
-      : null}
+      <div className={tourNavSceneDetailFooterClassName}>
+        <button
+          type='button'
+          className={tourNavSceneDetailVisitClassName}
+          disabled={disabled}
+          onClick={onVisit}
+        >
+          {tourDirectorySceneDetailVisitLabel(scene.title)}
+          <ExploreGalleryCtaArrowIcon
+            sizePx={MATERIAL_SYMBOL_SIZE_18}
+            variant='text'
+          />
+        </button>
+      </div>
     </div>
   );
 }

@@ -578,7 +578,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       goToNamingOpportunity: (sceneId, hotspotId) => {
         return goToNamingOpportunityRef.current(sceneId, hotspotId);
       },
-      recenterToDefaultView: () => {
+      recenterToDefaultView: (options) => {
         const viewer = viewerRef.current;
         const virtualTour = virtualTourRef.current;
         if (
@@ -592,6 +592,21 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
         const sceneId = virtualTour.getCurrentNode()?.id;
         if (!sceneId) return;
+
+        // forceDefault — ignore any open naming opportunity and close anchored
+        // panels so "Visit" resets to the bare scene default in one move.
+        if (options?.forceDefault) {
+          const markers = markersRef.current;
+          if (markers) {
+            closeAnchoredInfoPanel(markers, true);
+            closeAnchoredNavPreviewPanel(markers, true);
+            onAnchoredPanelVisibilityChangeRef.current?.(false);
+          }
+          const view = tourRef.current.scenes[sceneId]?.defaultView;
+          if (!view) return;
+          void animateViewerToView(viewer, view);
+          return;
+        }
 
         const view = resolveSceneRecenterView(
           tourRef.current,
@@ -1365,8 +1380,9 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           if (hotspot.type === 'nav' && hotspot.targetScene) {
             const currentSceneId =
               virtualTour.getCurrentNode()?.id ?? tourRef.current.firstScene;
+            // Nav always arrives at the target scene landing view so later
+            // defaultView edits apply — no per-hotspot arrival override.
             const targetView =
-              hotspot.targetView ??
               tourRef.current.scenes[hotspot.targetScene]?.defaultView;
 
             if (hotspot.instant) {

@@ -11,7 +11,11 @@ import {
 } from '../data/namingOpportunityStatus';
 import { listSceneInfoHotspots } from './findTourHotspot';
 import { buildSceneGroups } from '../viewer/sceneDepth';
-import { formatNamingPriceAbbrev, parseNamingPrice } from './namingPrice';
+import {
+  formatNamingPriceAbbrev,
+  parseNamingPrice,
+  SHOW_SECTOR_NAMING_TOTAL,
+} from './namingPrice';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 
 function navPreviewNamingDescription(body: string): string {
@@ -99,8 +103,8 @@ export function buildNavPreview(
   const scene = tour.scenes[hotspot.targetScene];
   if (!scene) return null;
 
-  const videoUrl =
-    hotspot.preview?.videoUrl?.trim() || scene.videoUrl?.trim() || undefined;
+  const videoUrl = scene.previewVideoUrl?.trim() || undefined;
+  const featureVideoUrl = scene.videoUrl?.trim() || undefined;
   const image = hotspot.preview?.image ?? scene.panorama ?? undefined;
   const canNavigate = navPreviewCanNavigate(hotspot, currentSceneId);
   const hotspotLabel = hotspot.label?.trim();
@@ -111,7 +115,9 @@ export function buildNavPreview(
   );
   const hasSectorTotal = sectorNamingTotal > 0;
   const namingTotalLabel =
-    hasSectorTotal ? formatNamingPriceAbbrev(sectorNamingTotal) : undefined;
+    SHOW_SECTOR_NAMING_TOTAL && hasSectorTotal ?
+      formatNamingPriceAbbrev(sectorNamingTotal)
+    : undefined;
 
   return {
     targetSceneId: hotspot.targetScene,
@@ -119,11 +125,16 @@ export function buildNavPreview(
     panorama: scene.panorama,
     image,
     videoUrl,
+    featureVideoUrl,
+    videoPoster: featureVideoUrl ? scene.videoPoster : undefined,
     description: scene.description?.trim() || undefined,
     namingItems: buildNavPreviewNamingItems(tour, scene),
     namingTotalLabel,
-    namingTotalAmount: hasSectorTotal ? sectorNamingTotal : undefined,
-    targetView: hotspot.targetView ?? scene.defaultView,
+    namingTotalAmount:
+      SHOW_SECTOR_NAMING_TOTAL && hasSectorTotal ? sectorNamingTotal : (
+        undefined
+      ),
+    targetView: scene.defaultView,
     ctaLabel: hotspotLabel || undefined,
     canNavigate,
   };

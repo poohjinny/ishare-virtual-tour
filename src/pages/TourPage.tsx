@@ -717,6 +717,15 @@ function TourExperience() {
     viewerRef.current?.recenterToDefaultView();
   }, []);
 
+  // "Visit" on the current place — clear any open NO and reset to the bare
+  // scene default (unlike the recenter shortcut, which keeps an active NO).
+  const handleVisitCurrentScene = useCallback(() => {
+    pendingNamingSelectionRef.current = null;
+    setActiveNamingHotspotId(null);
+    clearNamingOpportunityFromUrl();
+    viewerRef.current?.recenterToDefaultView({ forceDefault: true });
+  }, [clearNamingOpportunityFromUrl, pendingNamingSelectionRef]);
+
   const handleToggleBackgroundMusic = useCallback(() => {
     if (!immersiveBackgroundController) return;
     toggleImmersiveBackgroundPlayback(immersiveBackgroundController);
@@ -1028,6 +1037,7 @@ function TourExperience() {
           onSelectScene={handleNavigate}
           onSelectNamingOpportunity={handleSelectNamingOpportunity}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
+          onRecenterCurrentScene={handleVisitCurrentScene}
           activeNamingHotspotId={activeNamingHotspotId}
           embed={searchParams.embed}
           panelStack={panelStack}

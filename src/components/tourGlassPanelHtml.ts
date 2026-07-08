@@ -61,6 +61,11 @@ import {
   resolvePopupVideo,
   youtubeEmbedUrl,
 } from '../utils/popupVideo';
+import { getUiScale } from '../utils/uiScale';
+import {
+  ANCHORED_PANEL_GAP_PX,
+  NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
+} from '../viewer/anchoredPanelPosition';
 
 export { youtubeEmbedUrl, initPopupVideoPlayers };
 
@@ -70,7 +75,7 @@ export const GLASS_PANEL_SIZE = {
   defaultWidth: 440,
   minHeight: 0,
   maxHeight: 840,
-  maxHeightRatio: 0.92,
+  maxHeightRatio: 0.7,
   viewportMargin: 48,
   viewportMarginMobile: 32,
 } as const;
@@ -78,12 +83,27 @@ export const GLASS_PANEL_SIZE = {
 /** Shared dock width — dev panel, nav preview, info panels. */
 export const TOUR_DOCK_PANEL_WIDTH = 440;
 
+/**
+ * Per-side breathing room used to cap anchored panel height. Kept larger than
+ * NUDGE_TARGET_MARGIN_PX (24) in anchoredPanelCameraNudge so the fitted panel
+ * lands inside the nudge safe area — the camera nudge then rarely fires and
+ * never has to make a large (jumpy) correction.
+ */
+const ANCHORED_PANEL_FIT_MARGIN_PX = 44;
+
+/** Minimum anchored panel height after fit cap (keeps hero + title readable). */
+const ANCHORED_PANEL_FIT_MIN_HEIGHT_PX = 200;
+
 const GLASS_PANEL_WIDTH_TIER: Record<PopupWidthTier, number> = {
   compact: 320,
   standard: 380,
   rich: 440,
   wide: 500,
 };
+
+function scaledPanelMinWidth(): number {
+  return Math.round(GLASS_PANEL_SIZE.minWidth * getUiScale());
+}
 
 function viewportMaxPanelWidth(): number {
   const margin =
@@ -94,7 +114,22 @@ function viewportMaxPanelWidth(): number {
     typeof window !== 'undefined' ?
       window.innerWidth
     : GLASS_PANEL_SIZE.maxWidth + margin;
-  return Math.max(GLASS_PANEL_SIZE.minWidth, viewport - margin);
+  return Math.max(scaledPanelMinWidth(), viewport - margin);
+}
+
+/** Max height that can be framed above a hotspot without camera warp. */
+function resolveAnchoredPanelFitMaxHeight(): number {
+  if (typeof window === 'undefined') return GLASS_PANEL_SIZE.maxHeight;
+
+  const vh = window.innerHeight;
+  const fitCap = Math.round(
+    vh -
+      ANCHORED_PANEL_FIT_MARGIN_PX * 2 -
+      ANCHORED_PANEL_GAP_PX -
+      NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
+  );
+
+  return Math.max(ANCHORED_PANEL_FIT_MIN_HEIGHT_PX, fitCap);
 }
 
 function preferredWidthFromPopup(popup: PopupContent): number {
@@ -108,13 +143,16 @@ export function resolveGlassPanelWidth(
   popup?: PopupContent,
   _tour?: Tour,
 ): number {
-  const preferred =
-    popup ? preferredWidthFromPopup(popup) : GLASS_PANEL_SIZE.defaultWidth;
+  const scale = getUiScale();
+  const preferred = Math.round(
+    (popup ? preferredWidthFromPopup(popup) : GLASS_PANEL_SIZE.defaultWidth) *
+      scale,
+  );
 
   return Math.round(
     Math.min(
       viewportMaxPanelWidth(),
-      Math.max(GLASS_PANEL_SIZE.minWidth, preferred),
+      Math.max(scaledPanelMinWidth(), preferred),
     ),
   );
 }
@@ -128,6 +166,7 @@ export function resolveGlassPanelMaxHeight(popup?: PopupContent): number {
   return Math.min(
     Math.round(window.innerHeight * ratio),
     GLASS_PANEL_SIZE.maxHeight,
+    resolveAnchoredPanelFitMaxHeight(),
   );
 }
 
@@ -465,7 +504,7 @@ export function buildNamingPriceUnderTitleHtml(
   const displayPrice = formatNamingPriceDisplay(price);
 
   return `<p class="${priceClass}">
-    <span class="${GLASS_PANEL.priceSep}" aria-hidden="true">|</span>
+    <span class="${GLASS_PANEL.priceSep}" aria-hidden="true">&bull;</span>
     <span class="${GLASS_PANEL.priceValue}">${escapeHtml(displayPrice)}</span>
   </p>`;
 }
@@ -757,7 +796,9 @@ export function buildAnchoredPopupHtml(
 const NAV_PREVIEW_HERO_ASPECT = 8 / 16;
 
 export function resolveNavPreviewPanelWidth(): number {
-  return Math.round(Math.min(TOUR_DOCK_PANEL_WIDTH, viewportMaxPanelWidth()));
+  const scale = getUiScale();
+  const preferred = Math.round(TOUR_DOCK_PANEL_WIDTH * scale);
+  return Math.round(Math.min(preferred, viewportMaxPanelWidth()));
 }
 
 export function resolveNavPreviewHeroHeight(
@@ -770,6 +811,7 @@ export function resolveNavPreviewPanelMaxHeight(): number {
   return Math.min(
     Math.round(window.innerHeight * GLASS_PANEL_SIZE.maxHeightRatio),
     GLASS_PANEL_SIZE.maxHeight,
+    resolveAnchoredPanelFitMaxHeight(),
   );
 }
 
@@ -1073,6 +1115,17 @@ export function buildAnchoredNavPreviewHtml(
     hotspotId,
   );
 
+  const featureVideoUrl = preview.featureVideoUrl?.trim();
+  const featureVideoHtml =
+    featureVideoUrl ?
+      buildPopupVideoHtml({
+        title: preview.title,
+        body: '',
+        videoUrl: featureVideoUrl,
+        videoPoster: preview.videoPoster,
+      })
+    : '';
+
   const ctaLabel = navPreviewCtaLabel(preview);
   const visitAriaLabel = navPreviewVisitAriaLabel(preview);
   const footerHtml =
@@ -1102,6 +1155,7 @@ export function buildAnchoredNavPreviewHtml(
   const bodyHtml = `<div class="${GLASS_PANEL.body} nav-preview-panel__body ishare-scrollbar">
     ${closeInBodyHtml}
     ${introHtml}
+    ${featureVideoHtml}
     ${namingHtml}
   </div>`;
 
