@@ -385,20 +385,21 @@
   }
 
   .ishare-accordion__icon {
-    display: inline-flex;
-    flex: 0 0 16px;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    /* Box matches the glyph so the open/close rotation pivots on its true center. */
+    transform-origin: center;
     color: var(--ishare-text-muted);
     transition:
       transform 0.2s ease,
       color 0.15s ease;
   }
 
-  .ishare-accordion__icon svg {
-    font-size: 16px;
+  .ishare-accordion__icon>* {
+    display: block;
     line-height: 1;
   }
 
@@ -441,7 +442,7 @@
   }
 
   .ishare-accordion__trigger--icon-right .ishare-accordion__icon {
-    flex: 0 0 16px;
+    flex: 0 0 22px;
   }
 
   .ishare-accordion__panel-inner {

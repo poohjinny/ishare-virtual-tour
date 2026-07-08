@@ -1,6 +1,7 @@
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
+  EXPLORE_GALLERY_LOCATION_DETAILS_LABEL,
   TOUR_DIRECTORY_SCENE_INFO_TOOLTIP,
   tourDirectorySceneInfoAriaLabel,
 } from '../constants/tourDirectory';
@@ -20,8 +21,8 @@ interface ExploreSceneInfoButtonProps {
   sceneTitle: string;
   disabled?: boolean;
   onShow: () => void;
-  /** Gallery cards: `galleryHero` on hero overlay chip; `list` on directory rows. */
-  variant?: 'gallery' | 'galleryHero' | 'list';
+  /** Gallery cards: `galleryHeroText` secondary pill below description; `listText` row pill on hover. */
+  variant?: 'gallery' | 'galleryHero' | 'galleryHeroText' | 'list' | 'listText';
 }
 
 export function ExploreSceneInfoButton({
@@ -31,40 +32,58 @@ export function ExploreSceneInfoButton({
   variant = 'gallery',
 }: ExploreSceneInfoButtonProps) {
   const label = tourDirectorySceneInfoAriaLabel(sceneTitle);
-  const isGalleryHero = variant === 'galleryHero';
+  const isGalleryHeroChip = variant === 'galleryHero';
+  const isGalleryHeroText = variant === 'galleryHeroText';
+  const isListText = variant === 'listText';
+  const isTextButton = isGalleryHeroText || isListText;
 
-  return (
-    <IconTooltip
-      label={TOUR_DIRECTORY_SCENE_INFO_TOOLTIP}
-      placement={isGalleryHero || variant === 'gallery' ? 'top' : 'left'}
+  const button = (
+    <button
+      type='button'
+      className={tourNavSceneInfoButtonClassName({
+        variant:
+          isListText ? 'listText'
+          : isGalleryHeroText ? 'galleryHeroText'
+          : isGalleryHeroChip ? 'galleryHero'
+          : variant,
+      })}
+      disabled={disabled}
+      aria-label={label}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onShow();
+      }}
     >
-      <button
-        type='button'
-        className={tourNavSceneInfoButtonClassName({
-          variant: isGalleryHero ? 'galleryHero' : variant,
-        })}
-        disabled={disabled}
-        aria-label={label}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onShow();
-        }}
-      >
-        <MaterialSymbol
-          name={isGalleryHero ? 'info_i' : 'info'}
+      {isTextButton ?
+        <span>{EXPLORE_GALLERY_LOCATION_DETAILS_LABEL}</span>
+      : <MaterialSymbol
+          name={isGalleryHeroChip ? 'info_i' : 'info'}
           className={cn(
             materialSymbolCompactClassName,
-            isGalleryHero && tourNavGalleryHeroInfoIconClassName,
+            isGalleryHeroChip && tourNavGalleryHeroInfoIconClassName,
           )}
           sizePx={
-            isGalleryHero ? MATERIAL_SYMBOL_SIZE_16
+            isGalleryHeroChip ? MATERIAL_SYMBOL_SIZE_16
             : variant === 'list' ?
               MATERIAL_SYMBOL_SIZE_22
             : MATERIAL_SYMBOL_SIZE_18
           }
         />
-      </button>
+      }
+    </button>
+  );
+
+  if (isTextButton) {
+    return button;
+  }
+
+  return (
+    <IconTooltip
+      label={TOUR_DIRECTORY_SCENE_INFO_TOOLTIP}
+      placement={isGalleryHeroChip || variant === 'gallery' ? 'top' : 'left'}
+    >
+      {button}
     </IconTooltip>
   );
 }

@@ -15,20 +15,19 @@ export const floorPlanMinimapCollapsedRootClassName = cn(
 export const floorPlanMinimapChipBtnClassName = cn(
   'flex size-11 cursor-pointer items-center justify-center rounded-full border-none',
   'bg-[var(--ishare-float-glass-bg)] text-foreground shadow-[var(--ishare-float-glass-shadow)]',
-  'backdrop-blur-[4px] backdrop-saturate-[110%]',
   'transition-[background,transform] duration-150',
-  'hover:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+  'hover:bg-[var(--ishare-float-glass-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
 );
 
 export const floorPlanMinimapChipIconClassName = materialSymbolCompactClassName;
 
 export const floorPlanMinimapFrameClassName = cn(
-  'pointer-events-auto relative w-fit overflow-hidden rounded-[10px] bg-[var(--ishare-float-glass-bg)] p-1.5 leading-none shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%] max-[480px]:rounded-lg max-[480px]:p-2',
+  'pointer-events-auto relative w-fit overflow-hidden rounded-[10px] bg-[var(--ishare-float-glass-bg)] p-1.5 leading-none shadow-[var(--ishare-float-glass-shadow)] max-[480px]:rounded-lg max-[480px]:p-2',
 );
 
 export const floorPlanMinimapCloseBtnClassName = cn(
   'absolute top-1 right-1 z-[2] flex size-7 cursor-pointer items-center justify-center rounded-full border-none',
-  'bg-white/88 text-muted shadow-sm backdrop-blur-[2px]',
+  'bg-white/88 text-muted shadow-sm',
   'hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary-light',
 );
 

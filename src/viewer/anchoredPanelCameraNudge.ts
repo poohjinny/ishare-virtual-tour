@@ -7,6 +7,13 @@ const NUDGE_DURATION_MS = 600;
 const MAX_MEASURE_ATTEMPTS = 36;
 const PANEL_ENTER_ANIM_MS = 220;
 
+/**
+ * Frames a present-but-zero-height panel is allowed before we treat it as
+ * off-view (PSV hides off-view markers with display:none). The panel markup is
+ * static so layout lands in ~1 frame; a few frames of zero height means hidden.
+ */
+const OFF_VIEW_GRACE_FRAMES = 4;
+
 /** Breathing room a clipped panel is shifted to (generous, per side). */
 const NUDGE_TARGET_MARGIN_PX = 24;
 
@@ -34,6 +41,15 @@ export interface PanelCameraNudgeSettled {
 export interface SchedulePanelCameraNudgeOptions {
   /** Runs after panel is ready; heavy embeds should load here. Deferred until nudge finishes when `nudged`. */
   afterSettled?: (result: PanelCameraNudgeSettled) => void;
+  /**
+   * Fallback for when the panel never lays out because it is off-view: PSV keeps
+   * off-view markers `display:none`, so at extreme pitch a panel whose spherical
+   * anchor falls outside the frustum never renders (offsetHeight stays 0) and the
+   * clip-nudge has nothing to measure. Called once the measure budget is spent so
+   * the caller can frame the camera analytically to bring the panel into view.
+   * Returns true when it moved the camera.
+   */
+  onPanelOffView?: () => boolean | Promise<boolean>;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -247,6 +263,53 @@ export function computeAnchoredPanelFramedView(
   return { yawDeg: anchor.yawDeg, pitchDeg };
 }
 
+/**
+ * Frame the camera on an anchored panel's host using the analytic framed view —
+ * no DOM measurement needed, so it works even when the panel is off-view and
+ * PSV has not rendered it. Rotates yaw to the host and pitch to seat the panel
+ * above it. Returns true when a camera move was issued.
+ */
+export async function frameCameraForAnchoredPanel(
+  viewer: Viewer,
+  anchor: AnchoredPanelNudgeAnchor,
+  panelHeightPx: number,
+): Promise<boolean> {
+  const framed = computeAnchoredPanelFramedView(
+    viewer,
+    anchor,
+    panelHeightPx,
+    viewer.getZoomLevel(),
+  );
+  if (!framed) return false;
+
+  const position = viewer.getPosition();
+  const currentYaw = radToDeg(position.yaw);
+  const targetYaw =
+    currentYaw + normalizeYawDeltaDeg(framed.yawDeg - currentYaw);
+  const targetPitch = framed.pitchDeg;
+
+  if (prefersReducedMotion()) {
+    viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
+    return true;
+  }
+
+  try {
+    await stopActiveViewerAnimation(viewer);
+    const animation = viewer.animate({
+      yaw: `${targetYaw}deg`,
+      pitch: `${targetPitch}deg`,
+      speed: NUDGE_DURATION_MS,
+      easing: 'outCubic',
+    });
+    if (animation) await animation;
+    else viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
+  } catch {
+    viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
+  }
+
+  return true;
+}
+
 export async function nudgeCameraForClippedPanel(
   viewer: Viewer,
   panelEl: HTMLElement,
@@ -312,14 +375,40 @@ export function scheduleNudgeCameraForClippedPanel(
   options?: SchedulePanelCameraNudgeOptions,
 ): void {
   let attempts = 0;
+  let zeroHeightFrames = 0;
+
+  const runOffViewFallback = () => {
+    if (options?.onPanelOffView) {
+      // Panel is present but PSV keeps it display:none — its anchor is off-view.
+      // Frame the camera analytically to bring it in (no DOM measure needed).
+      void Promise.resolve(options.onPanelOffView()).then((framed) => {
+        options?.afterSettled?.({ nudged: Boolean(framed) });
+      });
+    } else {
+      options?.afterSettled?.({ nudged: false });
+    }
+  };
 
   const tryNudge = () => {
     const panelEl = getPanelEl();
-    if (!panelEl || panelEl.offsetHeight <= 0) {
-      if (attempts++ < MAX_MEASURE_ATTEMPTS) {
+
+    if (!panelEl) {
+      if (attempts++ < MAX_MEASURE_ATTEMPTS) requestAnimationFrame(tryNudge);
+      else options?.afterSettled?.({ nudged: false });
+      return;
+    }
+
+    if (panelEl.offsetHeight <= 0) {
+      // Element exists but has no layout box: the panel markup is static, so a
+      // few frames of zero height means PSV is hiding it (off-view), not a slow
+      // mount. Fall back to camera framing quickly instead of waiting out the
+      // full measure budget (which felt like the panel never opened).
+      if (zeroHeightFrames++ >= OFF_VIEW_GRACE_FRAMES) {
+        runOffViewFallback();
+      } else if (attempts++ < MAX_MEASURE_ATTEMPTS) {
         requestAnimationFrame(tryNudge);
       } else {
-        options?.afterSettled?.({ nudged: false });
+        runOffViewFallback();
       }
       return;
     }

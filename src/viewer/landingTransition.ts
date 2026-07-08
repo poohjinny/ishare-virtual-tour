@@ -5,13 +5,9 @@ import { toPsvZoom } from '../utils/psvZoom';
 /** PSV zoom level 0 = widest FOV (max zoom out). */
 export const LANDING_ZOOM_OUT = 0;
 
-/** Random landing start — pitch (°). */
-const LANDING_PITCH_MIN = -42;
-const LANDING_PITCH_MAX = 18;
-
-/** Random landing start — PSV zoom (0 = widest … 24 = still fairly wide). */
-const LANDING_RANDOM_ZOOM_MIN = 0;
-const LANDING_RANDOM_ZOOM_MAX = 24;
+/** Random landing start — pitch (°). Wide spread so the reveal tilts, not just pans. */
+const LANDING_PITCH_MIN = -50;
+const LANDING_PITCH_MAX = 24;
 
 /** Landing animate duration bounds (ms) — scaled by travel distance. */
 const LANDING_DURATION_MIN_MS = 1400;
@@ -101,13 +97,9 @@ export function resetLandingTransitionState(): void {
 export function pickRandomLandingView(): ViewPosition {
   const pitch =
     LANDING_PITCH_MIN + Math.random() * (LANDING_PITCH_MAX - LANDING_PITCH_MIN);
-  const zoom =
-    LANDING_RANDOM_ZOOM_MIN +
-    Math.floor(
-      Math.random() * (LANDING_RANDOM_ZOOM_MAX - LANDING_RANDOM_ZOOM_MIN + 1),
-    );
 
-  return { yaw: Math.random() * 360, pitch, zoom };
+  // Always start fully zoomed out so the reveal zooms in — more dynamic than a pure pan.
+  return { yaw: Math.random() * 360, pitch, zoom: LANDING_ZOOM_OUT };
 }
 
 export async function playLandingTransition(

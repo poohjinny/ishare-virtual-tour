@@ -5,7 +5,9 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   DEV_URL_FLAG_TOGGLES,
@@ -20,6 +22,7 @@ import {
   removeDevTourCache,
   setDevTourCache,
   tryLoadTour,
+  type TourListItem,
 } from '../data/loadTour';
 import { normalizeTourAssets } from '../services/normalizeTourAssets';
 import {
@@ -155,7 +158,6 @@ import {
   devViewPanelSelectClassName,
   devViewPanelSlugPreviewClassName,
   devViewPanelStickyHeaderClassName,
-  devViewPanelStickyTourClientClassName,
   devViewPanelStickyTourLogoClassName,
   devViewPanelStickyTourLogoWrapClassName,
   devViewPanelStickyTourTitleClassName,
@@ -178,6 +180,7 @@ import {
   devViewPanelTourSwitchAnchorClassName,
   devViewPanelTourSwitchChevronClassName,
   devViewPanelTourSwitchMenuClassName,
+  devViewPanelTourSwitchGroupHeadingClassName,
   devViewPanelTourSwitchMenuItemActiveClassName,
   devViewPanelTourSwitchMenuItemClassName,
   devViewPanelTourSwitchTriggerClassName,
@@ -244,6 +247,7 @@ interface DevViewPanelProps {
   clickCoords: ClickCoords | null;
   captureSceneThumbnail?: () => Promise<Blob | null>;
   getCurrentView?: () => ViewPosition | null;
+  onClose?: () => void;
 }
 
 type ActionStatus = 'idle' | 'working' | 'done' | 'error';
@@ -333,6 +337,7 @@ export function DevViewPanel({
   clickCoords,
   captureSceneThumbnail,
   getCurrentView,
+  onClose,
 }: DevViewPanelProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -346,6 +351,28 @@ export function DevViewPanel({
   );
 
   const tourOptions = useMemo(() => listTours(), [catalogTick]);
+  const tourGroups = useMemo(() => {
+    const groups: {
+      clientId: string;
+      clientName: string;
+      tours: TourListItem[];
+    }[] = [];
+    const byClientId = new Map<string, (typeof groups)[number]>();
+    for (const option of tourOptions) {
+      let group = byClientId.get(option.clientId);
+      if (!group) {
+        group = {
+          clientId: option.clientId,
+          clientName: option.label,
+          tours: [],
+        };
+        byClientId.set(option.clientId, group);
+        groups.push(group);
+      }
+      group.tours.push(option);
+    }
+    return groups;
+  }, [tourOptions]);
   const currentTourId = scene.tourId ?? '';
   const isModel3dTour = tour.viewerType === 'model3d';
   const devViewerClickPlaceholder =
@@ -626,7 +653,12 @@ export function DevViewPanel({
     useState<DevCrudModeTab>('manage');
   const [sceneModeTab, setSceneModeTab] = useState<DevCrudModeTab>('manage');
   const [tourSwitchOpen, setTourSwitchOpen] = useState(false);
+  const [tourSwitchMenuStyle, setTourSwitchMenuStyle] = useState<CSSProperties>(
+    {},
+  );
   const tourSwitchRef = useRef<HTMLDivElement>(null);
+  const tourSwitchTriggerRef = useRef<HTMLButtonElement>(null);
+  const tourSwitchMenuRef = useRef<HTMLUListElement>(null);
   const panelBodyRef = useRef<HTMLDivElement>(null);
   const panelScrollTopRequestRef = useRef(false);
   const [hotspotTab, setHotspotTab] = useState<DevHotspotTab>('nav');
@@ -2397,17 +2429,14 @@ export function DevViewPanel({
   );
   const stickyTourName =
     currentTourEntry?.facilityTitle ?? tour.title ?? currentTourId;
-  const stickyClientName =
-    currentTourEntry?.label ??
-    findCatalogClient(getTourClientId(tour))?.name ??
-    tour.clientId ??
-    '';
 
   useEffect(() => {
     if (!tourSwitchOpen) return;
 
     const onPointerDown = (event: PointerEvent) => {
-      if (tourSwitchRef.current?.contains(event.target as Node)) return;
+      const target = event.target as Node;
+      if (tourSwitchRef.current?.contains(target)) return;
+      if (tourSwitchMenuRef.current?.contains(target)) return;
       setTourSwitchOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
@@ -2422,6 +2451,31 @@ export function DevViewPanel({
     return () => {
       document.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, [tourSwitchOpen]);
+
+  // Menu is portaled to <body> so the panel's overflow clip can't cut it off
+  // (e.g. when all sections are collapsed and the panel is short).
+  useLayoutEffect(() => {
+    if (!tourSwitchOpen) return;
+
+    const updatePosition = () => {
+      const trigger = tourSwitchTriggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      setTourSwitchMenuStyle({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
     };
   }, [tourSwitchOpen]);
 
@@ -4568,6 +4622,7 @@ export function DevViewPanel({
             {tourOptions.length > 1 ?
               <>
                 <button
+                  ref={tourSwitchTriggerRef}
                   type='button'
                   className={devViewPanelTourSwitchTriggerClassName}
                   aria-label='Switch tour'
@@ -4575,17 +4630,7 @@ export function DevViewPanel({
                   aria-expanded={tourSwitchOpen}
                   onClick={() => setTourSwitchOpen((open) => !open)}
                 >
-                  <span className='min-w-0 truncate'>
-                    {stickyTourName}
-                    {stickyClientName ?
-                      <>
-                        {' '}
-                        <span className={devViewPanelStickyTourClientClassName}>
-                          | {stickyClientName}
-                        </span>
-                      </>
-                    : null}
-                  </span>
+                  <span className='min-w-0 truncate'>{stickyTourName}</span>
                   <svg
                     className={devViewPanelTourSwitchChevronClassName}
                     viewBox='0 0 20 20'
@@ -4600,48 +4645,58 @@ export function DevViewPanel({
                   </svg>
                 </button>
 
-                {tourSwitchOpen ?
-                  <ul
-                    className={devViewPanelTourSwitchMenuClassName}
-                    role='listbox'
-                    aria-label='Switch tour'
-                  >
-                    {tourOptions.map((option) => {
-                      const isActive = option.id === currentTourId;
-                      return (
-                        <li key={option.id}>
-                          <button
-                            type='button'
-                            role='option'
-                            aria-selected={isActive}
-                            className={cn(
-                              devViewPanelTourSwitchMenuItemClassName,
-                              isActive &&
-                                devViewPanelTourSwitchMenuItemActiveClassName,
-                            )}
-                            onClick={() => {
-                              handleSwitchTour(option.id);
-                              setTourSwitchOpen(false);
-                            }}
+                {tourSwitchOpen && typeof document !== 'undefined' ?
+                  createPortal(
+                    <ul
+                      ref={tourSwitchMenuRef}
+                      style={tourSwitchMenuStyle}
+                      className={devViewPanelTourSwitchMenuClassName}
+                      role='listbox'
+                      aria-label='Switch tour'
+                    >
+                      {tourGroups.map((group) => (
+                        <li key={group.clientId} role='presentation'>
+                          <p
+                            className={
+                              devViewPanelTourSwitchGroupHeadingClassName
+                            }
                           >
-                            {option.facilityTitle} | {option.label}
-                          </button>
+                            {group.clientName}
+                          </p>
+                          <ul role='group' aria-label={group.clientName}>
+                            {group.tours.map((option) => {
+                              const isActive = option.id === currentTourId;
+                              return (
+                                <li key={option.id}>
+                                  <button
+                                    type='button'
+                                    role='option'
+                                    aria-selected={isActive}
+                                    className={cn(
+                                      devViewPanelTourSwitchMenuItemClassName,
+                                      isActive &&
+                                        devViewPanelTourSwitchMenuItemActiveClassName,
+                                    )}
+                                    onClick={() => {
+                                      handleSwitchTour(option.id);
+                                      setTourSwitchOpen(false);
+                                    }}
+                                  >
+                                    {option.facilityTitle}
+                                  </button>
+                                </li>
+                              );
+                            })}
+                          </ul>
                         </li>
-                      );
-                    })}
-                  </ul>
+                      ))}
+                    </ul>,
+                    document.body,
+                  )
                 : null}
               </>
             : <p className={devViewPanelStickyTourTitleClassName}>
                 {stickyTourName}
-                {stickyClientName ?
-                  <>
-                    {' '}
-                    <span className={devViewPanelStickyTourClientClassName}>
-                      | {stickyClientName}
-                    </span>
-                  </>
-                : null}
               </p>
             }
           </div>
@@ -4657,6 +4712,20 @@ export function DevViewPanel({
           >
             Intro
           </button>
+          {onClose ?
+            <button
+              type='button'
+              className={cn(
+                devViewPanelBtnVariants({ tone: 'secondary' }),
+                'shrink-0 px-2.5',
+              )}
+              onClick={onClose}
+              aria-label='Close dev panel (`)'
+              title='Close dev panel (`)'
+            >
+              ✕
+            </button>
+          : null}
         </div>
 
         <div

@@ -27,7 +27,8 @@
 
   --color-foreground: #0f172a;
   --color-body: #1e293b;
-  --color-muted: #64748b;
+  /* Muted / dark-grey text, nudged slightly lighter (was slate-500 #64748b) */
+  --color-muted: #74849a;
   --color-danger: #ef4444;
 
   /* Naming status */
@@ -487,24 +488,31 @@
     --ishare-radius-xl: var(--radius-xl);
     --ishare-shadow: var(--shadow-default);
 
-    /* Glass / float chrome */
-    --ishare-glass-blur: blur(8px) saturate(120%);
+    /* Glass / float chrome — solid + alpha, no backdrop-filter (see docs/PERFORMANCE.md) */
     --ishare-glass-dock-shadow:
       0 10px 28px rgba(15, 23, 42, 0.14),
       0 4px 12px rgba(15, 23, 42, 0.08);
-    --ishare-float-glass-bg: rgba(255, 255, 255, 0.38);
-    --ishare-float-glass-blur: blur(4px) saturate(110%);
+    /* Panel glass surface — solid stand-in for the former frosted shell */
+    --ishare-glass-shell-bg: rgba(255, 255, 255, 0.75);
+    --ishare-float-glass-bg: rgba(255, 255, 255, 0.75);
+    --ishare-float-glass-bg-hover: rgba(255, 255, 255, 0.9);
     --ishare-float-glass-shadow: var(--ishare-glass-dock-shadow);
     --ishare-glass-anchored-shadow:
       0 12px 28px rgba(15, 23, 42, 0.16),
       0 4px 10px rgba(15, 23, 42, 0.08);
     --ishare-glass-anchored-border: 1px solid rgba(15, 23, 42, 0.11);
-    --ishare-glass-body-bg: rgba(255, 255, 255, 0.78);
-    --ishare-glass-header-bg: rgba(255, 255, 255, 0.92);
-    --ishare-glass-footer-bg: rgba(255, 255, 255, 0.84);
+    --ishare-glass-body-bg: rgba(255, 255, 255, 0.6);
+    --ishare-glass-header-bg: rgba(255, 255, 255, 0.90);
+    --ishare-glass-footer-bg: rgba(255, 255, 255, 0.8);
     --ishare-glass-divider: 1px solid rgba(15, 23, 42, 0.08);
+    /* Card outline inside glass panels (help accordion item, naming card) */
+    --ishare-glass-card-border: rgba(15, 23, 42, 0.12);
+    /* Dark chrome pills over panorama (hero title, first-visit hint) */
+    --ishare-glass-dark-overlay: rgba(15, 23, 42, 0.68);
+    /* Modal dim behind info popup */
+    --ishare-glass-scrim: rgba(15, 23, 42, 0.55);
     --ishare-glass-body-text: color-mix(in srgb,
-        var(--color-body) 42%,
+        var(--color-body) 55%,
         var(--color-muted));
 
     /* Type scale shims */
@@ -631,7 +639,9 @@
         rgba(15, 23, 42, 0.3) 84%,
         rgba(15, 23, 42, 0) 100%,
         transparent 100%);
-    transition: height var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease);
+    transition:
+      height var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease),
+      background var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease);
   }
 
   @media (hover: hover) {
@@ -639,6 +649,12 @@
     .group\/card:hover .tour-nav-gallery-card-hero-overlay::before,
     .group\/card:focus-visible .tour-nav-gallery-card-hero-overlay::before {
       height: 100%;
+      background: linear-gradient(to top,
+          rgba(15, 23, 42, 0.96) 0%,
+          rgba(15, 23, 42, 0.84) 38%,
+          rgba(15, 23, 42, 0.58) 72%,
+          rgba(15, 23, 42, 0.22) 92%,
+          rgba(15, 23, 42, 0) 100%);
     }
 
     .group\/card:hover .tour-nav-gallery-card-hero-media--zoomable,
@@ -662,6 +678,84 @@
 
     .group\/card:hover .tour-nav-gallery-card-hero-hover-body,
     .group\/card:focus-visible .tour-nav-gallery-card-hero-hover-body {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  /* Explore directory — collapsible location / naming sector groups */
+  .tour-nav-location-group {
+    --tour-directory-group-expand-duration: 0.35s;
+    --tour-directory-group-expand-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .tour-nav-location-group__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    min-height: 0;
+    overflow: hidden;
+    transition: grid-template-rows var(--tour-directory-group-expand-duration) var(--tour-directory-group-expand-ease);
+  }
+
+  .tour-nav-location-group--expanded .tour-nav-location-group__panel {
+    grid-template-rows: 1fr;
+  }
+
+  .tour-nav-location-group__panel-inner {
+    min-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+  }
+
+  .tour-nav-location-group--expanded .tour-nav-location-group__panel-inner {
+    padding-top: var(--tour-directory-space, 16px);
+  }
+
+  .tour-nav-location-group__content {
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity var(--tour-directory-group-expand-duration) var(--tour-directory-group-expand-ease),
+      visibility 0s linear var(--tour-directory-group-expand-duration);
+  }
+
+  .tour-nav-location-group--expanded .tour-nav-location-group__content {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity var(--tour-directory-group-expand-duration) var(--tour-directory-group-expand-ease),
+      visibility 0s linear 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tour-nav-location-group__panel {
+      transition: none;
+    }
+
+    .tour-nav-location-group__content {
+      transition: none;
+    }
+
+    .tour-nav-location-group--expanded .tour-nav-location-group__content {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .tour-nav-location-group:not(.tour-nav-location-group--expanded) .tour-nav-location-group__content {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .tour-nav-directory-list-item-actions {
+      transition: none;
+    }
+
+    .group\/listitem:hover .tour-nav-directory-list-item-actions,
+    .group\/listitem:focus-within .tour-nav-directory-list-item-actions {
       grid-template-rows: 1fr;
     }
   }

@@ -10,13 +10,13 @@ export const aiAssistantStackClassName = cn(
 );
 
 const aiFabHoverClassName = cn(
-  'hover:max-w-[160px] hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
-  'focus-visible:max-w-[160px] focus-visible:bg-white/86 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'hover:max-w-[160px] hover:bg-[var(--ishare-float-glass-bg-hover)] hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'focus-visible:max-w-[160px] focus-visible:bg-[var(--ishare-float-glass-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
 );
 
 export const aiFabVariants = cva(
   cn(
-    'ai-fab group/fab relative box-border inline-flex h-[76px] min-h-[76px] min-w-[76px] w-auto max-w-[76px] cursor-pointer flex-row items-center justify-start overflow-hidden rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-2 shadow-[var(--ishare-float-glass-shadow)] backdrop-blur-[4px] backdrop-saturate-[110%]',
+    'ai-fab group/fab relative box-border inline-flex h-[var(--tour-chrome-ai-fab-size)] min-h-[var(--tour-chrome-ai-fab-size)] min-w-[var(--tour-chrome-ai-fab-size)] w-auto max-w-[var(--tour-chrome-ai-fab-size)] cursor-pointer flex-row items-center justify-start overflow-hidden rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-2 shadow-[var(--ishare-float-glass-shadow)]',
     'max-[480px]:h-16 max-[480px]:min-h-16 max-[480px]:min-w-16 max-[480px]:max-w-16 max-[480px]:self-end max-[480px]:p-2',
     'max-[480px]:hover:max-w-16 max-[480px]:focus-visible:max-w-16',
   ),
@@ -81,7 +81,7 @@ export const aiPanelVariants = cva(
 );
 
 export const aiPanelFallbackClassName = cn(
-  'tour-glass-panel--ai box-border h-[min(560px,calc(100vh-112px))] max-h-[560px] w-[380px] animate-ai-panel-in rounded-xl bg-white/72 shadow-[var(--ishare-glass-dock-shadow)] backdrop-blur-[8px] backdrop-saturate-[120%] [transform-origin:bottom_right]',
+  'tour-glass-panel--ai box-border h-[min(560px,calc(100vh-112px))] max-h-[560px] w-[380px] animate-ai-panel-in rounded-xl bg-[var(--ishare-glass-shell-bg)] shadow-[var(--ishare-glass-dock-shadow)] [transform-origin:bottom_right]',
 );
 
 export const aiPanelHeaderMainClassName = cn(
@@ -170,7 +170,7 @@ export const aiComposerClassName = cn(
 );
 
 export const aiComposerPillClassName = cn(
-  'group/composer pointer-events-auto flex w-[60%] max-w-full min-h-[46px] items-center gap-0.5 rounded-full border-[1.5px] border-[rgba(15,23,42,0.12)] bg-white/72 px-2.5 py-2 pl-5 shadow-[0_8px_24px_rgba(15,23,42,0.14)] backdrop-blur-[8px] backdrop-saturate-[120%] transition-[width,border-color,box-shadow,background] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-white/86 hover:shadow-[0_12px_28px_rgba(15,23,42,0.18)] focus-within:w-full focus-within:border-primary',
+  'group/composer pointer-events-auto flex w-[60%] max-w-full min-h-[46px] items-center gap-0.5 rounded-full border-[1.5px] border-[rgba(15,23,42,0.12)] bg-[var(--ishare-glass-shell-bg)] px-2.5 py-2 pl-5 shadow-[0_8px_24px_rgba(15,23,42,0.14)] transition-[width,border-color,box-shadow,background] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-white/[0.90] hover:shadow-[0_12px_28px_rgba(15,23,42,0.18)] focus-within:w-full focus-within:border-primary',
 );
 
 export const aiComposerInputClassName = cn(

@@ -62,17 +62,6 @@ export function DevTools({
   }, []);
   return (
     <div className={devToolsStackClassName}>
-      <button
-        type='button'
-        className={devFabVariants({ open: panelOpen })}
-        aria-expanded={panelOpen}
-        aria-controls='dev-view-panel'
-        aria-label={panelOpen ? 'Hide dev panel (`)' : 'Show dev panel (`)'}
-        onClick={() => setPanelOpen((open) => !open)}
-      >
-        Dev
-      </button>
-
       {panelOpen ?
         <DevViewPanel
           id='dev-view-panel'
@@ -85,8 +74,19 @@ export function DevTools({
           clickCoords={clickCoords}
           captureSceneThumbnail={captureSceneThumbnail}
           getCurrentView={getCurrentView}
+          onClose={() => setPanelOpen(false)}
         />
-      : null}
+      : <button
+          type='button'
+          className={devFabVariants({ open: panelOpen })}
+          aria-expanded={panelOpen}
+          aria-controls='dev-view-panel'
+          aria-label='Show dev panel (`)'
+          onClick={() => setPanelOpen((open) => !open)}
+        >
+          Dev
+        </button>
+      }
     </div>
   );
 }

@@ -6,14 +6,18 @@ import {
   tourNavLocationGroupChevronClassName,
   tourNavLocationGroupChevronOpenClassName,
   tourNavLocationGroupClassName,
-  tourNavLocationGroupCountClassName,
+  tourNavLocationGroupExpandedClassName,
   tourNavLocationGroupHeaderClassName,
+  tourNavLocationGroupMetaClassName,
+  tourNavLocationGroupPanelClassName,
+  tourNavLocationGroupPanelContentClassName,
+  tourNavLocationGroupPanelInnerClassName,
   tourNavLocationGroupTitleClassName,
 } from './tourNavFloatVariants';
 
 interface ExploreLocationGroupProps {
   title: string;
-  count: number;
+  metaLabel?: string;
   expanded: boolean;
   regionId: string;
   headingId: string;
@@ -25,7 +29,7 @@ interface ExploreLocationGroupProps {
 /** Collapsible department group header + region for the grouped locations list. */
 export function ExploreLocationGroup({
   title,
-  count,
+  metaLabel,
   expanded,
   regionId,
   headingId,
@@ -34,7 +38,12 @@ export function ExploreLocationGroup({
   children,
 }: ExploreLocationGroupProps) {
   return (
-    <section className={tourNavLocationGroupClassName}>
+    <section
+      className={cn(
+        tourNavLocationGroupClassName,
+        expanded && tourNavLocationGroupExpandedClassName,
+      )}
+    >
       <button
         type='button'
         id={headingId}
@@ -53,13 +62,23 @@ export function ExploreLocationGroup({
           )}
         />
         <span className={tourNavLocationGroupTitleClassName}>{title}</span>
-        <span className={tourNavLocationGroupCountClassName}>{count}</span>
+        {metaLabel ?
+          <span className={tourNavLocationGroupMetaClassName}>{metaLabel}</span>
+        : null}
       </button>
-      {expanded ?
-        <div id={regionId} role='region' aria-labelledby={headingId}>
-          {children}
+      <div className={tourNavLocationGroupPanelClassName}>
+        <div className={tourNavLocationGroupPanelInnerClassName}>
+          <div
+            id={regionId}
+            role='region'
+            aria-labelledby={headingId}
+            aria-hidden={!expanded}
+            className={tourNavLocationGroupPanelContentClassName}
+          >
+            {children}
+          </div>
         </div>
-      : null}
+      </div>
     </section>
   );
 }

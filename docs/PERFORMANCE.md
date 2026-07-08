@@ -90,12 +90,12 @@ not a task list.
 
 ### P3 — Runtime & rendering
 
-| Technique              | Guidance                                                                                                                                                                                                                                                 |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices.                                                                                                                 |
-| **Hotspot marker GPU** | Hotspot glass uses `backdrop-filter`; chrome animations pause when the tab is hidden or the pointer leaves the browser; main PSV and nav preview mini viewer pause render when the window loses focus (`viewerPerfPause.ts`, `navPreviewMiniViewer.ts`). |
-| **Marker DOM churn**   | Minimize HTML marker add/remove on scene change; profile 10+ hotspots.                                                                                                                                                                                   |
-| **Panel measure host** | Cache off-screen NO/nav height per `(popup hash, width)` if repeat opens are hot.                                                                                                                                                                        |
+| Technique              | Guidance                                                                                                                                                                                                                                                                                                                                           |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices.                                                                                                                                                                                                           |
+| **Hotspot marker GPU** | Hotspot pills are solid white + alpha (no `backdrop-filter`) to skip a per-frame blur pass — see [Findings log](#findings-log). Chrome animations pause when the tab is hidden or the pointer leaves the browser; main PSV and nav preview mini viewer pause render when the window loses focus (`viewerPerfPause.ts`, `navPreviewMiniViewer.ts`). |
+| **Marker DOM churn**   | Minimize HTML marker add/remove on scene change; profile 10+ hotspots.                                                                                                                                                                                                                                                                             |
+| **Panel measure host** | Cache off-screen NO/nav height per `(popup hash, width)` if repeat opens are hot.                                                                                                                                                                                                                                                                  |
 
 ---
 
@@ -140,6 +140,44 @@ not a task list.
 4. **Device test** — mid-range Android + iPhone Safari in embed iframe.
 
 Optional: `vite-plugin-visualizer` for chunk composition (temporary).
+
+---
+
+## Findings log
+
+### Jul 2026 — Multi-monitor GPU compositor contention
+
+**Symptom:** With the tour tab visible on a second monitor, a YouTube video on
+the main monitor stuttered whenever the cursor moved over it — regardless of
+window focus.
+
+**Investigation (via temporary `?debug*` URL toggles, since removed):**
+
+- Pausing looping chrome animations **or** disabling all `backdrop-filter` each
+  reduced the stutter on their own — the expensive part is animated pixels under
+  a blur layer forcing per-frame re-blur.
+- Disabling MSAA (`antialias`) / capping render pixel ratio: no meaningful
+  change.
+- Hiding **all** hotspot/panel markers (`.psv-marker { display: none }`) removed
+  the stutter completely — DOM markers each add a compositor layer that is
+  re-composited every frame during rotate / cursor move.
+- **Control test:** heavy third-party WebGL pages (WebGL Aquarium, Shadertoy,
+  Google Earth) on the second monitor reproduced the **same** YouTube stutter.
+
+**Conclusion:** Not an app bug. It is browser/driver-level GPU compositor
+contention in multi-monitor setups (any second-monitor GPU load can disturb
+main-monitor video). We cannot fully fix it in code — only reduce our own GPU
+footprint. Mismatched monitor refresh rates and hardware-accel settings are the
+main environmental levers (a user-environment concern, not app-fixable).
+
+**Shipped from this:** Hotspot pills switched from frosted glass
+(`backdrop-filter`) to **solid white + alpha** by default (`psv-layer.css`) —
+one fewer per-frame blur pass per marker. Helps low-end / mobile / laptop
+thermals broadly, independent of the multi-monitor issue.
+
+**Deferred (larger, optional):** replace the nav-preview second live WebGL
+viewer with a static preview; move markers into the WebGL scene (`imageLayer` /
+`videoLayer`) to drop DOM compositor layers entirely.
 
 ---
 

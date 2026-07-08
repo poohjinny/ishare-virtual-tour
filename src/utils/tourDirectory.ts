@@ -1,3 +1,4 @@
+import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 import type { ExploreDirectorySort } from '../constants/tourDirectorySort';
 import { compareNamingOpportunityStatusModifiers } from '../data/namingOpportunityStatus';
 import type { Scene, Tour, ViewPosition } from '../types/tour';
@@ -9,7 +10,11 @@ import {
   resolveModel3dNamingTargetView,
 } from './findTourHotspot';
 import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
-import { buildSceneVisitOrder } from '../viewer/sceneDepth';
+import {
+  buildSceneGroups,
+  buildSceneVisitOrder,
+  SCENE_GROUP_OTHER_ID,
+} from '../viewer/sceneDepth';
 
 export interface TourDirectoryNamingItem {
   sceneId: string;
@@ -17,6 +22,7 @@ export interface TourDirectoryNamingItem {
   hotspotId: string;
   name: string;
   price: number;
+  priceLabel?: string;
   priceAmount: number | null;
   statusLabel: string;
   statusShortLabel: string;
@@ -25,6 +31,13 @@ export interface TourDirectoryNamingItem {
   description?: string;
   /** model3d — baked preview hero for Explore cards */
   previewImage?: string;
+}
+
+export interface NamingSectorGroup {
+  id: string;
+  title: string;
+  items: TourDirectoryNamingItem[];
+  total: number;
 }
 
 export function buildTourNamingDirectory(
@@ -40,6 +53,7 @@ export function buildTourNamingDirectory(
         hotspotId: naming.hotspotId,
         name: naming.name,
         price: naming.price,
+        priceLabel: naming.priceLabel,
         priceAmount: parseNamingPrice(naming.price),
         statusLabel: naming.statusLabel,
         statusShortLabel: naming.statusShortLabel,
@@ -51,6 +65,64 @@ export function buildTourNamingDirectory(
   }
 
   return items;
+}
+
+/** Group sorted naming items by nav-graph sector and sum visible prices. */
+export function buildNamingSectorGroups(
+  tour: Pick<Tour, 'hotspots' | 'viewerType'> & {
+    scenes: Record<string, Scene>;
+    firstScene: string;
+  },
+  sortedItems: TourDirectoryNamingItem[],
+  otherGroupTitle: string = TOUR_DIRECTORY_GROUP_OTHER,
+): NamingSectorGroup[] {
+  const sceneGroups = buildSceneGroups(
+    tour,
+    tour.scenes,
+    tour.firstScene,
+    otherGroupTitle,
+  );
+
+  const sceneToGroupId = new Map<string, string>();
+  const groupMeta = new Map<string, { id: string; title: string }>();
+
+  for (const group of sceneGroups) {
+    groupMeta.set(group.id, { id: group.id, title: group.title });
+    sceneToGroupId.set(group.id, group.id);
+    for (const scene of group.scenes) {
+      sceneToGroupId.set(scene.id, group.id);
+    }
+  }
+
+  const buckets = new Map<string, TourDirectoryNamingItem[]>();
+  for (const group of sceneGroups) {
+    buckets.set(group.id, []);
+  }
+
+  for (const item of sortedItems) {
+    const groupId = sceneToGroupId.get(item.sceneId) ?? SCENE_GROUP_OTHER_ID;
+    if (!buckets.has(groupId)) {
+      buckets.set(groupId, []);
+      if (!groupMeta.has(groupId)) {
+        groupMeta.set(groupId, { id: groupId, title: otherGroupTitle });
+      }
+    }
+    buckets.get(groupId)!.push(item);
+  }
+
+  return sceneGroups
+    .map((group) => {
+      const items = buckets.get(group.id) ?? [];
+      if (items.length === 0) return null;
+
+      const total = items.reduce(
+        (sum, item) => sum + (item.priceAmount ?? 0),
+        0,
+      );
+
+      return { id: group.id, title: group.title, items, total };
+    })
+    .filter((group): group is NamingSectorGroup => group != null);
 }
 
 export { findNamingHotspotInTour } from './findTourHotspot';

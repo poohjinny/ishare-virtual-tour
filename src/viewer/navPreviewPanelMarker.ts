@@ -25,7 +25,9 @@ import {
   NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
 } from './anchoredPanelPosition';
 import { bindNavPreviewNamingAccordion } from './navPreviewNamingAccordion';
+import { animateNavPreviewTotal } from './navPreviewTotalCount';
 import {
+  frameCameraForAnchoredPanel,
   scheduleNudgeCameraForClippedPanel,
   waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
@@ -180,10 +182,12 @@ export function openAnchoredNavPreviewPanel(
     NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
   );
 
+  const markerSize = navPreviewPanelMarkerSize(preview, hotspot.id, hideShare);
+
   markers.addMarker({
     id,
     html: buildAnchoredNavPreviewHtml(preview, hotspot.id, { hideShare }),
-    size: navPreviewPanelMarkerSize(preview, hotspot.id, hideShare),
+    size: markerSize,
     position: anchoredPanelMarkerPosition(
       viewer,
       hotspot.position as ViewPosition,
@@ -229,6 +233,7 @@ export function openAnchoredNavPreviewPanel(
       if (!cameraSettled || !enterDone) return;
       const panelMarker = markers.getMarker(id);
       if (!(panelMarker?.domElement instanceof HTMLElement)) return;
+      animateNavPreviewTotal(panelMarker.domElement);
       if (preview.videoUrl?.trim()) {
         mountNavPreviewVideoHero(panelMarker.domElement);
       } else if (isNavPreviewMiniViewerEnabled()) {
@@ -260,6 +265,15 @@ export function openAnchoredNavPreviewPanel(
           }
           revealHero();
         },
+        onPanelOffView: () =>
+          frameCameraForAnchoredPanel(
+            viewer,
+            {
+              yawDeg: (hotspot.position as ViewPosition).yaw,
+              pitchDeg: (hotspot.position as ViewPosition).pitch,
+            },
+            markerSize.height,
+          ),
       },
     );
   }

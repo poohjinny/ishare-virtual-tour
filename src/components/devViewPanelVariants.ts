@@ -17,7 +17,7 @@ export const devFabVariants = cva(
   cn(
     'inline-flex h-9 shrink-0 items-center justify-center self-start rounded-full border px-3',
     'font-mono text-2xs font-bold uppercase tracking-[0.08em]',
-    'shadow-[0_8px_20px_rgba(15,23,42,0.28)] backdrop-blur-[4px]',
+    'shadow-[0_8px_20px_rgba(15,23,42,0.28)]',
   ),
   {
     variants: {
@@ -86,13 +86,18 @@ export const devViewPanelTourSwitchChevronClassName = cn(
 );
 
 export const devViewPanelTourSwitchMenuClassName = cn(
-  'absolute left-0 right-0 top-[calc(100%+4px)] z-[5] max-h-52 overflow-y-auto border border-[rgba(100,116,139,0.45)] bg-[rgba(15,23,42,0.98)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.55)]',
+  'fixed z-[var(--tour-chrome-menu-z-index)] max-h-[min(60vh,420px)] overflow-y-auto border border-[rgba(100,116,139,0.45)] bg-[rgba(15,23,42,0.98)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.55)]',
   devViewPanelControlRadiusClassName,
   '[scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.55)_transparent]',
 );
 
+/** Client name row — non-interactive group label above its tours. */
+export const devViewPanelTourSwitchGroupHeadingClassName = cn(
+  'block truncate px-2.5 pb-1 pt-2.5 text-[0.5625rem] font-bold uppercase tracking-[0.06em] text-[#94a3b8]',
+);
+
 export const devViewPanelTourSwitchMenuItemClassName = cn(
-  'block w-full truncate px-2.5 py-1.5 text-left text-2xs text-[#e2e8f0]',
+  'block w-full truncate py-1.5 pl-5 pr-2.5 text-left text-2xs text-[#e2e8f0]',
   'hover:bg-[rgba(56,189,248,0.12)] hover:text-[#f0fdf4]',
   'focus-visible:bg-[rgba(56,189,248,0.12)] focus-visible:outline-none',
 );
@@ -417,7 +422,7 @@ export const devViewPanelTabsClassName = devViewPanelSecondaryTabsClassName;
 /** @deprecated Use devViewPanelTertiaryTabsClassName for sub-tabs. */
 export const devViewPanelSubTabsClassName = cn(
   devViewPanelTertiaryTabsClassName,
-  'sticky top-0 z-[1] shrink-0 bg-[rgba(0,0,0,0.92)] backdrop-blur-[4px]',
+  'sticky top-0 z-[1] shrink-0 bg-[rgba(0,0,0,0.92)]',
 );
 
 export const devViewPanelTabVariants = cva(

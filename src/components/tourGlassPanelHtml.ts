@@ -6,11 +6,17 @@ import type {
   NavPreviewNamingItem,
   Tour,
 } from '../types/tour';
-import { formatNamingPriceDisplay } from '../utils/namingPrice';
+import {
+  formatNamingItemDisplayPrice,
+  formatNamingPriceDisplay,
+  formatNamingSectorGroupTotalLabel,
+  parseNamingPrice,
+} from '../utils/namingPrice';
 import {
   navPreviewCtaLabel,
   navPreviewVisitAriaLabel,
 } from '../utils/navPreview';
+import { formatCountValue } from '../viewer/navPreviewTotalCount';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import {
   glassPanelCtaIconHtml,
@@ -450,17 +456,6 @@ export function buildGlassPanelParagraphsHtml(body: string): string {
     .join('');
 }
 
-function buildNamingPriceInlineHtml(price: number, closed: boolean): string {
-  const priceClass =
-    closed ? GLASS_PANEL.priceInlineClosed : GLASS_PANEL.priceInline;
-  const displayPrice = formatNamingPriceDisplay(price);
-
-  return `<span class="${priceClass}">
-    <span class="${GLASS_PANEL.priceSep}" aria-hidden="true">|</span>
-    <span class="${GLASS_PANEL.priceValue}">${escapeHtml(displayPrice)}</span>
-  </span>`;
-}
-
 export function buildNamingPriceUnderTitleHtml(
   price: number,
   closed: boolean,
@@ -604,10 +599,10 @@ export function buildTourGlassPanelHtml(
     rootDataAttrs = {},
   } = options;
 
-  // Anchored panels scale the article (ancestor of the glass shell). Animating
-  // the shell — which carries backdrop-filter — hits a Chromium bug where the
-  // glass renders at final size while only the content scales, so the container
-  // "pops" before the content unfolds. Dock panels keep the shell-level entrance.
+  // Anchored panels scale the article (ancestor of the glass shell). This
+  // article-level entrance is retained from the frosted-glass era (when
+  // animating the backdrop-filter shell directly tripped a Chromium paint bug);
+  // it stays as the stable entrance. Dock panels keep the shell-level entrance.
   const animateArticle = variant === 'anchored' && animate;
 
   const rootBaseClass =
@@ -838,18 +833,22 @@ export function navPreviewPanelMarkerSize(
   };
 }
 
-function buildNavPreviewNamingStatusHtml(item: NavPreviewNamingItem): string {
-  const priceLabelHtml =
-    item.priceLabel ?
-      `<p class="${GLASS_PANEL.priceLabel} nav-preview-panel__naming-price-label">${escapeHtml(item.priceLabel)}</p>`
+function buildNavPreviewNamingBadgeHtml(item: NavPreviewNamingItem): string {
+  return `<span class="${GLASS_PANEL.badgeStatus(escapeHtml(item.statusModifier))} nav-preview-panel__naming-status">
+    <span class="${GLASS_PANEL.badgeText}">${escapeHtml(item.statusLabel)}</span>
+  </span>`;
+}
+
+function buildNavPreviewNamingPriceHtml(item: NavPreviewNamingItem): string {
+  const priceDisplay = formatNamingItemDisplayPrice(item);
+  if (!priceDisplay) return '';
+
+  const closedModifier =
+    item.statusModifier === 'closed' ?
+      ' nav-preview-panel__naming-price--closed'
     : '';
 
-  return `<span class="nav-preview-panel__naming-trigger-badges">
-    <span class="${GLASS_PANEL.badgeStatus(escapeHtml(item.statusModifier))} nav-preview-panel__naming-status">
-      <span class="${GLASS_PANEL.badgeText}">${escapeHtml(item.statusLabel)}</span>
-    </span>
-    ${priceLabelHtml}
-  </span>`;
+  return `<span class="nav-preview-panel__naming-price${closedModifier}">${escapeHtml(priceDisplay)}</span>`;
 }
 
 export function buildNavPreviewNamingListHtml(
@@ -867,11 +866,8 @@ export function buildNavPreviewNamingListHtml(
           `<p class="nav-preview-panel__naming-desc">${escapeHtml(item.description)}</p>`
         : '';
 
-      const statusHtml = buildNavPreviewNamingStatusHtml(item);
-      const priceHtml = buildNamingPriceInlineHtml(
-        item.price,
-        item.statusModifier === 'closed',
-      );
+      const badgeHtml = buildNavPreviewNamingBadgeHtml(item);
+      const priceHtml = buildNavPreviewNamingPriceHtml(item);
       const ctaHtml = buildNavPreviewNamingActionsHtml(item);
 
       const panelContent = `${descriptionHtml}${ctaHtml}`;
@@ -888,10 +884,10 @@ export function buildNavPreviewNamingListHtml(
             <span class="nav-preview-panel__naming-chevron" aria-hidden="true">${navPreviewNamingChevronHtml()}</span>
             <span class="nav-preview-panel__naming-title-line">
               <span class="nav-preview-panel__naming-name">${escapeHtml(item.name)}</span>
-              ${priceHtml}
+              ${badgeHtml}
             </span>
           </span>
-          ${statusHtml}
+          ${priceHtml}
         </button>
         <div class="nav-preview-panel__naming-panel-wrap" aria-hidden="true">
           <div
@@ -903,21 +899,26 @@ export function buildNavPreviewNamingListHtml(
     })
     .join('');
 
-  const countLabel =
-    items.length === 1 ?
-      ''
-    : ` <span class="nav-preview-panel__naming-count">(${items.length})</span>`;
+  const total = items.reduce(
+    (sum, item) => sum + (parseNamingPrice(item.price) ?? 0),
+    0,
+  );
+  const totalLabel = formatNamingSectorGroupTotalLabel(total);
+  const totalHtml =
+    totalLabel ?
+      `<span class="nav-preview-panel__naming-total-price">${escapeHtml(totalLabel)}</span>`
+    : '';
 
   return `<section class="nav-preview-panel__naming">
     <div class="nav-preview-panel__naming-divider">
-      <span class="nav-preview-panel__naming-divider-line" aria-hidden="true"></span>
       <h4 class="nav-preview-panel__naming-heading">
         <span class="nav-preview-panel__naming-heading-label">
           ${navPreviewNamingHeadingIconHtml()}
-          <span class="nav-preview-panel__naming-heading-text">Naming Opportunities${countLabel}</span>
+          <span class="nav-preview-panel__naming-heading-text">Naming Opportunities</span>
         </span>
       </h4>
       <span class="nav-preview-panel__naming-divider-line" aria-hidden="true"></span>
+      ${totalHtml}
     </div>
     <div class="nav-preview-panel__naming-accordion" data-nav-naming-accordion="true">${cards}</div>
   </section>`;
@@ -975,13 +976,23 @@ export function buildAnchoredNavPreviewHtml(
 ): string {
   const titleId = `nav-panel-title-${hotspotId}`;
   // Entrance scale runs on the article (ancestor of the glass shell), not the
-  // shell itself. backdrop-filter + transform on the same element hits a
-  // Chromium bug where the glass renders at final size immediately while only
-  // the content scales, making the container "pop" then the content unfold.
+  // shell itself — retained from the frosted-glass era (when backdrop-filter +
+  // transform on one element tripped a Chromium paint bug). Kept as the stable
+  // entrance now that the shell is solid.
   const articleEnterClass =
     options?.animate === false ? '' : ` ${GLASS_PANEL.anchoredEnter}`;
 
   const titleHtml = `<h3 id="${escapeHtml(titleId)}" class="${GLASS_PANEL.title} nav-preview-panel__title">${escapeHtml(preview.title)}</h3>`;
+
+  const namingTotalAmount = preview.namingTotalAmount ?? 0;
+  const namingTotalStartLabel = formatCountValue(0, namingTotalAmount);
+  const namingTotalHtml =
+    preview.namingTotalLabel ?
+      `<p class="nav-preview-panel__total">
+        <span class="nav-preview-panel__total-amount" data-nav-count-to="${namingTotalAmount}">${escapeHtml(namingTotalStartLabel)}</span>
+        <span class="nav-preview-panel__total-caption">naming opportunities</span>
+      </p>`
+    : '';
 
   const trimmedVideoUrl = preview.videoUrl?.trim();
   const hasVideo = Boolean(trimmedVideoUrl);
@@ -1078,10 +1089,19 @@ export function buildAnchoredNavPreviewHtml(
   </footer>`
     : '';
 
+  const introInnerHtml = `${namingTotalHtml}${bodyTitleHtml}${
+    descriptionHtml ?
+      `<div class="${GLASS_PANEL.copy}">${descriptionHtml}</div>`
+    : ''
+  }`;
+  const introHtml =
+    introInnerHtml.trim() ?
+      `<div class="nav-preview-panel__intro">${introInnerHtml}</div>`
+    : '';
+
   const bodyHtml = `<div class="${GLASS_PANEL.body} nav-preview-panel__body ishare-scrollbar">
     ${closeInBodyHtml}
-    ${bodyTitleHtml}
-    ${descriptionHtml ? `<div class="${GLASS_PANEL.copy}">${descriptionHtml}</div>` : ''}
+    ${introHtml}
     ${namingHtml}
   </div>`;
 

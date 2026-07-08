@@ -10,9 +10,9 @@ export const tourFirstVisitHintRootClassName = cn(
 
 export const tourFirstVisitHintPillClassName = cn(
   'inline-flex items-center gap-3 rounded-full border border-white/15',
-  'bg-[rgba(15,23,42,0.58)] text-base font-normal tracking-[0.01em] text-white/70',
+  'bg-[var(--ishare-glass-dark-overlay)] text-base font-normal tracking-[0.01em] text-white/70',
   'px-6 py-3',
-  'shadow-[0_16px_40px_rgba(15,23,42,0.45),0_6px_16px_rgba(15,23,42,0.28)] backdrop-blur-[8px] backdrop-saturate-[120%]',
+  'shadow-[0_16px_40px_rgba(15,23,42,0.45),0_6px_16px_rgba(15,23,42,0.28)]',
   'transition-opacity duration-[280ms] ease-out',
 );
 

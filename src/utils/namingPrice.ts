@@ -43,6 +43,62 @@ export function formatNamingPriceDisplay(price: number): string {
   return Number.isFinite(price) ? formatNamingPriceAmount(price) : '';
 }
 
+function trimTrailingZeroDecimal(value: string): string {
+  return value.replace(/\.0$/, '');
+}
+
+/** Abbreviated currency for sector totals — e.g. $10.5M, $525K. */
+export function formatNamingPriceAbbrev(amount: number): string {
+  if (!Number.isFinite(amount)) return '';
+
+  const rounded = Math.round(amount);
+  if (rounded >= 1_000_000) {
+    const millions = rounded / 1_000_000;
+    const formatted =
+      millions % 1 === 0 ?
+        String(millions)
+      : trimTrailingZeroDecimal(millions.toFixed(1));
+    return `$${formatted}M`;
+  }
+
+  if (rounded >= 1_000) {
+    const thousands = rounded / 1_000;
+    const formatted =
+      thousands % 1 === 0 ?
+        String(thousands)
+      : trimTrailingZeroDecimal(thousands.toFixed(1));
+    return `$${formatted}K`;
+  }
+
+  return formatNamingPriceAmount(rounded);
+}
+
+/** Per-item display — honors optional priceLabel override from tour JSON. */
+export function formatNamingItemDisplayPrice(item: {
+  price: number;
+  priceLabel?: string;
+}): string {
+  if (item.priceLabel?.trim()) return item.priceLabel.trim();
+  return formatNamingPriceDisplay(item.price);
+}
+
+/** Gallery card trailing price — abbreviated unless a custom label is set. */
+export function formatNamingGalleryItemPrice(item: {
+  price: number;
+  priceAmount?: number | null;
+  priceLabel?: string;
+}): string {
+  if (item.priceLabel?.trim()) return item.priceLabel.trim();
+  const amount = item.priceAmount ?? item.price;
+  return formatNamingPriceAbbrev(amount);
+}
+
+/** Sector group header — full total with meaning. */
+export function formatNamingSectorGroupTotalLabel(total: number): string {
+  const price = formatNamingPriceDisplay(total);
+  return price ? `${price} total` : '';
+}
+
 /** Plain string for dev panel inputs — accepts numeric JSON or text. */
 export function formatNamingPriceInput(
   price: number | string | undefined | null,

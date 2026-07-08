@@ -7,6 +7,12 @@ export const TOUR_DIRECTORY_SECTION_LOCATIONS = 'Locations';
 
 export const TOUR_DIRECTORY_SECTION_NAMING = 'Naming opportunities';
 
+/** Pinned section header highlighting the viewer's current scene. */
+export const TOUR_DIRECTORY_CURRENT_LOCATION_LABEL = 'You are here';
+
+/** Pinned section header for the tour's root/overview scene. */
+export const TOUR_DIRECTORY_OVERVIEW_LABEL = 'Overview';
+
 /** Header for scenes not reachable from the tour start via nav hotspots. */
 export const TOUR_DIRECTORY_GROUP_OTHER = 'More locations';
 
@@ -51,6 +57,16 @@ export const TOUR_DIRECTORY_EMPTY_SEARCH =
 
 /** Explore gallery card — hover CTA below description. */
 export const EXPLORE_GALLERY_VISIT_LABEL = 'Visit';
+
+export const EXPLORE_GALLERY_LOCATION_DETAILS_LABEL = 'Details';
+
+export const EXPLORE_GALLERY_NAMING_VIEW_LABEL = 'View opportunity';
+
+/** Collapsible group header — location count meta. */
+export function exploreLocationGroupCountLabel(count: number): string {
+  const n = Math.max(0, Math.round(count));
+  return n === 1 ? '1 location' : `${n} locations`;
+}
 
 export const TOUR_DIRECTORY_SCENE_DETAIL_BACK = 'Back to locations';
 

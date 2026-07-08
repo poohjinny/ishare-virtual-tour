@@ -1,17 +1,23 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { TOUR_CHROME_COMPACT_MAX_PX } from '../constants/tourChrome';
-import {
-  FLIP_LIST_KEY_ATTR,
-  useFlipListReorder,
-} from '../hooks/useFlipListReorder';
+import { useFlipListReorder } from '../hooks/useFlipListReorder';
 import { isTypingTarget } from '../utils/isTypingTarget';
 import { withBaseUrl } from '../utils/assetUrl';
 import {
   TOUR_DIRECTORY_PANEL_TITLE,
   TOUR_DIRECTORY_SECTION_LOCATIONS,
   TOUR_DIRECTORY_SECTION_NAMING,
+  TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
+  TOUR_DIRECTORY_OVERVIEW_LABEL,
   TOUR_DIRECTORY_TABS,
   TOUR_DIRECTORY_TAB_ORDER,
   TOUR_DIRECTORY_EMPTY_LOCATIONS,
@@ -19,6 +25,7 @@ import {
   TOUR_DIRECTORY_EMPTY_NAMING_PRICE,
   TOUR_DIRECTORY_EMPTY_SEARCH,
   TOUR_DIRECTORY_GROUP_OTHER,
+  exploreLocationGroupCountLabel,
   type TourDirectoryTab,
 } from '../constants/tourDirectory';
 import {
@@ -32,6 +39,7 @@ import { ExploreDirectoryTabLabel } from './icons/ExploreDirectoryTabIcons';
 import { TourMarkerIcon } from './icons/TourMarkerIcon';
 import { ExploreDirectoryLead } from './ExploreDirectoryLead';
 import { ExploreDirectoryPanel } from './ExploreDirectoryPanel';
+import { ExploreNamingDirectoryListItem } from './ExploreNamingDirectoryListItem';
 import { ExploreNamingGalleryCard } from './ExploreNamingGalleryCard';
 import { ExplorePanelSearch } from './ExplorePanelSearch';
 import { ExplorePanelRefine } from './ExplorePanelRefine';
@@ -68,6 +76,7 @@ import {
 } from '../viewer/sceneDepth';
 import type { Hotspot, Scene, TourClient, TourViewerType } from '../types/tour';
 import {
+  buildNamingSectorGroups,
   buildTourNamingDirectory,
   filterTourNamingDirectory,
   filterTourScenes,
@@ -78,6 +87,8 @@ import {
 import {
   computeNamingPriceBounds,
   filterTourNamingByPriceRange,
+  formatNamingItemDisplayPrice,
+  formatNamingSectorGroupTotalLabel,
 } from '../utils/namingPrice';
 import { SegmentedTabs } from './ui/SegmentedTabs';
 import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
@@ -88,8 +99,6 @@ import {
   MATERIAL_SYMBOL_SIZE_20,
   MATERIAL_SYMBOL_SIZE_22,
 } from './ui/materialSymbolClasses';
-import { type NamingStatusModifier } from './ui/Badge';
-import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import { TourHelpPanel } from './TourHelpPanel';
 import { TourHelpFooter } from './TourHelpFooter';
 import { TourGlassPanel, type TourGlassPanelAnimation } from './TourGlassPanel';
@@ -120,30 +129,23 @@ import {
   tourNavCircleIconClassName,
   tourNavDockOverflowItemClassName,
   tourNavDockOverflowMenuClassName,
-  tourNavDirectoryItemVariants,
   tourNavDirectoryPanelClassName,
+  tourNavDirectoryGroupedListClassName,
   tourNavDirectorySectionClassName,
   tourNavDirectoryTabsClassName,
-  tourNavDirectoryListItemBadgeColumnClassName,
   tourNavEmptyClassName,
   tourNavExploreHeaderActionsClassName,
   tourNavHistoryBtnIconClassName,
   tourNavHistoryGroupBtnClassName,
   tourNavHistoryGroupClassName,
-  tourNavItemDescriptionClassName,
-  tourNavItemBadgeClassName,
-  tourNavItemIconNamingVariants,
   tourNavItemLocationIconClassName,
-  tourNavItemLeadingLocationClassName,
-  tourNavItemNamingHeadingClassName,
-  tourNavItemNamingLocationClassName,
-  tourNavItemNamingNameClassName,
-  tourNavItemNamingSeparatorClassName,
-  tourNavItemTextClassName,
   tourNavListClassName,
   tourNavLocationGalleryListClassName,
   tourNavLogoClassName,
   tourNavLogoLinkClassName,
+  tourNavCurrentPinnedClassName,
+  tourNavCurrentPinnedLabelClassName,
+  tourNavOverviewPinnedLabelClassName,
   tourNavPanelScrollClassName,
   tourNavPanelScrollInnerClassName,
   tourNavPanelSlotVariants,
@@ -259,24 +261,6 @@ function HistoryForwardIcon() {
       name='chevron_right'
       className={tourNavHistoryBtnIconClassName}
       sizePx={MATERIAL_SYMBOL_SIZE_22}
-    />
-  );
-}
-
-function NamingHeartIcon({
-  active,
-  closed = false,
-}: {
-  active: boolean;
-  closed?: boolean;
-}) {
-  return (
-    <MaterialSymbol
-      name='favorite'
-      filled={active}
-      data-tour-nav-naming-icon
-      className={tourNavItemIconNamingVariants({ active, closed })}
-      sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
 }
@@ -620,6 +604,16 @@ export function TourNavFloat({
     [exploreNamingItems, exploreNamingSort],
   );
 
+  const namingSectorGroups = useMemo(
+    () =>
+      buildNamingSectorGroups(
+        { ...tourDirectoryContext, firstScene: firstSceneId },
+        exploreSortedNamingItems,
+        TOUR_DIRECTORY_GROUP_OTHER,
+      ),
+    [exploreSortedNamingItems, firstSceneId, tourDirectoryContext],
+  );
+
   const exploreSortedFilteredScenes = useMemo(
     () =>
       sortTourScenes(
@@ -648,6 +642,8 @@ export function TourNavFloat({
   );
 
   const firstScene = scenesById[firstSceneId];
+
+  const currentScene = scenesById[currentSceneId];
 
   // Department groups from the nav graph — only when sorted by tour order.
   const locationGroups = useMemo(() => {
@@ -689,6 +685,19 @@ export function TourNavFloat({
 
   const toggleGroup = useCallback((groupId: string) => {
     setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupId)) next.delete(groupId);
+      else next.add(groupId);
+      return next;
+    });
+  }, []);
+
+  const [collapsedNamingGroups, setCollapsedNamingGroups] = useState<
+    Set<string>
+  >(new Set());
+
+  const toggleNamingGroup = useCallback((groupId: string) => {
+    setCollapsedNamingGroups((prev) => {
       const next = new Set(prev);
       if (next.has(groupId)) next.delete(groupId);
       else next.add(groupId);
@@ -1151,6 +1160,7 @@ export function TourNavFloat({
       listBodyOnly?: boolean;
       /** Search results — list rows only (no gallery cards). */
       listOnly?: boolean;
+      suppressReorderRef?: boolean;
     },
   ) => {
     const listBody =
@@ -1158,7 +1168,9 @@ export function TourNavFloat({
         <>
           {!options?.listOnly ?
             <ul
-              ref={namingGalleryListRef}
+              ref={
+                options?.suppressReorderRef ? undefined : namingGalleryListRef
+              }
               hidden={exploreLayout !== 'gallery'}
               className={tourNavLocationGalleryListClassName}
               role='listbox'
@@ -1188,7 +1200,7 @@ export function TourNavFloat({
             </ul>
           : null}
           <ul
-            ref={namingListRef}
+            ref={options?.suppressReorderRef ? undefined : namingListRef}
             hidden={!options?.listOnly && exploreLayout !== 'list'}
             className={tourNavListClassName}
             role='listbox'
@@ -1198,78 +1210,18 @@ export function TourNavFloat({
               const isActive =
                 activeNamingHotspotId === item.hotspotId &&
                 currentSceneId === item.sceneId;
-              const isClosed = item.statusModifier === 'closed';
-              const description = item.description?.trim();
-              const ariaLabel =
-                isActive ?
-                  description ?
-                    `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${description}`
-                  : `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}.`
-                : description ?
-                  `${item.name}, ${item.sceneTitle}. ${item.statusLabel}. ${description}`
-                : `${item.name}, ${item.sceneTitle}. ${item.statusLabel}.`;
 
               return (
-                <li
+                <ExploreNamingDirectoryListItem
                   key={`${item.sceneId}:${item.hotspotId}`}
-                  role='presentation'
-                  {...{
-                    [FLIP_LIST_KEY_ATTR]: `${item.sceneId}:${item.hotspotId}`,
-                  }}
-                >
-                  <button
-                    type='button'
-                    role='option'
-                    aria-selected={isActive}
-                    data-tour-nav-directory-kind='naming'
-                    className={tourNavDirectoryItemVariants({
-                      kind: 'naming',
-                      active: isActive,
-                      statusTone: isClosed ? 'closed' : 'default',
-                    })}
-                    disabled={disabled || namingOpportunityBusy}
-                    onClick={() =>
-                      handleSelectNaming(item.sceneId, item.hotspotId)
-                    }
-                    aria-label={ariaLabel}
-                  >
-                    <span className={tourNavItemLeadingLocationClassName}>
-                      <NamingHeartIcon active={isActive} closed={isClosed} />
-                    </span>
-                    <span className={tourNavItemTextClassName}>
-                      <span className={tourNavItemNamingHeadingClassName}>
-                        <span className={tourNavItemNamingNameClassName}>
-                          {item.name}
-                        </span>
-                        <span
-                          className={tourNavItemNamingSeparatorClassName}
-                          aria-hidden='true'
-                        >
-                          |
-                        </span>
-                        <span className={tourNavItemNamingLocationClassName}>
-                          {item.sceneTitle}
-                        </span>
-                      </span>
-                      {description ?
-                        <span className={tourNavItemDescriptionClassName}>
-                          {description}
-                        </span>
-                      : null}
-                    </span>
-                    <span
-                      className={tourNavDirectoryListItemBadgeColumnClassName}
-                    >
-                      <NamingStatusBadge
-                        statusModifier={
-                          item.statusModifier as NamingStatusModifier
-                        }
-                        label={item.statusLabel}
-                        className={cn(tourNavItemBadgeClassName, 'ml-0')}
-                      />
-                    </span>
-                  </button>
-                </li>
+                  item={item}
+                  active={isActive}
+                  priceLabel={formatNamingItemDisplayPrice(item)}
+                  disabled={disabled || namingOpportunityBusy}
+                  onSelect={() =>
+                    handleSelectNaming(item.sceneId, item.hotspotId)
+                  }
+                />
               );
             })}
           </ul>
@@ -1309,40 +1261,115 @@ export function TourNavFloat({
     return renderExploreDirectory();
   };
 
-  const renderGroupedLocations = () => (
+  const renderPinnedSection = (
+    label: string,
+    body: ReactNode,
+    labelClassName: string = tourNavCurrentPinnedLabelClassName,
+  ) => (
+    <section className={tourNavCurrentPinnedClassName} aria-label={label}>
+      <span className={labelClassName}>{label}</span>
+      <ExploreLayoutPanel layout={exploreLayout}>{body}</ExploreLayoutPanel>
+    </section>
+  );
+
+  const renderGroupedLocations = (options?: { sectionGroupLead?: boolean }) => (
     <>
-      {firstScene ?
-        <ExploreLayoutPanel
-          layout={exploreLayout}
-          className='mb-[var(--tour-directory-space,16px)]'
-        >
-          {renderLocationsList([firstScene], {
+      {currentScene ?
+        renderPinnedSection(
+          TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
+          renderLocationsList([currentScene], {
             listBodyOnly: true,
             suppressReorderRef: true,
-          })}
-        </ExploreLayoutPanel>
+          }),
+        )
       : null}
-      {locationGroups?.map((group) => (
-        <ExploreLocationGroup
-          key={group.id}
-          title={group.title}
-          count={group.scenes.length}
-          expanded={expandedGroups.has(group.id)}
-          regionId={`tour-nav-loc-group-${group.id}`}
-          headingId={`tour-nav-loc-group-heading-${group.id}`}
-          disabled={disabled}
-          onToggle={() => toggleGroup(group.id)}
-        >
-          <ExploreLayoutPanel layout={exploreLayout}>
-            {renderLocationsList(group.scenes, {
-              listBodyOnly: true,
-              suppressReorderRef: true,
-            })}
-          </ExploreLayoutPanel>
-        </ExploreLocationGroup>
-      ))}
+      {firstScene && firstScene.id !== currentSceneId ?
+        renderPinnedSection(
+          TOUR_DIRECTORY_OVERVIEW_LABEL,
+          renderLocationsList([firstScene], {
+            listBodyOnly: true,
+            suppressReorderRef: true,
+          }),
+          tourNavOverviewPinnedLabelClassName,
+        )
+      : null}
+      <div
+        className={tourNavDirectoryGroupedListClassName({
+          sectionLead: options?.sectionGroupLead,
+        })}
+      >
+        {locationGroups?.map((group) => (
+          <ExploreLocationGroup
+            key={group.id}
+            title={group.title}
+            metaLabel={exploreLocationGroupCountLabel(group.scenes.length)}
+            expanded={expandedGroups.has(group.id)}
+            regionId={`tour-nav-loc-group-${group.id}`}
+            headingId={`tour-nav-loc-group-heading-${group.id}`}
+            disabled={disabled}
+            onToggle={() => toggleGroup(group.id)}
+          >
+            <ExploreLayoutPanel layout={exploreLayout}>
+              {renderLocationsList(group.scenes, {
+                listBodyOnly: true,
+                suppressReorderRef: true,
+              })}
+            </ExploreLayoutPanel>
+          </ExploreLocationGroup>
+        ))}
+      </div>
     </>
   );
+
+  const renderGroupedNaming = (options?: {
+    emptyMessage?: string;
+    sectionGroupLead?: boolean;
+  }) => {
+    if (exploreSortedNamingItems.length === 0) {
+      return options?.emptyMessage ?
+          <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
+        : null;
+    }
+
+    return (
+      <>
+        {activeNamingItem ?
+          renderPinnedSection(
+            TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
+            renderNamingList([activeNamingItem], {
+              listBodyOnly: true,
+              suppressReorderRef: true,
+            }),
+          )
+        : null}
+        <div
+          className={tourNavDirectoryGroupedListClassName({
+            sectionLead: options?.sectionGroupLead,
+          })}
+        >
+          {namingSectorGroups.map((group) => (
+            <ExploreLocationGroup
+              key={group.id}
+              title={group.title}
+              metaLabel={formatNamingSectorGroupTotalLabel(group.total)}
+              expanded={!collapsedNamingGroups.has(group.id)}
+              regionId={`tour-nav-naming-group-${group.id}`}
+              headingId={`tour-nav-naming-group-heading-${group.id}`}
+              disabled={disabled}
+              onToggle={() => toggleNamingGroup(group.id)}
+            >
+              <ExploreLayoutPanel layout={exploreLayout}>
+                {renderNamingList(group.items, {
+                  listBodyOnly: true,
+                  suppressReorderRef: true,
+                })}
+              </ExploreLayoutPanel>
+            </ExploreLocationGroup>
+          ))}
+        </div>
+      </>
+    );
+  };
 
   const renderExploreDirectory = () => {
     const showLocations =
@@ -1377,7 +1404,9 @@ export function TourNavFloat({
               </h3>
             )}
             {isLocationsGroupingActive ?
-              renderGroupedLocations()
+              renderGroupedLocations({
+                sectionGroupLead: showSectionTitles && !firstScene,
+              })
             : <ExploreLayoutPanel layout={exploreLayout}>
                 {renderLocationsList(exploreSortedScenes, {
                   listBodyOnly: true,
@@ -1407,8 +1436,8 @@ export function TourNavFloat({
             )}
 
             <ExploreLayoutPanel layout={exploreLayout}>
-              {renderNamingList(exploreSortedNamingItems, {
-                listBodyOnly: true,
+              {renderGroupedNaming({
+                sectionGroupLead: showSectionTitles,
                 emptyMessage:
                   namingItems.length === 0 ?
                     TOUR_DIRECTORY_EMPTY_NAMING

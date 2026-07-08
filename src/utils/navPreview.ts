@@ -10,6 +10,9 @@ import {
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
 import { listSceneInfoHotspots } from './findTourHotspot';
+import { buildSceneGroups } from '../viewer/sceneDepth';
+import { formatNamingPriceAbbrev, parseNamingPrice } from './namingPrice';
+import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 
 function navPreviewNamingDescription(body: string): string {
   const firstParagraph = body
@@ -51,6 +54,33 @@ export function buildNavPreviewNamingItems(
   return items;
 }
 
+/**
+ * Total naming price across a destination sector — only when `targetSceneId` is
+ * a department root (level-1 scene the overview links to). Returns 0 otherwise,
+ * so callers can skip the label for mid-sector nav targets.
+ */
+export function buildNavPreviewSectorNamingTotal(
+  tour: Tour,
+  targetSceneId: string,
+): number {
+  const groups = buildSceneGroups(
+    tour,
+    tour.scenes,
+    tour.firstScene,
+    TOUR_DIRECTORY_GROUP_OTHER,
+  );
+  const group = groups.find((entry) => entry.id === targetSceneId);
+  if (!group) return 0;
+
+  let total = 0;
+  for (const scene of group.scenes) {
+    for (const naming of buildNavPreviewNamingItems(tour, scene)) {
+      total += parseNamingPrice(naming.price) ?? 0;
+    }
+  }
+  return total;
+}
+
 export function navPreviewCanNavigate(
   hotspot: Hotspot,
   currentSceneId: string,
@@ -75,6 +105,14 @@ export function buildNavPreview(
   const canNavigate = navPreviewCanNavigate(hotspot, currentSceneId);
   const hotspotLabel = hotspot.label?.trim();
 
+  const sectorNamingTotal = buildNavPreviewSectorNamingTotal(
+    tour,
+    hotspot.targetScene,
+  );
+  const hasSectorTotal = sectorNamingTotal > 0;
+  const namingTotalLabel =
+    hasSectorTotal ? formatNamingPriceAbbrev(sectorNamingTotal) : undefined;
+
   return {
     targetSceneId: hotspot.targetScene,
     title: canNavigate ? scene.title : hotspotLabel || scene.title,
@@ -83,6 +121,8 @@ export function buildNavPreview(
     videoUrl,
     description: scene.description?.trim() || undefined,
     namingItems: buildNavPreviewNamingItems(tour, scene),
+    namingTotalLabel,
+    namingTotalAmount: hasSectorTotal ? sectorNamingTotal : undefined,
     targetView: hotspot.targetView ?? scene.defaultView,
     ctaLabel: hotspotLabel || undefined,
     canNavigate,

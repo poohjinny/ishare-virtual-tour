@@ -140,6 +140,10 @@ export interface NavPreviewContent {
   videoUrl?: string;
   description?: string;
   namingItems?: NavPreviewNamingItem[];
+  /** Department total across the destination sector — set only for sector roots. */
+  namingTotalLabel?: string;
+  /** Raw sector total (for the count-up animation) — paired with `namingTotalLabel`. */
+  namingTotalAmount?: number;
   targetView?: ViewPosition;
   /** Hotspot label — used for CTA copy when present */
   ctaLabel?: string;

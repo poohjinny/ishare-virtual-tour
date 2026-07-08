@@ -53,6 +53,10 @@
   --tour-chrome-inset-right: max(var(--tour-chrome-inset), env(safe-area-inset-right, 0px));
   --tour-chrome-inset-bottom: max(var(--tour-chrome-inset), env(safe-area-inset-bottom, 0px));
   --tour-chrome-inset-left: max(var(--tour-chrome-inset), env(safe-area-inset-left, 0px));
+  --tour-chrome-ai-fab-size: 4.75rem;
+  /* Top-right dock/directory panels share this cap so they grow as tall as the
+     viewport allows while clearing the bottom-right Ask Guide avatar. */
+  --tour-chrome-top-panel-max-height: calc(100vh - var(--tour-chrome-inset-top) - var(--tour-chrome-inset-bottom) - var(--tour-chrome-ai-fab-size) - var(--tour-chrome-inset));
   --tour-explore-panel-width: 580px;
   --tour-explore-panel-width-mobile-max: 380px;
   /* Scene HTML overlays (PSV markers, 3D CSS2D) stay below tour chrome. */
@@ -72,6 +76,7 @@
   .tour-page {
     --tour-chrome-inset: 0.5rem;
     --tour-chrome-fab-size: 2.75rem;
+    --tour-chrome-ai-fab-size: 4rem;
     --tour-chrome-breadcrumb-row-height: 2.5rem;
   }
 }
@@ -164,9 +169,16 @@ input::placeholder {
   /* Match nav pill block size (label line box + padding + border). */
   --ishare-hotspot-glass-block-size: max(26px,
       calc(2 * var(--ishare-hotspot-glass-padding-block) + 2 * var(--ishare-hotspot-glass-border-width) + 2 * var(--ishare-font-size-sm)));
-  --ishare-hotspot-glass-bg: rgba(255, 255, 255, 0.72);
-  --ishare-hotspot-glass-bg-hover: rgba(255, 255, 255, 0.86);
-  --ishare-hotspot-glass-blur: blur(8px) saturate(120%);
+  /* Solid white + alpha (no backdrop blur) — pills skip a per-frame blur pass,
+     cutting compositor cost. A faint border keeps them legible over bright
+     panorama regions now that the frosted edge is gone. */
+  --ishare-hotspot-glass-bg: rgba(255, 255, 255, 0.75);
+  --ishare-hotspot-glass-bg-hover: rgba(255, 255, 255, 0.9);
+}
+
+.hotspot-nav__pill,
+.hotspot-general-info__chip {
+  border-color: rgba(15, 23, 42, 0.08);
 }
 
 /* Hotspot HTML markers ? allow pulse rings to extend outside the pill box */
@@ -312,9 +324,7 @@ input::placeholder {
   flex-direction: row;
   padding: 8px 20px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.52);
-  backdrop-filter: blur(6px) saturate(120%);
-  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  background: var(--ishare-float-glass-bg);
   border: none;
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.14),
@@ -440,6 +450,12 @@ input::placeholder {
     flex: 0 0 22px;
   }
 
+  /* Collapsed FAB hover — drop the toolbar's dark button tint (pill bg handles it) */
+  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-button.psv-tour-toolbar-toggle:hover,
+  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-button.psv-tour-toolbar-toggle:focus-visible {
+    background: transparent;
+  }
+
   .viewer-container:not(.viewer-container--controls-collapsed) .psv-navbar {
     width: auto;
     height: auto;
@@ -497,7 +513,7 @@ input::placeholder {
 }
 
 .viewer-container .psv-navbar:hover {
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--ishare-float-glass-bg-hover);
   box-shadow:
     0 12px 32px rgba(15, 23, 42, 0.16),
     0 5px 14px rgba(15, 23, 42, 0.09);
@@ -964,8 +980,6 @@ input::placeholder {
   padding: var(--ishare-hotspot-glass-padding-block) 11px;
   border-radius: 999px;
   background: var(--ishare-hotspot-glass-bg);
-  backdrop-filter: var(--ishare-hotspot-glass-blur);
-  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
   border: var(--ishare-hotspot-glass-border-width) solid transparent;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
   transition:
@@ -1040,6 +1054,7 @@ input::placeholder {
 .hotspot-nav--active .hotspot-nav__pill,
 .hotspot-nav--active:hover .hotspot-nav__pill,
 .hotspot-nav--active:focus-visible .hotspot-nav__pill {
+  background: var(--ishare-hotspot-glass-bg-hover);
   box-shadow: var(--ishare-hotspot-active-glow);
 }
 
@@ -1106,8 +1121,6 @@ input::placeholder {
   min-height: var(--ishare-hotspot-glass-block-size);
   border-radius: 50%;
   background: var(--ishare-hotspot-glass-bg);
-  backdrop-filter: var(--ishare-hotspot-glass-blur);
-  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
   border: var(--ishare-hotspot-glass-border-width) solid transparent;
   padding: var(--ishare-hotspot-glass-padding-block);
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
@@ -1303,9 +1316,7 @@ input::placeholder {
 
 /* Active ? popup open: glass pill, theme label/icon + glow (no pulse ? already engaged) */
 .hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__pill {
-  background: var(--ishare-hotspot-glass-bg);
-  backdrop-filter: var(--ishare-hotspot-glass-blur);
-  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
+  background: var(--ishare-hotspot-glass-bg-hover);
   border-color: transparent;
   box-shadow: var(--ishare-hotspot-active-glow);
 }
@@ -1335,9 +1346,7 @@ input::placeholder {
 }
 
 .hotspot-info--active.hotspot-info--status-closed .hotspot-info__pill {
-  background: var(--ishare-hotspot-glass-bg);
-  backdrop-filter: var(--ishare-hotspot-glass-blur);
-  -webkit-backdrop-filter: var(--ishare-hotspot-glass-blur);
+  background: var(--ishare-hotspot-glass-bg-hover);
   border-color: var(--ishare-active-item-closed-border);
   box-shadow: var(--ishare-hotspot-active-glow-closed);
 }

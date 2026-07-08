@@ -18,6 +18,7 @@ import {
   measureHotspotHalfHeightPx,
 } from './anchoredPanelPosition';
 import {
+  frameCameraForAnchoredPanel,
   scheduleNudgeCameraForClippedPanel,
   waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
@@ -86,8 +87,8 @@ export function closeAnchoredInfoPanel(
     }
 
     // Exit scale runs on the article (ancestor of the glass shell), matching the
-    // entrance — animating the backdrop-filter shell directly hits a Chromium
-    // bug where the glass detaches from the content scale.
+    // entrance — retained from the frosted-glass era (when animating the
+    // backdrop-filter shell tripped a Chromium paint bug).
     const article = marker.domElement.querySelector(
       '.tour-glass-panel--anchored',
     );
@@ -141,6 +142,12 @@ export function openAnchoredInfoPanel(
     hostMarker?.domElement,
     INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
   );
+  const markerSize = glassPanelMarkerSize(
+    hotspot.popup,
+    hotspot.id,
+    tour,
+    hideShare,
+  );
 
   markers.addMarker({
     id,
@@ -148,7 +155,7 @@ export function openAnchoredInfoPanel(
       tour,
       hideShare,
     }),
-    size: glassPanelMarkerSize(hotspot.popup, hotspot.id, tour, hideShare),
+    size: markerSize,
     position: anchoredPanelMarkerPosition(
       viewer,
       hotspot.position as ViewPosition,
@@ -198,6 +205,7 @@ export function openAnchoredInfoPanel(
   // follow-up clip-correcting nudge to avoid a second, redundant camera move.
   if (options?.skipCameraNudge) return;
 
+  const hostPosition = hotspot.position as ViewPosition;
   scheduleNudgeCameraForClippedPanel(
     viewer,
     () => {
@@ -211,6 +219,12 @@ export function openAnchoredInfoPanel(
         cameraSettled = true;
         revealMedia();
       },
+      onPanelOffView: () =>
+        frameCameraForAnchoredPanel(
+          viewer,
+          { yawDeg: hostPosition.yaw, pitchDeg: hostPosition.pitch },
+          markerSize.height,
+        ),
     },
   );
 }

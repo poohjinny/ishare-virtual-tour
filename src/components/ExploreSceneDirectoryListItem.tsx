@@ -1,18 +1,22 @@
 import { type ReactNode } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import type { Scene } from '../types/tour';
+import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
+import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { ExploreTourStartPin } from './ExploreTourStartPin';
+import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import {
   tourNavDirectoryItemTitleRowClassName,
   tourNavDirectoryItemVariants,
-  tourNavDirectoryListItemBadgeColumnClassName,
+  tourNavDirectoryListItemPrimaryCtaClassName,
   tourNavDirectoryListItemSelectClassName,
   tourNavItemDescriptionClassName,
   tourNavItemLabelClassName,
   tourNavItemLeadingLocationClassName,
   tourNavItemTextClassName,
 } from './tourNavFloatVariants';
+import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
 import { cn } from '../lib/cn';
 
 interface ExploreSceneDirectoryListItemProps {
@@ -36,6 +40,7 @@ export function ExploreSceneDirectoryListItem({
 }: ExploreSceneDirectoryListItemProps) {
   const description = scene.description?.trim();
   const showInfo = Boolean(description && onShowDescription);
+  const showActions = !active;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const ariaLabel =
     active ?
@@ -73,23 +78,41 @@ export function ExploreSceneDirectoryListItem({
                 <ExploreTourStartPin variant='list' />
               : null}
             </span>
-            {description ?
-              <span className={tourNavItemDescriptionClassName}>
-                {description}
+            {description || showActions ?
+              <span className='flex min-w-0 flex-col'>
+                {description ?
+                  <span className={tourNavItemDescriptionClassName}>
+                    {description}
+                  </span>
+                : null}
+                {showActions ?
+                  <ExploreDirectoryListItemActions>
+                    {showInfo ?
+                      <ExploreSceneInfoButton
+                        variant='listText'
+                        sceneTitle={scene.title}
+                        disabled={disabled}
+                        onShow={onShowDescription!}
+                      />
+                    : null}
+                    <span
+                      className={tourNavDirectoryListItemPrimaryCtaClassName}
+                      aria-hidden='true'
+                    >
+                      <span className='min-w-0 truncate'>
+                        {EXPLORE_GALLERY_VISIT_LABEL}
+                      </span>
+                      <ExploreGalleryCtaArrowIcon
+                        variant='text'
+                        sizePx={MATERIAL_SYMBOL_SIZE_14}
+                      />
+                    </span>
+                  </ExploreDirectoryListItemActions>
+                : null}
               </span>
             : null}
           </span>
         </button>
-        {showInfo ?
-          <div className={tourNavDirectoryListItemBadgeColumnClassName}>
-            <ExploreSceneInfoButton
-              variant='list'
-              sceneTitle={scene.title}
-              disabled={disabled}
-              onShow={onShowDescription!}
-            />
-          </div>
-        : null}
       </div>
     </li>
   );
