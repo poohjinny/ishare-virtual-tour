@@ -4,7 +4,6 @@ import type { Scene } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
-import { ExploreTourStartPin } from './ExploreTourStartPin';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import {
   tourNavDirectoryItemTitleRowClassName,
@@ -74,9 +73,6 @@ export function ExploreSceneDirectoryListItem({
           <span className={tourNavItemTextClassName}>
             <span className={tourNavDirectoryItemTitleRowClassName}>
               <span className={tourNavItemLabelClassName}>{scene.title}</span>
-              {isTourStart ?
-                <ExploreTourStartPin variant='list' />
-              : null}
             </span>
             {description || showActions ?
               <span className='flex min-w-0 flex-col'>

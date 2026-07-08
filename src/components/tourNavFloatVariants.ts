@@ -500,16 +500,6 @@ export const tourNavLocationGalleryFeaturedBadgeClassName = cn(
   'gap-0.5 bg-gold/70 text-white',
 );
 
-/** Pin next to title on gallery hero — no chip; blends with dark scrim. */
-export const tourNavLocationGalleryTourStartPinClassName = cn(
-  'inline-flex size-[22px] shrink-0 items-center justify-center text-white/75',
-  'transition-colors duration-150 hover:text-white',
-);
-
-export const tourNavDirectoryTourStartPinClassName = cn(
-  'inline-flex size-[22px] shrink-0 items-center justify-center text-muted',
-);
-
 export const tourNavLocationGalleryStatusBadgeVariants = cva(
   cn(tourNavLocationGalleryHeroBadgeClassName, 'text-white'),
   {
@@ -591,11 +581,6 @@ export const tourNavLocationGalleryHeroCtaOverlayClassName = cn(
 
 export const tourNavLocationGalleryHeroTitleOverlayClassName = cn(
   'min-w-0 truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
-);
-
-/** Wraps title + optional tour-start pin so the pin sits directly beside the label. */
-export const tourNavLocationGalleryHeroTitleWithPinClassName = cn(
-  'flex min-w-0 flex-1 items-end gap-1',
 );
 
 export const tourNavLocationGalleryHeroNamingTitleRowClassName = cn(
@@ -869,7 +854,7 @@ export const tourNavCurrentPinnedClassName = cn(
 
 export const tourNavCurrentPinnedLabelClassName = cn(
   'mb-1.5 flex items-center gap-1 px-1',
-  'font-display text-xs font-semibold uppercase tracking-[0.04em] text-primary',
+  'font-display text-xs font-bold uppercase tracking-[0.04em] text-primary',
 );
 
 /** Overview pin label — muted, so the current-location pin reads as primary. */

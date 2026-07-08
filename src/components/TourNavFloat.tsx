@@ -96,6 +96,7 @@ import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
+  MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_20,
   MATERIAL_SYMBOL_SIZE_22,
 } from './ui/materialSymbolClasses';
@@ -1265,9 +1266,15 @@ export function TourNavFloat({
     label: string,
     body: ReactNode,
     labelClassName: string = tourNavCurrentPinnedLabelClassName,
+    icon?: string,
   ) => (
     <section className={tourNavCurrentPinnedClassName} aria-label={label}>
-      <span className={labelClassName}>{label}</span>
+      <span className={labelClassName}>
+        {icon ?
+          <MaterialSymbol name={icon} sizePx={MATERIAL_SYMBOL_SIZE_16} />
+        : null}
+        {label}
+      </span>
       <ExploreLayoutPanel layout={exploreLayout}>{body}</ExploreLayoutPanel>
     </section>
   );
@@ -1281,6 +1288,8 @@ export function TourNavFloat({
             listBodyOnly: true,
             suppressReorderRef: true,
           }),
+          tourNavCurrentPinnedLabelClassName,
+          'flag',
         )
       : null}
       {firstScene && firstScene.id !== currentSceneId ?
@@ -1291,6 +1300,7 @@ export function TourNavFloat({
             suppressReorderRef: true,
           }),
           tourNavOverviewPinnedLabelClassName,
+          'trip_origin',
         )
       : null}
       <div
@@ -1340,6 +1350,8 @@ export function TourNavFloat({
               listBodyOnly: true,
               suppressReorderRef: true,
             }),
+            tourNavCurrentPinnedLabelClassName,
+            'flag',
           )
         : null}
         <div

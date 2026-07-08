@@ -11,7 +11,7 @@ export const TOUR_DIRECTORY_SECTION_NAMING = 'Naming opportunities';
 export const TOUR_DIRECTORY_CURRENT_LOCATION_LABEL = 'You are here';
 
 /** Pinned section header for the tour's root/overview scene. */
-export const TOUR_DIRECTORY_OVERVIEW_LABEL = 'Overview';
+export const TOUR_DIRECTORY_OVERVIEW_LABEL = 'Tour start';
 
 /** Header for scenes not reachable from the tour start via nav hotspots. */
 export const TOUR_DIRECTORY_GROUP_OTHER = 'More locations';
@@ -78,7 +78,3 @@ export const TOUR_DIRECTORY_SCENE_INFO_TOOLTIP = 'Location details';
 export function tourDirectorySceneInfoAriaLabel(sceneTitle: string): string {
   return `Location details for ${sceneTitle}`;
 }
-
-/** Pinned firstScene row — explains sort order in Explore locations. */
-export const TOUR_DIRECTORY_TOUR_START_TOOLTIP =
-  'Tour start · stays at top when sorting';

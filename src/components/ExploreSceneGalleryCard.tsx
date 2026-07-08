@@ -6,7 +6,6 @@ import { useScenePreview } from '../hooks/useScenePreview';
 import type { Scene } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
-import { ExploreTourStartPin } from './ExploreTourStartPin';
 import {
   tourNavLocationGalleryCardClassName,
   tourNavLocationGalleryCardHeroClassName,
@@ -21,7 +20,6 @@ import {
   tourNavLocationGalleryHeroPillCtaClassName,
   tourNavLocationGalleryHeroTitleOverlayClassName,
   tourNavLocationGalleryHeroTitleRowClassName,
-  tourNavLocationGalleryHeroTitleWithPinClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
@@ -134,16 +132,9 @@ export function ExploreSceneGalleryCard({
             <span className={tourNavLocationGalleryHeroOverlayInnerClassName}>
               <span className={tourNavLocationGalleryHeroTitleRowClassName}>
                 <span
-                  className={tourNavLocationGalleryHeroTitleWithPinClassName}
+                  className={tourNavLocationGalleryHeroTitleOverlayClassName}
                 >
-                  <span
-                    className={tourNavLocationGalleryHeroTitleOverlayClassName}
-                  >
-                    {scene.title}
-                  </span>
-                  {isTourStart ?
-                    <ExploreTourStartPin variant='galleryHero' />
-                  : null}
+                  {scene.title}
                 </span>
               </span>
               {showHoverBody ?
