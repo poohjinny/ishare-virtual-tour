@@ -33,13 +33,15 @@ export const aiFabVariants = cva(
 );
 
 export const aiFabAvatarClassName = cn(
-  'inline-flex size-[60px] shrink-0 items-center justify-center overflow-visible leading-none',
+  // rem so the orb tracks the rem-based FAB pill under app ui-scale (60px @ scale 1).
+  'inline-flex size-[3.75rem] shrink-0 items-center justify-center overflow-visible leading-none',
   'max-[480px]:size-12',
 );
 
 /** FAB orb — inset within the pill so outer shadow is not clipped by `overflow-hidden`. */
 export const aiFabGuideMarkClassName = cn(
-  'size-[52px] max-[480px]:size-11',
+  // rem so the orb tracks the rem-based FAB pill under app ui-scale (52px @ scale 1).
+  'size-[3.25rem] max-[480px]:size-11',
   'origin-center animate-guide-avatar-orb motion-reduce:animate-none',
   'shadow-[inset_0_-2px_8px_rgba(var(--ishare-primary-rgb),0.2),0_0_0_1px_rgba(var(--ishare-primary-rgb),0.22),0_2px_6px_rgba(var(--ishare-primary-rgb),0.28)]',
 );

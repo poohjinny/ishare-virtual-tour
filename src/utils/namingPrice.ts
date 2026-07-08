@@ -93,6 +93,9 @@ export function formatNamingGalleryItemPrice(item: {
   return formatNamingPriceAbbrev(amount);
 }
 
+/** Temporary — hide sector-level naming opportunity totals in Explore and nav preview. */
+export const SHOW_SECTOR_NAMING_TOTAL = false;
+
 /** Sector group header — full total with meaning. */
 export function formatNamingSectorGroupTotalLabel(total: number): string {
   const price = formatNamingPriceDisplay(total);

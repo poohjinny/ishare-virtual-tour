@@ -1,7 +1,7 @@
-/** Persisted only after the user toggles Controls; absent key → default visible. */
+/** Persisted only after the user toggles Controls; absent key → default hidden. */
 const VIEWER_CONTROLS_VISIBLE_KEY = 'ishare-tour-viewer-controls-visible-v2';
 
-export const VIEWER_CONTROLS_VISIBLE_DEFAULT = true;
+export const VIEWER_CONTROLS_VISIBLE_DEFAULT = false;
 
 export function readViewerControlsVisiblePreference(): boolean {
   if (typeof window === 'undefined') {

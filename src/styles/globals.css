@@ -516,7 +516,15 @@
         var(--color-muted));
 
     /* Type scale shims */
-    --ishare-font-size-base: 16px;
+    /*
+     * App UI scale (single source of truth). Root rem shrinks on constrained
+     * viewports so rem-based chrome/panels scale uniformly; the PSV canvas is
+     * px-projected and stays unaffected. Continuous scale, not stepped:
+     *   coeffs = 16px / refPx * 100  → 1542w, 960h ; floor 0.72 * 16 = 11.52px.
+     * JS reads the resulting root font-size (see utils/uiScale.ts). Mobile is
+     * reset to 16px below (it has its own responsive layout).
+     */
+    --ishare-font-size-base: clamp(11.52px, min(1.0376vw, 1.6667vh), 16px);
     --ishare-font-size-2xs: var(--text-2xs);
     --ishare-font-size-xs: var(--text-xs);
     --ishare-font-size-sm: var(--text-sm);
@@ -567,6 +575,13 @@
 
     /* Ask Guide FAB hover — max-width must live in CSS (Tailwind arbitrary multi-prop transition is not emitted) */
     --ai-fab-expand-duration: 300ms;
+  }
+
+  /* Mobile keeps full size — its own responsive layout, no ui-scale. Matches TOUR_CHROME_MOBILE_MAX_PX. */
+  @media (max-width: 480px) {
+    :root {
+      --ishare-font-size-base: 16px;
+    }
   }
 }
 
