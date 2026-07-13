@@ -49,8 +49,8 @@
       "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-overview.webp",
       "defaultView": {
-        "yaw": 94.8,
-        "pitch": -43.5,
+        "yaw": 89.3,
+        "pitch": -42.7,
         "zoom": 65
       },
       "hotspots": [
@@ -77,7 +77,7 @@
         {
           "id": "nav-to-ambulance-offload",
           "type": "nav",
-          "label": "Ambulance Off-load",
+          "label": "Ambulance Off-Load",
           "position": {
             "yaw": 119.7,
             "pitch": -39.7
@@ -238,7 +238,7 @@
     },
     "ed-ambulance-offload": {
       "id": "ed-ambulance-offload",
-      "title": "Ambulance Off-load",
+      "title": "Ambulance Off-Load",
       "description": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawa’s west end — one that supports patients, families, paramedics, and hospital staff when time matters most.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-ambulance-offload.webp",
       "defaultView": {
@@ -508,7 +508,7 @@
             "namingOpportunity": {
               "name": "Reception Centre Naming Opportunity",
               "price": 500000,
-              "status": "reserved"
+              "status": "open"
             },
             "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
