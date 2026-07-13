@@ -7,7 +7,7 @@ import type {
   Tour,
 } from '../types/tour';
 import {
-  formatNamingItemDisplayPrice,
+  formatNamingGalleryItemPrice,
   formatNamingPriceDisplay,
   formatNamingSectorGroupTotalLabel,
   parseNamingPrice,
@@ -893,7 +893,7 @@ function buildNavPreviewNamingBadgeHtml(item: NavPreviewNamingItem): string {
 }
 
 function buildNavPreviewNamingPriceHtml(item: NavPreviewNamingItem): string {
-  const priceDisplay = formatNamingItemDisplayPrice(item);
+  const priceDisplay = formatNamingGalleryItemPrice(item);
   if (!priceDisplay) return '';
 
   const closedModifier =

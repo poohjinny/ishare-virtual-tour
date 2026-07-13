@@ -2184,6 +2184,39 @@
     color: var(--ishare-text);
   }
 
+  /* Expanded: wrap title text only; keep badge + price on the first row. */
+  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-trigger {
+    align-items: start;
+    overflow: visible;
+  }
+
+  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-trigger-inner {
+    align-items: flex-start;
+    overflow: visible;
+  }
+
+  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-chevron {
+    margin-top: 1px;
+  }
+
+  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-title-line {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    overflow: visible;
+  }
+
+  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+  }
+
+  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-trigger>.nav-preview-panel__naming-price {
+    align-self: start;
+  }
+
   .nav-preview-panel__naming-status {
     flex: 0 0 auto;
     max-width: 100%;
