@@ -132,6 +132,17 @@
             "pitch": -39.4
           },
           "targetScene": "acute-care-pod-d"
+        },
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 128.1,
+            "pitch": -49.1
+          },
+          "targetScene": "overview",
+          "instant": true,
+          "navVariant": "hub"
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-overview.webp",
@@ -240,17 +251,17 @@
       "description": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawa’s west end — one that supports patients, families, paramedics, and hospital staff when time matters most.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-ambulance-offload.webp",
       "defaultView": {
-        "yaw": 88.4,
-        "pitch": 2.1,
-        "zoom": 10
+        "yaw": 88.6,
+        "pitch": -1.9,
+        "zoom": 15
       },
       "hotspots": [
         {
           "id": "info-ambulance-offload",
           "type": "info",
           "position": {
-            "yaw": 33.8,
-            "pitch": -8.5
+            "yaw": 90.8,
+            "pitch": -24.4
           },
           "popup": {
             "display": "anchored",
@@ -273,6 +284,17 @@
             "pitch": 0.4
           },
           "targetScene": "ed-mh-3",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-emergency-department",
+          "type": "nav",
+          "position": {
+            "yaw": 88.9,
+            "pitch": -0.6
+          },
+          "targetScene": "ed-overview",
           "instant": true,
           "navVariant": "back"
         }
@@ -420,6 +442,17 @@
             "pitch": -47.6
           },
           "targetScene": "msi-inpatient-suites"
+        },
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 148.8,
+            "pitch": -15.9
+          },
+          "targetScene": "overview",
+          "instant": true,
+          "navVariant": "hub"
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-overview.webp"
@@ -438,8 +471,8 @@
           "id": "info-inpatient-bed-rooms",
           "type": "info",
           "position": {
-            "yaw": 101.7,
-            "pitch": 6.7
+            "yaw": 103.9,
+            "pitch": -12.8
           },
           "popup": {
             "display": "anchored",
@@ -452,6 +485,17 @@
             "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
           }
+        },
+        {
+          "id": "nav-to-emergency-department",
+          "type": "nav",
+          "position": {
+            "yaw": 294.9,
+            "pitch": -17.2
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-inpatient-suites.webp",
@@ -466,22 +510,78 @@
         "pitch": -17.2,
         "zoom": 10
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "info-nursing-station",
+          "type": "info",
+          "position": {
+            "yaw": 78.3,
+            "pitch": -20.8
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 250000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 124.7,
+            "pitch": -14
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-nursing-station.webp",
-      "description": "Explore Nursing Station as part of the Med/Surg Inpatient virtual tour."
+      "description": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day.",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
     },
     "msi-multi-use-lounge-activity-room": {
       "id": "msi-multi-use-lounge-activity-room",
       "title": "Multi Use Lounge / Activity Room",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-multi-use-lounge-activity-room.webp",
       "defaultView": {
-        "yaw": 181.7,
-        "pitch": -18.3,
-        "zoom": 10
+        "yaw": 183.1,
+        "pitch": -8.5,
+        "zoom": 1
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "info-multi-use-lounge-activity-room",
+          "type": "info",
+          "position": {
+            "yaw": 186.7,
+            "pitch": -40.4
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 250000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 182.5,
+            "pitch": -5
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-multi-use-lounge-activity-room.webp",
-      "description": "Explore Multi Use Lounge / Activity Room as part of the Med/Surg Inpatient virtual tour."
+      "description": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
     },
     "msi-reception-centre": {
       "id": "msi-reception-centre",
@@ -511,10 +611,22 @@
             "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
           }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 128.1,
+            "pitch": -6.7
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-reception-centre.webp",
-      "description": "Explore Reception Centre as part of the Med/Surg Inpatient virtual tour."
+      "description": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey.",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
     },
     "msi-quiet-consultant": {
       "id": "msi-quiet-consultant",
@@ -525,9 +637,37 @@
         "pitch": -29.9,
         "zoom": 10
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "info-quiet-consultant",
+          "type": "info",
+          "position": {
+            "yaw": 237,
+            "pitch": -32
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 100000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 53.9,
+            "pitch": -8.3
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-quiet-consultant.webp",
-      "description": "Explore Quiet / Consultant as part of the Med/Surg Inpatient virtual tour."
+      "description": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey.",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
     },
     "msi-allied-health-team-room": {
       "id": "msi-allied-health-team-room",
@@ -538,21 +678,76 @@
         "pitch": -41.3,
         "zoom": 14
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "info-allied-health-team-room",
+          "type": "info",
+          "position": {
+            "yaw": 82.3,
+            "pitch": -43.4
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 100000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 111.3,
+            "pitch": -5.6
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-allied-health-team-room.webp",
-      "description": "Explore Allied Health Team Room as part of the Med/Surg Inpatient virtual tour."
+      "description": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape.",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
     },
     "msi-report-meeting-room": {
       "id": "msi-report-meeting-room",
       "title": "Report Meeting Room",
-      "description": "Explore Report Meeting Room as part of the Med/Surg Inpatient virtual tour.",
+      "description": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-report-meeting-room.webp",
       "defaultView": {
         "yaw": 91.4,
         "pitch": -19.3,
         "zoom": 32
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "info-report-meeting-room",
+          "type": "info",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -16.9
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 100000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 6.9,
+            "pitch": -8.2
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-report-meeting-room.webp"
     },
     "msi-galley-servery": {
@@ -565,33 +760,100 @@
         "pitch": -13.6,
         "zoom": 4
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 75.2,
+            "pitch": -4.3
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-galley-servery.webp"
     },
     "msi-dining-activity-room": {
       "id": "msi-dining-activity-room",
       "title": "Dining / Activity Room",
-      "description": "Explore Dining / Activity Room as part of the Med/Surg Inpatient virtual tour.",
+      "description": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-dining-activity-room.webp",
       "defaultView": {
         "yaw": 73.6,
         "pitch": -29.2,
         "zoom": 14
       },
-      "hotspots": [],
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-dining-activity-room.webp"
+      "hotspots": [
+        {
+          "id": "info-dining-activity-room",
+          "type": "info",
+          "position": {
+            "yaw": 70.4,
+            "pitch": -20
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 250000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 169.5,
+            "pitch": -12.7
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-dining-activity-room.webp",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
     },
     "msi-staff-facility-lounge": {
       "id": "msi-staff-facility-lounge",
       "title": "Staff Facility / Lounge",
-      "description": "Explore Staff Facility / Lounge as part of the Med/Surg Inpatient virtual tour.",
+      "description": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-staff-facility-lounge.webp",
       "defaultView": {
         "yaw": 329.3,
         "pitch": -22.6,
         "zoom": 19
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "info-staff-facility-lounge",
+          "type": "info",
+          "position": {
+            "yaw": 330.7,
+            "pitch": -27.4
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 100000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-james-beech-health-care-centre",
+          "type": "nav",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -7.4
+          },
+          "targetScene": "msi-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-staff-facility-lounge.webp"
     },
     "mental-health-emergency-services-unit": {
