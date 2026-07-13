@@ -1035,9 +1035,18 @@ input::placeholder {
   letter-spacing: -0.01em;
   color: var(--ishare-text);
   white-space: nowrap;
-  max-width: 11rem;
+  max-width: 10rem;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: max-width 0.22s ease;
+}
+
+.hotspot-nav:is(:hover, :focus-visible, .hotspot-nav--active) .hotspot-nav__label {
+  max-width: min(22rem, 75vw);
+}
+
+.viewer-container .psv-marker:has(.hotspot-nav:is(:hover, :focus-visible, .hotspot-nav--active)) {
+  z-index: 5;
 }
 
 .hotspot-nav:not(.hotspot-nav--active):hover .hotspot-nav__pill,
@@ -1253,10 +1262,11 @@ input::placeholder {
   letter-spacing: -0.01em;
   color: #fff;
   white-space: nowrap;
-  max-width: 14rem;
+  max-width: 12rem;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: max-width 0.22s ease;
 }
 
 .hotspot-info__name {
@@ -1264,6 +1274,14 @@ input::placeholder {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.hotspot-info:is(:hover, :focus-visible, .hotspot-info--active) .hotspot-info__label {
+  max-width: min(22rem, 75vw);
+}
+
+.viewer-container .psv-marker:has(.hotspot-info:is(:hover, :focus-visible, .hotspot-info--active)) {
+  z-index: 5;
 }
 
 .hotspot-info__label-sep,
@@ -1441,7 +1459,22 @@ input::placeholder {
   animation: none;
 }
 
+@media (pointer: coarse) {
+  .hotspot-nav__label {
+    max-width: 14rem;
+  }
+
+  .hotspot-info__label {
+    max-width: 16rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+
+  .hotspot-nav__label,
+  .hotspot-info__label {
+    transition: none;
+  }
 
   .hotspot-nav--active .hotspot-nav__dot {
     box-shadow: var(--ishare-active-icon-dot-ring);
