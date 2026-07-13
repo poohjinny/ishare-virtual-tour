@@ -55,7 +55,8 @@ function syncHeroHeight(hero: HTMLElement): void {
     marker instanceof HTMLElement && marker.offsetWidth > 0 ?
       marker.offsetWidth
     : resolveNavPreviewPanelWidth();
-  hero.style.height = `${resolveNavPreviewHeroHeight(width)}px`;
+  const video = hero.classList.contains('nav-preview-panel__hero--video');
+  hero.style.height = `${resolveNavPreviewHeroHeight(width, { video })}px`;
 }
 
 function markHeroLoaded(hero: HTMLElement): void {

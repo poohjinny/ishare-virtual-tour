@@ -48,9 +48,9 @@ export function ExploreSceneDescriptionView({
   onVisit,
 }: ExploreSceneDescriptionViewProps) {
   const description = scene.description?.trim();
-  const previewVideoUrl = scene.previewVideoUrl?.trim();
-  const featureVideoUrl = scene.videoUrl?.trim();
-  const showThumbnailHero = !previewVideoUrl;
+  const heroVideoUrl = scene.previewVideoUrl?.trim();
+  const bodyVideoUrl = scene.videoUrl?.trim();
+  const showThumbnailHero = !heroVideoUrl;
   const {
     src: previewSrc,
     failed: previewFailed,
@@ -79,11 +79,15 @@ export function ExploreSceneDescriptionView({
 
       <div className={tourNavSceneDetailHeroCopyStackClassName}>
         <div
-          className={tourNavSceneDetailHeroClassName(Boolean(previewVideoUrl))}
+          className={tourNavSceneDetailHeroClassName(Boolean(heroVideoUrl))}
           aria-busy={heroLoading || undefined}
         >
-          {previewVideoUrl ?
-            <PopupVideoEmbed videoUrl={previewVideoUrl} title={scene.title} />
+          {heroVideoUrl ?
+            <PopupVideoEmbed
+              videoUrl={heroVideoUrl}
+              title={scene.title}
+              poster={scene.videoPoster}
+            />
           : <>
               {heroLoading ?
                 <span
@@ -133,12 +137,8 @@ export function ExploreSceneDescriptionView({
             </p>
           }
 
-          {featureVideoUrl ?
-            <PopupVideoEmbed
-              videoUrl={featureVideoUrl}
-              title={scene.title}
-              poster={scene.videoPoster}
-            />
+          {bodyVideoUrl ?
+            <PopupVideoEmbed videoUrl={bodyVideoUrl} title={scene.title} />
           : null}
         </div>
       </div>

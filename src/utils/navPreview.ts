@@ -104,7 +104,7 @@ export function buildNavPreview(
   if (!scene) return null;
 
   const videoUrl = scene.previewVideoUrl?.trim() || undefined;
-  const featureVideoUrl = scene.videoUrl?.trim() || undefined;
+  const bodyVideoUrl = scene.videoUrl?.trim() || undefined;
   const image = hotspot.preview?.image ?? scene.panorama ?? undefined;
   const canNavigate = navPreviewCanNavigate(hotspot, currentSceneId);
   const hotspotLabel = hotspot.label?.trim();
@@ -125,8 +125,8 @@ export function buildNavPreview(
     panorama: scene.panorama,
     image,
     videoUrl,
-    featureVideoUrl,
-    videoPoster: featureVideoUrl ? scene.videoPoster : undefined,
+    videoPoster: videoUrl ? scene.videoPoster : undefined,
+    bodyVideoUrl,
     description: scene.description?.trim() || undefined,
     namingItems: buildNavPreviewNamingItems(tour, scene),
     namingTotalLabel,

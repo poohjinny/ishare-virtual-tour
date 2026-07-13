@@ -1,4 +1,4 @@
-import { VIRTUAL_TOUR_GUIDE_NAME } from './branding';
+import { SHOW_ASK_GUIDE, VIRTUAL_TOUR_GUIDE_NAME } from './branding';
 
 import type { TourViewerType } from '../types/tour';
 
@@ -142,7 +142,10 @@ export function tourHelpViewerControls(
 }
 
 export function tourHelpFaq(viewerType?: TourViewerType): TourHelpFaqItem[] {
-  return viewerType === 'model3d' ? TOUR_HELP_FAQ_3D : TOUR_HELP_FAQ;
+  const items = viewerType === 'model3d' ? TOUR_HELP_FAQ_3D : TOUR_HELP_FAQ;
+  return SHOW_ASK_GUIDE ? items : (
+      items.filter((item) => item.id !== 'ask-guide')
+    );
 }
 
 export function tourHelpLeadText(

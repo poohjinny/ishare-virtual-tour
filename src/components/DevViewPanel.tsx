@@ -4259,20 +4259,20 @@ export function DevViewPanel({
                                   onChange={(e) =>
                                     setEditScenePreviewVideoUrl(e.target.value)
                                   }
-                                  placeholder='https://youtube.com/…'
+                                  placeholder='https://share.synthesia.io/… or hosted mp4'
                                   spellCheck={false}
                                   autoComplete='off'
                                 />
                                 <p className={devViewPanelSectionHintClassName}>
-                                  Explore scene detail hero and nav preview hero
-                                  for links to this scene.
+                                  Synthesia — Explore scene detail and nav
+                                  preview hero for links to this scene.
                                 </p>
                               </label>
                               <label className={devViewPanelFieldClassName}>
                                 <span
                                   className={devViewPanelFieldLabelClassName}
                                 >
-                                  Feature video URL (body, optional)
+                                  Body video URL (optional)
                                 </span>
                                 <input
                                   className={devViewPanelInputClassName}
@@ -4281,13 +4281,13 @@ export function DevViewPanel({
                                   onChange={(e) =>
                                     setEditSceneVideoUrl(e.target.value)
                                   }
-                                  placeholder='https://share.synthesia.io/… or hosted mp4'
+                                  placeholder='https://youtube.com/…'
                                   spellCheck={false}
                                   autoComplete='off'
                                 />
                                 <p className={devViewPanelSectionHintClassName}>
-                                  Embedded in scene detail body below the
-                                  description.
+                                  YouTube — shown in Explore scene detail and
+                                  nav preview body below the description.
                                 </p>
                               </label>
                             </>
@@ -4526,30 +4526,31 @@ export function DevViewPanel({
                     type='url'
                     value={scenePreviewVideoUrl}
                     onChange={(e) => setScenePreviewVideoUrl(e.target.value)}
-                    placeholder='https://youtube.com/…'
+                    placeholder='https://share.synthesia.io/… or hosted mp4'
                     spellCheck={false}
                     autoComplete='off'
                   />
                   <p className={devViewPanelSectionHintClassName}>
-                    Explore scene detail hero and nav preview hero for links to
-                    this scene.
+                    Synthesia — Explore scene detail and nav preview hero for
+                    links to this scene.
                   </p>
                 </label>
                 <label className={devViewPanelFieldClassName}>
                   <span className={devViewPanelFieldLabelClassName}>
-                    Feature video URL (body, optional)
+                    Body video URL (optional)
                   </span>
                   <input
                     className={devViewPanelInputClassName}
                     type='url'
                     value={sceneVideoUrl}
                     onChange={(e) => setSceneVideoUrl(e.target.value)}
-                    placeholder='https://share.synthesia.io/… or hosted mp4'
+                    placeholder='https://youtube.com/…'
                     spellCheck={false}
                     autoComplete='off'
                   />
                   <p className={devViewPanelSectionHintClassName}>
-                    Embedded in scene detail body below the description.
+                    YouTube — shown in Explore scene detail and nav preview body
+                    below the description.
                   </p>
                 </label>
               </>

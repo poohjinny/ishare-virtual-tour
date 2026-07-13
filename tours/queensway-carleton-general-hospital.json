@@ -136,8 +136,8 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-overview.webp",
-      "previewVideoUrl": "https://www.youtube.com/watch?v=UhIAhTf_4L0&t=2s",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/c299f173-bd3c-4ac9-bc10-03f17e8814f3"
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/c299f173-bd3c-4ac9-bc10-03f17e8814f3",
+      "videoUrl": "https://www.youtube.com/watch?v=UhIAhTf_4L0&t=2s"
     },
     "ed-mh-2": {
       "id": "ed-mh-2",
@@ -175,8 +175,8 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-mh-2.webp",
-      "previewVideoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144",
+      "videoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA"
     },
     "ed-mh-3": {
       "id": "ed-mh-3",
@@ -233,8 +233,8 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-mh-3.webp",
-      "previewVideoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144",
+      "videoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA"
     },
     "ed-ambulance-offload": {
       "id": "ed-ambulance-offload",
@@ -279,8 +279,8 @@
           "navVariant": "back"
         }
       ],
-      "videoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7",
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-ambulance-offload.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-ambulance-offload.webp",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7"
     },
     "msi-overview": {
       "id": "msi-overview",
@@ -651,8 +651,8 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/mental-health-emergency-services-unit.webp",
-      "previewVideoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900"
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900",
+      "videoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s"
     },
     "acute-care-pod-a": {
       "id": "acute-care-pod-a",
@@ -697,8 +697,8 @@
           "navVariant": "back"
         }
       ],
-      "previewVideoUrl": "https://www.youtube.com/watch?v=Ekza7eysssc&t=1s",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/f8601c47-6a3d-425d-8d85-ec765796909d",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/f8601c47-6a3d-425d-8d85-ec765796909d",
+      "videoUrl": "https://www.youtube.com/watch?v=Ekza7eysssc&t=1s",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-a.webp"
     },
     "acute-care-pod-b": {
@@ -744,8 +744,8 @@
           "navVariant": "back"
         }
       ],
-      "previewVideoUrl": "https://www.youtube.com/watch?v=DTWKUUtz1TI&t=2s",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/24ad8146-f72d-4428-9a75-a0801853e2d2",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/24ad8146-f72d-4428-9a75-a0801853e2d2",
+      "videoUrl": "https://www.youtube.com/watch?v=DTWKUUtz1TI&t=2s",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-b.webp"
     },
     "acute-care-pod-c": {
@@ -791,8 +791,8 @@
           "navVariant": "back"
         }
       ],
-      "previewVideoUrl": "https://www.youtube.com/watch?v=c7jEErgm8NI&t=1s",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/2013054c-1a9d-428c-b08f-6a670507081b",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/2013054c-1a9d-428c-b08f-6a670507081b",
+      "videoUrl": "https://www.youtube.com/watch?v=c7jEErgm8NI&t=1s",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-c.webp"
     },
     "mental-health-emergency-services-unit-2": {
@@ -819,8 +819,8 @@
           "navVariant": "back"
         }
       ],
-      "previewVideoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900",
+      "videoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/mental-health-emergency-services-unit-2.webp"
     },
     "acute-care-pod-d": {
@@ -877,8 +877,8 @@
           }
         }
       ],
-      "previewVideoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
+      "videoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-d.webp"
     },
     "acute-care-pod-d-2": {
@@ -892,8 +892,8 @@
         "zoom": 5
       },
       "hotspots": [],
-      "previewVideoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
-      "videoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
+      "videoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-d-2.webp"
     }
   },

@@ -136,12 +136,12 @@ export interface NavPreviewContent {
   panorama?: string;
   /** Static fallback for reduced-motion / load errors — defaults to target panorama */
   image?: string;
-  /** Target scene hero preview — from `scene.previewVideoUrl` */
+  /** Target scene hero video — from `scene.previewVideoUrl` (Synthesia embed or mp4/webm) */
   videoUrl?: string;
-  /** Target scene body feature video — from `scene.videoUrl` (Synthesia embed or mp4/webm) */
-  featureVideoUrl?: string;
-  /** Poster for local `featureVideoUrl` (mp4/webm) — from `scene.videoPoster` */
+  /** Poster for local hero video — from `scene.videoPoster` */
   videoPoster?: string;
+  /** Target scene body video — from `scene.videoUrl` (YouTube) */
+  bodyVideoUrl?: string;
   description?: string;
   namingItems?: NavPreviewNamingItem[];
   /** Department total across the destination sector — set only for sector roots. */
@@ -177,11 +177,11 @@ export interface Scene {
   id: string;
   title: string;
   description?: string;
-  /** Optional hero preview video — YouTube or hosted mp4/webm; Explore scene detail + nav preview hero. */
+  /** Optional hero video — Synthesia embed or hosted mp4/webm; Explore + nav preview hero. */
   previewVideoUrl?: string;
-  /** Optional feature video in body copy — Synthesia embed or hosted mp4/webm. */
+  /** Optional body video — YouTube; Explore scene detail + nav preview body. */
   videoUrl?: string;
-  /** Optional poster for feature `videoUrl` (mp4/webm). */
+  /** Optional poster for hero `previewVideoUrl` when it is local mp4/webm. */
   videoPoster?: string;
   /** Equirectangular panorama URL (panorama tours). */
   panorama: string;

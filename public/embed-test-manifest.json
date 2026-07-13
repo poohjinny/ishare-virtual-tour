@@ -67,6 +67,26 @@
       "firstScene": "overview",
       "scenes": [
         {
+          "id": "acute-care-pod-a",
+          "title": "Acute Care Pod A"
+        },
+        {
+          "id": "acute-care-pod-b",
+          "title": "Acute Care Pod B"
+        },
+        {
+          "id": "acute-care-pod-c",
+          "title": "Acute Care Pod C"
+        },
+        {
+          "id": "acute-care-pod-d",
+          "title": "Acute Care Pod D"
+        },
+        {
+          "id": "acute-care-pod-d-2",
+          "title": "Acute Care Pod D - 2"
+        },
+        {
           "id": "msi-allied-health-team-room",
           "title": "Allied Health Team Room"
         },
@@ -97,6 +117,10 @@
         {
           "id": "mental-health-emergency-services-unit",
           "title": "Mental Health Emergency Services Unit"
+        },
+        {
+          "id": "mental-health-emergency-services-unit-2",
+          "title": "Mental Health Emergency Services Unit - 2"
         },
         {
           "id": "msi-multi-use-lounge-activity-room",

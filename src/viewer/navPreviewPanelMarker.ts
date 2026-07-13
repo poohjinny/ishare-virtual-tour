@@ -243,10 +243,10 @@ export function openAnchoredNavPreviewPanel(
         dismissNavPreviewHero(panelMarker.domElement);
       }
 
-      // Body feature video lives outside the hero, so its play button needs
-      // wiring even when the hero is a mini viewer / dismissed (no hero video).
+      // Body YouTube lives outside the hero, so its play button needs wiring
+      // even when the hero is a mini viewer / dismissed (no hero video).
       // Idempotent — safe when the hero video mount already ran this.
-      if (preview.featureVideoUrl?.trim()) {
+      if (preview.bodyVideoUrl?.trim()) {
         initPopupVideoPlayers(panelMarker.domElement);
       }
     };

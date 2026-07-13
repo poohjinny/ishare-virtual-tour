@@ -793,7 +793,10 @@ export function buildAnchoredPopupHtml(
   });
 }
 
+/** Panorama mini-viewer hero — wider crop than 16:9. */
 const NAV_PREVIEW_HERO_ASPECT = 8 / 16;
+/** Video hero — match Synthesia/YouTube 16:9 so playback fills without pillarbox. */
+const NAV_PREVIEW_VIDEO_HERO_ASPECT = 9 / 16;
 
 export function resolveNavPreviewPanelWidth(): number {
   const scale = getUiScale();
@@ -803,8 +806,11 @@ export function resolveNavPreviewPanelWidth(): number {
 
 export function resolveNavPreviewHeroHeight(
   panelWidth = resolveNavPreviewPanelWidth(),
+  options?: { video?: boolean },
 ): number {
-  return Math.round(panelWidth * NAV_PREVIEW_HERO_ASPECT);
+  const aspect =
+    options?.video ? NAV_PREVIEW_VIDEO_HERO_ASPECT : NAV_PREVIEW_HERO_ASPECT;
+  return Math.round(panelWidth * aspect);
 }
 
 export function resolveNavPreviewPanelMaxHeight(): number {
@@ -850,7 +856,12 @@ export function measureAnchoredNavPreviewHeight(
     panel.style.width = '100%';
     const hero = panel.querySelector('.nav-preview-panel__hero');
     if (hero instanceof HTMLElement) {
-      hero.style.height = `${resolveNavPreviewHeroHeight(panelWidth)}px`;
+      const isVideoHero = hero.classList.contains(
+        'nav-preview-panel__hero--video',
+      );
+      hero.style.height = `${resolveNavPreviewHeroHeight(panelWidth, {
+        video: isVideoHero,
+      })}px`;
     }
   }
 
@@ -1046,7 +1057,10 @@ export function buildAnchoredNavPreviewHtml(
       `<div class="nav-preview-panel__hero-title">${titleHtml}</div>`
     : '';
 
-  const heroHeight = resolveNavPreviewHeroHeight();
+  const videoHeroHeight = resolveNavPreviewHeroHeight(undefined, {
+    video: true,
+  });
+  const panoramaHeroHeight = resolveNavPreviewHeroHeight();
 
   const hideShare = options?.hideShare ?? false;
   const navShareHtml = hideShare ? '' : navPreviewShareButtonHtml();
@@ -1063,14 +1077,19 @@ export function buildAnchoredNavPreviewHtml(
 
   const heroHtml =
     hasVideo ?
-      `<div class="nav-preview-panel__hero nav-preview-panel__hero--video nav-preview-panel__hero--loading" style="height:${heroHeight}px" aria-busy="true">
+      `<div class="nav-preview-panel__hero nav-preview-panel__hero--video nav-preview-panel__hero--loading" style="height:${videoHeroHeight}px" aria-busy="true">
         <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
-        ${buildPopupVideoHtml({ title: preview.title, body: '', videoUrl: trimmedVideoUrl! })}
+        ${buildPopupVideoHtml({
+          title: preview.title,
+          body: '',
+          videoUrl: trimmedVideoUrl!,
+          videoPoster: preview.videoPoster,
+        })}
         ${heroTitleOverlayHtml}
         ${heroActionsHtml}
       </div>`
     : hasPanorama ?
-      `<div class="nav-preview-panel__hero nav-preview-panel__hero--loading" style="height:${heroHeight}px" aria-busy="true">
+      `<div class="nav-preview-panel__hero nav-preview-panel__hero--loading" style="height:${panoramaHeroHeight}px" aria-busy="true">
         <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
         <div class="nav-preview-panel__hero-viewer"></div>
         ${
@@ -1115,14 +1134,13 @@ export function buildAnchoredNavPreviewHtml(
     hotspotId,
   );
 
-  const featureVideoUrl = preview.featureVideoUrl?.trim();
-  const featureVideoHtml =
-    featureVideoUrl ?
+  const bodyVideoUrl = preview.bodyVideoUrl?.trim();
+  const bodyVideoHtml =
+    bodyVideoUrl ?
       buildPopupVideoHtml({
         title: preview.title,
         body: '',
-        videoUrl: featureVideoUrl,
-        videoPoster: preview.videoPoster,
+        videoUrl: bodyVideoUrl,
       })
     : '';
 
@@ -1155,7 +1173,7 @@ export function buildAnchoredNavPreviewHtml(
   const bodyHtml = `<div class="${GLASS_PANEL.body} nav-preview-panel__body ishare-scrollbar">
     ${closeInBodyHtml}
     ${introHtml}
-    ${featureVideoHtml}
+    ${bodyVideoHtml}
     ${namingHtml}
   </div>`;
 

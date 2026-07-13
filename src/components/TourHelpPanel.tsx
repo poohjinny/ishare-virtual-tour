@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import {
   PLATFORM_PRODUCT_LOGO,
+  SHOW_ASK_GUIDE,
   VIRTUAL_TOUR_GUIDE_NAME,
 } from '../constants/branding';
 
@@ -112,10 +113,12 @@ export function TourHelpPanel({
               info or to move to a new area.
             </li>
 
-            <li>
-              Use <strong>Ask Guide</strong> (bottom-right) to chat with{' '}
-              {VIRTUAL_TOUR_GUIDE_NAME} about this facility.
-            </li>
+            {SHOW_ASK_GUIDE ?
+              <li>
+                Use <strong>Ask Guide</strong> (bottom-right) to chat with{' '}
+                {VIRTUAL_TOUR_GUIDE_NAME} about this facility.
+              </li>
+            : null}
 
             <li>
               Viewer controls appear at the bottom by default; use the Viewer

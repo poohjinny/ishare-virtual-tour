@@ -58,6 +58,9 @@ export function ClientIntroGalleryCard({
         <span
           className={cn(
             tourNavLocationGalleryCardHeroClassName,
+            // Card already has rounded-lg + overflow-hidden; keep the hero flush
+            // with the body — no bottom radius between thumbnail and copy.
+            'rounded-b-none',
             previewFailed && 'bg-[#e2e8f0]',
           )}
           aria-busy={previewLoading || undefined}

@@ -164,12 +164,11 @@ export function popupVideoYoutubeEmbedUrl(embedUrl: string): string {
   url.searchParams.set('rel', '0');
   url.searchParams.set('enablejsapi', '1');
   url.searchParams.set('origin', window.location.origin);
-  // Strip player chrome so only the video shows (click still toggles play/pause).
-  url.searchParams.set('controls', '0');
+  // Native chrome: mute + progress + fullscreen (fs must be on for the button).
+  url.searchParams.set('controls', '1');
   url.searchParams.set('modestbranding', '1');
   url.searchParams.set('iv_load_policy', '3');
-  url.searchParams.set('disablekb', '1');
-  url.searchParams.set('fs', '0');
+  url.searchParams.set('fs', '1');
   url.searchParams.set('playsinline', '1');
   return url.toString();
 }

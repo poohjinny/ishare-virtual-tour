@@ -36,6 +36,12 @@ export const VIRTUAL_TOUR_GUIDE_NAME = 'Virtual Tour Guide';
 /** Short CTA label on nav preview and assistant FAB hover. */
 export const VIRTUAL_TOUR_GUIDE_CTA = 'Ask Guide';
 
+/**
+ * Ask Guide FAB + panel. Keep off until the live guide API is wired;
+ * flip to `true` to re-enable the UI (Help copy follows this flag too).
+ */
+export const SHOW_ASK_GUIDE = false;
+
 /** Guide panel location badge — prefixes the active scene title. */
 export const GUIDE_PANEL_CURRENT_SCENE_LABEL = 'Current scene';
 

@@ -14,6 +14,7 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { AiAssistant } from '../components/ai/AiAssistant';
+import { SHOW_ASK_GUIDE } from '../constants/branding';
 import { ClientIntroPicker } from '../components/ClientIntroPicker';
 import { DEV_NOT_FOUND_SAMPLE_TOUR_ID } from '../constants/devUrlFlags';
 import { DevTools } from '../components/DevTools';
@@ -680,10 +681,12 @@ function TourExperience() {
   }, [activePopup, panelStack]);
 
   useEffect(() => {
+    if (!SHOW_ASK_GUIDE) return;
     return panelStack.registerPanel('ai-chat', assistant.close);
   }, [assistant.close, panelStack]);
 
   useEffect(() => {
+    if (!SHOW_ASK_GUIDE) return;
     if (assistant.isOpen) panelStack.openPanel('ai-chat');
     else panelStack.closePanel('ai-chat');
   }, [assistant.isOpen, panelStack]);
@@ -1062,7 +1065,9 @@ function TourExperience() {
 
         <TourFirstVisitHint visible={hintVisible} />
 
-        <AiAssistant assistant={assistant} chatTest={searchParams.chatTest} />
+        {SHOW_ASK_GUIDE ?
+          <AiAssistant assistant={assistant} chatTest={searchParams.chatTest} />
+        : null}
 
         {searchParams.dev && (
           <DevTools
