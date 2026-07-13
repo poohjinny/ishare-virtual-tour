@@ -3,125 +3,189 @@
   "clientId": "gphospitalfoundation",
   "category": "Healthcare",
   "title": "Ken Sargent House",
-  "firstScene": "overview",
+  "firstScene": "overall",
   "floorPlan": {
     "image": "/assets/gphospitalfoundation/ken-sargent-house/maps/floorplan.svg",
     "width": 324,
     "height": 216
   },
-  "defaultTransition": { "speed": "500ms", "effect": "fade" },
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
   "scenes": {
-    "overview": {
-      "id": "overview",
-      "title": "Overview",
-      "description": "Take in an aerial view of Ken Sargent House and the surrounding campus. From here you can see the full building layout, the main entrance, visitor parking, and the landscaped grounds that welcome patients and families. The house sits within walking distance of the Grande Prairie Regional Hospital, making it a convenient home away from home during treatment.",
-      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/overview.webp",
-      "defaultView": { "yaw": 80.8, "pitch": -57, "zoom": 14 },
-      "map": { "x": 0.5, "y": 0.139, "heading": 149.2 },
-      "hotspots": [
-        {
-          "id": "nav-to-entrance",
-          "type": "nav",
-          "label": "Main Entrance",
-          "position": { "yaw": 117.3, "pitch": -62.5 },
-          "targetScene": "main-entrance"
-        },
-        {
-          "id": "nav-to-comfort-corner",
-          "type": "nav",
-          "label": "Comfort Corner",
-          "position": { "yaw": 100, "pitch": -17.7 },
-          "targetScene": "comfort-corner"
-        },
-        {
-          "id": "nav-to-entrance-to-the-base-level",
-          "type": "nav",
-          "label": "Entrance to the Base Level",
-          "position": { "yaw": 26, "pitch": -38.8 },
-          "targetScene": "entrance-to-the-base-level"
-        },
-        {
-          "id": "info-kitchen",
-          "type": "info",
-          "position": { "yaw": 55.2, "pitch": -40.6 },
-          "popup": {
-            "display": "anchored",
-            "title": "Kitchen",
-            "body": "The kitchen at Ken Sargent House is a shared space where guests and families can prepare meals, store food, and gather during their stay.",
-            "visitScene": "kitchen"
-          }
-        },
-        {
-          "id": "info-overview-reception",
-          "type": "info",
-          "position": { "yaw": 77.3, "pitch": -62.3 },
-          "popup": {
-            "display": "anchored",
-            "title": "Reception",
-            "body": "Step into the reception lobby at Ken Sargent House — the first point of contact for guests and families. Check in at the welcome desk, take a seat in the comfortable lounge area, and get directions to the dining hall and other guest spaces. Our reception team is here to help everyone feel informed, supported, and at home.",
-            "visitScene": "reception"
-          }
-        }
-      ],
-      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/overview.webp"
-    },
     "kitchen": {
       "id": "kitchen",
       "title": "Kitchen",
-      "description": "The kitchen at Ken Sargent House is a shared space where guests and families can prepare meals, store food, and gather during their stay.",
+      "description": "The Kitchen at the Ken Sargent House is the heart of our home, just as it is in many of your homes, only bigger. It’s more than just a place to cook—it’s a gathering spot where patients & their families can prepare meals together, creating a sense of normalcy and connection. This communal space fosters togetherness, allowing families to share experiences, support one another, and build bonds. The kitchen also provides a cost-effective alternative to dining out, easing financial strain while offering emotional comfort through familiar, home-cooked meals. Your support ensures that this vital space remains a cornerstone of care and continues to nourish both bodies and hearts.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/kitchen.webp",
-      "defaultView": { "yaw": 156.5, "pitch": -13.3, "zoom": 35 },
+      "defaultView": {
+        "yaw": 126.9,
+        "pitch": -9.2,
+        "zoom": 35
+      },
       "hotspots": [
         {
           "id": "nav-to-reception",
           "type": "nav",
           "label": "Reception",
-          "position": { "yaw": 179.3, "pitch": 4.7 },
+          "position": {
+            "yaw": 178.9,
+            "pitch": -4.8
+          },
           "targetScene": "reception"
         },
         {
           "id": "nav-to-entrance-to-the-base-level",
           "type": "nav",
-          "label": "Entrance to the Base Level",
-          "position": { "yaw": 234.5, "pitch": -3.8 },
-          "targetScene": "entrance-to-the-base-level",
-          "instant": true,
-          "navVariant": "back"
+          "position": {
+            "yaw": 304.9,
+            "pitch": -18.4
+          },
+          "targetScene": "entrance-to-the-base-level"
         },
         {
           "id": "nav-to-main-entrance",
           "type": "nav",
-          "label": "Main Entrance",
-          "position": { "yaw": 167.5, "pitch": -1.6 },
-          "targetScene": "main-entrance",
+          "position": {
+            "yaw": 167.5,
+            "pitch": -1.6
+          },
+          "targetScene": "main-entrance"
+        },
+        {
+          "id": "info-kitchen",
+          "type": "info",
+          "position": {
+            "yaw": 130.4,
+            "pitch": -3.9
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 150000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 235,
+            "pitch": -4.8
+          },
+          "targetScene": "main-floor",
           "instant": true,
           "navVariant": "back"
+        },
+        {
+          "id": "nav-to-pantry",
+          "type": "nav",
+          "position": {
+            "yaw": 93.3,
+            "pitch": -5
+          },
+          "targetScene": "pantry"
+        },
+        {
+          "id": "nav-to-family-patient-communal-space",
+          "type": "nav",
+          "position": {
+            "yaw": 196.5,
+            "pitch": -5.6
+          },
+          "targetScene": "family-patient-communal-space"
+        },
+        {
+          "id": "nav-to-dining-area",
+          "type": "nav",
+          "position": {
+            "yaw": 219.9,
+            "pitch": -12.6
+          },
+          "targetScene": "dining-area"
+        },
+        {
+          "id": "nav-to-main-floor-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 154.9,
+            "pitch": -1.5
+          },
+          "targetScene": "main-floor-corridor"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/kitchen.webp"
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/kitchen.webp",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/cc45c26c-fda8-45f7-a6ae-96d7a7c8bc10",
+      "videoUrl": "https://www.youtube.com/watch?v=GQP2udP-HiA"
     },
     "entrance-to-the-base-level": {
       "id": "entrance-to-the-base-level",
       "title": "Entrance to the Base Level",
       "description": "Approach the base-level entrance of Ken Sargent House from the landscaped grounds. This lower entry provides access to guest spaces on the building's foundation level.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/entrance-to-the-base-level.webp",
-      "defaultView": { "yaw": 77.5, "pitch": -1.7, "zoom": 5 },
+      "defaultView": {
+        "yaw": 77.5,
+        "pitch": -1.7,
+        "zoom": 5
+      },
       "hotspots": [
         {
-          "id": "nav-back-overview",
+          "id": "nav-to-main-floor",
           "type": "nav",
-          "label": "Overview",
+          "position": {
+            "yaw": 122.3,
+            "pitch": 1.6
+          },
+          "targetScene": "main-floor",
           "instant": true,
-          "navVariant": "hub",
-          "position": { "yaw": 137, "pitch": 13.8 },
-          "targetScene": "overview"
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-basement",
+          "type": "nav",
+          "position": {
+            "yaw": 74.2,
+            "pitch": -27.8
+          },
+          "targetScene": "basement"
+        },
+        {
+          "id": "nav-to-covered-porch",
+          "type": "nav",
+          "position": {
+            "yaw": 109.8,
+            "pitch": 1.6
+          },
+          "targetScene": "covered-porch"
+        },
+        {
+          "id": "nav-to-dining-area",
+          "type": "nav",
+          "position": {
+            "yaw": 86.3,
+            "pitch": 6.2
+          },
+          "targetScene": "dining-area"
         },
         {
           "id": "nav-to-kitchen",
           "type": "nav",
-          "label": "Kitchen",
-          "position": { "yaw": 95.3, "pitch": 4.1 },
+          "position": {
+            "yaw": 52.4,
+            "pitch": 4.1
+          },
           "targetScene": "kitchen"
+        },
+        {
+          "id": "nav-to-gazebo",
+          "type": "nav",
+          "position": {
+            "yaw": 27.9,
+            "pitch": 0.1
+          },
+          "targetScene": "gazebo"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/entrance-to-the-base-level.webp"
@@ -129,60 +193,108 @@
     "comfort-corner": {
       "id": "comfort-corner",
       "title": "Comfort Corner",
-      "description": "The Comfort Corner at Ken Sargent House offers a welcoming space where guests can pause, connect, and find a moment of calm during their stay.",
+      "description": "Nestled in the heart of the Ken Sargent House is a small but meaningful comfort corner—a place designed to bring families together through shared experiences, much like the close-knit region of Northwestern Alberta. \n\nThis shared area provides emotional support, fostering a sense of belonging and connection, especially during tough times. Here, families can relax, share stories, and find strength in each other. It’s a space to create bonds that transcend their stay, offering comfort and reassurance that they’re never alone. \n\nYour support helps us maintain this vital area, ensuring that families can continue to find peace, community, and hope within our walls.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/comfort_corner.webp",
-      "defaultView": { "yaw": 107.5, "pitch": -9.6, "zoom": 15 },
+      "defaultView": {
+        "yaw": 107.5,
+        "pitch": -9.6,
+        "zoom": 15
+      },
       "hotspots": [
         {
-          "id": "nav-back-overview",
+          "id": "info-comfort-corner",
+          "type": "info",
+          "position": {
+            "yaw": 100.2,
+            "pitch": -35.4
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 25000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-main-floor",
           "type": "nav",
-          "label": "Overview",
+          "position": {
+            "yaw": 105.1,
+            "pitch": -0.6
+          },
+          "targetScene": "main-floor",
           "instant": true,
-          "navVariant": "hub",
-          "position": { "yaw": 260.2, "pitch": -0.5 },
-          "targetScene": "overview"
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-playroom",
+          "type": "nav",
+          "position": {
+            "yaw": 82.9,
+            "pitch": 0.5
+          },
+          "targetScene": "playroom"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/comfort-corner.webp"
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/comfort-corner.webp",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/510e41aa-d14b-4bc7-8b13-54c8517fac66",
+      "videoUrl": "https://www.youtube.com/watch?v=oj27sZn2ETw"
     },
     "main-entrance": {
       "id": "main-entrance",
       "title": "Main Entrance",
       "description": "Arrive at the ground-level main entrance of Ken Sargent House. Glass doors open directly into the reception lobby, with an accessible ramp and railings on the left side of the front stairs. Illuminated welcome signage helps visitors find their way, whether arriving during the day or in the evening.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-entrance.webp",
-      "defaultView": { "yaw": 108.3, "pitch": 10.6, "zoom": 20 },
-      "map": { "x": 0.5, "y": 0.944, "heading": 14.6 },
+      "defaultView": {
+        "yaw": 108.3,
+        "pitch": 10.6,
+        "zoom": 20
+      },
+      "map": {
+        "x": 0.5,
+        "y": 0.944,
+        "heading": 14.6
+      },
       "hotspots": [
-        {
-          "id": "nav-back-overview",
-          "type": "nav",
-          "label": "Overview",
-          "instant": true,
-          "navVariant": "hub",
-          "position": { "yaw": 268.7, "pitch": 4.9 },
-          "targetScene": "overview"
-        },
         {
           "id": "nav-to-reception",
           "type": "nav",
           "label": "Reception",
-          "position": { "yaw": 105.9, "pitch": 3.8 },
+          "position": {
+            "yaw": 105.9,
+            "pitch": 3.8
+          },
           "targetScene": "reception"
         },
         {
           "id": "info-parking-lot",
           "type": "info",
-          "position": { "yaw": 220.7, "pitch": 2.1 },
+          "position": {
+            "yaw": 220.7,
+            "pitch": 2.1
+          },
           "popup": {
             "display": "anchored",
             "title": "Parking Lot",
             "namingOpportunity": {
               "name": "Parking Lot Naming Opportunity",
               "price": 75000,
-              "status": "soon"
+              "status": "open"
             },
             "body": "Visitor parking at Ken Sargent House provides convenient, accessible spaces for families and guests arriving for short or extended stays. This naming opportunity will recognize partners who help keep welcome and comfort within easy reach from the moment guests arrive.\n\nNaming details for the parking area will be announced soon. Contact the Foundation to register your interest."
           }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 35.1,
+            "pitch": 1.7
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/main-entrance.webp"
@@ -190,24 +302,30 @@
     "reception": {
       "id": "reception",
       "title": "Reception",
-      "description": "Step into the reception lobby at Ken Sargent House — the first point of contact for guests and families. Check in at the welcome desk, take a seat in the comfortable lounge area, and get directions to the dining hall and other guest spaces. Our reception team is here to help everyone feel informed, supported, and at home.",
+      "description": "The reception at Ken Sargent House offers a warm and welcoming atmosphere for all guests. As the first point of contact, our reception team is dedicated to providing excellent customer service, ensuring that every visitor feels comfortable and well-informed.\n\nThe reception area is designed with a blend of modern comfort and classic charm, featuring stylish seating, soft lighting, and a cozy ambiance. Whether you're checking in, seeking assistance, or just looking for information, our friendly staff is always ready to help.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/reception.webp",
-      "defaultView": { "yaw": 89.6, "pitch": 2.1, "zoom": 17 },
-      "map": { "x": 0.5, "y": 0.431, "heading": 100 },
+      "defaultView": {
+        "yaw": 89.6,
+        "pitch": 2.1,
+        "zoom": 17
+      },
       "hotspots": [
         {
           "id": "nav-back-entrance",
           "type": "nav",
-          "label": "Main Entrance",
-          "instant": true,
-          "navVariant": "back",
-          "position": { "yaw": 170, "pitch": -5 },
+          "position": {
+            "yaw": 170,
+            "pitch": -5
+          },
           "targetScene": "main-entrance"
         },
         {
           "id": "info-reception",
           "type": "info",
-          "position": { "yaw": 91.1, "pitch": -10.5 },
+          "position": {
+            "yaw": 91.1,
+            "pitch": -10.5
+          },
           "popup": {
             "display": "anchored",
             "title": "Reception Desk",
@@ -216,8 +334,6 @@
               "price": 150000,
               "status": "open"
             },
-            "body": "The reception at Ken Sargent House offers a warm and welcoming atmosphere for all guests. As the first point of contact, our reception team is dedicated to providing excellent customer service, ensuring that every visitor feels comfortable and well-informed.\n\nThe reception area is designed with a blend of modern comfort and classic charm, featuring stylish seating, soft lighting, and a cozy ambiance. Whether you're checking in, seeking assistance, or just looking for information, our friendly staff is always ready to help.",
-            "videoUrl": "https://www.youtube.com/watch?v=sUe_TSb4Ffo",
             "cta": {
               "product": "giftabulator",
               "url": "https://gphospitalfoundation.giftabulatornow.com/give-now?locale=en-CA&view=result&zoom=100&calc=eyJwcm92aW5jZSI6IkFCIiwiaW5jb21lIjoiMTUwMDAwIiwiYXNzZXQiOiJzdG9jayIsImFzc2V0VmFsdWUiOiIxMDAwMDAiLCJhc3NldENvc3QiOiI0NTAwMCIsImRvbmF0aW9uIjoiMTUwMDAwIiwicGxlZGdlUGVyaW9kIjoiNSJ9"
@@ -225,53 +341,973 @@
           }
         },
         {
-          "id": "info-donor-wall",
-          "type": "info",
-          "position": { "yaw": 314.1, "pitch": 1.1 },
-          "popup": {
-            "display": "anchored",
-            "title": "Donor Wall",
-            "namingOpportunity": {
-              "name": "Donor Wall Naming Opportunity",
-              "price": 100000,
-              "status": "closed"
-            },
-            "body": "The Donor Wall at Ken Sargent House honours the generosity of partners who help families feel at home during treatment. Each recognition on the wall celebrates a lasting commitment to compassionate care and community support.\n\nThank you to our naming partners whose gifts continue to make a difference for patients and families at Grande Prairie Regional Hospital."
-          }
+          "id": "nav-to-kitchen",
+          "type": "nav",
+          "label": "Kitchen",
+          "position": {
+            "yaw": 280,
+            "pitch": -1.6
+          },
+          "targetScene": "kitchen"
         },
         {
-          "id": "info-guest-shelter",
+          "id": "nav-to-main-floor-stairwell",
+          "type": "nav",
+          "position": {
+            "yaw": 8.6,
+            "pitch": -4.4
+          },
+          "targetScene": "main-floor-stairs"
+        },
+        {
+          "id": "nav-to-family-patient-communal-space",
+          "type": "nav",
+          "position": {
+            "yaw": 239.5,
+            "pitch": -9.2
+          },
+          "targetScene": "family-patient-communal-space"
+        },
+        {
+          "id": "nav-to-dining-area",
+          "type": "nav",
+          "position": {
+            "yaw": 257.4,
+            "pitch": -3.7
+          },
+          "targetScene": "dining-area"
+        },
+        {
+          "id": "nav-to-main-floor-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 323.4,
+            "pitch": -2.8
+          },
+          "targetScene": "main-floor-corridor"
+        },
+        {
+          "id": "nav-to-covered-porch",
+          "type": "nav",
+          "position": {
+            "yaw": 236.5,
+            "pitch": -1.8
+          },
+          "targetScene": "covered-porch"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/reception.webp",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/7d557c98-18e9-4b4d-955b-da24d88eab0f",
+      "videoUrl": "https://www.youtube.com/watch?v=sUe_TSb4Ffo"
+    },
+    "overall": {
+      "id": "overall",
+      "title": "Overview",
+      "description": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/overall.webp",
+      "defaultView": {
+        "yaw": 80.8,
+        "pitch": -12.8,
+        "zoom": 36
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 59.8,
+            "pitch": -17.7
+          },
+          "targetScene": "main-floor"
+        },
+        {
+          "id": "nav-to-basement",
+          "type": "nav",
+          "position": {
+            "yaw": 48.1,
+            "pitch": -9.4
+          },
+          "targetScene": "basement"
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 94,
+            "pitch": -1.8
+          },
+          "targetScene": "second-floor"
+        }
+      ],
+      "previewVideoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/overall.webp"
+    },
+    "main-floor": {
+      "id": "main-floor",
+      "title": "Main Floor",
+      "description": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-floor.webp",
+      "defaultView": {
+        "yaw": 78,
+        "pitch": -50.4,
+        "zoom": 21
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 89.9,
+            "pitch": -44.6
+          },
+          "targetScene": "main-floor-stairs"
+        },
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 6.9,
+            "pitch": -55.5
+          },
+          "targetScene": "overall",
+          "instant": true,
+          "navVariant": "hub"
+        },
+        {
+          "id": "nav-to-main-entrance",
+          "type": "nav",
+          "position": {
+            "yaw": 123.5,
+            "pitch": -61.4
+          },
+          "targetScene": "main-entrance"
+        },
+        {
+          "id": "nav-to-entrance-to-the-base-level",
+          "type": "nav",
+          "position": {
+            "yaw": 25.5,
+            "pitch": -39.4
+          },
+          "targetScene": "entrance-to-the-base-level"
+        },
+        {
+          "id": "nav-to-covered-porch",
+          "type": "nav",
+          "position": {
+            "yaw": 23.2,
+            "pitch": -57.8
+          },
+          "targetScene": "covered-porch"
+        },
+        {
+          "id": "nav-to-dining-area",
+          "type": "nav",
+          "position": {
+            "yaw": 40,
+            "pitch": -44.9
+          },
+          "targetScene": "dining-area"
+        },
+        {
+          "id": "nav-to-kitchen",
+          "type": "nav",
+          "position": {
+            "yaw": 54.5,
+            "pitch": -41.5
+          },
+          "targetScene": "kitchen"
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "position": {
+            "yaw": 74.4,
+            "pitch": -62.3
+          },
+          "targetScene": "reception"
+        },
+        {
+          "id": "nav-to-family-patient-communal-space",
+          "type": "nav",
+          "position": {
+            "yaw": 49,
+            "pitch": -53.2
+          },
+          "targetScene": "family-patient-communal-space"
+        },
+        {
+          "id": "nav-to-accessible-larger-suites",
+          "type": "nav",
+          "position": {
+            "yaw": 102.2,
+            "pitch": -38.2
+          },
+          "targetScene": "accessible-larger-suites"
+        },
+        {
+          "id": "nav-to-accessible-larger-suites-2",
+          "type": "nav",
+          "position": {
+            "yaw": 104.7,
+            "pitch": -32.6
+          },
+          "targetScene": "accessible-larger-suites"
+        },
+        {
+          "id": "nav-to-suite-a",
+          "type": "nav",
+          "position": {
+            "yaw": 107.4,
+            "pitch": -23.8
+          },
+          "targetScene": "suite-a"
+        },
+        {
+          "id": "nav-to-suite-a-2",
+          "type": "nav",
+          "position": {
+            "yaw": 72.5,
+            "pitch": -31.4
+          },
+          "targetScene": "suite-a"
+        },
+        {
+          "id": "nav-to-suite-a-3",
+          "type": "nav",
+          "position": {
+            "yaw": 78.9,
+            "pitch": -27.4
+          },
+          "targetScene": "suite-a"
+        },
+        {
+          "id": "nav-to-comfort-corner",
+          "type": "nav",
+          "position": {
+            "yaw": 100.2,
+            "pitch": -17.5
+          },
+          "targetScene": "comfort-corner"
+        },
+        {
+          "id": "nav-to-gazebo",
+          "type": "nav",
+          "position": {
+            "yaw": 94.2,
+            "pitch": -14.7
+          },
+          "targetScene": "gazebo"
+        },
+        {
+          "id": "nav-to-pantry",
+          "type": "nav",
+          "position": {
+            "yaw": 59.5,
+            "pitch": -32.4
+          },
+          "targetScene": "pantry"
+        },
+        {
+          "id": "nav-to-playroom",
+          "type": "nav",
+          "position": {
+            "yaw": 106.1,
+            "pitch": -17.8
+          },
+          "targetScene": "playroom"
+        },
+        {
+          "id": "nav-to-main-floor-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 85.6,
+            "pitch": -33.8
+          },
+          "targetScene": "main-floor-corridor"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/main-floor.webp",
+      "videoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI"
+    },
+    "second-floor": {
+      "id": "second-floor",
+      "title": "Second Floor",
+      "description": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/second-floor.webp",
+      "defaultView": {
+        "yaw": 84.6,
+        "pitch": -45.1,
+        "zoom": 41
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 17.7,
+            "pitch": -46.5
+          },
+          "targetScene": "overall",
+          "instant": true,
+          "navVariant": "hub"
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 94.3,
+            "pitch": -53.3
+          },
+          "targetScene": "main-floor-stairs"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/second-floor.webp",
+      "videoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI"
+    },
+    "basement": {
+      "id": "basement",
+      "title": "Basement",
+      "description": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/basement.webp",
+      "defaultView": {
+        "yaw": 113.5,
+        "pitch": -69,
+        "zoom": 16
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 48.2,
+            "pitch": -37.3
+          },
+          "targetScene": "main-floor",
+          "instant": true
+        },
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 6.7,
+            "pitch": -45.3
+          },
+          "targetScene": "overall",
+          "instant": true,
+          "navVariant": "hub"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/basement.webp",
+      "videoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI"
+    },
+    "covered-porch": {
+      "id": "covered-porch",
+      "title": "Covered Porch",
+      "description": "Explore Covered Porch as part of the Ken Sargent House virtual tour.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/covered-porch.webp",
+      "defaultView": {
+        "yaw": 166.8,
+        "pitch": -10.4,
+        "zoom": 15
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 191.3,
+            "pitch": -20.3
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-entrance-to-the-base-level",
+          "type": "nav",
+          "position": {
+            "yaw": 348.8,
+            "pitch": -6.9
+          },
+          "targetScene": "entrance-to-the-base-level",
+          "instant": true
+        },
+        {
+          "id": "nav-to-dining-area",
+          "type": "nav",
+          "position": {
+            "yaw": 17,
+            "pitch": -2.6
+          },
+          "targetScene": "dining-area"
+        },
+        {
+          "id": "nav-to-main-floor-stairwell",
+          "type": "nav",
+          "position": {
+            "yaw": 92.2,
+            "pitch": -1.2
+          },
+          "targetScene": "main-floor-stairs"
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "position": {
+            "yaw": 110.4,
+            "pitch": -2.6
+          },
+          "targetScene": "reception"
+        },
+        {
+          "id": "nav-to-main-entrance",
+          "type": "nav",
+          "position": {
+            "yaw": 153.2,
+            "pitch": -2
+          },
+          "targetScene": "main-entrance"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/covered-porch.webp"
+    },
+    "dining-area": {
+      "id": "dining-area",
+      "title": "Dining Area",
+      "description": "The Dining Area at the Ken Sargent House is for more than sharing a meal, it’s a space for connection and togetherness. It’s where families gather around the table, share stories, and support each other. As the hub of the home, it provides more than just nourishment—it’s a place of comfort, where conversations are plenty and family and friends can visit, play games, and share in conversation. Your support helps us maintain this special space, ensuring that families have a place to eat, share, and build lasting memories during their time here.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/dining-area.webp",
+      "defaultView": {
+        "yaw": 337.8,
+        "pitch": -17.5,
+        "zoom": 40
+      },
+      "hotspots": [
+        {
+          "id": "info-dining-area",
           "type": "info",
-          "position": { "yaw": 236.3, "pitch": -10.2 },
+          "position": {
+            "yaw": 348,
+            "pitch": -15.5
+          },
           "popup": {
             "display": "anchored",
-            "title": "Guest Shelter",
             "namingOpportunity": {
-              "name": "Guest Shelter Naming Opportunity",
-              "price": 75000,
-              "status": "reserved"
-            },
-            "body": "The Guest Shelter at Ken Sargent House offers a covered outdoor space where families can pause, gather, and take a breath before heading inside. It extends a sense of welcome from the parking area to the front doors — a quiet moment of shelter on the way in or out.\n\nThis naming opportunity is currently reserved. Contact the Foundation with questions about availability or other ways to support Ken Sargent House."
+              "price": 150000,
+              "status": "open"
+            }
           }
         },
         {
           "id": "nav-to-kitchen",
           "type": "nav",
-          "label": "Kitchen",
-          "position": { "yaw": 280, "pitch": -1.6 },
+          "position": {
+            "yaw": 90,
+            "pitch": -4.5
+          },
           "targetScene": "kitchen"
         },
         {
-          "id": "nav-to-entrance-to-the-base-level",
+          "id": "nav-to-main-floor-corridor",
           "type": "nav",
-          "label": "Entrance to the Base Level",
-          "position": { "yaw": 235, "pitch": -1.8 },
-          "targetScene": "entrance-to-the-base-level",
+          "position": {
+            "yaw": 123.5,
+            "pitch": -1.7
+          },
+          "targetScene": "main-floor-corridor"
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "position": {
+            "yaw": 167.7,
+            "pitch": -0.9
+          },
+          "targetScene": "reception"
+        },
+        {
+          "id": "nav-to-main-floor-stairwell",
+          "type": "nav",
+          "position": {
+            "yaw": 143.3,
+            "pitch": -1.1
+          },
+          "targetScene": "main-floor-stairs"
+        },
+        {
+          "id": "nav-to-family-patient-communal-space",
+          "type": "nav",
+          "position": {
+            "yaw": 172.9,
+            "pitch": -10.5
+          },
+          "targetScene": "family-patient-communal-space"
+        },
+        {
+          "id": "nav-to-covered-porch",
+          "type": "nav",
+          "position": {
+            "yaw": 260,
+            "pitch": -13.8
+          },
+          "targetScene": "covered-porch"
+        },
+        {
+          "id": "nav-to-main-entrance",
+          "type": "nav",
+          "position": {
+            "yaw": 152.6,
+            "pitch": -2.5
+          },
+          "targetScene": "main-entrance"
+        },
+        {
+          "id": "nav-to-pantry",
+          "type": "nav",
+          "position": {
+            "yaw": 65.8,
+            "pitch": -2.9
+          },
+          "targetScene": "pantry"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/0f9ccf86-f6fb-4739-8c03-6e0aa8abff08",
+      "videoUrl": "https://www.youtube.com/watch?v=EG-JDOqPc80",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/dining-area.webp"
+    },
+    "family-patient-communal-space": {
+      "id": "family-patient-communal-space",
+      "title": "Family & Patient Communal Space",
+      "description": "The Family & Patient Communal Space at the Ken Sargent House is a haven designed to bring families together during difficult times to find comfort and connection, building a strong sense of community. This shared space fosters support and camaraderie, helping families navigate difficult times with emotional resilience. It’s a place, in the main area of the home where families share experiences, offer advice, and build lasting relationships that extend beyond their stay. \n\nThis is where the magic of natural support systems are created, where strangers become friends and friends turn into family. Your support helps us maintain this vital space, ensuring families have a safe, supportive environment to heal together.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/family-patient-communal-space.webp",
+      "defaultView": {
+        "yaw": 46.7,
+        "pitch": -5.1,
+        "zoom": 35
+      },
+      "hotspots": [
+        {
+          "id": "info-family-patient-communal-space",
+          "type": "info",
+          "position": {
+            "yaw": 19.9,
+            "pitch": -5.2
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 250000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-dining-area",
+          "type": "nav",
+          "position": {
+            "yaw": 101,
+            "pitch": -4.8
+          },
+          "targetScene": "dining-area"
+        },
+        {
+          "id": "nav-to-covered-porch",
+          "type": "nav",
+          "position": {
+            "yaw": 70.4,
+            "pitch": -1
+          },
+          "targetScene": "covered-porch"
+        },
+        {
+          "id": "nav-to-kitchen",
+          "type": "nav",
+          "position": {
+            "yaw": 156.9,
+            "pitch": 0.3
+          },
+          "targetScene": "kitchen"
+        },
+        {
+          "id": "nav-to-main-floor-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 196.7,
+            "pitch": -0.6
+          },
+          "targetScene": "main-floor-corridor"
+        },
+        {
+          "id": "nav-to-main-floor-stairwell",
+          "type": "nav",
+          "position": {
+            "yaw": 231.1,
+            "pitch": 0.9
+          },
+          "targetScene": "main-floor-stairs"
+        },
+        {
+          "id": "nav-to-main-entrance",
+          "type": "nav",
+          "position": {
+            "yaw": 328.9,
+            "pitch": -0.1
+          },
+          "targetScene": "main-entrance"
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "position": {
+            "yaw": 272,
+            "pitch": 1
+          },
+          "targetScene": "reception"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/9227b641-562a-49f2-b1cf-19eac55ec6d6",
+      "videoUrl": "https://www.youtube.com/watch?v=b3bH7Q499Xg",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/family-patient-communal-space.webp"
+    },
+    "main-floor-stairs": {
+      "id": "main-floor-stairs",
+      "title": "Main Floor Stairwell",
+      "description": "The Stairwell connects families and staff to every part of the home, providing a safe and reliable pathway throughout the space. More than just a transition point, it represents movement, access, and continuity in daily life. Your support ensures that this essential connection remains secure, accessible, and welcoming for all.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-floor-stairs.webp",
+      "defaultView": {
+        "yaw": 69.9,
+        "pitch": -0.7,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "info-main-floor-stairwell",
+          "type": "info",
+          "position": {
+            "yaw": 74.1,
+            "pitch": 3.6
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 35000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 106.5,
+            "pitch": 16.3
+          },
+          "targetScene": "second-floor",
+          "instant": true
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 248.1,
+            "pitch": -22
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-basement",
+          "type": "nav",
+          "position": {
+            "yaw": 223,
+            "pitch": -32.4
+          },
+          "targetScene": "basement"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/main-floor-stairs.webp",
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/8431074c-e271-4083-be66-189dd064148f"
+    },
+    "accessible-larger-suites": {
+      "id": "accessible-larger-suites",
+      "title": "Accessible & Larger Suites",
+      "description": "At the Ken Sargent House, our two accessible and two larger suites offer families a private sanctuary during their loved one’s medical treatment.\n\nThese larger suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nThe accessible & larger suites include all the basic necessities—two beds, a bathroom with a shower, and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe, private and comforting environment during their time of need.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/accessible-larger-suites.webp",
+      "defaultView": {
+        "yaw": 94.3,
+        "pitch": -7.2,
+        "zoom": 27
+      },
+      "hotspots": [
+        {
+          "id": "info-accessible-larger-suites",
+          "type": "info",
+          "position": {
+            "yaw": 95,
+            "pitch": 2
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 75000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 5.6,
+            "pitch": -3.6
+          },
+          "targetScene": "main-floor",
           "instant": true,
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/reception.webp"
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788",
+      "videoUrl": "https://www.youtube.com/watch?v=HBrWJTrkXQc",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/accessible-larger-suites.webp"
+    },
+    "suite-a": {
+      "id": "suite-a",
+      "title": "Suite A",
+      "description": "At the Ken Sargent House, Suite A offers families a private sanctuary on the main level during their loved one’s medical treatment.\n\nThis 476 square foot suite provides privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nWith its convenient location near the hospital, Suite A  in the Ken Sargent House reduces travel stress and ensures families can stay close to their loved ones when it matters most.\n\n        The suite includes all the basic necessities—two beds, a bathroom with a bathtub, and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe and comforting environment during their time of need.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/suite-a.webp",
+      "defaultView": {
+        "yaw": 109.5,
+        "pitch": -14.8,
+        "zoom": 36
+      },
+      "hotspots": [
+        {
+          "id": "info-suite-a",
+          "type": "info",
+          "position": {
+            "yaw": 105.9,
+            "pitch": -21.5
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 50000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 38,
+            "pitch": -5.8
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/28feffbb-caed-43f8-bfa1-ac8addf0c1c3",
+      "videoUrl": "https://www.youtube.com/watch?v=w5wxALUMipE",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/suite-a.webp"
+    },
+    "gazebo": {
+      "id": "gazebo",
+      "title": "Gazebo",
+      "description": "The Gazebo at the Ken Sargent House offers a peaceful retreat, set against the serene backdrop of Northwestern Alberta’s breathtaking natural beauty. Surrounded by the quiet tranquility of the outdoors, it’s a space where families can unwind, reflect, and find peace amidst the challenges they face. \n\nFor caregivers and families alike, this space provides the perfect opportunity to recharge, away from the clinical environment. Whether you’re sitting in the stillness of winter or enjoying the cool northern breeze, the Gazebo is a sanctuary that promotes healing and connection. \n\nYour support ensures that this tranquil retreat continues to serve families in need of respite.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/gazebo.webp",
+      "defaultView": {
+        "yaw": 86.3,
+        "pitch": 4.4,
+        "zoom": 28
+      },
+      "hotspots": [
+        {
+          "id": "info-gazebo",
+          "type": "info",
+          "position": {
+            "yaw": 88.9,
+            "pitch": -1
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 25000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 244.9,
+            "pitch": -0.3
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/b650328c-722e-4a11-93b0-69110088a77a",
+      "videoUrl": "https://www.youtube.com/watch?v=CV_NmMg2hxw",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/gazebo.webp"
+    },
+    "pantry": {
+      "id": "pantry",
+      "title": "Pantry",
+      "description": "At the Ken Sargent House, our pantry is more than a place to store food—it’s a vital resource for families. The pantry offers convenient access to dry goods, snacks, and personal food storage, ensuring that families can focus on what matters most—being there for one another. \n\nIt also alleviates financial burdens by offering nutritious, cost-effective options that support the well-being of our families. Whether it’s the long winters or the unpredictable weather, the pantry helps families maintain healthy eating habits during challenging times. \n\nYour support allows us to continue offering this essential service, providing comfort and relief when it’s needed most.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/pantry.webp",
+      "defaultView": {
+        "yaw": 66.4,
+        "pitch": -1.8,
+        "zoom": 21
+      },
+      "hotspots": [
+        {
+          "id": "info-pantry",
+          "type": "info",
+          "position": {
+            "yaw": 97.6,
+            "pitch": -7.5
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 25000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 73.7,
+            "pitch": -9.8
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/8c273fc2-9b00-4c9a-9869-02e4c60c9a82",
+      "videoUrl": "https://www.youtube.com/watch?v=LMVaFVHcF4U",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/pantry.webp"
+    },
+    "playroom": {
+      "id": "playroom",
+      "title": "Playroom",
+      "description": "The Playroom at the Ken Sargent House offers a burst of joy and creativity for children, allowing them to engage in playful activities and foster growth, even in the midst of adversity. \n\nIn Northwestern Alberta, where winters are long and isolation can set in, the Playroom is a vital space where children can reduce stress, express themselves, and experience moments of happiness. This safe and welcoming space encourages social interactions, while giving children a sense of normalcy and fun. \n\nYour support helps keep this haven alive, offering children and families a much-needed escape and the chance to create memories of joy, even in difficult times.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/playroom.webp",
+      "defaultView": {
+        "yaw": 83.1,
+        "pitch": -10.9,
+        "zoom": 21
+      },
+      "hotspots": [
+        {
+          "id": "info-playroom",
+          "type": "info",
+          "position": {
+            "yaw": 82.9,
+            "pitch": -8.4
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 75000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 318.8,
+            "pitch": -13.6
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-comfort-corner",
+          "type": "nav",
+          "position": {
+            "yaw": 339.4,
+            "pitch": -9
+          },
+          "targetScene": "comfort-corner"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/6219e1bf-98ed-45c4-837e-d0e1ced62cbe",
+      "videoUrl": "https://www.youtube.com/watch?v=WHKuzresqMI",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/playroom.webp"
+    },
+    "main-floor-corridor": {
+      "id": "main-floor-corridor",
+      "title": "Main Floor Corridor",
+      "description": "Explore Main Floor Corridor as part of the Ken Sargent House virtual tour.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-floor-corridor.webp",
+      "defaultView": {
+        "yaw": 94.8,
+        "pitch": 0.1,
+        "zoom": 21
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-playroom",
+          "type": "nav",
+          "position": {
+            "yaw": 97.8,
+            "pitch": -1.7
+          },
+          "targetScene": "playroom"
+        },
+        {
+          "id": "nav-to-comfort-corner",
+          "type": "nav",
+          "position": {
+            "yaw": 91.6,
+            "pitch": 1
+          },
+          "targetScene": "comfort-corner"
+        },
+        {
+          "id": "nav-to-accessible-larger-suites",
+          "type": "nav",
+          "position": {
+            "yaw": 181.2,
+            "pitch": -8.8
+          },
+          "targetScene": "accessible-larger-suites"
+        },
+        {
+          "id": "nav-to-suite-a",
+          "type": "nav",
+          "position": {
+            "yaw": 10.6,
+            "pitch": -13.1
+          },
+          "targetScene": "suite-a"
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 275,
+            "pitch": -1.8
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/main-floor-corridor.webp"
     }
   }
 }
