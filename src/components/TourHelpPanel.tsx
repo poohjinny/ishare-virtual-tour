@@ -2,12 +2,13 @@ import type { ReactNode } from 'react';
 
 import {
   PLATFORM_PRODUCT_LOGO,
-  SHOW_ASK_GUIDE,
+  isAskGuideEnabled,
   VIRTUAL_TOUR_GUIDE_NAME,
 } from '../constants/branding';
 
 import type { TourClient, TourViewerType } from '../types/tour';
 
+import { useAppSearchParams } from '../hooks/useAppSearchParams';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 
 import {
@@ -65,12 +66,14 @@ export function TourHelpPanel({
   viewerType,
 }: TourHelpPanelProps) {
   const { isCoarsePointer } = useTourChromeLayout();
+  const { askGuide } = useAppSearchParams();
+  const showAskGuide = isAskGuideEnabled(askGuide);
   const showClientContact = hasClientContact(client);
   const showTourSupport = hasClientContact(PLATFORM_TOUR_SUPPORT);
   const showContact = showClientContact || showTourSupport;
   const keyboardShortcuts = tourHelpKeyboardShortcuts(viewerType);
   const viewerControls = tourHelpViewerControls(viewerType);
-  const faqItems = tourHelpFaq(viewerType);
+  const faqItems = tourHelpFaq(viewerType, { showAskGuide });
   const isModel3d = viewerType === 'model3d';
 
   const tourSupportLogo = (
@@ -113,7 +116,7 @@ export function TourHelpPanel({
               info or to move to a new area.
             </li>
 
-            {SHOW_ASK_GUIDE ?
+            {showAskGuide ?
               <li>
                 Use <strong>Ask Guide</strong> (bottom-right) to chat with{' '}
                 {VIRTUAL_TOUR_GUIDE_NAME} about this facility.

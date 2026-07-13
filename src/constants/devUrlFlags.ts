@@ -75,4 +75,11 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     isOn: (params) => params.firstVisitHint,
     urlPatch: (enabled) => ({ firstVisitHint: enabled ? '1' : null }),
   },
+  {
+    key: 'askGuide',
+    label: 'askGuide',
+    hint: 'Show Ask Guide FAB + panel (overrides product default off)',
+    isOn: (params) => params.askGuide,
+    urlPatch: (enabled) => ({ askGuide: enabled ? '1' : null }),
+  },
 ];

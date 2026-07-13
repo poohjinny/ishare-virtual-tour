@@ -252,6 +252,7 @@ Single accordion card: **URL flags**. Toggles apply immediately via URL
 | `skipLanding`       | Skip landing zoom — start at `defaultView`                     |
 | `splashHold`        | Hold load splash longer (loader UX test)                       |
 | `firstVisitHint`    | Force first-visit coach pill (ignores localStorage)            |
+| `askGuide`          | Show Ask Guide FAB + panel (overrides product default off)     |
 
 Combine with `dev=1` as needed, e.g. `?dev=1&embed=1`.
 

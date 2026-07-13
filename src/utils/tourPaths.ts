@@ -149,6 +149,7 @@ export const PRESERVED_SEARCH_KEYS = [
   'skipLanding',
   'splashHold',
   'firstVisitHint',
+  'askGuide',
   NAMING_OPPORTUNITY_SEARCH_KEY,
 ] as const;
 

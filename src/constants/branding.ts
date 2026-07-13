@@ -37,10 +37,16 @@ export const VIRTUAL_TOUR_GUIDE_NAME = 'Virtual Tour Guide';
 export const VIRTUAL_TOUR_GUIDE_CTA = 'Ask Guide';
 
 /**
- * Ask Guide FAB + panel. Keep off until the live guide API is wired;
- * flip to `true` to re-enable the UI (Help copy follows this flag too).
+ * Ask Guide FAB + panel product default. Keep off until the live guide API
+ * is wired; flip to `true` to ship it. Dev QA can still force it on with
+ * `?askGuide=1` (see Debug URL flags).
  */
 export const SHOW_ASK_GUIDE = false;
+
+/** Effective Ask Guide visibility — product default or `?askGuide=1`. */
+export function isAskGuideEnabled(urlOverride = false): boolean {
+  return SHOW_ASK_GUIDE || urlOverride;
+}
 
 /** Guide panel location badge — prefixes the active scene title. */
 export const GUIDE_PANEL_CURRENT_SCENE_LABEL = 'Current scene';

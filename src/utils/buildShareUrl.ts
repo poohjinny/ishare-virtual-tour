@@ -43,6 +43,7 @@ export function buildSharePath({
       skipLanding: null,
       splashHold: null,
       firstVisitHint: null,
+      askGuide: null,
     },
   );
 }
@@ -76,6 +77,7 @@ export function buildEmbedPath({
       skipLanding: null,
       splashHold: null,
       firstVisitHint: null,
+      askGuide: null,
     },
   );
 }

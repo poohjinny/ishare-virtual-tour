@@ -141,11 +141,13 @@ export function tourHelpViewerControls(
     : TOUR_HELP_VIEWER_CONTROLS;
 }
 
-export function tourHelpFaq(viewerType?: TourViewerType): TourHelpFaqItem[] {
+export function tourHelpFaq(
+  viewerType?: TourViewerType,
+  options?: { showAskGuide?: boolean },
+): TourHelpFaqItem[] {
   const items = viewerType === 'model3d' ? TOUR_HELP_FAQ_3D : TOUR_HELP_FAQ;
-  return SHOW_ASK_GUIDE ? items : (
-      items.filter((item) => item.id !== 'ask-guide')
-    );
+  const showAskGuide = options?.showAskGuide ?? SHOW_ASK_GUIDE;
+  return showAskGuide ? items : items.filter((item) => item.id !== 'ask-guide');
 }
 
 export function tourHelpLeadText(

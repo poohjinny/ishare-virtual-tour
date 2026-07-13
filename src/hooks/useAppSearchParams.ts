@@ -23,6 +23,8 @@ export interface AppSearchParams {
   splashHold: boolean;
   /** Force first-visit coach pill (dev QA — overrides embed/dev off). */
   firstVisitHint: boolean;
+  /** Force Ask Guide FAB + panel (dev QA — overrides product default off). */
+  askGuide: boolean;
 }
 
 export function useAppSearchParams(): AppSearchParams {
@@ -41,6 +43,7 @@ export function useAppSearchParams(): AppSearchParams {
       skipLanding: searchParams.get('skipLanding') === '1',
       splashHold: searchParams.get('splashHold') === '1',
       firstVisitHint: searchParams.get('firstVisitHint') === '1',
+      askGuide: searchParams.get('askGuide') === '1',
     };
   }, [searchParams]);
 }
