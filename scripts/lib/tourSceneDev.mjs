@@ -166,25 +166,37 @@ export function buildNavHotspotRecord({
   name,
   position,
   targetSceneId,
+  targetSceneTitle,
   instant,
   navVariant,
   previewImage,
 }) {
-  const label = name.trim();
-  const slug = slugifyHotspotName(label);
   const targetScene = targetSceneId.trim();
-
-  if (!label) throw new Error('Hotspot name is required');
-  if (!slug) throw new Error('Hotspot name must contain letters or numbers');
   if (!targetScene) throw new Error('Target scene is required');
+
+  const inheritedTitle = (targetSceneTitle ?? '').trim();
+  const override = (name ?? '').trim();
+  const displayName = override || inheritedTitle;
+  if (!displayName) {
+    throw new Error('Hotspot name or target scene title is required');
+  }
+
+  const slug =
+    slugifyHotspotName(displayName) || slugifyHotspotName(targetScene);
+  if (!slug) {
+    throw new Error('Hotspot name must contain letters or numbers');
+  }
 
   const record = {
     id: `nav-to-${slug}`,
     type: 'nav',
-    label,
     position: normalizeHotspotPosition(position),
     targetScene,
   };
+
+  if (override && override !== inheritedTitle) {
+    record.label = override;
+  }
 
   if (instant) {
     record.instant = true;
@@ -229,6 +241,11 @@ function applyScenePreviewVideoField(scene, previewVideoUrl) {
   }
 }
 
+function inheritedNamingOpportunityName(sceneTitle) {
+  const title = (sceneTitle ?? '').trim();
+  return title ? `${title} Naming Opportunity` : '';
+}
+
 export function buildNamingHotspotRecord({
   name,
   position,
@@ -237,32 +254,54 @@ export function buildNamingHotspotRecord({
   body,
   videoUrl,
   image,
-  tourTitle,
+  sceneTitle,
+  sceneDescription,
+  scenePreviewVideoUrl,
 }) {
-  const title = name.trim();
-  const slug = slugifyHotspotName(title);
+  const inheritedTitle = (sceneTitle ?? '').trim();
+  const overrideTitle = (name ?? '').trim();
+  const displayTitle = overrideTitle || inheritedTitle;
+  if (!displayTitle) {
+    throw new Error('Hotspot name or scene title is required');
+  }
+
+  const slug = slugifyHotspotName(displayTitle);
   const priceValue = normalizeNamingPriceStorage(price);
   const statusValue = status?.trim() || 'soon';
-  const bodyValue = body?.trim() || defaultNamingBody(title, tourTitle);
 
-  if (!title) throw new Error('Hotspot name is required');
   if (!slug) throw new Error('Hotspot name must contain letters or numbers');
   if (!Number.isFinite(priceValue)) throw new Error('Price is required');
   if (!NAMING_STATUSES.has(statusValue)) {
     throw new Error(`Invalid naming status: ${statusValue}`);
   }
 
+  const inheritedBody = (sceneDescription ?? '').trim();
+  const overrideBody = (body ?? '').trim();
+  const inheritedVideo = (scenePreviewVideoUrl ?? '').trim();
+  const overrideVideo = (videoUrl ?? '').trim();
+
   const popup = {
     display: 'anchored',
-    title,
-    namingOpportunity: {
-      name: `${title} Naming Opportunity`,
-      price: priceValue,
-      status: statusValue,
-    },
-    body: bodyValue,
+    namingOpportunity: { price: priceValue, status: statusValue },
   };
-  applyPopupMediaFields(popup, { videoUrl, image });
+
+  if (overrideTitle && overrideTitle !== inheritedTitle) {
+    popup.title = overrideTitle;
+    popup.namingOpportunity.name =
+      inheritedNamingOpportunityName(overrideTitle);
+  }
+
+  if (overrideBody && overrideBody !== inheritedBody) {
+    popup.body = overrideBody;
+  }
+
+  applyPopupMediaFields(popup, {
+    videoUrl:
+      overrideVideo && overrideVideo !== inheritedVideo ?
+        overrideVideo
+      : undefined,
+    image,
+  });
 
   return {
     id: `info-${slug}`,
@@ -901,10 +940,12 @@ export async function createNavHotspot({
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
   assertTargetSceneExists(tour, targetSceneId);
+  const resolvedTargetId = targetSceneId.trim();
   const hotspot = buildNavHotspotRecord({
     name,
     position,
-    targetSceneId,
+    targetSceneId: resolvedTargetId,
+    targetSceneTitle: tour.scenes[resolvedTargetId]?.title,
     instant,
     navVariant,
     previewImage,
@@ -932,6 +973,7 @@ export async function createNamingHotspot({
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
+  const hostScene = tour.scenes?.[sceneId?.trim()];
   const hotspot = buildNamingHotspotRecord({
     name,
     position,
@@ -940,7 +982,9 @@ export async function createNamingHotspot({
     body,
     videoUrl,
     image,
-    tourTitle: tour.title,
+    sceneTitle: hostScene?.title,
+    sceneDescription: hostScene?.description,
+    scenePreviewVideoUrl: hostScene?.previewVideoUrl,
   });
 
   if (tour.viewerType === 'model3d') {
@@ -1023,7 +1067,8 @@ export function updateNavHotspot({
     throw new Error(`Hotspot is not nav: ${resolvedHotspotId}`);
   }
 
-  const nextLabel = label?.trim();
+  const labelProvided = label !== undefined;
+  const nextLabel = typeof label === 'string' ? label.trim() : undefined;
   const nextTargetSceneId = targetSceneId?.trim();
   const hasInstant = instant !== undefined;
   const hasNavVariant = navVariant !== undefined;
@@ -1031,7 +1076,7 @@ export function updateNavHotspot({
   const wantsClearPreview = clearPreviewImage === true;
 
   if (
-    !nextLabel &&
+    !labelProvided &&
     !nextTargetSceneId &&
     !hasInstant &&
     !hasNavVariant &&
@@ -1043,13 +1088,19 @@ export function updateNavHotspot({
     );
   }
 
-  if (nextLabel) {
-    hotspot.label = nextLabel;
-  }
-
   if (nextTargetSceneId) {
     assertTargetSceneExists(tour, nextTargetSceneId);
     hotspot.targetScene = nextTargetSceneId;
+  }
+
+  if (labelProvided) {
+    const targetId = hotspot.targetScene?.trim() ?? '';
+    const targetTitle = tour.scenes[targetId]?.title?.trim() ?? '';
+    if (!nextLabel || nextLabel === targetTitle) {
+      delete hotspot.label;
+    } else {
+      hotspot.label = nextLabel;
+    }
   }
 
   // Nav arrival follows the target scene defaultView at runtime; drop any
@@ -1116,16 +1167,29 @@ export async function updateNamingHotspot({
     );
   }
 
-  const nextTitle = title?.trim();
+  const titleProvided = title !== undefined;
+  const nextTitle = typeof title === 'string' ? title.trim() : undefined;
   const hasPrice = price !== undefined;
   const nextStatus = status?.trim();
-  const nextBody = body?.trim();
+  const bodyProvided = body !== undefined;
+  const nextBody = typeof body === 'string' ? body.trim() : undefined;
   const hasVideoUrl = videoUrl !== undefined;
   const hasImage = image !== undefined;
 
-  if (nextTitle) {
-    hotspot.popup.title = nextTitle;
-    hotspot.popup.namingOpportunity.name = `${nextTitle} Naming Opportunity`;
+  const hostScene = tour.scenes?.[sceneId];
+  const inheritedTitle = hostScene?.title?.trim() ?? '';
+  const inheritedBody = hostScene?.description?.trim() ?? '';
+  const inheritedVideo = hostScene?.previewVideoUrl?.trim() ?? '';
+
+  if (titleProvided) {
+    if (!nextTitle || nextTitle === inheritedTitle) {
+      delete hotspot.popup.title;
+      delete hotspot.popup.namingOpportunity.name;
+    } else {
+      hotspot.popup.title = nextTitle;
+      hotspot.popup.namingOpportunity.name =
+        inheritedNamingOpportunityName(nextTitle);
+    }
   }
   if (hasPrice) {
     hotspot.popup.namingOpportunity.price = normalizeNamingPriceStorage(price);
@@ -1136,17 +1200,19 @@ export async function updateNamingHotspot({
     }
     hotspot.popup.namingOpportunity.status = nextStatus;
   }
-  if (body !== undefined) {
-    const opportunityTitle = nextTitle || hotspot.popup.title;
-    hotspot.popup.body =
-      nextBody || defaultNamingBody(opportunityTitle, tour.title);
+  if (bodyProvided) {
+    if (!nextBody || nextBody === inheritedBody) {
+      delete hotspot.popup.body;
+    } else {
+      hotspot.popup.body = nextBody;
+    }
   }
   if (hasVideoUrl) {
     const nextVideoUrl = videoUrl?.trim();
-    if (nextVideoUrl) {
-      hotspot.popup.videoUrl = nextVideoUrl;
-    } else {
+    if (!nextVideoUrl || nextVideoUrl === inheritedVideo) {
       delete hotspot.popup.videoUrl;
+    } else {
+      hotspot.popup.videoUrl = nextVideoUrl;
     }
   }
   if (hasImage) {
@@ -1180,10 +1246,10 @@ export async function updateNamingHotspot({
   }
 
   if (
-    !nextTitle &&
+    !titleProvided &&
     !hasPrice &&
     !nextStatus &&
-    body === undefined &&
+    !bodyProvided &&
     !hasVideoUrl &&
     !hasImage &&
     !hasTargetView &&
@@ -1290,6 +1356,59 @@ export function updateInfoHotspot({
   return { tourPath, hotspot };
 }
 
+function clearMatchingNavLabelsForTargetScene(tour, targetSceneId, oldTitle) {
+  const clearFrom = (hotspots) => {
+    if (!Array.isArray(hotspots)) return;
+    for (const hotspot of hotspots) {
+      if (hotspot.type !== 'nav') continue;
+      if (hotspot.targetScene !== targetSceneId) continue;
+      if (hotspot.label?.trim() === oldTitle) {
+        delete hotspot.label;
+      }
+    }
+  };
+
+  for (const scene of Object.values(tour.scenes ?? {})) {
+    clearFrom(scene.hotspots);
+  }
+  clearFrom(tour.hotspots);
+}
+
+/** Drop NO copy overrides that still matched the previous host-scene values. */
+function clearMatchingNamingInheritFields(
+  scene,
+  { oldTitle, oldDescription, oldPreviewVideoUrl },
+) {
+  if (!Array.isArray(scene?.hotspots)) return;
+
+  const oldInheritedName =
+    oldTitle ? inheritedNamingOpportunityName(oldTitle) : '';
+
+  for (const hotspot of scene.hotspots) {
+    if (hotspot.type !== 'info' || !hotspot.popup?.namingOpportunity) continue;
+    const popup = hotspot.popup;
+
+    if (oldTitle && popup.title?.trim() === oldTitle) {
+      delete popup.title;
+    }
+    if (
+      oldInheritedName &&
+      popup.namingOpportunity.name?.trim() === oldInheritedName
+    ) {
+      delete popup.namingOpportunity.name;
+    }
+    if (oldDescription != null && popup.body?.trim() === oldDescription) {
+      delete popup.body;
+    }
+    if (
+      oldPreviewVideoUrl != null &&
+      popup.videoUrl?.trim() === oldPreviewVideoUrl
+    ) {
+      delete popup.videoUrl;
+    }
+  }
+}
+
 export function updateScene({
   toursDir,
   tourId,
@@ -1337,8 +1456,15 @@ export function updateScene({
     );
   }
 
+  const oldTitle = scene.title?.trim() ?? '';
+  const oldDescription = scene.description?.trim() ?? '';
+  const oldPreviewVideoUrl = scene.previewVideoUrl?.trim() ?? '';
+
   if (nextTitle) {
     scene.title = nextTitle;
+    if (oldTitle && oldTitle !== nextTitle) {
+      clearMatchingNavLabelsForTargetScene(tour, resolvedSceneId, oldTitle);
+    }
   }
 
   if (hasDescription) {
@@ -1349,6 +1475,28 @@ export function updateScene({
 
   if (hasPreviewVideoUrl) {
     applyScenePreviewVideoField(scene, previewVideoUrl);
+  }
+
+  if (
+    (nextTitle && oldTitle && oldTitle !== nextTitle) ||
+    (hasDescription && oldDescription !== (scene.description?.trim() ?? '')) ||
+    (hasPreviewVideoUrl &&
+      oldPreviewVideoUrl !== (scene.previewVideoUrl?.trim() ?? ''))
+  ) {
+    clearMatchingNamingInheritFields(scene, {
+      oldTitle: nextTitle && oldTitle !== nextTitle ? oldTitle : undefined,
+      oldDescription:
+        hasDescription && oldDescription !== (scene.description?.trim() ?? '') ?
+          oldDescription
+        : undefined,
+      oldPreviewVideoUrl:
+        (
+          hasPreviewVideoUrl &&
+          oldPreviewVideoUrl !== (scene.previewVideoUrl?.trim() ?? '')
+        ) ?
+          oldPreviewVideoUrl
+        : undefined,
+    });
   }
 
   if (hasVideoUrl) {

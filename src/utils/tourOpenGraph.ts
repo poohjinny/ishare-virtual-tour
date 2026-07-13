@@ -4,6 +4,10 @@ import type { Tour } from '../types/tour';
 import { withBaseUrl } from './assetUrl';
 import { buildAbsoluteShareUrl, buildShareMessage } from './buildShareUrl';
 import { findHotspotInTour } from './findTourHotspot';
+import {
+  resolveHotspotHostScene,
+  resolveNamingPopup,
+} from './namingSceneInherit';
 
 export interface TourOpenGraphMeta {
   title: string;
@@ -79,11 +83,13 @@ function resolveNamingOpportunityName(
   if (!found?.hotspot.popup?.namingOpportunity) return null;
   if (found.sceneId && found.sceneId !== sceneId) return null;
 
-  return (
-    found.hotspot.popup.namingOpportunity.name ??
-    found.hotspot.popup.title ??
-    null
+  const hostScene = resolveHotspotHostScene(
+    tour,
+    found.hotspot,
+    tour.scenes[sceneId],
   );
+  const popup = resolveNamingPopup(found.hotspot.popup, hostScene);
+  return popup.namingOpportunity?.name?.trim() || popup.title?.trim() || null;
 }
 
 function resolveSceneShareImagePath(

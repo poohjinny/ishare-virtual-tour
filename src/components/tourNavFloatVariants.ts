@@ -841,7 +841,7 @@ export const tourNavDirectoryListItemDetailCtaClassName = cn(
   'disabled:pointer-events-none disabled:opacity-45',
 );
 
-/** Primary list-row CTA — Visit / View opportunity. */
+/** Primary list-row CTA — Visit (places + naming). */
 export const tourNavDirectoryListItemPrimaryCtaClassName = cn(
   tourNavLocationGalleryHeroPillCtaButtonClassName,
   'w-auto flex-none px-3.5',

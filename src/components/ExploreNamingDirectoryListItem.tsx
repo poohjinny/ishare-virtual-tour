@@ -1,6 +1,10 @@
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import { cn } from '../lib/cn';
-import { EXPLORE_GALLERY_NAMING_VIEW_LABEL } from '../constants/tourDirectory';
+import {
+  EXPLORE_GALLERY_NAMING_VIEW_LABEL,
+  EXPLORE_GALLERY_VISIT_LABEL,
+  exploreNamingVisitPlaceAriaLabel,
+} from '../constants/tourDirectory';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
@@ -23,6 +27,7 @@ import {
   tourNavItemNamingPriceClassName,
   tourNavItemNamingTitleRowClassName,
   tourNavItemTextClassName,
+  tourNavSceneInfoButtonClassName,
 } from './tourNavFloatVariants';
 import type { TourDirectoryNamingItem } from '../utils/tourDirectory';
 import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
@@ -34,7 +39,10 @@ interface ExploreNamingDirectoryListItemProps {
   disabled?: boolean;
   /** Show the scene (place) name under the title. Off when a scene subheader already names it. */
   showLocation?: boolean;
+  /** Open the naming opportunity (framed panel). */
   onSelect: () => void;
+  /** Go to the place without opening the opportunity panel. */
+  onVisitPlace: () => void;
 }
 
 export function ExploreNamingDirectoryListItem({
@@ -44,30 +52,47 @@ export function ExploreNamingDirectoryListItem({
   disabled = false,
   showLocation = true,
   onSelect,
+  onVisitPlace,
 }: ExploreNamingDirectoryListItemProps) {
   const { isCoarsePointer } = useTourChromeLayout();
   const isClosed = item.statusModifier === 'closed';
   const description = item.description?.trim();
   const showActions = true;
-  const ariaLabel =
+  const visitPlaceLabel = exploreNamingVisitPlaceAriaLabel(item.sceneTitle);
+  const viewOpportunityLabel = `${EXPLORE_GALLERY_NAMING_VIEW_LABEL}: ${item.name}`;
+  const rowAriaLabel =
     active ?
       description ?
         `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}. ${description}`
       : `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}.`
     : description ?
-      `${item.name}, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}. ${description}`
-    : `${item.name}, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}.`;
+      `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}. ${description}`
+    : `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}.`;
 
-  const viewCta = (
+  const visitCta = (
     <>
-      <span className='min-w-0 truncate'>
-        {EXPLORE_GALLERY_NAMING_VIEW_LABEL}
-      </span>
+      <span className='min-w-0 truncate'>{EXPLORE_GALLERY_VISIT_LABEL}</span>
       <ExploreGalleryCtaArrowIcon
         variant='text'
         sizePx={MATERIAL_SYMBOL_SIZE_14}
       />
     </>
+  );
+
+  const viewOpportunityButton = (
+    <button
+      type='button'
+      className={tourNavSceneInfoButtonClassName({ variant: 'listText' })}
+      disabled={disabled}
+      aria-label={viewOpportunityLabel}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onSelect();
+      }}
+    >
+      <span>{EXPLORE_GALLERY_NAMING_VIEW_LABEL}</span>
+    </button>
   );
 
   const body = (
@@ -105,12 +130,13 @@ export function ExploreNamingDirectoryListItem({
             : null}
             {showActions ?
               <ExploreDirectoryListItemActions>
+                {viewOpportunityButton}
                 {isCoarsePointer ?
                   <span
                     className={tourNavDirectoryListItemPrimaryCtaClassName}
                     aria-hidden='true'
                   >
-                    {viewCta}
+                    {visitCta}
                   </span>
                 : <button
                     type='button'
@@ -119,10 +145,10 @@ export function ExploreNamingDirectoryListItem({
                     data-tour-nav-directory-kind='naming'
                     disabled={disabled}
                     className={tourNavDirectoryListItemPrimaryCtaClassName}
-                    onClick={onSelect}
-                    aria-label={ariaLabel}
+                    onClick={onVisitPlace}
+                    aria-label={visitPlaceLabel}
                   >
-                    {viewCta}
+                    {visitCta}
                   </button>
                 }
               </ExploreDirectoryListItemActions>
@@ -162,8 +188,8 @@ export function ExploreNamingDirectoryListItem({
             data-tour-nav-directory-kind='naming'
             className={tourNavDirectoryListItemSelectClassName}
             disabled={disabled}
-            onClick={onSelect}
-            aria-label={ariaLabel}
+            onClick={onVisitPlace}
+            aria-label={rowAriaLabel}
           >
             {body}
           </button>

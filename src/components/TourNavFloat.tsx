@@ -168,6 +168,8 @@ interface TourNavFloatProps {
   onHistoryForward?: () => void;
   onSelectScene: (sceneId: string) => void;
   onSelectNamingOpportunity: (sceneId: string, hotspotId: string) => void;
+  /** Visit the place aimed at this NO hotspot — no opportunity panel. */
+  onVisitNamingPlace: (sceneId: string, hotspotId: string) => void;
   onBreadcrumbNavigate: (sceneId: string) => void;
   /** Recenter the live scene to its default view — used when "Visiting" the current place. */
   onRecenterCurrentScene?: () => void;
@@ -318,6 +320,7 @@ export function TourNavFloat({
   onHistoryForward,
   onSelectScene,
   onSelectNamingOpportunity,
+  onVisitNamingPlace,
   onBreadcrumbNavigate,
   onRecenterCurrentScene,
   activeNamingHotspotId = null,
@@ -333,6 +336,18 @@ export function TourNavFloat({
   const [displayPanel, setDisplayPanel] = useState<DisplayPanel>(null);
   const [panelPhase, setPanelPhase] = useState<PanelAnimPhase>('idle');
   const [exploreSearchOpen, setExploreSearchOpen] = useState(false);
+  /**
+   * Explore "You are here" for a naming row — set by View (panel) or Visit place.
+   * Survives panel close; cleared when leaving that NO's scene or visiting a place.
+   * Pending holds a cross-scene Visit until `currentSceneId` catches up.
+   */
+  const [namingHereHotspotId, setNamingHereHotspotId] = useState<string | null>(
+    null,
+  );
+  const pendingNamingHereRef = useRef<{
+    sceneId: string;
+    hotspotId: string;
+  } | null>(null);
   const [directoryTab, setDirectoryTab] = useState<TourDirectoryTab>('all');
   const [exploreLayout, setExploreLayout] =
     useState<ExploreDirectoryLayout>('gallery');
@@ -354,6 +369,8 @@ export function TourNavFloat({
   const exploreSearchScrollRef = useRef<HTMLDivElement>(null);
   const exploreSearchRef = useRef<HTMLInputElement>(null);
   const targetPanelRef = useRef<DisplayPanel>(null);
+  /** Scene / NO navigation deferred until Explore finish exiting. */
+  const pendingAfterExploreExitRef = useRef<(() => void) | null>(null);
 
   const breadcrumbItems = useMemo(() => {
     const items = buildBreadcrumbItems(
@@ -451,6 +468,47 @@ export function TourNavFloat({
       ) ?? null
     );
   }, [activeNamingHotspotId, currentSceneId, namingItems]);
+
+  // Keep Explore naming "You are here" in sync with an open panel.
+  useEffect(() => {
+    if (!activeNamingHotspotId) return;
+
+    setNamingHereHotspotId(activeNamingHotspotId);
+    const item = namingItems.find(
+      (entry) => entry.hotspotId === activeNamingHotspotId,
+    );
+    pendingNamingHereRef.current =
+      item ? { sceneId: item.sceneId, hotspotId: item.hotspotId } : null;
+  }, [activeNamingHotspotId, namingItems]);
+
+  // Apply a pending Visit once the scene arrives; clear here after leaving it.
+  useEffect(() => {
+    const pending = pendingNamingHereRef.current;
+    if (pending && pending.sceneId === currentSceneId) {
+      setNamingHereHotspotId(pending.hotspotId);
+      pendingNamingHereRef.current = null;
+      return;
+    }
+
+    if (!namingHereHotspotId) return;
+
+    const stillHere = namingItems.some(
+      (item) =>
+        item.hotspotId === namingHereHotspotId &&
+        item.sceneId === currentSceneId,
+    );
+    if (!stillHere) {
+      setNamingHereHotspotId(null);
+    }
+  }, [currentSceneId, namingHereHotspotId, namingItems]);
+
+  const isNamingItemHere = useCallback(
+    (item: TourDirectoryNamingItem) =>
+      currentSceneId === item.sceneId &&
+      (activeNamingHotspotId === item.hotspotId ||
+        namingHereHotspotId === item.hotspotId),
+    [activeNamingHotspotId, currentSceneId, namingHereHotspotId],
+  );
 
   const shareUrl = useMemo(
     () =>
@@ -755,6 +813,25 @@ export function TourNavFloat({
     closeExploreSearch();
   }, [closeExploreSearch, panelStack]);
 
+  /**
+   * Close Explore (if open), then run `action` after the exit animation so the
+   * panorama doesn't start moving under a still-visible panel.
+   */
+  const closeExploreThen = useCallback(
+    (action: () => void) => {
+      const exploreOpen = panelMode === 'explore' || displayPanel === 'explore';
+      if (!exploreOpen) {
+        pendingAfterExploreExitRef.current = null;
+        action();
+        return;
+      }
+
+      pendingAfterExploreExitRef.current = action;
+      closePanel();
+    },
+    [closePanel, displayPanel, panelMode],
+  );
+
   const activatePanel = useCallback(
     (next: Exclude<PanelMode, null>) => {
       setPanelMode((current) => {
@@ -903,12 +980,20 @@ export function TourNavFloat({
   }, [exploreSearchOpen]);
 
   useEffect(() => {
-    if (panelMode === 'explore') return;
+    // Wait until Explore is fully off-screen — clearing detail when panelMode
+    // flips would flash the directory list during the exit animation.
+    if (displayPanel === 'explore') return;
+
+    const pending = pendingAfterExploreExitRef.current;
+    if (pending) {
+      pendingAfterExploreExitRef.current = null;
+      pending();
+    }
 
     closeExploreSearch();
     setExploreSceneDetailExiting(false);
     setExploreSceneDetailId(null);
-  }, [closeExploreSearch, panelMode]);
+  }, [closeExploreSearch, displayPanel]);
 
   useEffect(() => {
     if (!isExploreSearchActive) return;
@@ -924,45 +1009,37 @@ export function TourNavFloat({
   }, [panelMode]);
 
   const handleSelect = (sceneId: string) => {
-    if (sceneId !== currentSceneId) {
-      onSelectScene(sceneId);
-    } else {
-      // Already here — "Visit" recenters to the default view and reveals it.
-      onRecenterCurrentScene?.();
-      closePanel();
-    }
+    pendingNamingHereRef.current = null;
+    setNamingHereHotspotId(null);
 
-    if (exploreSearchOpen) {
-      closeExploreSearch();
-    }
-
-    setExploreSceneDetailExiting(false);
-    setExploreSceneDetailId(null);
+    const shouldRecenter = sceneId === currentSceneId;
+    closeExploreThen(() => {
+      if (shouldRecenter) {
+        onRecenterCurrentScene?.();
+      } else {
+        onSelectScene(sceneId);
+      }
+    });
   };
 
   const handleExploreSceneDetailVisit = useCallback(() => {
     if (!exploreSceneDetailId) return;
 
-    if (exploreSceneDetailId !== currentSceneId) {
-      onSelectScene(exploreSceneDetailId);
-    } else {
-      // Already here — "Visit" recenters to the default view and reveals it.
-      onRecenterCurrentScene?.();
-      closePanel();
-    }
-
-    if (exploreSearchOpen) {
-      closeExploreSearch();
-    }
-
-    setExploreSceneDetailExiting(false);
-    setExploreSceneDetailId(null);
+    const sceneId = exploreSceneDetailId;
+    const shouldRecenter = sceneId === currentSceneId;
+    // Keep detail mounted while Explore exits; detail resets when displayPanel
+    // leaves 'explore'. Scene change waits until the panel is gone.
+    closeExploreThen(() => {
+      if (shouldRecenter) {
+        onRecenterCurrentScene?.();
+      } else {
+        onSelectScene(sceneId);
+      }
+    });
   }, [
-    closePanel,
-    closeExploreSearch,
+    closeExploreThen,
     currentSceneId,
     exploreSceneDetailId,
-    exploreSearchOpen,
     onRecenterCurrentScene,
     onSelectScene,
   ]);
@@ -1032,11 +1109,24 @@ export function TourNavFloat({
 
   const handleSelectNaming = (sceneId: string, hotspotId: string) => {
     if (disabled || namingOpportunityBusy) return;
-    onSelectNamingOpportunity(sceneId, hotspotId);
+    pendingNamingHereRef.current = { sceneId, hotspotId };
+    closeExploreThen(() => {
+      onSelectNamingOpportunity(sceneId, hotspotId);
+    });
+  };
 
-    if (exploreSearchOpen) {
-      closeExploreSearch();
+  const handleVisitNamingPlace = (sceneId: string, hotspotId: string) => {
+    if (disabled || namingOpportunityBusy) return;
+
+    pendingNamingHereRef.current = { sceneId, hotspotId };
+    if (sceneId === currentSceneId) {
+      setNamingHereHotspotId(hotspotId);
+      pendingNamingHereRef.current = null;
     }
+
+    closeExploreThen(() => {
+      onVisitNamingPlace(sceneId, hotspotId);
+    });
   };
 
   const openExploreSearch = useCallback(() => {
@@ -1195,14 +1285,14 @@ export function TourNavFloat({
       <ExploreNamingDirectoryListItem
         key={`${item.sceneId}:${item.hotspotId}`}
         item={item}
-        active={
-          activeNamingHotspotId === item.hotspotId &&
-          currentSceneId === item.sceneId
-        }
+        active={isNamingItemHere(item)}
         priceLabel={formatNamingItemDisplayPrice(item)}
         disabled={disabled || namingOpportunityBusy}
         showLocation={showLocation}
         onSelect={() => handleSelectNaming(item.sceneId, item.hotspotId)}
+        onVisitPlace={() =>
+          handleVisitNamingPlace(item.sceneId, item.hotspotId)
+        }
       />
     );
 
@@ -1264,13 +1354,13 @@ export function TourNavFloat({
                   }}
                   scenes={scenes}
                   item={item}
-                  active={
-                    activeNamingHotspotId === item.hotspotId &&
-                    currentSceneId === item.sceneId
-                  }
+                  active={isNamingItemHere(item)}
                   disabled={disabled || namingOpportunityBusy}
                   onSelect={() =>
                     handleSelectNaming(item.sceneId, item.hotspotId)
+                  }
+                  onVisitPlace={() =>
+                    handleVisitNamingPlace(item.sceneId, item.hotspotId)
                   }
                 />
               ))}

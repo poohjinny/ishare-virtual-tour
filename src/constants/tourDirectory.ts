@@ -67,6 +67,12 @@ export const EXPLORE_GALLERY_LOCATION_DETAILS_LABEL = 'Details';
 
 export const EXPLORE_GALLERY_NAMING_VIEW_LABEL = 'View opportunity';
 
+/** Naming row secondary CTA — go to the place without opening the opportunity panel. */
+export function exploreNamingVisitPlaceAriaLabel(sceneTitle: string): string {
+  const name = sceneTitle.trim();
+  return name ? `Visit ${name}` : 'Visit place';
+}
+
 /** Collapsible group header — place count meta. */
 export function exploreLocationGroupCountLabel(count: number): string {
   const n = Math.max(0, Math.round(count));

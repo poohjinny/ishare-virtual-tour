@@ -1,4 +1,5 @@
 import type { Scene, Tour } from '../types/tour';
+import { resolveNavHotspotLabel } from '../utils/navHotspotLabel';
 import { hotspotToMarkerConfig } from './buildMarkers';
 
 /** VirtualTourPlugin node list from tour JSON. */
@@ -8,7 +9,9 @@ export function buildVirtualTourNodes(tour: Tour) {
     name: scene.title,
     panorama: scene.panorama,
     links: [],
-    markers: scene.hotspots.map(hotspotToMarkerConfig),
+    markers: scene.hotspots.map((hotspot) =>
+      hotspotToMarkerConfig(hotspot, tour, scene),
+    ),
   }));
 }
 
@@ -20,10 +23,44 @@ export type VirtualTourNodePatch = {
   links?: [];
 };
 
+function inheritedNavLabelsChanged(
+  scene: Scene,
+  previousTour: Tour | undefined,
+  nextTour: Tour,
+): boolean {
+  if (!previousTour) return false;
+
+  for (const hotspot of scene.hotspots) {
+    if (hotspot.type !== 'nav') continue;
+    if (
+      resolveNavHotspotLabel(hotspot, previousTour) !==
+      resolveNavHotspotLabel(hotspot, nextTour)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Scene fields that naming-opportunity pills/panels inherit. */
+function inheritedNamingSceneFieldsChanged(
+  prevScene: Scene,
+  nextScene: Scene,
+): boolean {
+  return (
+    prevScene.title !== nextScene.title ||
+    prevScene.description !== nextScene.description ||
+    prevScene.previewVideoUrl !== nextScene.previewVideoUrl ||
+    prevScene.videoPoster !== nextScene.videoPoster
+  );
+}
+
 /** Diff scene fields that map to VirtualTour nodes (skip defaultView, thumbnail, etc.). */
 export function buildVirtualTourNodePatch(
   prevScene: Scene | undefined,
   nextScene: Scene,
+  nextTour: Tour,
+  previousTour?: Tour,
 ): VirtualTourNodePatch | null {
   if (!prevScene) {
     return {
@@ -31,7 +68,9 @@ export function buildVirtualTourNodePatch(
       name: nextScene.title,
       panorama: nextScene.panorama,
       links: [],
-      markers: nextScene.hotspots.map(hotspotToMarkerConfig),
+      markers: nextScene.hotspots.map((hotspot) =>
+        hotspotToMarkerConfig(hotspot, nextTour, nextScene),
+      ),
     };
   }
 
@@ -47,9 +86,13 @@ export function buildVirtualTourNodePatch(
     changed = true;
   }
   if (
-    JSON.stringify(prevScene.hotspots) !== JSON.stringify(nextScene.hotspots)
+    JSON.stringify(prevScene.hotspots) !== JSON.stringify(nextScene.hotspots) ||
+    inheritedNavLabelsChanged(nextScene, previousTour, nextTour) ||
+    inheritedNamingSceneFieldsChanged(prevScene, nextScene)
   ) {
-    patch.markers = nextScene.hotspots.map(hotspotToMarkerConfig);
+    patch.markers = nextScene.hotspots.map((hotspot) =>
+      hotspotToMarkerConfig(hotspot, nextTour, nextScene),
+    );
     changed = true;
   }
 

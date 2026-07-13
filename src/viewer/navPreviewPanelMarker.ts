@@ -28,7 +28,7 @@ import {
 import { bindNavPreviewNamingAccordion } from './navPreviewNamingAccordion';
 import { animateNavPreviewTotal } from './navPreviewTotalCount';
 import {
-  frameCameraForAnchoredPanel,
+  revealCameraForOffViewPanel,
   scheduleNudgeCameraForClippedPanel,
   waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
@@ -274,13 +274,19 @@ export function openAnchoredNavPreviewPanel(
           revealHero();
         },
         onPanelOffView: () =>
-          frameCameraForAnchoredPanel(
+          revealCameraForOffViewPanel(
             viewer,
             {
               yawDeg: (hotspot.position as ViewPosition).yaw,
               pitchDeg: (hotspot.position as ViewPosition).pitch,
             },
-            markerSize.height,
+            markerSize,
+            () => {
+              const panelMarker = markers.getMarker(id);
+              return panelMarker?.domElement instanceof HTMLElement ?
+                  panelMarker.domElement
+                : null;
+            },
           ),
       },
     );

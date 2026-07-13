@@ -618,6 +618,21 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
         void animateViewerToView(viewer, view);
       },
+      animateToView: (view) => {
+        const viewer = viewerRef.current;
+        if (!viewer || disabledRef.current || transitioningRef.current) {
+          return;
+        }
+
+        const markers = markersRef.current;
+        if (markers) {
+          closeAnchoredInfoPanel(markers, true);
+          closeAnchoredNavPreviewPanel(markers, true);
+          onAnchoredPanelVisibilityChangeRef.current?.(false);
+        }
+
+        void animateViewerToView(viewer, view);
+      },
       applyTourUpdate: async (nextTour) => {
         const virtualTour = virtualTourRef.current;
         if (!viewerActiveRef.current || !virtualTour) return;
@@ -654,6 +669,8 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           const patch = buildVirtualTourNodePatch(
             previousTour.scenes[scene.id],
             scene,
+            nextTour,
+            previousTour,
           );
           if (!patch) continue;
 

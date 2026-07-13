@@ -2,6 +2,10 @@ import { stripNamingOpportunitySuffix } from '../data/namingOpportunityStatus';
 import type { Hotspot, Tour } from '../types/tour';
 import { slugifyHotspotName } from './devHotspotLogger';
 import { findNamingHotspotInTour } from './tourDirectory';
+import {
+  resolveHotspotHostScene,
+  resolveNamingPopup,
+} from './namingSceneInherit';
 
 /** Deep link — open naming opportunity panel (`?no={kebab-case-name}`). */
 export const NAMING_OPPORTUNITY_SEARCH_KEY = 'no';
@@ -33,10 +37,17 @@ export function namingOpportunityNameToCamelCase(name: string): string {
     .join('');
 }
 
-function namingOpportunityDisplayName(hotspot: Hotspot): string | null {
-  const naming = hotspot.popup?.namingOpportunity;
-  if (!naming) return null;
-  return stripNamingOpportunitySuffix(naming.name);
+function namingOpportunityDisplayName(
+  tour: Tour,
+  sceneId: string,
+  hotspot: Hotspot,
+): string | null {
+  if (!hotspot.popup?.namingOpportunity) return null;
+  const scene = resolveHotspotHostScene(tour, hotspot, tour.scenes[sceneId]);
+  const popup = resolveNamingPopup(hotspot.popup, scene);
+  const name = popup.namingOpportunity?.name?.trim();
+  if (!name) return null;
+  return stripNamingOpportunitySuffix(name);
 }
 
 function legacyKebabFromHotspotId(hotspotId: string): string {
@@ -58,7 +69,7 @@ function listNamingOpportunityLinks(tour: Tour): NamingOpportunityLink[] {
   const items: NamingOpportunityLink[] = [];
 
   const appendLink = (sceneId: string, hotspot: Hotspot) => {
-    const displayName = namingOpportunityDisplayName(hotspot);
+    const displayName = namingOpportunityDisplayName(tour, sceneId, hotspot);
     if (hotspot.type !== 'info' || !displayName) return;
 
     items.push({

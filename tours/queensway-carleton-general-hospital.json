@@ -77,7 +77,6 @@
         {
           "id": "nav-to-ambulance-offload",
           "type": "nav",
-          "label": "Ambulance Off-Load",
           "position": {
             "yaw": 119.7,
             "pitch": -39.7
@@ -223,7 +222,6 @@
         {
           "id": "nav-to-ambulance-off-load",
           "type": "nav",
-          "label": "Ambulance Off-load",
           "position": {
             "yaw": 170.3,
             "pitch": -1
@@ -431,8 +429,8 @@
       "title": "Inpatient Suites",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-inpatient-suites.webp",
       "defaultView": {
-        "yaw": 100.4,
-        "pitch": -13,
+        "yaw": 111,
+        "pitch": 0.2,
         "zoom": 15
       },
       "hotspots": [

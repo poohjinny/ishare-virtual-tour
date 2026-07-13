@@ -16,6 +16,8 @@ import {
   parseNamingPrice,
   SHOW_SECTOR_NAMING_TOTAL,
 } from './namingPrice';
+import { resolveNavHotspotLabel } from './navHotspotLabel';
+import { resolveNamingPopup } from './namingSceneInherit';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 
 function navPreviewNamingDescription(body: string): string {
@@ -34,22 +36,24 @@ export function buildNavPreviewNamingItems(
   const items: NavPreviewNamingItem[] = [];
 
   for (const hotspot of listSceneInfoHotspots(tour, scene)) {
-    const popup = hotspot.popup;
-    const naming = popup?.namingOpportunity;
-    if (!naming) continue;
+    const rawPopup = hotspot.popup;
+    const naming = rawPopup?.namingOpportunity;
+    if (!naming || !rawPopup) continue;
 
-    const statusConfig = namingOpportunityStatusConfig(naming.status);
+    const popup = resolveNamingPopup(rawPopup, scene);
+    const resolvedNaming = popup.namingOpportunity!;
+    const statusConfig = namingOpportunityStatusConfig(resolvedNaming.status);
     const description =
       popup.body?.trim() ? navPreviewNamingDescription(popup.body) : undefined;
 
     items.push({
       hotspotId: hotspot.id,
-      name: stripNamingOpportunitySuffix(naming.name),
+      name: stripNamingOpportunitySuffix(resolvedNaming.name),
       statusLabel: statusConfig.label,
       statusShortLabel: statusConfig.shortLabel,
       statusModifier: statusConfig.cssModifier,
-      price: naming.price,
-      priceLabel: naming.priceLabel,
+      price: resolvedNaming.price,
+      priceLabel: resolvedNaming.priceLabel,
       description,
       previewImage: hotspot.preview?.image,
     });
@@ -107,7 +111,7 @@ export function buildNavPreview(
   const bodyVideoUrl = scene.videoUrl?.trim() || undefined;
   const image = hotspot.preview?.image ?? scene.panorama ?? undefined;
   const canNavigate = navPreviewCanNavigate(hotspot, currentSceneId);
-  const hotspotLabel = hotspot.label?.trim();
+  const hotspotLabel = resolveNavHotspotLabel(hotspot, tour);
 
   const sectorNamingTotal = buildNavPreviewSectorNamingTotal(
     tour,
@@ -121,7 +125,7 @@ export function buildNavPreview(
 
   return {
     targetSceneId: hotspot.targetScene,
-    title: canNavigate ? scene.title : hotspotLabel || scene.title,
+    title: canNavigate ? scene.title : hotspotLabel,
     panorama: scene.panorama,
     image,
     videoUrl,
@@ -135,7 +139,7 @@ export function buildNavPreview(
         undefined
       ),
     targetView: scene.defaultView,
-    ctaLabel: hotspotLabel || undefined,
+    ctaLabel: hotspotLabel,
     canNavigate,
   };
 }

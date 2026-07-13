@@ -96,6 +96,7 @@ import { useHistoryNavControls } from '../hooks/useHistoryNavControls';
 import { useViewerControlsVisible } from '../hooks/useViewerControlsVisible';
 import type { TourViewerHandle } from '../viewer/viewerHandle';
 import type { ViewerLoadErrorInfo } from '../viewer/viewerHandle';
+import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
 
 const PanoramaViewer = lazy(() =>
   import('../viewer/PanoramaViewer').then((m) => ({
@@ -787,6 +788,40 @@ function TourExperience() {
     [bootstrapTour, openNamingOpportunity],
   );
 
+  /** Explore naming Visit — aim at the hotspot without opening the panel. */
+  const handleVisitNamingPlace = useCallback(
+    async (sceneId: string, hotspotId: string) => {
+      const found = findNamingHotspotInTour(bootstrapTour, hotspotId);
+      const targetSceneId = found?.sceneId ?? sceneId;
+      const scene = bootstrapTour.scenes[targetSceneId];
+      if (!scene) return;
+
+      pendingNamingSelectionRef.current = null;
+      setActiveNamingHotspotId(null);
+      clearNamingOpportunityFromUrl();
+      viewerRef.current?.clearActiveInfoHotspot();
+      viewerRef.current?.closeAnchoredPanels();
+
+      const view =
+        resolveNamingOpportunityView(bootstrapTour, targetSceneId, hotspotId) ??
+        scene.defaultView;
+
+      if (targetSceneId === currentSceneId) {
+        viewerRef.current?.animateToView(view);
+        return;
+      }
+
+      syncSceneToUrl(targetSceneId, { clearNamingOpportunity: true });
+      await viewerRef.current?.navigateToScene(targetSceneId, view);
+    },
+    [
+      bootstrapTour,
+      clearNamingOpportunityFromUrl,
+      currentSceneId,
+      syncSceneToUrl,
+    ],
+  );
+
   const handleNavigate = useCallback(
     async (sceneId: string, targetView?: ViewPosition) => {
       const pendingNaming = pendingNamingSelectionRef.current;
@@ -1040,6 +1075,7 @@ function TourExperience() {
           onHistoryForward={goForward}
           onSelectScene={handleNavigate}
           onSelectNamingOpportunity={handleSelectNamingOpportunity}
+          onVisitNamingPlace={handleVisitNamingPlace}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
           onRecenterCurrentScene={handleVisitCurrentScene}
           activeNamingHotspotId={activeNamingHotspotId}

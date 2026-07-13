@@ -38,14 +38,22 @@ interface DevHotspotBasePayload {
     | { x: number; y: number; z: number };
 }
 
-export interface DevNavHotspotPayload extends DevHotspotBasePayload {
+export interface DevNavHotspotPayload extends Omit<
+  DevHotspotBasePayload,
+  'name'
+> {
+  name?: string;
   targetSceneId: string;
   instant?: boolean;
   navVariant?: NavHotspotVariant;
   previewImage?: string;
 }
 
-export interface DevNamingHotspotPayload extends DevHotspotBasePayload {
+export interface DevNamingHotspotPayload extends Omit<
+  DevHotspotBasePayload,
+  'name'
+> {
+  name?: string;
   price: number;
   status: NamingOpportunityStatus;
   body?: string;

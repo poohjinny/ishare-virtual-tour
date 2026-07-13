@@ -80,6 +80,7 @@ import type {
 } from '../types/tour';
 import { isWorldPosition } from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
+import { resolveNavHotspotLabel } from '../utils/navHotspotLabel';
 import {
   DEV_NAV_NAME_STORAGE_KEY,
   DEV_NO_NAME_STORAGE_KEY,
@@ -275,9 +276,16 @@ function hotspotKindBadgeKind(hotspot: Hotspot): DevHotspotKindBadgeKind {
   return 'info';
 }
 
-function hotspotDisplayLabel(hotspot: Hotspot): string {
-  if (hotspot.type === 'nav') return hotspot.label ?? hotspot.id;
-  return hotspot.popup?.title ?? hotspot.id;
+function hotspotDisplayLabel(hotspot: Hotspot, tour: Tour): string {
+  if (hotspot.type === 'nav') return resolveNavHotspotLabel(hotspot, tour);
+  if (isNamingInfoHotspot(hotspot)) {
+    return (
+      hotspot.popup?.namingOpportunity?.name?.trim() ||
+      hotspot.popup?.title?.trim() ||
+      hotspot.id
+    );
+  }
+  return hotspot.popup?.title?.trim() || hotspot.label?.trim() || hotspot.id;
 }
 
 function confirmDevPanelDelete(message: string): boolean {
@@ -298,13 +306,16 @@ function hotspotManageKindOrder(hotspot: Hotspot): number {
   return 3;
 }
 
-function sortSceneHotspotsForManage(hotspots: Hotspot[]): Hotspot[] {
+function sortSceneHotspotsForManage(
+  hotspots: Hotspot[],
+  tour: Tour,
+): Hotspot[] {
   return [...hotspots].sort((a, b) => {
     const kindDiff = hotspotManageKindOrder(a) - hotspotManageKindOrder(b);
     if (kindDiff !== 0) return kindDiff;
 
-    const labelDiff = hotspotDisplayLabel(a).localeCompare(
-      hotspotDisplayLabel(b),
+    const labelDiff = hotspotDisplayLabel(a, tour).localeCompare(
+      hotspotDisplayLabel(b, tour),
       undefined,
       { sensitivity: 'base' },
     );
@@ -674,9 +685,12 @@ export function DevViewPanel({
 
   const managedHotspots = useMemo(() => {
     if (isModel3dTour) {
-      return sortSceneHotspotsForManage(listDevTourHotspots(tour));
+      return sortSceneHotspotsForManage(listDevTourHotspots(tour), tour);
     }
-    return sortSceneHotspotsForManage(tour.scenes[scene.id]?.hotspots ?? []);
+    return sortSceneHotspotsForManage(
+      tour.scenes[scene.id]?.hotspots ?? [],
+      tour,
+    );
   }, [isModel3dTour, scene.id, tour]);
 
   const showHotspotDevPanel =
@@ -698,14 +712,18 @@ export function DevViewPanel({
   const trimmedNavName = navName.trim();
   const trimmedNoName = noName.trim();
   const trimmedInfoName = infoName.trim();
+  const hostSceneRecord = tour.scenes[scene.id];
+  const inheritedNoTitle = hostSceneRecord?.title?.trim() ?? '';
+  const inheritedNoBody = hostSceneRecord?.description?.trim() ?? '';
+  const inheritedNoVideo = hostSceneRecord?.previewVideoUrl?.trim() ?? '';
   const navSlug = useMemo(
     () => (trimmedNavName ? slugifyHotspotName(trimmedNavName) : ''),
     [trimmedNavName],
   );
-  const noSlug = useMemo(
-    () => (trimmedNoName ? slugifyHotspotName(trimmedNoName) : ''),
-    [trimmedNoName],
-  );
+  const noSlug = useMemo(() => {
+    const display = trimmedNoName || inheritedNoTitle;
+    return display ? slugifyHotspotName(display) : '';
+  }, [inheritedNoTitle, trimmedNoName]);
   const infoSlug = useMemo(
     () => (trimmedInfoName ? slugifyHotspotName(trimmedInfoName) : ''),
     [trimmedInfoName],
@@ -761,13 +779,10 @@ export function DevViewPanel({
     [newFirstSceneTitle],
   );
 
-  const canCreateNav = Boolean(
-    scene.tourId && clickCoords && trimmedNavName && navTargetSceneId,
-  );
+  const canCreateNav = Boolean(scene.tourId && clickCoords && navTargetSceneId);
   const canCreateNaming = Boolean(
     scene.tourId &&
     clickCoords &&
-    trimmedNoName &&
     parseNamingPriceInput(noPrice) != null &&
     noStatus,
   );
@@ -1219,8 +1234,7 @@ export function DevViewPanel({
 
   const createNavHotspot = useCallback(async () => {
     const position = buildHotspotPosition();
-    if (!scene.tourId || !position || !trimmedNavName || !navTargetSceneId)
-      return;
+    if (!scene.tourId || !position || !navTargetSceneId) return;
 
     setNavStatus('working');
     setNavError(null);
@@ -1264,13 +1278,7 @@ export function DevViewPanel({
   const createNamingHotspot = useCallback(async () => {
     const position = buildHotspotPosition();
     const priceAmount = parseNamingPriceInput(noPrice);
-    if (
-      !scene.tourId ||
-      !position ||
-      !trimmedNoName ||
-      priceAmount == null ||
-      !noStatus
-    ) {
+    if (!scene.tourId || !position || priceAmount == null || !noStatus) {
       return;
     }
 
@@ -1939,7 +1947,8 @@ export function DevViewPanel({
       if (!scene.tourId) return;
 
       const found = findHotspotInTour(tour, hotspotId);
-      const label = found ? hotspotDisplayLabel(found.hotspot) : hotspotId;
+      const label =
+        found ? hotspotDisplayLabel(found.hotspot, tour) : hotspotId;
       const deleteScopeLabel = isModel3dTour ? 'tour' : `scene “${scene.id}”`;
       if (
         !confirmDevPanelDelete(
@@ -2019,35 +2028,52 @@ export function DevViewPanel({
     scene.tourId,
   ]);
 
-  const startEditHotspot = useCallback((hotspot: Hotspot) => {
-    setEditingHotspotId(hotspot.id);
-    setMovingHotspotId(null);
-    if (hotspot.type === 'nav') {
-      setEditNavLabel(hotspot.label ?? '');
-      setEditNavTarget(hotspot.targetScene ?? '');
-      setEditNavInstant(Boolean(hotspot.instant));
-      setEditNavVariant(resolveNavHotspotVariant(hotspot));
-      return;
-    }
-    if (isNamingInfoHotspot(hotspot)) {
-      setEditNoTitle(hotspot.popup?.title ?? '');
-      setEditNoPrice(
-        formatNamingPriceInput(hotspot.popup?.namingOpportunity?.price),
-      );
-      setEditNoStatus(hotspot.popup?.namingOpportunity?.status ?? '');
-      setEditNoBody(hotspot.popup?.body ?? '');
-      setEditNoVideoUrl(hotspot.popup?.videoUrl ?? '');
-      setEditNoImage(hotspot.popup?.image ?? '');
-      setEditNoSyncPosition(false);
-      return;
-    }
-    setEditInfoTitle(hotspot.popup?.title ?? '');
-    setEditInfoBody(hotspot.popup?.body ?? '');
-    setEditInfoDisplay(hotspot.popup?.display ?? 'anchored');
-    setEditInfoVideoUrl(hotspot.popup?.videoUrl ?? '');
-    setEditInfoImage(hotspot.popup?.image ?? '');
-    setEditInfoVisitScene(hotspot.popup?.visitScene ?? '');
-  }, []);
+  const startEditHotspot = useCallback(
+    (hotspot: Hotspot) => {
+      setEditingHotspotId(hotspot.id);
+      setMovingHotspotId(null);
+      if (hotspot.type === 'nav') {
+        const targetTitle =
+          tour.scenes[hotspot.targetScene ?? '']?.title?.trim() ?? '';
+        const stored = hotspot.label?.trim() ?? '';
+        setEditNavLabel(stored && stored !== targetTitle ? stored : '');
+        setEditNavTarget(hotspot.targetScene ?? '');
+        setEditNavInstant(Boolean(hotspot.instant));
+        setEditNavVariant(resolveNavHotspotVariant(hotspot));
+        return;
+      }
+      if (isNamingInfoHotspot(hotspot)) {
+        const hostScene = tour.scenes[scene.id];
+        const sceneTitle = hostScene?.title?.trim() ?? '';
+        const sceneBody = hostScene?.description?.trim() ?? '';
+        const sceneVideo = hostScene?.previewVideoUrl?.trim() ?? '';
+        const storedTitle = hotspot.popup?.title?.trim() ?? '';
+        const storedBody = hotspot.popup?.body?.trim() ?? '';
+        const storedVideo = hotspot.popup?.videoUrl?.trim() ?? '';
+        setEditNoTitle(
+          storedTitle && storedTitle !== sceneTitle ? storedTitle : '',
+        );
+        setEditNoPrice(
+          formatNamingPriceInput(hotspot.popup?.namingOpportunity?.price),
+        );
+        setEditNoStatus(hotspot.popup?.namingOpportunity?.status ?? '');
+        setEditNoBody(storedBody && storedBody !== sceneBody ? storedBody : '');
+        setEditNoVideoUrl(
+          storedVideo && storedVideo !== sceneVideo ? storedVideo : '',
+        );
+        setEditNoImage(hotspot.popup?.image ?? '');
+        setEditNoSyncPosition(false);
+        return;
+      }
+      setEditInfoTitle(hotspot.popup?.title ?? '');
+      setEditInfoBody(hotspot.popup?.body ?? '');
+      setEditInfoDisplay(hotspot.popup?.display ?? 'anchored');
+      setEditInfoVideoUrl(hotspot.popup?.videoUrl ?? '');
+      setEditInfoImage(hotspot.popup?.image ?? '');
+      setEditInfoVisitScene(hotspot.popup?.visitScene ?? '');
+    },
+    [tour.scenes],
+  );
 
   const openNavTargetScene = useCallback(
     (targetSceneId: string) => {
@@ -2079,7 +2105,7 @@ export function DevViewPanel({
           tourId: scene.tourId,
           sceneId: scene.id,
           hotspotId: editingHotspotId,
-          label: editNavLabel.trim() || undefined,
+          label: editNavLabel.trim(),
           targetSceneId: editNavTarget.trim() || undefined,
           instant: editNavInstant,
           navVariant: editNavVariant,
@@ -2110,11 +2136,11 @@ export function DevViewPanel({
           tourId: scene.tourId,
           sceneId: scene.id,
           hotspotId: editingHotspotId,
-          title: editNoTitle.trim() || undefined,
+          title: editNoTitle.trim(),
           price: parseNamingPriceInput(editNoPrice) ?? undefined,
           status: editNoStatus || undefined,
-          body: editNoBody.trim() || undefined,
-          videoUrl: editNoVideoUrl,
+          body: editNoBody.trim(),
+          videoUrl: editNoVideoUrl.trim(),
           image: editNoImage,
           targetView,
           previewFile,
@@ -2786,7 +2812,7 @@ export function DevViewPanel({
                                 devViewPanelManageListItemTitleClassName
                               }
                             >
-                              {hotspotDisplayLabel(hotspot)}
+                              {hotspotDisplayLabel(hotspot, tour)}
                             </span>
                             <span
                               className={
@@ -2932,7 +2958,7 @@ export function DevViewPanel({
                                 <span
                                   className={devViewPanelFieldLabelClassName}
                                 >
-                                  Label
+                                  Label (optional)
                                 </span>
                                 <input
                                   className={devViewPanelInputClassName}
@@ -2941,6 +2967,12 @@ export function DevViewPanel({
                                   onChange={(e) =>
                                     setEditNavLabel(e.target.value)
                                   }
+                                  placeholder={
+                                    tour.scenes[editNavTarget]?.title?.trim() ||
+                                    'Uses target scene title'
+                                  }
+                                  spellCheck={false}
+                                  autoComplete='off'
                                 />
                               </label>
                               <label className={devViewPanelFieldClassName}>
@@ -2952,9 +2984,21 @@ export function DevViewPanel({
                                 <select
                                   className={devViewPanelSelectClassName}
                                   value={editNavTarget}
-                                  onChange={(e) =>
-                                    setEditNavTarget(e.target.value)
-                                  }
+                                  onChange={(e) => {
+                                    const nextId = e.target.value;
+                                    const prevTitle =
+                                      tour.scenes[
+                                        editNavTarget
+                                      ]?.title?.trim() ?? '';
+                                    setEditNavTarget(nextId);
+                                    setEditNavLabel((prev) => {
+                                      const trimmed = prev.trim();
+                                      if (!trimmed || trimmed === prevTitle) {
+                                        return '';
+                                      }
+                                      return prev;
+                                    });
+                                  }}
                                 >
                                   <option value=''>Select scene…</option>
                                   {sortedSceneOptions.map((entry) => (
@@ -2964,6 +3008,10 @@ export function DevViewPanel({
                                   ))}
                                 </select>
                               </label>
+                              <p className={devViewPanelSectionHintClassName}>
+                                Leave label empty to use the target scene title
+                                (stays in sync when the scene is renamed).
+                              </p>
                               <label className={devViewPanelFieldClassName}>
                                 <span
                                   className={devViewPanelFieldLabelClassName}
@@ -3056,7 +3104,7 @@ export function DevViewPanel({
                                 <span
                                   className={devViewPanelFieldLabelClassName}
                                 >
-                                  Title
+                                  Title (optional)
                                 </span>
                                 <input
                                   className={devViewPanelInputClassName}
@@ -3065,6 +3113,11 @@ export function DevViewPanel({
                                   onChange={(e) =>
                                     setEditNoTitle(e.target.value)
                                   }
+                                  placeholder={
+                                    inheritedNoTitle || 'Uses scene title'
+                                  }
+                                  spellCheck={false}
+                                  autoComplete='off'
                                 />
                               </label>
                               <label className={devViewPanelFieldClassName}>
@@ -3114,7 +3167,7 @@ export function DevViewPanel({
                                 <span
                                   className={devViewPanelFieldLabelClassName}
                                 >
-                                  Body
+                                  Body (optional)
                                 </span>
                                 <textarea
                                   className={devViewPanelTextareaClassName}
@@ -3122,9 +3175,17 @@ export function DevViewPanel({
                                   onChange={(e) =>
                                     setEditNoBody(e.target.value)
                                   }
+                                  placeholder={
+                                    inheritedNoBody || 'Uses scene description'
+                                  }
                                   rows={3}
                                 />
                               </label>
+                              <p className={devViewPanelSectionHintClassName}>
+                                Leave title/body/video empty to inherit from
+                                this scene (stays in sync when the scene
+                                changes).
+                              </p>
                               <label className={devViewPanelFieldClassName}>
                                 <span
                                   className={devViewPanelFieldLabelClassName}
@@ -3138,7 +3199,10 @@ export function DevViewPanel({
                                   onChange={(e) =>
                                     setEditNoVideoUrl(e.target.value)
                                   }
-                                  placeholder='https://youtube.com/… or Synthesia embed'
+                                  placeholder={
+                                    inheritedNoVideo ||
+                                    'Uses scene preview video URL'
+                                  }
                                 />
                               </label>
                               <label className={devViewPanelFieldClassName}>
@@ -3250,16 +3314,7 @@ export function DevViewPanel({
                                     tone: 'primary',
                                   })}
                                   onClick={() => void saveHotspotEdit()}
-                                  disabled={
-                                    hotspotManageStatus === 'working' ||
-                                    (!editNoTitle.trim() &&
-                                      parseNamingPriceInput(editNoPrice) ==
-                                        null &&
-                                      !editNoStatus &&
-                                      !editNoBody.trim() &&
-                                      !editNoVideoUrl.trim() &&
-                                      !editNoImage.trim())
-                                  }
+                                  disabled={hotspotManageStatus === 'working'}
                                 >
                                   Save NO
                                 </button>
@@ -3477,18 +3532,26 @@ export function DevViewPanel({
 
                     <label className={devViewPanelFieldClassName}>
                       <span className={devViewPanelFieldLabelClassName}>
-                        Name
+                        Label (optional)
                       </span>
                       <input
                         className={devViewPanelInputClassName}
                         type='text'
                         value={navName}
                         onChange={(e) => setNavName(e.target.value)}
-                        placeholder='e.g. Main Entrance'
+                        placeholder={
+                          sortedSceneOptions.find(
+                            (entry) => entry.id === navTargetSceneId,
+                          )?.title || 'Uses target scene title'
+                        }
                         spellCheck={false}
                         autoComplete='off'
                       />
                     </label>
+                    <p className={devViewPanelSectionHintClassName}>
+                      Optional override. Leave empty (or matching the target
+                      title) to inherit the scene title and stay in sync.
+                    </p>
 
                     <label className={devViewPanelFieldClassName}>
                       <span className={devViewPanelFieldLabelClassName}>
@@ -3500,13 +3563,21 @@ export function DevViewPanel({
                         onChange={(e) => {
                           setNavTargetTouched(true);
                           const nextId = e.target.value;
+                          const prevTitle =
+                            sortedSceneOptions.find(
+                              (entry) => entry.id === navTargetSceneId,
+                            )?.title ?? '';
                           setNavTargetSceneId(nextId);
                           const matchedScene = sortedSceneOptions.find(
                             (entry) => entry.id === nextId,
                           );
-                          if (matchedScene) {
-                            setNavName(matchedScene.title);
-                          }
+                          setNavName((prev) => {
+                            const trimmed = prev.trim();
+                            if (!trimmed || trimmed === prevTitle) {
+                              return matchedScene?.title ?? '';
+                            }
+                            return prev;
+                          });
                         }}
                       >
                         <option value=''>Select scene…</option>
@@ -3758,18 +3829,22 @@ export function DevViewPanel({
 
                     <label className={devViewPanelFieldClassName}>
                       <span className={devViewPanelFieldLabelClassName}>
-                        Name
+                        Name (optional)
                       </span>
                       <input
                         className={devViewPanelInputClassName}
                         type='text'
                         value={noName}
                         onChange={(e) => setNoName(e.target.value)}
-                        placeholder='e.g. Parking Lot'
+                        placeholder={inheritedNoTitle || 'Uses scene title'}
                         spellCheck={false}
                         autoComplete='off'
                       />
                     </label>
+                    <p className={devViewPanelSectionHintClassName}>
+                      Optional overrides. Empty name/body/video inherit from
+                      this scene and stay in sync.
+                    </p>
 
                     <label className={devViewPanelFieldClassName}>
                       <span className={devViewPanelFieldLabelClassName}>
@@ -3816,7 +3891,9 @@ export function DevViewPanel({
                         className={devViewPanelTextareaClassName}
                         value={noBody}
                         onChange={(e) => setNoBody(e.target.value)}
-                        placeholder='Leave empty for placeholder copy from the title…'
+                        placeholder={
+                          inheritedNoBody || 'Uses scene description'
+                        }
                         rows={3}
                         spellCheck={true}
                       />
@@ -3831,7 +3908,9 @@ export function DevViewPanel({
                         type='url'
                         value={noVideoUrl}
                         onChange={(e) => setNoVideoUrl(e.target.value)}
-                        placeholder='https://youtube.com/… or Synthesia embed'
+                        placeholder={
+                          inheritedNoVideo || 'Uses scene preview video URL'
+                        }
                         spellCheck={false}
                         autoComplete='off'
                       />

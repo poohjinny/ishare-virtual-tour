@@ -32,6 +32,8 @@ export interface TourViewerHandle {
    * it and go to the bare scene default (used when "Visiting" the current place).
    */
   recenterToDefaultView: (options?: { forceDefault?: boolean }) => void;
+  /** Animate the live camera to a view on the current scene (no scene change). */
+  animateToView: (view: ViewPosition) => void;
   /** Dev — apply fresh tour JSON without remounting the viewer. */
   applyTourUpdate: (tour: Tour) => Promise<void>;
   /** Dev — capture current WebGL frame for 3D scene thumbnail bake (panorama: null). */

@@ -2,6 +2,10 @@ import type { Viewer } from '@photo-sphere-viewer/core';
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import type { Hotspot, PopupContent, Tour, ViewPosition } from '../types/tour';
 import {
+  resolveHotspotHostScene,
+  resolveNamingPopup,
+} from '../utils/namingSceneInherit';
+import {
   buildAnchoredPopupHtml,
   glassPanelMarkerSize,
   initPopupVideoPlayers,
@@ -18,7 +22,7 @@ import {
   measureHotspotHalfHeightPx,
 } from './anchoredPanelPosition';
 import {
-  frameCameraForAnchoredPanel,
+  revealCameraForOffViewPanel,
   scheduleNudgeCameraForClippedPanel,
   waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
@@ -136,25 +140,30 @@ export function openAnchoredInfoPanel(
 
   closeAnchoredInfoPanel(markers, false);
 
+  const hostScene = resolveHotspotHostScene(
+    tour,
+    hotspot,
+    // Prefer scene that currently owns this marker id when present.
+    Object.values(tour.scenes).find((scene) =>
+      scene.hotspots.some((entry) => entry.id === hotspot.id),
+    ),
+  );
+  const popup =
+    hotspot.popup.namingOpportunity ?
+      resolveNamingPopup(hotspot.popup, hostScene)
+    : hotspot.popup;
+
   const id = panelMarkerId(hotspot.id);
   const hostMarker = markers.getMarker(hotspot.id);
   const halfHeight = measureHotspotHalfHeightPx(
     hostMarker?.domElement,
     INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
   );
-  const markerSize = glassPanelMarkerSize(
-    hotspot.popup,
-    hotspot.id,
-    tour,
-    hideShare,
-  );
+  const markerSize = glassPanelMarkerSize(popup, hotspot.id, tour, hideShare);
 
   markers.addMarker({
     id,
-    html: buildAnchoredPopupHtml(hotspot.popup, hotspot.id, {
-      tour,
-      hideShare,
-    }),
+    html: buildAnchoredPopupHtml(popup, hotspot.id, { tour, hideShare }),
     size: markerSize,
     position: anchoredPanelMarkerPosition(
       viewer,
@@ -220,10 +229,16 @@ export function openAnchoredInfoPanel(
         revealMedia();
       },
       onPanelOffView: () =>
-        frameCameraForAnchoredPanel(
+        revealCameraForOffViewPanel(
           viewer,
           { yawDeg: hostPosition.yaw, pitchDeg: hostPosition.pitch },
-          markerSize.height,
+          markerSize,
+          () => {
+            const panelMarker = markers.getMarker(id);
+            return panelMarker?.domElement instanceof HTMLElement ?
+                panelMarker.domElement
+              : null;
+          },
         ),
     },
   );

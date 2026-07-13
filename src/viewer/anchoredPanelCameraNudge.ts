@@ -4,13 +4,23 @@ import { ANCHORED_PANEL_GAP_PX } from './anchoredPanelPosition';
 import { tourBreadcrumbSelector } from '../components/tourNavFloatVariants';
 
 const NUDGE_DURATION_MS = 600;
+/** Floor / ceiling when scaling nudge duration by angular travel. */
+const NUDGE_DURATION_MIN_MS = 500;
+const NUDGE_DURATION_MAX_MS = 1400;
+/**
+ * Angular travel (°) that should take ~NUDGE_DURATION_MS — keeps small clip
+ * nudges snappy while large off-view reveals don't whip at the same clock time.
+ */
+const NUDGE_DURATION_REF_DEG = 18;
 const MAX_MEASURE_ATTEMPTS = 36;
 const PANEL_ENTER_ANIM_MS = 220;
 
 /**
- * Frames a present-but-zero-height panel is allowed before we treat it as
- * off-view (PSV hides off-view markers with display:none). The panel markup is
- * static so layout lands in ~1 frame; a few frames of zero height means hidden.
+ * Frames a present-but-off-view panel is allowed before we frame the camera.
+ * Off-view signals: offsetHeight 0 (PSV display:none), or missing
+ * `psv-marker--visible` (anchored panels force display:block and stay
+ * visibility:hidden until PSV marks them in-frustum). Markup is static so
+ * layout lands in ~1 frame; a few frames of either signal means off-view.
  */
 const OFF_VIEW_GRACE_FRAMES = 4;
 
@@ -19,6 +29,12 @@ const NUDGE_TARGET_MARGIN_PX = 24;
 
 /** Cap per-axis camera correction so oversized panels never warp the view. */
 const MAX_NUDGE_SHIFT_DEG = 60;
+
+/**
+ * Off-view reveal may need a larger single step than a clip nudge (host can sit
+ * well outside the frustum). Still a "scroll into view" delta, not a re-center.
+ */
+const MAX_REVEAL_SHIFT_DEG = 120;
 
 /** Extra gap kept below the floating breadcrumb so a nudged panel clears it. */
 const BREADCRUMB_CLEARANCE_PX = 12;
@@ -45,14 +61,23 @@ export interface SchedulePanelCameraNudgeOptions {
   /** Runs after panel is ready; heavy embeds should load here. Deferred until nudge finishes when `nudged`. */
   afterSettled?: (result: PanelCameraNudgeSettled) => void;
   /**
-   * Fallback for when the panel never lays out because it is off-view: PSV keeps
-   * off-view markers `display:none`, so at extreme pitch a panel whose spherical
-   * anchor falls outside the frustum never renders (offsetHeight stays 0) and the
-   * clip-nudge has nothing to measure. Called once the measure budget is spent so
-   * the caller can frame the camera analytically to bring the panel into view.
-   * Returns true when it moved the camera.
+   * Fallback when the panel is off-view: PSV either keeps markers
+   * `display:none` (offsetHeight 0) or omits `psv-marker--visible`. Anchored
+   * panels override the former with `display:block !important` and use
+   * `visibility:hidden` until `--visible`, so height alone is not enough.
+   * Clip-nudge cannot measure a hidden marker; called after a short grace so
+   * the caller can scroll the camera just far enough to reveal the panel
+   * (same feel as clip-nudge — not a full re-center). Returns true when moved.
    */
   onPanelOffView?: () => boolean | Promise<boolean>;
+}
+
+/** True when PSV has not marked the marker in-frustum (or it has no layout). */
+function isPanelMarkerOffView(panelEl: HTMLElement): boolean {
+  return (
+    panelEl.offsetHeight <= 0 ||
+    !panelEl.classList.contains('psv-marker--visible')
+  );
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -72,6 +97,52 @@ async function stopActiveViewerAnimation(viewer: Viewer): Promise<void> {
   ).animation;
   if (anim && !anim.resolved && !anim.cancelled) {
     await viewer.stopAnimation();
+  }
+}
+
+/** Shared orientation move used by clip-nudge and off-view reveal. */
+async function animateCameraOrientation(
+  viewer: Viewer,
+  targetYawDeg: number,
+  targetPitchDeg: number,
+): Promise<void> {
+  if (prefersReducedMotion()) {
+    viewer.rotate({ yaw: `${targetYawDeg}deg`, pitch: `${targetPitchDeg}deg` });
+    return;
+  }
+
+  const position = viewer.getPosition();
+  const yawDelta = Math.abs(
+    normalizeYawDeltaDeg(targetYawDeg - radToDeg(position.yaw)),
+  );
+  const pitchDelta = Math.abs(targetPitchDeg - radToDeg(position.pitch));
+  // Combined travel — yaw usually dominates; keep pitch from being ignored.
+  const travelDeg = Math.hypot(yawDelta, pitchDelta);
+  const durationMs = Math.round(
+    clamp(
+      NUDGE_DURATION_MS * (travelDeg / NUDGE_DURATION_REF_DEG),
+      NUDGE_DURATION_MIN_MS,
+      NUDGE_DURATION_MAX_MS,
+    ),
+  );
+
+  try {
+    await stopActiveViewerAnimation(viewer);
+    const animation = viewer.animate({
+      yaw: `${targetYawDeg}deg`,
+      pitch: `${targetPitchDeg}deg`,
+      speed: durationMs,
+      easing: 'outCubic',
+    });
+    if (animation) await animation;
+    else {
+      viewer.rotate({
+        yaw: `${targetYawDeg}deg`,
+        pitch: `${targetPitchDeg}deg`,
+      });
+    }
+  } catch {
+    viewer.rotate({ yaw: `${targetYawDeg}deg`, pitch: `${targetPitchDeg}deg` });
   }
 }
 
@@ -213,6 +284,7 @@ function panelFitCameraPitchDeg(
 export function computeAnchoredPanelNudgeTarget(
   viewer: Viewer,
   rect: PanelScreenRect,
+  options?: { maxShiftDeg?: number },
 ): { yawDeg: number; pitchDeg: number } | null {
   const vw = viewer.container.clientWidth;
   const vh = viewer.container.clientHeight;
@@ -225,6 +297,7 @@ export function computeAnchoredPanelNudgeTarget(
   const focalPx = vh / 2 / Math.tan(vFov / 2);
   if (!(focalPx > 0)) return null;
 
+  const maxShift = options?.maxShiftDeg ?? MAX_NUDGE_SHIFT_DEG;
   const m = NUDGE_TARGET_MARGIN_PX;
   // Top uses a breadcrumb-aware inset so the panel never tucks under it.
   const topMargin = resolveTopMarginPx(viewer);
@@ -243,13 +316,13 @@ export function computeAnchoredPanelNudgeTarget(
   // Push down/right to clear top/left; up/left to clear bottom/right.
   const pitchShiftDeg = clamp(
     radToDeg((topOver - effectiveBottomOver) / focalPx),
-    -MAX_NUDGE_SHIFT_DEG,
-    MAX_NUDGE_SHIFT_DEG,
+    -maxShift,
+    maxShift,
   );
   const yawShiftDeg = clamp(
     radToDeg((rightOver - leftOver) / focalPx),
-    -MAX_NUDGE_SHIFT_DEG,
-    MAX_NUDGE_SHIFT_DEG,
+    -maxShift,
+    maxShift,
   );
 
   const pos = viewer.getPosition();
@@ -257,6 +330,49 @@ export function computeAnchoredPanelNudgeTarget(
     yawDeg: radToDeg(pos.yaw) + yawShiftDeg,
     pitchDeg: clamp(radToDeg(pos.pitch) + pitchShiftDeg, -89, 89),
   };
+}
+
+/**
+ * Estimated screen rect for an anchored panel above its host, from spherical
+ * projection (works when the marker is off-view / visibility:hidden).
+ */
+function estimateAnchoredPanelScreenRect(
+  viewer: Viewer,
+  anchor: AnchoredPanelNudgeAnchor,
+  panelSize: { width: number; height: number },
+): PanelScreenRect | null {
+  const point = viewer.dataHelper.sphericalCoordsToViewerCoords({
+    yaw: degToRad(anchor.yawDeg),
+    pitch: degToRad(anchor.pitchDeg),
+  });
+  if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return null;
+
+  const halfW = panelSize.width / 2;
+  const bottom = point.y - ANCHORED_PANEL_GAP_PX;
+  return {
+    left: point.x - halfW,
+    right: point.x + halfW,
+    top: bottom - panelSize.height,
+    bottom,
+  };
+}
+
+/**
+ * Minimal camera target that scrolls an off-view panel just into the safe area —
+ * same overflow math as clip-nudge, using a projected panel estimate. Prefer this
+ * over a full re-center (`computeAnchoredPanelFramedView`) when the panel opens
+ * from the user's current view.
+ */
+export function computeAnchoredPanelRevealTarget(
+  viewer: Viewer,
+  anchor: AnchoredPanelNudgeAnchor,
+  panelSize: { width: number; height: number },
+): { yawDeg: number; pitchDeg: number } | null {
+  const rect = estimateAnchoredPanelScreenRect(viewer, anchor, panelSize);
+  if (!rect) return null;
+  return computeAnchoredPanelNudgeTarget(viewer, rect, {
+    maxShiftDeg: MAX_REVEAL_SHIFT_DEG,
+  });
 }
 
 /**
@@ -286,6 +402,9 @@ export function computeAnchoredPanelFramedView(
  * no DOM measurement needed, so it works even when the panel is off-view and
  * PSV has not rendered it. Rotates yaw to the host and pitch to seat the panel
  * above it. Returns true when a camera move was issued.
+ *
+ * Prefer {@link revealCameraForOffViewPanel} when opening a panel from the
+ * user's current view — framed view is a full re-center (e.g. NO deep-links).
  */
 export async function frameCameraForAnchoredPanel(
   viewer: Viewer,
@@ -306,26 +425,97 @@ export async function frameCameraForAnchoredPanel(
     currentYaw + normalizeYawDeltaDeg(framed.yawDeg - currentYaw);
   const targetPitch = framed.pitchDeg;
 
-  if (prefersReducedMotion()) {
-    viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
-    return true;
-  }
-
-  try {
-    await stopActiveViewerAnimation(viewer);
-    const animation = viewer.animate({
-      yaw: `${targetYaw}deg`,
-      pitch: `${targetPitch}deg`,
-      speed: NUDGE_DURATION_MS,
-      easing: 'outCubic',
-    });
-    if (animation) await animation;
-    else viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
-  } catch {
-    viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
-  }
-
+  await animateCameraOrientation(viewer, targetYaw, targetPitch);
   return true;
+}
+
+/**
+ * Capped step toward the host when projection-based reveal has nothing to do
+ * (e.g. behind-camera coords) but the marker is still off-view.
+ */
+function computeAnchoredPanelHostStepTarget(
+  viewer: Viewer,
+  anchor: AnchoredPanelNudgeAnchor,
+  panelHeightPx: number,
+): { yawDeg: number; pitchDeg: number } | null {
+  const position = viewer.getPosition();
+  const currentYaw = radToDeg(position.yaw);
+  const currentPitch = radToDeg(position.pitch);
+
+  const yawDelta = clamp(
+    normalizeYawDeltaDeg(anchor.yawDeg - currentYaw),
+    -MAX_REVEAL_SHIFT_DEG,
+    MAX_REVEAL_SHIFT_DEG,
+  );
+  const idealPitch =
+    panelFitCameraPitchDeg(
+      viewer,
+      anchor.pitchDeg,
+      panelHeightPx,
+      viewer.getZoomLevel(),
+    ) ?? anchor.pitchDeg;
+  const pitchDelta = clamp(
+    idealPitch - currentPitch,
+    -MAX_REVEAL_SHIFT_DEG,
+    MAX_REVEAL_SHIFT_DEG,
+  );
+
+  if (Math.abs(yawDelta) < 0.25 && Math.abs(pitchDelta) < 0.25) return null;
+
+  return {
+    yawDeg: currentYaw + yawDelta,
+    pitchDeg: clamp(currentPitch + pitchDelta, -89, 89),
+  };
+}
+
+/**
+ * Bring an off-view anchored panel into the safe viewport with the same minimal
+ * scroll-into-view math and animation as clip-nudge (not a full re-center).
+ * Once visible, applies a follow-up clip nudge when the measured rect still
+ * overflows. Returns true when any camera move was issued.
+ */
+export async function revealCameraForOffViewPanel(
+  viewer: Viewer,
+  anchor: AnchoredPanelNudgeAnchor,
+  panelSize: { width: number; height: number },
+  getPanelEl?: () => HTMLElement | null | undefined,
+): Promise<boolean> {
+  let moved = false;
+
+  // Up to two reveal steps when the host sits far outside the frustum.
+  for (let step = 0; step < 2; step++) {
+    const panelEl = getPanelEl?.();
+    if (panelEl && !isPanelMarkerOffView(panelEl)) break;
+
+    const target =
+      computeAnchoredPanelRevealTarget(viewer, anchor, panelSize) ??
+      computeAnchoredPanelHostStepTarget(viewer, anchor, panelSize.height);
+    if (!target) break;
+
+    const position = viewer.getPosition();
+    const currentYaw = radToDeg(position.yaw);
+    const currentPitch = radToDeg(position.pitch);
+    const yawDelta = normalizeYawDeltaDeg(target.yawDeg - currentYaw);
+    const targetYaw = currentYaw + yawDelta;
+    const targetPitch = target.pitchDeg;
+
+    if (
+      Math.abs(yawDelta) < 0.25 &&
+      Math.abs(targetPitch - currentPitch) < 0.25
+    ) {
+      break;
+    }
+
+    await animateCameraOrientation(viewer, targetYaw, targetPitch);
+    moved = true;
+  }
+
+  const panelEl = getPanelEl?.();
+  if (panelEl && !isPanelMarkerOffView(panelEl)) {
+    if (await nudgeCameraForClippedPanel(viewer, panelEl)) moved = true;
+  }
+
+  return moved;
 }
 
 export async function nudgeCameraForClippedPanel(
@@ -355,22 +545,7 @@ export async function nudgeCameraForClippedPanel(
     return false;
   }
 
-  try {
-    await stopActiveViewerAnimation(viewer);
-    const animation = viewer.animate({
-      yaw: `${targetYaw}deg`,
-      pitch: `${targetPitch}deg`,
-      speed: NUDGE_DURATION_MS,
-      easing: 'outCubic',
-    });
-    if (animation) await animation;
-    else {
-      viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
-    }
-  } catch {
-    viewer.rotate({ yaw: `${targetYaw}deg`, pitch: `${targetPitch}deg` });
-  }
-
+  await animateCameraOrientation(viewer, targetYaw, targetPitch);
   return true;
 }
 
@@ -393,12 +568,11 @@ export function scheduleNudgeCameraForClippedPanel(
   options?: SchedulePanelCameraNudgeOptions,
 ): void {
   let attempts = 0;
-  let zeroHeightFrames = 0;
+  let offViewFrames = 0;
 
   const runOffViewFallback = () => {
     if (options?.onPanelOffView) {
-      // Panel is present but PSV keeps it display:none — its anchor is off-view.
-      // Frame the camera analytically to bring it in (no DOM measure needed).
+      // Anchor is outside the frustum — frame analytically (no DOM measure).
       void Promise.resolve(options.onPanelOffView()).then((framed) => {
         options?.afterSettled?.({ nudged: Boolean(framed) });
       });
@@ -416,12 +590,10 @@ export function scheduleNudgeCameraForClippedPanel(
       return;
     }
 
-    if (panelEl.offsetHeight <= 0) {
-      // Element exists but has no layout box: the panel markup is static, so a
-      // few frames of zero height means PSV is hiding it (off-view), not a slow
-      // mount. Fall back to camera framing quickly instead of waiting out the
-      // full measure budget (which felt like the panel never opened).
-      if (zeroHeightFrames++ >= OFF_VIEW_GRACE_FRAMES) {
+    if (isPanelMarkerOffView(panelEl)) {
+      // Markup is static; a few frames of off-view means frustum miss, not a
+      // slow mount. Frame quickly instead of waiting out the measure budget.
+      if (offViewFrames++ >= OFF_VIEW_GRACE_FRAMES) {
         runOffViewFallback();
       } else if (attempts++ < MAX_MEASURE_ATTEMPTS) {
         requestAnimationFrame(tryNudge);

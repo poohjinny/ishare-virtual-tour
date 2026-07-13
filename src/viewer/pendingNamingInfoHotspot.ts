@@ -6,6 +6,10 @@ import {
   isModel3dTour,
   resolveModel3dNamingTargetView,
 } from '../utils/findTourHotspot';
+import {
+  resolveHotspotHostScene,
+  resolveNamingPopup,
+} from '../utils/namingSceneInherit';
 import { toPsvZoom } from '../utils/psvZoom';
 import { glassPanelMarkerSize } from '../components/tourGlassPanelHtml';
 import {
@@ -152,7 +156,15 @@ export function resolveNamingOpportunityFramedView(
   const popup = found?.hotspot.popup;
   if (!popup || !isAnchoredPopup(popup)) return base;
 
-  const { height } = glassPanelMarkerSize(popup, hotspotId, tour);
+  const hostScene = resolveHotspotHostScene(
+    tour,
+    found.hotspot,
+    tour.scenes[found.sceneId ?? sceneId],
+  );
+  const resolvedPopup =
+    popup.namingOpportunity ? resolveNamingPopup(popup, hostScene) : popup;
+
+  const { height } = glassPanelMarkerSize(resolvedPopup, hotspotId, tour);
   const framed = computeAnchoredPanelFramedView(
     viewer,
     { yawDeg: base.yaw, pitchDeg: base.pitch },
@@ -250,13 +262,23 @@ export function openNamingInfoHotspot(
   );
   if (!hotspot?.popup) return false;
 
-  if (isAnchoredPopup(hotspot.popup)) {
-    openAnchoredInfoPanel(viewer, markers, hotspot, tour, hideShare, {
+  const hostScene = resolveHotspotHostScene(
+    tour,
+    hotspot,
+    tour.scenes[sceneId],
+  );
+  const resolvedHotspot =
+    hotspot.popup.namingOpportunity ?
+      { ...hotspot, popup: resolveNamingPopup(hotspot.popup, hostScene) }
+    : hotspot;
+
+  if (isAnchoredPopup(resolvedHotspot.popup)) {
+    openAnchoredInfoPanel(viewer, markers, resolvedHotspot, tour, hideShare, {
       skipCameraNudge,
     });
   } else {
     setActiveInfoHotspot(markers, hotspot.id);
-    onModalPopup?.(hotspot.popup);
+    onModalPopup?.(resolvedHotspot.popup!);
   }
 
   return true;

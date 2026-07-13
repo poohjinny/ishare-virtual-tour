@@ -102,10 +102,13 @@ function validateScenePayload(body) {
   return { tourId, sceneId, defaultView };
 }
 
-function validateHotspotPayload(body) {
+function validateHotspotPayload(body, { requireName = true } = {}) {
   const { tourId, sceneId, name, position } = body ?? {};
-  if (!tourId || !sceneId || !name || !position) {
-    throw new Error('tourId, sceneId, name, and position are required');
+  if (!tourId || !sceneId || !position) {
+    throw new Error('tourId, sceneId, and position are required');
+  }
+  if (requireName && !String(name ?? '').trim()) {
+    throw new Error('name is required');
   }
   const isView =
     typeof position.yaw === 'number' && typeof position.pitch === 'number';
@@ -119,7 +122,7 @@ function validateHotspotPayload(body) {
   return {
     tourId,
     sceneId,
-    name,
+    name: typeof name === 'string' ? name : '',
     position,
     targetSceneId: body.targetSceneId,
     instant: typeof body.instant === 'boolean' ? body.instant : undefined,
@@ -370,7 +373,7 @@ function validateNavHotspotUpdatePayload(body) {
     throw new Error('tourId, sceneId, and hotspotId are required');
   }
   if (
-    !label?.trim() &&
+    label === undefined &&
     !targetSceneId?.trim() &&
     instant === undefined &&
     navVariant === undefined &&
@@ -385,7 +388,7 @@ function validateNavHotspotUpdatePayload(body) {
     tourId,
     sceneId,
     hotspotId: hotspotId.trim(),
-    label,
+    label: typeof label === 'string' ? label : undefined,
     targetSceneId,
     instant: typeof instant === 'boolean' ? instant : undefined,
     navVariant: typeof navVariant === 'string' ? navVariant : undefined,
@@ -433,10 +436,10 @@ function validateNamingHotspotUpdatePayload(body) {
     }
   }
   if (
-    !title?.trim() &&
+    title === undefined &&
     !hasPrice &&
     !status?.trim() &&
-    !copy?.trim() &&
+    copy === undefined &&
     videoUrl === undefined &&
     image === undefined &&
     !targetView &&
@@ -450,10 +453,10 @@ function validateNamingHotspotUpdatePayload(body) {
     tourId,
     sceneId,
     hotspotId: hotspotId.trim(),
-    title,
+    title: typeof title === 'string' ? title : undefined,
     price: hasPrice ? normalizeNamingPriceStorage(price) : undefined,
     status,
-    body: copy,
+    body: typeof copy === 'string' ? copy : undefined,
     videoUrl,
     image,
     targetView,
@@ -795,7 +798,9 @@ function validateInfoHotspotUpdatePayload(body) {
 }
 
 function validateCreateNamingHotspotPayload(body) {
-  const { tourId, sceneId, name, position } = validateHotspotPayload(body);
+  const { tourId, sceneId, name, position } = validateHotspotPayload(body, {
+    requireName: false,
+  });
   const status = body?.status;
   const copy = body?.body;
   const videoUrl = body?.videoUrl;
@@ -1553,7 +1558,7 @@ export function viteDevTourApiPlugin() {
               instant,
               navVariant,
               previewImage,
-            } = validateHotspotPayload(body);
+            } = validateHotspotPayload(body, { requireName: false });
             if (!targetSceneId) {
               throw new Error('targetSceneId is required for nav hotspots');
             }

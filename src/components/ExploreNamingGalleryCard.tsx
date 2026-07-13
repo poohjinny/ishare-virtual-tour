@@ -8,7 +8,11 @@ import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import type { Scene, Tour, TourViewerType } from '../types/tour';
 import type { NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
-import { EXPLORE_GALLERY_NAMING_VIEW_LABEL } from '../constants/tourDirectory';
+import {
+  EXPLORE_GALLERY_NAMING_VIEW_LABEL,
+  EXPLORE_GALLERY_VISIT_LABEL,
+  exploreNamingVisitPlaceAriaLabel,
+} from '../constants/tourDirectory';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import {
   tourNavCurrentHeroChipClassName,
@@ -32,6 +36,7 @@ import {
   tourNavLocationGalleryHeroMetaRowClassName,
   tourNavLocationGalleryHeroTitleRowClassName,
   tourNavLocationGalleryStatusBadgeVariants,
+  tourNavSceneInfoButtonClassName,
 } from './tourNavFloatVariants';
 import {
   resolveNamingDirectoryPreviewView,
@@ -54,6 +59,7 @@ interface ExploreNamingGalleryCardProps {
   active: boolean;
   disabled?: boolean;
   onSelect: () => void;
+  onVisitPlace: () => void;
 }
 
 export function ExploreNamingGalleryCard({
@@ -65,6 +71,7 @@ export function ExploreNamingGalleryCard({
   active,
   disabled = false,
   onSelect,
+  onVisitPlace,
 }: ExploreNamingGalleryCardProps) {
   const { isCoarsePointer } = useTourChromeLayout();
   const { ref, inView } = useLazyInView<HTMLLIElement>();
@@ -144,25 +151,43 @@ export function ExploreNamingGalleryCard({
   const description = item.description?.trim();
   const priceLabel = formatNamingGalleryItemPrice(item);
   const showHoverBody = true;
-  const ariaLabel =
+  const visitPlaceLabel = exploreNamingVisitPlaceAriaLabel(item.sceneTitle);
+  const viewOpportunityLabel = `${EXPLORE_GALLERY_NAMING_VIEW_LABEL}: ${item.name}`;
+  const cardAriaLabel =
     active ?
       description ?
         `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}. ${description}`
       : `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}.`
     : description ?
-      `${item.name}, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}. ${description}`
-    : `${item.name}, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}.`;
+      `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}. ${description}`
+    : `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}.`;
 
-  const viewCta = (
+  const visitCta = (
     <>
-      <span className='min-w-0 truncate'>
-        {EXPLORE_GALLERY_NAMING_VIEW_LABEL}
-      </span>
+      <span className='min-w-0 truncate'>{EXPLORE_GALLERY_VISIT_LABEL}</span>
       <ExploreGalleryCtaArrowIcon
         variant='text'
         sizePx={MATERIAL_SYMBOL_SIZE_14}
       />
     </>
+  );
+
+  const viewOpportunityButton = (
+    <button
+      type='button'
+      className={tourNavSceneInfoButtonClassName({
+        variant: 'galleryHeroText',
+      })}
+      disabled={disabled}
+      aria-label={viewOpportunityLabel}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onSelect();
+      }}
+    >
+      <span>{EXPLORE_GALLERY_NAMING_VIEW_LABEL}</span>
+    </button>
   );
 
   return (
@@ -195,8 +220,8 @@ export function ExploreNamingGalleryCard({
               data-tour-nav-directory-kind='naming'
               disabled={disabled}
               className='absolute inset-0 z-[1] block h-full w-full cursor-pointer rounded-lg border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light disabled:cursor-not-allowed'
-              onClick={onSelect}
-              aria-label={ariaLabel}
+              onClick={onVisitPlace}
+              aria-label={cardAriaLabel}
             />
           : null}
 
@@ -310,12 +335,13 @@ export function ExploreNamingGalleryCard({
                         'relative z-[3]',
                       )}
                     >
+                      {viewOpportunityButton}
                       {isCoarsePointer ?
                         <span
                           className={tourNavLocationGalleryHeroPillCtaClassName}
                           aria-hidden='true'
                         >
-                          {viewCta}
+                          {visitCta}
                         </span>
                       : <button
                           type='button'
@@ -326,10 +352,10 @@ export function ExploreNamingGalleryCard({
                           className={
                             tourNavLocationGalleryHeroPillCtaButtonClassName
                           }
-                          onClick={onSelect}
-                          aria-label={ariaLabel}
+                          onClick={onVisitPlace}
+                          aria-label={visitPlaceLabel}
                         >
-                          {viewCta}
+                          {visitCta}
                         </button>
                       }
                     </span>

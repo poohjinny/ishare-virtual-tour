@@ -5,11 +5,16 @@ import {
   resolveNavHotspotVariant,
 } from '../constants/navHotspotVariant';
 import { isGeneralInfoHotspot } from '../data/generalInfoHotspot';
-import type { Hotspot, ViewPosition } from '../types/tour';
 import {
   namingOpportunityStatusConfig,
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
+import { resolveNavHotspotLabel } from '../utils/navHotspotLabel';
+import {
+  resolveHotspotHostScene,
+  resolveNamingPopup,
+} from '../utils/namingSceneInherit';
+import type { Hotspot, Scene, Tour, ViewPosition } from '../types/tour';
 
 export function escapeHtml(text: string): string {
   return text
@@ -86,8 +91,8 @@ function buildNavLeadingHtml(hotspot: Hotspot): string {
   return '<span class="hotspot-nav__dot" aria-hidden="true"></span>';
 }
 
-function buildNavHtml(hotspot: Hotspot): string {
-  const label = hotspot.label?.trim() || 'Go';
+function buildNavHtml(hotspot: Hotspot, tour: Tour): string {
+  const label = resolveNavHotspotLabel(hotspot, tour);
   const variant = resolveNavHotspotVariant(hotspot);
   const variantClass = navHotspotVariantModifierClass(variant);
   const ariaLabel = buildNavHotspotAriaLabel(label, variant);
@@ -150,11 +155,22 @@ function buildInfoHtml(hotspot: Hotspot): string {
   `;
 }
 
-export function hotspotToMarkerConfig(hotspot: Hotspot) {
+export function hotspotToMarkerConfig(
+  hotspot: Hotspot,
+  tour: Tour,
+  hostScene?: Scene,
+) {
+  const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
+  const displayHotspot =
+    hotspot.popup?.namingOpportunity ?
+      { ...hotspot, popup: resolveNamingPopup(hotspot.popup, scene) }
+    : hotspot;
+
   const html =
-    hotspot.type === 'nav' ? buildNavHtml(hotspot)
-    : isGeneralInfoHotspot(hotspot) ? buildGeneralInfoHtml(hotspot)
-    : buildInfoHtml(hotspot);
+    displayHotspot.type === 'nav' ? buildNavHtml(displayHotspot, tour)
+    : isGeneralInfoHotspot(displayHotspot) ?
+      buildGeneralInfoHtml(displayHotspot)
+    : buildInfoHtml(displayHotspot);
 
   const pos = hotspot.position as ViewPosition;
   return {
