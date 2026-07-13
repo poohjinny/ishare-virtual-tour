@@ -33,7 +33,6 @@ Default preset anchor (`donation` = 5,000):
 
 ```json
 {
-  "province": "AB",
   "income": "100000",
   "asset": "stock",
   "assetValue": "75000",
@@ -47,7 +46,6 @@ NO at **$150,000** (after bounded scaling):
 
 ```json
 {
-  "province": "AB",
   "income": "150000",
   "asset": "stock",
   "assetValue": "100000",
@@ -83,7 +81,6 @@ Fixed across all NO links unless noted:
 
 | Field          | Value    | Notes                                        |
 | -------------- | -------- | -------------------------------------------- |
-| `province`     | `AB`     | Fixed                                        |
 | `asset`        | `stock`  | Fixed                                        |
 | `pledgePeriod` | `5`      | Fixed                                        |
 | `donation`     | `5000`   | Anchor for ratio scaling                     |

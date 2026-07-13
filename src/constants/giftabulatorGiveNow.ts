@@ -1,9 +1,8 @@
 import type { NamingOpportunity } from '../types/tour';
 import { parseNamingPrice } from '../utils/namingPrice';
 
-/** Giftabulator give-now `calc` defaults — province, asset, pledgePeriod stay fixed. */
+/** Giftabulator give-now `calc` defaults — asset and pledgePeriod stay fixed. */
 export const GIFTABULATOR_GIVE_NOW_PRESET = {
-  province: 'AB',
   asset: 'stock',
   pledgePeriod: '5',
   income: 100_000,
@@ -33,7 +32,6 @@ export const GIFTABULATOR_GIVE_NOW_LIMITS = {
 } as const;
 
 export interface GiftabulatorGiveNowCalc {
-  province: string;
   income: string;
   asset: string;
   assetValue: string;
@@ -113,7 +111,6 @@ export function resolveGiftabulatorGiveNowCalc(
   );
 
   return {
-    province: preset.province,
     asset: preset.asset,
     pledgePeriod: preset.pledgePeriod,
     income: formatGiftabulatorCalcAmount(income),
