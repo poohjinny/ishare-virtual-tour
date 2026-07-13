@@ -33,7 +33,7 @@
         {
           "id": "nav-to-med-surg-inpatient",
           "type": "nav",
-          "label": "Med/Surg Inpatient",
+          "label": "James Beech Health Care Centre",
           "position": {
             "yaw": 80.3,
             "pitch": 0.1
@@ -284,8 +284,8 @@
     },
     "msi-overview": {
       "id": "msi-overview",
-      "title": "Med/Surg Inpatient",
-      "description": "Explore Med/Surg Inpatient as part of the Queensway Carleton General Hospital virtual tour.",
+      "title": "James Beech Health Care Centre",
+      "description": "Explore James Beech Health Care Centre as part of the Queensway Carleton General Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-overview.webp",
       "defaultView": {
         "yaw": 109.1,
