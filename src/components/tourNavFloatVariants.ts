@@ -1118,7 +1118,9 @@ export const tourNavLocationGroupChevronClassName = cn(
   'motion-reduce:transition-none',
 );
 
-export const tourNavLocationGroupChevronOpenClassName = cn('rotate-90');
+export const tourNavLocationGroupChevronOpenClassName = cn(
+  'rotate-90 text-primary',
+);
 
 export const tourNavLocationGroupTitleClassName = cn(
   'min-w-0 flex-1 truncate font-display text-lg font-semibold text-foreground',
