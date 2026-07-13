@@ -3,6 +3,7 @@ import { cn } from '../lib/cn';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
+import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import type { Scene } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
@@ -20,6 +21,7 @@ import {
   tourNavLocationGalleryHeroMetaRowClassName,
   tourNavLocationGalleryHeroOverlayInnerClassName,
   tourNavLocationGalleryHeroPillCtaClassName,
+  tourNavLocationGalleryHeroPillCtaButtonClassName,
   tourNavLocationGalleryHeroTitleOverlayClassName,
   tourNavLocationGalleryHeroTitleRowClassName,
 } from './tourNavFloatVariants';
@@ -45,6 +47,7 @@ export function ExploreSceneGalleryCard({
   onSelect,
   onShowDescription,
 }: ExploreSceneGalleryCardProps) {
+  const { isCoarsePointer } = useTourChromeLayout();
   const { ref, inView } = useLazyInView<HTMLLIElement>();
   const {
     src: previewSrc,
@@ -70,6 +73,16 @@ export function ExploreSceneGalleryCard({
     : description ? `${tourStartPrefix}Go to ${scene.title}. ${description}`
     : `${tourStartPrefix}Go to ${scene.title}`;
 
+  const visitCta = (
+    <>
+      <span className='min-w-0 truncate'>{EXPLORE_GALLERY_VISIT_LABEL}</span>
+      <ExploreGalleryCtaArrowIcon
+        variant='text'
+        sizePx={MATERIAL_SYMBOL_SIZE_14}
+      />
+    </>
+  );
+
   return (
     <li
       ref={ref}
@@ -81,6 +94,8 @@ export function ExploreSceneGalleryCard({
         className={cn(
           tourNavLocationGalleryCardClassName({ active }),
           'relative w-full',
+          // Desktop: don't advertise the whole card as clickable.
+          !isCoarsePointer && !active && 'cursor-auto',
           disabled && 'pointer-events-none opacity-50',
         )}
       >
@@ -91,16 +106,18 @@ export function ExploreSceneGalleryCard({
           )}
           aria-busy={heroLoading || undefined}
         >
-          <button
-            type='button'
-            role='option'
-            aria-selected={active}
-            data-tour-nav-directory-kind='location'
-            disabled={disabled}
-            className='absolute inset-0 z-[1] block h-full w-full cursor-pointer rounded-lg border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light disabled:cursor-not-allowed'
-            onClick={onSelect}
-            aria-label={ariaLabel}
-          />
+          {isCoarsePointer ?
+            <button
+              type='button'
+              role='option'
+              aria-selected={active}
+              data-tour-nav-directory-kind='location'
+              disabled={disabled}
+              className='absolute inset-0 z-[1] block h-full w-full cursor-pointer rounded-lg border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light disabled:cursor-not-allowed'
+              onClick={onSelect}
+              aria-label={ariaLabel}
+            />
+          : null}
           {heroLoading ?
             <span
               className={cn(
@@ -174,18 +191,28 @@ export function ExploreSceneGalleryCard({
                           onShow={onShowDescription!}
                         />
                       : null}
-                      <span
-                        className={tourNavLocationGalleryHeroPillCtaClassName}
-                        aria-hidden='true'
-                      >
-                        <span className='min-w-0 truncate'>
-                          {EXPLORE_GALLERY_VISIT_LABEL}
+                      {isCoarsePointer ?
+                        <span
+                          className={tourNavLocationGalleryHeroPillCtaClassName}
+                          aria-hidden='true'
+                        >
+                          {visitCta}
                         </span>
-                        <ExploreGalleryCtaArrowIcon
-                          variant='text'
-                          sizePx={MATERIAL_SYMBOL_SIZE_14}
-                        />
-                      </span>
+                      : <button
+                          type='button'
+                          role='option'
+                          aria-selected={active}
+                          data-tour-nav-directory-kind='location'
+                          disabled={disabled}
+                          className={
+                            tourNavLocationGalleryHeroPillCtaButtonClassName
+                          }
+                          onClick={onSelect}
+                          aria-label={ariaLabel}
+                        >
+                          {visitCta}
+                        </button>
+                      }
                     </span>
                   </span>
                 </span>

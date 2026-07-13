@@ -538,7 +538,7 @@ export const tourNavLocationGalleryHeroTitleRowClassName = cn(
 );
 
 export const tourNavLocationGalleryHeroDescriptionClassName = cn(
-  'tour-nav-gallery-card-hero-desc min-w-0 text-xs leading-[1.4] text-white/85 line-clamp-3',
+  'tour-nav-gallery-card-hero-desc pointer-events-auto min-w-0 cursor-text text-xs leading-[1.4] text-white/85 line-clamp-3',
 );
 
 /** Shared arrow motion tokens — nudge is applied only on text CTAs via explore-cta-text-arrow. */
@@ -580,7 +580,7 @@ export const tourNavLocationGalleryHeroCtaOverlayClassName = cn(
 );
 
 export const tourNavLocationGalleryHeroTitleOverlayClassName = cn(
-  'min-w-0 truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
+  'pointer-events-auto min-w-0 cursor-text truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
 );
 
 export const tourNavLocationGalleryHeroNamingTitleRowClassName = cn(
@@ -588,7 +588,7 @@ export const tourNavLocationGalleryHeroNamingTitleRowClassName = cn(
 );
 
 export const tourNavLocationGalleryHeroNamingNameClassName = cn(
-  'min-w-0 flex-1 truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
+  'pointer-events-auto min-w-0 flex-1 cursor-text truncate font-display text-lg font-bold leading-[1.3] tracking-tight text-white',
 );
 
 export const tourNavLocationGalleryHeroNamingSeparatorClassName = cn(
@@ -605,11 +605,11 @@ export const tourNavLocationGalleryHeroNamingHeaderClassName = cn(
 );
 
 export const tourNavLocationGalleryHeroNamingLocationClassName = cn(
-  'min-w-0 truncate text-xs leading-[1.3] text-white/65',
+  'pointer-events-auto min-w-0 cursor-text truncate text-xs leading-[1.3] text-white/65',
 );
 
 export const tourNavLocationGalleryHeroNamingPriceClassName = cn(
-  'shrink-0 font-display text-lg font-bold tabular-nums leading-[1.3] tracking-tight text-white',
+  'pointer-events-auto shrink-0 cursor-text font-display text-lg font-bold tabular-nums leading-[1.3] tracking-tight text-white',
 );
 
 export const tourNavLocationGalleryHeroHoverBodyInnerColumnClassName = cn(
@@ -629,6 +629,14 @@ export const tourNavLocationGalleryHeroPillCtaClassName = cn(
   'shadow-[0_6px_16px_rgba(var(--ishare-primary-rgb),0.24),0_2px_8px_rgba(var(--ishare-primary-rgb),0.14)]',
   'transition-[background,transform] duration-150 hover:bg-primary-dark',
   'motion-reduce:transition-none',
+);
+
+/** Interactive Visit / View pill — hero overlay is pointer-events-none, so restore hits. */
+export const tourNavLocationGalleryHeroPillCtaButtonClassName = cn(
+  tourNavLocationGalleryHeroPillCtaClassName,
+  'pointer-events-auto cursor-pointer',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+  'disabled:cursor-not-allowed',
 );
 
 /** Secondary pill on gallery overlay — details / info actions. */
@@ -743,7 +751,7 @@ export const tourNavItemLocationIconClassName = cn(
 );
 
 export const tourNavItemLabelClassName = cn(
-  'tour-nav-item-label min-w-0 font-medium transition-colors duration-150',
+  'tour-nav-item-label min-w-0 cursor-text font-medium transition-colors duration-150',
 );
 
 export const tourNavItemNamingLabelClassName = cn(
@@ -751,7 +759,7 @@ export const tourNavItemNamingLabelClassName = cn(
 );
 
 export const tourNavItemNamingNameClassName = cn(
-  'tour-nav-item-label min-w-0 truncate font-medium transition-colors duration-150',
+  'tour-nav-item-label min-w-0 cursor-text truncate font-medium transition-colors duration-150',
 );
 
 /** NO list — title row + location stacked with tight spacing. */
@@ -765,7 +773,7 @@ export const tourNavItemNamingTitleRowClassName = cn(
 );
 
 export const tourNavItemNamingLocationClassName = cn(
-  'tour-nav-item-meta min-w-0 shrink truncate text-xs leading-[1.3] text-muted',
+  'tour-nav-item-meta min-w-0 shrink cursor-text truncate text-xs leading-[1.3] text-muted',
 );
 
 /** Price mirrors the title type scale in a muted tone. */
@@ -787,7 +795,7 @@ export const tourNavItemMetaClassName = cn(
 );
 
 export const tourNavItemDescriptionClassName = cn(
-  'tour-nav-item-description mb-1.5 text-xs leading-[1.35] text-muted line-clamp-2',
+  'tour-nav-item-description mb-1.5 cursor-text text-xs leading-[1.35] text-muted line-clamp-2',
 );
 
 export const tourNavItemBadgePlacementClassName = cn('shrink-0 self-center');
@@ -835,8 +843,8 @@ export const tourNavDirectoryListItemDetailCtaClassName = cn(
 
 /** Primary list-row CTA — Visit / View opportunity. */
 export const tourNavDirectoryListItemPrimaryCtaClassName = cn(
-  tourNavLocationGalleryHeroPillCtaClassName,
-  'pointer-events-auto w-auto flex-none px-3.5',
+  tourNavLocationGalleryHeroPillCtaButtonClassName,
+  'w-auto flex-none px-3.5',
 );
 
 export const tourNavEmptyClassName = cn(
