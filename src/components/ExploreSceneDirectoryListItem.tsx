@@ -1,5 +1,7 @@
 import { type ReactNode } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
+import { useLazyInView } from '../hooks/useLazyInView';
+import { useScenePreview } from '../hooks/useScenePreview';
 import type { Scene } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
@@ -15,7 +17,9 @@ import {
   tourNavDirectoryListItemSelectClassName,
   tourNavItemDescriptionClassName,
   tourNavItemLabelClassName,
-  tourNavItemLeadingLocationClassName,
+  tourNavItemLeadingThumbClassName,
+  tourNavItemLeadingThumbFallbackClassName,
+  tourNavItemLeadingThumbImageClassName,
   tourNavItemMetaClassName,
   tourNavItemTextClassName,
 } from './tourNavFloatVariants';
@@ -23,6 +27,7 @@ import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
 import { cn } from '../lib/cn';
 
 interface ExploreSceneDirectoryListItemProps {
+  tourId: string;
   scene: Scene;
   active: boolean;
   isTourStart?: boolean;
@@ -31,10 +36,12 @@ interface ExploreSceneDirectoryListItemProps {
   disabled?: boolean;
   onSelect: () => void;
   onShowDescription?: () => void;
+  /** Fallback when the scene thumbnail is missing or fails to load. */
   locationIcon: ReactNode;
 }
 
 export function ExploreSceneDirectoryListItem({
+  tourId,
   scene,
   active,
   isTourStart = false,
@@ -45,6 +52,13 @@ export function ExploreSceneDirectoryListItem({
   locationIcon,
 }: ExploreSceneDirectoryListItemProps) {
   const { isCoarsePointer } = useTourChromeLayout();
+  const { ref: thumbRef, inView } = useLazyInView<HTMLSpanElement>();
+  const { src: previewSrc, failed: previewFailed } = useScenePreview(
+    tourId,
+    scene,
+    inView,
+  );
+  const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
   const description = scene.description?.trim();
   const showInfo = Boolean(description && onShowDescription);
   const showActions = true;
@@ -69,11 +83,24 @@ export function ExploreSceneDirectoryListItem({
     </>
   );
 
+  const leading =
+    thumbSrc ?
+      <span ref={thumbRef} className={tourNavItemLeadingThumbClassName}>
+        <img
+          className={tourNavItemLeadingThumbImageClassName}
+          src={thumbSrc}
+          alt=''
+          aria-hidden='true'
+          draggable={false}
+        />
+      </span>
+    : <span ref={thumbRef} className={tourNavItemLeadingThumbFallbackClassName}>
+        {locationIcon}
+      </span>;
+
   const body = (
     <>
-      <span className={tourNavItemLeadingLocationClassName}>
-        {locationIcon}
-      </span>
+      {leading}
       <span className={tourNavItemTextClassName}>
         {active ?
           <ExploreCurrentHereLabel

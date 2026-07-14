@@ -770,6 +770,26 @@ export const tourNavItemLeadingLocationClassName = cn(
   'mt-0.5',
 );
 
+/** Explore list row thumb — fixed square at idle; stretch with actions on hover. */
+export const tourNavItemLeadingThumbClassName = cn(
+  'tour-nav-item-leading size-14 shrink-0 self-start overflow-hidden rounded-md',
+  'bg-[rgba(15,23,42,0.06)]',
+  'transition-[width,height,min-height] duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
+  'group-hover/listitem:h-auto group-hover/listitem:min-h-14 group-hover/listitem:w-14 group-hover/listitem:self-stretch',
+  'group-focus-within/listitem:h-auto group-focus-within/listitem:min-h-14 group-focus-within/listitem:w-14 group-focus-within/listitem:self-stretch',
+  'pointer-coarse:h-auto pointer-coarse:min-h-14 pointer-coarse:w-14 pointer-coarse:self-stretch',
+  'motion-reduce:transition-none',
+);
+
+export const tourNavItemLeadingThumbImageClassName = cn(
+  'size-full object-cover',
+);
+
+export const tourNavItemLeadingThumbFallbackClassName = cn(
+  tourNavItemLeadingThumbClassName,
+  'flex items-center justify-center',
+);
+
 export const tourNavItemLocationIconClassName = cn(
   materialSymbolCompactClassName,
   'text-[rgba(100,116,139,0.42)] transition-colors duration-150',
@@ -787,18 +807,26 @@ export const tourNavItemNamingNameClassName = cn(
   'tour-nav-item-label min-w-0 cursor-text truncate font-medium transition-colors duration-150',
 );
 
-/** NO list — title row + location stacked with tight spacing. */
+/**
+ * NO list — name → location → description.
+ * Badge lives in the trailing column, so this stack uses the full text width;
+ * keep title→location tight and give description a slightly larger step.
+ */
 export const tourNavItemNamingHeaderClassName = cn(
   'flex min-w-0 flex-col gap-0.5',
 );
 
-/** NO list — name + status badge share a row; badge at the trailing edge. */
 export const tourNavItemNamingTitleRowClassName = cn(
-  'flex min-w-0 items-center justify-between gap-x-2',
+  'flex min-w-0 items-center',
 );
 
 export const tourNavItemNamingLocationClassName = cn(
   'tour-nav-item-meta min-w-0 shrink cursor-text truncate text-xs leading-[1.3] text-muted',
+);
+
+/** Description under location — no bottom margin; actions use the text-column gap. */
+export const tourNavItemNamingDescriptionClassName = cn(
+  'tour-nav-item-description mt-1 line-clamp-2 cursor-text text-xs leading-[1.3] text-pretty break-words whitespace-normal text-muted',
 );
 
 /** Price mirrors the title type scale in a muted tone. */
@@ -826,7 +854,7 @@ export const tourNavItemDescriptionClassName = cn(
 export const tourNavItemBadgePlacementClassName = cn('shrink-0 self-center');
 
 export const tourNavDirectoryListItemSelectClassName = cn(
-  'flex min-w-0 flex-1 items-start gap-2.5 border-none bg-transparent p-0 text-left font-[inherit] text-inherit',
+  'flex min-w-0 flex-1 items-stretch gap-3.5 border-none bg-transparent p-0 text-left font-[inherit] text-inherit',
   'cursor-pointer focus-visible:outline-none disabled:cursor-not-allowed',
 );
 
@@ -877,8 +905,15 @@ export const tourNavEmptyClassName = cn(
 );
 
 export const tourNavSectionTitleClassName = cn(
-  'm-0 mb-[var(--tour-directory-space)] font-display text-lg-plus font-semibold text-foreground',
+  'm-0 mb-[var(--tour-directory-space)] flex items-center gap-1.5',
+  'font-display text-lg-plus font-semibold leading-none tracking-tight text-foreground',
 );
+
+export const tourNavSectionTitleIconClassName = cn(
+  'inline-flex size-5 shrink-0 translate-y-px items-center justify-center text-muted',
+);
+
+export const tourNavSectionTitleLabelClassName = cn('min-w-0 leading-none');
 
 /** Pinned "current location" block above the grouped directory lists. */
 export const tourNavCurrentPinnedClassName = cn(
@@ -1133,7 +1168,8 @@ export const tourNavLocationGroupPanelContentClassName =
   'tour-nav-location-group__content';
 
 export const tourNavLocationGroupHeaderClassName = cn(
-  // pr aligns the trailing meta label with list-item content (px-3 + 1px border).
+  // Flush left with the list-item card; pr keeps trailing meta lined up with
+  // item content (px-3 + 1px border).
   'flex w-full items-center gap-1.5 border-none bg-transparent p-0 pr-[calc(0.75rem+1px)] text-left',
   'cursor-pointer',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
@@ -1162,9 +1198,9 @@ export const tourNavLocationGroupMetaClassName = cn(
 export const tourNavNamingSceneSubgroupsClassName = cn('flex flex-col gap-3');
 
 /** Scene (place) subheader above its naming items — smaller than the sector title.
- *  pl-10 aligns the label with the item title (item px-3.5 + icon 16px + gap 10px). */
+ *  Flush with the item card left (same column as sector headers / list rows). */
 export const tourNavNamingSceneSubheaderClassName = cn(
-  'mb-1 min-w-0 truncate pl-10 pr-1 font-display text-xs font-semibold text-foreground/75',
+  'mb-1 min-w-0 truncate pr-1 font-display text-xs font-semibold text-foreground/75',
 );
 
 /** @deprecated Use {@link tourNavLocationGroupMetaClassName}. */
@@ -1185,9 +1221,17 @@ export const tourNavItemBadgeClassName = cn(
   'ml-0.5 shrink-0 px-2.5 py-1 text-2xs font-semibold tracking-[0.03em]',
 );
 
-/** Directory list — fixed trailing column (longest NO label: "Coming soon"). */
+/**
+ * NO list — text + trailing badge/price share the row beside the thumb.
+ * Tighter than the thumb gap so title/desc keep more width.
+ */
+export const tourNavDirectoryListItemNamingMainClassName = cn(
+  'flex min-w-0 flex-1 items-start gap-6',
+);
+
+/** Directory list — trailing status + price stack (badge above amount). */
 export const tourNavDirectoryListItemBadgeColumnClassName = cn(
-  'flex w-24 shrink-0 flex-row items-center justify-end gap-1.5 self-center pl-1',
+  'flex w-max shrink-0 flex-col items-end justify-start gap-1 self-start',
 );
 
 export const tourNavItemIconNamingVariants = cva(

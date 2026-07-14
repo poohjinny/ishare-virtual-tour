@@ -26,7 +26,10 @@ import {
   type ExploreDirectorySort,
   type ExploreDirectorySortContext,
 } from '../constants/tourDirectorySort';
-import { ExploreDirectoryTabLabel } from './icons/ExploreDirectoryTabIcons';
+import {
+  ExploreDirectoryTabLabel,
+  ExploreDirectoryTabIcon,
+} from './icons/ExploreDirectoryTabIcons';
 import { TourMarkerIcon } from './icons/TourMarkerIcon';
 import { ExploreDirectoryLead } from './ExploreDirectoryLead';
 import { ExploreDirectoryPanel } from './ExploreDirectoryPanel';
@@ -147,6 +150,8 @@ import {
   tourNavPanelScrollInnerClassName,
   tourNavPanelSlotVariants,
   tourNavSectionTitleClassName,
+  tourNavSectionTitleIconClassName,
+  tourNavSectionTitleLabelClassName,
 } from './tourNavFloatVariants';
 
 interface TourNavFloatProps {
@@ -749,6 +754,9 @@ export function TourNavFloat({
   }, [locationGroups, currentSceneId]);
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [expandedNamingGroups, setExpandedNamingGroups] = useState<Set<string>>(
+    new Set(),
+  );
 
   const currentGroupIdRef = useRef(currentGroupId);
   useEffect(() => {
@@ -757,12 +765,19 @@ export function TourNavFloat({
 
   // Expand the current scene's group only when Explore opens. Expanding on
   // every scene change (while open) would reflow the list and jump the scroll.
+  // Naming sectors share the same department ids as Places.
   const exploreOpen = panelMode === 'explore';
   useEffect(() => {
     if (!exploreOpen) return;
     const groupId = currentGroupIdRef.current;
     if (!groupId) return;
     setExpandedGroups((prev) => {
+      if (prev.has(groupId)) return prev;
+      const next = new Set(prev);
+      next.add(groupId);
+      return next;
+    });
+    setExpandedNamingGroups((prev) => {
       if (prev.has(groupId)) return prev;
       const next = new Set(prev);
       next.add(groupId);
@@ -779,12 +794,8 @@ export function TourNavFloat({
     });
   }, []);
 
-  const [collapsedNamingGroups, setCollapsedNamingGroups] = useState<
-    Set<string>
-  >(new Set());
-
   const toggleNamingGroup = useCallback((groupId: string) => {
-    setCollapsedNamingGroups((prev) => {
+    setExpandedNamingGroups((prev) => {
       const next = new Set(prev);
       if (next.has(groupId)) next.delete(groupId);
       else next.add(groupId);
@@ -1239,6 +1250,19 @@ export function TourNavFloat({
     />
   );
 
+  const renderDirectorySectionHeading = (
+    headingId: string,
+    tab: 'locations' | 'naming',
+    label: string,
+  ) => (
+    <h3 id={headingId} className={tourNavSectionTitleClassName}>
+      <span className={tourNavSectionTitleIconClassName} aria-hidden='true'>
+        <ExploreDirectoryTabIcon tab={tab} sizePx={20} />
+      </span>
+      <span className={tourNavSectionTitleLabelClassName}>{label}</span>
+    </h3>
+  );
+
   const renderLocationsList = (
     items: Scene[],
     options?: {
@@ -1315,6 +1339,7 @@ export function TourNavFloat({
               return (
                 <ExploreSceneDirectoryListItem
                   key={scene.id}
+                  tourId={tourId}
                   scene={scene}
                   active={scene.id === currentSceneId}
                   isTourStart={scene.id === firstSceneId}
@@ -1353,14 +1378,12 @@ export function TourNavFloat({
           : undefined
         }
       >
-        {options?.showSectionTitle && (
-          <h3
-            id='tour-nav-directory-locations-heading'
-            className={tourNavSectionTitleClassName}
-          >
-            {TOUR_DIRECTORY_SECTION_LOCATIONS}
-          </h3>
-        )}
+        {options?.showSectionTitle &&
+          renderDirectorySectionHeading(
+            'tour-nav-directory-locations-heading',
+            'locations',
+            TOUR_DIRECTORY_SECTION_LOCATIONS,
+          )}
 
         {listBody}
       </section>
@@ -1386,7 +1409,10 @@ export function TourNavFloat({
     ) => (
       <ExploreNamingDirectoryListItem
         key={`${item.sceneId}:${item.hotspotId}`}
+        tourId={tourId}
         item={item}
+        scene={scenesById[item.sceneId]}
+        tourViewerType={tourViewerType}
         active={isNamingItemHere(item)}
         priceLabel={formatNamingItemDisplayPrice(item)}
         disabled={disabled || namingOpportunityBusy}
@@ -1487,14 +1513,12 @@ export function TourNavFloat({
           : undefined
         }
       >
-        {options?.showSectionTitle && (
-          <h3
-            id='tour-nav-directory-naming-heading'
-            className={tourNavSectionTitleClassName}
-          >
-            {TOUR_DIRECTORY_SECTION_NAMING}
-          </h3>
-        )}
+        {options?.showSectionTitle &&
+          renderDirectorySectionHeading(
+            'tour-nav-directory-naming-heading',
+            'naming',
+            TOUR_DIRECTORY_SECTION_NAMING,
+          )}
 
         {listBody}
       </section>
@@ -1573,7 +1597,7 @@ export function TourNavFloat({
                   formatNamingSectorGroupTotalLabel(group.total)
                 : undefined
               }
-              expanded={!collapsedNamingGroups.has(group.id)}
+              expanded={expandedNamingGroups.has(group.id)}
               regionId={`tour-nav-naming-group-${group.id}`}
               headingId={`tour-nav-naming-group-heading-${group.id}`}
               disabled={disabled}
@@ -1617,14 +1641,12 @@ export function TourNavFloat({
               : undefined
             }
           >
-            {showSectionTitles && (
-              <h3
-                id='tour-nav-directory-locations-heading'
-                className={tourNavSectionTitleClassName}
-              >
-                {TOUR_DIRECTORY_SECTION_LOCATIONS}
-              </h3>
-            )}
+            {showSectionTitles &&
+              renderDirectorySectionHeading(
+                'tour-nav-directory-locations-heading',
+                'locations',
+                TOUR_DIRECTORY_SECTION_LOCATIONS,
+              )}
             {isLocationsGroupingActive ?
               renderGroupedLocations({
                 sectionGroupLead: showSectionTitles && !firstScene,
@@ -1648,14 +1670,12 @@ export function TourNavFloat({
               : undefined
             }
           >
-            {showSectionTitles && (
-              <h3
-                id='tour-nav-directory-naming-heading'
-                className={tourNavSectionTitleClassName}
-              >
-                {TOUR_DIRECTORY_SECTION_NAMING}
-              </h3>
-            )}
+            {showSectionTitles &&
+              renderDirectorySectionHeading(
+                'tour-nav-directory-naming-heading',
+                'naming',
+                TOUR_DIRECTORY_SECTION_NAMING,
+              )}
 
             <ExploreLayoutPanel layout={exploreLayout}>
               {renderGroupedNaming({
@@ -1692,12 +1712,11 @@ export function TourNavFloat({
             className={tourNavDirectorySectionClassName}
             aria-labelledby='tour-nav-search-locations-heading'
           >
-            <h3
-              id='tour-nav-search-locations-heading'
-              className={tourNavSectionTitleClassName}
-            >
-              {TOUR_DIRECTORY_SECTION_LOCATIONS}
-            </h3>
+            {renderDirectorySectionHeading(
+              'tour-nav-search-locations-heading',
+              'locations',
+              TOUR_DIRECTORY_SECTION_LOCATIONS,
+            )}
             <ExploreLayoutPanel layout='list'>
               {renderLocationsList(sceneResults, {
                 listBodyOnly: true,
@@ -1712,12 +1731,11 @@ export function TourNavFloat({
             className={tourNavDirectorySectionClassName}
             aria-labelledby='tour-nav-search-naming-heading'
           >
-            <h3
-              id='tour-nav-search-naming-heading'
-              className={tourNavSectionTitleClassName}
-            >
-              {TOUR_DIRECTORY_SECTION_NAMING}
-            </h3>
+            {renderDirectorySectionHeading(
+              'tour-nav-search-naming-heading',
+              'naming',
+              TOUR_DIRECTORY_SECTION_NAMING,
+            )}
             <ExploreLayoutPanel layout='list'>
               {renderNamingList(namingResults, {
                 listBodyOnly: true,

@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
+import { useLazyInView } from '../hooks/useLazyInView';
+import { useScenePreview } from '../hooks/useScenePreview';
 import { cn } from '../lib/cn';
 import {
   EXPLORE_GALLERY_NAMING_VIEW_LABEL,
@@ -6,6 +9,7 @@ import {
   exploreNamingVisitPlaceAriaLabel,
 } from '../constants/tourDirectory';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
+import type { Scene, TourViewerType } from '../types/tour';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
@@ -16,11 +20,14 @@ import {
   tourNavCurrentInlineLabelClassName,
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBadgeColumnClassName,
+  tourNavDirectoryListItemNamingMainClassName,
   tourNavDirectoryListItemPrimaryCtaClassName,
   tourNavDirectoryListItemSelectClassName,
   tourNavItemBadgeClassName,
-  tourNavItemDescriptionClassName,
-  tourNavItemLeadingLocationClassName,
+  tourNavItemLeadingThumbClassName,
+  tourNavItemLeadingThumbFallbackClassName,
+  tourNavItemLeadingThumbImageClassName,
+  tourNavItemNamingDescriptionClassName,
   tourNavItemNamingHeaderClassName,
   tourNavItemNamingLocationClassName,
   tourNavItemNamingNameClassName,
@@ -33,7 +40,10 @@ import type { TourDirectoryNamingItem } from '../utils/tourDirectory';
 import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
 
 interface ExploreNamingDirectoryListItemProps {
+  tourId: string;
   item: TourDirectoryNamingItem;
+  scene?: Scene;
+  tourViewerType?: TourViewerType;
   active: boolean;
   priceLabel: string;
   disabled?: boolean;
@@ -46,7 +56,10 @@ interface ExploreNamingDirectoryListItemProps {
 }
 
 export function ExploreNamingDirectoryListItem({
+  tourId,
   item,
+  scene,
+  tourViewerType = 'panorama',
   active,
   priceLabel,
   disabled = false,
@@ -55,6 +68,7 @@ export function ExploreNamingDirectoryListItem({
   onVisitPlace,
 }: ExploreNamingDirectoryListItemProps) {
   const { isCoarsePointer } = useTourChromeLayout();
+  const { ref: thumbRef, inView } = useLazyInView<HTMLSpanElement>();
   const isClosed = item.statusModifier === 'closed';
   const description = item.description?.trim();
   const showActions = true;
@@ -68,6 +82,33 @@ export function ExploreNamingDirectoryListItem({
     : description ?
       `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}. ${description}`
     : `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}.`;
+
+  const previewScene = useMemo((): Scene => {
+    const base: Scene = scene ?? {
+      id: item.sceneId,
+      title: item.sceneTitle,
+      panorama: '',
+      defaultView: { yaw: 0, pitch: 0, zoom: 50 },
+      hotspots: [],
+    };
+
+    if (tourViewerType === 'model3d' && item.previewImage) {
+      return {
+        ...base,
+        thumbnail: item.previewImage,
+        panorama: item.previewImage,
+      };
+    }
+
+    return base;
+  }, [item.previewImage, item.sceneId, item.sceneTitle, scene, tourViewerType]);
+
+  const { src: previewSrc, failed: previewFailed } = useScenePreview(
+    tourId,
+    previewScene,
+    inView && Boolean(previewScene.panorama || previewScene.thumbnail),
+  );
+  const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
 
   const visitCta = (
     <>
@@ -95,72 +136,87 @@ export function ExploreNamingDirectoryListItem({
     </button>
   );
 
+  const leading =
+    thumbSrc ?
+      <span ref={thumbRef} className={tourNavItemLeadingThumbClassName}>
+        <img
+          className={tourNavItemLeadingThumbImageClassName}
+          src={thumbSrc}
+          alt=''
+          aria-hidden='true'
+          draggable={false}
+        />
+      </span>
+    : <span ref={thumbRef} className={tourNavItemLeadingThumbFallbackClassName}>
+        <NamingHeartIcon active={active} closed={isClosed} />
+      </span>;
+
   const body = (
     <>
-      <span className={tourNavItemLeadingLocationClassName}>
-        <NamingHeartIcon active={active} closed={isClosed} />
-      </span>
-      <span className={tourNavItemTextClassName}>
-        {active ?
-          <ExploreCurrentHereLabel
-            className={tourNavCurrentInlineLabelClassName}
-          />
-        : null}
-        <span className={tourNavItemNamingHeaderClassName}>
-          <span className={tourNavItemNamingTitleRowClassName}>
-            <span className={tourNavItemNamingNameClassName}>{item.name}</span>
-            <NamingStatusBadge
-              statusModifier={item.statusModifier as NamingStatusModifier}
-              label={item.statusLabel}
-              className={cn(tourNavItemBadgeClassName, 'ml-0 shrink-0')}
+      {leading}
+      <span className={tourNavDirectoryListItemNamingMainClassName}>
+        <span className={tourNavItemTextClassName}>
+          {active ?
+            <ExploreCurrentHereLabel
+              className={tourNavCurrentInlineLabelClassName}
             />
-          </span>
-          {showLocation ?
-            <span className={tourNavItemNamingLocationClassName}>
-              {item.sceneTitle}
-            </span>
           : null}
-        </span>
-        {description || showActions ?
-          <span className='flex min-w-0 flex-col'>
+          <span className={tourNavItemNamingHeaderClassName}>
+            <span className={tourNavItemNamingTitleRowClassName}>
+              <span className={tourNavItemNamingNameClassName}>
+                {item.name}
+              </span>
+            </span>
+            {showLocation ?
+              <span className={tourNavItemNamingLocationClassName}>
+                {item.sceneTitle}
+              </span>
+            : null}
             {description ?
-              <span className={tourNavItemDescriptionClassName}>
+              <span className={tourNavItemNamingDescriptionClassName}>
                 {description}
               </span>
             : null}
-            {showActions ?
-              <ExploreDirectoryListItemActions>
-                {viewOpportunityButton}
-                {isCoarsePointer ?
-                  <span
-                    className={tourNavDirectoryListItemPrimaryCtaClassName}
-                    aria-hidden='true'
-                  >
-                    {visitCta}
-                  </span>
-                : <button
-                    type='button'
-                    role='option'
-                    aria-selected={active}
-                    data-tour-nav-directory-kind='naming'
-                    disabled={disabled}
-                    className={tourNavDirectoryListItemPrimaryCtaClassName}
-                    onClick={onVisitPlace}
-                    aria-label={visitPlaceLabel}
-                  >
-                    {visitCta}
-                  </button>
-                }
-              </ExploreDirectoryListItemActions>
-            : null}
           </span>
-        : null}
-      </span>
-      {priceLabel ?
-        <span className={tourNavDirectoryListItemBadgeColumnClassName}>
-          <span className={tourNavItemNamingPriceClassName}>{priceLabel}</span>
+          {showActions ?
+            <ExploreDirectoryListItemActions>
+              {viewOpportunityButton}
+              {isCoarsePointer ?
+                <span
+                  className={tourNavDirectoryListItemPrimaryCtaClassName}
+                  aria-hidden='true'
+                >
+                  {visitCta}
+                </span>
+              : <button
+                  type='button'
+                  role='option'
+                  aria-selected={active}
+                  data-tour-nav-directory-kind='naming'
+                  disabled={disabled}
+                  className={tourNavDirectoryListItemPrimaryCtaClassName}
+                  onClick={onVisitPlace}
+                  aria-label={visitPlaceLabel}
+                >
+                  {visitCta}
+                </button>
+              }
+            </ExploreDirectoryListItemActions>
+          : null}
         </span>
-      : null}
+        <span className={tourNavDirectoryListItemBadgeColumnClassName}>
+          <NamingStatusBadge
+            statusModifier={item.statusModifier as NamingStatusModifier}
+            label={item.statusLabel}
+            className={cn(tourNavItemBadgeClassName, 'ml-0')}
+          />
+          {priceLabel ?
+            <span className={tourNavItemNamingPriceClassName}>
+              {priceLabel}
+            </span>
+          : null}
+        </span>
+      </span>
     </>
   );
 

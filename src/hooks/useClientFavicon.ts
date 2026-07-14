@@ -9,7 +9,10 @@ export function useClientFavicon(tour: Tour): void {
   const clientId = tour.clientId ?? tour.id;
 
   useEffect(() => {
-    applyClientFavicon(tour);
-    return resetClientFavicon;
+    const cancelApply = applyClientFavicon(tour);
+    return () => {
+      cancelApply();
+      resetClientFavicon();
+    };
   }, [tour, clientId, branding?.favicon, branding?.logo]);
 }

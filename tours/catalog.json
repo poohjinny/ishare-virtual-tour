@@ -20,7 +20,8 @@
       "branding": {
         "logo": "/assets/gphospitalfoundation/brand/logo.png",
         "logoAlt": "Grande Prairie Regional Hospital Foundation",
-        "primaryColor": "#cb007c"
+        "primaryColor": "#cb007c",
+        "favicon": "/assets/gphospitalfoundation/favicon.ico"
       },
       "tours": [
         {
@@ -39,14 +40,8 @@
       "website": "https://cancerresearchsociety.ca",
       "email": "mboustani@src-crs.ca",
       "phones": [
-        {
-          "number": "514-861-9227",
-          "label": "Telephone"
-        },
-        {
-          "number": "1-888-766-2262",
-          "label": "Toll free"
-        }
+        { "number": "514-861-9227", "label": "Telephone" },
+        { "number": "1-888-766-2262", "label": "Toll free" }
       ],
       "fax": "514-861-9220",
       "faxLabel": "Fax",
@@ -54,7 +49,8 @@
       "branding": {
         "logo": "/assets/cancerresearchsociety/brand/logo.png",
         "logoAlt": "Cancer Research Society",
-        "primaryColor": "#e12827"
+        "primaryColor": "#e12827",
+        "favicon": "/assets/cancerresearchsociety/favicon.ico"
       },
       "tours": [
         {
@@ -71,19 +67,15 @@
       "name": "Holodomor Research and Education Consortium",
       "website": "https://holodomor.ca",
       "email": "hrec@ualberta.ca",
-      "phones": [
-        {
-          "number": "416-923-4732",
-          "label": "Telephone"
-        }
-      ],
+      "phones": [{ "number": "416-923-4732", "label": "Telephone" }],
       "address": "620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4",
       "branding": {
         "logo": "/assets/holodomor/brand/logo.png",
         "logoAlt": "Holodomor Research and Education Consortium",
         "primaryColor": "#ffcc66",
         "fontFamily": "'Open Sans', Arial, sans-serif",
-        "fontSourceUrl": "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
+        "fontSourceUrl": "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap",
+        "favicon": "/assets/holodomor/favicon.ico"
       },
       "tours": [
         {
@@ -100,12 +92,7 @@
       "name": "Queensway Carleton Hospital Foundation",
       "website": "https://qchfoundation.ca",
       "email": "info@qchfoundation.ca",
-      "phones": [
-        {
-          "number": "613-721-4731",
-          "label": "Telephone"
-        }
-      ],
+      "phones": [{ "number": "613-721-4731", "label": "Telephone" }],
       "address": "3045 Baseline Road, Ottawa, ON K2H 8P4",
       "branding": {
         "logo": "/assets/qchfoundation/brand/logo.png",

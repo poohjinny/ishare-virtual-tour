@@ -363,8 +363,8 @@
           "id": "nav-to-family-patient-communal-space",
           "type": "nav",
           "position": {
-            "yaw": 239.5,
-            "pitch": -9.2
+            "yaw": 238.3,
+            "pitch": -10.8
           },
           "targetScene": "family-patient-communal-space"
         },

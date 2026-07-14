@@ -1,5 +1,5 @@
 import type { Tour } from '../types/tour';
-import { withBaseUrl } from './assetUrl';
+import { appendCacheBust, withBaseUrl } from './assetUrl';
 import { getTourClientId } from './tourClientId';
 import { tourAssetPath } from './tourAssetPath';
 import {
@@ -10,10 +10,20 @@ import {
 const DEFAULT_FAVICON = '/favicon.ico';
 const FAVICON_SELECTOR = 'link[rel="icon"][data-client-favicon]';
 
+/** Ignore stale async resolves after cleanup / newer apply. */
+let faviconApplyToken = 0;
+
 async function faviconPathExists(path: string): Promise<boolean> {
   try {
-    const response = await fetch(withBaseUrl(path), { method: 'HEAD' });
-    return response.ok;
+    const url = withBaseUrl(path);
+    const head = await fetch(url, { method: 'HEAD' });
+    if (head.ok) return true;
+    // Some hosts reject HEAD; fall back to a lightweight GET.
+    if (head.status === 405 || head.status === 501) {
+      const get = await fetch(url, { method: 'GET' });
+      return get.ok;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -40,43 +50,50 @@ export async function resolveClientFavicon(tour: Tour): Promise<string> {
   return tourAssetPath(tour, 'favicon.ico');
 }
 
-function getFaviconLink(): HTMLLinkElement {
-  const managed = document.querySelector<HTMLLinkElement>(FAVICON_SELECTOR);
-  if (managed) {
-    return managed;
-  }
+function iconTypeForHref(href: string): string | null {
+  const path = href.split(/[?#]/)[0]?.toLowerCase() ?? '';
+  if (path.endsWith('.png')) return 'image/png';
+  if (path.endsWith('.ico')) return 'image/x-icon';
+  if (path.endsWith('.svg')) return 'image/svg+xml';
+  return null;
+}
 
-  const existing = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-  if (existing) {
-    existing.dataset.clientFavicon = 'true';
-    return existing;
-  }
+/**
+ * Replace the managed favicon link so browsers actually refresh the tab icon
+ * (in-place href updates are often ignored due to favicon caching).
+ */
+function setFaviconHref(href: string): void {
+  document
+    .querySelectorAll<HTMLLinkElement>(FAVICON_SELECTOR)
+    .forEach((node) => node.remove());
 
   const link = document.createElement('link');
   link.rel = 'icon';
   link.sizes = 'any';
   link.dataset.clientFavicon = 'true';
+  const type = iconTypeForHref(href);
+  if (type) link.type = type;
+  // Cache-bust so a re-uploaded file at the same path still updates the tab.
+  link.href = appendCacheBust(href, href);
   document.head.appendChild(link);
-  return link;
 }
 
-function setFaviconHref(link: HTMLLinkElement, href: string): void {
-  link.href = href;
-  if (href.endsWith('.png')) {
-    link.type = 'image/png';
-  } else if (href.endsWith('.ico')) {
-    link.type = 'image/x-icon';
-  } else {
-    link.removeAttribute('type');
-  }
-}
+export function applyClientFavicon(tour: Tour): () => void {
+  const token = ++faviconApplyToken;
 
-export function applyClientFavicon(tour: Tour): void {
   void resolveClientFavicon(tour).then((path) => {
-    setFaviconHref(getFaviconLink(), withBaseUrl(path));
+    if (token !== faviconApplyToken) return;
+    setFaviconHref(withBaseUrl(path));
   });
+
+  return () => {
+    if (token === faviconApplyToken) {
+      faviconApplyToken += 1;
+    }
+  };
 }
 
 export function resetClientFavicon(): void {
-  setFaviconHref(getFaviconLink(), DEFAULT_FAVICON);
+  faviconApplyToken += 1;
+  setFaviconHref(DEFAULT_FAVICON);
 }
