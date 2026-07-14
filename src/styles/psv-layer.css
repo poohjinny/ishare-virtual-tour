@@ -1262,7 +1262,7 @@ input::placeholder {
   letter-spacing: -0.01em;
   color: #fff;
   white-space: nowrap;
-  max-width: 12rem;
+  max-width: 16rem;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1465,7 +1465,7 @@ input::placeholder {
   }
 
   .hotspot-info__label {
-    max-width: 16rem;
+    max-width: 18rem;
   }
 }
 

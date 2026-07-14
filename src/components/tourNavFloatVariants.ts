@@ -91,13 +91,19 @@ export const tourNavBreadcrumbItemClassName = cn(
   'flex min-w-0 shrink-0 items-center last:min-w-0 last:shrink',
 );
 
+/** Ancestor links, separators, and info — muted, a touch darker than global muted. */
+const tourNavBreadcrumbMutedTextClassName =
+  'text-[color:color-mix(in_srgb,var(--ishare-text-muted)_55%,var(--ishare-text-body))]';
+
 export const tourNavBreadcrumbSepClassName = cn(
-  'mx-3.5 shrink-0 font-normal text-muted max-[480px]:mx-[11px]',
+  'mx-3.5 shrink-0 font-normal max-[480px]:mx-[11px]',
+  tourNavBreadcrumbMutedTextClassName,
 );
 
 export const tourNavBreadcrumbLinkClassName = cn(
   'inline-flex cursor-pointer items-center border-none bg-transparent p-0',
-  'font-[inherit] whitespace-nowrap text-muted transition-colors duration-150',
+  'font-[inherit] whitespace-nowrap transition-colors duration-150',
+  tourNavBreadcrumbMutedTextClassName,
   'hover:enabled:text-primary',
   'disabled:cursor-not-allowed disabled:opacity-50',
 );
@@ -108,6 +114,11 @@ export const tourNavBreadcrumbCurrentClassName = cn(
 
 export const tourNavBreadcrumbCurrentLabelClassName = cn(
   'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap',
+);
+
+/** Info + title — tight pair; distance to the pulse comes from the parent gap. */
+export const tourNavBreadcrumbCurrentLeadClassName = cn(
+  'inline-flex min-w-0 items-center gap-0.5',
 );
 
 export const tourNavBreadcrumbPulseDotClassName = cn(
@@ -123,6 +134,15 @@ export const tourNavBreadcrumbPulseDotClassName = cn(
   'after:rounded-full after:border-2 after:border-[rgba(var(--ishare-primary-rgb),0.5)]',
   'after:content-[""] after:animate-tour-nav-dot-pulse after:[animation-delay:1.1s]',
   'motion-reduce:after:animate-none',
+);
+
+/** Breadcrumb current-pill Details control — compact glass chip beside the title. */
+export const tourNavBreadcrumbSceneInfoButtonClassName = cn(
+  'size-6 shrink-0 border-none bg-transparent shadow-none',
+  tourNavBreadcrumbMutedTextClassName,
+  'hover:bg-[rgba(15,23,42,0.06)] hover:text-primary',
+  'aria-expanded:bg-[rgba(var(--ishare-primary-rgb),0.1)] aria-expanded:text-primary',
+  'max-[480px]:size-5',
 );
 
 /* ── Actions root ── */
@@ -535,6 +555,11 @@ export const tourNavLocationGalleryHeroHoverBodyInnerClassName =
 
 export const tourNavLocationGalleryHeroTitleRowClassName = cn(
   'flex min-w-0 items-end gap-1.5',
+);
+
+/** Floor / department under a colliding gallery title. */
+export const tourNavLocationGalleryHeroContextClassName = cn(
+  'min-w-0 shrink truncate text-xs font-medium leading-[1.2] text-white/65',
 );
 
 export const tourNavLocationGalleryHeroDescriptionClassName = cn(
@@ -955,6 +980,8 @@ export const tourNavSceneInfoButtonClassName = cva(
         ),
         /** List row — text pill below description; reveals on row hover. */
         listText: tourNavDirectoryListItemDetailCtaClassName,
+        /** Current breadcrumb — place details without opening the directory first. */
+        breadcrumb: tourNavBreadcrumbSceneInfoButtonClassName,
       },
     },
     defaultVariants: { variant: 'gallery' },

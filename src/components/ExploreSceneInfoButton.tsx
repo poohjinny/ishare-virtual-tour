@@ -9,6 +9,7 @@ import { cn } from '../lib/cn';
 import {
   MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_18,
+  MATERIAL_SYMBOL_SIZE_20,
   MATERIAL_SYMBOL_SIZE_22,
   materialSymbolCompactClassName,
 } from './ui/materialSymbolClasses';
@@ -22,7 +23,15 @@ interface ExploreSceneInfoButtonProps {
   disabled?: boolean;
   onShow: () => void;
   /** Gallery cards: `galleryHeroText` secondary pill below description; `listText` row pill on hover. */
-  variant?: 'gallery' | 'galleryHero' | 'galleryHeroText' | 'list' | 'listText';
+  variant?:
+    | 'gallery'
+    | 'galleryHero'
+    | 'galleryHeroText'
+    | 'list'
+    | 'listText'
+    | 'breadcrumb';
+  /** When set (breadcrumb), reflects whether place details are already open. */
+  expanded?: boolean;
 }
 
 export function ExploreSceneInfoButton({
@@ -30,11 +39,13 @@ export function ExploreSceneInfoButton({
   disabled = false,
   onShow,
   variant = 'gallery',
+  expanded = false,
 }: ExploreSceneInfoButtonProps) {
   const label = tourDirectorySceneInfoAriaLabel(sceneTitle);
   const isGalleryHeroChip = variant === 'galleryHero';
   const isGalleryHeroText = variant === 'galleryHeroText';
   const isListText = variant === 'listText';
+  const isBreadcrumb = variant === 'breadcrumb';
   const isTextButton = isGalleryHeroText || isListText;
 
   const button = (
@@ -49,6 +60,7 @@ export function ExploreSceneInfoButton({
       })}
       disabled={disabled}
       aria-label={label}
+      aria-expanded={isBreadcrumb ? expanded : undefined}
       onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -65,6 +77,8 @@ export function ExploreSceneInfoButton({
           )}
           sizePx={
             isGalleryHeroChip ? MATERIAL_SYMBOL_SIZE_16
+            : isBreadcrumb ?
+              MATERIAL_SYMBOL_SIZE_20
             : variant === 'list' ?
               MATERIAL_SYMBOL_SIZE_22
             : MATERIAL_SYMBOL_SIZE_18
@@ -81,7 +95,12 @@ export function ExploreSceneInfoButton({
   return (
     <IconTooltip
       label={TOUR_DIRECTORY_SCENE_INFO_TOOLTIP}
-      placement={isGalleryHeroChip || variant === 'gallery' ? 'top' : 'left'}
+      placement={
+        isBreadcrumb || isGalleryHeroChip || variant === 'gallery' ?
+          'bottom'
+        : 'left'
+      }
+      disabled={disabled}
     >
       {button}
     </IconTooltip>

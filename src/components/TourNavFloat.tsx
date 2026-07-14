@@ -38,6 +38,7 @@ import { ExploreSceneDirectoryListItem } from './ExploreSceneDirectoryListItem';
 import { ExploreSceneDescriptionView } from './ExploreSceneDescriptionView';
 import { ExploreSceneDetailPanel } from './ExploreSceneDetailPanel';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
+import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
   TOUR_NAV_ACTION_SHARE,
@@ -63,6 +64,8 @@ import { ExploreLocationGroup } from './ExploreLocationGroup';
 import {
   buildScenePath,
   buildSceneGroups,
+  buildSceneGroupSecondaryById,
+  sceneIdsWithTitleCollisions,
   SCENE_GROUP_OTHER_ID,
 } from '../viewer/sceneDepth';
 import type { Hotspot, Scene, TourClient, TourViewerType } from '../types/tour';
@@ -106,12 +109,14 @@ import {
   tourNavActionsRootClassName,
   tourNavDockOverflowWrapClassName,
   TOUR_BREADCRUMB_ATTR,
+  tourBreadcrumbSelector,
   tourExploreRefineMenuSelector,
   tourNavBreadcrumbAlignVariants,
   tourNavBreadcrumbBarClassName,
   tourNavBreadcrumbClassName,
   tourNavBreadcrumbCurrentClassName,
   tourNavBreadcrumbCurrentLabelClassName,
+  tourNavBreadcrumbCurrentLeadClassName,
   tourNavBreadcrumbItemClassName,
   tourNavBreadcrumbLinkClassName,
   tourNavBreadcrumbListClassName,
@@ -450,12 +455,18 @@ export function TourNavFloat({
     setExploreDirectoryEnterToken((token) => token + 1);
   }, []);
 
-  const currentSceneTitle = useMemo(() => {
-    return (
-      scenes.find((scene) => scene.id === currentSceneId)?.title ??
-      currentSceneId
-    );
+  const currentScene = useMemo(() => {
+    return scenes.find((scene) => scene.id === currentSceneId) ?? null;
   }, [currentSceneId, scenes]);
+
+  const currentSceneTitle = currentScene?.title ?? currentSceneId;
+
+  const currentSceneHasDetails = Boolean(currentScene?.description?.trim());
+
+  const currentSceneDetailOpen =
+    (panelMode === 'explore' || displayPanel === 'explore') &&
+    exploreSceneDetailId === currentSceneId &&
+    !exploreSceneDetailExiting;
 
   const activeNamingItem = useMemo(() => {
     if (!activeNamingHotspotId) return null;
@@ -707,6 +718,22 @@ export function TourNavFloat({
     );
   }, [exploreLocationsSort, firstSceneId, scenesById, tourDirectoryContext]);
 
+  const sceneGroupSecondaryById = useMemo(
+    () =>
+      buildSceneGroupSecondaryById(
+        tourDirectoryContext,
+        scenesById,
+        firstSceneId,
+        TOUR_DIRECTORY_GROUP_OTHER,
+      ),
+    [firstSceneId, scenesById, tourDirectoryContext],
+  );
+
+  const collidingSceneTitleIds = useMemo(
+    () => sceneIdsWithTitleCollisions(scenes),
+    [scenes],
+  );
+
   const isLocationsGroupingActive =
     !isExploreSearchActive &&
     locationGroups !== null &&
@@ -850,6 +877,55 @@ export function TourNavFloat({
     [onDismissAnchoredPanels, panelStack],
   );
 
+  /**
+   * Open Explore to the place-detail view for a scene — used by the breadcrumb
+   * so current-scene copy is one tap away without browsing the directory first.
+   * Toggles closed when that same detail is already showing.
+   */
+  const openExploreWithSceneDetail = useCallback(
+    (sceneId: string) => {
+      const exploreVisible =
+        panelMode === 'explore' || displayPanel === 'explore';
+      const showingSameDetail =
+        exploreVisible &&
+        exploreSceneDetailId === sceneId &&
+        !exploreSceneDetailExiting;
+
+      if (showingSameDetail) {
+        // Drop detail immediately so exit doesn't briefly flash the directory.
+        setExploreSceneDetailExiting(false);
+        setExploreSceneDetailId(null);
+        closePanel();
+        return;
+      }
+
+      closeExploreSearch();
+      openExploreSceneDetail(sceneId);
+      setPanelMode((current) => {
+        if (current === 'explore') return 'explore';
+        onDismissAnchoredPanels?.();
+        if (current) panelStack?.closePanel(current);
+        panelStack?.openPanel('explore');
+        return 'explore';
+      });
+    },
+    [
+      closeExploreSearch,
+      closePanel,
+      displayPanel,
+      exploreSceneDetailExiting,
+      exploreSceneDetailId,
+      onDismissAnchoredPanels,
+      openExploreSceneDetail,
+      panelMode,
+      panelStack,
+    ],
+  );
+
+  const handleBreadcrumbSceneDetails = useCallback(() => {
+    openExploreWithSceneDetail(currentSceneId);
+  }, [currentSceneId, openExploreWithSceneDetail]);
+
   useEffect(() => {
     if (targetPanel === displayPanel) {
       return;
@@ -954,7 +1030,8 @@ export function TourNavFloat({
       if (actionsRef.current?.contains(target)) return;
       if (
         target instanceof Element &&
-        target.closest(tourExploreRefineMenuSelector)
+        (target.closest(tourExploreRefineMenuSelector) ||
+          target.closest(tourBreadcrumbSelector))
       ) {
         return;
       }
@@ -1172,8 +1249,15 @@ export function TourNavFloat({
       listOnly?: boolean;
       /** Grouped mode renders many lists — skip the shared FLIP reorder refs. */
       suppressReorderRef?: boolean;
+      /**
+       * When false, skip floor/department secondary (rows already under a group
+       * header). Default true — show context when titles collide.
+       */
+      showGroupContext?: boolean;
     },
   ) => {
+    const showGroupContext = options?.showGroupContext !== false;
+
     const listBody =
       items.length > 0 ?
         <>
@@ -1189,22 +1273,30 @@ export function TourNavFloat({
               role='listbox'
               aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
             >
-              {items.map((scene) => (
-                <ExploreSceneGalleryCard
-                  key={scene.id}
-                  tourId={tourId}
-                  scene={scene}
-                  active={scene.id === currentSceneId}
-                  isTourStart={scene.id === firstSceneId}
-                  disabled={locationNavDisabled}
-                  onSelect={() => handleSelect(scene.id)}
-                  onShowDescription={
-                    scene.description?.trim() ?
-                      () => openExploreSceneDetail(scene.id)
-                    : undefined
-                  }
-                />
-              ))}
+              {items.map((scene) => {
+                const contextLabel =
+                  showGroupContext && collidingSceneTitleIds.has(scene.id) ?
+                    sceneGroupSecondaryById[scene.id]
+                  : undefined;
+
+                return (
+                  <ExploreSceneGalleryCard
+                    key={scene.id}
+                    tourId={tourId}
+                    scene={scene}
+                    active={scene.id === currentSceneId}
+                    isTourStart={scene.id === firstSceneId}
+                    contextLabel={contextLabel}
+                    disabled={locationNavDisabled}
+                    onSelect={() => handleSelect(scene.id)}
+                    onShowDescription={
+                      scene.description?.trim() ?
+                        () => openExploreSceneDetail(scene.id)
+                      : undefined
+                    }
+                  />
+                );
+              })}
             </ul>
           : null}
           <ul
@@ -1214,24 +1306,34 @@ export function TourNavFloat({
             role='listbox'
             aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
           >
-            {items.map((scene) => (
-              <ExploreSceneDirectoryListItem
-                key={scene.id}
-                scene={scene}
-                active={scene.id === currentSceneId}
-                isTourStart={scene.id === firstSceneId}
-                disabled={locationNavDisabled}
-                onSelect={() => handleSelect(scene.id)}
-                onShowDescription={
-                  scene.description?.trim() ?
-                    () => openExploreSceneDetail(scene.id)
-                  : undefined
-                }
-                locationIcon={
-                  <TourLocationItemIcon active={scene.id === currentSceneId} />
-                }
-              />
-            ))}
+            {items.map((scene) => {
+              const contextLabel =
+                showGroupContext && collidingSceneTitleIds.has(scene.id) ?
+                  sceneGroupSecondaryById[scene.id]
+                : undefined;
+
+              return (
+                <ExploreSceneDirectoryListItem
+                  key={scene.id}
+                  scene={scene}
+                  active={scene.id === currentSceneId}
+                  isTourStart={scene.id === firstSceneId}
+                  contextLabel={contextLabel}
+                  disabled={locationNavDisabled}
+                  onSelect={() => handleSelect(scene.id)}
+                  onShowDescription={
+                    scene.description?.trim() ?
+                      () => openExploreSceneDetail(scene.id)
+                    : undefined
+                  }
+                  locationIcon={
+                    <TourLocationItemIcon
+                      active={scene.id === currentSceneId}
+                    />
+                  }
+                />
+              );
+            })}
           </ul>
         </>
       : options?.emptyMessage ?
@@ -1436,6 +1538,7 @@ export function TourNavFloat({
               {renderLocationsList(group.scenes, {
                 listBodyOnly: true,
                 suppressReorderRef: true,
+                showGroupContext: false,
               })}
             </ExploreLayoutPanel>
           </ExploreLocationGroup>
@@ -1823,8 +1926,21 @@ export function TourNavFloat({
                       className={tourNavBreadcrumbCurrentClassName}
                       aria-current='location'
                     >
-                      <span className={tourNavBreadcrumbCurrentLabelClassName}>
-                        {item.title}
+                      <span className={tourNavBreadcrumbCurrentLeadClassName}>
+                        {currentSceneHasDetails ?
+                          <ExploreSceneInfoButton
+                            sceneTitle={item.title}
+                            disabled={disabled}
+                            variant='breadcrumb'
+                            expanded={currentSceneDetailOpen}
+                            onShow={handleBreadcrumbSceneDetails}
+                          />
+                        : null}
+                        <span
+                          className={tourNavBreadcrumbCurrentLabelClassName}
+                        >
+                          {item.title}
+                        </span>
                       </span>
                       <span
                         key={currentSceneId}

@@ -140,6 +140,8 @@ import {
   listAllTourHotspotIds,
   listDevTourHotspots,
 } from '../utils/findTourHotspot';
+import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
+import { buildSceneGroupSecondaryById } from '../viewer/sceneDepth';
 import { cn } from '../lib/cn';
 import {
   devViewPanelActionsClassName,
@@ -575,6 +577,18 @@ export function DevViewPanel({
     () =>
       Object.values(tour.scenes).sort((a, b) => a.title.localeCompare(b.title)),
     [tour.scenes],
+  );
+
+  /** Dev Manage secondary — floor / department title; fall back to scene id. */
+  const sceneManageSecondaryById = useMemo(
+    () =>
+      buildSceneGroupSecondaryById(
+        tour,
+        tour.scenes,
+        tour.firstScene,
+        TOUR_DIRECTORY_GROUP_OTHER,
+      ),
+    [tour],
   );
   const knowledgeSceneDraftsRef = useRef<
     Record<string, TourKnowledge['scenes'][string]>
@@ -4181,6 +4195,8 @@ export function DevViewPanel({
                   const isFirst = entry.id === tour.firstScene;
                   const isEditing = editingSceneId === entry.id;
                   const canDelete = entry.id !== tour.firstScene;
+                  const secondaryLabel =
+                    sceneManageSecondaryById[entry.id] ?? entry.id;
 
                   return (
                     <li
@@ -4196,6 +4212,7 @@ export function DevViewPanel({
                           className={
                             devViewPanelManageListItemHeadMainClassName
                           }
+                          title={entry.id}
                         >
                           <span
                             className={devViewPanelManageListItemTitleClassName}
@@ -4210,11 +4227,11 @@ export function DevViewPanel({
                           >
                             ·
                           </span>
-                          <code
+                          <span
                             className={devViewPanelManageListItemIdClassName}
                           >
-                            {entry.id}
-                          </code>
+                            {secondaryLabel}
+                          </span>
                         </div>
                         {isFirst || isCurrent ?
                           <div

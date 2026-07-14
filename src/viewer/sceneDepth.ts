@@ -217,3 +217,52 @@ export function findEgressHotspot(
     (hotspot) => hotspot.targetScene === targetSceneId,
   );
 }
+
+/**
+ * Scene id → department / floor title for rows that need context without
+ * baking a floor prefix into {@link Scene.title}. Group roots and the tour
+ * start are omitted (no secondary) so hubs don't read as "Main Floor · Main Floor".
+ */
+export function buildSceneGroupSecondaryById(
+  tour: Pick<Tour, 'hotspots'>,
+  scenes: Record<string, Scene>,
+  firstSceneId: string,
+  otherGroupTitle: string,
+): Record<string, string> {
+  const groups = buildSceneGroups(tour, scenes, firstSceneId, otherGroupTitle);
+  const out: Record<string, string> = {};
+
+  for (const group of groups) {
+    // Orphans stay unlabeled so callers can fall back to scene id — "More places"
+    // is not useful for authoring disambiguation.
+    if (group.id === SCENE_GROUP_OTHER_ID) continue;
+
+    for (const scene of group.scenes) {
+      if (scene.id === group.id) continue;
+      out[scene.id] = group.title;
+    }
+  }
+
+  return out;
+}
+
+/** Scene ids whose visitor-facing titles collide (case-insensitive trim). */
+export function sceneIdsWithTitleCollisions(
+  scenes: Iterable<Scene>,
+): Set<string> {
+  const counts = new Map<string, number>();
+
+  for (const scene of scenes) {
+    const key = scene.title.trim().toLowerCase();
+    if (!key) continue;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  const colliding = new Set<string>();
+  for (const scene of scenes) {
+    const key = scene.title.trim().toLowerCase();
+    if (key && (counts.get(key) ?? 0) > 1) colliding.add(scene.id);
+  }
+
+  return colliding;
+}

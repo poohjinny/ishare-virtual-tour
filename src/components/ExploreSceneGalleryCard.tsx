@@ -23,6 +23,7 @@ import {
   tourNavLocationGalleryHeroPillCtaClassName,
   tourNavLocationGalleryHeroPillCtaButtonClassName,
   tourNavLocationGalleryHeroTitleOverlayClassName,
+  tourNavLocationGalleryHeroContextClassName,
   tourNavLocationGalleryHeroTitleRowClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
@@ -33,6 +34,8 @@ interface ExploreSceneGalleryCardProps {
   scene: Scene;
   active: boolean;
   isTourStart?: boolean;
+  /** Floor / department when the same title appears on multiple scenes. */
+  contextLabel?: string;
   disabled?: boolean;
   onSelect: () => void;
   onShowDescription?: () => void;
@@ -43,6 +46,7 @@ export function ExploreSceneGalleryCard({
   scene,
   active,
   isTourStart = false,
+  contextLabel,
   disabled = false,
   onSelect,
   onShowDescription,
@@ -65,13 +69,15 @@ export function ExploreSceneGalleryCard({
   const showInfo = Boolean(description && onShowDescription);
   const showHoverBody = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
+  const contextSuffix = contextLabel ? `, ${contextLabel}` : '';
   const ariaLabel =
     active ?
       description ?
-        `${tourStartPrefix}${scene.title}, current location. ${description}`
-      : `${tourStartPrefix}${scene.title}, current location`
-    : description ? `${tourStartPrefix}Go to ${scene.title}. ${description}`
-    : `${tourStartPrefix}Go to ${scene.title}`;
+        `${tourStartPrefix}${scene.title}${contextSuffix}, current location. ${description}`
+      : `${tourStartPrefix}${scene.title}${contextSuffix}, current location`
+    : description ?
+      `${tourStartPrefix}Go to ${scene.title}${contextSuffix}. ${description}`
+    : `${tourStartPrefix}Go to ${scene.title}${contextSuffix}`;
 
   const visitCta = (
     <>
@@ -160,6 +166,11 @@ export function ExploreSceneGalleryCard({
                 >
                   {scene.title}
                 </span>
+                {contextLabel ?
+                  <span className={tourNavLocationGalleryHeroContextClassName}>
+                    {contextLabel}
+                  </span>
+                : null}
               </span>
               {showHoverBody ?
                 <span className={tourNavLocationGalleryHeroHoverBodyClassName}>

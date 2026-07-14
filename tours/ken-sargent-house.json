@@ -415,8 +415,8 @@
           "id": "nav-to-main-floor",
           "type": "nav",
           "position": {
-            "yaw": 59.8,
-            "pitch": -17.7
+            "yaw": 65.4,
+            "pitch": -14.6
           },
           "targetScene": "main-floor"
         },
@@ -656,10 +656,91 @@
           "id": "nav-to-main-floor",
           "type": "nav",
           "position": {
-            "yaw": 94.3,
-            "pitch": -53.3
+            "yaw": 77.7,
+            "pitch": -54.6
           },
           "targetScene": "main-floor-stairs"
+        },
+        {
+          "id": "nav-to-comfort-corner",
+          "type": "nav",
+          "position": {
+            "yaw": 104.5,
+            "pitch": -18.2
+          },
+          "targetScene": "second-floor-comfort-corner"
+        },
+        {
+          "id": "nav-to-social-space",
+          "type": "nav",
+          "position": {
+            "yaw": 57.8,
+            "pitch": -58
+          },
+          "targetScene": "social-space"
+        },
+        {
+          "id": "nav-to-quite-space",
+          "type": "nav",
+          "position": {
+            "yaw": 47.1,
+            "pitch": -40.7
+          },
+          "targetScene": "quite-space"
+        },
+        {
+          "id": "nav-to-suite-b",
+          "type": "nav",
+          "position": {
+            "yaw": 73.3,
+            "pitch": -32.4
+          },
+          "targetScene": "suite-b"
+        },
+        {
+          "id": "nav-to-suite-b-2",
+          "type": "nav",
+          "position": {
+            "yaw": 99.4,
+            "pitch": -42.5
+          },
+          "targetScene": "suite-b"
+        },
+        {
+          "id": "nav-to-accessible-larger-suites",
+          "type": "nav",
+          "position": {
+            "yaw": 110.7,
+            "pitch": -35.2
+          },
+          "targetScene": "accessible-larger-suites"
+        },
+        {
+          "id": "nav-to-suite-b-3",
+          "type": "nav",
+          "position": {
+            "yaw": 80.9,
+            "pitch": -28.6
+          },
+          "targetScene": "suite-b"
+        },
+        {
+          "id": "nav-to-fitness-room",
+          "type": "nav",
+          "position": {
+            "yaw": 111.5,
+            "pitch": -18.1
+          },
+          "targetScene": "fitness-room"
+        },
+        {
+          "id": "nav-to-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 77.7,
+            "pitch": -39.4
+          },
+          "targetScene": "corridor"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/second-floor.webp",
@@ -683,19 +764,46 @@
             "yaw": 48.2,
             "pitch": -37.3
           },
-          "targetScene": "main-floor",
-          "instant": true
+          "targetScene": "entrance-to-the-base-level"
         },
         {
           "id": "nav-to-overview",
           "type": "nav",
           "position": {
-            "yaw": 6.7,
-            "pitch": -45.3
+            "yaw": 351.9,
+            "pitch": -68.5
           },
           "targetScene": "overall",
           "instant": true,
           "navVariant": "hub"
+        },
+        {
+          "id": "nav-to-laundry",
+          "type": "nav",
+          "position": {
+            "yaw": 98.2,
+            "pitch": -34.5
+          },
+          "targetScene": "laundry"
+        },
+        {
+          "id": "nav-to-staff-room",
+          "type": "nav",
+          "position": {
+            "yaw": 67.4,
+            "pitch": -44.3
+          },
+          "targetScene": "staff-room"
+        },
+        {
+          "id": "nav-to-basement-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 129.6,
+            "pitch": -46.4
+          },
+          "targetScene": "basement-corridor",
+          "instant": true
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/basement.webp",
@@ -971,7 +1079,7 @@
     },
     "main-floor-stairs": {
       "id": "main-floor-stairs",
-      "title": "Main Floor Stairwell",
+      "title": "Stairwell",
       "description": "The Stairwell connects families and staff to every part of the home, providing a safe and reliable pathway throughout the space. More than just a transition point, it represents movement, access, and continuity in daily life. Your support ensures that this essential connection remains secure, accessible, and welcoming for all.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-floor-stairs.webp",
       "defaultView": {
@@ -1002,8 +1110,7 @@
             "yaw": 106.5,
             "pitch": 16.3
           },
-          "targetScene": "second-floor",
-          "instant": true
+          "targetScene": "second-floor"
         },
         {
           "id": "nav-to-main-floor",
@@ -1062,9 +1169,19 @@
             "yaw": 5.6,
             "pitch": -3.6
           },
-          "targetScene": "main-floor",
+          "targetScene": "second-floor",
           "instant": true,
           "navVariant": "back"
+        },
+        {
+          "id": "nav-to-wash-room",
+          "type": "nav",
+          "position": {
+            "yaw": 13.8,
+            "pitch": -7.2
+          },
+          "targetScene": "wash-room",
+          "instant": true
         }
       ],
       "previewVideoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788",
@@ -1250,7 +1367,7 @@
     },
     "main-floor-corridor": {
       "id": "main-floor-corridor",
-      "title": "Main Floor Corridor",
+      "title": "Corridor",
       "description": "Explore Main Floor Corridor as part of the Ken Sargent House virtual tour.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-floor-corridor.webp",
       "defaultView": {
@@ -1308,6 +1425,505 @@
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/main-floor-corridor.webp"
+    },
+    "staff-room": {
+      "id": "staff-room",
+      "title": "Staff Room",
+      "description": "Explore Staff Room as part of the Ken Sargent House virtual tour.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/staff-room.webp",
+      "defaultView": {
+        "yaw": 141.3,
+        "pitch": 0,
+        "zoom": 36
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-laundry",
+          "type": "nav",
+          "position": {
+            "yaw": 89.8,
+            "pitch": -4.6
+          },
+          "targetScene": "laundry"
+        },
+        {
+          "id": "nav-to-entrance-to-the-base-level",
+          "type": "nav",
+          "position": {
+            "yaw": 201.3,
+            "pitch": -5.6
+          },
+          "targetScene": "basement",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/staff-room.webp"
+    },
+    "laundry": {
+      "id": "laundry",
+      "title": "Laundry",
+      "description": "The Laundry Room at the Ken Sargent House is more than just a convenience—it’s one less hurdle a family has to navigate. It offers cost savings by eliminating the need for external laundry services and ensures hygiene and comfort with clean clothes and bedding. The laundry room, located in the basement of the home is accessible by elevator and is free for families to use. \n\nYour support keeps this essential space running, providing comfort and care when families need it most.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/laundry.webp",
+      "defaultView": {
+        "yaw": 27.3,
+        "pitch": -3.1,
+        "zoom": 29
+      },
+      "hotspots": [
+        {
+          "id": "info-laundry",
+          "type": "info",
+          "position": {
+            "yaw": 28.8,
+            "pitch": -3.4
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 50000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-basement",
+          "type": "nav",
+          "position": {
+            "yaw": 297.6,
+            "pitch": -4.5
+          },
+          "targetScene": "basement",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/8841a848-6936-469d-8992-8d0447f2d42d",
+      "videoUrl": "https://www.youtube.com/watch?v=pdQt9Wrtrzk",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/laundry.webp"
+    },
+    "basement-corridor": {
+      "id": "basement-corridor",
+      "title": "Corridor",
+      "description": "Explore Basement Corridor as part of the Ken Sargent House virtual tour.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/basement-corridor.webp",
+      "defaultView": {
+        "yaw": 44.8,
+        "pitch": -14.3,
+        "zoom": 16
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-laundry",
+          "type": "nav",
+          "position": {
+            "yaw": 84.8,
+            "pitch": -4
+          },
+          "targetScene": "laundry"
+        },
+        {
+          "id": "nav-to-reception",
+          "type": "nav",
+          "position": {
+            "yaw": 288.9,
+            "pitch": -31.6
+          },
+          "targetScene": "reception"
+        },
+        {
+          "id": "nav-to-staff-room",
+          "type": "nav",
+          "position": {
+            "yaw": 12.7,
+            "pitch": -3.8
+          },
+          "targetScene": "staff-room",
+          "instant": true
+        },
+        {
+          "id": "nav-to-basement",
+          "type": "nav",
+          "position": {
+            "yaw": 358.2,
+            "pitch": -5.1
+          },
+          "targetScene": "basement",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/basement-corridor.webp"
+    },
+    "social-space": {
+      "id": "social-space",
+      "title": "Social Space",
+      "description": "Welcome to the Social Space at the Ken Sargent House—a space designed to bring families together. Grab a friend and make yourselves a hot coffee or tea, relax in the comfort of this space that encourages connection, allowing families to share experiences, form supportive relationships, and find comfort in one another. It's a place where stress melts away, and emotional support thrives, as families understand and uplift each other.\n\nWhether you’re spending quality time with loved ones or engaging in house activities, the social space promotes well-being and reduces stress. \n\nThe social space is a place to build lasting relationships, and natural support systems to guide families through their journey and create bonds that extend far beyond one’s stay.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/social-space.webp",
+      "defaultView": {
+        "yaw": 87.4,
+        "pitch": -7.2,
+        "zoom": 41
+      },
+      "hotspots": [
+        {
+          "id": "info-social-space",
+          "type": "info",
+          "position": {
+            "yaw": 95.4,
+            "pitch": -10.5
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 50000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-quite-space",
+          "type": "nav",
+          "position": {
+            "yaw": 253.1,
+            "pitch": -11.6
+          },
+          "targetScene": "quite-space"
+        },
+        {
+          "id": "nav-to-stairwell",
+          "type": "nav",
+          "position": {
+            "yaw": 55,
+            "pitch": -5.4
+          },
+          "targetScene": "main-floor-stairs"
+        },
+        {
+          "id": "nav-to-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 354.4,
+            "pitch": -6
+          },
+          "targetScene": "corridor",
+          "instant": true
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 349.5,
+            "pitch": -26.9
+          },
+          "targetScene": "second-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/29ab5a30-8c4b-46a7-8e45-6ea7773f5e0f",
+      "videoUrl": "https://www.youtube.com/watch?v=XkJvW64Fbjs",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/social-space.webp"
+    },
+    "quite-space": {
+      "id": "quite-space",
+      "title": "Quite Space",
+      "description": "Shhhhhhhh, join us in The Quiet Space at the Ken Sargent House, a peaceful retreat—much like the stillness of Northwestern Alberta’s vast wilderness. Here, families can reflect, recharge, and regain their mental and emotional strength. \n\nWhether it’s a moment of silence to gather their thoughts, nestled up with a good book or a quiet conversation, this space provides the calm needed to stay centered and focused. The Quiet Space encourages self-care and offers a refuge where families can process their emotions and find renewal. \n\nYour support ensures that this sanctuary remains a calming and restorative space for families to gather strength.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/quite-space.webp",
+      "defaultView": {
+        "yaw": 140,
+        "pitch": -17,
+        "zoom": 30
+      },
+      "hotspots": [
+        {
+          "id": "info-quite-space",
+          "type": "info",
+          "position": {
+            "yaw": 144,
+            "pitch": -19.9
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 100000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-social-space",
+          "type": "nav",
+          "position": {
+            "yaw": 82.4,
+            "pitch": -2.2
+          },
+          "targetScene": "social-space"
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 98.1,
+            "pitch": -5.7
+          },
+          "targetScene": "second-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/4665eae4-a333-4968-b7a8-16a8fdd3318d",
+      "videoUrl": "https://www.youtube.com/watch?v=4MZR_lXT0j8",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/quite-space.webp"
+    },
+    "suite-b": {
+      "id": "suite-b",
+      "title": "Suite B",
+      "description": "At the Ken Sargent House, we have 17 suites that offer families a private sanctuary during their loved one’s medical treatment.\n\nThese suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nThese suites includes all the basic necessities—with either one or two beds, a bathroom with a shower or bathtub and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe, private and comforting environment during their time of need.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/suite-b.webp",
+      "defaultView": {
+        "yaw": 48,
+        "pitch": -8.9,
+        "zoom": 56
+      },
+      "hotspots": [
+        {
+          "id": "info-suite-b",
+          "type": "info",
+          "position": {
+            "yaw": 50.1,
+            "pitch": -7.3
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 50000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 138,
+            "pitch": -4.8
+          },
+          "targetScene": "second-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/9775faff-a2ce-4620-9e5a-8cbe822b1efe",
+      "videoUrl": "https://www.youtube.com/watch?v=nTW58_IByFo",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/suite-b.webp"
+    },
+    "second-floor-comfort-corner": {
+      "id": "second-floor-comfort-corner",
+      "title": "Comfort Corner",
+      "description": "Nestled in the heart of the Ken Sargent House is a small but meaningful comfort corner—a place designed to bring families together through shared experiences, much like the close-knit region of Northwestern Alberta. \n\nThis shared area provides emotional support, fostering a sense of belonging and connection, especially during tough times. Here, families can relax, share stories, and find strength in each other. It’s a space to create bonds that transcend their stay, offering comfort and reassurance that they’re never alone. \n\nYour support helps us maintain this vital area, ensuring that families can continue to find peace, community, and hope within our walls.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/second-floor-comfort-corner.webp",
+      "defaultView": {
+        "yaw": 17.1,
+        "pitch": -13.3,
+        "zoom": 35
+      },
+      "hotspots": [
+        {
+          "id": "info-second-floor-comfort-corner",
+          "type": "info",
+          "position": {
+            "yaw": 39.8,
+            "pitch": -26.3
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 25000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 190.5,
+            "pitch": -1.8
+          },
+          "targetScene": "corridor",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-fitness-room",
+          "type": "nav",
+          "position": {
+            "yaw": 132.8,
+            "pitch": -11
+          },
+          "targetScene": "fitness-room"
+        },
+        {
+          "id": "nav-to-second-floor-2",
+          "type": "nav",
+          "position": {
+            "yaw": 178.3,
+            "pitch": -23.1
+          },
+          "targetScene": "second-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/f1fc94b3-9b5c-4c8c-843f-173c1459bd1e",
+      "videoUrl": "https://www.youtube.com/watch?v=rCLOmd-uFoI",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/second-floor-comfort-corner.webp"
+    },
+    "fitness-room": {
+      "id": "fitness-room",
+      "title": "Fitness Room",
+      "description": "The Fitness Room at the Ken Sargent House is more than just a place to work out—it’s a place where families can build strength, resilience, and hope in the face of adversity. \n\nDuring the long northern winters or the endless daylight of summer, staying active is key to mental and physical well-being. Our fitness space helps families reduce stress, stay strong, and cope with the emotional strain of challenging times. \n\nFor caregivers, it’s an essential outlet, offering a place to release tension and restore balance. \n\nYour support keeps this space active, enabling families to take care of themselves as they care for their loved ones.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/fitness-room.webp",
+      "defaultView": {
+        "yaw": 81.5,
+        "pitch": -8,
+        "zoom": 40
+      },
+      "hotspots": [
+        {
+          "id": "info-fitness-room",
+          "type": "info",
+          "position": {
+            "yaw": 80.4,
+            "pitch": -13.2
+          },
+          "popup": {
+            "display": "anchored",
+            "namingOpportunity": {
+              "price": 50000,
+              "status": "open"
+            }
+          }
+        },
+        {
+          "id": "nav-to-comfort-corner",
+          "type": "nav",
+          "position": {
+            "yaw": 38.5,
+            "pitch": -5.1
+          },
+          "targetScene": "second-floor-comfort-corner"
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 30.4,
+            "pitch": -11
+          },
+          "targetScene": "second-floor",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/be369002-6a25-4ef4-bf60-310e11612a99",
+      "videoUrl": "https://www.youtube.com/watch?v=tYPS-OTKohg",
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/fitness-room.webp"
+    },
+    "corridor": {
+      "id": "corridor",
+      "title": "Corridor",
+      "description": "Explore Corridor as part of the Ken Sargent House virtual tour.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/corridor.webp",
+      "defaultView": {
+        "yaw": 88.5,
+        "pitch": -3,
+        "zoom": 40
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-suite-b",
+          "type": "nav",
+          "position": {
+            "yaw": 0.5,
+            "pitch": -12.7
+          },
+          "targetScene": "suite-b"
+        },
+        {
+          "id": "nav-to-suite-b-2",
+          "type": "nav",
+          "position": {
+            "yaw": 180.3,
+            "pitch": -12.7
+          },
+          "targetScene": "suite-b"
+        },
+        {
+          "id": "nav-to-comfort-corner",
+          "type": "nav",
+          "position": {
+            "yaw": 87.4,
+            "pitch": 1.4
+          },
+          "targetScene": "second-floor-comfort-corner"
+        },
+        {
+          "id": "nav-to-fitness-room",
+          "type": "nav",
+          "position": {
+            "yaw": 90.8,
+            "pitch": -1.5
+          },
+          "targetScene": "fitness-room"
+        },
+        {
+          "id": "nav-to-second-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 266.3,
+            "pitch": -5.2
+          },
+          "targetScene": "second-floor",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-social-space",
+          "type": "nav",
+          "position": {
+            "yaw": 258.3,
+            "pitch": -1.6
+          },
+          "targetScene": "social-space"
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/corridor.webp"
+    },
+    "wash-room": {
+      "id": "wash-room",
+      "title": "Wash Room",
+      "description": "Explore Wash Room as part of the Ken Sargent House virtual tour.",
+      "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/wash-room.webp",
+      "defaultView": {
+        "yaw": 88.5,
+        "pitch": -7.8,
+        "zoom": 27
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-accessible-larger-suites",
+          "type": "nav",
+          "position": {
+            "yaw": 98,
+            "pitch": -9.2
+          },
+          "targetScene": "accessible-larger-suites",
+          "instant": true
+        }
+      ],
+      "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/wash-room.webp"
     }
   }
 }

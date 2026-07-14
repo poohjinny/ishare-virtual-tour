@@ -453,6 +453,226 @@
         "Tell me about Main Floor Corridor",
         "What is available at Ken Sargent House?"
       ]
+    },
+    "staff-room": {
+      "title": "Staff Room",
+      "description": "Explore Staff Room as part of the Ken Sargent House virtual tour.",
+      "facts": [
+        "Staff Room is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Staff Room?",
+          "a": "Explore Staff Room as part of the Ken Sargent House virtual tour."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Staff Room",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "laundry": {
+      "title": "Laundry",
+      "description": "The Laundry Room at the Ken Sargent House is more than just a convenience—it’s one less hurdle a family has to navigate. It offers cost savings by eliminating the need for external laundry services and ensures hygiene and comfort with clean clothes and bedding. The laundry room, located in the basement of the home is accessible by elevator and is free for families to use. \n\nYour support keeps this essential space running, providing comfort and care when families need it most.",
+      "facts": [
+        "Laundry is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Laundry?",
+          "a": "The Laundry Room at the Ken Sargent House is more than just a convenience—it’s one less hurdle a family has to navigate. It offers cost savings by eliminating the need for external laundry services and ensures hygiene and comfort with clean clothes and bedding. The laundry room, located in the basement of the home is accessible by elevator and is free for families to use. \n\nYour support keeps this essential space running, providing comfort and care when families need it most."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Laundry",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "basement-corridor": {
+      "title": "Basement Corridor",
+      "description": "Explore Basement Corridor as part of the Ken Sargent House virtual tour.",
+      "facts": [
+        "Basement Corridor is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Basement Corridor?",
+          "a": "Explore Basement Corridor as part of the Ken Sargent House virtual tour."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Basement Corridor",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "social-space": {
+      "title": "Social Space",
+      "description": "Welcome to the Social Space at the Ken Sargent House—a space designed to bring families together. Grab a friend and make yourselves a hot coffee or tea, relax in the comfort of this space that encourages connection, allowing families to share experiences, form supportive relationships, and find comfort in one another. It's a place where stress melts away, and emotional support thrives, as families understand and uplift each other.\n\nWhether you’re spending quality time with loved ones or engaging in house activities, the social space promotes well-being and reduces stress. \n\nThe social space is a place to build lasting relationships, and natural support systems to guide families through their journey and create bonds that extend far beyond one’s stay.",
+      "facts": [
+        "Social Space is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Social Space?",
+          "a": "Welcome to the Social Space at the Ken Sargent House—a space designed to bring families together. Grab a friend and make yourselves a hot coffee or tea, relax in the comfort of this space that encourages connection, allowing families to share experiences, form supportive relationships, and find comfort in one another. It's a place where stress melts away, and emotional support thrives, as families understand and uplift each other.\n\nWhether you’re spending quality time with loved ones or engaging in house activities, the social space promotes well-being and reduces stress. \n\nThe social space is a place to build lasting relationships, and natural support systems to guide families through their journey and create bonds that extend far beyond one’s stay."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Social Space",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "quite-space": {
+      "title": "Quite Space",
+      "description": "Shhhhhhhh, join us in The Quiet Space at the Ken Sargent House, a peaceful retreat—much like the stillness of Northwestern Alberta’s vast wilderness. Here, families can reflect, recharge, and regain their mental and emotional strength. \n\nWhether it’s a moment of silence to gather their thoughts, nestled up with a good book or a quiet conversation, this space provides the calm needed to stay centered and focused. The Quiet Space encourages self-care and offers a refuge where families can process their emotions and find renewal. \n\nYour support ensures that this sanctuary remains a calming and restorative space for families to gather strength.",
+      "facts": [
+        "Quite Space is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Quite Space?",
+          "a": "Shhhhhhhh, join us in The Quiet Space at the Ken Sargent House, a peaceful retreat—much like the stillness of Northwestern Alberta’s vast wilderness. Here, families can reflect, recharge, and regain their mental and emotional strength. \n\nWhether it’s a moment of silence to gather their thoughts, nestled up with a good book or a quiet conversation, this space provides the calm needed to stay centered and focused. The Quiet Space encourages self-care and offers a refuge where families can process their emotions and find renewal. \n\nYour support ensures that this sanctuary remains a calming and restorative space for families to gather strength."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Quite Space",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "suite-b": {
+      "title": "Suite B",
+      "description": "At the Ken Sargent House, we have 17 suites that offer families a private sanctuary during their loved one’s medical treatment.\n\nThese suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nThese suites includes all the basic necessities—with either one or two beds, a bathroom with a shower or bathtub and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe, private and comforting environment during their time of need.",
+      "facts": [
+        "Suite B is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Suite B?",
+          "a": "At the Ken Sargent House, we have 17 suites that offer families a private sanctuary during their loved one’s medical treatment.\n\nThese suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nThese suites includes all the basic necessities—with either one or two beds, a bathroom with a shower or bathtub and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe, private and comforting environment during their time of need."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Suite B",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "second-floor-comfort-corner": {
+      "title": "Comfort Corner",
+      "description": "Nestled in the heart of the Ken Sargent House is a small but meaningful comfort corner—a place designed to bring families together through shared experiences, much like the close-knit region of Northwestern Alberta. \n\nThis shared area provides emotional support, fostering a sense of belonging and connection, especially during tough times. Here, families can relax, share stories, and find strength in each other. It’s a space to create bonds that transcend their stay, offering comfort and reassurance that they’re never alone. \n\nYour support helps us maintain this vital area, ensuring that families can continue to find peace, community, and hope within our walls.",
+      "facts": [
+        "Comfort Corner on the second floor is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Comfort Corner?",
+          "a": "Nestled in the heart of the Ken Sargent House is a small but meaningful comfort corner—a place designed to bring families together through shared experiences, much like the close-knit region of Northwestern Alberta. \n\nThis shared area provides emotional support, fostering a sense of belonging and connection, especially during tough times. Here, families can relax, share stories, and find strength in each other. It’s a space to create bonds that transcend their stay, offering comfort and reassurance that they’re never alone. \n\nYour support helps us maintain this vital area, ensuring that families can continue to find peace, community, and hope within our walls."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Comfort Corner",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "fitness-room": {
+      "title": "Fitness Room",
+      "description": "The Fitness Room at the Ken Sargent House is more than just a place to work out—it’s a place where families can build strength, resilience, and hope in the face of adversity. \n\nDuring the long northern winters or the endless daylight of summer, staying active is key to mental and physical well-being. Our fitness space helps families reduce stress, stay strong, and cope with the emotional strain of challenging times. \n\nFor caregivers, it’s an essential outlet, offering a place to release tension and restore balance. \n\nYour support keeps this space active, enabling families to take care of themselves as they care for their loved ones.",
+      "facts": [
+        "Fitness Room is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Fitness Room?",
+          "a": "The Fitness Room at the Ken Sargent House is more than just a place to work out—it’s a place where families can build strength, resilience, and hope in the face of adversity. \n\nDuring the long northern winters or the endless daylight of summer, staying active is key to mental and physical well-being. Our fitness space helps families reduce stress, stay strong, and cope with the emotional strain of challenging times. \n\nFor caregivers, it’s an essential outlet, offering a place to release tension and restore balance. \n\nYour support keeps this space active, enabling families to take care of themselves as they care for their loved ones."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Fitness Room",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "corridor": {
+      "title": "Corridor",
+      "description": "Explore Corridor as part of the Ken Sargent House virtual tour.",
+      "facts": [
+        "Corridor is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Corridor?",
+          "a": "Explore Corridor as part of the Ken Sargent House virtual tour."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Corridor",
+        "What is available at Ken Sargent House?"
+      ]
+    },
+    "wash-room": {
+      "title": "Wash Room",
+      "description": "Explore Wash Room as part of the Ken Sargent House virtual tour.",
+      "facts": [
+        "Wash Room is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Wash Room?",
+          "a": "Explore Wash Room as part of the Ken Sargent House virtual tour."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Wash Room",
+        "What is available at Ken Sargent House?"
+      ]
     }
   }
 }

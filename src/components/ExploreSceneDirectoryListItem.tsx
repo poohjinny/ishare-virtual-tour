@@ -16,6 +16,7 @@ import {
   tourNavItemDescriptionClassName,
   tourNavItemLabelClassName,
   tourNavItemLeadingLocationClassName,
+  tourNavItemMetaClassName,
   tourNavItemTextClassName,
 } from './tourNavFloatVariants';
 import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
@@ -25,6 +26,8 @@ interface ExploreSceneDirectoryListItemProps {
   scene: Scene;
   active: boolean;
   isTourStart?: boolean;
+  /** Floor / department when the same title appears on multiple scenes. */
+  contextLabel?: string;
   disabled?: boolean;
   onSelect: () => void;
   onShowDescription?: () => void;
@@ -35,6 +38,7 @@ export function ExploreSceneDirectoryListItem({
   scene,
   active,
   isTourStart = false,
+  contextLabel,
   disabled = false,
   onSelect,
   onShowDescription,
@@ -45,13 +49,15 @@ export function ExploreSceneDirectoryListItem({
   const showInfo = Boolean(description && onShowDescription);
   const showActions = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
+  const contextSuffix = contextLabel ? `, ${contextLabel}` : '';
   const ariaLabel =
     active ?
       description ?
-        `${tourStartPrefix}${scene.title}, current location. ${description}`
-      : `${tourStartPrefix}${scene.title}, current location`
-    : description ? `${tourStartPrefix}Go to ${scene.title}. ${description}`
-    : `${tourStartPrefix}Go to ${scene.title}`;
+        `${tourStartPrefix}${scene.title}${contextSuffix}, current location. ${description}`
+      : `${tourStartPrefix}${scene.title}${contextSuffix}, current location`
+    : description ?
+      `${tourStartPrefix}Go to ${scene.title}${contextSuffix}. ${description}`
+    : `${tourStartPrefix}Go to ${scene.title}${contextSuffix}`;
 
   const visitCta = (
     <>
@@ -76,6 +82,9 @@ export function ExploreSceneDirectoryListItem({
         : null}
         <span className={tourNavDirectoryItemTitleRowClassName}>
           <span className={tourNavItemLabelClassName}>{scene.title}</span>
+          {contextLabel ?
+            <span className={tourNavItemMetaClassName}>{contextLabel}</span>
+          : null}
         </span>
         {description || showActions ?
           <span className='flex min-w-0 flex-col'>
