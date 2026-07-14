@@ -32,31 +32,123 @@
       "id": "ken-sargent-house",
       "name": "Ken Sargent House",
       "clientName": "Grande Prairie Regional Hospital Foundation",
-      "firstScene": "overview",
+      "firstScene": "overall",
       "scenes": [
+        {
+          "id": "accessible-larger-suites",
+          "title": "Accessible & Larger Suites"
+        },
+        {
+          "id": "basement",
+          "title": "Basement"
+        },
         {
           "id": "comfort-corner",
           "title": "Comfort Corner"
+        },
+        {
+          "id": "second-floor-comfort-corner",
+          "title": "Comfort Corner"
+        },
+        {
+          "id": "main-floor-corridor",
+          "title": "Corridor"
+        },
+        {
+          "id": "basement-corridor",
+          "title": "Corridor"
+        },
+        {
+          "id": "corridor",
+          "title": "Corridor"
+        },
+        {
+          "id": "covered-porch",
+          "title": "Covered Porch"
+        },
+        {
+          "id": "dining-area",
+          "title": "Dining Area"
         },
         {
           "id": "entrance-to-the-base-level",
           "title": "Entrance to the Base Level"
         },
         {
+          "id": "family-patient-communal-space",
+          "title": "Family & Patient Communal Space"
+        },
+        {
+          "id": "fitness-room",
+          "title": "Fitness Room"
+        },
+        {
+          "id": "gazebo",
+          "title": "Gazebo"
+        },
+        {
           "id": "kitchen",
           "title": "Kitchen"
+        },
+        {
+          "id": "laundry",
+          "title": "Laundry"
         },
         {
           "id": "main-entrance",
           "title": "Main Entrance"
         },
         {
-          "id": "overview",
+          "id": "main-floor",
+          "title": "Main Floor"
+        },
+        {
+          "id": "overall",
           "title": "Overview"
+        },
+        {
+          "id": "pantry",
+          "title": "Pantry"
+        },
+        {
+          "id": "playroom",
+          "title": "Playroom"
+        },
+        {
+          "id": "quite-space",
+          "title": "Quite Space"
         },
         {
           "id": "reception",
           "title": "Reception"
+        },
+        {
+          "id": "second-floor",
+          "title": "Second Floor"
+        },
+        {
+          "id": "social-space",
+          "title": "Social Space"
+        },
+        {
+          "id": "staff-room",
+          "title": "Staff Room"
+        },
+        {
+          "id": "main-floor-stairs",
+          "title": "Stairwell"
+        },
+        {
+          "id": "suite-a",
+          "title": "Suite A"
+        },
+        {
+          "id": "suite-b",
+          "title": "Suite B"
+        },
+        {
+          "id": "wash-room",
+          "title": "Wash Room"
         }
       ]
     },
@@ -92,7 +184,7 @@
         },
         {
           "id": "ed-ambulance-offload",
-          "title": "Ambulance Off-load"
+          "title": "Ambulance Off-Load"
         },
         {
           "id": "msi-dining-activity-room",
@@ -112,7 +204,7 @@
         },
         {
           "id": "msi-overview",
-          "title": "Med/Surg Inpatient"
+          "title": "James Beech Health Care Centre"
         },
         {
           "id": "mental-health-emergency-services-unit",

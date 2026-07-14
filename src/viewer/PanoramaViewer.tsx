@@ -76,7 +76,7 @@ import {
   setActiveInfoHotspotChangeListener,
 } from './infoHotspotActive';
 import { setAnchoredPanelVisibilityListener } from './anchoredPanelVisibility';
-import { navigateToScene, preloadOtherScenes } from './transition';
+import { navigateToScene } from './transition';
 import { bindVirtualTourLifecycleGuard } from './virtualTourLifecycle';
 import { createRecenterViewNavbarButton } from './recenterViewNavbarButton';
 import {
@@ -938,11 +938,14 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           !splashDoneRef.current
         ) {
           tryNotifyInitialTourReveal();
+          // Mid-landing: landingStarted is true — wait for landing finally.
+          // skipLanding / already-played (no active landing): enter now.
           if (
             viewerReady &&
             splashDoneRef.current &&
             initialLoadNotifiedRef.current &&
-            (skipLanding || hasLandingTransitionPlayed(tourId))
+            (skipLanding ||
+              (hasLandingTransitionPlayed(tourId) && !landingStarted))
           ) {
             hotspotEnter.schedule();
           }
@@ -1037,8 +1040,6 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
         if (!initialLoadNotifiedRef.current) {
           notifyInitialLoadComplete();
-          const currentId = virtualTour.getCurrentNode()?.id ?? startSceneId;
-          preloadOtherScenes(viewer, virtualTour, tourRef.current, currentId);
           if (skipLanding) {
             hotspotEnter.schedule();
             tryNotifyInitialTourReveal();
@@ -1070,7 +1071,6 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         onSceneChangeRef.current(e.node.id);
         deferredErrorRef.current = null;
         onViewerLoadRecoveredRef.current?.();
-        preloadOtherScenes(viewer, virtualTour, tourRef.current, e.node.id);
 
         const pending = pendingNamingInfoHotspotRef.current;
         if (

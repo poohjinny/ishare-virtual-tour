@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { TOUR_CHROME_COMPACT_MAX_PX } from '../constants/tourChrome';
@@ -376,6 +383,8 @@ export function TourNavFloat({
   const [exploreSearchFocusRequest, setExploreSearchFocusRequest] = useState(0);
   const actionsRef = useRef<HTMLDivElement>(null);
   const exploreScrollRef = useRef<HTMLDivElement>(null);
+  /** Directory list scroll — survives detail + Explore close/reopen. */
+  const exploreDirectoryScrollTopRef = useRef(0);
   const exploreSearchScrollRef = useRef<HTMLDivElement>(null);
   const exploreSearchRef = useRef<HTMLInputElement>(null);
   const targetPanelRef = useRef<DisplayPanel>(null);
@@ -443,11 +452,25 @@ export function TourNavFloat({
     return scenes.find((scene) => scene.id === exploreSceneDetailId) ?? null;
   }, [exploreSceneDetailId, scenes]);
 
-  const openExploreSceneDetail = useCallback((sceneId: string) => {
-    setExploreSceneDetailExiting(false);
-    setExploreSceneDetailId(sceneId);
-    exploreScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  const captureExploreDirectoryScroll = useCallback(() => {
+    // Detail / search use other scroll roots — keep the last directory offset.
+    if (exploreSceneDetailId != null) return;
+    const scrollEl = exploreScrollRef.current;
+    if (!scrollEl) return;
+    exploreDirectoryScrollTopRef.current = scrollEl.scrollTop;
+  }, [exploreSceneDetailId]);
+
+  const openExploreSceneDetail = useCallback(
+    (sceneId: string) => {
+      // Capture list scroll only when leaving the directory — not when swapping details.
+      if (exploreSceneDetailId == null) {
+        captureExploreDirectoryScroll();
+      }
+      setExploreSceneDetailExiting(false);
+      setExploreSceneDetailId(sceneId);
+    },
+    [captureExploreDirectoryScroll, exploreSceneDetailId],
+  );
 
   const requestCloseExploreSceneDetail = useCallback(() => {
     if (!exploreSceneDetailId || exploreSceneDetailExiting) return;
@@ -459,6 +482,22 @@ export function TourNavFloat({
     setExploreSceneDetailExiting(false);
     setExploreDirectoryEnterToken((token) => token + 1);
   }, []);
+
+  // Restore directory scroll after remount (detail back or Explore reopen).
+  useLayoutEffect(() => {
+    if (displayPanel !== 'explore') return;
+    if (exploreSceneDetailId != null) return;
+    if (exploreSearch.trim().length > 0) return;
+
+    const el = exploreScrollRef.current;
+    if (!el) return;
+    el.scrollTop = exploreDirectoryScrollTopRef.current;
+  }, [
+    displayPanel,
+    exploreDirectoryEnterToken,
+    exploreSceneDetailId,
+    exploreSearch,
+  ]);
 
   const currentScene = useMemo(() => {
     return scenes.find((scene) => scene.id === currentSceneId) ?? null;
@@ -763,21 +802,17 @@ export function TourNavFloat({
     currentGroupIdRef.current = currentGroupId;
   }, [currentGroupId]);
 
-  // Expand the current scene's group only when Explore opens. Expanding on
-  // every scene change (while open) would reflow the list and jump the scroll.
-  // Naming sectors share the same department ids as Places.
+  // Idle only: first Explore open expands the current Places group. Naming
+  // groups stay collapsed — sharing sector ids must not auto-open NO sections.
   const exploreOpen = panelMode === 'explore';
+  const didIdleExpandExploreGroupsRef = useRef(false);
   useEffect(() => {
-    if (!exploreOpen) return;
+    if (!exploreOpen || didIdleExpandExploreGroupsRef.current) return;
     const groupId = currentGroupIdRef.current;
     if (!groupId) return;
+
+    didIdleExpandExploreGroupsRef.current = true;
     setExpandedGroups((prev) => {
-      if (prev.has(groupId)) return prev;
-      const next = new Set(prev);
-      next.add(groupId);
-      return next;
-    });
-    setExpandedNamingGroups((prev) => {
       if (prev.has(groupId)) return prev;
       const next = new Set(prev);
       next.add(groupId);
@@ -864,16 +899,20 @@ export function TourNavFloat({
         return;
       }
 
+      captureExploreDirectoryScroll();
       pendingAfterExploreExitRef.current = action;
       closePanel();
     },
-    [closePanel, displayPanel, panelMode],
+    [captureExploreDirectoryScroll, closePanel, displayPanel, panelMode],
   );
 
   const activatePanel = useCallback(
     (next: Exclude<PanelMode, null>) => {
       setPanelMode((current) => {
         if (current === next) {
+          if (current === 'explore') {
+            captureExploreDirectoryScroll();
+          }
           panelStack?.closePanel(next);
           panelStack?.closePanel('explore-search');
           return null;
@@ -885,7 +924,7 @@ export function TourNavFloat({
         return next;
       });
     },
-    [onDismissAnchoredPanels, panelStack],
+    [captureExploreDirectoryScroll, onDismissAnchoredPanels, panelStack],
   );
 
   /**
@@ -1090,12 +1129,6 @@ export function TourNavFloat({
     setExploreSceneDetailId(null);
   }, [isExploreSearchActive]);
 
-  useEffect(() => {
-    if (panelMode !== null) return;
-
-    setDirectoryTab('all');
-  }, [panelMode]);
-
   const handleSelect = (sceneId: string) => {
     pendingNamingHereRef.current = null;
     setNamingHereHotspotId(null);
@@ -1292,17 +1325,19 @@ export function TourNavFloat({
   ) => {
     const showGroupContext = options?.showGroupContext !== false;
 
+    const showGallery = !options?.listOnly && exploreLayout === 'gallery';
+    const showList = options?.listOnly || exploreLayout === 'list';
+
     const listBody =
       items.length > 0 ?
         <>
-          {!options?.listOnly ?
+          {showGallery ?
             <ul
               ref={
                 options?.suppressReorderRef ? undefined : (
                   locationsGalleryListRef
                 )
               }
-              hidden={exploreLayout !== 'gallery'}
               className={tourNavLocationGalleryListClassName}
               role='listbox'
               aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
@@ -1333,43 +1368,44 @@ export function TourNavFloat({
               })}
             </ul>
           : null}
-          <ul
-            ref={options?.suppressReorderRef ? undefined : locationsListRef}
-            hidden={!options?.listOnly && exploreLayout !== 'list'}
-            className={tourNavListClassName}
-            role='listbox'
-            aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
-          >
-            {items.map((scene) => {
-              const contextLabel =
-                showGroupContext && collidingSceneTitleIds.has(scene.id) ?
-                  sceneGroupSecondaryById[scene.id]
-                : undefined;
+          {showList ?
+            <ul
+              ref={options?.suppressReorderRef ? undefined : locationsListRef}
+              className={tourNavListClassName}
+              role='listbox'
+              aria-label={TOUR_DIRECTORY_SECTION_LOCATIONS}
+            >
+              {items.map((scene) => {
+                const contextLabel =
+                  showGroupContext && collidingSceneTitleIds.has(scene.id) ?
+                    sceneGroupSecondaryById[scene.id]
+                  : undefined;
 
-              return (
-                <ExploreSceneDirectoryListItem
-                  key={scene.id}
-                  tourId={tourId}
-                  scene={scene}
-                  active={scene.id === currentSceneId}
-                  isTourStart={scene.id === firstSceneId}
-                  contextLabel={contextLabel}
-                  disabled={locationNavDisabled}
-                  onSelect={() => handleSelect(scene.id)}
-                  onShowDescription={
-                    scene.description?.trim() ?
-                      () => openExploreSceneDetail(scene.id)
-                    : undefined
-                  }
-                  locationIcon={
-                    <TourLocationItemIcon
-                      active={scene.id === currentSceneId}
-                    />
-                  }
-                />
-              );
-            })}
-          </ul>
+                return (
+                  <ExploreSceneDirectoryListItem
+                    key={scene.id}
+                    tourId={tourId}
+                    scene={scene}
+                    active={scene.id === currentSceneId}
+                    isTourStart={scene.id === firstSceneId}
+                    contextLabel={contextLabel}
+                    disabled={locationNavDisabled}
+                    onSelect={() => handleSelect(scene.id)}
+                    onShowDescription={
+                      scene.description?.trim() ?
+                        () => openExploreSceneDetail(scene.id)
+                      : undefined
+                    }
+                    locationIcon={
+                      <TourLocationItemIcon
+                        active={scene.id === currentSceneId}
+                      />
+                    }
+                  />
+                );
+              })}
+            </ul>
+          : null}
         </>
       : options?.emptyMessage ?
         <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
@@ -1434,15 +1470,13 @@ export function TourNavFloat({
       />
     );
 
-    const listHidden = !options?.listOnly && exploreLayout !== 'list';
+    const showGallery = !options?.listOnly && exploreLayout === 'gallery';
+    const showList = options?.listOnly || exploreLayout === 'list';
     const subgroups = options?.sceneSubgroups;
 
     const listView =
       subgroups ?
-        <div
-          hidden={listHidden}
-          className={tourNavNamingSceneSubgroupsClassName}
-        >
+        <div className={tourNavNamingSceneSubgroupsClassName}>
           {subgroups.map((subgroup) => (
             <div key={subgroup.sceneId}>
               <p className={tourNavNamingSceneSubheaderClassName}>
@@ -1460,7 +1494,6 @@ export function TourNavFloat({
         </div>
       : <ul
           ref={options?.suppressReorderRef ? undefined : namingListRef}
-          hidden={listHidden}
           className={tourNavListClassName}
           role='listbox'
           aria-label={TOUR_DIRECTORY_SECTION_NAMING}
@@ -1471,12 +1504,11 @@ export function TourNavFloat({
     const listBody =
       items.length > 0 ?
         <>
-          {!options?.listOnly ?
+          {showGallery ?
             <ul
               ref={
                 options?.suppressReorderRef ? undefined : namingGalleryListRef
               }
-              hidden={exploreLayout !== 'gallery'}
               className={tourNavLocationGalleryListClassName}
               role='listbox'
               aria-label={TOUR_DIRECTORY_SECTION_NAMING}
@@ -1504,7 +1536,7 @@ export function TourNavFloat({
               ))}
             </ul>
           : null}
-          {listView}
+          {showList ? listView : null}
         </>
       : options?.emptyMessage ?
         <p className={tourNavEmptyClassName}>{options.emptyMessage}</p>
@@ -1870,7 +1902,14 @@ export function TourNavFloat({
             : null}
             {renderDirectoryTabs()}
 
-            <div ref={exploreScrollRef} className={tourNavPanelScrollClassName}>
+            <div
+              ref={exploreScrollRef}
+              className={tourNavPanelScrollClassName}
+              onScroll={(event) => {
+                exploreDirectoryScrollTopRef.current =
+                  event.currentTarget.scrollTop;
+              }}
+            >
               <div className={tourNavPanelScrollInnerClassName}>
                 {renderDirectoryBody()}
               </div>

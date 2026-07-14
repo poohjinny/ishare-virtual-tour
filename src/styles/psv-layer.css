@@ -81,7 +81,10 @@
   }
 }
 
-/* Thin scrollbar ? shared across panels (AI chat, nav lists, help, etc.) */
+/* Thin scrollbar — shared across panels (AI chat, nav lists, help, etc.).
+ * Avoid `scrollbar-gutter: stable` with thin bars: the classic gutter is wider
+ * than the 4px thumb, which leaves empty space to the right of the bar.
+ * Pair with overflow-y: scroll on the scrollport (not this utility alone). */
 .ishare-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(15, 23, 42, 0.22) transparent;

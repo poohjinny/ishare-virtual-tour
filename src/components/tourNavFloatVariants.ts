@@ -406,8 +406,10 @@ export const tourNavPanelSlotVariants = cva(
   },
 );
 
+/** Shared panel scroller (Explore, intro gallery, …). Full-bleed scrollport;
+ * `overflow-y: scroll` keeps thin-track width stable without scrollbar-gutter. */
 export const tourNavPanelScrollClassName = cn(
-  'ishare-scrollbar min-h-0 min-w-0 flex-1 overflow-x-clip overflow-y-auto',
+  'ishare-scrollbar min-h-0 min-w-0 flex-1 overflow-x-clip overflow-y-scroll',
 );
 
 export const tourNavPanelScrollInnerClassName = cn(
@@ -770,15 +772,25 @@ export const tourNavItemLeadingLocationClassName = cn(
   'mt-0.5',
 );
 
-/** Explore list row thumb — fixed square at idle; stretch with actions on hover. */
-export const tourNavItemLeadingThumbClassName = cn(
-  'tour-nav-item-leading size-14 shrink-0 self-start overflow-hidden rounded-md',
-  'bg-[rgba(15,23,42,0.06)]',
-  'transition-[width,height,min-height] duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
-  'group-hover/listitem:h-auto group-hover/listitem:min-h-14 group-hover/listitem:w-14 group-hover/listitem:self-stretch',
-  'group-focus-within/listitem:h-auto group-focus-within/listitem:min-h-14 group-focus-within/listitem:w-14 group-focus-within/listitem:self-stretch',
-  'pointer-coarse:h-auto pointer-coarse:min-h-14 pointer-coarse:w-14 pointer-coarse:self-stretch',
+/** Explore list row body — thumb spans both rows; row 2 opens for actions.
+ * Single `grid-template-rows` transition drives thumb height (no separate
+ * thumb height/max-height animation — that felt like a two-step leave). */
+export const tourNavDirectoryListItemBodyClassName = cn(
+  'tour-nav-directory-list-item-body grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)] grid-rows-[auto_0fr] gap-x-3.5',
+  'group-hover/listitem:grid-rows-[auto_1fr] group-focus-within/listitem:grid-rows-[auto_1fr]',
+  'pointer-coarse:grid-rows-[auto_1fr]',
+  'transition-[grid-template-rows] duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
   'motion-reduce:transition-none',
+);
+
+export const tourNavDirectoryListItemBodyMainClassName = cn(
+  'col-start-2 row-start-1 min-w-0',
+);
+
+/** Explore list row thumb — stretches with the body grid (row-span 2). */
+export const tourNavItemLeadingThumbClassName = cn(
+  'tour-nav-item-leading col-start-1 row-span-2 row-start-1 w-14 min-h-14 self-stretch overflow-hidden rounded-md',
+  'bg-[rgba(15,23,42,0.06)]',
 );
 
 export const tourNavItemLeadingThumbImageClassName = cn(
@@ -854,7 +866,7 @@ export const tourNavItemDescriptionClassName = cn(
 export const tourNavItemBadgePlacementClassName = cn('shrink-0 self-center');
 
 export const tourNavDirectoryListItemSelectClassName = cn(
-  'flex min-w-0 flex-1 items-stretch gap-3.5 border-none bg-transparent p-0 text-left font-[inherit] text-inherit',
+  'flex min-w-0 flex-1 items-stretch border-none bg-transparent p-0 text-left font-[inherit] text-inherit',
   'cursor-pointer focus-visible:outline-none disabled:cursor-not-allowed',
 );
 
@@ -870,13 +882,9 @@ export const tourNavDirectoryListItemRevealClassName = cn(
   'motion-reduce:transition-none',
 );
 
-/** List row — hover-expand action slot (no layout space when collapsed). */
+/** List row — hover-expand action slot (row height owned by body grid). */
 export const tourNavDirectoryListItemActionsClassName = cn(
-  'tour-nav-directory-list-item-actions grid min-w-0 grid-rows-[0fr]',
-  'group-hover/listitem:grid-rows-[1fr] group-focus-within/listitem:grid-rows-[1fr]',
-  'pointer-coarse:grid-rows-[1fr]',
-  'transition-[grid-template-rows] duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
-  'motion-reduce:transition-none',
+  'tour-nav-directory-list-item-actions col-start-2 row-start-2 min-h-0 overflow-hidden',
 );
 
 export const tourNavDirectoryListItemActionsInnerClassName =

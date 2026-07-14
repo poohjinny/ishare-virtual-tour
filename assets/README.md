@@ -49,6 +49,17 @@ Use `clientIdFromUrl()` in `src/utils/clientId.ts` when adding new clients.
 **Every `.jpg` (or `.jpeg`) dropped into a `panoramas/` folder must be converted
 to WebP before the tour references it.** Tour JSON uses `.webp` paths only.
 
+Encode settings are shared with Dev Panel upload
+([`scripts/lib/panoramaEncode.mjs`](../scripts/lib/panoramaEncode.mjs)):
+
+| Setting   | Default | Env                                       |
+| --------- | ------- | ----------------------------------------- |
+| Max width | 8192    | `PANORAMA_MAX_WIDTH` or `WEBP_MAX_WIDTH`  |
+| Quality   | 90      | `PANORAMA_WEBP_QUALITY` or `WEBP_QUALITY` |
+
+Do **not** chase a single MB-per-scene number — simple interiors compress small;
+outdoor scenes stay larger at the same settings.
+
 1. Place the source JPG under `assets/{clientId}/{tourId}/panoramas/` (e.g.
    `overview.jpg`).
 2. Convert in place with the project script (writes `{name}.webp` next to the
@@ -66,9 +77,6 @@ to WebP before the tour references it.** Tour JSON uses `.webp` paths only.
      gphospitalfoundation/ken-sargent-house/panoramas/reception.jpg
    ```
 
-   Optional quality (default `82`):
-   `WEBP_QUALITY=85 node scripts/convert-jpg-to-webp.mjs …`
-
 3. Point the scene `panorama` (and any popup `image` under `panoramas/`) at the
    `.webp` file in `tours/{tourId}.json`.
 4. Delete the source `.jpg` from `panoramas/` — do not commit JPG panoramas to
@@ -76,8 +84,10 @@ to WebP before the tour references it.** Tour JSON uses `.webp` paths only.
 5. Run `npm run sync-assets` (or `npm run dev` / `npm run build`, which sync
    automatically).
 
-Target size after conversion: roughly **800 KB–1.2 MB** per scene at acceptable
-quality. Re-export or lower `WEBP_QUALITY` if a WebP is still too large.
+Optional: normalize existing WebPs (max width + quality) with
+`node scripts/recompress-panorama-webp.mjs <client>/<tour>/panoramas` then
+`npm run sync-assets`. Lower `WEBP_QUALITY` only when deliberately trading
+quality for size.
 
 ## Scene thumbnails (defaultView)
 

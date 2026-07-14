@@ -9,7 +9,7 @@ interface ExploreDirectoryListItemActionsProps {
   children: ReactNode;
 }
 
-/** Hover-expand action row — zero height until row hover/focus. */
+/** Hover-expand action row — height owned by the list-item body grid. */
 export function ExploreDirectoryListItemActions({
   children,
 }: ExploreDirectoryListItemActionsProps) {

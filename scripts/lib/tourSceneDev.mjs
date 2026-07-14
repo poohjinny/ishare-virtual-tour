@@ -25,6 +25,7 @@ import {
   defaultSceneDescription,
 } from './devContentPlaceholders.mjs';
 import { normalizeNamingPriceStorage } from './namingPrice.mjs';
+import { encodePanoramaWebp } from './panoramaEncode.mjs';
 import { persistTourContentPlaceholders } from './tourContentSync.mjs';
 
 const THUMBNAIL_WIDTH = Number(process.env.THUMBNAIL_WIDTH ?? 640);
@@ -803,7 +804,7 @@ export async function saveUploadedPanoramaWebp({
   const filePath = resolvePanoramaFilePath(assetsRoot, webPath);
   mkdirSync(dirname(filePath), { recursive: true });
 
-  await sharp(fileBuffer).webp({ quality: 90 }).toFile(filePath);
+  await encodePanoramaWebp(fileBuffer, filePath);
   syncAssetToPublic(root, filePath, webPath);
 
   return webPath;

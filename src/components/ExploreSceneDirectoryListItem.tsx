@@ -13,6 +13,8 @@ import {
   tourNavCurrentInlineLabelClassName,
   tourNavDirectoryItemTitleRowClassName,
   tourNavDirectoryItemVariants,
+  tourNavDirectoryListItemBodyClassName,
+  tourNavDirectoryListItemBodyMainClassName,
   tourNavDirectoryListItemPrimaryCtaClassName,
   tourNavDirectoryListItemSelectClassName,
   tourNavItemDescriptionClassName,
@@ -99,9 +101,14 @@ export function ExploreSceneDirectoryListItem({
       </span>;
 
   const body = (
-    <>
+    <span className={tourNavDirectoryListItemBodyClassName}>
       {leading}
-      <span className={tourNavItemTextClassName}>
+      <span
+        className={cn(
+          tourNavDirectoryListItemBodyMainClassName,
+          tourNavItemTextClassName,
+        )}
+      >
         {active ?
           <ExploreCurrentHereLabel
             className={tourNavCurrentInlineLabelClassName}
@@ -113,49 +120,43 @@ export function ExploreSceneDirectoryListItem({
             <span className={tourNavItemMetaClassName}>{contextLabel}</span>
           : null}
         </span>
-        {description || showActions ?
-          <span className='flex min-w-0 flex-col'>
-            {description ?
-              <span className={tourNavItemDescriptionClassName}>
-                {description}
-              </span>
-            : null}
-            {showActions ?
-              <ExploreDirectoryListItemActions>
-                {showInfo ?
-                  <ExploreSceneInfoButton
-                    variant='listText'
-                    sceneTitle={scene.title}
-                    disabled={disabled}
-                    onShow={onShowDescription!}
-                  />
-                : null}
-                {isCoarsePointer ?
-                  <span
-                    className={tourNavDirectoryListItemPrimaryCtaClassName}
-                    aria-hidden='true'
-                  >
-                    {visitCta}
-                  </span>
-                : <button
-                    type='button'
-                    role='option'
-                    aria-selected={active}
-                    data-tour-nav-directory-kind='location'
-                    disabled={disabled}
-                    className={tourNavDirectoryListItemPrimaryCtaClassName}
-                    onClick={onSelect}
-                    aria-label={ariaLabel}
-                  >
-                    {visitCta}
-                  </button>
-                }
-              </ExploreDirectoryListItemActions>
-            : null}
-          </span>
+        {description ?
+          <span className={tourNavItemDescriptionClassName}>{description}</span>
         : null}
       </span>
-    </>
+      {showActions ?
+        <ExploreDirectoryListItemActions>
+          {showInfo ?
+            <ExploreSceneInfoButton
+              variant='listText'
+              sceneTitle={scene.title}
+              disabled={disabled}
+              onShow={onShowDescription!}
+            />
+          : null}
+          {isCoarsePointer ?
+            <span
+              className={tourNavDirectoryListItemPrimaryCtaClassName}
+              aria-hidden='true'
+            >
+              {visitCta}
+            </span>
+          : <button
+              type='button'
+              role='option'
+              aria-selected={active}
+              data-tour-nav-directory-kind='location'
+              disabled={disabled}
+              className={tourNavDirectoryListItemPrimaryCtaClassName}
+              onClick={onSelect}
+              aria-label={ariaLabel}
+            >
+              {visitCta}
+            </button>
+          }
+        </ExploreDirectoryListItemActions>
+      : null}
+    </span>
   );
 
   return (

@@ -14,20 +14,20 @@ triggers tuning, work **top-down P0 → P5** below — do not duplicate tasks he
 
 Measured from a production `npm run build` and Ken Sargent House assets.
 
-| Area                      | Size                                                      | Notes                                 |
-| ------------------------- | --------------------------------------------------------- | ------------------------------------- |
-| **JS bundle**             | ~1,033 KB min (~**287 KB gzip**)                          | Single chunk; Vite warns above 500 KB |
-| **CSS**                   | ~115 KB min (~**18 KB gzip**)                             | Shared glass panels, nav, hotspots    |
-| **Dependencies**          | PSV core + markers + virtual-tour, React 19, React Router | No extra UI/chart libraries           |
-| **Panorama files**        | ~1.1–2.4 MB per scene (WebP)                              | Dominates network and GPU memory      |
-| **Tour JSON / knowledge** | Bundled inline                                            | Negligible vs JS and images           |
+| Area                      | Size                                                      | Notes                                             |
+| ------------------------- | --------------------------------------------------------- | ------------------------------------------------- |
+| **JS bundle**             | ~1,033 KB min (~**287 KB gzip**)                          | Single chunk; Vite warns above 500 KB             |
+| **CSS**                   | ~115 KB min (~**18 KB gzip**)                             | Shared glass panels, nav, hotspots                |
+| **Dependencies**          | PSV core + markers + virtual-tour, React 19, React Router | No extra UI/chart libraries                       |
+| **Panorama files**        | ~0.5–5.5 MB/scene @ **8192w**; Ken ~**51 MB**             | Encode defaults ≤8192w / q90; MB varies by detail |
+| **Tour JSON / knowledge** | Bundled inline                                            | Negligible vs JS and images                       |
 
 **Runtime:** WebGL 360° viewer (Photo Sphere Viewer) — GPU use during drag/zoom
 is expected. React UI (FABs, panels, AI shell) is comparatively light.
 
-**Preload today:** After the first scene loads, `preloadOtherScenes()` in
-[`src/viewer/transition.ts`](../src/viewer/transition.ts) fetches **all other
-scenes** in the background for faster transitions.
+**Preload today:** None in the background. The start scene loads for landing;
+other panoramas load only when navigating (`ensureScenePreloaded` inside
+`navigateToScene`).
 
 Re-measure after major changes; update this table when gzip or panorama sizes
 shift meaningfully.
@@ -36,9 +36,16 @@ shift meaningfully.
 
 ## Conventions already in place
 
-- **WebP panoramas** — JPG under `panoramas/` is converted via
-  `scripts/convert-jpg-to-webp.mjs`; tour JSON references `.webp` only. See
-  [`assets/README.md`](../assets/README.md#panoramas--jpg--webp-required).
+- **WebP panoramas** — shared encode settings in
+  [`scripts/lib/panoramaEncode.mjs`](../scripts/lib/panoramaEncode.mjs): **max
+  width 8192**, **WebP quality 90** (override via `PANORAMA_MAX_WIDTH` /
+  `PANORAMA_WEBP_QUALITY`, or `WEBP_*` aliases). Used by:
+  - Dev Panel upload (`saveUploadedPanoramaWebp`)
+  - `scripts/convert-jpg-to-webp.mjs`
+  - `scripts/recompress-panorama-webp.mjs` Tour JSON references `.webp` only —
+    see [`assets/README.md`](../assets/README.md#panoramas--jpg--webp-required).
+    Byte size is **not** forced to a single MB target; outdoor/high-detail
+    scenes stay larger at the same settings.
 
 ---
 
@@ -51,7 +58,7 @@ not a task list.
 
 | Technique               | Guidance                                                                                                                                                                        |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Compress exports**    | Target ~800 KB–1.2 MB per scene at acceptable quality (current ~1.1–2.4 MB).                                                                                                    |
+| **Compress exports**    | Fix encode settings (≤8192w, WebP q90 via `panoramaEncode.mjs`) — **not** a uniform MB budget. Expect ~0.5–1.5 MB indoors, several MB for outdoor/foliage at the same settings. |
 | **Resolution tiers**    | Optional mobile/downlink-aware URLs (e.g. 4K desktop, 2K mobile) via tour JSON or loader.                                                                                       |
 | **CDN / cache headers** | Long-cache `public/assets/`; align with iShare embed origin — [ROADMAP Phase 2](./ROADMAP.md#accessibility--performance-ongoing).                                               |
 | **Thumbnail previews**  | Explore location cards use baked `scene.thumbnail`; naming hotspot cards may still runtime-crop at the NO view — [ROADMAP Sprint A](./ROADMAP.md#sprint-a--embed--demo-safety). |
@@ -63,14 +70,14 @@ not a task list.
 
 ### P1 — Preload strategy
 
-| Technique                     | Guidance                                                                                           |
-| ----------------------------- | -------------------------------------------------------------------------------------------------- |
-| **Limit background preload**  | Adjacent scenes only, or after `requestIdleCallback` / first interaction — not all scenes on load. |
-| **Connection-aware preload**  | Skip or reduce on `navigator.connection.saveData` or slow effective types (`2g`, `slow-2g`).       |
-| **Cancel in-flight preloads** | On navigate away or embed close — avoid wasted MB on large tours.                                  |
+| Technique                    | Guidance                                                                                      |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| **Limit background preload** | No background prefetch (current). Only the navigate target is loaded.                         |
+| **Connection-aware preload** | Optional later if soft-nav prefetch returns — skip on `saveData` / slow effective types.      |
+| **Cancel in-flight loads**   | On navigate away or embed close — avoid wasted MB when a slow destination fetch is abandoned. |
 
 **Touch:** [`src/viewer/transition.ts`](../src/viewer/transition.ts)
-(`preloadOtherScenes`, `ensureScenePreloaded`).
+(`navigateToScene`, `ensureScenePreloaded`).
 
 ---
 
@@ -125,7 +132,7 @@ not a task list.
 | Signal                             | Start with                                                         |
 | ---------------------------------- | ------------------------------------------------------------------ |
 | Slow first load on 4G              | P0 (images) + P2 (JS split)                                        |
-| Scene change stutter after preload | P0 resolution + P1 preload limits                                  |
+| Scene change stutter after preload | P1 (no background prefetch) + P0 if assets oversized               |
 | Vite / bundle budget CI failure    | P2                                                                 |
 | 10+ scenes per tour                | P1 + per-tour JSON (P2)                                            |
 | Embed in iShare mobile webview     | P0 + mobile tiers (P0); React UI layout — [MOBILE.md](./MOBILE.md) |
@@ -136,7 +143,8 @@ not a task list.
 
 1. **Lighthouse** (mobile, throttled) — LCP, TBT, total byte weight.
 2. **`npm run build`** — JS/CSS gzip sizes.
-3. **Network tab** — first scene + preload waterfall; total MB in first 30s.
+3. **Network tab** — first scene only during landing; destination fetch on
+   navigate; total MB in first 30s.
 4. **Device test** — mid-range Android + iPhone Safari in embed iframe.
 
 Optional: `vite-plugin-visualizer` for chunk composition (temporary).
@@ -144,6 +152,49 @@ Optional: `vite-plugin-visualizer` for chunk composition (temporary).
 ---
 
 ## Findings log
+
+### Jul 2026 — Ken landing stutter (panorama decode contention)
+
+**Symptom:** Ken Sargent House felt janky during the splash curtain and landing
+camera move. Chrome Performance showed long tasks; Bottom-Up ~52% React work and
+~15% **image decode**. Network showed many `panoramas/*.webp` fetches starting
+while the camera was still landing.
+
+**Root cause (two layers):**
+
+1. **`virtualTour` `node-changed`** called `preloadOtherScenes()` on the very
+   first `setNodes` (start scene), before landing ran — so Ken’s ~29 other
+   scenes competed with the landing decode/paint.
+2. **Background preload policy** then fetched **the entire tour** (later
+   narrowed to neighbors-first, concurrency 2). Even after deferring past
+   landing + hotspot enter, warming all remaining scenes still burned bandwidth
+   and decode budget after enter.
+
+**Also checked / not the main win:**
+
+- Deferring TourNavFloat mount until after splash — **no meaningful
+  improvement**; reverted.
+- Aggressive full-tour WebP recompress (≤4096w / q78) — large size win but
+  **visible quality loss**; reverted.
+- `covered-porch.webp` alone was **14000×7000** (~13 MB). Not a resize bug — Dev
+  upload had **no max width**; source resolution passed through. Downscaled to
+  ≤8192 to match other Ken scenes.
+
+**Shipped:**
+
+| Change                                          | Where                                                                                                                |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| No background panorama prefetch                 | [`transition.ts`](../src/viewer/transition.ts) — load destination only in `navigateToScene` / `ensureScenePreloaded` |
+| Do not kick preload from initial `node-changed` | [`PanoramaViewer.tsx`](../src/viewer/PanoramaViewer.tsx)                                                             |
+| Shared encode: ≤8192w, WebP q90                 | [`panoramaEncode.mjs`](../scripts/lib/panoramaEncode.mjs) — Dev upload, JPG→WebP CLI, optional recompress            |
+| Cap outlier `covered-porch` to 8192w            | Ken assets (~13 MB → ~5.5 MB)                                                                                        |
+
+**Lesson:** For large tours, landing smoothness beats “prefetch everything.”
+Uniform **encode settings** (width + quality) are good; forcing a uniform **MB
+budget** is not (outdoor/foliage stays larger). Measure with Network during
+landing: only the start-scene panorama should appear until the user navigates.
+
+---
 
 ### Jul 2026 — Multi-monitor GPU compositor contention
 
@@ -191,12 +242,13 @@ viewer with a static preview; move markers into the WebGL scene (`imageLayer` /
 
 ## Related code
 
-| Concern              | Location                                                                      |
-| -------------------- | ----------------------------------------------------------------------------- |
-| Scene preload        | [`src/viewer/transition.ts`](../src/viewer/transition.ts)                     |
-| Viewer mount         | [`src/viewer/PanoramaViewer.tsx`](../src/viewer/PanoramaViewer.tsx)           |
-| Hotspot perf pause   | [`src/viewer/viewerPerfPause.ts`](../src/viewer/viewerPerfPause.ts)           |
-| Nav preview mini PSV | [`src/viewer/navPreviewMiniViewer.ts`](../src/viewer/navPreviewMiniViewer.ts) |
-| Tour asset paths     | [`src/data/loadTour.ts`](../src/data/loadTour.ts)                             |
-| Build config         | [`vite.config.ts`](../vite.config.ts)                                         |
-| Panorama files       | `assets/{clientId}/panoramas/` → `public/assets/` via sync script             |
+| Concern                | Location                                                                      |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| Scene load on navigate | [`src/viewer/transition.ts`](../src/viewer/transition.ts)                     |
+| Panorama encode        | [`scripts/lib/panoramaEncode.mjs`](../scripts/lib/panoramaEncode.mjs)         |
+| Viewer mount           | [`src/viewer/PanoramaViewer.tsx`](../src/viewer/PanoramaViewer.tsx)           |
+| Hotspot perf pause     | [`src/viewer/viewerPerfPause.ts`](../src/viewer/viewerPerfPause.ts)           |
+| Nav preview mini PSV   | [`src/viewer/navPreviewMiniViewer.ts`](../src/viewer/navPreviewMiniViewer.ts) |
+| Tour asset paths       | [`src/data/loadTour.ts`](../src/data/loadTour.ts)                             |
+| Build config           | [`vite.config.ts`](../vite.config.ts)                                         |
+| Panorama files         | `assets/{clientId}/panoramas/` → `public/assets/` via sync script             |

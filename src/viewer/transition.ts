@@ -1,6 +1,7 @@
 /**
- * Scene navigation — preload target panorama, then Virtual Tour setCurrentNode.
- * Preload keeps the current scene visible; PSV fade overlays the cached texture.
+ * Scene navigation — load the target panorama, then Virtual Tour setCurrentNode.
+ * No background prefetch of neighbors or other scenes; only the destination
+ * is loaded (keeps the current scene visible until the cached texture is ready).
  */
 import type { Viewer } from '@photo-sphere-viewer/core';
 import type { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
@@ -32,22 +33,17 @@ function preloadPanorama(viewer: Viewer, panorama: string): Promise<unknown> {
   return viewer.textureLoader.preloadPanorama(panorama);
 }
 
-/** Wait for an in-flight preload or start one; registers with VT preload cache. */
-export async function ensureScenePreloaded(
+function enqueueScenePreload(
   viewer: Viewer,
   virtualTour: VirtualTourPlugin,
   sceneId: string,
   panorama: string,
-): Promise<void> {
+): Promise<unknown> | null {
   const preload = getPreloadMap(virtualTour);
   const existing = preload[sceneId];
 
-  if (existing === true) return;
-
-  if (existing && typeof existing !== 'boolean') {
-    await existing;
-    return;
-  }
+  if (existing === true) return null;
+  if (existing && typeof existing !== 'boolean') return existing;
 
   const promise = preloadPanorama(viewer, panorama)
     .then(() => {
@@ -59,35 +55,27 @@ export async function ensureScenePreloaded(
     });
 
   preload[sceneId] = promise;
-  await promise;
+  return promise;
 }
 
-/** Background preload of other tour scenes (deduped via VT preload map). */
-export function preloadOtherScenes(
+/** Wait for an in-flight load or start one; registers with VT preload cache. */
+export async function ensureScenePreloaded(
   viewer: Viewer,
   virtualTour: VirtualTourPlugin,
-  tour: Tour,
-  currentSceneId: string,
-): void {
-  for (const scene of Object.values(tour.scenes)) {
-    if (scene.id === currentSceneId) continue;
+  sceneId: string,
+  panorama: string,
+): Promise<void> {
+  const existing = getPreloadMap(virtualTour)[sceneId];
 
-    const preload = getPreloadMap(virtualTour);
-    const existing = preload[scene.id];
-    if (existing === true || (existing && typeof existing !== 'boolean')) {
-      continue;
-    }
+  if (existing === true) return;
 
-    const promise = preloadPanorama(viewer, scene.panorama)
-      .then(() => {
-        preload[scene.id] = true;
-      })
-      .catch(() => {
-        delete preload[scene.id];
-      });
-
-    preload[scene.id] = promise;
+  if (existing && typeof existing !== 'boolean') {
+    await existing;
+    return;
   }
+
+  const promise = enqueueScenePreload(viewer, virtualTour, sceneId, panorama);
+  if (promise) await promise;
 }
 
 export async function navigateToScene(

@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import { MATERIAL_SYMBOL_SIZE_20 } from './ui/materialSymbolClasses';
@@ -37,6 +37,15 @@ export function ExploreLocationGroup({
   onToggle,
   children,
 }: ExploreLocationGroupProps) {
+  // Mount children on first expand and keep them — collapsed groups used to keep
+  // every list/gallery row in the DOM, and grid 0fr→1fr then laid all of that out
+  // every frame during the open animation.
+  const [contentMounted, setContentMounted] = useState(expanded);
+
+  useEffect(() => {
+    if (expanded) setContentMounted(true);
+  }, [expanded]);
+
   return (
     <section
       className={cn(
@@ -75,7 +84,7 @@ export function ExploreLocationGroup({
             aria-hidden={!expanded}
             className={tourNavLocationGroupPanelContentClassName}
           >
-            {children}
+            {contentMounted ? children : null}
           </div>
         </div>
       </div>

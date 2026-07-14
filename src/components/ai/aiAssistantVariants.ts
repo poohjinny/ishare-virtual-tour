@@ -138,7 +138,7 @@ export const aiPanelPoweredByClassName = cn(
 );
 
 export const aiPanelMessagesClassName = cn(
-  'ishare-scrollbar flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto p-[var(--ai-panel-inline-padding)] pb-[88px]',
+  'ishare-scrollbar flex min-h-0 flex-1 flex-col gap-5 overflow-x-clip overflow-y-scroll p-[var(--ai-panel-inline-padding)] pb-[88px]',
 );
 
 export const aiPanelIntroClassName = cn('flex flex-col gap-5 self-stretch');

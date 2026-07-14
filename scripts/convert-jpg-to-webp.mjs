@@ -1,16 +1,24 @@
 /**
  * Convert selected JPG assets to WebP (lossy).
+ * Uses the same max width + quality as Dev Panel upload
+ * (`scripts/lib/panoramaEncode.mjs`).
+ *
  * Usage: node scripts/convert-jpg-to-webp.mjs <relative-path-from-assets> [...]
  * Example: node scripts/convert-jpg-to-webp.mjs gphospitalfoundation/ken-sargent-house/panoramas/overview.jpg
+ *
+ * Env: WEBP_QUALITY / PANORAMA_WEBP_QUALITY, WEBP_MAX_WIDTH / PANORAMA_MAX_WIDTH
  */
 import { statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import sharp from 'sharp';
+import {
+  encodePanoramaWebp,
+  PANORAMA_MAX_WIDTH,
+  PANORAMA_WEBP_QUALITY,
+} from './lib/panoramaEncode.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const assetsRoot = join(root, 'assets');
-const quality = Number(process.env.WEBP_QUALITY ?? 82);
 
 const inputs = process.argv.slice(2);
 if (inputs.length === 0) {
@@ -33,7 +41,7 @@ for (const relative of inputs) {
   const output = input.replace(/\.jpe?g$/i, '.webp');
   const before = statSync(input).size;
 
-  await sharp(input).webp({ quality, effort: 4 }).toFile(output);
+  await encodePanoramaWebp(input, output);
 
   const after = statSync(output).size;
   const saved = before - after;
@@ -48,7 +56,9 @@ for (const relative of inputs) {
   });
 }
 
-console.log(`WebP quality: ${quality}\n`);
+console.log(
+  `WebP quality: ${PANORAMA_WEBP_QUALITY}, maxWidth: ${PANORAMA_MAX_WIDTH}\n`,
+);
 console.log('file\tbefore\tafter\tsaved\t%');
 for (const row of results) {
   console.log(

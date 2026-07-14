@@ -20,6 +20,8 @@ import {
   tourNavCurrentInlineLabelClassName,
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBadgeColumnClassName,
+  tourNavDirectoryListItemBodyClassName,
+  tourNavDirectoryListItemBodyMainClassName,
   tourNavDirectoryListItemNamingMainClassName,
   tourNavDirectoryListItemPrimaryCtaClassName,
   tourNavDirectoryListItemSelectClassName,
@@ -152,9 +154,14 @@ export function ExploreNamingDirectoryListItem({
       </span>;
 
   const body = (
-    <>
+    <span className={tourNavDirectoryListItemBodyClassName}>
       {leading}
-      <span className={tourNavDirectoryListItemNamingMainClassName}>
+      <span
+        className={cn(
+          tourNavDirectoryListItemBodyMainClassName,
+          tourNavDirectoryListItemNamingMainClassName,
+        )}
+      >
         <span className={tourNavItemTextClassName}>
           {active ?
             <ExploreCurrentHereLabel
@@ -178,31 +185,6 @@ export function ExploreNamingDirectoryListItem({
               </span>
             : null}
           </span>
-          {showActions ?
-            <ExploreDirectoryListItemActions>
-              {viewOpportunityButton}
-              {isCoarsePointer ?
-                <span
-                  className={tourNavDirectoryListItemPrimaryCtaClassName}
-                  aria-hidden='true'
-                >
-                  {visitCta}
-                </span>
-              : <button
-                  type='button'
-                  role='option'
-                  aria-selected={active}
-                  data-tour-nav-directory-kind='naming'
-                  disabled={disabled}
-                  className={tourNavDirectoryListItemPrimaryCtaClassName}
-                  onClick={onVisitPlace}
-                  aria-label={visitPlaceLabel}
-                >
-                  {visitCta}
-                </button>
-              }
-            </ExploreDirectoryListItemActions>
-          : null}
         </span>
         <span className={tourNavDirectoryListItemBadgeColumnClassName}>
           <NamingStatusBadge
@@ -217,7 +199,32 @@ export function ExploreNamingDirectoryListItem({
           : null}
         </span>
       </span>
-    </>
+      {showActions ?
+        <ExploreDirectoryListItemActions>
+          {viewOpportunityButton}
+          {isCoarsePointer ?
+            <span
+              className={tourNavDirectoryListItemPrimaryCtaClassName}
+              aria-hidden='true'
+            >
+              {visitCta}
+            </span>
+          : <button
+              type='button'
+              role='option'
+              aria-selected={active}
+              data-tour-nav-directory-kind='naming'
+              disabled={disabled}
+              className={tourNavDirectoryListItemPrimaryCtaClassName}
+              onClick={onVisitPlace}
+              aria-label={visitPlaceLabel}
+            >
+              {visitCta}
+            </button>
+          }
+        </ExploreDirectoryListItemActions>
+      : null}
+    </span>
   );
 
   return (

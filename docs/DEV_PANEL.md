@@ -136,10 +136,10 @@ Shortcuts are ignored while typing in inputs (`isTypingTarget`).
 
 ### Panorama
 
-| Block                | What it does                                                              |
-| -------------------- | ------------------------------------------------------------------------- |
-| **Landing view**     | Saves the current camera as `defaultView` and rebakes the scene thumbnail |
-| **Replace panorama** | Upload JPG/PNG/WebP → overwrites `{sceneId}.webp` and rebakes thumbnail   |
+| Block                | What it does                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Landing view**     | Saves the current camera as `defaultView` and rebakes the scene thumbnail                                            |
+| **Replace panorama** | Upload JPG/PNG/WebP → overwrites `{sceneId}.webp` via shared encode (≤**8192**w, WebP q**90**) and rebakes thumbnail |
 
 Landing view requires a live camera readout (pan the scene first). Button label
 also shows **`(L)`** for the keyboard shortcut.

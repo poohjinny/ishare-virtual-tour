@@ -104,7 +104,9 @@
     cursor: text;
   }
 
-  /* NO / info � content height when short; body scrolls when marker hits max-height */
+  /* NO / info — content height when short; body scrolls when marker hits max-height.
+   * Keep overflow-y: auto (not scroll) so short panels match dock chrome without a
+   * permanent thin track; scrollbar still sits on the body edge when present. */
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__body {
     flex: 1 1 auto;
     min-height: 0;
@@ -487,7 +489,7 @@
   .tour-glass-panel__body {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
     gap: 16px;

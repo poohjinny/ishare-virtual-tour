@@ -34,7 +34,8 @@ export const HOTSPOT_ENTER_3D: Required<HotspotEnterOptions> = {
 
 export interface HotspotEnterController {
   hold: () => void;
-  schedule: () => void;
+  /** Optional callback runs after the enter sequence finishes (or immediately if reduced motion). */
+  schedule: (onComplete?: () => void) => void;
   release: () => void;
   destroy: () => void;
 }
@@ -115,13 +116,17 @@ export function createHotspotEnterController(
       if (el) clearEnterStagger(el, clearDelaySelector);
     },
 
-    schedule() {
+    schedule(onComplete?: () => void) {
       clearTimers();
       const el = getEl();
-      if (!el) return;
+      if (!el) {
+        onComplete?.();
+        return;
+      }
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         el.classList.remove(holdClass);
+        onComplete?.();
         return;
       }
 
@@ -135,6 +140,7 @@ export function createHotspotEnterController(
         clearEnterTimer = window.setTimeout(() => {
           clearEnterTimer = null;
           finishEnter(el);
+          onComplete?.();
         }, enterAnimationTotalMs(markerCount));
       }, HOTSPOT_ENTER_DELAY_MS);
     },
