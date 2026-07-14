@@ -93,8 +93,14 @@ export function formatNamingGalleryItemPrice(item: {
   return formatNamingPriceAbbrev(amount);
 }
 
-/** Show sector-level naming opportunity totals in Explore and nav preview. */
+/** Explore directory — sector group header totals (e.g. `$1,250,000 total`). */
 export const SHOW_SECTOR_NAMING_TOTAL = true;
+
+/**
+ * Nav destination preview — hero count-up + Naming Opportunities accordion totals.
+ * Kept off for now; Explore list totals use {@link SHOW_SECTOR_NAMING_TOTAL}.
+ */
+export const SHOW_NAV_PREVIEW_NAMING_TOTAL = false;
 
 /** Sector group header — full currency total, same format as item prices. */
 export function formatNamingSectorGroupTotalLabel(total: number): string {

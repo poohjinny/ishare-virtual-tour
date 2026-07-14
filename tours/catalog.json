@@ -40,8 +40,14 @@
       "website": "https://cancerresearchsociety.ca",
       "email": "mboustani@src-crs.ca",
       "phones": [
-        { "number": "514-861-9227", "label": "Telephone" },
-        { "number": "1-888-766-2262", "label": "Toll free" }
+        {
+          "number": "514-861-9227",
+          "label": "Telephone"
+        },
+        {
+          "number": "1-888-766-2262",
+          "label": "Toll free"
+        }
       ],
       "fax": "514-861-9220",
       "faxLabel": "Fax",
@@ -67,7 +73,12 @@
       "name": "Holodomor Research and Education Consortium",
       "website": "https://holodomor.ca",
       "email": "hrec@ualberta.ca",
-      "phones": [{ "number": "416-923-4732", "label": "Telephone" }],
+      "phones": [
+        {
+          "number": "416-923-4732",
+          "label": "Telephone"
+        }
+      ],
       "address": "620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4",
       "branding": {
         "logo": "/assets/holodomor/brand/logo.png",
@@ -92,7 +103,12 @@
       "name": "Queensway Carleton Hospital Foundation",
       "website": "https://qchfoundation.ca",
       "email": "info@qchfoundation.ca",
-      "phones": [{ "number": "613-721-4731", "label": "Telephone" }],
+      "phones": [
+        {
+          "number": "613-721-4731",
+          "label": "Telephone"
+        }
+      ],
       "address": "3045 Baseline Road, Ottawa, ON K2H 8P4",
       "branding": {
         "logo": "/assets/qchfoundation/brand/logo.png",
@@ -105,7 +121,7 @@
           "id": "queensway-carleton-hospital",
           "category": "Healthcare",
           "name": "Queensway Carleton Hospital",
-          "visibility": "public",
+          "visibility": "unlisted",
           "featured": false
         },
         {

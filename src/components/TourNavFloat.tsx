@@ -1110,6 +1110,16 @@ export function TourNavFloat({
     });
   };
 
+  /** Breadcrumb jump — leave Explore so the panel doesn't outlive the move. */
+  const handleBreadcrumbNavigate = useCallback(
+    (sceneId: string) => {
+      closeExploreThen(() => {
+        onBreadcrumbNavigate(sceneId);
+      });
+    },
+    [closeExploreThen, onBreadcrumbNavigate],
+  );
+
   const handleExploreSceneDetailVisit = useCallback(() => {
     if (!exploreSceneDetailId) return;
 
@@ -1970,7 +1980,7 @@ export function TourNavFloat({
                       type='button'
                       className={tourNavBreadcrumbLinkClassName}
                       disabled={disabled}
-                      onClick={() => onBreadcrumbNavigate(item.id)}
+                      onClick={() => handleBreadcrumbNavigate(item.id)}
                     >
                       {item.title}
                     </button>

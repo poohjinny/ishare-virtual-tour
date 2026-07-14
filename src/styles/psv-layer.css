@@ -1045,8 +1045,25 @@ input::placeholder {
   max-width: min(22rem, 75vw);
 }
 
-.viewer-container .psv-marker:has(.hotspot-nav:is(:hover, :focus-visible, .hotspot-nav--active)) {
-  z-index: 5;
+/*
+ * PSV sets inline z-index (30 + config, usually 31). Without !important the
+ * raised stack never wins — overlapped idle chips stay on top of active ones.
+ */
+.viewer-container .psv-marker:has(.hotspot-nav:is(:hover, :focus-visible)),
+.viewer-container .psv-marker:has(.hotspot-info:is(:hover, :focus-visible)),
+.viewer-container .psv-marker:has(.hotspot-general-info:is(:hover, :focus-visible)) {
+  z-index: 50 !important;
+}
+
+.viewer-container .psv-marker:has(.hotspot-nav--active),
+.viewer-container .psv-marker:has(.hotspot-info--active),
+.viewer-container .psv-marker:has(.hotspot-general-info--active) {
+  z-index: 55 !important;
+}
+
+.viewer-container .psv-marker:has([data-info-panel='true']).psv-marker--visible,
+.viewer-container .psv-marker:has([data-nav-panel='true']).psv-marker--visible {
+  z-index: 70 !important;
 }
 
 .hotspot-nav:not(.hotspot-nav--active):hover .hotspot-nav__pill,
@@ -1278,10 +1295,6 @@ input::placeholder {
 
 .hotspot-info:is(:hover, :focus-visible, .hotspot-info--active) .hotspot-info__label {
   max-width: min(22rem, 75vw);
-}
-
-.viewer-container .psv-marker:has(.hotspot-info:is(:hover, :focus-visible, .hotspot-info--active)) {
-  z-index: 5;
 }
 
 .hotspot-info__label-sep,

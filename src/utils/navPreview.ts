@@ -14,7 +14,7 @@ import { buildSceneGroups } from '../viewer/sceneDepth';
 import {
   formatNamingPriceAbbrev,
   parseNamingPrice,
-  SHOW_SECTOR_NAMING_TOTAL,
+  SHOW_NAV_PREVIEW_NAMING_TOTAL,
 } from './namingPrice';
 import { resolveNavHotspotLabel } from './navHotspotLabel';
 import { resolveNamingPopup } from './namingSceneInherit';
@@ -119,7 +119,7 @@ export function buildNavPreview(
   );
   const hasSectorTotal = sectorNamingTotal > 0;
   const namingTotalLabel =
-    SHOW_SECTOR_NAMING_TOTAL && hasSectorTotal ?
+    SHOW_NAV_PREVIEW_NAMING_TOTAL && hasSectorTotal ?
       formatNamingPriceAbbrev(sectorNamingTotal)
     : undefined;
 
@@ -135,7 +135,7 @@ export function buildNavPreview(
     namingItems: buildNavPreviewNamingItems(tour, scene),
     namingTotalLabel,
     namingTotalAmount:
-      SHOW_SECTOR_NAMING_TOTAL && hasSectorTotal ? sectorNamingTotal : (
+      SHOW_NAV_PREVIEW_NAMING_TOTAL && hasSectorTotal ? sectorNamingTotal : (
         undefined
       ),
     targetView: scene.defaultView,

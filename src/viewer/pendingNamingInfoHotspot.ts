@@ -267,18 +267,19 @@ export function openNamingInfoHotspot(
     hotspot,
     tour.scenes[sceneId],
   );
-  const resolvedHotspot =
+  const popup =
     hotspot.popup.namingOpportunity ?
-      { ...hotspot, popup: resolveNamingPopup(hotspot.popup, hostScene) }
-    : hotspot;
+      resolveNamingPopup(hotspot.popup, hostScene)
+    : hotspot.popup;
+  const resolvedHotspot = { ...hotspot, popup };
 
-  if (isAnchoredPopup(resolvedHotspot.popup)) {
+  if (isAnchoredPopup(popup)) {
     openAnchoredInfoPanel(viewer, markers, resolvedHotspot, tour, hideShare, {
       skipCameraNudge,
     });
   } else {
     setActiveInfoHotspot(markers, hotspot.id);
-    onModalPopup?.(resolvedHotspot.popup!);
+    onModalPopup?.(popup);
   }
 
   return true;
