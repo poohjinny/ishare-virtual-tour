@@ -1802,82 +1802,73 @@ export function TourNavFloat({
         onClose={closePanel}
         headerActions={
           <div className={tourNavExploreHeaderActionsClassName}>
-            <ExplorePanelSearch
-              open={exploreSearchOpen}
-              value={exploreSearch}
-              disabled={disabled}
-              inputRef={exploreSearchRef}
-              onOpen={openExploreSearch}
-              onClose={closeExploreSearch}
-              onChange={setExploreSearch}
-            />
-            {exploreSortGroups.length > 0 ?
-              <ExplorePanelRefine
-                context={exploreRefineContext}
-                locationsSort={exploreLocationsSort}
-                namingSort={exploreNamingSort}
-                groups={exploreSortGroups}
-                namingPriceBounds={namingPriceBounds}
-                namingPriceMin={namingPriceMin}
-                namingPriceMax={namingPriceMax}
-                namingPriceFilterActive={
-                  exploreRefineNamingAvailable && namingPriceFilterActive
-                }
-                showGroupHeadings={exploreSortContext === 'mixed'}
-                disabled={disabled}
-                onLocationsSortChange={setExploreLocationsSort}
-                onNamingSortChange={setExploreNamingSort}
-                onNamingPriceRangeChange={handleNamingPriceRangeChange}
-              />
+            {!exploreSceneDetail ?
+              <>
+                <ExplorePanelSearch
+                  open={exploreSearchOpen}
+                  value={exploreSearch}
+                  disabled={disabled}
+                  inputRef={exploreSearchRef}
+                  onOpen={openExploreSearch}
+                  onClose={closeExploreSearch}
+                  onChange={setExploreSearch}
+                />
+                {exploreSortGroups.length > 0 ?
+                  <ExplorePanelRefine
+                    context={exploreRefineContext}
+                    locationsSort={exploreLocationsSort}
+                    namingSort={exploreNamingSort}
+                    groups={exploreSortGroups}
+                    namingPriceBounds={namingPriceBounds}
+                    namingPriceMin={namingPriceMin}
+                    namingPriceMax={namingPriceMax}
+                    namingPriceFilterActive={
+                      exploreRefineNamingAvailable && namingPriceFilterActive
+                    }
+                    showGroupHeadings={exploreSortContext === 'mixed'}
+                    disabled={disabled}
+                    onLocationsSortChange={setExploreLocationsSort}
+                    onNamingSortChange={setExploreNamingSort}
+                    onNamingPriceRangeChange={handleNamingPriceRangeChange}
+                  />
+                : null}
+                {!isExploreSearchActive ?
+                  <IconTooltip
+                    label={tourNavExploreLayoutActionLabel(exploreLayout)}
+                    placement='bottom'
+                  >
+                    <button
+                      type='button'
+                      className={tourGlassPanelCloseClassName}
+                      onClick={toggleExploreLayout}
+                      aria-pressed={exploreLayout === 'list'}
+                      {...tourNavIconButtonA11y(
+                        tourNavExploreLayoutActionLabel(exploreLayout),
+                      )}
+                    >
+                      {exploreLayout === 'gallery' ?
+                        <MaterialSymbol
+                          name='view_list'
+                          className={tourGlassPanelCloseIconClassName}
+                          sizePx={MATERIAL_SYMBOL_SIZE_22}
+                        />
+                      : <MaterialSymbol
+                          name='grid_view'
+                          className={tourGlassPanelCloseIconClassName}
+                          sizePx={MATERIAL_SYMBOL_SIZE_22}
+                        />
+                      }
+                    </button>
+                  </IconTooltip>
+                : null}
+              </>
             : null}
-            <IconTooltip
-              label={tourNavExploreLayoutActionLabel(exploreLayout)}
-              placement='bottom'
-            >
-              <button
-                type='button'
-                className={tourGlassPanelCloseClassName}
-                onClick={toggleExploreLayout}
-                aria-pressed={exploreLayout === 'list'}
-                {...tourNavIconButtonA11y(
-                  tourNavExploreLayoutActionLabel(exploreLayout),
-                )}
-              >
-                {exploreLayout === 'gallery' ?
-                  <MaterialSymbol
-                    name='view_list'
-                    className={tourGlassPanelCloseIconClassName}
-                    sizePx={MATERIAL_SYMBOL_SIZE_22}
-                  />
-                : <MaterialSymbol
-                    name='grid_view'
-                    className={tourGlassPanelCloseIconClassName}
-                    sizePx={MATERIAL_SYMBOL_SIZE_22}
-                  />
-                }
-              </button>
-            </IconTooltip>
           </div>
         }
         animation={panelAnimation(panelPhase)}
         bodyClassName='tour-glass-panel__body--directory'
       >
-        {isExploreSearchActive ?
-          <div
-            id='tour-nav-explore-search-results'
-            ref={exploreSearchScrollRef}
-            className={tourNavPanelScrollClassName}
-            role='region'
-            aria-label='Search results'
-          >
-            <div className={tourNavPanelScrollInnerClassName}>
-              {renderDirectorySearchResults(
-                exploreSortedFilteredScenes,
-                exploreSortedFilteredNamingItems,
-              )}
-            </div>
-          </div>
-        : exploreSceneDetail ?
+        {exploreSceneDetail ?
           <div ref={exploreScrollRef} className={tourNavPanelScrollClassName}>
             <div className={tourNavPanelScrollInnerClassName}>
               <ExploreSceneDetailPanel
@@ -1894,6 +1885,21 @@ export function TourNavFloat({
                   onVisit={handleExploreSceneDetailVisit}
                 />
               </ExploreSceneDetailPanel>
+            </div>
+          </div>
+        : isExploreSearchActive ?
+          <div
+            id='tour-nav-explore-search-results'
+            ref={exploreSearchScrollRef}
+            className={tourNavPanelScrollClassName}
+            role='region'
+            aria-label='Search results'
+          >
+            <div className={tourNavPanelScrollInnerClassName}>
+              {renderDirectorySearchResults(
+                exploreSortedFilteredScenes,
+                exploreSortedFilteredNamingItems,
+              )}
             </div>
           </div>
         : <ExploreDirectoryPanel enterToken={exploreDirectoryEnterToken}>
