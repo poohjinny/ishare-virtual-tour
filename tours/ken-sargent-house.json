@@ -51,7 +51,7 @@
             "yaw": 167.5,
             "pitch": -1.6
           },
-          "targetScene": "main-entrance"
+          "targetScene": "main-floor"
         },
         {
           "id": "info-kitchen",
@@ -75,9 +75,7 @@
             "yaw": 235,
             "pitch": -4.8
           },
-          "targetScene": "main-floor",
-          "instant": true,
-          "navVariant": "back"
+          "targetScene": "covered-porch"
         },
         {
           "id": "nav-to-pantry",
@@ -114,6 +112,17 @@
             "pitch": -1.5
           },
           "targetScene": "main-floor-corridor"
+        },
+        {
+          "id": "nav-to-main-entrance-2",
+          "type": "nav",
+          "position": {
+            "yaw": 202.4,
+            "pitch": -1.4
+          },
+          "targetScene": "main-entrance",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/kitchen.webp",
@@ -314,8 +323,8 @@
           "id": "nav-back-entrance",
           "type": "nav",
           "position": {
-            "yaw": 170,
-            "pitch": -5
+            "yaw": 35.3,
+            "pitch": -6.8
           },
           "targetScene": "main-entrance"
         },
@@ -394,6 +403,17 @@
             "pitch": -1.8
           },
           "targetScene": "covered-porch"
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 175.8,
+            "pitch": -4.8
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/reception.webp",
@@ -448,9 +468,9 @@
       "description": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/main-floor.webp",
       "defaultView": {
-        "yaw": 78,
-        "pitch": -50.4,
-        "zoom": 21
+        "yaw": 79.4,
+        "pitch": -47.4,
+        "zoom": 31
       },
       "hotspots": [
         {
@@ -486,8 +506,8 @@
           "id": "nav-to-entrance-to-the-base-level",
           "type": "nav",
           "position": {
-            "yaw": 25.5,
-            "pitch": -39.4
+            "yaw": 24,
+            "pitch": -39
           },
           "targetScene": "entrance-to-the-base-level"
         },
@@ -636,9 +656,9 @@
       "description": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
       "panorama": "/assets/gphospitalfoundation/ken-sargent-house/panoramas/second-floor.webp",
       "defaultView": {
-        "yaw": 84.6,
-        "pitch": -45.1,
-        "zoom": 41
+        "yaw": 81.7,
+        "pitch": -53.2,
+        "zoom": 21
       },
       "hotspots": [
         {
@@ -741,6 +761,15 @@
             "pitch": -39.4
           },
           "targetScene": "corridor"
+        },
+        {
+          "id": "nav-to-main-floor-2",
+          "type": "nav",
+          "position": {
+            "yaw": 357.2,
+            "pitch": -62
+          },
+          "targetScene": "main-floor"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/second-floor.webp",
@@ -804,6 +833,15 @@
           },
           "targetScene": "basement-corridor",
           "instant": true
+        },
+        {
+          "id": "nav-to-main-floor-2",
+          "type": "nav",
+          "position": {
+            "yaw": 166.4,
+            "pitch": -39.9
+          },
+          "targetScene": "main-floor"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/basement.webp",
@@ -872,8 +910,8 @@
           "id": "nav-to-main-entrance",
           "type": "nav",
           "position": {
-            "yaw": 153.2,
-            "pitch": -2
+            "yaw": 99.4,
+            "pitch": -2.9
           },
           "targetScene": "main-entrance"
         }
@@ -977,6 +1015,17 @@
             "pitch": -2.9
           },
           "targetScene": "pantry"
+        },
+        {
+          "id": "nav-to-main-entrance-2",
+          "type": "nav",
+          "position": {
+            "yaw": 197.7,
+            "pitch": -2.7
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "previewVideoUrl": "https://share.synthesia.io/embeds/videos/0f9ccf86-f6fb-4739-8c03-6e0aa8abff08",
@@ -1058,8 +1107,8 @@
           "id": "nav-to-main-entrance",
           "type": "nav",
           "position": {
-            "yaw": 328.9,
-            "pitch": -0.1
+            "yaw": 247.4,
+            "pitch": -0.6
           },
           "targetScene": "main-entrance"
         },
@@ -1071,6 +1120,17 @@
             "pitch": 1
           },
           "targetScene": "reception"
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 328.5,
+            "pitch": -1.7
+          },
+          "targetScene": "main-floor",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "previewVideoUrl": "https://share.synthesia.io/embeds/videos/9227b641-562a-49f2-b1cf-19eac55ec6d6",

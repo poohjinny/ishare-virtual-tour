@@ -163,13 +163,11 @@
         {
           "id": "nav-to-waiting-area",
           "type": "nav",
-          "label": "Waiting Area",
           "position": {
             "yaw": 77.9,
             "pitch": -3.8
           },
-          "targetScene": "ed-mh-3",
-          "instant": true
+          "targetScene": "ed-mh-3"
         },
         {
           "id": "nav-to-emergency-department",
@@ -237,8 +235,7 @@
             "yaw": 170.3,
             "pitch": -1
           },
-          "targetScene": "ed-ambulance-offload",
-          "instant": true
+          "targetScene": "ed-ambulance-offload"
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-mh-3.webp",
@@ -278,14 +275,11 @@
         {
           "id": "nav-to-waiting-area",
           "type": "nav",
-          "label": "Waiting Area",
           "position": {
             "yaw": 266.6,
             "pitch": 0.4
           },
-          "targetScene": "ed-mh-3",
-          "instant": true,
-          "navVariant": "back"
+          "targetScene": "ed-mh-3"
         },
         {
           "id": "nav-to-emergency-department",
@@ -308,8 +302,8 @@
       "description": "Explore James Beech Health Care Centre as part of the Queensway Carleton General Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-overview.webp",
       "defaultView": {
-        "yaw": 109.1,
-        "pitch": -66.4,
+        "yaw": 110.2,
+        "pitch": -62.6,
         "zoom": 1
       },
       "hotspots": [
@@ -471,8 +465,8 @@
           "id": "info-inpatient-bed-rooms",
           "type": "info",
           "position": {
-            "yaw": 103.9,
-            "pitch": -12.8
+            "yaw": 101.1,
+            "pitch": -15.8
           },
           "popup": {
             "display": "anchored",
@@ -490,8 +484,8 @@
           "id": "nav-to-emergency-department",
           "type": "nav",
           "position": {
-            "yaw": 294.9,
-            "pitch": -17.2
+            "yaw": 293,
+            "pitch": -2.6
           },
           "targetScene": "msi-overview",
           "instant": true,
@@ -1077,6 +1071,17 @@
           "targetScene": "mental-health-emergency-services-unit",
           "instant": true,
           "navVariant": "back"
+        },
+        {
+          "id": "nav-to-emergency-department",
+          "type": "nav",
+          "position": {
+            "yaw": 124.7,
+            "pitch": -1.6
+          },
+          "targetScene": "ed-overview",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "previewVideoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900",
@@ -1147,11 +1152,34 @@
       "description": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/acute-care-pod-d-2.webp",
       "defaultView": {
-        "yaw": 33.6,
-        "pitch": -10.1,
+        "yaw": 90,
+        "pitch": -9,
         "zoom": 5
       },
-      "hotspots": [],
+      "hotspots": [
+        {
+          "id": "nav-to-acute-care-pod-d",
+          "type": "nav",
+          "position": {
+            "yaw": 271.6,
+            "pitch": -1.8
+          },
+          "targetScene": "acute-care-pod-d",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "nav-to-emergency-department",
+          "type": "nav",
+          "position": {
+            "yaw": 91.1,
+            "pitch": -1.4
+          },
+          "targetScene": "ed-overview",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
       "previewVideoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
       "videoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-d-2.webp"
