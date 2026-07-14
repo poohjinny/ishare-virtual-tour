@@ -11,6 +11,7 @@ import {
   formatNamingPriceDisplay,
   formatNamingSectorGroupTotalLabel,
   parseNamingPrice,
+  SHOW_NAV_PREVIEW_NAMING_TOTAL,
 } from '../utils/namingPrice';
 import {
   navPreviewCtaLabel,
@@ -956,7 +957,10 @@ export function buildNavPreviewNamingListHtml(
     (sum, item) => sum + (parseNamingPrice(item.price) ?? 0),
     0,
   );
-  const totalLabel = formatNamingSectorGroupTotalLabel(total);
+  const totalLabel =
+    SHOW_NAV_PREVIEW_NAMING_TOTAL ?
+      formatNamingSectorGroupTotalLabel(total)
+    : '';
   const totalHtml =
     totalLabel ?
       `<span class="nav-preview-panel__naming-total-price">${escapeHtml(totalLabel)}</span>`
