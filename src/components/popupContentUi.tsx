@@ -81,9 +81,6 @@ export function NamingOpportunityPrice({
         : 'tour-glass-panel__price tour-glass-panel__price--under-title'
       }
     >
-      <span className='tour-glass-panel__price-sep' aria-hidden='true'>
-        |
-      </span>
       <span className='tour-glass-panel__price-value'>
         {formatNamingPriceDisplay(opportunity.price)}
       </span>

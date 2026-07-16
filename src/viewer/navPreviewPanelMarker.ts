@@ -38,8 +38,18 @@ const PANEL_ID_SUFFIX = '-nav-panel';
 const PANEL_EXIT_MS = 200;
 
 const closingPanelIds = new Set<string>();
+const closingPanelTimeouts = new Map<string, number>();
 const namingAccordionCleanups = new Map<string, () => void>();
 const ctaOverflowCleanups = new Map<string, () => void>();
+
+function cancelPanelExit(id: string): void {
+  const timeoutId = closingPanelTimeouts.get(id);
+  if (timeoutId != null) {
+    window.clearTimeout(timeoutId);
+    closingPanelTimeouts.delete(id);
+  }
+  closingPanelIds.delete(id);
+}
 
 function clearNavPreviewCtaOverflow(panelId: string): void {
   ctaOverflowCleanups.get(panelId)?.();
@@ -97,20 +107,28 @@ export function closeAnchoredNavPreviewPanel(
     }
 
     const id = marker.id;
-    if (closingPanelIds.has(id)) continue;
 
     if (!animate) {
+      cancelPanelExit(id);
       destroyNavPreviewMiniViewer(id);
       clearNavPreviewNamingAccordion(id);
-      closingPanelIds.delete(id);
-      markers.removeMarker(id);
+      try {
+        markers.removeMarker(id);
+      } catch {
+        /* marker already removed */
+      }
       continue;
     }
+
+    if (closingPanelIds.has(id)) continue;
 
     const article = marker.domElement.querySelector(
       '.tour-glass-panel--anchored',
     );
     if (!(article instanceof HTMLElement)) {
+      cancelPanelExit(id);
+      destroyNavPreviewMiniViewer(id);
+      clearNavPreviewNamingAccordion(id);
       markers.removeMarker(id);
       continue;
     }
@@ -122,7 +140,8 @@ export function closeAnchoredNavPreviewPanel(
 
     // Keep the mini viewer rendering through the exit animation — destroying it
     // early empties the hero and flashes its navy background as the panel closes.
-    window.setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
+      closingPanelTimeouts.delete(id);
       closingPanelIds.delete(id);
       destroyNavPreviewMiniViewer(id);
       try {
@@ -133,6 +152,7 @@ export function closeAnchoredNavPreviewPanel(
         /* marker already removed */
       }
     }, PANEL_EXIT_MS);
+    closingPanelTimeouts.set(id, timeoutId);
   }
 }
 
@@ -172,6 +192,7 @@ export function openAnchoredNavPreviewPanel(
   preview: NavPreviewContent,
   tourId: string,
   hideShare = false,
+  options?: { skipCameraNudge?: boolean },
 ): void {
   closeAnchoredNavPreviewPanel(markers, false, false);
   setActiveNavHotspot(markers, hotspot.id);
@@ -228,7 +249,7 @@ export function openAnchoredNavPreviewPanel(
     // settled (nudge done, or none). Running the hero mount alongside either
     // animation caused the panel-open jank. Text content is already in the
     // markup and shows immediately behind the skeleton.
-    let cameraSettled = false;
+    let cameraSettled = options?.skipCameraNudge ?? false;
     let enterDone = false;
     const revealHero = () => {
       if (!cameraSettled || !enterDone) return;
@@ -255,6 +276,13 @@ export function openAnchoredNavPreviewPanel(
       enterDone = true;
       revealHero();
     });
+
+    if (options?.skipCameraNudge) {
+      cameraSettled = true;
+      revealHero();
+      notifyAnchoredPanelOpened();
+      return;
+    }
 
     scheduleNudgeCameraForClippedPanel(
       viewer,

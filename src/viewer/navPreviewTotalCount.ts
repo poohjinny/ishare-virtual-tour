@@ -1,6 +1,6 @@
 const COUNT_ATTR = 'data-nav-count-to';
 const COUNT_DURATION_MS = 3000;
-const HERO_LOADING_CLASS = 'nav-preview-panel__hero--loading';
+const HERO_LOADING_CLASS = 'anchored-panel__hero--loading';
 const HERO_READY_TIMEOUT_MS = 4500;
 
 function easeOutExpo(t: number): number {
@@ -21,7 +21,7 @@ export function formatCountValue(value: number, target: number): string {
  * the panorama/WebGL mount for frame budget. Resolves immediately when there's
  * no loading hero (e.g. body-only panel), with a timeout fallback. */
 function whenHeroReady(root: HTMLElement, run: () => void): void {
-  const hero = root.querySelector('.nav-preview-panel__hero');
+  const hero = root.querySelector('.anchored-panel__hero');
   if (
     !(hero instanceof HTMLElement) ||
     !hero.classList.contains(HERO_LOADING_CLASS)

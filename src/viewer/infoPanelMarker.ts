@@ -8,8 +8,11 @@ import {
 import {
   buildAnchoredPopupHtml,
   glassPanelMarkerSize,
-  initPopupVideoPlayers,
 } from '../components/tourGlassPanelHtml';
+import {
+  mountNavPreviewImageHero,
+  mountNavPreviewVideoHero,
+} from './navPreviewMiniViewer';
 import { setActiveInfoHotspot } from './infoHotspotActive';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import { bindGlassPanelCtaOverflowTitles } from '../utils/glassPanelCtaOverflow';
@@ -32,6 +35,16 @@ const PANEL_ID_SUFFIX = '-panel';
 const PANEL_EXIT_MS = 200;
 
 const closingPanelIds = new Set<string>();
+const closingPanelTimeouts = new Map<string, number>();
+
+function cancelPanelExit(id: string): void {
+  const timeoutId = closingPanelTimeouts.get(id);
+  if (timeoutId != null) {
+    window.clearTimeout(timeoutId);
+    closingPanelTimeouts.delete(id);
+  }
+  closingPanelIds.delete(id);
+}
 
 interface InfoPanelPositionTrack {
   panelId: string;
@@ -82,13 +95,18 @@ export function closeAnchoredInfoPanel(
     }
 
     const id = marker.id;
-    if (closingPanelIds.has(id)) continue;
 
     if (!animate) {
-      closingPanelIds.delete(id);
-      markers.removeMarker(id);
+      cancelPanelExit(id);
+      try {
+        markers.removeMarker(id);
+      } catch {
+        /* marker already removed */
+      }
       continue;
     }
+
+    if (closingPanelIds.has(id)) continue;
 
     // Exit scale runs on the article (ancestor of the glass shell), matching the
     // entrance — retained from the frosted-glass era (when animating the
@@ -97,6 +115,7 @@ export function closeAnchoredInfoPanel(
       '.tour-glass-panel--anchored',
     );
     if (!(article instanceof HTMLElement)) {
+      cancelPanelExit(id);
       markers.removeMarker(id);
       continue;
     }
@@ -105,7 +124,8 @@ export function closeAnchoredInfoPanel(
     article.classList.remove('tour-glass-panel--anchored-enter');
     article.classList.add('tour-glass-panel--anchored-exit');
 
-    window.setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
+      closingPanelTimeouts.delete(id);
       closingPanelIds.delete(id);
       try {
         if (markers.getMarker(id)) {
@@ -115,6 +135,7 @@ export function closeAnchoredInfoPanel(
         /* marker already removed */
       }
     }, PANEL_EXIT_MS);
+    closingPanelTimeouts.set(id, timeoutId);
   }
 }
 
@@ -200,8 +221,13 @@ export function openAnchoredInfoPanel(
   const revealMedia = () => {
     if (!cameraSettled || !enterDone) return;
     const live = markers.getMarker(id);
-    if (live?.domElement instanceof HTMLElement) {
-      initPopupVideoPlayers(live.domElement);
+    if (!(live?.domElement instanceof HTMLElement)) return;
+    if (live.domElement.querySelector('.anchored-panel__hero--video')) {
+      mountNavPreviewVideoHero(live.domElement);
+    } else if (
+      live.domElement.querySelector('.anchored-panel__hero--image')
+    ) {
+      mountNavPreviewImageHero(live.domElement);
     }
   };
 

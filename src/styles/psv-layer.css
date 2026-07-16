@@ -83,28 +83,70 @@
 
 /* Thin scrollbar — shared across panels (AI chat, nav lists, help, etc.).
  * Avoid `scrollbar-gutter: stable` with thin bars: the classic gutter is wider
- * than the 4px thumb, which leaves empty space to the right of the bar.
- * Pair with overflow-y: scroll on the scrollport (not this utility alone). */
+ * than the styled thumb, which leaves empty space to the right of the bar.
+ * Pair with overflow-y: scroll on the scrollport (not this utility alone).
+ *
+ * Chromium: do not set `scrollbar-width` / `scrollbar-color` — those standard
+ * properties override ::-webkit-scrollbar and draw the OS classic bar (thick,
+ * often with arrows). Firefox: use scrollbar-* only. */
 .ishare-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
+  /* intentional: no scrollbar-* here for Blink */
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .ishare-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
+  }
+}
+
+@supports selector(::-webkit-scrollbar) {
+  .ishare-scrollbar {
+    scrollbar-width: unset;
+    scrollbar-color: unset;
+  }
 }
 
 .ishare-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 7px;
+  height: 7px;
+}
+
+.ishare-scrollbar::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+.ishare-scrollbar::-webkit-scrollbar-button:start:decrement,
+.ishare-scrollbar::-webkit-scrollbar-button:end:increment,
+.ishare-scrollbar::-webkit-scrollbar-button:vertical:start:decrement,
+.ishare-scrollbar::-webkit-scrollbar-button:vertical:end:increment {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .ishare-scrollbar::-webkit-scrollbar-track {
   background: transparent;
+  cursor: pointer;
 }
 
 .ishare-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(15, 23, 42, 0.18);
+  background: rgba(15, 23, 42, 0.22);
   border-radius: 999px;
+  cursor: pointer;
 }
 
 .ishare-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(15, 23, 42, 0.32);
+  background: rgba(15, 23, 42, 0.48);
+}
+
+.ishare-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Text inputs ? pill shape + Google Sans (placeholders included) */
@@ -199,24 +241,26 @@ input::placeholder {
 
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__close,
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__header-btn,
+.viewer-container .psv-marker:has([data-info-panel='true']) .anchored-panel__close,
+.viewer-container .psv-marker:has([data-info-panel='true']) .anchored-panel__header-btn,
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__video-play,
 .viewer-container .psv-marker:has([data-info-panel='true']) .tour-glass-panel__cta,
-.viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__close,
-.viewer-container .psv-marker:has([data-nav-panel='true']) .nav-preview-panel__header-btn,
+.viewer-container .psv-marker:has([data-nav-panel='true']) .anchored-panel__close,
+.viewer-container .psv-marker:has([data-nav-panel='true']) .anchored-panel__header-btn,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .tour-glass-panel__video-play,
 .viewer-container .psv-marker:has([data-nav-panel='true']) .tour-glass-panel__cta {
   cursor: pointer;
 }
 
-.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero,
-.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero-viewer,
-.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero-fallback {
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__hero,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__hero-viewer,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__hero-fallback {
   cursor: default;
 }
 
 /* Nav preview ? cap button row width to marker (unlayered; beats @layer components fit-content) */
-.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__main,
-.viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__body,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main,
+.viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body,
 .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming,
 .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-accordion,
 .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__naming-card,
@@ -258,7 +302,9 @@ input::placeholder {
 /* Info / NO panel ? cap footer CTA width to marker (unlayered; beats @layer components fit-content) */
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'],
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__shell,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__body,
+.viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-wrap,
 .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__footer .tour-glass-panel__cta-primary-group,
@@ -1062,6 +1108,43 @@ input::placeholder {
 .viewer-container .psv-marker:has(.hotspot-info--active),
 .viewer-container .psv-marker:has(.hotspot-general-info--active) {
   z-index: 55 !important;
+}
+
+/* Dev Manage — Edit / Move target (above panel-active so duplicates are obvious) */
+.viewer-container .psv-marker:has(.hotspot--dev-focus) {
+  z-index: 65 !important;
+}
+
+.hotspot-nav.hotspot--dev-focus .hotspot-nav__pill,
+.hotspot-info.hotspot--dev-focus .hotspot-info__pill,
+.hotspot-general-info.hotspot--dev-focus .hotspot-general-info__chip {
+  outline: 3px solid var(--ishare-accent);
+  outline-offset: 4px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.85),
+    0 0 18px rgba(232, 168, 56, 0.55);
+  animation: hotspot-dev-focus-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes hotspot-dev-focus-pulse {
+
+  0%,
+  100% {
+    outline-offset: 4px;
+  }
+
+  50% {
+    outline-offset: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .hotspot-nav.hotspot--dev-focus .hotspot-nav__pill,
+  .hotspot-info.hotspot--dev-focus .hotspot-info__pill,
+  .hotspot-general-info.hotspot--dev-focus .hotspot-general-info__chip {
+    animation: none;
+  }
 }
 
 .viewer-container .psv-marker:has([data-info-panel='true']).psv-marker--visible,

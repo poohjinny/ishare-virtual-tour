@@ -163,29 +163,68 @@
     letter-spacing: 0.04em;
   }
 
-  /* ── Thin scrollbar (Explore panel, client intro gallery, AI chat, etc.) ── */
+  /* ── Thin scrollbar (Explore panel, client intro gallery, AI chat, etc.) ──
+   * See psv-layer.css `.ishare-scrollbar` — Chromium must not set
+   * scrollbar-width/color or Windows draws a thick classic bar with arrows. */
   .ishare-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
   }
 
+  @supports not selector(::-webkit-scrollbar) {
+    .ishare-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(15, 23, 42, 0.22) transparent;
+    }
+  }
+
+  @supports selector(::-webkit-scrollbar) {
+    .ishare-scrollbar {
+      scrollbar-width: unset;
+      scrollbar-color: unset;
+    }
+  }
+
   .ishare-scrollbar::-webkit-scrollbar {
-    width: 4px;
+    width: 7px;
+    height: 7px;
+  }
+
+  .ishare-scrollbar::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+
+  .ishare-scrollbar::-webkit-scrollbar-button:start:decrement,
+  .ishare-scrollbar::-webkit-scrollbar-button:end:increment,
+  .ishare-scrollbar::-webkit-scrollbar-button:vertical:start:decrement,
+  .ishare-scrollbar::-webkit-scrollbar-button:vertical:end:increment {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
 
   .ishare-scrollbar::-webkit-scrollbar-track {
     background: transparent;
+    cursor: pointer;
   }
 
   .ishare-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(15, 23, 42, 0.18);
+    background: rgba(15, 23, 42, 0.22);
     border-radius: 999px;
+    cursor: pointer;
   }
 
   .ishare-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(15, 23, 42, 0.32);
+    background: rgba(15, 23, 42, 0.48);
+  }
+
+  .ishare-scrollbar::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   /* ── Dark tooltips (Google Sans) — hover only, bubble only (no arrow) ── */

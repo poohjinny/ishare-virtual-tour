@@ -43,7 +43,6 @@ import {
   TOUR_SHARE_OPPORTUNITY_ARIA,
   TOUR_SHARE_OPPORTUNITY_LABEL,
 } from '../constants/tourShare';
-import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import {
   popupCtaRowClassName,
   popupCtaWrapClassName,
@@ -55,6 +54,13 @@ import {
 } from './namingStatusBadgeIcons';
 import { BADGE_CLASS } from './ui/badgeClasses';
 import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
+import {
+  ANCHORED_PANEL,
+  buildAnchoredMediaPanelHtml,
+  buildAnchoredPanelBodyToolbarHtml,
+  buildAnchoredPanelHeroActionsHtml,
+  buildAnchoredPanelShareButtonHtml,
+} from './anchoredPanelChrome';
 import {
   initPopupVideoPlayers,
   popupVideoPlayIconHtml,
@@ -311,82 +317,6 @@ export function glassPanelCloseIconHtml(): string {
   });
 }
 
-function glassPanelShareIconHtml(): string {
-  return materialSymbolHtml('share', {
-    className: GLASS_PANEL.headerBtnIcon,
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
-  });
-}
-
-function navPreviewShareIconHtml(): string {
-  return materialSymbolHtml('share', {
-    className: 'nav-preview-panel__header-btn-icon',
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
-  });
-}
-
-function glassPanelMailIconHtml(): string {
-  return materialSymbolHtml('mail', {
-    className: GLASS_PANEL.headerBtnIcon,
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
-  });
-}
-
-function glassPanelExternalLinkIconHtml(): string {
-  return materialSymbolHtml('open_in_new', {
-    className: GLASS_PANEL.headerBtnIcon,
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
-  });
-}
-
-function buildShareHeaderButtonHtml(
-  dataAttr: string,
-  ariaLabel: string,
-  tooltipLabel: string,
-  className = GLASS_PANEL.headerBtn,
-): string {
-  return `<button
-        type="button"
-        class="${className} ishare-tooltip-host"
-        data-${dataAttr}="true"
-        aria-label="${escapeHtml(ariaLabel)}"
-        data-ishare-tooltip="${escapeHtml(tooltipLabel)}"
-        data-ishare-tooltip-placement="left"
-      >${glassPanelShareIconHtml()}</button>`;
-}
-
-function buildPopupHeaderActionHtml(cta: PopupCta): string {
-  const resolved = resolvePopupCta(cta);
-  const iconHtml =
-    isMailtoCtaUrl(resolved.url) ?
-      glassPanelMailIconHtml()
-    : glassPanelExternalLinkIconHtml();
-
-  return `<a
-        class="${GLASS_PANEL.headerBtn}"
-        href="${escapeHtml(resolved.url)}"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="${escapeHtml(resolved.ariaLabel)}"
-      >${iconHtml}</a>`;
-}
-
-function buildPopupHeaderActionsHtml(options: {
-  headerCtas: PopupCta[];
-  shareHtml?: string;
-}): string {
-  const actionHtml = [
-    options.shareHtml ?? '',
-    ...options.headerCtas.map((cta) => buildPopupHeaderActionHtml(cta)),
-  ]
-    .filter(Boolean)
-    .join('');
-
-  if (!actionHtml) return '';
-
-  return `<div class="${GLASS_PANEL.headerActions}">${actionHtml}</div>`;
-}
-
 function buildPopupFooterInnerHtml(ctas: PopupCta[]): string {
   const layout = resolvePopupFooterLayout(ctas);
   if (!layout) return '';
@@ -422,13 +352,6 @@ function buildPopupFooterInnerHtml(ctas: PopupCta[]): string {
       ${primaryButton}
     </div>
   </div>`;
-}
-
-function navPreviewCloseIconHtml(): string {
-  return materialSymbolHtml('close', {
-    className: 'nav-preview-panel__close-icon',
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
-  });
 }
 
 export function glassPanelCtaArrowIconHtml(): string {
@@ -505,7 +428,6 @@ export function buildNamingPriceUnderTitleHtml(
   const displayPrice = formatNamingPriceDisplay(price);
 
   return `<p class="${priceClass}">
-    <span class="${GLASS_PANEL.priceSep}" aria-hidden="true">&bull;</span>
     <span class="${GLASS_PANEL.priceValue}">${escapeHtml(displayPrice)}</span>
   </p>`;
 }
@@ -702,9 +624,9 @@ export function buildTourGlassPanelHtml(
         </div>
         <div class="${GLASS_PANEL.body} ishare-scrollbar">
           ${mediaHtml}
+          ${videoHtml}
           <div class="${GLASS_PANEL.copy}">${bodyHtml}</div>
           ${bodyAfterHtml}
-          ${videoHtml}
         </div>
         ${footerHtml}
       </div>
@@ -719,6 +641,8 @@ export function buildAnchoredPopupHtml(
 ): string {
   const titleId = `info-panel-title-${hotspotId}`;
   const naming = popup.namingOpportunity;
+  const hideShare = options?.hideShare ?? false;
+
   const titleAfterHtml =
     naming ?
       buildNamingPriceUnderTitleHtml(
@@ -731,19 +655,88 @@ export function buildAnchoredPopupHtml(
       `<p class="${GLASS_PANEL.priceLabel}">${escapeHtml(naming.priceLabel)}</p>`
     : '';
 
-  const ctas =
-    options?.tour ? resolvePopupContentCtas(popup, options.tour) : [];
-  const headerActionsHtml = buildPopupHeaderActionsHtml({
-    headerCtas: [],
-    shareHtml:
-      naming && !options?.hideShare ?
-        buildShareHeaderButtonHtml(
-          'info-panel-share',
-          TOUR_SHARE_OPPORTUNITY_ARIA,
-          TOUR_SHARE_OPPORTUNITY_LABEL,
-        )
-      : undefined,
+  const titleBlockHtml = `<div class="${GLASS_PANEL.titleBlock}">
+      <div class="${GLASS_PANEL.titleLine}">
+        <h3 id="${escapeHtml(titleId)}" class="${GLASS_PANEL.title}">
+          ${escapeHtml(popup.title)}
+        </h3>
+        ${titleAfterHtml}
+      </div>
+      ${titleSubHtml}
+    </div>`;
+
+  const trimmedVideoUrl = popup.videoUrl?.trim();
+  const trimmedImage = popup.image?.trim();
+  const hasVideo = Boolean(trimmedVideoUrl);
+  const hasImage = Boolean(trimmedImage) && !hasVideo;
+  const hasHero = hasVideo || hasImage;
+  const heroHeight = resolveNavPreviewHeroHeight(undefined, {
+    video: hasVideo || hasImage,
   });
+
+  const shareHtml =
+    naming && !hideShare ?
+      buildAnchoredPanelShareButtonHtml({
+        dataAttr: 'info-panel-share',
+        ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
+        tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
+      })
+    : '';
+  const shareInlineHtml =
+    naming && !hideShare ?
+      buildAnchoredPanelShareButtonHtml({
+        dataAttr: 'info-panel-share',
+        ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
+        tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
+        inline: true,
+      })
+    : '';
+
+  const heroActionsHtml = buildAnchoredPanelHeroActionsHtml({
+    shareHtml,
+    closeDataAttr: 'info-panel-close',
+  });
+
+  const heroHtml =
+    hasVideo ?
+      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroVideo} ${ANCHORED_PANEL.heroLoading}" style="height:${heroHeight}px" aria-busy="true">
+        <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
+        ${buildPopupVideoHtml(popup)}
+        ${heroActionsHtml}
+      </div>`
+    : hasImage ?
+      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroImage} ${ANCHORED_PANEL.heroLoading}" style="height:${heroHeight}px" aria-busy="true">
+        <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
+        <img
+          src="${escapeHtml(trimmedImage!)}"
+          alt=""
+          class="${ANCHORED_PANEL.heroImageEl}"
+          decoding="async"
+        />
+        ${heroActionsHtml}
+      </div>`
+    : '';
+
+  const closeInBodyHtml =
+    hasHero ? '' : (
+      buildAnchoredPanelBodyToolbarHtml({
+        shareHtml: shareInlineHtml,
+        closeDataAttr: 'info-panel-close',
+      })
+    );
+
+  const badgeHtml = buildPopupBadgeHtml(popup);
+  const copyHtml = buildGlassPanelParagraphsHtml(popup.body);
+  const introHtml = `<div class="info-panel__intro">
+      ${titleBlockHtml}
+      ${badgeHtml}
+    </div>`;
+
+  const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
+    ${closeInBodyHtml}
+    ${introHtml}
+    ${copyHtml ? `<div class="${GLASS_PANEL.copy}">${copyHtml}</div>` : ''}
+  </div>`;
 
   const visitSceneId = popup.visitScene;
   const visitSceneTitle =
@@ -757,7 +750,7 @@ export function buildAnchoredPopupHtml(
     <div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
       <button
         type="button"
-        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-trailing-icon"
+        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-postfix-icon"
         data-visit-scene="${escapeHtml(visitSceneId)}"
         aria-label="${escapeHtml(visitCtaLabel)}"
       >${buildGlassPanelCtaTextHtml(visitCtaLabel)}${glassPanelCtaArrowIconHtml()}</button>
@@ -765,27 +758,19 @@ export function buildAnchoredPopupHtml(
   </footer>`
     : '';
 
+  const ctas =
+    options?.tour ? resolvePopupContentCtas(popup, options.tour) : [];
   const ctaFooterHtml =
     ctas.length > 0 ?
       `<footer class="${GLASS_PANEL.footer}">${buildPopupFooterInnerHtml(ctas)}</footer>`
     : buildPopupFooterHtml(popup, options?.tour);
 
-  const footerHtml = ctaFooterHtml + visitFooterHtml;
-
-  return buildTourGlassPanelHtml({
-    title: popup.title,
+  return buildAnchoredMediaPanelHtml({
     titleId,
-    titleAfterHtml,
-    titleSubHtml,
-    badgeHtml: buildPopupBadgeHtml(popup),
-    bodyHtml: buildGlassPanelParagraphsHtml(popup.body),
-    mediaHtml: buildPopupImageHtml(popup),
-    videoHtml: buildPopupVideoHtml(popup),
-    headerActionsHtml,
-    footerHtml,
-    variant: 'anchored',
     animate: options?.animate ?? true,
-    closeDataAttr: 'info-panel-close',
+    heroHtml,
+    bodyHtml,
+    footerHtml: ctaFooterHtml + visitFooterHtml,
     rootDataAttrs: {
       'data-info-panel': 'true',
       'data-info-panel-for': hotspotId,
@@ -855,10 +840,10 @@ export function measureAnchoredNavPreviewHeight(
   const panelWidth = resolveNavPreviewPanelWidth();
   if (panel instanceof HTMLElement) {
     panel.style.width = '100%';
-    const hero = panel.querySelector('.nav-preview-panel__hero');
+    const hero = panel.querySelector('.anchored-panel__hero');
     if (hero instanceof HTMLElement) {
       const isVideoHero = hero.classList.contains(
-        'nav-preview-panel__hero--video',
+        'anchored-panel__hero--video',
       );
       hero.style.height = `${resolveNavPreviewHeroHeight(panelWidth, {
         video: isVideoHero,
@@ -938,10 +923,12 @@ export function buildNavPreviewNamingListHtml(
             <span class="nav-preview-panel__naming-chevron" aria-hidden="true">${navPreviewNamingChevronHtml()}</span>
             <span class="nav-preview-panel__naming-title-line">
               <span class="nav-preview-panel__naming-name">${escapeHtml(item.name)}</span>
-              ${badgeHtml}
             </span>
           </span>
-          ${priceHtml}
+          <span class="nav-preview-panel__naming-trailing">
+            ${badgeHtml}
+            ${priceHtml}
+          </span>
         </button>
         <div class="nav-preview-panel__naming-panel-wrap" aria-hidden="true">
           <div
@@ -1010,34 +997,12 @@ function navPreviewNamingCtaArrowHtml(): string {
 </svg>`;
 }
 
-function navPreviewShareButtonHtml(inline = false): string {
-  const className =
-    inline ?
-      'nav-preview-panel__header-btn nav-preview-panel__header-btn--inline ishare-tooltip-host'
-    : 'nav-preview-panel__header-btn ishare-tooltip-host';
-
-  return `<button
-            type="button"
-            class="${className}"
-            data-nav-panel-share="true"
-            aria-label="${escapeHtml(TOUR_SHARE_LOCATION_ARIA)}"
-            data-ishare-tooltip="${escapeHtml(TOUR_SHARE_LOCATION_LABEL)}"
-            data-ishare-tooltip-placement="left"
-          >${navPreviewShareIconHtml()}</button>`;
-}
-
 export function buildAnchoredNavPreviewHtml(
   preview: NavPreviewContent,
   hotspotId: string,
   options?: { animate?: boolean; hideShare?: boolean },
 ): string {
   const titleId = `nav-panel-title-${hotspotId}`;
-  // Entrance scale runs on the article (ancestor of the glass shell), not the
-  // shell itself — retained from the frosted-glass era (when backdrop-filter +
-  // transform on one element tripped a Chromium paint bug). Kept as the stable
-  // entrance now that the shell is solid.
-  const articleEnterClass =
-    options?.animate === false ? '' : ` ${GLASS_PANEL.anchoredEnter}`;
 
   const titleHtml = `<h3 id="${escapeHtml(titleId)}" class="${GLASS_PANEL.title} nav-preview-panel__title">${escapeHtml(preview.title)}</h3>`;
 
@@ -1056,32 +1021,38 @@ export function buildAnchoredNavPreviewHtml(
   const hasPanorama = Boolean(preview.panorama) && !hasVideo;
   const hasHero = hasVideo || hasPanorama;
 
-  const heroTitleOverlayHtml =
-    hasHero ?
-      `<div class="nav-preview-panel__hero-title">${titleHtml}</div>`
-    : '';
-
   const videoHeroHeight = resolveNavPreviewHeroHeight(undefined, {
     video: true,
   });
   const panoramaHeroHeight = resolveNavPreviewHeroHeight();
 
   const hideShare = options?.hideShare ?? false;
-  const navShareHtml = hideShare ? '' : navPreviewShareButtonHtml();
+  const navShareHtml =
+    hideShare ? '' : (
+      buildAnchoredPanelShareButtonHtml({
+        dataAttr: 'nav-panel-share',
+        ariaLabel: TOUR_SHARE_LOCATION_ARIA,
+        tooltipLabel: TOUR_SHARE_LOCATION_LABEL,
+      })
+    );
+  const navShareInlineHtml =
+    hideShare ? '' : (
+      buildAnchoredPanelShareButtonHtml({
+        dataAttr: 'nav-panel-share',
+        ariaLabel: TOUR_SHARE_LOCATION_ARIA,
+        tooltipLabel: TOUR_SHARE_LOCATION_LABEL,
+        inline: true,
+      })
+    );
 
-  const heroActionsHtml = `<div class="nav-preview-panel__hero-actions">
-          ${navShareHtml}
-          <button
-            type="button"
-            class="nav-preview-panel__close"
-            data-nav-panel-close="true"
-            aria-label="Close"
-          >${navPreviewCloseIconHtml()}</button>
-        </div>`;
+  const heroActionsHtml = buildAnchoredPanelHeroActionsHtml({
+    shareHtml: navShareHtml,
+    closeDataAttr: 'nav-panel-close',
+  });
 
   const heroHtml =
     hasVideo ?
-      `<div class="nav-preview-panel__hero nav-preview-panel__hero--video nav-preview-panel__hero--loading" style="height:${videoHeroHeight}px" aria-busy="true">
+      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroVideo} ${ANCHORED_PANEL.heroLoading}" style="height:${videoHeroHeight}px" aria-busy="true">
         <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
         ${buildPopupVideoHtml({
           title: preview.title,
@@ -1089,45 +1060,34 @@ export function buildAnchoredNavPreviewHtml(
           videoUrl: trimmedVideoUrl!,
           videoPoster: preview.videoPoster,
         })}
-        ${heroTitleOverlayHtml}
         ${heroActionsHtml}
       </div>`
     : hasPanorama ?
-      `<div class="nav-preview-panel__hero nav-preview-panel__hero--loading" style="height:${panoramaHeroHeight}px" aria-busy="true">
+      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroLoading}" style="height:${panoramaHeroHeight}px" aria-busy="true">
         <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
-        <div class="nav-preview-panel__hero-viewer"></div>
+        <div class="${ANCHORED_PANEL.heroViewer}"></div>
         ${
           preview.image ?
             `<img
           src="${escapeHtml(preview.image)}"
           alt=""
-          class="nav-preview-panel__hero-fallback"
+          class="${ANCHORED_PANEL.heroFallback}"
           hidden
           decoding="async"
         />`
           : ''
         }
-        ${heroTitleOverlayHtml}
         ${heroActionsHtml}
       </div>`
     : '';
 
   const closeInBodyHtml =
     hasHero ? '' : (
-      `<div class="nav-preview-panel__body-toolbar">
-        <div class="nav-preview-panel__toolbar-actions">
-          ${hideShare ? '' : navPreviewShareButtonHtml(true)}
-          <button
-            type="button"
-            class="nav-preview-panel__close nav-preview-panel__close--inline"
-            data-nav-panel-close="true"
-            aria-label="Close"
-          >${navPreviewCloseIconHtml()}</button>
-        </div>
-      </div>`
+      buildAnchoredPanelBodyToolbarHtml({
+        shareHtml: navShareInlineHtml,
+        closeDataAttr: 'nav-panel-close',
+      })
     );
-
-  const bodyTitleHtml = hasHero ? '' : titleHtml;
 
   const descriptionHtml =
     preview.description ?
@@ -1156,7 +1116,7 @@ export function buildAnchoredNavPreviewHtml(
     <div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
       <button
         type="button"
-        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-trailing-icon"
+        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-postfix-icon"
         data-nav-panel-go="true"
         aria-label="${escapeHtml(visitAriaLabel)}"
       >${buildGlassPanelCtaTextHtml(ctaLabel)}${glassPanelCtaArrowIconHtml()}</button>
@@ -1164,7 +1124,7 @@ export function buildAnchoredNavPreviewHtml(
   </footer>`
     : '';
 
-  const introInnerHtml = `${namingTotalHtml}${bodyTitleHtml}${
+  const introInnerHtml = `${namingTotalHtml}${titleHtml}${
     descriptionHtml ?
       `<div class="${GLASS_PANEL.copy}">${descriptionHtml}</div>`
     : ''
@@ -1174,28 +1134,23 @@ export function buildAnchoredNavPreviewHtml(
       `<div class="nav-preview-panel__intro">${introInnerHtml}</div>`
     : '';
 
-  const bodyHtml = `<div class="${GLASS_PANEL.body} nav-preview-panel__body ishare-scrollbar">
+  const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
     ${closeInBodyHtml}
     ${introHtml}
     ${bodyVideoHtml}
     ${namingHtml}
   </div>`;
 
-  return `
-    <article
-      class="${GLASS_PANEL.rootAnchored} tour-glass-panel--nav-preview${articleEnterClass}"
-      role="dialog"
-      aria-labelledby="${escapeHtml(titleId)}"
-      data-nav-panel="true"
-      data-nav-panel-for="${escapeHtml(hotspotId)}"
-    >
-      <div class="${GLASS_PANEL.shell}">
-        ${heroHtml}
-        <div class="nav-preview-panel__main">
-          ${bodyHtml}
-          ${footerHtml}
-        </div>
-      </div>
-    </article>
-  `;
+  return buildAnchoredMediaPanelHtml({
+    titleId,
+    rootExtraClass: 'tour-glass-panel--nav-preview',
+    animate: options?.animate ?? true,
+    heroHtml,
+    bodyHtml,
+    footerHtml,
+    rootDataAttrs: {
+      'data-nav-panel': 'true',
+      'data-nav-panel-for': hotspotId,
+    },
+  });
 }

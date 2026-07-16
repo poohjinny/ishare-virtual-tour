@@ -12,7 +12,7 @@ export function enableGlassPanelTextSelection(root: ParentNode): void {
   root.style.userSelect = 'text';
 
   for (const el of root.querySelectorAll(
-    '.tour-glass-panel__body, .nav-preview-panel__body, .nav-preview-panel__hero-title, .tour-glass-panel__copy, .tour-glass-panel__paragraph',
+    '.tour-glass-panel__body, .anchored-panel__body, .anchored-panel__hero-title, .tour-glass-panel__copy, .tour-glass-panel__paragraph',
   )) {
     if (el instanceof HTMLElement) {
       el.style.userSelect = 'text';

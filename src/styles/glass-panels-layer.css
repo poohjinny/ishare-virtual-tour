@@ -86,6 +86,9 @@
     max-width: 100%;
     height: auto;
     max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .tour-glass-panel--anchored .tour-glass-panel__body {
@@ -101,17 +104,64 @@
   }
 
   .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body {
+    cursor: default;
+  }
+
+  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .tour-glass-panel__copy,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .tour-glass-panel__paragraph,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .tour-glass-panel__title,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .info-panel__intro,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .nav-preview-panel__intro {
     cursor: text;
   }
 
-  /* NO / info — content height when short; body scrolls when marker hits max-height.
-   * Keep overflow-y: auto (not scroll) so short panels match dock chrome without a
-   * permanent thin track; scrollbar still sits on the body edge when present. */
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__body {
+  /* Shared anchored media panel: body scrolls, footer stays pinned. */
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body,
+  .tour-glass-panel--nav-preview .anchored-panel__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: clip;
+    /* scroll: reserve track always so content width does not jump.
+     * ishare-scrollbar styles that track (no OS arrows / thick classic bar). */
+    overflow-y: scroll;
+    gap: 14px;
+    padding: var(--anchored-body-pad-top, 32px) var(--ishare-panel-inline-padding, 28px) 28px;
+    background: var(--ishare-glass-body-bg);
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    /* default on the scrollport so the scrollbar gutter is not stuck on I-beam */
+    cursor: default;
+  }
+
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .tour-glass-panel__copy,
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .tour-glass-panel__paragraph,
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .tour-glass-panel__title,
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .info-panel__intro,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__copy,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__paragraph,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__intro,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__title,
+  .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__copy,
+  .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__paragraph,
+  .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__intro,
+  .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__title {
+    cursor: text;
   }
 
   .tour-glass-panel--anchored[data-info-panel='true'],
@@ -119,18 +169,27 @@
     --ishare-panel-inline-padding: 28px;
     --ishare-panel-header-padding-y: 18px;
     --ishare-panel-footer-padding-y: 22px;
-  }
-
-  .tour-glass-panel--anchored[data-info-panel='true'] {
     --ishare-panel-header-btn-size: 38px;
     --ishare-panel-header-icon-size: 16px;
   }
 
-  .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__header {
-    padding-top: var(--ishare-panel-header-padding-y);
-    padding-bottom: var(--ishare-panel-header-padding-y);
-    padding-left: var(--ishare-panel-inline-padding);
-    padding-right: var(--ishare-panel-inline-padding);
+  .info-panel__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .info-panel__intro .tour-glass-panel__title {
+    font-size: var(--ishare-font-size-2xl);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .info-panel__intro .tour-glass-panel__price--under-title {
+    font-size: var(--ishare-font-size-2xl);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
   }
 
   .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body button {
@@ -330,22 +389,29 @@
 
   .tour-glass-panel__title-line {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: baseline;
-    gap: 6px 10px;
+    justify-content: space-between;
+    gap: 12px 16px;
     width: 100%;
     min-width: 0;
   }
 
   .tour-glass-panel__title-line .tour-glass-panel__title {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     width: auto;
     min-width: 0;
   }
 
   .tour-glass-panel__title-line .tour-glass-panel__price--under-title {
     flex: 0 0 auto;
-    margin: 0;
+    margin: 0 0 0 auto;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .tour-glass-panel__title-line .tour-glass-panel__price--under-title .tour-glass-panel__price-sep {
+    display: none;
   }
 
   .tour-glass-panel__title-block .tour-glass-panel__title {
@@ -860,6 +926,10 @@
 
   .tour-glass-panel__body>.tour-glass-panel__video {
     flex-shrink: 0;
+  }
+
+  .tour-glass-panel__video+.tour-glass-panel__copy {
+    margin-top: 10px;
   }
 
   .tour-glass-panel__copy+.tour-glass-panel__video {
@@ -1503,15 +1573,10 @@
       --ishare-panel-footer-padding-y: 18px;
     }
 
-    .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__header {
-      padding-top: var(--ishare-panel-header-padding-y);
-      padding-bottom: var(--ishare-panel-header-padding-y);
-      padding-left: var(--ishare-panel-inline-padding);
-      padding-right: var(--ishare-panel-inline-padding);
-    }
-
-    .tour-glass-panel--nav-preview .nav-preview-panel__body {
-      padding: 26px var(--ishare-panel-inline-padding, 22px) 22px;
+    .tour-glass-panel--nav-preview .anchored-panel__body,
+    .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body {
+      --anchored-body-pad-top: 26px;
+      padding: var(--anchored-body-pad-top, 26px) var(--ishare-panel-inline-padding, 22px) 22px;
     }
 
     .tour-glass-panel__body {
@@ -1596,11 +1661,11 @@
     transform-origin: bottom center;
   }
 
-  .viewer-container .psv-marker .tour-glass-panel--nav-preview .nav-preview-panel__hero .ishare-tooltip-host::after {
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__hero .ishare-tooltip-host::after {
     z-index: 20;
   }
 
-  .nav-preview-panel__hero {
+  .anchored-panel__hero {
     position: relative;
     flex: 0 0 auto;
     flex-shrink: 0;
@@ -1615,13 +1680,13 @@
     border-top-right-radius: calc(var(--ishare-panel-radius) - 1px);
   }
 
-  .nav-preview-panel__hero .preview-hero-skeleton {
+  .anchored-panel__hero .preview-hero-skeleton {
     position: absolute;
     inset: -1px;
     z-index: 0;
   }
 
-  .nav-preview-panel__hero:not(.nav-preview-panel__hero--loading) .preview-hero-skeleton {
+  .anchored-panel__hero:not(.anchored-panel__hero--loading) .preview-hero-skeleton {
     opacity: 0;
     /* Hold the skeleton opaque until the media has finished its 0.28s fade-in,
        then fade it out underneath. Fading both at once let the navy hero
@@ -1629,17 +1694,17 @@
     transition: opacity 0.2s ease 0.28s;
   }
 
-  .nav-preview-panel__hero--error .preview-hero-skeleton {
+  .anchored-panel__hero--error .preview-hero-skeleton {
     opacity: 1;
     background: #e2e8f0;
   }
 
-  .nav-preview-panel__hero--error .preview-hero-skeleton::after {
+  .anchored-panel__hero--error .preview-hero-skeleton::after {
     animation: none;
     display: none;
   }
 
-  .nav-preview-panel__hero-image {
+  .anchored-panel__hero-image {
     position: absolute;
     z-index: 1;
     display: block;
@@ -1652,7 +1717,7 @@
     transition: opacity 0.28s ease;
   }
 
-  .nav-preview-panel__hero-viewer {
+  .anchored-panel__hero-viewer {
     position: absolute;
     z-index: 1;
     width: 100%;
@@ -1662,37 +1727,37 @@
     transition: opacity 0.28s ease;
   }
 
-  .nav-preview-panel__hero:not(.nav-preview-panel__hero--loading) .nav-preview-panel__hero-viewer {
+  .anchored-panel__hero:not(.anchored-panel__hero--loading) .anchored-panel__hero-viewer {
     opacity: 1;
   }
 
-  .nav-preview-panel__hero-viewer .psv-container {
+  .anchored-panel__hero-viewer .psv-container {
     border: none;
     border-radius: 0;
     outline: none;
     box-shadow: none;
   }
 
-  .nav-preview-panel__hero-viewer .psv-container,
-  .nav-preview-panel__hero-viewer .psv-canvas-container {
+  .anchored-panel__hero-viewer .psv-container,
+  .anchored-panel__hero-viewer .psv-canvas-container {
     width: 100% !important;
     height: 100% !important;
     cursor: default;
   }
 
-  .nav-preview-panel__hero-viewer .psv-canvas-container canvas {
+  .anchored-panel__hero-viewer .psv-canvas-container canvas {
     display: block;
     outline: none;
     cursor: default;
   }
 
-  .nav-preview-panel__hero-viewer .psv-navbar,
-  .nav-preview-panel__hero-viewer .psv-loader-container,
-  .nav-preview-panel__hero-viewer .psv-loader-text {
+  .anchored-panel__hero-viewer .psv-navbar,
+  .anchored-panel__hero-viewer .psv-loader-container,
+  .anchored-panel__hero-viewer .psv-loader-text {
     display: none !important;
   }
 
-  .nav-preview-panel__hero-fallback {
+  .anchored-panel__hero-fallback {
     position: absolute;
     inset: -1px;
     z-index: 1;
@@ -1707,19 +1772,19 @@
     transition: opacity 0.28s ease;
   }
 
-  .nav-preview-panel__hero-fallback--loaded {
+  .anchored-panel__hero-fallback--loaded {
     opacity: 1;
   }
 
-  .nav-preview-panel__hero-image--loaded {
+  .anchored-panel__hero-image--loaded {
     opacity: 1;
   }
 
-  .nav-preview-panel__hero--error {
+  .anchored-panel__hero--error {
     background: #e2e8f0;
   }
 
-  .nav-preview-panel__hero--video .tour-glass-panel__video {
+  .anchored-panel__hero--video .tour-glass-panel__video {
     /* Square the whole video off — the hero sits flush at the panel top, so the
        shell, its ::after overlay and skeleton (all keyed off this token) must
        drop the radius, not just the shell. */
@@ -1733,54 +1798,41 @@
     aspect-ratio: auto;
   }
 
-  .nav-preview-panel__hero--video:not(.nav-preview-panel__hero--loading) .tour-glass-panel__video {
+  .anchored-panel__hero--video:not(.anchored-panel__hero--loading) .tour-glass-panel__video {
     opacity: 1;
   }
 
-  .nav-preview-panel__hero--video:not(.nav-preview-panel__hero--loading) .preview-hero-skeleton {
+  .anchored-panel__hero--video:not(.anchored-panel__hero--loading) .preview-hero-skeleton {
     opacity: 0;
     /* Same as the 360 hero: wait for the video fade-in before hiding the
        skeleton so the navy background never shows through. */
     transition: opacity 0.2s ease 0.28s;
   }
 
+  .anchored-panel__hero--image .anchored-panel__hero-image {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.28s ease;
+  }
+
+  .anchored-panel__hero--image .anchored-panel__hero-image--loaded {
+    opacity: 1;
+  }
+
   @media (prefers-reduced-motion: reduce) {
 
-    .nav-preview-panel__hero-image,
-    .nav-preview-panel__hero-fallback {
+    .anchored-panel__hero-image,
+    .anchored-panel__hero-fallback {
       transition: none;
     }
   }
 
-  .nav-preview-panel__hero-title {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2;
-    padding: 44px 16px 14px;
-    background: linear-gradient(to top,
-        color-mix(in srgb, #000 80%, transparent) 0%,
-        color-mix(in srgb, #000 40%, transparent) 42%,
-        transparent 100%);
-    pointer-events: none;
-  }
-
-  .nav-preview-panel__hero-title .nav-preview-panel__title {
-    margin: 0;
-    pointer-events: auto;
-    user-select: text;
-    -webkit-user-select: text;
-    cursor: text;
-    font-family: var(--ishare-display-font);
-    font-size: var(--ishare-font-size-2xl);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    text-align: center;
-    color: #fff;
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
-  }
+  /* Title lives in the body now — keep overlay styles out of the hero. */
 
   .nav-preview-panel__intro {
     display: flow-root;
@@ -1788,6 +1840,7 @@
 
   .nav-preview-panel__intro .tour-glass-panel__copy {
     display: block;
+    margin-top: 12px;
   }
 
   .nav-preview-panel__intro .tour-glass-panel__paragraph+.tour-glass-panel__paragraph {
@@ -1823,7 +1876,7 @@
     color: var(--ishare-text-muted);
   }
 
-  .nav-preview-panel__hero-actions {
+  .anchored-panel__hero-actions {
     position: absolute;
     top: 8px;
     right: 8px;
@@ -1834,7 +1887,7 @@
     overflow: visible;
   }
 
-  .nav-preview-panel__header-btn {
+  .anchored-panel__header-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1851,29 +1904,62 @@
       transform 0.15s ease;
   }
 
-  .nav-preview-panel__header-btn:hover,
-  .nav-preview-panel__header-btn:focus-visible {
+  .anchored-panel__header-btn:hover,
+  .anchored-panel__header-btn:focus-visible {
     background: rgba(15, 23, 42, 0.68);
     outline: none;
   }
 
-  .nav-preview-panel__header-btn-icon {
+  /* InfoPopup / shared glass header buttons on media heroes */
+  .anchored-panel__hero-actions .tour-glass-panel__header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .anchored-panel__hero-actions .tour-glass-panel__header-btn,
+  .anchored-panel__hero-actions .tour-glass-panel__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ishare-panel-header-btn-size, 36px);
+    height: var(--ishare-panel-header-btn-size, 36px);
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.52);
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  .anchored-panel__hero-actions .tour-glass-panel__header-btn:hover,
+  .anchored-panel__hero-actions .tour-glass-panel__header-btn:focus-visible,
+  .anchored-panel__hero-actions .tour-glass-panel__close:hover,
+  .anchored-panel__hero-actions .tour-glass-panel__close:focus-visible {
+    background: rgba(15, 23, 42, 0.68);
+    outline: none;
+  }
+
+  .anchored-panel__header-btn-icon {
     font-size: var(--ishare-panel-header-icon-size, 16px);
     line-height: 1;
   }
 
-  .nav-preview-panel__header-btn--inline {
+  .anchored-panel__header-btn--inline {
     background: transparent;
     color: var(--ishare-text-muted);
   }
 
-  .nav-preview-panel__header-btn--inline:hover,
-  .nav-preview-panel__header-btn--inline:focus-visible {
+  .anchored-panel__header-btn--inline:hover,
+  .anchored-panel__header-btn--inline:focus-visible {
     background: rgba(15, 23, 42, 0.06);
     color: var(--ishare-text);
   }
 
-  .nav-preview-panel__close {
+  .anchored-panel__close {
     position: static;
     top: auto;
     right: auto;
@@ -1894,74 +1980,112 @@
       transform 0.15s ease;
   }
 
-  .nav-preview-panel__close:hover,
-  .nav-preview-panel__close:focus-visible {
+  .anchored-panel__close:hover,
+  .anchored-panel__close:focus-visible {
     background: rgba(15, 23, 42, 0.68);
     outline: none;
   }
 
-  .nav-preview-panel__close-icon {
+  .anchored-panel__close-icon {
     font-size: var(--ishare-panel-header-icon-size, 16px);
     line-height: 1;
   }
 
-  .nav-preview-panel__body-toolbar {
+  .anchored-panel__body-toolbar {
     display: flex;
     justify-content: flex-end;
-    margin: -8px 0 -4px;
+    margin: 0;
   }
 
-  .nav-preview-panel__toolbar-actions {
+  .anchored-panel__toolbar-actions {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 0;
   }
 
-  .nav-preview-panel__close--inline {
+  .anchored-panel__toolbar-actions>*+* {
+    margin-left: -4px;
+  }
+
+  /*
+   * No-media chrome: hug panel corner like hero, without negative
+   * margins that expand scroll overflow. Shrink body pad around the toolbar
+   * row; keep content on the normal inline inset.
+   */
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body:has(> .anchored-panel__body-toolbar),
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar),
+  .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar),
+  .info-popup .anchored-panel__body:has(> .anchored-panel__body-toolbar),
+  .info-popup .info-popup__body:has(> .anchored-panel__body-toolbar) {
+    padding-top: 8px;
+    padding-right: 0;
+  }
+
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
+  .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
+  .info-popup .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
+  .info-popup .info-popup__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar) {
+    margin-right: var(--ishare-panel-inline-padding, 28px);
+  }
+
+  /* Body chrome (no media): same hit area as hero, ghost fill instead of glass disc. */
+  .anchored-panel__body-toolbar .anchored-panel__header-btn,
+  .anchored-panel__body-toolbar .anchored-panel__close,
+  .anchored-panel__body-toolbar .tour-glass-panel__header-btn {
+    width: var(--ishare-panel-header-btn-size, 36px);
+    height: var(--ishare-panel-header-btn-size, 36px);
+    background: transparent;
+    color: var(--ishare-text-muted);
+  }
+
+  .anchored-panel__body-toolbar .anchored-panel__header-btn:hover,
+  .anchored-panel__body-toolbar .anchored-panel__header-btn:focus-visible,
+  .anchored-panel__body-toolbar .anchored-panel__close:hover,
+  .anchored-panel__body-toolbar .anchored-panel__close:focus-visible,
+  .anchored-panel__body-toolbar .tour-glass-panel__header-btn:hover,
+  .anchored-panel__body-toolbar .tour-glass-panel__header-btn:focus-visible {
+    background: rgba(15, 23, 42, 0.06);
+    color: var(--ishare-text);
+    outline: none;
+  }
+
+  .anchored-panel__body-toolbar .anchored-panel__header-btn-icon,
+  .anchored-panel__body-toolbar .anchored-panel__close-icon,
+  .anchored-panel__body-toolbar .tour-glass-panel__header-btn-icon,
+  .anchored-panel__body-toolbar .tour-glass-panel__close-icon {
+    font-size: var(--ishare-panel-header-icon-size, 16px);
+  }
+
+  .anchored-panel__close--inline {
     position: static;
     background: transparent;
     color: var(--ishare-text-muted);
   }
 
-  .nav-preview-panel__close--inline:hover,
-  .nav-preview-panel__close--inline:focus-visible {
+  .anchored-panel__close--inline:hover,
+  .anchored-panel__close--inline:focus-visible {
     background: rgba(15, 23, 42, 0.06);
     color: var(--ishare-text);
   }
 
-  .nav-preview-panel__main {
+  .anchored-panel__main {
     flex: 1 1 auto;
     min-height: 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    overflow-x: clip;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
-  .tour-glass-panel--nav-preview .nav-preview-panel__body {
-    flex: 0 1 auto;
-    min-height: auto;
-    min-width: 0;
-    max-width: 100%;
-    overflow-x: clip;
-    gap: 14px;
-    padding: 32px var(--ishare-panel-inline-padding, 28px) 28px;
-    background: var(--ishare-glass-body-bg);
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-    user-select: text !important;
-    -webkit-user-select: text !important;
-    cursor: text;
-  }
-
-  .tour-glass-panel--nav-preview .nav-preview-panel__body * {
+  .tour-glass-panel--nav-preview .anchored-panel__body *,
+  .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body * {
     user-select: text !important;
     -webkit-user-select: text !important;
   }
 
-  .tour-glass-panel--nav-preview .nav-preview-panel__body button {
+  .tour-glass-panel--nav-preview .anchored-panel__body button,
+  .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body button {
     user-select: none !important;
     -webkit-user-select: none !important;
     cursor: pointer;
@@ -1971,15 +2095,23 @@
     cursor: auto;
   }
 
-  .tour-glass-panel--nav-preview .nav-preview-panel__body .nav-preview-panel__title {
+  .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__title {
     margin: 0;
+    font-size: var(--ishare-font-size-2xl);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .info-panel__intro+.tour-glass-panel__copy {
+    margin-top: 6px;
   }
 
   .nav-preview-panel__naming {
     clear: both;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -1991,7 +2123,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    margin: 12px 0 8px;
+    margin: 12px 0 2px;
   }
 
   .nav-preview-panel__naming-divider-line {
@@ -2114,6 +2246,14 @@
     overflow: hidden;
   }
 
+  .nav-preview-panel__naming-trailing {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .nav-preview-panel__naming-card--panel-mounted .nav-preview-panel__naming-trigger {
     align-items: center;
     border-bottom: 1px solid rgba(15, 23, 42, 0.1);
@@ -2123,18 +2263,16 @@
     align-items: center;
   }
 
-  .nav-preview-panel__naming-trigger>.nav-preview-panel__naming-price {
-    justify-self: end;
-    align-self: center;
+  .nav-preview-panel__naming-trailing .nav-preview-panel__naming-price {
     font-family: var(--ishare-display-font);
     font-size: var(--ishare-font-size-md);
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1;
     color: var(--ishare-text-muted);
     white-space: nowrap;
   }
 
-  .nav-preview-panel__naming-trigger>.nav-preview-panel__naming-price--closed {
+  .nav-preview-panel__naming-trailing .nav-preview-panel__naming-price--closed {
     color: var(--ishare-text-muted);
     text-decoration: line-through;
     text-decoration-color: rgba(15, 23, 42, 0.3);
@@ -2215,14 +2353,14 @@
     white-space: normal;
   }
 
-  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-trigger>.nav-preview-panel__naming-price {
+  .nav-preview-panel__naming-card--open .nav-preview-panel__naming-trailing {
     align-self: start;
   }
 
   .nav-preview-panel__naming-status {
     flex: 0 0 auto;
     max-width: 100%;
-    margin: 0 0 0 auto;
+    margin: 0;
     overflow: hidden;
   }
 
@@ -2445,12 +2583,48 @@
     animation: info-popup-in 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .info-popup.tour-glass-panel--dock {
-    --ishare-panel-header-icon-size: 16px;
+  .info-popup.tour-glass-panel--dock .tour-glass-panel__shell,
+  .info-popup .info-popup__shell {
+    max-height: min(90vh, 720px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
-  .info-popup.tour-glass-panel--dock .tour-glass-panel__shell {
-    max-height: min(90vh, 720px);
+  .info-popup__main,
+  .info-popup .anchored-panel__main {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .info-popup__body,
+  .info-popup .anchored-panel__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: scroll;
+    gap: 14px;
+    --anchored-body-pad-top: 28px;
+    padding: var(--anchored-body-pad-top, 28px) var(--ishare-panel-inline-padding, 28px) 24px;
+  }
+
+  .info-popup .info-panel__intro .info-popup__title,
+  .info-popup .info-panel__intro .tour-glass-panel__price--under-title {
+    font-size: var(--ishare-font-size-2xl);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .info-popup .anchored-panel__hero--video .tour-glass-panel__video {
+    --ishare-video-radius: 0;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    aspect-ratio: auto;
   }
 
   .info-popup__title-row {
@@ -2495,6 +2669,10 @@
     width: 100%;
     border-radius: var(--ishare-radius);
     object-fit: cover;
+  }
+
+  .info-popup .anchored-panel__hero--image .info-popup__image {
+    border-radius: 0;
   }
 
   @keyframes info-popup-backdrop-in {

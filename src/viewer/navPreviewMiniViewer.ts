@@ -55,33 +55,35 @@ function syncHeroHeight(hero: HTMLElement): void {
     marker instanceof HTMLElement && marker.offsetWidth > 0 ?
       marker.offsetWidth
     : resolveNavPreviewPanelWidth();
-  const video = hero.classList.contains('nav-preview-panel__hero--video');
+  const video =
+    hero.classList.contains('anchored-panel__hero--video') ||
+    hero.classList.contains('anchored-panel__hero--image');
   hero.style.height = `${resolveNavPreviewHeroHeight(width, { video })}px`;
 }
 
 function markHeroLoaded(hero: HTMLElement): void {
-  hero.classList.remove('nav-preview-panel__hero--loading');
+  hero.classList.remove('anchored-panel__hero--loading');
   hero.removeAttribute('aria-busy');
 }
 
 function markHeroError(hero: HTMLElement): void {
-  hero.classList.remove('nav-preview-panel__hero--loading');
-  hero.classList.add('nav-preview-panel__hero--error');
+  hero.classList.remove('anchored-panel__hero--loading');
+  hero.classList.add('anchored-panel__hero--error');
   hero.removeAttribute('aria-busy');
 }
 
 /** Skip hero media entirely (debug / perf test). No network, no WebGL. */
 export function dismissNavPreviewHero(root: ParentNode): void {
-  const hero = root.querySelector('.nav-preview-panel__hero');
+  const hero = root.querySelector('.anchored-panel__hero');
   if (!(hero instanceof HTMLElement)) return;
 
-  const viewer = hero.querySelector('.nav-preview-panel__hero-viewer');
+  const viewer = hero.querySelector('.anchored-panel__hero-viewer');
   if (viewer instanceof HTMLElement) {
     viewer.replaceChildren();
     viewer.hidden = true;
   }
 
-  const fallback = hero.querySelector('.nav-preview-panel__hero-fallback');
+  const fallback = hero.querySelector('.anchored-panel__hero-fallback');
   if (fallback instanceof HTMLImageElement) {
     fallback.removeAttribute('src');
     fallback.hidden = true;
@@ -91,14 +93,14 @@ export function dismissNavPreviewHero(root: ParentNode): void {
 }
 
 function wireFallbackImage(hero: HTMLElement, imageUrl: string): void {
-  const fallback = hero.querySelector('.nav-preview-panel__hero-fallback');
+  const fallback = hero.querySelector('.anchored-panel__hero-fallback');
   if (!(fallback instanceof HTMLImageElement)) return;
 
   fallback.hidden = false;
   fallback.src = imageUrl;
 
   const onLoad = () => {
-    fallback.classList.add('nav-preview-panel__hero-fallback--loaded');
+    fallback.classList.add('anchored-panel__hero-fallback--loaded');
     markHeroLoaded(hero);
   };
 
@@ -270,8 +272,8 @@ export function mountNavPreviewMiniViewer(
 ): void {
   destroyNavPreviewMiniViewer(markerId);
 
-  const hero = root.querySelector('.nav-preview-panel__hero');
-  const container = root.querySelector('.nav-preview-panel__hero-viewer');
+  const hero = root.querySelector('.anchored-panel__hero');
+  const container = root.querySelector('.anchored-panel__hero-viewer');
   if (!(hero instanceof HTMLElement) || !(container instanceof HTMLElement)) {
     return;
   }
@@ -305,7 +307,7 @@ export function mountNavPreviewMiniViewer(
 const NAV_PREVIEW_VIDEO_HERO_LOAD_MS = 4000;
 
 export function mountNavPreviewVideoHero(root: ParentNode): void {
-  const hero = root.querySelector('.nav-preview-panel__hero--video');
+  const hero = root.querySelector('.anchored-panel__hero--video');
   if (!(hero instanceof HTMLElement)) return;
 
   syncHeroHeight(hero);
@@ -340,6 +342,38 @@ export function mountNavPreviewVideoHero(root: ParentNode): void {
     observer.disconnect();
     finish();
   }, NAV_PREVIEW_VIDEO_HERO_LOAD_MS);
+}
+
+/** Still-image hero (info panels) — same chrome as video, no mini-viewer. */
+export function mountNavPreviewImageHero(root: ParentNode): void {
+  const hero = root.querySelector('.anchored-panel__hero--image');
+  if (!(hero instanceof HTMLElement)) return;
+
+  syncHeroHeight(hero);
+  const img = hero.querySelector('.anchored-panel__hero-image');
+  if (!(img instanceof HTMLImageElement)) {
+    markHeroLoaded(hero);
+    return;
+  }
+
+  const finish = () => {
+    img.classList.add('anchored-panel__hero-image--loaded');
+    markHeroLoaded(hero);
+  };
+
+  if (img.complete && img.naturalWidth > 0) {
+    finish();
+    return;
+  }
+
+  img.addEventListener('load', finish, { once: true });
+  img.addEventListener(
+    'error',
+    () => {
+      markHeroError(hero);
+    },
+    { once: true },
+  );
 }
 
 export function destroyNavPreviewMiniViewer(markerId: string): void {

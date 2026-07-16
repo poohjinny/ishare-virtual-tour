@@ -20,7 +20,10 @@ import {
   buildAbsoluteShareUrl,
   buildShareMessage,
 } from '../utils/buildShareUrl';
-import { resolveGlassPanelWidth } from './tourGlassPanelHtml';
+import {
+  resolveGlassPanelWidth,
+  resolveNavPreviewHeroHeight,
+} from './tourGlassPanelHtml';
 import { GlassPanelHeaderActions } from './GlassPanelHeaderActions';
 import { GlassPanelCloseIcon } from './TourGlassPanel';
 import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
@@ -32,14 +35,14 @@ import {
   infoPopupTitleBlockClassName,
   infoPopupTitleClassName,
   infoPopupTitleLineClassName,
-  infoPopupTitleRowClassName,
-  tourGlassPanelBodyClassName,
-  tourGlassPanelCloseClassName,
-  tourGlassPanelHeaderClassName,
-  tourGlassPanelHeaderLeadingClassName,
-  tourGlassPanelShellVariants,
-  tourGlassPanelTitleActionsClassName,
 } from './infoPopupVariants';
+import { cn } from '../lib/cn';
+import { ANCHORED_PANEL } from './anchoredPanelChrome';
+import {
+  AnchoredPanelBodyToolbar,
+  AnchoredPanelHeroActions,
+  AnchoredPanelShell,
+} from './AnchoredPanelShell';
 
 const POPUP_EXIT_MS = 280;
 
@@ -160,6 +163,105 @@ export function InfoPopup({
   const showNamingShare =
     !embed && Boolean(shown.namingOpportunity) && Boolean(namingHotspotId);
 
+  const hasVideo = Boolean(shown.videoUrl?.trim());
+  const hasImage = Boolean(shown.image?.trim()) && !hasVideo;
+  const hasHero = hasVideo || hasImage;
+  const heroHeight =
+    panelWidth != null ?
+      resolveNavPreviewHeroHeight(panelWidth, { video: true })
+    : undefined;
+
+  const shareActions =
+    showNamingShare ?
+      {
+        shareUrl,
+        message: shareMessage,
+        ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
+        tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
+      }
+    : undefined;
+
+  const chromeActions = (
+    <>
+      <GlassPanelHeaderActions share={shareActions} />
+      <button
+        ref={closeRef}
+        type='button'
+        className={
+          hasHero ?
+            ANCHORED_PANEL.close
+          : `${ANCHORED_PANEL.close} ${ANCHORED_PANEL.closeInline}`
+        }
+        onClick={handleDismiss}
+        aria-label='Close'
+      >
+        <GlassPanelCloseIcon
+          className={hasHero ? ANCHORED_PANEL.closeIcon : undefined}
+          sizePx={MATERIAL_SYMBOL_SIZE_16}
+        />
+      </button>
+    </>
+  );
+
+  const hero =
+    hasVideo ?
+      <div
+        className={`${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroVideo}`}
+        style={heroHeight ? { height: heroHeight } : undefined}
+      >
+        <PopupVideoEmbed
+          videoUrl={shown.videoUrl!}
+          title={shown.title}
+          poster={shown.videoPoster}
+        />
+        <AnchoredPanelHeroActions>{chromeActions}</AnchoredPanelHeroActions>
+      </div>
+    : hasImage ?
+      <div
+        className={`${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroImage}`}
+        style={heroHeight ? { height: heroHeight } : undefined}
+      >
+        <img
+          src={shown.image}
+          alt=''
+          className={cn(
+            ANCHORED_PANEL.heroImageEl,
+            ANCHORED_PANEL.heroImageLoaded,
+            infoPopupImageClassName,
+          )}
+        />
+        <AnchoredPanelHeroActions>{chromeActions}</AnchoredPanelHeroActions>
+      </div>
+    : undefined;
+
+  const footer =
+    hasFooterCtas ?
+      <>
+        {resolvedCtas.length > 0 && <PopupCtasFooter ctas={resolvedCtas} />}
+        {canVisitScene && (
+          <footer className='tour-glass-panel__footer'>
+            <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
+              <button
+                type='button'
+                className='tour-glass-panel__cta tour-glass-panel__cta--has-postfix-icon'
+                data-visit-scene={visitSceneId}
+                onClick={handleVisitScene}
+                aria-label={visitCtaLabel!}
+              >
+                <span
+                  className='tour-glass-panel__cta-text'
+                  data-cta-label={visitCtaLabel!}
+                >
+                  {visitCtaLabel}
+                </span>
+                <PopupCtaArrowIcon />
+              </button>
+            </div>
+          </footer>
+        )}
+      </>
+    : undefined;
+
   return (
     <div
       className={infoPopupBackdropVariants({
@@ -169,119 +271,50 @@ export function InfoPopup({
         if (e.target === e.currentTarget) handleDismiss();
       }}
     >
-      <article
+      <AnchoredPanelShell
+        titleId='info-popup-title'
         className={infoPopupPanelVariants({
           phase: isExiting ? 'exit' : 'idle',
         })}
-        role='dialog'
+        shellClassName='info-popup__shell'
+        bodyClassName='info-popup__body'
         aria-modal='true'
-        aria-labelledby='info-popup-title'
-        data-info-panel-naming={shown.namingOpportunity ? 'true' : undefined}
+        dataAttrs={{
+          'data-info-panel-naming':
+            shown.namingOpportunity ? 'true' : undefined,
+        }}
         style={
           panelWidth ? { width: panelWidth, maxWidth: panelWidth } : undefined
         }
         onClick={(e) => e.stopPropagation()}
+        hero={hero}
+        footer={footer}
       >
-        <div className={tourGlassPanelShellVariants({ animation: 'none' })}>
-          <header className={tourGlassPanelHeaderClassName}>
-            <div className={infoPopupTitleRowClassName}>
-              <div className={tourGlassPanelHeaderLeadingClassName}>
-                <div className={infoPopupTitleBlockClassName}>
-                  <div className={infoPopupTitleLineClassName}>
-                    <h2
-                      id='info-popup-title'
-                      className={infoPopupTitleClassName}
-                    >
-                      {shown.title}
-                    </h2>
-                    {shown.namingOpportunity && (
-                      <NamingOpportunityPrice
-                        opportunity={shown.namingOpportunity}
-                      />
-                    )}
-                  </div>
-                  {shown.namingOpportunity?.priceLabel && (
-                    <p className={infoPopupPriceLabelClassName}>
-                      {shown.namingOpportunity.priceLabel}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className={tourGlassPanelTitleActionsClassName}>
-                <GlassPanelHeaderActions
-                  share={
-                    showNamingShare ?
-                      {
-                        shareUrl,
-                        message: shareMessage,
-                        ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
-                        tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
-                      }
-                    : undefined
-                  }
-                />
-                <button
-                  ref={closeRef}
-                  type='button'
-                  className={tourGlassPanelCloseClassName}
-                  onClick={handleDismiss}
-                  aria-label='Close'
-                >
-                  <GlassPanelCloseIcon sizePx={MATERIAL_SYMBOL_SIZE_16} />
-                </button>
-              </div>
-            </div>
-            <PopupHeaderMeta popup={shown} />
-          </header>
+        {!hasHero ?
+          <AnchoredPanelBodyToolbar>{chromeActions}</AnchoredPanelBodyToolbar>
+        : null}
 
-          <div className={tourGlassPanelBodyClassName}>
-            {shown.image && (
-              <img
-                src={shown.image}
-                alt=''
-                className={infoPopupImageClassName}
-              />
-            )}
-            <PopupBodyCopy body={shown.body} />
-            {shown.videoUrl && (
-              <PopupVideoEmbed
-                videoUrl={shown.videoUrl}
-                title={shown.title}
-                poster={shown.videoPoster}
-              />
+        <div className='info-panel__intro'>
+          <div className={infoPopupTitleBlockClassName}>
+            <div className={infoPopupTitleLineClassName}>
+              <h2 id='info-popup-title' className={infoPopupTitleClassName}>
+                {shown.title}
+              </h2>
+              {shown.namingOpportunity && (
+                <NamingOpportunityPrice opportunity={shown.namingOpportunity} />
+              )}
+            </div>
+            {shown.namingOpportunity?.priceLabel && (
+              <p className={infoPopupPriceLabelClassName}>
+                {shown.namingOpportunity.priceLabel}
+              </p>
             )}
           </div>
-
-          {hasFooterCtas && (
-            <>
-              {resolvedCtas.length > 0 && (
-                <PopupCtasFooter ctas={resolvedCtas} />
-              )}
-              {canVisitScene && (
-                <footer className='tour-glass-panel__footer'>
-                  <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
-                    <button
-                      type='button'
-                      className='tour-glass-panel__cta tour-glass-panel__cta--has-trailing-icon'
-                      data-visit-scene={visitSceneId}
-                      onClick={handleVisitScene}
-                      aria-label={visitCtaLabel!}
-                    >
-                      <span
-                        className='tour-glass-panel__cta-text'
-                        data-cta-label={visitCtaLabel!}
-                      >
-                        {visitCtaLabel}
-                      </span>
-                      <PopupCtaArrowIcon />
-                    </button>
-                  </div>
-                </footer>
-              )}
-            </>
-          )}
+          <PopupHeaderMeta popup={shown} />
         </div>
-      </article>
+
+        <PopupBodyCopy body={shown.body} />
+      </AnchoredPanelShell>
     </div>
   );
 }
