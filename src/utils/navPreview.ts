@@ -18,6 +18,7 @@ import {
 } from './namingPrice';
 import { resolveNavHotspotLabel } from './navHotspotLabel';
 import { resolveNamingPopup } from './namingSceneInherit';
+import { resolveScenePlaceLead } from './resolveScenePlaceLead';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 
 function navPreviewNamingDescription(body: string): string {
@@ -131,7 +132,7 @@ export function buildNavPreview(
     videoUrl,
     videoPoster: videoUrl ? scene.videoPoster : undefined,
     bodyVideoUrl,
-    description: scene.description?.trim() || undefined,
+    description: resolveScenePlaceLead(tour, scene),
     namingItems: buildNavPreviewNamingItems(tour, scene),
     namingTotalLabel,
     namingTotalAmount:

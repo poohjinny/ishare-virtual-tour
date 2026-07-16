@@ -66,7 +66,7 @@ export function ExploreSceneGalleryCard({
   const heroLoading =
     previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
   const description = scene.description?.trim();
-  const showInfo = Boolean(description && onShowDescription);
+  const showInfo = Boolean(onShowDescription);
   const showHoverBody = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const contextSuffix = contextLabel ? `, ${contextLabel}` : '';

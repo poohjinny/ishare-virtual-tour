@@ -1,11 +1,12 @@
 import { useScenePreview } from '../hooks/useScenePreview';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
-import type { Scene } from '../types/tour';
+import type { Hotspot, Scene, TourViewerType } from '../types/tour';
 import {
   TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
   TOUR_DIRECTORY_SCENE_DETAIL_BACK,
   tourDirectorySceneDetailVisitLabel,
 } from '../constants/tourDirectory';
+import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { cn } from '../lib/cn';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { PopupVideoEmbed } from './popupContentUi';
@@ -33,6 +34,8 @@ import {
 interface ExploreSceneDescriptionViewProps {
   tourId: string;
   scene: Scene;
+  tourHotspots?: Hotspot[];
+  tourViewerType?: TourViewerType;
   active: boolean;
   disabled?: boolean;
   onBack: () => void;
@@ -42,12 +45,17 @@ interface ExploreSceneDescriptionViewProps {
 export function ExploreSceneDescriptionView({
   tourId,
   scene,
+  tourHotspots,
+  tourViewerType,
   active,
   disabled = false,
   onBack,
   onVisit,
 }: ExploreSceneDescriptionViewProps) {
-  const description = scene.description?.trim();
+  const description = resolveScenePlaceLead(
+    { hotspots: tourHotspots, viewerType: tourViewerType },
+    scene,
+  );
   const heroVideoUrl = scene.previewVideoUrl?.trim();
   const bodyVideoUrl = scene.videoUrl?.trim();
   const showThumbnailHero = !heroVideoUrl;
@@ -130,12 +138,7 @@ export function ExploreSceneDescriptionView({
             : null}
           </div>
 
-          {description ?
-            <p className={tourNavSceneDetailBodyClassName}>{description}</p>
-          : <p className={tourNavSceneDetailBodyClassName}>
-              No description for this place yet.
-            </p>
-          }
+          <p className={tourNavSceneDetailBodyClassName}>{description}</p>
 
           {bodyVideoUrl ?
             <PopupVideoEmbed videoUrl={bodyVideoUrl} title={scene.title} />

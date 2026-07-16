@@ -505,7 +505,7 @@ export function TourNavFloat({
 
   const currentSceneTitle = currentScene?.title ?? currentSceneId;
 
-  const currentSceneHasDetails = Boolean(currentScene?.description?.trim());
+  const currentSceneHasDetails = Boolean(currentScene);
 
   const currentSceneDetailOpen =
     (panelMode === 'explore' || displayPanel === 'explore') &&
@@ -1358,11 +1358,7 @@ export function TourNavFloat({
                     contextLabel={contextLabel}
                     disabled={locationNavDisabled}
                     onSelect={() => handleSelect(scene.id)}
-                    onShowDescription={
-                      scene.description?.trim() ?
-                        () => openExploreSceneDetail(scene.id)
-                      : undefined
-                    }
+                    onShowDescription={() => openExploreSceneDetail(scene.id)}
                   />
                 );
               })}
@@ -1391,11 +1387,7 @@ export function TourNavFloat({
                     contextLabel={contextLabel}
                     disabled={locationNavDisabled}
                     onSelect={() => handleSelect(scene.id)}
-                    onShowDescription={
-                      scene.description?.trim() ?
-                        () => openExploreSceneDetail(scene.id)
-                      : undefined
-                    }
+                    onShowDescription={() => openExploreSceneDetail(scene.id)}
                     locationIcon={
                       <TourLocationItemIcon
                         active={scene.id === currentSceneId}
@@ -1879,6 +1871,8 @@ export function TourNavFloat({
                 <ExploreSceneDescriptionView
                   tourId={tourId}
                   scene={exploreSceneDetail}
+                  tourHotspots={tourHotspots}
+                  tourViewerType={tourViewerType}
                   active={exploreSceneDetail.id === currentSceneId}
                   disabled={locationNavDisabled}
                   onBack={requestCloseExploreSceneDetail}

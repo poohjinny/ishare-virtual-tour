@@ -62,7 +62,7 @@ export function ExploreSceneDirectoryListItem({
   );
   const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
   const description = scene.description?.trim();
-  const showInfo = Boolean(description && onShowDescription);
+  const showInfo = Boolean(onShowDescription);
   const showActions = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const contextSuffix = contextLabel ? `, ${contextLabel}` : '';
