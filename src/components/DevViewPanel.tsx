@@ -140,6 +140,7 @@ import {
   listAllTourHotspotIds,
   listDevTourHotspots,
 } from '../utils/findTourHotspot';
+import { buildScenePlaceLeadFromNaming } from '../utils/resolveScenePlaceLead';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 import { buildSceneGroupSecondaryById } from '../viewer/sceneDepth';
 import { cn } from '../lib/cn';
@@ -250,6 +251,10 @@ interface DevViewPanelProps {
   clickCoords: ClickCoords | null;
   captureSceneThumbnail?: () => Promise<Blob | null>;
   getCurrentView?: () => ViewPosition | null;
+  focusHotspot?: (
+    hotspotId: string | null,
+    options?: { animate?: boolean },
+  ) => void;
   onClose?: () => void;
 }
 
@@ -350,6 +355,7 @@ export function DevViewPanel({
   clickCoords,
   captureSceneThumbnail,
   getCurrentView,
+  focusHotspot,
   onClose,
 }: DevViewPanelProps) {
   const navigate = useNavigate();
@@ -2377,6 +2383,26 @@ export function DevViewPanel({
     setEditingHotspotId(null);
   }, [scene.id]);
 
+  const focusHotspotRef = useRef(focusHotspot);
+  focusHotspotRef.current = focusHotspot;
+
+  useEffect(() => {
+    const hotspotId = editingHotspotId ?? movingHotspotId;
+    focusHotspotRef.current?.(hotspotId);
+    return () => {
+      focusHotspotRef.current?.(null);
+    };
+  }, [editingHotspotId, movingHotspotId]);
+
+  const previewHotspotHighlight = useCallback((hotspotId: string | null) => {
+    focusHotspotRef.current?.(hotspotId, { animate: false });
+  }, []);
+
+  const restoreLockedHotspotHighlight = useCallback(() => {
+    const lockedId = editingHotspotId ?? movingHotspotId;
+    focusHotspotRef.current?.(lockedId, { animate: false });
+  }, [editingHotspotId, movingHotspotId]);
+
   useEffect(() => {
     if (
       landingStatus === 'idle' &&
@@ -2812,6 +2838,8 @@ export function DevViewPanel({
                           (isMoving || isEditing) &&
                             devViewPanelManageListItemActiveClassName,
                         )}
+                        onMouseEnter={() => previewHotspotHighlight(hotspot.id)}
+                        onMouseLeave={restoreLockedHotspotHighlight}
                       >
                         <div
                           className={devViewPanelManageListItemHeadClassName}
@@ -4273,6 +4301,13 @@ export function DevViewPanel({
                         >
                           {entry.description}
                         </p>
+                      : entry.placeLead ?
+                        <p
+                          className={devViewPanelManageListItemDescClassName}
+                          title={entry.placeLead}
+                        >
+                          Auto soft lead · {entry.placeLead}
+                        </p>
                       : null}
                       <div className={devViewPanelActionsClassName}>
                         <button
@@ -4337,9 +4372,63 @@ export function DevViewPanel({
                                 setEditSceneDescription(e.target.value)
                               }
                               rows={2}
-                              placeholder='Optional — leave empty to remove'
+                              placeholder='Optional client place copy — leave empty to remove'
                             />
+                            <p className={devViewPanelSectionHintClassName}>
+                              Wins over soft lead in Explore / nav preview when
+                              set. Leave empty to use auto soft lead from NO.
+                            </p>
                           </label>
+                          <div className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
+                              Soft lead
+                            </span>
+                            {(() => {
+                              const draftDesc = editSceneDescription.trim();
+                              const autoLead =
+                                buildScenePlaceLeadFromNaming(tour, entry) ||
+                                entry.placeLead?.trim() ||
+                                '';
+                              if (draftDesc) {
+                                return (
+                                  <p
+                                    className={devViewPanelSectionHintClassName}
+                                  >
+                                    Using Description — soft lead is ignored
+                                    while Description is set.
+                                  </p>
+                                );
+                              }
+                              if (autoLead) {
+                                return (
+                                  <>
+                                    <p
+                                      className={
+                                        devViewPanelManageListItemDescClassName
+                                      }
+                                      title={autoLead}
+                                    >
+                                      Auto from NO · {autoLead}
+                                    </p>
+                                    <p
+                                      className={
+                                        devViewPanelSectionHintClassName
+                                      }
+                                    >
+                                      Updates automatically when NO copy changes
+                                      (Description empty).
+                                    </p>
+                                  </>
+                                );
+                              }
+                              return (
+                                <p className={devViewPanelSectionHintClassName}>
+                                  No place copy yet — add Description or NO body
+                                  copy.
+                                </p>
+                              );
+                            })()}
+                          </div>
                           {!isModel3dTour ?
                             <>
                               <label className={devViewPanelFieldClassName}>

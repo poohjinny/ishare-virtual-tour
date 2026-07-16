@@ -18,6 +18,10 @@ interface DevToolsProps {
   clickCoords: ClickCoords | null;
   captureSceneThumbnail?: () => Promise<Blob | null>;
   getCurrentView?: () => ViewPosition | null;
+  focusHotspot?: (
+    hotspotId: string | null,
+    options?: { animate?: boolean },
+  ) => void;
   panelStack?: TourPanelStack;
 }
 
@@ -31,6 +35,7 @@ export function DevTools({
   clickCoords,
   captureSceneThumbnail,
   getCurrentView,
+  focusHotspot,
   panelStack,
 }: DevToolsProps) {
   const [panelOpen, setPanelOpen] = useState(() => !prefersMobileTourChrome());
@@ -74,6 +79,7 @@ export function DevTools({
           clickCoords={clickCoords}
           captureSceneThumbnail={captureSceneThumbnail}
           getCurrentView={getCurrentView}
+          focusHotspot={focusHotspot}
           onClose={() => setPanelOpen(false)}
         />
       : <button

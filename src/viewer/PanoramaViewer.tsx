@@ -20,11 +20,13 @@ import type {
   ViewPosition,
   ViewerOrientation,
 } from '../types/tour';
+import { isWorldPosition } from '../types/tour';
 import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
 import { resolveTourSceneTransitionEffect } from '../utils/tourTransition';
 import {
   buildVirtualTourNodePatch,
   buildVirtualTourNodes,
+  currentSceneMarkersNeedRefresh,
 } from './buildTourNodes';
 import {
   buildAbsoluteShareUrl,
@@ -52,12 +54,15 @@ import {
   closeAnchoredInfoPanel,
   getOpenAnchoredPanelHostId,
   isAnchoredPopup,
+  openAnchoredInfoPanel,
   syncInfoPanelPosition,
   toggleAnchoredInfoPanel,
 } from './infoPanelMarker';
 import {
   closeAnchoredNavPreviewPanel,
   getNavPanelNavigateTarget,
+  getOpenNavPreviewHostId,
+  openAnchoredNavPreviewPanel,
   syncNavPreviewPanelPosition,
   toggleAnchoredNavPreviewPanel,
 } from './navPreviewPanelMarker';
@@ -75,6 +80,7 @@ import {
   setActiveInfoHotspot,
   setActiveInfoHotspotChangeListener,
 } from './infoHotspotActive';
+import { setDevFocusedHotspot } from './devHotspotFocus';
 import { setAnchoredPanelVisibilityListener } from './anchoredPanelVisibility';
 import { navigateToScene } from './transition';
 import { bindVirtualTourLifecycleGuard } from './virtualTourLifecycle';
@@ -635,6 +641,8 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       },
       applyTourUpdate: async (nextTour) => {
         const virtualTour = virtualTourRef.current;
+        const viewer = viewerRef.current;
+        const markers = markersRef.current;
         if (!viewerActiveRef.current || !virtualTour) return;
 
         const previousTour = tourRef.current;
@@ -662,16 +670,53 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           return;
         }
 
+        const currentPatch = buildVirtualTourNodePatch(
+          previousTour.scenes[currentId],
+          nextScene,
+          nextTour,
+          previousTour,
+        );
+        const markersNeedRefresh = currentSceneMarkersNeedRefresh(
+          previousTour.scenes[currentId],
+          nextScene,
+          previousTour,
+          nextTour,
+        );
+        // Preserve open/closed: remember which panels were open, refresh content
+        // after marker rebuild (scene edits update nav pills + preview copy).
+        const openInfoHostId =
+          markers && markersNeedRefresh ?
+            getOpenAnchoredPanelHostId(markers)
+          : null;
+        const openNavHostId =
+          markers && markersNeedRefresh ?
+            getOpenNavPreviewHostId(markers)
+          : null;
+
+        if (
+          markers &&
+          markersNeedRefresh &&
+          (openInfoHostId || openNavHostId)
+        ) {
+          // Instant close — animated exit schedules a delayed removeMarker that
+          // would kill the panel we reopen below with the same marker id.
+          closeAnchoredInfoPanel(markers, false);
+          closeAnchoredNavPreviewPanel(markers, false);
+        }
+
         let needsHotspotEnter = false;
         let reloadPromise: Promise<void> | undefined;
 
         for (const scene of Object.values(nextTour.scenes)) {
-          const patch = buildVirtualTourNodePatch(
-            previousTour.scenes[scene.id],
-            scene,
-            nextTour,
-            previousTour,
-          );
+          const patch =
+            scene.id === currentId ?
+              currentPatch
+            : buildVirtualTourNodePatch(
+                previousTour.scenes[scene.id],
+                scene,
+                nextTour,
+                previousTour,
+              );
           if (!patch) continue;
 
           if (patch.panorama && patch.id === currentId) {
@@ -716,6 +761,48 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         if (needsHotspotEnter) {
           hotspotEnterRef.current?.schedule();
         }
+
+        if (viewer && markers && openInfoHostId) {
+          const refreshed =
+            nextScene.hotspots.find(
+              (hotspot) => hotspot.id === openInfoHostId,
+            ) ??
+            nextTour.hotspots?.find((hotspot) => hotspot.id === openInfoHostId);
+          if (
+            refreshed?.type === 'info' &&
+            refreshed.popup &&
+            isAnchoredPopup(refreshed.popup)
+          ) {
+            openAnchoredInfoPanel(
+              viewer,
+              markers,
+              refreshed,
+              nextTour,
+              embedRef.current,
+              { skipCameraNudge: true },
+            );
+          }
+        }
+
+        if (viewer && markers && openNavHostId) {
+          const navHotspot = nextScene.hotspots.find(
+            (hotspot) => hotspot.id === openNavHostId,
+          );
+          if (navHotspot?.type === 'nav' && navHotspot.targetScene) {
+            const preview = buildNavPreview(navHotspot, nextTour, currentId);
+            if (preview) {
+              openAnchoredNavPreviewPanel(
+                viewer,
+                markers,
+                navHotspot,
+                preview,
+                nextTour.id,
+                embedRef.current,
+                { skipCameraNudge: true },
+              );
+            }
+          }
+        }
       },
       captureSceneThumbnail: async () => null,
       getCurrentView: () => {
@@ -726,6 +813,29 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         const pitch = (position.pitch * 180) / Math.PI;
         const zoom = fromPsvZoom(viewer.getZoomLevel());
         return toViewPosition(yaw, pitch, zoom);
+      },
+      focusHotspot: (hotspotId, options) => {
+        const markers = markersRef.current;
+        if (!markers) return;
+
+        setDevFocusedHotspot(markers, hotspotId);
+        if (!hotspotId || options?.animate === false) return;
+
+        const viewer = viewerRef.current;
+        if (!viewer || disabledRef.current || transitioningRef.current) {
+          return;
+        }
+
+        const marker = markers.getMarker(hotspotId);
+        const hotspot = marker?.data?.hotspot as Hotspot | undefined;
+        if (!hotspot || isWorldPosition(hotspot.position)) return;
+
+        const zoom = fromPsvZoom(viewer.getZoomLevel());
+        void animateViewerToView(viewer, {
+          yaw: hotspot.position.yaw,
+          pitch: hotspot.position.pitch,
+          zoom,
+        });
       },
     }));
 

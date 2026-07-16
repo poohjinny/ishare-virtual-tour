@@ -1125,6 +1125,9 @@ function TourExperience() {
               Promise.resolve(null)
             }
             getCurrentView={() => viewerRef.current?.getCurrentView() ?? null}
+            focusHotspot={(hotspotId, options) =>
+              viewerRef.current?.focusHotspot(hotspotId, options)
+            }
             panelStack={panelStack}
           />
         )}

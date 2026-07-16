@@ -42,16 +42,76 @@ function inheritedNavLabelsChanged(
   return false;
 }
 
-/** Scene fields that naming-opportunity pills/panels inherit. */
-function inheritedNamingSceneFieldsChanged(
+/** Scene fields that naming-opportunity pills/panels inherit or display. */
+export function inheritedNamingSceneFieldsChanged(
   prevScene: Scene,
   nextScene: Scene,
 ): boolean {
   return (
     prevScene.title !== nextScene.title ||
     prevScene.description !== nextScene.description ||
+    prevScene.placeLead !== nextScene.placeLead ||
     prevScene.previewVideoUrl !== nextScene.previewVideoUrl ||
+    prevScene.videoUrl !== nextScene.videoUrl ||
     prevScene.videoPoster !== nextScene.videoPoster
+  );
+}
+
+/**
+ * Nav pills/previews on `scene` depend on target scene titles + place copy.
+ * Rebuild markers when any nav target's display fields (or NO list) change.
+ */
+function navTargetPreviewSourcesChanged(
+  scene: Scene,
+  previousTour: Tour | undefined,
+  nextTour: Tour,
+): boolean {
+  if (!previousTour) return false;
+
+  for (const hotspot of scene.hotspots) {
+    if (hotspot.type !== 'nav') continue;
+    const targetId = hotspot.targetScene?.trim();
+    if (!targetId) continue;
+
+    const prevTarget = previousTour.scenes[targetId];
+    const nextTarget = nextTour.scenes[targetId];
+    if (!prevTarget || !nextTarget) return true;
+    if (inheritedNamingSceneFieldsChanged(prevTarget, nextTarget)) return true;
+    if (
+      JSON.stringify(prevTarget.hotspots) !==
+      JSON.stringify(nextTarget.hotspots)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** True when current-scene markers should rebuild after a tour save. */
+export function currentSceneMarkersNeedRefresh(
+  prevScene: Scene | undefined,
+  nextScene: Scene,
+  previousTour: Tour | undefined,
+  nextTour: Tour,
+): boolean {
+  if (!prevScene) return true;
+  return (
+    JSON.stringify(prevScene.hotspots) !== JSON.stringify(nextScene.hotspots) ||
+    inheritedNamingSceneFieldsChanged(prevScene, nextScene) ||
+    inheritedNavLabelsChanged(nextScene, previousTour, nextTour) ||
+    navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour)
+  );
+}
+
+/** @deprecated Use {@link currentSceneMarkersNeedRefresh}. */
+export function sceneUpdateShouldRefreshOpenInfoPanel(
+  prevScene: Scene | undefined,
+  nextScene: Scene,
+): boolean {
+  if (!prevScene) return true;
+  return (
+    JSON.stringify(prevScene.hotspots) !== JSON.stringify(nextScene.hotspots) ||
+    inheritedNamingSceneFieldsChanged(prevScene, nextScene)
   );
 }
 
@@ -88,7 +148,8 @@ export function buildVirtualTourNodePatch(
   if (
     JSON.stringify(prevScene.hotspots) !== JSON.stringify(nextScene.hotspots) ||
     inheritedNavLabelsChanged(nextScene, previousTour, nextTour) ||
-    inheritedNamingSceneFieldsChanged(prevScene, nextScene)
+    inheritedNamingSceneFieldsChanged(prevScene, nextScene) ||
+    navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour)
   ) {
     patch.markers = nextScene.hotspots.map((hotspot) =>
       hotspotToMarkerConfig(hotspot, nextTour, nextScene),

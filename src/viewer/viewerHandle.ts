@@ -40,4 +40,12 @@ export interface TourViewerHandle {
   captureSceneThumbnail: () => Promise<Blob | null>;
   /** Dev — read the live camera/view (avoids stale React state when saving defaultView). */
   getCurrentView: () => ViewPosition | null;
+  /**
+   * Dev Manage — highlight a hotspot marker; optionally animate the camera to it.
+   * Pass `null` to clear the highlight. Default `animate: true`.
+   */
+  focusHotspot: (
+    hotspotId: string | null,
+    options?: { animate?: boolean },
+  ) => void;
 }
