@@ -673,6 +673,28 @@
         "Tell me about Wash Room",
         "What is available at Ken Sargent House?"
       ]
+    },
+    "suite-a3": {
+      "title": "Suite 'A3'",
+      "description": "Explore Suite 'A3' as part of the Ken Sargent House virtual tour.",
+      "facts": [
+        "Suite 'A3' is part of the Ken Sargent House virtual tour.",
+        "Use navigation markers to move between areas of Ken Sargent House."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Suite 'A3'?",
+          "a": "Explore Suite 'A3' as part of the Ken Sargent House virtual tour."
+        },
+        {
+          "q": "What is Ken Sargent House?",
+          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Suite 'A3'",
+        "What is available at Ken Sargent House?"
+      ]
     }
   }
 }

@@ -30,7 +30,7 @@
           "name": "Ken Sargent House",
           "visibility": "public",
           "featured": true,
-          "summary": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat."
+          "summary": "Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a (replace a with the) Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat."
         }
       ]
     },
@@ -63,7 +63,7 @@
           "id": "cancer-research",
           "category": "Healthcare",
           "name": "Cancer Research",
-          "visibility": "public",
+          "visibility": "internal",
           "featured": true
         }
       ]
@@ -93,7 +93,7 @@
           "id": "holodomor-museum",
           "category": "Culture",
           "name": "Holodomor Museum",
-          "visibility": "public",
+          "visibility": "internal",
           "featured": true
         }
       ]

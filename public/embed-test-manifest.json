@@ -1,34 +1,6 @@
 {
   "tours": [
     {
-      "id": "cancer-research",
-      "name": "Cancer Research",
-      "clientName": "Cancer Research Society",
-      "firstScene": "overview",
-      "scenes": [
-        {
-          "id": "overview",
-          "title": "Overview"
-        },
-        {
-          "id": "reception",
-          "title": "Reception"
-        }
-      ]
-    },
-    {
-      "id": "holodomor-museum",
-      "name": "Holodomor Museum",
-      "clientName": "Holodomor Research and Education Consortium",
-      "firstScene": "reception",
-      "scenes": [
-        {
-          "id": "reception",
-          "title": "Reception"
-        }
-      ]
-    },
-    {
       "id": "ken-sargent-house",
       "name": "Ken Sargent House",
       "clientName": "Grande Prairie Regional Hospital Foundation",
@@ -43,12 +15,12 @@
           "title": "Basement"
         },
         {
-          "id": "comfort-corner",
+          "id": "second-floor-comfort-corner",
           "title": "Comfort Corner"
         },
         {
-          "id": "second-floor-comfort-corner",
-          "title": "Comfort Corner"
+          "id": "comfort-corner",
+          "title": "Communal Space"
         },
         {
           "id": "main-floor-corridor",

@@ -12,7 +12,6 @@
     "overview": {
       "id": "overview",
       "title": "Overview",
-      "description": "Explore Overview as part of the Queensway Carleton General Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/overview.webp",
       "defaultView": {
         "yaw": 87.6,
@@ -189,7 +188,6 @@
     "ed-mh-3": {
       "id": "ed-mh-3",
       "title": "Waiting Area",
-      "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-mh-3.webp",
       "defaultView": {
         "yaw": 130,
@@ -208,7 +206,7 @@
             "display": "anchored",
             "title": "Emergency Department Waiting Area",
             "namingOpportunity": {
-              "name": "Emergency Department Waiting Area Naming Opportunity",
+              "name": "Emergency Department Waiting Area",
               "price": 10000000,
               "status": "open"
             },
@@ -239,13 +237,12 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-mh-3.webp",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144",
-      "videoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA"
+      "previewVideoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA",
+      "placeLead": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying. Originally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and…"
     },
     "ed-ambulance-offload": {
       "id": "ed-ambulance-offload",
       "title": "Ambulance Off-Load",
-      "description": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawa’s west end — one that supports patients, families, paramedics, and hospital staff when time matters most.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/ed-ambulance-offload.webp",
       "defaultView": {
         "yaw": 88.6,
@@ -264,7 +261,7 @@
             "display": "anchored",
             "title": "Ambulance Offload",
             "namingOpportunity": {
-              "name": "Ambulance Offload Naming Opportunity",
+              "name": "Ambulance Offload",
               "price": 500000,
               "status": "open"
             },
@@ -294,12 +291,11 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/ed-ambulance-offload.webp",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7"
+      "placeLead": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity. This area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved…"
     },
     "msi-overview": {
       "id": "msi-overview",
       "title": "James Beech Health Care Centre",
-      "description": "Explore James Beech Health Care Centre as part of the Queensway Carleton General Hospital virtual tour.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-overview.webp",
       "defaultView": {
         "yaw": 110.2,
@@ -472,7 +468,7 @@
             "display": "anchored",
             "title": "Inpatient Bed Rooms",
             "namingOpportunity": {
-              "name": "Inpatient Bed Rooms Naming Opportunity",
+              "name": "Inpatient Bed Rooms",
               "price": 50000,
               "status": "open"
             },
@@ -516,8 +512,12 @@
             "display": "anchored",
             "namingOpportunity": {
               "price": 250000,
-              "status": "open"
-            }
+              "status": "open",
+              "name": "Nursing Station"
+            },
+            "title": "Nursing Station",
+            "body": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
           }
         },
         {
@@ -533,8 +533,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-nursing-station.webp",
-      "description": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day.",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
+      "placeLead": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
     },
     "msi-multi-use-lounge-activity-room": {
       "id": "msi-multi-use-lounge-activity-room",
@@ -557,8 +556,12 @@
             "display": "anchored",
             "namingOpportunity": {
               "price": 250000,
-              "status": "open"
-            }
+              "status": "open",
+              "name": "Multi Use Lounge / Activity Room"
+            },
+            "title": "Multi Use Lounge / Activity Room",
+            "body": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
           }
         },
         {
@@ -574,8 +577,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-multi-use-lounge-activity-room.webp",
-      "description": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
+      "placeLead": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
     },
     "msi-reception-centre": {
       "id": "msi-reception-centre",
@@ -598,7 +600,7 @@
             "display": "anchored",
             "title": "Reception Centre",
             "namingOpportunity": {
-              "name": "Reception Centre Naming Opportunity",
+              "name": "Reception Centre",
               "price": 500000,
               "status": "open"
             },
@@ -619,8 +621,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-reception-centre.webp",
-      "description": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey.",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
+      "placeLead": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
     },
     "msi-quiet-consultant": {
       "id": "msi-quiet-consultant",
@@ -643,8 +644,12 @@
             "display": "anchored",
             "namingOpportunity": {
               "price": 100000,
-              "status": "open"
-            }
+              "status": "open",
+              "name": "Quiet / Consultant"
+            },
+            "title": "Quiet / Consultant",
+            "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
           }
         },
         {
@@ -660,8 +665,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-quiet-consultant.webp",
-      "description": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey.",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
+      "placeLead": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
     },
     "msi-allied-health-team-room": {
       "id": "msi-allied-health-team-room",
@@ -684,8 +688,12 @@
             "display": "anchored",
             "namingOpportunity": {
               "price": 100000,
-              "status": "open"
-            }
+              "status": "open",
+              "name": "Allied Health Team Room"
+            },
+            "title": "Allied Health Team Room",
+            "body": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
           }
         },
         {
@@ -701,13 +709,11 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-allied-health-team-room.webp",
-      "description": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape.",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
+      "placeLead": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care. Where care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place…"
     },
     "msi-report-meeting-room": {
       "id": "msi-report-meeting-room",
       "title": "Report Meeting Room",
-      "description": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-report-meeting-room.webp",
       "defaultView": {
         "yaw": 91.4,
@@ -726,8 +732,11 @@
             "display": "anchored",
             "namingOpportunity": {
               "price": 100000,
-              "status": "open"
-            }
+              "status": "open",
+              "name": "Report Meeting Room"
+            },
+            "title": "Report Meeting Room",
+            "body": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
           }
         },
         {
@@ -742,7 +751,8 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-report-meeting-room.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-report-meeting-room.webp",
+      "placeLead": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
     },
     "msi-galley-servery": {
       "id": "msi-galley-servery",
@@ -772,7 +782,6 @@
     "msi-dining-activity-room": {
       "id": "msi-dining-activity-room",
       "title": "Dining / Activity Room",
-      "description": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-dining-activity-room.webp",
       "defaultView": {
         "yaw": 73.6,
@@ -791,8 +800,12 @@
             "display": "anchored",
             "namingOpportunity": {
               "price": 250000,
-              "status": "open"
-            }
+              "status": "open",
+              "name": "Dining / Activity Room"
+            },
+            "title": "Dining / Activity Room",
+            "body": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together.",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
           }
         },
         {
@@ -808,12 +821,11 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-dining-activity-room.webp",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
+      "placeLead": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
     },
     "msi-staff-facility-lounge": {
       "id": "msi-staff-facility-lounge",
       "title": "Staff Facility / Lounge",
-      "description": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/msi-staff-facility-lounge.webp",
       "defaultView": {
         "yaw": 329.3,
@@ -832,8 +844,11 @@
             "display": "anchored",
             "namingOpportunity": {
               "price": 100000,
-              "status": "open"
-            }
+              "status": "open",
+              "name": "Staff Facility / Lounge"
+            },
+            "title": "Staff Facility / Lounge",
+            "body": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
           }
         },
         {
@@ -848,12 +863,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-staff-facility-lounge.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/msi-staff-facility-lounge.webp",
+      "placeLead": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
     },
     "mental-health-emergency-services-unit": {
       "id": "mental-health-emergency-services-unit",
       "title": "Mental Health Emergency Services Unit",
-      "description": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/mental-health-emergency-services-unit.webp",
       "defaultView": {
         "yaw": 89.8,
@@ -872,7 +887,7 @@
             "display": "anchored",
             "title": "Mental Health Emergency Services Unit",
             "namingOpportunity": {
-              "name": "Mental Health Emergency Services Unit Naming Opportunity",
+              "name": "Mental Health Emergency Services Unit",
               "price": 1000000,
               "status": "open"
             },
@@ -905,13 +920,12 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/mental-health-emergency-services-unit.webp",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900",
-      "videoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s"
+      "previewVideoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s",
+      "placeLead": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre. The new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the…"
     },
     "acute-care-pod-a": {
       "id": "acute-care-pod-a",
       "title": "Acute Care Pod A",
-      "description": "Acute Care Pod A is a vital part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery.\n\nAs emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providing dedicated spaces for patients who require urgent medical attention but may not need trauma or resuscitation-level care.\n\nThis pod will support faster clinical decision-making, better patient flow, and a calmer environment for both patients and frontline teams. Each treatment bay is planned to give staff clear visibility, efficient access to equipment, and enough space to provide safe, compassionate care.\n\nFor patients and families, Acute Care Pod A means less time waiting, more organized care, and a better experience during stressful and uncertain moments.\n\nThis is more than a group of treatment rooms. It is an essential part of a modern Emergency Department built to respond to the growing needs of Ottawa’s west end — with care that is faster, safer, and closer to where it is needed most.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/acute-care-pod-a.webp",
       "defaultView": {
         "yaw": 174.8,
@@ -930,7 +944,7 @@
             "display": "anchored",
             "title": "Acute Care Pod A",
             "namingOpportunity": {
-              "name": "Acute Care Pod A Naming Opportunity",
+              "name": "Acute Care Pod A",
               "price": 1000000,
               "status": "open"
             },
@@ -951,14 +965,13 @@
           "navVariant": "back"
         }
       ],
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/f8601c47-6a3d-425d-8d85-ec765796909d",
-      "videoUrl": "https://www.youtube.com/watch?v=Ekza7eysssc&t=1s",
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-a.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-a.webp",
+      "previewVideoUrl": "https://www.youtube.com/watch?v=Ekza7eysssc&t=1s",
+      "placeLead": "Acute Care Pod A is a vital part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery. As emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providing…"
     },
     "acute-care-pod-b": {
       "id": "acute-care-pod-b",
       "title": "Acute Care Pod B",
-      "description": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospital’s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention.\n\nAs the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provide individual patient bays designed for privacy, visibility, and quick access to staff, equipment, and support services.\n\nFor patients and families, this means a more structured care experience during stressful moments. Instead of waiting in overcrowded areas, patients can be moved into appropriate treatment spaces sooner, where care teams can respond with greater focus and coordination.\n\nFor frontline staff, Acute Care Pod B will help reduce congestion, improve workflow, and create a safer environment for delivering urgent care. The pod layout supports better communication between nurses, physicians, and support teams, helping decisions happen faster when time matters.\n\nAcute Care Pod B is more than a collection of treatment bays. It is part of a modern Emergency Department designed for Ottawa’s growing west end — helping Queensway Carleton Hospital deliver care that is timely, compassionate, and ready for the needs of today and tomorrow.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/acute-care-pod-b.webp",
       "defaultView": {
         "yaw": 89.1,
@@ -977,7 +990,7 @@
             "display": "anchored",
             "title": "Acute Care Pod B",
             "namingOpportunity": {
-              "name": "Acute Care Pod B Naming Opportunity",
+              "name": "Acute Care Pod B",
               "price": 1000000,
               "status": "open"
             },
@@ -998,14 +1011,13 @@
           "navVariant": "back"
         }
       ],
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/24ad8146-f72d-4428-9a75-a0801853e2d2",
-      "videoUrl": "https://www.youtube.com/watch?v=DTWKUUtz1TI&t=2s",
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-b.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-b.webp",
+      "previewVideoUrl": "https://www.youtube.com/watch?v=DTWKUUtz1TI&t=2s",
+      "placeLead": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospital’s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention. As the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provide…"
     },
     "acute-care-pod-c": {
       "id": "acute-care-pod-c",
       "title": "Acute Care Pod C",
-      "description": "Acute Care Pod C is an important part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawa’s west end.\n\nAs patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patient bays that support faster movement through the department and better coordination between nurses, physicians, and support teams.\n\nThis pod is designed to improve both clinical efficiency and patient experience. Patients will have more appropriate treatment spaces, greater privacy, and easier access to the care team. For staff, the layout supports clearer workflows, better visibility, and faster access to equipment and nearby services.\n\nAcute Care Pod C will help reduce bottlenecks, support timely decision-making, and create a calmer, safer environment during urgent medical situations.\n\nThis is more than additional space. It is a critical investment in a stronger, more responsive Emergency Department — one that is better prepared to care for families across Ottawa’s west end when every minute matters.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/acute-care-pod-c.webp",
       "defaultView": {
         "yaw": 87.3,
@@ -1024,7 +1036,7 @@
             "display": "anchored",
             "title": "Acute Care Pod C",
             "namingOpportunity": {
-              "name": "Acute Care Pod C Naming Opportunity",
+              "name": "Acute Care Pod C",
               "price": 1000000,
               "status": "open"
             },
@@ -1045,9 +1057,9 @@
           "navVariant": "back"
         }
       ],
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/2013054c-1a9d-428c-b08f-6a670507081b",
-      "videoUrl": "https://www.youtube.com/watch?v=c7jEErgm8NI&t=1s",
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-c.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-c.webp",
+      "previewVideoUrl": "https://www.youtube.com/watch?v=c7jEErgm8NI&t=1s",
+      "placeLead": "Acute Care Pod C is an important part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawa’s west end. As patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patient…"
     },
     "mental-health-emergency-services-unit-2": {
       "id": "mental-health-emergency-services-unit-2",
@@ -1091,7 +1103,6 @@
     "acute-care-pod-d": {
       "id": "acute-care-pod-d",
       "title": "Acute Care Pod D",
-      "description": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/queensway-carleton-general-hospital/panoramas/acute-care-pod-d.webp",
       "defaultView": {
         "yaw": 33.6,
@@ -1133,7 +1144,7 @@
             "display": "anchored",
             "title": "Acute Care Pod D",
             "namingOpportunity": {
-              "name": "Acute Care Pod D Naming Opportunity",
+              "name": "Acute Care Pod D",
               "price": 1000000,
               "status": "open"
             },
@@ -1142,9 +1153,9 @@
           }
         }
       ],
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e",
-      "videoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
-      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-d.webp"
+      "thumbnail": "/assets/qchfoundation/queensway-carleton-general-hospital/thumbnails/acute-care-pod-d.webp",
+      "previewVideoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
+      "placeLead": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment. With emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to…"
     },
     "acute-care-pod-d-2": {
       "id": "acute-care-pod-d-2",
