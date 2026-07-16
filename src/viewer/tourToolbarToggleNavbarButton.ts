@@ -18,9 +18,9 @@ function toolbarMaterialSymbolIcon(name: string): string {
   return `<span class="${TOOLBAR_TOGGLE_MATERIAL_SYMBOL_CLASS}" aria-hidden="true">${name}</span>`;
 }
 
-const TOOLBAR_EXPAND_ICON = toolbarMaterialSymbolIcon('unfold_more');
+const TOOLBAR_EXPAND_ICON = toolbarMaterialSymbolIcon('expand_content');
 
-const TOOLBAR_COLLAPSE_ICON = toolbarMaterialSymbolIcon('unfold_less');
+const TOOLBAR_COLLAPSE_ICON = toolbarMaterialSymbolIcon('collapse_content');
 
 interface NavbarButtonWithContainer {
   container: HTMLElement;
