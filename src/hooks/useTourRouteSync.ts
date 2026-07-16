@@ -63,6 +63,8 @@ export function useTourRouteSync({
 
   const syncingFromUrlRef = useRef(false);
   const syncingToUrlRef = useRef(false);
+  /** Scene id we pushed to the URL — keep URL→viewer blocked until Router catches up. */
+  const pendingToUrlSceneIdRef = useRef<string | null>(null);
 
   const route = useMemo(
     () => resolveTourRoute(tourOrScene ?? tourId, sceneParam),
@@ -86,6 +88,16 @@ export function useTourRouteSync({
   useEffect(() => {
     if (route.tourId !== tour.id) {
       return;
+    }
+
+    // Outbound URL sync in flight — wait until route matches before snapping viewer.
+    if (pendingToUrlSceneIdRef.current !== null) {
+      if (routeSceneId === pendingToUrlSceneIdRef.current) {
+        pendingToUrlSceneIdRef.current = null;
+        syncingToUrlRef.current = false;
+      } else {
+        return;
+      }
     }
 
     if (
@@ -131,6 +143,7 @@ export function useTourRouteSync({
     viewerRef,
     pendingNamingSelectionRef,
     searchParams,
+    transitioningRef,
   ]);
 
   useEffect(() => {
@@ -158,11 +171,9 @@ export function useTourRouteSync({
       return;
     }
 
+    pendingToUrlSceneIdRef.current = currentSceneId;
     syncingToUrlRef.current = true;
     navigate(target, { replace: true });
-    queueMicrotask(() => {
-      syncingToUrlRef.current = false;
-    });
   }, [
     currentSceneId,
     isTransitioning,
@@ -204,11 +215,9 @@ export function useTourRouteSync({
         return;
       }
 
+      pendingToUrlSceneIdRef.current = sceneId;
       syncingToUrlRef.current = true;
       navigate(target);
-      queueMicrotask(() => {
-        syncingToUrlRef.current = false;
-      });
     },
     [
       location.pathname,
