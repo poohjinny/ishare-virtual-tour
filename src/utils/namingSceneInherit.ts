@@ -1,9 +1,8 @@
 import type { Hotspot, PopupContent, Scene, Tour } from '../types/tour';
 
-/** Legal naming title derived from a scene title when `namingOpportunity.name` is omitted. */
+/** Naming title derived from a scene title when `namingOpportunity.name` is omitted. */
 export function inheritedNamingOpportunityName(sceneTitle: string): string {
-  const title = sceneTitle.trim();
-  return title ? `${title} Naming Opportunity` : '';
+  return sceneTitle.trim();
 }
 
 /** Host scene for a naming/info hotspot — `sceneId` (model3d) or the panorama scene that owns it. */

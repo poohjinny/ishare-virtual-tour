@@ -193,11 +193,7 @@ export function formatNamingHotspotJson(
         popup: {
           display: 'anchored',
           title,
-          namingOpportunity: {
-            name: `${title} Naming Opportunity`,
-            price: '$75,000',
-            status: 'soon',
-          },
+          namingOpportunity: { name: title, price: '$75,000', status: 'soon' },
           body: 'First paragraph describing the naming opportunity…',
         },
       },

@@ -445,7 +445,7 @@ export function resolvePopupContentCta(
   return resolvePopupContentCtas(popup, tour)[0] ?? null;
 }
 
-/** Display name without trailing "Naming Opportunity" (JSON stores full legal title). */
+/** Strip legacy trailing "Naming Opportunity" from stored names (no-op if already short). */
 export function stripNamingOpportunitySuffix(name: string): string {
   return name.replace(/\s+Naming Opportunity\s*$/i, '').trim();
 }

@@ -27,6 +27,7 @@ import {
 import { normalizeNamingPriceStorage } from './namingPrice.mjs';
 import { encodePanoramaWebp } from './panoramaEncode.mjs';
 import { persistTourContentPlaceholders } from './tourContentSync.mjs';
+import { syncScenePlaceLeadFromNaming } from './scenePlaceLead.mjs';
 
 const THUMBNAIL_WIDTH = Number(process.env.THUMBNAIL_WIDTH ?? 640);
 const THUMBNAIL_QUALITY = Number(process.env.THUMBNAIL_QUALITY ?? 85);
@@ -243,8 +244,7 @@ function applyScenePreviewVideoField(scene, previewVideoUrl) {
 }
 
 function inheritedNamingOpportunityName(sceneTitle) {
-  const title = (sceneTitle ?? '').trim();
-  return title ? `${title} Naming Opportunity` : '';
+  return (sceneTitle ?? '').trim();
 }
 
 export function buildNamingHotspotRecord({
@@ -415,17 +415,21 @@ export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
 
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
-  const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+  const { hotspot, scene } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
+  const wasNaming = Boolean(hotspot.popup?.namingOpportunity);
 
   if (tour.viewerType === 'model3d') {
     tour.hotspots = (tour.hotspots ?? []).filter(
       (entry) => entry.id !== resolvedHotspotId,
     );
   } else {
-    const { scene } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
     scene.hotspots = scene.hotspots.filter(
       (entry) => entry.id !== resolvedHotspotId,
     );
+  }
+
+  if (wasNaming) {
+    syncScenePlaceLeadFromNaming(tour, scene);
   }
 
   writeTourJson(tourPath, tour);
@@ -1008,6 +1012,9 @@ export async function createNamingHotspot({
   }
 
   appendSceneHotspot(tour, sceneId, hotspot);
+  if (hostScene) {
+    syncScenePlaceLeadFromNaming(tour, hostScene);
+  }
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
 }
@@ -1261,6 +1268,10 @@ export async function updateNamingHotspot({
     );
   }
 
+  if (hostScene) {
+    syncScenePlaceLeadFromNaming(tour, hostScene);
+  }
+
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
 }
@@ -1416,6 +1427,7 @@ export function updateScene({
   sceneId,
   title,
   description,
+  placeLead,
   previewVideoUrl,
   videoUrl,
   setAsFirstScene,
@@ -1437,6 +1449,8 @@ export function updateScene({
   const nextTitle = title?.trim();
   const hasDescription = description !== undefined;
   const nextDescription = description?.trim();
+  const hasPlaceLead = placeLead !== undefined;
+  const nextPlaceLead = placeLead?.trim();
   const hasPreviewVideoUrl = previewVideoUrl !== undefined;
   const hasVideoUrl = videoUrl !== undefined;
   const wantsFirstScene = Boolean(setAsFirstScene);
@@ -1446,6 +1460,7 @@ export function updateScene({
   if (
     !nextTitle &&
     !hasDescription &&
+    !hasPlaceLead &&
     !hasPreviewVideoUrl &&
     !hasVideoUrl &&
     !wantsFirstScene &&
@@ -1453,7 +1468,7 @@ export function updateScene({
     !wantsClearMap
   ) {
     throw new Error(
-      'At least one of title, description, previewVideoUrl, videoUrl, setAsFirstScene, map, or clearMap is required',
+      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, setAsFirstScene, map, or clearMap is required',
     );
   }
 
@@ -1469,9 +1484,22 @@ export function updateScene({
   }
 
   if (hasDescription) {
-    scene.description =
-      nextDescription ||
-      defaultSceneDescription(tour.title, scene.title ?? resolvedSceneId);
+    if (nextDescription) {
+      scene.description = nextDescription;
+    } else {
+      delete scene.description;
+    }
+  }
+
+  if (hasPlaceLead) {
+    if (nextPlaceLead) {
+      scene.placeLead = nextPlaceLead;
+    } else {
+      delete scene.placeLead;
+    }
+  } else if (hasDescription && !scene.description?.trim()) {
+    // Description cleared — refresh auto soft lead from NO bodies.
+    syncScenePlaceLeadFromNaming(tour, scene);
   }
 
   if (hasPreviewVideoUrl) {
