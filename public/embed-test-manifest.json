@@ -7,19 +7,19 @@
       "firstScene": "overall",
       "scenes": [
         {
-          "id": "accessible-larger-suites",
-          "title": "Accessible & Larger Suites"
-        },
-        {
           "id": "basement",
           "title": "Basement"
         },
         {
-          "id": "second-floor-comfort-corner",
-          "title": "Comfort Corner"
+          "id": "entrance-to-the-base-level",
+          "title": "Basement Entrance"
         },
         {
           "id": "comfort-corner",
+          "title": "Commual Space"
+        },
+        {
+          "id": "second-floor-comfort-corner",
           "title": "Communal Space"
         },
         {
@@ -43,16 +43,12 @@
           "title": "Dining Area"
         },
         {
-          "id": "entrance-to-the-base-level",
-          "title": "Entrance to the Base Level"
+          "id": "fitness-room",
+          "title": "Exercise Room"
         },
         {
           "id": "family-patient-communal-space",
-          "title": "Family & Patient Communal Space"
-        },
-        {
-          "id": "fitness-room",
-          "title": "Fitness Room"
+          "title": "Families & Patients Communal Space"
         },
         {
           "id": "gazebo",
@@ -64,7 +60,7 @@
         },
         {
           "id": "laundry",
-          "title": "Laundry"
+          "title": "Laundry Room"
         },
         {
           "id": "main-entrance",
@@ -88,7 +84,7 @@
         },
         {
           "id": "quite-space",
-          "title": "Quite Space"
+          "title": "Quite Room"
         },
         {
           "id": "reception",
@@ -112,11 +108,19 @@
         },
         {
           "id": "suite-a",
-          "title": "Suite A"
+          "title": "Suite 'A'"
+        },
+        {
+          "id": "accessible-larger-suites",
+          "title": "Suite 'A2'"
+        },
+        {
+          "id": "suite-a3",
+          "title": "Suite 'A3'"
         },
         {
           "id": "suite-b",
-          "title": "Suite B"
+          "title": "Suite 'B'"
         },
         {
           "id": "wash-room",
