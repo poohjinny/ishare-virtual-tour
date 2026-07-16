@@ -6,6 +6,8 @@
   "scripts": {
     "sync-assets": "node scripts/sync-assets.mjs",
     "generate-thumbnails": "node scripts/generate-scene-thumbnails.mjs",
+    "generate-place-leads": "node scripts/generate-scene-place-leads.mjs",
+    "sync-place-leads": "node scripts/sync-scene-place-leads.mjs",
     "dev": "npm run sync-assets && vite",
     "build": "npm run sync-assets && tsgo -b && vite build",
     "build:ghpages": "npm run sync-assets && tsgo -b && vite build --mode ghpages",

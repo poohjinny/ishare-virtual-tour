@@ -690,6 +690,7 @@ export interface DevUpdateScenePayload {
   sceneId: string;
   title?: string;
   description?: string;
+  placeLead?: string;
   previewVideoUrl?: string;
   videoUrl?: string;
   setAsFirstScene?: boolean;

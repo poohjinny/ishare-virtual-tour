@@ -53,7 +53,7 @@ export interface PopupCta {
 export type NamingOpportunityStatus = 'open' | 'reserved' | 'soon' | 'closed';
 
 export interface NamingOpportunity {
-  /** Full naming opportunity title (e.g. "Reception Desk Naming Opportunity") */
+  /** Naming opportunity display name (e.g. "Reception Desk") — no suffix. */
   name: string;
   /** Numeric amount in tour JSON (e.g. 75000) — formatted at display time. */
   price: number;
@@ -177,6 +177,11 @@ export interface Scene {
   id: string;
   title: string;
   description?: string;
+  /**
+   * Soft place lead when `description` is empty — often generated from NO copy
+   * (`npm run generate-place-leads`). Client place copy still prefers `description`.
+   */
+  placeLead?: string;
   /** Optional hero video — Synthesia embed or hosted mp4/webm; Explore + nav preview hero. */
   previewVideoUrl?: string;
   /** Optional body video — YouTube; Explore scene detail + nav preview body. */

@@ -81,6 +81,13 @@ export function exploreLocationGroupCountLabel(count: number): string {
 
 export const TOUR_DIRECTORY_SCENE_DETAIL_BACK = 'Back to places';
 
+/** Soft lead when a place has no scene description and no naming opportunities. */
+export const TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD =
+  'Step inside and look around this space.';
+
+/** Soft lead from an NO body when the place has no scene description. */
+export const TOUR_DIRECTORY_SCENE_NAMING_LEAD_MAX_CHARS = 480;
+
 /** Detail panel primary CTA — room for the place name (unlike compact gallery cards). */
 export function tourDirectorySceneDetailVisitLabel(sceneTitle: string): string {
   const name = sceneTitle.trim();

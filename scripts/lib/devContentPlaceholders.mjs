@@ -60,20 +60,10 @@ function isBlank(value) {
 
 /** Fill missing scene descriptions in tour JSON (returns true if mutated). */
 export function fillMissingTourSceneDescriptions(tour) {
-  const tourTitle = tour.title?.trim() || tour.id;
-  let changed = false;
-
-  for (const scene of Object.values(tour.scenes ?? {})) {
-    if (isBlank(scene.description)) {
-      scene.description = defaultSceneDescription(
-        tourTitle,
-        scene.title ?? scene.id,
-      );
-      changed = true;
-    }
-  }
-
-  return changed;
+  // Empty scene descriptions are intentional (placeLead / NO soft leads).
+  // Do not auto-inject placeholder copy on every save.
+  void tour;
+  return false;
 }
 
 /** Merge tour scenes into knowledge JSON with placeholder copy for empty fields. */

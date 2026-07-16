@@ -312,6 +312,7 @@ function validateUpdateScenePayload(body) {
     sceneId,
     title,
     description,
+    placeLead,
     previewVideoUrl,
     videoUrl,
     setAsFirstScene,
@@ -324,6 +325,7 @@ function validateUpdateScenePayload(body) {
   if (
     !title?.trim() &&
     description === undefined &&
+    placeLead === undefined &&
     previewVideoUrl === undefined &&
     videoUrl === undefined &&
     setAsFirstScene !== true &&
@@ -331,7 +333,7 @@ function validateUpdateScenePayload(body) {
     clearMap !== true
   ) {
     throw new Error(
-      'At least one of title, description, previewVideoUrl, videoUrl, setAsFirstScene, map, or clearMap is required',
+      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, setAsFirstScene, map, or clearMap is required',
     );
   }
 
@@ -348,6 +350,7 @@ function validateUpdateScenePayload(body) {
     sceneId: sceneId.trim(),
     title,
     description,
+    placeLead: typeof placeLead === 'string' ? placeLead : undefined,
     previewVideoUrl:
       typeof previewVideoUrl === 'string' ? previewVideoUrl : undefined,
     videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
@@ -1360,6 +1363,7 @@ export function viteDevTourApiPlugin() {
               sceneId,
               title,
               description,
+              placeLead,
               previewVideoUrl,
               videoUrl,
               setAsFirstScene,
@@ -1372,6 +1376,7 @@ export function viteDevTourApiPlugin() {
               sceneId,
               title,
               description,
+              placeLead,
               previewVideoUrl,
               videoUrl,
               setAsFirstScene,
