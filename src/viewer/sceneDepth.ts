@@ -233,8 +233,9 @@ export function buildSceneGroupSecondaryById(
   const out: Record<string, string> = {};
 
   for (const group of groups) {
-    // Orphans stay unlabeled so callers can fall back to scene id — "More places"
-    // is not useful for authoring disambiguation.
+    // Orphans stay unlabeled — "More places" is not useful for authoring.
+    // Callers should not fall back to scene id as a secondary title (ids are
+    // stable technical keys and often diverge from display titles).
     if (group.id === SCENE_GROUP_OTHER_ID) continue;
 
     for (const scene of group.scenes) {

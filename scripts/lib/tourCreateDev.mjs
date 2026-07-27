@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { allocateOpaqueId, assertEntityId } from './opaqueId.mjs';
 import {
   bakeSceneThumbnail,
   buildSceneRecord,
@@ -7,7 +8,6 @@ import {
   saveUploadedTourModel,
   saveUploadedPanoramaWebp,
   saveUploadedSceneThumbnailWebp,
-  slugifyHotspotName,
   writeTourJson,
 } from './tourSceneDev.mjs';
 import { syncKnowledgeFromTour } from './devContentPlaceholders.mjs';
@@ -27,12 +27,8 @@ const DEFAULT_VIEW = { yaw: 0, pitch: 0, zoom: 17 };
 const DEFAULT_3D_VIEW = { yaw: 0, pitch: 0, zoom: 50 };
 const DEFAULT_PRIMARY_COLOR = '#007078';
 
-function assertSlug(value, label) {
-  const slug = slugifyHotspotName(value);
-  if (!slug) {
-    throw new Error(`${label} must contain letters or numbers`);
-  }
-  return slug;
+function assertClientId(value, label) {
+  return assertEntityId(value, label);
 }
 
 function buildTourRecord({
@@ -212,6 +208,7 @@ export async function createTour({
   immersivePlaylistManifest,
   immersiveVolume,
   clearImmersiveBackground,
+  firstSceneId: rawFirstSceneId,
 }) {
   if (!rawClientId?.trim()) {
     throw new Error('clientId is required');
@@ -238,9 +235,12 @@ export async function createTour({
 
   const resolvedBrandingMode = brandingMode === 'custom' ? 'custom' : 'client';
 
-  const tourId = assertSlug(rawTourId, 'Tour id');
-  const clientId = assertSlug(rawClientId, 'Client id');
-  const sceneId = slugifyHotspotName(firstSceneTitle.trim()) || 'overview';
+  const tourId = assertEntityId(rawTourId, 'Tour id');
+  const clientId = assertClientId(rawClientId, 'Client id');
+  const sceneId =
+    rawFirstSceneId?.trim() ?
+      assertEntityId(rawFirstSceneId, 'First scene id')
+    : allocateOpaqueId('s_', []);
   const tourTitleValue = tourTitle.trim();
   const sceneTitleValue = firstSceneTitle.trim();
 
