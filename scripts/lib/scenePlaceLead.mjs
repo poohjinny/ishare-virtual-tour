@@ -3,6 +3,8 @@
  * Keep in sync with src/utils/resolveScenePlaceLead.ts + tourDirectory constant.
  */
 
+import { isDefaultSceneDescription } from './devContentPlaceholders.mjs';
+
 export const SCENE_PLACE_LEAD_MAX_CHARS = 480;
 
 function firstParagraphs(body, count = 2) {
@@ -58,23 +60,31 @@ export function buildScenePlaceLeadFromNaming(tour, scene) {
 }
 
 /**
- * When scene.description is empty, set or clear placeLead from NO bodies.
- * Does nothing when description is set (client place copy wins).
- * @returns {boolean} whether scene.placeLead changed
+ * When scene.description is empty (or only the auto placeholder), set or clear
+ * placeLead from NO bodies. Real client descriptions still win.
+ * @returns {boolean} whether scene.placeLead or description changed
  */
 export function syncScenePlaceLeadFromNaming(tour, scene) {
-  if (scene.description?.trim()) return false;
+  const tourTitle = tour.title?.trim() || tour.id;
+  let changed = false;
+
+  if (isDefaultSceneDescription(scene.description, tourTitle, scene.title)) {
+    delete scene.description;
+    changed = true;
+  }
+
+  if (scene.description?.trim()) return changed;
 
   const lead = buildScenePlaceLeadFromNaming(tour, scene);
   const current = scene.placeLead?.trim() ?? '';
 
   if (lead) {
-    if (current === lead) return false;
+    if (current === lead) return changed;
     scene.placeLead = lead;
     return true;
   }
 
-  if (!current) return false;
+  if (!current) return changed;
   delete scene.placeLead;
   return true;
 }

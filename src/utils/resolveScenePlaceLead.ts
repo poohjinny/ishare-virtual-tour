@@ -7,6 +7,7 @@ import type { Scene, Tour } from '../types/tour';
 import { listSceneInfoHotspots } from './findTourHotspot';
 import { formatNamingPriceDisplay, parseNamingPrice } from './namingPrice';
 import { resolveNamingPopup } from './namingSceneInherit';
+import { isDefaultSceneDescription } from './sceneDescriptionPlaceholder';
 
 interface SceneNamingLeadItem {
   name: string;
@@ -16,17 +17,23 @@ interface SceneNamingLeadItem {
 
 /**
  * Soft place copy for Explore / nav preview:
- * 1. Client `description`
+ * 1. Client `description` (ignores auto placeholders)
  * 2. Baked `placeLead` (generated from NO copy)
  * 3. Abbreviated NO body
  * 4. General empty-place phrase
  */
 export function resolveScenePlaceLead(
-  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'title' | 'id'>,
   scene: Scene,
 ): string {
+  const tourTitle = tour.title?.trim() || tour.id;
   const description = scene.description?.trim();
-  if (description) return description;
+  if (
+    description &&
+    !isDefaultSceneDescription(description, tourTitle, scene.title)
+  ) {
+    return description;
+  }
 
   const placeLead = scene.placeLead?.trim();
   if (placeLead) return placeLead;

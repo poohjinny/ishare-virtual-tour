@@ -6,6 +6,16 @@ export function defaultSceneDescription(tourTitle, sceneTitle) {
   return `Explore ${scene} as part of the ${tour} virtual tour.`;
 }
 
+/**
+ * True when copy matches the auto scene placeholder (not real client copy).
+ * Soft-lead sync treats these as empty so NO bodies can replace them.
+ */
+export function isDefaultSceneDescription(description, tourTitle, sceneTitle) {
+  const trimmed = typeof description === 'string' ? description.trim() : '';
+  if (!trimmed) return false;
+  return trimmed === defaultSceneDescription(tourTitle, sceneTitle);
+}
+
 export function defaultNamingBody(opportunityTitle, tourTitle) {
   const title = opportunityTitle?.trim() || 'This space';
   const tour = tourTitle?.trim() || 'this virtual tour';
