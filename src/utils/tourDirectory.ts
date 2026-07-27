@@ -31,6 +31,8 @@ export interface TourDirectoryNamingItem {
   description?: string;
   /** model3d — baked preview hero for Explore cards */
   previewImage?: string;
+  /** Sold + donor — e.g. “Named by Jane Smith”. */
+  donorCredit?: string;
 }
 
 /** Naming items for one scene (place) within a sector group. */
@@ -69,6 +71,7 @@ export function buildTourNamingDirectory(
         statusModifier: naming.statusModifier,
         description: naming.description,
         previewImage: naming.previewImage,
+        donorCredit: naming.donorCredit,
       });
     }
   }
@@ -196,7 +199,6 @@ export function filterTourScenes(scenes: Scene[], query: string): Scene[] {
   return scenes.filter(
     (scene) =>
       scene.title.toLowerCase().includes(q) ||
-      scene.id.toLowerCase().includes(q) ||
       scene.description?.toLowerCase().includes(q),
   );
 }
@@ -212,9 +214,8 @@ export function filterTourNamingDirectory(
     (item) =>
       item.name.toLowerCase().includes(q) ||
       item.sceneTitle.toLowerCase().includes(q) ||
-      item.statusLabel.toLowerCase().includes(q) ||
-      item.statusShortLabel.toLowerCase().includes(q) ||
-      item.description?.toLowerCase().includes(q),
+      item.description?.toLowerCase().includes(q) ||
+      item.donorCredit?.toLowerCase().includes(q),
   );
 }
 

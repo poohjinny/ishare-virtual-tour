@@ -1400,8 +1400,8 @@ input::placeholder {
   box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
 }
 
-.hotspot-info--active:not(.hotspot-info--status-closed):hover .hotspot-info__pill,
-.hotspot-info--active:not(.hotspot-info--status-closed):focus-visible .hotspot-info__pill {
+.hotspot-info--active:hover .hotspot-info__pill,
+.hotspot-info--active:focus-visible .hotspot-info__pill {
   background: var(--ishare-hotspot-glass-bg-hover);
   box-shadow: var(--ishare-hotspot-active-glow-strong);
 }
@@ -1411,9 +1411,9 @@ input::placeholder {
   color: rgba(255, 255, 255, 0.78);
 }
 
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__icon-wrap,
-.hotspot-info--active:not(.hotspot-info--status-closed):hover .hotspot-info__icon-wrap,
-.hotspot-info--active:not(.hotspot-info--status-closed):focus-visible .hotspot-info__icon-wrap {
+.hotspot-info--active .hotspot-info__icon-wrap,
+.hotspot-info--active:hover .hotspot-info__icon-wrap,
+.hotspot-info--active:focus-visible .hotspot-info__icon-wrap {
   width: 18px;
   height: 18px;
   background: var(--ishare-active-icon-leading-bg);
@@ -1421,7 +1421,7 @@ input::placeholder {
   color: var(--ishare-primary);
 }
 
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__icon {
+.hotspot-info--active .hotspot-info__icon {
   width: 13px;
   height: 13px;
 }
@@ -1431,103 +1431,35 @@ input::placeholder {
   outline-offset: 2px;
 }
 
-/* Active ? popup open: glass pill, theme label/icon + glow (no pulse ? already engaged) */
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__pill {
+/* Active — popup open: glass pill, theme label/icon + glow (no pulse — already engaged) */
+.hotspot-info--active .hotspot-info__pill {
   background: var(--ishare-hotspot-glass-bg-hover);
   border-color: transparent;
   box-shadow: var(--ishare-hotspot-active-glow);
 }
 
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__label {
+.hotspot-info--active .hotspot-info__label {
   color: inherit;
 }
 
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__name {
+.hotspot-info--active .hotspot-info__name {
   color: var(--ishare-primary);
 }
 
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__label-sep,
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__status {
+.hotspot-info--active .hotspot-info__label-sep,
+.hotspot-info--active .hotspot-info__status {
   color: rgba(var(--ishare-primary-rgb), 0.52);
 }
 
-.hotspot-info--active:not(.hotspot-info--status-closed) .hotspot-info__pulse {
+.hotspot-info--active .hotspot-info__pulse {
   animation: none;
   opacity: 0;
 }
 
-/* Closed — muted pill, no pulse (status detail lives in popup / directory) */
-.hotspot-info--status-closed .hotspot-info__pulse {
+/* Sold — primary pill (same brand confidence); no pulse. Status lives in label / directory. */
+.hotspot-info--status-sold .hotspot-info__pulse {
   animation: none;
   opacity: 0;
-}
-
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__pill {
-  background: var(--ishare-hotspot-glass-bg-hover);
-  border-color: var(--ishare-active-item-closed-border);
-  box-shadow: var(--ishare-hotspot-active-glow-closed);
-}
-
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__label {
-  color: inherit;
-}
-
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__name {
-  color: var(--ishare-text);
-}
-
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__label-sep,
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__status {
-  color: rgba(100, 116, 139, 0.72);
-}
-
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__icon-wrap {
-  width: 18px;
-  height: 18px;
-  background: var(--ishare-active-icon-leading-closed-bg);
-  box-shadow: var(--ishare-active-icon-leading-closed-ring);
-  color: rgba(71, 85, 105, 0.72);
-}
-
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__icon {
-  width: 13px;
-  height: 13px;
-}
-
-.hotspot-info--active.hotspot-info--status-closed .hotspot-info__pulse {
-  animation: none;
-  opacity: 0;
-}
-
-.hotspot-info--active.hotspot-info--status-closed:hover .hotspot-info__pill,
-.hotspot-info--active.hotspot-info--status-closed:focus-visible .hotspot-info__pill {
-  background: var(--ishare-hotspot-glass-bg-hover);
-  box-shadow: var(--ishare-hotspot-active-glow-closed-strong);
-}
-
-.hotspot-info--active.hotspot-info--status-closed:hover .hotspot-info__icon-wrap,
-.hotspot-info--active.hotspot-info--status-closed:focus-visible .hotspot-info__icon-wrap {
-  color: rgba(51, 65, 85, 0.82);
-}
-
-.hotspot-info--status-closed .hotspot-info__pill {
-  background: rgba(71, 85, 105, 0.82);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
-}
-
-.hotspot-info--status-closed:not(.hotspot-info--active):hover .hotspot-info__pill,
-.hotspot-info--status-closed:not(.hotspot-info--active):focus-visible .hotspot-info__pill {
-  background: rgba(51, 65, 85, 0.88);
-  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.2);
-}
-
-.hotspot-info--status-closed .hotspot-info__icon-wrap {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.hotspot-info--status-closed:not(.hotspot-info--active):hover .hotspot-info__icon-wrap,
-.hotspot-info--status-closed:not(.hotspot-info--active):focus-visible .hotspot-info__icon-wrap {
-  color: rgba(255, 255, 255, 0.58);
 }
 
 /* Pause infinite chrome motion when the tab is hidden or the window loses focus. */

@@ -22,6 +22,7 @@ import {
   tourNavDirectoryListItemBadgeColumnClassName,
   tourNavDirectoryListItemBodyClassName,
   tourNavDirectoryListItemBodyMainClassName,
+  tourNavDirectoryListItemContentClassName,
   tourNavDirectoryListItemNamingMainClassName,
   tourNavDirectoryListItemPrimaryCtaClassName,
   tourNavDirectoryListItemSelectClassName,
@@ -71,19 +72,21 @@ export function ExploreNamingDirectoryListItem({
 }: ExploreNamingDirectoryListItemProps) {
   const { isCoarsePointer } = useTourChromeLayout();
   const { ref: thumbRef, inView } = useLazyInView<HTMLSpanElement>();
-  const isClosed = item.statusModifier === 'closed';
+  const isSold = item.statusModifier === 'sold';
   const description = item.description?.trim();
+  const donorCredit = item.donorCredit?.trim();
   const showActions = true;
   const visitPlaceLabel = exploreNamingVisitPlaceAriaLabel(item.sceneTitle);
   const viewOpportunityLabel = `${EXPLORE_GALLERY_NAMING_VIEW_LABEL}: ${item.name}`;
+  const creditSuffix = donorCredit ? ` ${donorCredit}.` : '';
   const rowAriaLabel =
     active ?
       description ?
-        `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}. ${description}`
-      : `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}.`
+        `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+      : `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`
     : description ?
-      `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}. ${description}`
-    : `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}.`;
+      `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+    : `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`;
 
   const previewScene = useMemo((): Scene => {
     const base: Scene = scene ?? {
@@ -150,80 +153,87 @@ export function ExploreNamingDirectoryListItem({
         />
       </span>
     : <span ref={thumbRef} className={tourNavItemLeadingThumbFallbackClassName}>
-        <NamingHeartIcon active={active} closed={isClosed} />
+        <NamingHeartIcon active={active} sold={isSold} />
       </span>;
 
   const body = (
     <span className={tourNavDirectoryListItemBodyClassName}>
       {leading}
-      <span
-        className={cn(
-          tourNavDirectoryListItemBodyMainClassName,
-          tourNavDirectoryListItemNamingMainClassName,
-        )}
-      >
-        <span className={tourNavItemTextClassName}>
-          {active ?
-            <ExploreCurrentHereLabel
-              className={tourNavCurrentInlineLabelClassName}
-            />
-          : null}
-          <span className={tourNavItemNamingHeaderClassName}>
-            <span className={tourNavItemNamingTitleRowClassName}>
-              <span className={tourNavItemNamingNameClassName}>
-                {item.name}
-              </span>
-            </span>
-            {showLocation ?
-              <span className={tourNavItemNamingLocationClassName}>
-                {item.sceneTitle}
-              </span>
+      <span className={tourNavDirectoryListItemContentClassName}>
+        <span
+          className={cn(
+            tourNavDirectoryListItemBodyMainClassName,
+            tourNavDirectoryListItemNamingMainClassName,
+          )}
+        >
+          <span className={tourNavItemTextClassName}>
+            {active ?
+              <ExploreCurrentHereLabel
+                className={tourNavCurrentInlineLabelClassName}
+              />
             : null}
-            {description ?
-              <span className={tourNavItemNamingDescriptionClassName}>
-                {description}
+            <span className={tourNavItemNamingHeaderClassName}>
+              <span className={tourNavItemNamingTitleRowClassName}>
+                <span className={tourNavItemNamingNameClassName}>
+                  {item.name}
+                </span>
+              </span>
+              {showLocation ?
+                <span className={tourNavItemNamingLocationClassName}>
+                  {item.sceneTitle}
+                </span>
+              : null}
+              {donorCredit ?
+                <span className={tourNavItemNamingLocationClassName}>
+                  {donorCredit}
+                </span>
+              : null}
+              {description ?
+                <span className={tourNavItemNamingDescriptionClassName}>
+                  {description}
+                </span>
+              : null}
+            </span>
+          </span>
+          <span className={tourNavDirectoryListItemBadgeColumnClassName}>
+            <NamingStatusBadge
+              statusModifier={item.statusModifier as NamingStatusModifier}
+              label={item.statusLabel}
+              className={cn(tourNavItemBadgeClassName, 'ml-0')}
+            />
+            {priceLabel ?
+              <span className={tourNavItemNamingPriceClassName}>
+                {priceLabel}
               </span>
             : null}
           </span>
         </span>
-        <span className={tourNavDirectoryListItemBadgeColumnClassName}>
-          <NamingStatusBadge
-            statusModifier={item.statusModifier as NamingStatusModifier}
-            label={item.statusLabel}
-            className={cn(tourNavItemBadgeClassName, 'ml-0')}
-          />
-          {priceLabel ?
-            <span className={tourNavItemNamingPriceClassName}>
-              {priceLabel}
-            </span>
-          : null}
-        </span>
+        {showActions ?
+          <ExploreDirectoryListItemActions>
+            {viewOpportunityButton}
+            {isCoarsePointer ?
+              <span
+                className={tourNavDirectoryListItemPrimaryCtaClassName}
+                aria-hidden='true'
+              >
+                {visitCta}
+              </span>
+            : <button
+                type='button'
+                role='option'
+                aria-selected={active}
+                data-tour-nav-directory-kind='naming'
+                disabled={disabled}
+                className={tourNavDirectoryListItemPrimaryCtaClassName}
+                onClick={onVisitPlace}
+                aria-label={visitPlaceLabel}
+              >
+                {visitCta}
+              </button>
+            }
+          </ExploreDirectoryListItemActions>
+        : null}
       </span>
-      {showActions ?
-        <ExploreDirectoryListItemActions>
-          {viewOpportunityButton}
-          {isCoarsePointer ?
-            <span
-              className={tourNavDirectoryListItemPrimaryCtaClassName}
-              aria-hidden='true'
-            >
-              {visitCta}
-            </span>
-          : <button
-              type='button'
-              role='option'
-              aria-selected={active}
-              data-tour-nav-directory-kind='naming'
-              disabled={disabled}
-              className={tourNavDirectoryListItemPrimaryCtaClassName}
-              onClick={onVisitPlace}
-              aria-label={visitPlaceLabel}
-            >
-              {visitCta}
-            </button>
-          }
-        </ExploreDirectoryListItemActions>
-      : null}
     </span>
   );
 
@@ -237,7 +247,7 @@ export function ExploreNamingDirectoryListItem({
           tourNavDirectoryItemVariants({
             kind: 'naming',
             active,
-            statusTone: isClosed ? 'closed' : 'default',
+            statusTone: isSold ? 'sold' : 'default',
           }),
           !isCoarsePointer && !active && 'cursor-auto',
           disabled && 'pointer-events-none opacity-50',

@@ -106,12 +106,12 @@
     text-transform: none;
   }
 
-  .ishare-badge--price-closed {
+  .ishare-badge--price-sold {
     background: rgba(15, 23, 42, 0.06);
     color: var(--ishare-text-muted);
   }
 
-  .ishare-badge--price-closed .ishare-badge__label {
+  .ishare-badge--price-sold .ishare-badge__label {
     text-decoration: line-through;
     text-decoration-color: rgba(15, 23, 42, 0.28);
   }
@@ -122,10 +122,10 @@
     color: var(--ishare-naming-status-open-color);
   }
 
-  .ishare-badge--status-closed {
+  .ishare-badge--status-sold {
     font-weight: 600;
-    background: var(--ishare-naming-status-closed-bg);
-    color: var(--ishare-naming-status-closed-color);
+    background: var(--ishare-naming-status-sold-bg);
+    color: var(--ishare-naming-status-sold-color);
   }
 
   .ishare-badge--status-reserved {

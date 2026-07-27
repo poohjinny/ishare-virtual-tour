@@ -17,6 +17,7 @@ import {
   SHOW_NAV_PREVIEW_NAMING_TOTAL,
 } from './namingPrice';
 import { resolveNavHotspotLabel } from './navHotspotLabel';
+import { resolveNamingDonorCredit } from './namingDonor';
 import { resolveNamingPopup } from './namingSceneInherit';
 import { resolveScenePlaceLead } from './resolveScenePlaceLead';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
@@ -46,6 +47,7 @@ export function buildNavPreviewNamingItems(
     const statusConfig = namingOpportunityStatusConfig(resolvedNaming.status);
     const description =
       popup.body?.trim() ? navPreviewNamingDescription(popup.body) : undefined;
+    const donorCredit = resolveNamingDonorCredit(resolvedNaming) ?? undefined;
 
     items.push({
       hotspotId: hotspot.id,
@@ -57,6 +59,7 @@ export function buildNavPreviewNamingItems(
       priceLabel: resolvedNaming.priceLabel,
       description,
       previewImage: hotspot.preview?.image,
+      donorCredit,
     });
   }
 

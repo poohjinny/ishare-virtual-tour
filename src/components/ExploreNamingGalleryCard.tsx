@@ -8,6 +8,7 @@ import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import type { Scene, Tour, TourViewerType } from '../types/tour';
 import type { NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
+import { namingOpportunityStatusShowsBadge } from '../data/namingOpportunityStatus';
 import {
   EXPLORE_GALLERY_NAMING_VIEW_LABEL,
   EXPLORE_GALLERY_VISIT_LABEL,
@@ -149,18 +150,20 @@ export function ExploreNamingGalleryCard({
   } = usePreviewHeroReveal(previewSrc);
 
   const description = item.description?.trim();
+  const donorCredit = item.donorCredit?.trim();
   const priceLabel = formatNamingGalleryItemPrice(item);
   const showHoverBody = true;
   const visitPlaceLabel = exploreNamingVisitPlaceAriaLabel(item.sceneTitle);
   const viewOpportunityLabel = `${EXPLORE_GALLERY_NAMING_VIEW_LABEL}: ${item.name}`;
+  const creditSuffix = donorCredit ? ` ${donorCredit}.` : '';
   const cardAriaLabel =
     active ?
       description ?
-        `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}. ${description}`
-      : `${item.name}, current naming opportunity, ${item.sceneTitle}. ${item.statusLabel}. ${priceLabel}.`
+        `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+      : `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`
     : description ?
-      `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}. ${description}`
-    : `${visitPlaceLabel}. ${item.name}. ${item.statusLabel}. ${priceLabel}.`;
+      `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+    : `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`;
 
   const visitCta = (
     <>
@@ -263,16 +266,18 @@ export function ExploreNamingGalleryCard({
             />
           : null}
 
-          <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
-            <NamingStatusBadge
-              statusModifier={item.statusModifier as NamingStatusModifier}
-              label={item.statusShortLabel}
-              ariaLabel={item.statusLabel}
-              className={tourNavLocationGalleryStatusBadgeVariants({
-                status: item.statusModifier as NamingStatusModifier,
-              })}
-            />
-          </span>
+          {namingOpportunityStatusShowsBadge(item.statusModifier) ?
+            <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
+              <NamingStatusBadge
+                statusModifier={item.statusModifier as NamingStatusModifier}
+                label={item.statusShortLabel}
+                ariaLabel={item.statusLabel}
+                className={tourNavLocationGalleryStatusBadgeVariants({
+                  status: item.statusModifier as NamingStatusModifier,
+                })}
+              />
+            </span>
+          : null}
 
           <span className={tourNavLocationGalleryHeroBottomOverlayClassName}>
             <span className={tourNavLocationGalleryHeroOverlayInnerClassName}>
@@ -308,6 +313,16 @@ export function ExploreNamingGalleryCard({
                     }
                   >
                     {item.sceneTitle}
+                  </span>
+                : null}
+
+                {donorCredit ?
+                  <span
+                    className={
+                      tourNavLocationGalleryHeroNamingLocationClassName
+                    }
+                  >
+                    {donorCredit}
                   </span>
                 : null}
               </span>

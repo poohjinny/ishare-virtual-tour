@@ -13,6 +13,7 @@ import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
+  namingOpportunityStatusShowsBadge,
 } from '../data/namingOpportunityStatus';
 import {
   bindYoutubeIframeForegroundMedia,
@@ -32,6 +33,10 @@ import {
 import { BADGE_CLASS } from './ui/badgeClasses';
 import type { NamingStatusModifier } from './ui/Badge';
 import { formatNamingPriceDisplay } from '../utils/namingPrice';
+import {
+  NAMING_DONOR_CREDIT_PREFIX,
+  resolveNamingDonorPresentation,
+} from '../utils/namingDonor';
 import { applyCtaTextOverflowTitle } from '../utils/glassPanelCtaOverflow';
 import { PopupCtaIcon } from './glassPanelCtaIcons';
 import {
@@ -70,14 +75,14 @@ export function NamingOpportunityPrice({
 }: {
   opportunity: NamingOpportunity;
 }) {
-  const priceClosed =
-    namingOpportunityStatusConfig(opportunity.status).cssModifier === 'closed';
+  const priceSold =
+    namingOpportunityStatusConfig(opportunity.status).cssModifier === 'sold';
 
   return (
     <p
       className={
-        priceClosed ?
-          'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--closed'
+        priceSold ?
+          'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--sold'
         : 'tour-glass-panel__price tour-glass-panel__price--under-title'
       }
     >
@@ -88,12 +93,65 @@ export function NamingOpportunityPrice({
   );
 }
 
+export function NamingDonorCreditBlock({
+  opportunity,
+}: {
+  opportunity?: NamingOpportunity | null;
+}) {
+  const donor = resolveNamingDonorPresentation(opportunity);
+  if (!donor) return null;
+
+  const creditBody =
+    donor.kind === 'organization' && donor.website ?
+      <>
+        {NAMING_DONOR_CREDIT_PREFIX}{' '}
+        <a
+          className='tour-glass-panel__donor-credit-link'
+          href={donor.website}
+          target='_blank'
+          rel='noopener noreferrer'
+        >
+          {donor.name}
+        </a>
+      </>
+    : donor.kind === 'person' && donor.affiliation ?
+      <>
+        {NAMING_DONOR_CREDIT_PREFIX} {donor.name},{' '}
+        {donor.website ?
+          <a
+            className='tour-glass-panel__donor-credit-link'
+            href={donor.website}
+            target='_blank'
+            rel='noopener noreferrer'
+          >
+            {donor.affiliation}
+          </a>
+        : donor.affiliation}
+      </>
+    : donor.credit;
+
+  return (
+    <div className='tour-glass-panel__donor'>
+      {donor.logo ?
+        <img
+          className='tour-glass-panel__donor-logo'
+          src={donor.logo}
+          alt=''
+          decoding='async'
+        />
+      : null}
+      <p className='tour-glass-panel__donor-credit'>{creditBody}</p>
+    </div>
+  );
+}
+
 export function NamingOpportunityMeta({
   opportunity,
 }: {
   opportunity: NamingOpportunity;
 }) {
   const statusConfig = namingOpportunityStatusConfig(opportunity.status);
+  const showStatusBadge = namingOpportunityStatusShowsBadge(opportunity.status);
 
   return (
     <div className='tour-glass-panel__meta' aria-label={opportunity.name}>
@@ -104,14 +162,16 @@ export function NamingOpportunityMeta({
             {NAMING_OPPORTUNITY_BADGE_LABEL}
           </span>
         </span>
-        <span
-          className={BADGE_CLASS.fillLgStatusIcon(
-            statusConfig.cssModifier as NamingStatusModifier,
-          )}
-        >
-          <StatusBadgeIcon modifier={statusConfig.cssModifier} />
-          <span className={BADGE_CLASS.label}>{statusConfig.label}</span>
-        </span>
+        {showStatusBadge ?
+          <span
+            className={BADGE_CLASS.fillLgStatusIcon(
+              statusConfig.cssModifier as NamingStatusModifier,
+            )}
+          >
+            <StatusBadgeIcon modifier={statusConfig.cssModifier} />
+            <span className={BADGE_CLASS.label}>{statusConfig.label}</span>
+          </span>
+        : null}
       </div>
     </div>
   );
