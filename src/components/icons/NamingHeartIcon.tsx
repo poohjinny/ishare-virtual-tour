@@ -4,19 +4,19 @@ import { tourNavItemIconNamingVariants } from '../tourNavFloatVariants';
 
 interface NamingHeartIconProps {
   active: boolean;
-  closed?: boolean;
+  sold?: boolean;
 }
 
 export function NamingHeartIcon({
   active,
-  closed = false,
+  sold = false,
 }: NamingHeartIconProps) {
   return (
     <MaterialSymbol
       name='favorite'
       filled={active}
       data-tour-nav-naming-icon
-      className={tourNavItemIconNamingVariants({ active, closed })}
+      className={tourNavItemIconNamingVariants({ active, sold })}
       sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );

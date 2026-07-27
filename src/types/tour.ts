@@ -50,7 +50,31 @@ export interface PopupCta {
   iconKind?: 'arrow' | 'mail' | 'bell' | 'external' | 'heart';
 }
 
-export type NamingOpportunityStatus = 'open' | 'reserved' | 'soon' | 'closed';
+export type NamingOpportunityStatus = 'open' | 'reserved' | 'soon' | 'sold';
+
+export type NamingDonorKind = 'person' | 'organization';
+
+/** Single named donor when the opportunity is sold. */
+export interface NamingDonor {
+  name: string;
+  kind: NamingDonorKind;
+  /**
+   * Person only — org/affiliation name.
+   * Credit: “Named by {name}, {affiliation}”.
+   */
+  affiliation?: string;
+  /**
+   * Organization: donor site (links the name).
+   * Person: affiliation site (links the affiliation).
+   */
+  website?: string;
+  /**
+   * Organization: donor logo.
+   * Person: affiliation logo.
+   * Uploaded asset path shown in Info popup/panel.
+   */
+  logo?: string;
+}
 
 export interface NamingOpportunity {
   /** Naming opportunity display name (e.g. "Reception Desk") — no suffix. */
@@ -60,6 +84,8 @@ export interface NamingOpportunity {
   priceLabel?: string;
   /** Availability — defaults to `open` when omitted */
   status?: NamingOpportunityStatus;
+  /** Sold opportunities — shown as “Named by {name}”. */
+  donor?: NamingDonor;
 }
 
 export interface PopupSponsor {
@@ -126,6 +152,8 @@ export interface NavPreviewNamingItem {
   description?: string;
   /** model3d — baked preview image for directory cards */
   previewImage?: string;
+  /** Sold + donor — e.g. “Named by Jane Smith”. */
+  donorCredit?: string;
 }
 
 /** Lightweight nav destination preview — shown before scene transition. */
@@ -178,8 +206,8 @@ export interface Scene {
   title: string;
   description?: string;
   /**
-   * Soft place lead when `description` is empty — often generated from NO copy
-   * (`npm run generate-place-leads`). Client place copy still prefers `description`.
+   * Soft place lead when `description` is empty (or only the auto placeholder) —
+   * often generated from NO copy. Real client `description` still wins.
    */
   placeLead?: string;
   /** Optional hero video — Synthesia embed or hosted mp4/webm; Explore + nav preview hero. */

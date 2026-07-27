@@ -14,7 +14,7 @@ export type NamingStatusModifier =
   | 'open'
   | 'reserved'
   | 'soon'
-  | 'closed';
+  | 'sold';
 
 export interface BadgeProps {
   children: React.ReactNode;

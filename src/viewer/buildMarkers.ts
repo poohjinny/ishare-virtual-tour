@@ -7,6 +7,7 @@ import {
 import { isGeneralInfoHotspot } from '../data/generalInfoHotspot';
 import {
   namingOpportunityStatusConfig,
+  namingOpportunityStatusShowsBadge,
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
 import { resolveNavHotspotLabel } from '../utils/navHotspotLabel';
@@ -41,6 +42,10 @@ export function buildNamingHotspotPillLabelHtml(hotspot: Hotspot): string {
       hotspot.label?.trim() ??
       statusConfig.hotspotLabel);
 
+  if (!namingOpportunityStatusShowsBadge(naming.status)) {
+    return `<span class="hotspot-info__name">${escapeHtml(name)}</span>`;
+  }
+
   return `<span class="hotspot-info__name">${escapeHtml(name)}</span><span class="hotspot-info__label-sep" aria-hidden="true">·</span><span class="hotspot-info__status">${escapeHtml(statusConfig.label)}</span>`;
 }
 
@@ -59,6 +64,10 @@ export function buildNamingHotspotAriaLabel(hotspot: Hotspot): string {
     : (hotspot.popup?.title?.trim() ??
       hotspot.label?.trim() ??
       statusConfig.hotspotLabel);
+
+  if (!namingOpportunityStatusShowsBadge(naming.status)) {
+    return name;
+  }
 
   return `${name} · ${statusConfig.label}`;
 }
@@ -139,9 +148,9 @@ function buildInfoHtml(hotspot: Hotspot): string {
   const statusClass =
     (
       naming &&
-      namingOpportunityStatusConfig(naming.status).cssModifier === 'closed'
+      namingOpportunityStatusConfig(naming.status).cssModifier === 'sold'
     ) ?
-      ' hotspot-info--status-closed'
+      ' hotspot-info--status-sold'
     : '';
 
   return `

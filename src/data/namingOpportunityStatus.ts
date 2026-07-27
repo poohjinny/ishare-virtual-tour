@@ -53,12 +53,12 @@ export interface NamingOpportunityStatusConfig {
 export const NAMING_OPPORTUNITY_BADGE_LABEL = 'Naming Opportunity';
 export const NAMING_OPPORTUNITY_BADGE_SHORT_LABEL = 'NO';
 
-/** Display / sort order — open → reserved → soon → closed. */
+/** Display / sort order — open → sold → reserved → soon. */
 export const NAMING_OPPORTUNITY_STATUS_ORDER = [
   'open',
+  'sold',
   'reserved',
   'soon',
-  'closed',
 ] as const satisfies readonly NamingOpportunityStatus[];
 
 /** Legacy tour JSON / CSS values normalized to canonical status keys. */
@@ -67,7 +67,8 @@ const LEGACY_NAMING_STATUS_ALIASES: Record<string, NamingOpportunityStatus> = {
   'on-sale': 'open',
   coming_soon: 'soon',
   'coming-soon': 'soon',
-  sold: 'closed',
+  /** Previous canonical key before brochure-aligned `sold`. */
+  closed: 'sold',
 };
 
 const STATUS_CONFIG: Record<
@@ -146,11 +147,11 @@ const STATUS_CONFIG: Record<
       },
     ],
   },
-  closed: {
-    label: 'Closed',
-    shortLabel: 'Closed',
-    hotspotLabel: 'Closed',
-    cssModifier: 'closed',
+  sold: {
+    label: 'Sold',
+    shortLabel: 'Sold',
+    hotspotLabel: 'Sold',
+    cssModifier: 'sold',
     ctas: [
       {
         preset: 'website',
@@ -220,6 +221,16 @@ export function namingOpportunityStatusConfig(
   status?: NamingOpportunityStatus,
 ): NamingOpportunityStatusConfig {
   return STATUS_CONFIG[resolveNamingOpportunityStatus(status)];
+}
+
+/**
+ * Open is the default/available state — no status badge.
+ * Reserved / soon / sold are exceptions that need a visible chip.
+ */
+export function namingOpportunityStatusShowsBadge(
+  status?: NamingOpportunityStatus | string,
+): boolean {
+  return resolveNamingOpportunityStatus(status) !== 'open';
 }
 
 export function namingOpportunityStatusDisplayLabel(

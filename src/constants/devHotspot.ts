@@ -2,7 +2,7 @@ import {
   NAMING_OPPORTUNITY_STATUS_ORDER,
   namingOpportunityStatusConfig,
 } from '../data/namingOpportunityStatus';
-import type { NamingOpportunityStatus } from '../types/tour';
+import type { NamingDonorKind, NamingOpportunityStatus } from '../types/tour';
 
 export const DEV_NAMING_STATUS_OPTIONS: {
   value: NamingOpportunityStatus;
@@ -11,6 +11,14 @@ export const DEV_NAMING_STATUS_OPTIONS: {
   value,
   label: namingOpportunityStatusConfig(value).label,
 }));
+
+export const DEV_NAMING_DONOR_KIND_OPTIONS: {
+  value: NamingDonorKind;
+  label: string;
+}[] = [
+  { value: 'organization', label: 'Organization' },
+  { value: 'person', label: 'Person' },
+];
 
 export type DevHotspotTab = 'nav' | 'naming' | 'info';
 

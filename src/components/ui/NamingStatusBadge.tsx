@@ -1,5 +1,8 @@
 import type { NamingOpportunityStatus } from '../../types/tour';
-import { namingOpportunityStatusConfig } from '../../data/namingOpportunityStatus';
+import {
+  namingOpportunityStatusConfig,
+  namingOpportunityStatusShowsBadge,
+} from '../../data/namingOpportunityStatus';
 import { Badge, type NamingStatusModifier } from './Badge';
 
 export interface NamingStatusBadgeProps {
@@ -39,6 +42,13 @@ export function NamingStatusBadge({
     (compact && config && label !== config.label ? config.label : undefined);
 
   if (!statusModifier || !label) return null;
+  if (
+    !namingOpportunityStatusShowsBadge(
+      status ?? (statusModifier as NamingOpportunityStatus),
+    )
+  ) {
+    return null;
+  }
 
   return (
     <Badge

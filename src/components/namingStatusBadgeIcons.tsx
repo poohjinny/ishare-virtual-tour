@@ -11,7 +11,7 @@ const NAMING_STATUS_MATERIAL_ICONS: Record<NamingStatusModifier, string> = {
   open: 'door_open',
   reserved: 'handshake',
   soon: 'schedule',
-  closed: 'check_circle',
+  sold: 'check_circle',
 };
 
 export function NamingStatusBadgeIcon({
@@ -46,6 +46,6 @@ export function isNamingStatusIconModifier(
     modifier === 'open' ||
     modifier === 'reserved' ||
     modifier === 'soon' ||
-    modifier === 'closed'
+    modifier === 'sold'
   );
 }

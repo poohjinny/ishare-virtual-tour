@@ -17,7 +17,7 @@ export const badgeVariants = cva(
       status: {
         none: '',
         open: '',
-        closed: '',
+        sold: '',
         reserved: '',
         soon: '',
       },
@@ -51,9 +51,9 @@ export const badgeVariants = cva(
       },
       {
         variant: 'fill',
-        status: 'closed',
+        status: 'sold',
         class:
-          'bg-[var(--ishare-naming-status-closed-bg)] font-semibold text-[var(--ishare-naming-status-closed-color)]',
+          'bg-[var(--ishare-naming-status-sold-bg)] font-semibold text-[var(--ishare-naming-status-sold-color)]',
       },
       {
         variant: 'fill',
