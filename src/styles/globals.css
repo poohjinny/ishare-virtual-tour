@@ -83,7 +83,6 @@
   --animate-segmented-tab-layout-in: segmented-tab-layout-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-error-backdrop-in: error-backdrop-in 0.3s ease-out forwards;
   --animate-error-card-in: error-card-in 0.34s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both;
-  --animate-floor-plan-pulse: floor-plan-pulse 2.4s ease-out infinite;
   --animate-guide-avatar-orb: guide-avatar-orb-breathe 4.5s ease-in-out infinite;
   --animate-ai-fab-in: ai-fab-in 0.14s ease-out forwards;
   --animate-ai-fab-out: ai-fab-out 0.14s ease-in forwards;
@@ -184,18 +183,6 @@
 .tour-load-splash--embed .tour-load-splash__logo {
   height: 3.5rem;
   transition-duration: 0.35s;
-}
-
-@keyframes floor-plan-pulse {
-
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-
-  50% {
-    opacity: 0.15;
-  }
 }
 
 @keyframes guide-avatar-orb-breathe {

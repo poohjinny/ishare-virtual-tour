@@ -13,14 +13,16 @@ const logoSvg = `<?xml version="1.0" encoding="UTF-8"?>
   </g>
 </svg>`;
 
-writeFileSync('assets/holodomor/holodomor-museum/brand/logo.svg', logoSvg);
+writeFileSync('assets/holodomor/t_r7v4n1c0wd/brand/logo.svg', logoSvg);
 
 await sharp(Buffer.from(logoSvg))
   .resize(840, null, { fit: 'inside' })
   .png()
-  .toFile('assets/holodomor/holodomor-museum/brand/logo.png');
+  .toFile('assets/holodomor/t_r7v4n1c0wd/brand/logo.png');
 
-const meta = await sharp('assets/holodomor/holodomor-museum/brand/logo.png').metadata();
+const meta = await sharp(
+  'assets/holodomor/t_r7v4n1c0wd/brand/logo.png',
+).metadata();
 console.log(
-  `Wrote assets/holodomor/holodomor-museum/brand/logo.png (${meta.width}x${meta.height})`,
+  `Wrote assets/holodomor/t_r7v4n1c0wd/brand/logo.png (${meta.width}x${meta.height})`,
 );

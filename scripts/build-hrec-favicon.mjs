@@ -19,5 +19,7 @@ const pngBuffers = await Promise.all(
 );
 
 const ico = await pngToIco(pngBuffers);
-writeFileSync('assets/holodomor/holodomor-museum/favicon.ico', ico);
-console.log(`Wrote assets/holodomor/holodomor-museum/favicon.ico (${sizes.join(', ')}px)`);
+writeFileSync('assets/holodomor/t_r7v4n1c0wd/favicon.ico', ico);
+console.log(
+  `Wrote assets/holodomor/t_r7v4n1c0wd/favicon.ico (${sizes.join(', ')}px)`,
+);

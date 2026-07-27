@@ -89,10 +89,6 @@ export function normalizeTourAssets(tour: Tour): Tour {
           : {}),
         }
       : undefined,
-    floorPlan:
-      tour.floorPlan ?
-        { ...tour.floorPlan, image: withBaseUrl(tour.floorPlan.image) }
-      : undefined,
     immersiveBackground: normalizeImmersiveBackground(
       tour.immersiveBackground ?? GLOBAL_IMMERSIVE_BACKGROUND,
     ),

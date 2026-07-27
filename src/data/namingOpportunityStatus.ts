@@ -181,7 +181,7 @@ export function normalizeNamingOpportunityStatus(
 }
 
 export function resolveNamingOpportunityStatus(
-  status?: NamingOpportunityStatus,
+  status?: string | NamingOpportunityStatus,
 ): NamingOpportunityStatus {
   return normalizeNamingOpportunityStatus(status);
 }

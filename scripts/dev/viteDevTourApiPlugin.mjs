@@ -29,11 +29,6 @@ import {
   validateDeleteTourPayload,
 } from '../lib/tourDeleteDev.mjs';
 import {
-  clearTourFloorPlan,
-  updateTourFloorPlan,
-  validateUpdateTourFloorPlanPayload,
-} from '../lib/tourFloorPlanDev.mjs';
-import {
   normalizePrimaryColor,
   suggestBrandingFromWebsite,
 } from '../lib/tourBrandDev.mjs';
@@ -316,8 +311,6 @@ function validateUpdateScenePayload(body) {
     previewVideoUrl,
     videoUrl,
     setAsFirstScene,
-    map,
-    clearMap,
   } = body ?? {};
   if (!tourId || !sceneId?.trim()) {
     throw new Error('tourId and sceneId are required');
@@ -328,21 +321,11 @@ function validateUpdateScenePayload(body) {
     placeLead === undefined &&
     previewVideoUrl === undefined &&
     videoUrl === undefined &&
-    setAsFirstScene !== true &&
-    map === undefined &&
-    clearMap !== true
+    setAsFirstScene !== true
   ) {
     throw new Error(
-      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, setAsFirstScene, map, or clearMap is required',
+      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, or setAsFirstScene is required',
     );
-  }
-
-  let normalizedMap;
-  if (map !== undefined && map !== null) {
-    if (typeof map !== 'object') {
-      throw new Error('map must be an object');
-    }
-    normalizedMap = map;
   }
 
   return {
@@ -355,8 +338,6 @@ function validateUpdateScenePayload(body) {
       typeof previewVideoUrl === 'string' ? previewVideoUrl : undefined,
     videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
     setAsFirstScene: setAsFirstScene === true,
-    map: normalizedMap,
-    clearMap: clearMap === true,
   };
 }
 
@@ -1202,32 +1183,6 @@ export function viteDevTourApiPlugin() {
             return;
           }
 
-          if (req.url === '/__dev/api/tour/floor-plan/update') {
-            const payload = validateUpdateTourFloorPlanPayload(body);
-            const result =
-              payload.clearFloorPlan ?
-                clearTourFloorPlan({
-                  root,
-                  toursDir,
-                  assetsRoot,
-                  tourId: payload.tourId,
-                })
-              : await updateTourFloorPlan({
-                  root,
-                  toursDir,
-                  assetsRoot,
-                  ...payload,
-                });
-            sendJson(res, 200, {
-              ok: true,
-              tourId: payload.tourId,
-              tourPath: result.tourPath,
-              tour: result.tour,
-              floorPlan: result.tour.floorPlan ?? null,
-            });
-            return;
-          }
-
           if (req.url === '/__dev/api/tour/delete') {
             const payload = validateDeleteTourPayload(body);
             const result = deleteTour({
@@ -1395,8 +1350,6 @@ export function viteDevTourApiPlugin() {
               previewVideoUrl,
               videoUrl,
               setAsFirstScene,
-              map,
-              clearMap,
             } = validateUpdateScenePayload(body);
             const result = updateScene({
               toursDir,
@@ -1408,8 +1361,6 @@ export function viteDevTourApiPlugin() {
               previewVideoUrl,
               videoUrl,
               setAsFirstScene,
-              map,
-              clearMap,
             });
             sendJson(res, 200, {
               ok: true,

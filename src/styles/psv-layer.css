@@ -44,7 +44,7 @@
   font-family: var(--ishare-body-font);
   --ishare-body-font: var(--client-font, var(--ishare-font));
   --ishare-display-font: var(--client-font, var(--ishare-font-display));
-  /* Tour chrome gutter — nav FAB dock, breadcrumb, dev tools, minimap, Ask Guide */
+  /* Tour chrome gutter — nav FAB dock, breadcrumb, dev tools, Ask Guide */
   --tour-chrome-inset: 1rem;
   --tour-chrome-fab-size: 2.875rem;
   --tour-chrome-breadcrumb-row-height: 2.75rem;
@@ -1467,10 +1467,6 @@ input::placeholder {
   animation: none;
   opacity: 0.35;
   transform: scale(1.08);
-}
-
-.viewer-area--perf-pause .animate-floor-plan-pulse {
-  animation: none;
 }
 
 .viewer-area--perf-pause .animate-tour-nav-dot-glow {

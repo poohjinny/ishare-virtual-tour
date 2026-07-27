@@ -34,6 +34,7 @@ import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
 interface ExploreSceneGalleryCardProps {
   tourId: string;
   scene: Scene;
+  tourTitle?: string;
   tourHotspots?: Hotspot[];
   tourViewerType?: TourViewerType;
   active: boolean;
@@ -48,6 +49,7 @@ interface ExploreSceneGalleryCardProps {
 export function ExploreSceneGalleryCard({
   tourId,
   scene,
+  tourTitle,
   tourHotspots,
   tourViewerType,
   active,
@@ -73,7 +75,12 @@ export function ExploreSceneGalleryCard({
   const heroLoading =
     previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
   const description = resolveScenePlaceLead(
-    { hotspots: tourHotspots, viewerType: tourViewerType },
+    {
+      id: tourId,
+      title: tourTitle ?? '',
+      hotspots: tourHotspots,
+      viewerType: tourViewerType,
+    },
     scene,
   ).trim();
   const showInfo = Boolean(onShowDescription);

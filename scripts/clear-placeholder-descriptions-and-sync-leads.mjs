@@ -25,11 +25,9 @@ const files =
     tourIds.map((id) =>
       path.join(toursDir, id.endsWith('.json') ? id : `${id}.json`),
     )
-  : [
-      'ken-sargent-house.json',
-      'queensway-carleton-general-hospital.json',
-      'queensway-carleton-hospital.json',
-    ].map((name) => path.join(toursDir, name));
+  : ['t_l01wnq8eh6.json', 't_9zs0j4a7xt.json', 't_2hf6y5b3ue.json'].map(
+      (name) => path.join(toursDir, name),
+    );
 
 for (const file of files) {
   const tour = JSON.parse(fs.readFileSync(file, 'utf8'));

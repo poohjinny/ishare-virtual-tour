@@ -26,7 +26,6 @@ import {
   TourLoadSplash,
   getTourLoadSplashFadeMs,
 } from '../components/TourLoadSplash';
-import { FloorPlanMinimap } from '../components/FloorPlanMinimap';
 import { TourNavFloat } from '../components/TourNavFloat';
 import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
 import {
@@ -65,7 +64,6 @@ import type {
   Tour,
   TourKnowledge,
   ViewPosition,
-  ViewerOrientation,
 } from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import {
@@ -479,8 +477,6 @@ function TourExperience() {
       dev: searchParams.dev,
       firstVisitHint: searchParams.firstVisitHint,
     });
-  const [viewerOrientation, setViewerOrientation] =
-    useState<ViewerOrientation | null>(null);
   const [viewerLoadError, setViewerLoadError] =
     useState<ViewerLoadErrorInfo | null>(null);
 
@@ -739,7 +735,7 @@ function TourExperience() {
   useTourEscapeClose(panelStack, { disabled: isTransitioning });
 
   // Close in-scene anchored panels when focus moves to tour chrome outside the
-  // viewer (breadcrumb, explore dock, minimap, etc.). PanoramaViewer handles
+  // viewer (breadcrumb, explore dock, etc.). PanoramaViewer handles
   // dismiss inside the viewer area.
   useEffect(() => {
     const dismissAnchoredPanelsOnChromePointerDown = (event: PointerEvent) => {
@@ -957,10 +953,6 @@ function TourExperience() {
     );
   }, [bootstrapTour.firstScene, bootstrapTour.scenes, syncSceneToUrl]);
 
-  const handleViewUpdate = useCallback((view: ViewerOrientation) => {
-    setViewerOrientation(view);
-  }, []);
-
   if (!tour || bootstrapTour.id === BOOTSTRAP_TOUR_PLACEHOLDER.id) {
     if (searchParams.dev && devTourBootstrapStatus === 'loading') {
       return (
@@ -1021,7 +1013,6 @@ function TourExperience() {
             onTransitionEnd={handleTransitionEnd}
             onDevClick={searchParams.dev ? setDevClickCoords : undefined}
             onDevViewUpdate={searchParams.dev ? setDevViewCoords : undefined}
-            onViewUpdate={tour.floorPlan ? handleViewUpdate : undefined}
             onLoadStart={handleLoadStart}
             onLoadProgress={handleLoadProgress}
             onLoadComplete={handleLoadComplete}
@@ -1040,17 +1031,6 @@ function TourExperience() {
             canGoHome={currentSceneId !== tour.firstScene}
             onRetry={handleRetryLoad}
             onGoHome={handleLoadErrorGoHome}
-          />
-        )}
-
-        {tour.floorPlan && (
-          <FloorPlanMinimap
-            floorPlan={tour.floorPlan}
-            tour={tour}
-            currentSceneId={currentSceneId}
-            view={viewerOrientation}
-            disabled={isTransitioning}
-            onSelectScene={handleNavigate}
           />
         )}
 

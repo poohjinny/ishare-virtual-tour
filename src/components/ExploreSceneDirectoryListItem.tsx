@@ -34,6 +34,7 @@ import { cn } from '../lib/cn';
 interface ExploreSceneDirectoryListItemProps {
   tourId: string;
   scene: Scene;
+  tourTitle?: string;
   tourHotspots?: Hotspot[];
   tourViewerType?: TourViewerType;
   active: boolean;
@@ -50,6 +51,7 @@ interface ExploreSceneDirectoryListItemProps {
 export function ExploreSceneDirectoryListItem({
   tourId,
   scene,
+  tourTitle,
   tourHotspots,
   tourViewerType,
   active,
@@ -70,7 +72,12 @@ export function ExploreSceneDirectoryListItem({
   );
   const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
   const description = resolveScenePlaceLead(
-    { hotspots: tourHotspots, viewerType: tourViewerType },
+    {
+      id: tourId,
+      title: tourTitle ?? '',
+      hotspots: tourHotspots,
+      viewerType: tourViewerType,
+    },
     scene,
   ).trim();
   const showInfo = Boolean(onShowDescription);

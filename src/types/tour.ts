@@ -183,24 +183,6 @@ export interface NavPreviewContent {
   canNavigate: boolean;
 }
 
-export interface SceneMapPosition {
-  /** 0–1 horizontal position on the floor plan */
-  x: number;
-  /** 0–1 vertical position on the floor plan */
-  y: number;
-  /**
-   * Map bearing (°) when viewer yaw equals defaultView.yaw.
-   * 0 = up on the plan, clockwise. Must be calibrated per scene — not equal to yaw.
-   */
-  heading: number;
-}
-
-export interface FloorPlan {
-  image: string;
-  width: number;
-  height: number;
-}
-
 export interface Scene {
   id: string;
   title: string;
@@ -225,8 +207,6 @@ export interface Scene {
   defaultView: ViewPosition;
   /** Panorama / legacy 3D hotspots — `model3d` tours use {@link Tour.hotspots} instead. */
   hotspots: Hotspot[];
-  /** Panorama minimap pin — normalized position on {@link Tour.floorPlan}. */
-  map?: SceneMapPosition;
 }
 
 export interface ClientPhone {
@@ -300,14 +280,12 @@ export interface Tour {
   branding?: TourBranding;
   /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
   immersiveBackground?: TourImmersiveBackground;
-  /** Panorama tours only — 2D minimap image and scene `map` pin coordinate space. */
-  floorPlan?: FloorPlan;
   firstScene: string;
   defaultTransition?: { speed?: string; effect?: 'fade' | 'black' };
   scenes: Record<string, Scene>;
 }
 
-/** Live viewer orientation for mini-map and dev tooling */
+/** Live viewer orientation for dev tooling */
 export interface ViewerOrientation extends ViewPosition {
   hFov: number;
 }

@@ -10,11 +10,10 @@ assets/
 ├── favicon.ico              # Platform default → synced to public/favicon.ico
 ├── brand/                   # Platform-wide (iShare product, immersive playlist, …)
 └── {clientId}/              # id = website hostname without TLD
-    └── {tourId}/            # matches tour JSON `id` (e.g. ken-sargent-house)
+    └── {tourId}/            # matches tour JSON `id` (opaque `t_*` or legacy slug)
         ├── favicon.ico      # Tour tab icon → auto via resolveClientFavicon()
         ├── panoramas/       # 360° equirectangular images (WebP in repo — see below)
         ├── thumbnails/      # Baked scene previews at defaultView (see below)
-        ├── maps/            # Floor plans (optional)
         ├── brand/
         │   └── logo.png
         └── audio/           # Optional tour-specific audio
@@ -22,12 +21,13 @@ assets/
 
 ### Current clients & tours
 
-| clientId                | tourId                        | website                           | assets folder                                       |
-| ----------------------- | ----------------------------- | --------------------------------- | --------------------------------------------------- |
-| `gphospitalfoundation`  | `ken-sargent-house`           | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/ken-sargent-house/`    |
-| `cancerresearchsociety` | `cancer-research`             | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/cancer-research/`     |
-| `holodomor`             | `holodomor-museum`            | https://holodomor.ca/             | `assets/holodomor/holodomor-museum/`                |
-| `qchfoundation`         | `queensway-carleton-hospital` | https://qchfoundation.ca/         | `assets/qchfoundation/queensway-carleton-hospital/` |
+| clientId                | tourId         | website                           | assets folder                                |
+| ----------------------- | -------------- | --------------------------------- | -------------------------------------------- |
+| `gphospitalfoundation`  | `t_l01wnq8eh6` | https://gphospitalfoundation.ca/  | `assets/gphospitalfoundation/t_l01wnq8eh6/`  |
+| `cancerresearchsociety` | `t_8kx3m2p9qa` | https://cancerresearchsociety.ca/ | `assets/cancerresearchsociety/t_8kx3m2p9qa/` |
+| `holodomor`             | `t_r7v4n1c0wd` | https://holodomor.ca/             | `assets/holodomor/t_r7v4n1c0wd/`             |
+| `qchfoundation`         | `t_2hf6y5b3ue` | https://qchfoundation.ca/         | `assets/qchfoundation/t_2hf6y5b3ue/`         |
+| `qchfoundation`         | `t_9zs0j4a7xt` | https://qchfoundation.ca/         | `assets/qchfoundation/t_9zs0j4a7xt/`         |
 
 ## Client id convention
 

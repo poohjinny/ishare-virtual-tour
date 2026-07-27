@@ -17,7 +17,7 @@ import { loadKnowledgeSync, loadTourSync } from '../services/tourRepository';
 import { getDevTourCache } from '../services/devTourCache';
 import { getCatalogTourPreviewSourceFromTour } from '../services/jsonTourRepository';
 
-export const DEFAULT_TOUR_ID = 'ken-sargent-house';
+export const DEFAULT_TOUR_ID = 't_l01wnq8eh6';
 
 export interface TourListItem {
   id: string;

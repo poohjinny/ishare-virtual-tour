@@ -96,6 +96,8 @@ export function abbreviateNamingBodyLead(
 /**
  * Soft lead text derived from this scene's naming opportunities (no API).
  * Prefers abbreviated NO body; falls back to name · price summary.
+ * Skips name-only leads that merely echo the scene title (common for
+ * whole-scene NOs that inherit name and have no body yet).
  */
 export function buildScenePlaceLeadFromNaming(
   tour: Pick<Tour, 'hotspots' | 'viewerType'>,
@@ -103,11 +105,23 @@ export function buildScenePlaceLeadFromNaming(
 ): string | null {
   const namingItems = listSceneNamingLeadItems(tour, scene);
   if (namingItems.length === 0) return null;
-  const lead = formatSceneNamingLead(namingItems).trim();
+  const lead = formatSceneNamingLead(namingItems, scene.title).trim();
   return lead || null;
 }
 
-function formatSceneNamingLead(items: SceneNamingLeadItem[]): string {
+function namingNameMatchesSceneTitle(
+  name: string,
+  sceneTitle: string | undefined,
+): boolean {
+  const title = sceneTitle?.trim();
+  if (!title || !name) return false;
+  return name.localeCompare(title, undefined, { sensitivity: 'accent' }) === 0;
+}
+
+function formatSceneNamingLead(
+  items: SceneNamingLeadItem[],
+  sceneTitle?: string,
+): string {
   const withBody = items.find((item) => item.body);
   if (withBody) {
     const abbreviated = abbreviateNamingBodyLead(withBody.body);
@@ -118,6 +132,11 @@ function formatSceneNamingLead(items: SceneNamingLeadItem[]): string {
     const item = items[0]!;
     const price = formatNamingPriceDisplay(item.price);
     const name = item.name.trim();
+    // Whole-scene NO with no body: name === scene title would duplicate the
+    // nav/Explore title — prefer empty-place fallback instead of echoing it.
+    if (namingNameMatchesSceneTitle(name, sceneTitle)) {
+      return '';
+    }
     if (name && price) return `${name} · ${price}`;
     if (name) return name;
     if (price) return `Naming opportunity · ${price}`;

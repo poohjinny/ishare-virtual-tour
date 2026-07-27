@@ -1353,6 +1353,7 @@ export function TourNavFloat({
                     key={scene.id}
                     tourId={tourId}
                     scene={scene}
+                    tourTitle={tourTitle}
                     tourHotspots={tourHotspots}
                     tourViewerType={tourViewerType}
                     active={scene.id === currentSceneId}
@@ -1384,6 +1385,7 @@ export function TourNavFloat({
                     key={scene.id}
                     tourId={tourId}
                     scene={scene}
+                    tourTitle={tourTitle}
                     tourHotspots={tourHotspots}
                     tourViewerType={tourViewerType}
                     active={scene.id === currentSceneId}
@@ -1875,6 +1877,7 @@ export function TourNavFloat({
                 <ExploreSceneDescriptionView
                   tourId={tourId}
                   scene={exploreSceneDetail}
+                  tourTitle={tourTitle}
                   tourHotspots={tourHotspots}
                   tourViewerType={tourViewerType}
                   active={exploreSceneDetail.id === currentSceneId}

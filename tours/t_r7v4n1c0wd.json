@@ -1,0 +1,26 @@
+{
+  "id": "t_r7v4n1c0wd",
+  "clientId": "holodomor",
+  "category": "Culture",
+  "title": "Holodomor Museum",
+  "firstScene": "s_j5fd296rtm",
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
+  "scenes": {
+    "s_j5fd296rtm": {
+      "id": "s_j5fd296rtm",
+      "title": "Reception",
+      "description": "Welcome to the Holodomor Museum virtual tour. This reception area introduces visitors to the Holodomor Research and Education Consortium (HREC) — a project of the Canadian Institute of Ukrainian Studies at the University of Alberta — and the research, education, and remembrance work that preserves the memory of the 1932–33 famine-genocide in Ukraine.",
+      "panorama": "/assets/holodomor/t_r7v4n1c0wd/panoramas/s_j5fd296rtm.webp",
+      "defaultView": {
+        "yaw": 113.3,
+        "pitch": 4.7,
+        "zoom": 5
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/holodomor/t_r7v4n1c0wd/thumbnails/s_j5fd296rtm.webp"
+    }
+  }
+}

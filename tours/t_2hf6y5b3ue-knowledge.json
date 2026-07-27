@@ -1,0 +1,148 @@
+{
+  "id": "t_2hf6y5b3ue",
+  "url": "https://qchfoundation.ca",
+  "global": {
+    "facilityName": "Queensway Carleton Hospital Foundation",
+    "summary": "Queensway Carleton Hospital Foundation raises community support for Queensway Carleton Hospital — funding medical equipment, building improvements, and priority campaigns that help deliver world-class care in west Ottawa."
+  },
+  "scenes": {
+    "s_sjfdkbqs8b": {
+      "title": "Overview",
+      "description": "Take in an aerial view of Queensway Carleton Hospital and the surrounding community. QCH provides care to half of Ottawa's population — and community support through the Foundation helps purchase critical medical equipment and fund hospital priorities.",
+      "facts": [
+        "QCH opened in 1976 and today serves roughly half of Ottawa's population.",
+        "The Emergency Department is one of the busiest in Ontario, with more than 80,000 visits each year.",
+        "QCH Foundation is accredited under Imagine Canada's National Standards Program."
+      ],
+      "faqs": [
+        {
+          "q": "What does QCH Foundation support?",
+          "a": "Donations fund medical equipment, building improvements, and priority campaigns such as surgical suite upgrades, MRI replacement, and new patient care spaces at Queensway Carleton Hospital."
+        },
+        {
+          "q": "How can I contact the Foundation?",
+          "a": "Call 613-721-4731, email info@qchfoundation.ca, or visit qchfoundation.ca. The office is at 3045 Baseline Road, Ottawa, ON K2H 8P4."
+        },
+        {
+          "q": "How can I donate?",
+          "a": "Visit qchfoundation.ca to give online, become a monthly donor, explore Giftabulator®, or learn about gifts in your will and other ways to give."
+        }
+      ],
+      "suggestedQuestions": [
+        "What does QCH Foundation support?",
+        "How can I contact the Foundation?",
+        "How can I donate?"
+      ]
+    },
+    "s_iuv5nruzh8": {
+      "title": "Walk In Entrace",
+      "description": "Explore Walk In Entrace as part of the Queensway Carleton Hospital virtual tour.",
+      "facts": [
+        "Walk In Entrace is part of the Queensway Carleton Hospital virtual tour.",
+        "Use navigation markers to explore other areas of this tour."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Walk In Entrace?",
+          "a": "Explore Walk In Entrace as part of the Queensway Carleton Hospital virtual tour."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Walk In Entrace",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "s_7zym2qikw3": {
+      "title": "Ambulance of Load",
+      "description": "Explore Ambulance of Load as part of the Queensway Carleton Hospital virtual tour.",
+      "facts": [
+        "Ambulance of Load is part of the Queensway Carleton Hospital virtual tour.",
+        "Use navigation markers to explore other areas of this tour."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Ambulance of Load?",
+          "a": "Explore Ambulance of Load as part of the Queensway Carleton Hospital virtual tour."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Ambulance of Load",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "s_3705yxl10z": {
+      "title": "Satalite Imaging Waiting Area",
+      "description": "Explore Satalite Imaging Waiting Area as part of the Queensway Carleton Hospital virtual tour.",
+      "facts": [
+        "Satalite Imaging Waiting Area is part of the Queensway Carleton Hospital virtual tour.",
+        "Use navigation markers to explore other areas of this tour."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Satalite Imaging Waiting Area?",
+          "a": "Explore Satalite Imaging Waiting Area as part of the Queensway Carleton Hospital virtual tour."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Satalite Imaging Waiting Area",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "s_m1tpkghyku": {
+      "title": "Corridor",
+      "description": "Explore Corridor as part of the Queensway Carleton Hospital virtual tour.",
+      "facts": [
+        "Corridor is part of the Queensway Carleton Hospital virtual tour.",
+        "Use navigation markers to explore other areas of this tour."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Corridor?",
+          "a": "Explore Corridor as part of the Queensway Carleton Hospital virtual tour."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Corridor",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    },
+    "s_99m6qgg3rk": {
+      "title": "Waiting Room",
+      "description": "Explore Waiting Room as part of the Queensway Carleton Hospital virtual tour.",
+      "facts": [
+        "Waiting Room is part of the Queensway Carleton Hospital virtual tour.",
+        "Use navigation markers to explore other areas of this tour."
+      ],
+      "faqs": [
+        {
+          "q": "What can I see in Waiting Room?",
+          "a": "Explore Waiting Room as part of the Queensway Carleton Hospital virtual tour."
+        },
+        {
+          "q": "What is Queensway Carleton Hospital?",
+          "a": "Queensway Carleton Hospital is an interactive virtual tour. Use navigation markers to move between scenes."
+        }
+      ],
+      "suggestedQuestions": [
+        "Tell me about Waiting Room",
+        "What is available at Queensway Carleton Hospital?"
+      ]
+    }
+  }
+}

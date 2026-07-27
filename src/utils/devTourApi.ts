@@ -5,7 +5,6 @@ import type {
   NamingOpportunityStatus,
   NavHotspotVariant,
   PopupDisplay,
-  SceneMapPosition,
   Tour,
   TourKnowledge,
   ViewPosition,
@@ -703,8 +702,6 @@ export interface DevUpdateScenePayload {
   previewVideoUrl?: string;
   videoUrl?: string;
   setAsFirstScene?: boolean;
-  map?: SceneMapPosition;
-  clearMap?: boolean;
 }
 
 export function devUpdateScene(payload: DevUpdateScenePayload) {
@@ -780,31 +777,4 @@ export function devUpdateInfoHotspot(payload: DevUpdateInfoHotspotPayload) {
     '/hotspot/info/update',
     payload,
   );
-}
-
-export interface DevUpdateTourFloorPlanPayload {
-  tourId: string;
-  floorPlanFile?: File | null;
-  width?: number;
-  height?: number;
-  clearFloorPlan?: boolean;
-}
-
-export async function devUpdateTourFloorPlan({
-  floorPlanFile,
-  ...payload
-}: DevUpdateTourFloorPlanPayload) {
-  const floorPlanFileBase64 =
-    floorPlanFile ? await fileToBase64(floorPlanFile) : undefined;
-
-  return postDevTourJson<{
-    ok: true;
-    tourId: string;
-    tour: Tour;
-    floorPlan: Tour['floorPlan'] | null;
-  }>('/tour/floor-plan/update', {
-    ...payload,
-    floorPlanFileBase64,
-    floorPlanFileName: floorPlanFile?.name,
-  });
 }

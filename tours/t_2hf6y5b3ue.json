@@ -1,0 +1,229 @@
+{
+  "id": "t_2hf6y5b3ue",
+  "clientId": "qchfoundation",
+  "category": "Healthcare",
+  "title": "Queensway Carleton Hospital",
+  "firstScene": "s_sjfdkbqs8b",
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
+  "scenes": {
+    "s_sjfdkbqs8b": {
+      "id": "s_sjfdkbqs8b",
+      "title": "Overview",
+      "description": "Take in an aerial view of Queensway Carleton Hospital and the surrounding community. QCH provides care to half of Ottawa's population — and community support through the Foundation helps purchase critical medical equipment and fund hospital priorities.",
+      "panorama": "/assets/qchfoundation/t_2hf6y5b3ue/panoramas/s_sjfdkbqs8b.webp",
+      "defaultView": {
+        "yaw": 78.3,
+        "pitch": -77.4,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-ambulance-garage",
+          "type": "nav",
+          "label": "Ambulance Garage",
+          "position": {
+            "yaw": 157.5,
+            "pitch": -31.2
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-satellite-imaging",
+          "type": "nav",
+          "label": "Satalite Imaging Waiting Area",
+          "position": {
+            "yaw": 125.9,
+            "pitch": -68.3
+          },
+          "targetScene": "s_3705yxl10z"
+        },
+        {
+          "id": "nav-to-ambulatory-care-shelled-in-expansion-area",
+          "type": "nav",
+          "label": "Ambulatory Care Shelled-in Expansion Area",
+          "position": {
+            "yaw": 332.6,
+            "pitch": -57.3
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-zone-1-walk-in-entrance",
+          "type": "nav",
+          "label": "Zone 1: Walk-in Entrance",
+          "position": {
+            "yaw": 160.5,
+            "pitch": -43.7
+          },
+          "targetScene": "s_iuv5nruzh8"
+        },
+        {
+          "id": "nav-to-zone-2-trauma-resuscitation",
+          "type": "nav",
+          "label": "Zone 2: Trauma / Resuscitation",
+          "position": {
+            "yaw": 135.8,
+            "pitch": -33.5
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-zone-3-acute-care-pod-d",
+          "type": "nav",
+          "label": "Zone 3: Acute Care, Pod D",
+          "position": {
+            "yaw": 86.2,
+            "pitch": -54.5
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-zone-4-ambulatory-care",
+          "type": "nav",
+          "label": "Zone 4: Ambulatory Care",
+          "position": {
+            "yaw": 9.1,
+            "pitch": -47.1
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-zone-5-mhesu",
+          "type": "nav",
+          "label": "Zone 5: MHESU",
+          "position": {
+            "yaw": 81.4,
+            "pitch": -36.9
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-zone6-1-admin-education",
+          "type": "nav",
+          "label": "Zone 6-1: Admin & Education",
+          "position": {
+            "yaw": 43.8,
+            "pitch": -38.2
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-zone-6-2-administration-educational-areas",
+          "type": "nav",
+          "label": "Zone 6-2: Administration & Educational Areas",
+          "position": {
+            "yaw": 109.2,
+            "pitch": -36.5
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-zone-3-acute-care-pod-a",
+          "type": "nav",
+          "label": "Zone 3: Acute Care, Pod A",
+          "position": {
+            "yaw": 108.9,
+            "pitch": -51.2
+          },
+          "targetScene": "s_sjfdkbqs8b"
+        },
+        {
+          "id": "nav-to-corridor",
+          "type": "nav",
+          "label": "Corridor",
+          "position": {
+            "yaw": 93.8,
+            "pitch": -71
+          },
+          "targetScene": "s_m1tpkghyku"
+        },
+        {
+          "id": "nav-to-waiting-area",
+          "type": "nav",
+          "label": "Waiting Area",
+          "position": {
+            "yaw": 159.6,
+            "pitch": -60.7
+          },
+          "targetScene": "s_99m6qgg3rk"
+        },
+        {
+          "id": "nav-to-ambulance-of-load",
+          "type": "nav",
+          "label": "Ambulance Off-Load",
+          "position": {
+            "yaw": 151.3,
+            "pitch": -49.5
+          },
+          "targetScene": "s_7zym2qikw3"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_2hf6y5b3ue/thumbnails/s_sjfdkbqs8b.webp"
+    },
+    "s_iuv5nruzh8": {
+      "id": "s_iuv5nruzh8",
+      "title": "Zone - 1: Walk In Entrace",
+      "description": "Explore Walk In Entrace as part of the Queensway Carleton Hospital virtual tour.",
+      "panorama": "/assets/qchfoundation/t_2hf6y5b3ue/panoramas/s_iuv5nruzh8.webp",
+      "defaultView": {
+        "yaw": 42.1,
+        "pitch": -4.2,
+        "zoom": 35
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/t_2hf6y5b3ue/thumbnails/s_iuv5nruzh8.webp"
+    },
+    "s_7zym2qikw3": {
+      "id": "s_7zym2qikw3",
+      "title": "Ambulance of Load",
+      "panorama": "/assets/qchfoundation/t_2hf6y5b3ue/panoramas/s_7zym2qikw3.webp",
+      "defaultView": {
+        "yaw": 109.7,
+        "pitch": 1.3,
+        "zoom": 15
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/t_2hf6y5b3ue/thumbnails/s_7zym2qikw3.webp"
+    },
+    "s_3705yxl10z": {
+      "id": "s_3705yxl10z",
+      "title": "Satalite Imaging Waiting Area",
+      "panorama": "/assets/qchfoundation/t_2hf6y5b3ue/panoramas/s_3705yxl10z.webp",
+      "defaultView": {
+        "yaw": 73,
+        "pitch": 3.3,
+        "zoom": 20
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/t_2hf6y5b3ue/thumbnails/s_3705yxl10z.webp"
+    },
+    "s_m1tpkghyku": {
+      "id": "s_m1tpkghyku",
+      "title": "Corridor",
+      "panorama": "/assets/qchfoundation/t_2hf6y5b3ue/panoramas/s_m1tpkghyku.webp",
+      "defaultView": {
+        "yaw": 110.6,
+        "pitch": 1.2,
+        "zoom": 5
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/t_2hf6y5b3ue/thumbnails/s_m1tpkghyku.webp"
+    },
+    "s_99m6qgg3rk": {
+      "id": "s_99m6qgg3rk",
+      "title": "Waiting Area",
+      "description": "Explore Waiting Room as part of the Queensway Carleton Hospital virtual tour.",
+      "panorama": "/assets/qchfoundation/t_2hf6y5b3ue/panoramas/s_99m6qgg3rk.webp",
+      "defaultView": {
+        "yaw": 355.3,
+        "pitch": -4.9,
+        "zoom": 5
+      },
+      "hotspots": [],
+      "thumbnail": "/assets/qchfoundation/t_2hf6y5b3ue/thumbnails/s_99m6qgg3rk.webp"
+    }
+  }
+}

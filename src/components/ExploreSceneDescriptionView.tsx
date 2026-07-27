@@ -34,6 +34,7 @@ import {
 interface ExploreSceneDescriptionViewProps {
   tourId: string;
   scene: Scene;
+  tourTitle?: string;
   tourHotspots?: Hotspot[];
   tourViewerType?: TourViewerType;
   active: boolean;
@@ -45,6 +46,7 @@ interface ExploreSceneDescriptionViewProps {
 export function ExploreSceneDescriptionView({
   tourId,
   scene,
+  tourTitle,
   tourHotspots,
   tourViewerType,
   active,
@@ -53,7 +55,12 @@ export function ExploreSceneDescriptionView({
   onVisit,
 }: ExploreSceneDescriptionViewProps) {
   const description = resolveScenePlaceLead(
-    { hotspots: tourHotspots, viewerType: tourViewerType },
+    {
+      id: tourId,
+      title: tourTitle ?? '',
+      hotspots: tourHotspots,
+      viewerType: tourViewerType,
+    },
     scene,
   );
   const heroVideoUrl = scene.previewVideoUrl?.trim();

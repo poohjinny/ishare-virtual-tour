@@ -81,32 +81,6 @@ export function normalizeDefaultView(view) {
   return normalized;
 }
 
-function roundMapCoord(value) {
-  return +Number(value).toFixed(3);
-}
-
-export function normalizeMapPosition(map) {
-  if (
-    typeof map?.x !== 'number' ||
-    typeof map?.y !== 'number' ||
-    typeof map?.heading !== 'number'
-  ) {
-    throw new Error('map.x, map.y, and map.heading must be numbers');
-  }
-
-  const x = Number(map.x);
-  const y = Number(map.y);
-  if (x < 0 || x > 1 || y < 0 || y > 1) {
-    throw new Error('map.x and map.y must be between 0 and 1');
-  }
-
-  return {
-    x: roundMapCoord(x),
-    y: roundMapCoord(y),
-    heading: roundCoord(map.heading),
-  };
-}
-
 export function normalizeHotspotPosition(position) {
   if (isWorldHotspotPosition(position)) {
     return {
@@ -1567,8 +1541,6 @@ export function updateScene({
   previewVideoUrl,
   videoUrl,
   setAsFirstScene,
-  map,
-  clearMap,
 }) {
   const resolvedSceneId = sceneId?.trim();
   if (!resolvedSceneId) {
@@ -1590,8 +1562,6 @@ export function updateScene({
   const hasPreviewVideoUrl = previewVideoUrl !== undefined;
   const hasVideoUrl = videoUrl !== undefined;
   const wantsFirstScene = Boolean(setAsFirstScene);
-  const hasMap = map !== undefined && map !== null;
-  const wantsClearMap = clearMap === true;
 
   if (
     !nextTitle &&
@@ -1599,12 +1569,10 @@ export function updateScene({
     !hasPlaceLead &&
     !hasPreviewVideoUrl &&
     !hasVideoUrl &&
-    !wantsFirstScene &&
-    !hasMap &&
-    !wantsClearMap
+    !wantsFirstScene
   ) {
     throw new Error(
-      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, setAsFirstScene, map, or clearMap is required',
+      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, or setAsFirstScene is required',
     );
   }
 
@@ -1670,16 +1638,6 @@ export function updateScene({
 
   if (wantsFirstScene) {
     tour.firstScene = resolvedSceneId;
-  }
-
-  if (tour.viewerType === 'model3d' && (hasMap || wantsClearMap)) {
-    throw new Error('Scene map pins are not supported for model3d tours');
-  }
-
-  if (wantsClearMap) {
-    delete scene.map;
-  } else if (hasMap) {
-    scene.map = normalizeMapPosition(map);
   }
 
   writeTourJson(tourPath, tour);

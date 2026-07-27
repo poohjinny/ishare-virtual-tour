@@ -134,7 +134,6 @@ import {
   devUpdateNamingHotspot,
   devUpdateScene,
   devUpdateTour,
-  devUpdateTourFloorPlan,
   type DevCatalogClient,
   type DevTourBrandingMode,
   type DevTourMutateOptions,
@@ -500,10 +499,6 @@ export function DevViewPanel({
   const [editScenePreviewVideoUrl, setEditScenePreviewVideoUrl] = useState('');
   const [editSceneVideoUrl, setEditSceneVideoUrl] = useState('');
   const [editSceneAsFirst, setEditSceneAsFirst] = useState(false);
-  const [editSceneMapEnabled, setEditSceneMapEnabled] = useState(false);
-  const [editSceneMapX, setEditSceneMapX] = useState('');
-  const [editSceneMapY, setEditSceneMapY] = useState('');
-  const [editSceneMapHeading, setEditSceneMapHeading] = useState('');
   const [sceneManageStatus, setSceneManageStatus] =
     useState<ActionStatus>('idle');
   const [sceneManageError, setSceneManageError] = useState<string | null>(null);
@@ -604,11 +599,6 @@ export function DevViewPanel({
   const [deleteTourStatus, setDeleteTourStatus] =
     useState<ActionStatus>('idle');
   const [deleteTourError, setDeleteTourError] = useState<string | null>(null);
-  const [floorPlanWidth, setFloorPlanWidth] = useState('');
-  const [floorPlanHeight, setFloorPlanHeight] = useState('');
-  const [floorPlanFile, setFloorPlanFile] = useState<File | null>(null);
-  const [floorPlanStatus, setFloorPlanStatus] = useState<ActionStatus>('idle');
-  const [floorPlanError, setFloorPlanError] = useState<string | null>(null);
   const [knowledgeMissing, setKnowledgeMissing] = useState(false);
   const [knowledgeLoadStatus, setKnowledgeLoadStatus] =
     useState<ActionStatus>('idle');
@@ -982,14 +972,6 @@ export function DevViewPanel({
       }),
     [editTourProductFullName, editTourTitle, tour],
   );
-  const canSaveFloorPlan = Boolean(
-    tour.id &&
-    (floorPlanFile ||
-      (tour.floorPlan &&
-        (floorPlanWidth.trim() !== String(tour.floorPlan.width) ||
-          floorPlanHeight.trim() !== String(tour.floorPlan.height)))),
-  );
-  const canClearFloorPlan = Boolean(tour.floorPlan);
   const canDeleteTour = deleteTourConfirm.trim() === tour.id;
   const canSaveKnowledge = Boolean(
     tour.id &&
@@ -1186,11 +1168,6 @@ export function DevViewPanel({
     setEditTourSuggestStatus('idle');
     setEditTourStatus('idle');
     setEditTourError(null);
-    setFloorPlanWidth(tour.floorPlan ? String(tour.floorPlan.width) : '');
-    setFloorPlanHeight(tour.floorPlan ? String(tour.floorPlan.height) : '');
-    setFloorPlanFile(null);
-    setFloorPlanStatus('idle');
-    setFloorPlanError(null);
   }, [
     tour.branding?.fontFamily,
     tour.branding?.fontSourceUrl,
@@ -1198,8 +1175,6 @@ export function DevViewPanel({
     tour.branding?.primaryColor,
     tour.category,
     tour.clientId,
-    tour.floorPlan?.height,
-    tour.floorPlan?.width,
     tour.id,
     tour.title,
     catalogTick,
@@ -1510,7 +1485,7 @@ export function DevViewPanel({
 
   const resolveModel3dSceneCreatePayload = useCallback(
     async (
-      title: string,
+      _title: string,
       manualThumbnailFile?: File | null,
       sceneIdForFile?: string,
     ) => {
@@ -1783,62 +1758,6 @@ export function DevViewPanel({
     onTourMutated,
     tour.id,
   ]);
-
-  const saveFloorPlan = useCallback(async () => {
-    if (!canSaveFloorPlan || !tour.id) return;
-
-    setFloorPlanStatus('working');
-    setFloorPlanError(null);
-
-    try {
-      await devUpdateTourFloorPlan({
-        tourId: tour.id,
-        floorPlanFile,
-        width: floorPlanWidth.trim() ? Number(floorPlanWidth) : undefined,
-        height: floorPlanHeight.trim() ? Number(floorPlanHeight) : undefined,
-      });
-      setFloorPlanFile(null);
-      await onTourMutated?.();
-      setFloorPlanStatus('done');
-    } catch (error) {
-      setFloorPlanStatus('error');
-      setFloorPlanError(
-        error instanceof DevTourApiError ?
-          error.message
-        : 'Could not save floor plan',
-      );
-    }
-  }, [
-    canSaveFloorPlan,
-    floorPlanFile,
-    floorPlanHeight,
-    floorPlanWidth,
-    onTourMutated,
-    tour.id,
-  ]);
-
-  const clearFloorPlan = useCallback(async () => {
-    if (!canClearFloorPlan || !tour.id) return;
-
-    setFloorPlanStatus('working');
-    setFloorPlanError(null);
-
-    try {
-      await devUpdateTourFloorPlan({ tourId: tour.id, clearFloorPlan: true });
-      setFloorPlanFile(null);
-      setFloorPlanWidth('');
-      setFloorPlanHeight('');
-      await onTourMutated?.();
-      setFloorPlanStatus('done');
-    } catch (error) {
-      setFloorPlanStatus('error');
-      setFloorPlanError(
-        error instanceof DevTourApiError ?
-          error.message
-        : 'Could not remove floor plan',
-      );
-    }
-  }, [canClearFloorPlan, onTourMutated, tour.id]);
 
   const deleteCurrentTour = useCallback(async () => {
     if (!canDeleteTour || !tour.id) return;
@@ -2432,10 +2351,6 @@ export function DevViewPanel({
       setEditScenePreviewVideoUrl(entry.previewVideoUrl ?? '');
       setEditSceneVideoUrl(entry.videoUrl ?? '');
       setEditSceneAsFirst(entry.id === tour.firstScene);
-      setEditSceneMapEnabled(Boolean(entry.map));
-      setEditSceneMapX(String(entry.map?.x ?? 0.5));
-      setEditSceneMapY(String(entry.map?.y ?? 0.5));
-      setEditSceneMapHeading(String(entry.map?.heading ?? 0));
     },
     [tour.firstScene],
   );
@@ -2444,8 +2359,6 @@ export function DevViewPanel({
     if (!scene.tourId || !editingSceneId) return;
 
     const isAlreadyFirst = editingSceneId === tour.firstScene;
-    const existingScene = tour.scenes[editingSceneId];
-    const hadMap = Boolean(existingScene?.map);
 
     setSceneManageStatus('working');
     setSceneManageError(null);
@@ -2463,19 +2376,6 @@ export function DevViewPanel({
           }
         : {}),
         setAsFirstScene: editSceneAsFirst && !isAlreadyFirst,
-        ...(isModel3dTour ?
-          {}
-        : {
-            clearMap: !editSceneMapEnabled && hadMap,
-            map:
-              editSceneMapEnabled ?
-                {
-                  x: Number(editSceneMapX),
-                  y: Number(editSceneMapY),
-                  heading: Number(editSceneMapHeading),
-                }
-              : undefined,
-          }),
       });
       setEditingSceneId(null);
       await onTourMutated?.();
@@ -2493,17 +2393,12 @@ export function DevViewPanel({
     editSceneDescription,
     editScenePreviewVideoUrl,
     editSceneVideoUrl,
-    editSceneMapEnabled,
-    editSceneMapHeading,
-    editSceneMapX,
-    editSceneMapY,
     editSceneTitle,
     editingSceneId,
     isModel3dTour,
     onTourMutated,
     scene.tourId,
     tour.firstScene,
-    tour.scenes,
   ]);
 
   const replacePanorama = useCallback(async () => {
@@ -4970,86 +4865,7 @@ export function DevViewPanel({
                                 </span>
                               </label>
                             : null}
-                            {!isModel3dTour ?
-                              <>
-                                <label
-                                  className={devViewPanelToggleLabelClassName}
-                                >
-                                  <input
-                                    type='checkbox'
-                                    className={devViewPanelToggleInputClassName}
-                                    checked={editSceneMapEnabled}
-                                    onChange={(e) =>
-                                      setEditSceneMapEnabled(
-                                        e.currentTarget.checked,
-                                      )
-                                    }
-                                  />
-                                  <span
-                                    className={devViewPanelToggleTextClassName}
-                                  >
-                                    Floor plan map position
-                                  </span>
-                                </label>
-                              </>
-                            : null}
                           </div>
-                          {!isModel3dTour && editSceneMapEnabled ?
-                            <DevPanelFormRow cols={3}>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Map X (0–1)
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='number'
-                                  min='0'
-                                  max='1'
-                                  step='0.001'
-                                  value={editSceneMapX}
-                                  onChange={(e) =>
-                                    setEditSceneMapX(e.target.value)
-                                  }
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Map Y (0–1)
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='number'
-                                  min='0'
-                                  max='1'
-                                  step='0.001'
-                                  value={editSceneMapY}
-                                  onChange={(e) =>
-                                    setEditSceneMapY(e.target.value)
-                                  }
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Map heading (°)
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='number'
-                                  step='0.1'
-                                  value={editSceneMapHeading}
-                                  onChange={(e) =>
-                                    setEditSceneMapHeading(e.target.value)
-                                  }
-                                />
-                              </label>
-                            </DevPanelFormRow>
-                          : null}
                           <div className={devViewPanelActionsClassName}>
                             <button
                               type='button'
@@ -6342,121 +6158,6 @@ export function DevViewPanel({
                   </>
                 }
               </DevPanelSection>
-
-              {!isModel3dTour ?
-                <DevPanelSection
-                  title='Floor plan'
-                  description={
-                    <>
-                      <p className={devViewPanelSectionLeadClassName}>
-                        Tour-level minimap image and coordinate space for scene{' '}
-                        <code>map</code> pins.
-                      </p>
-                      {tour.floorPlan ?
-                        <p className={devViewPanelSectionHintClassName}>
-                          Current: <code>{tour.floorPlan.image}</code> ·{' '}
-                          {tour.floorPlan.width}×{tour.floorPlan.height}
-                        </p>
-                      : <p className={devViewPanelSectionHintClassName}>
-                          No floor plan configured yet.
-                        </p>
-                      }
-                    </>
-                  }
-                >
-                  <DevPanelFormGroup hint='Raster images auto-detect dimensions. SVG needs width/height here (or a viewBox in the file).'>
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Floor plan image
-                      </span>
-                      <DevPanelFileField
-                        file={floorPlanFile}
-                        preview={
-                          <DevLocalFilePreview
-                            file={floorPlanFile}
-                            className={devViewPanelBrandLogoClassName}
-                            alt='Floor plan preview'
-                          />
-                        }
-                        onClearPreview={() => setFloorPlanFile(null)}
-                        showClear={Boolean(floorPlanFile)}
-                      >
-                        <DevPanelFileInput
-                          accept='image/svg+xml,image/png,image/jpeg,image/webp,.svg,.png,.jpg,.jpeg,.webp'
-                          file={floorPlanFile}
-                          onChange={setFloorPlanFile}
-                        />
-                      </DevPanelFileField>
-                    </label>
-
-                    <DevPanelFormRow>
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Width
-                        </span>
-                        <input
-                          className={devViewPanelInputClassName}
-                          type='number'
-                          min='1'
-                          step='1'
-                          value={floorPlanWidth}
-                          onChange={(e) => setFloorPlanWidth(e.target.value)}
-                          placeholder='324'
-                        />
-                      </label>
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Height
-                        </span>
-                        <input
-                          className={devViewPanelInputClassName}
-                          type='number'
-                          min='1'
-                          step='1'
-                          value={floorPlanHeight}
-                          onChange={(e) => setFloorPlanHeight(e.target.value)}
-                          placeholder='216'
-                        />
-                      </label>
-                    </DevPanelFormRow>
-
-                    {floorPlanError ?
-                      <p className={devViewPanelSectionHintClassName}>
-                        {floorPlanError}
-                      </p>
-                    : null}
-
-                    <div className={devViewPanelActionsClassName}>
-                      <button
-                        type='button'
-                        className={devViewPanelBtnVariants({ tone: 'primary' })}
-                        onClick={() => void saveFloorPlan()}
-                        disabled={
-                          !canSaveFloorPlan || floorPlanStatus === 'working'
-                        }
-                      >
-                        {floorPlanStatus === 'working' ?
-                          'Saving…'
-                        : floorPlanStatus === 'done' ?
-                          'Floor plan saved!'
-                        : 'Save floor plan'}
-                      </button>
-                      {canClearFloorPlan ?
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'danger',
-                          })}
-                          onClick={() => void clearFloorPlan()}
-                          disabled={floorPlanStatus === 'working'}
-                        >
-                          Remove floor plan
-                        </button>
-                      : null}
-                    </div>
-                  </DevPanelFormGroup>
-                </DevPanelSection>
-              : null}
 
               <DevPanelSection
                 title='Knowledge (AI assistant)'

@@ -8,7 +8,7 @@ export interface TourPerfPauseState {
 }
 
 export interface ViewerPerfPauseOptions {
-  /** Tour shell — `.viewer-area` so chrome (nav, minimap, AI) pauses too. */
+  /** Tour shell — `.viewer-area` so chrome (nav, AI) pauses too. */
   scope: HTMLElement;
   getViewer?: () => Viewer | null;
 }

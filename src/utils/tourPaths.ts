@@ -25,9 +25,9 @@ export {
 
 /** Old paths that used client id as the first segment → canonical tour id. */
 const LEGACY_TOUR_PATH_ALIASES: Record<string, string> = {
-  gphospitalfoundation: 'ken-sargent-house',
-  cancerresearchsociety: 'cancer-research',
-  holodomor: 'holodomor-museum',
+  gphospitalfoundation: 't_l01wnq8eh6',
+  cancerresearchsociety: 't_8kx3m2p9qa',
+  holodomor: 't_r7v4n1c0wd',
 };
 
 export function normalizeTourPathId(segment: string): string {
