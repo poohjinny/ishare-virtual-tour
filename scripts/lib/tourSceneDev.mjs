@@ -3,6 +3,8 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  renameSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -14,6 +16,7 @@ import sharp from 'sharp';
 // "unable to open for write". Disabling the cache releases the handle after each
 // write — negligible cost for dev-only image conversions.
 sharp.cache(false);
+import { allocateOpaqueId, assertEntityId } from './opaqueId.mjs';
 import {
   renderEquirectPreviewToFile,
   resolveThumbnailFilePath,
@@ -22,9 +25,9 @@ import {
 import {
   defaultInfoBody,
   defaultNamingBody,
-  defaultSceneDescription,
 } from './devContentPlaceholders.mjs';
 import { normalizeNamingPriceStorage } from './namingPrice.mjs';
+import { namingDonorAllowsLogo, normalizeNamingDonor } from './namingDonor.mjs';
 import { encodePanoramaWebp } from './panoramaEncode.mjs';
 import { persistTourContentPlaceholders } from './tourContentSync.mjs';
 import { syncScenePlaceLeadFromNaming } from './scenePlaceLead.mjs';
@@ -214,7 +217,7 @@ export function buildNavHotspotRecord({
   return record;
 }
 
-const NAMING_STATUSES = new Set(['open', 'closed', 'reserved', 'soon']);
+const NAMING_STATUSES = new Set(['open', 'sold', 'reserved', 'soon']);
 
 function applyPopupMediaFields(popup, { videoUrl, image }) {
   const nextVideoUrl = videoUrl?.trim();
@@ -255,6 +258,7 @@ export function buildNamingHotspotRecord({
   body,
   videoUrl,
   image,
+  donor,
   sceneTitle,
   sceneDescription,
   scenePreviewVideoUrl,
@@ -280,11 +284,16 @@ export function buildNamingHotspotRecord({
   const overrideBody = (body ?? '').trim();
   const inheritedVideo = (scenePreviewVideoUrl ?? '').trim();
   const overrideVideo = (videoUrl ?? '').trim();
+  const normalizedDonor = normalizeNamingDonor(donor, { status: statusValue });
 
   const popup = {
     display: 'anchored',
     namingOpportunity: { price: priceValue, status: statusValue },
   };
+
+  if (normalizedDonor) {
+    popup.namingOpportunity.donor = normalizedDonor;
+  }
 
   if (overrideTitle && overrideTitle !== inheritedTitle) {
     popup.title = overrideTitle;
@@ -586,24 +595,26 @@ export function buildSceneRecord({
   tourTitle,
 }) {
   const label = title.trim();
-  const id = sceneId?.trim() || slugifyHotspotName(label);
+  const id = sceneId?.trim();
   const panoramaPath = panorama?.trim();
-  const tour = tourTitle?.trim() || 'this facility';
 
   if (!label) throw new Error('Scene title is required');
-  if (!id) throw new Error('Scene title must contain letters or numbers');
+  if (!id) throw new Error('Scene id is required');
   if (!panoramaPath) throw new Error('Panorama path is required');
 
   const record = {
     id,
     title: label,
-    description: description?.trim() || defaultSceneDescription(tour, label),
     panorama: panoramaPath,
     defaultView: normalizeDefaultView(
       defaultView ?? { yaw: 0, pitch: 0, zoom: 17 },
     ),
     hotspots: [],
   };
+  const nextDescription = description?.trim();
+  if (nextDescription) {
+    record.description = nextDescription;
+  }
   applyScenePreviewVideoField(record, previewVideoUrl);
   applySceneVideoField(record, videoUrl);
   return record;
@@ -628,6 +639,11 @@ export function buildDefaultSceneThumbnailWebPath(tour, sceneId) {
 export function buildDefaultHotspotPreviewWebPath(tour, hotspotId) {
   const clientId = tour.clientId ?? tour.id;
   return `/assets/${clientId}/${tour.id}/previews/${hotspotId}.webp`;
+}
+
+export function buildDefaultNamingDonorLogoWebPath(tour, hotspotId) {
+  const clientId = tour.clientId ?? tour.id;
+  return `/assets/${clientId}/${tour.id}/naming/${hotspotId}/donor-logo.png`;
 }
 
 export function assertModelUploadFileName(fileName) {
@@ -655,25 +671,27 @@ export function buildSceneRecord3D({
   tour,
 }) {
   const label = title.trim();
-  const id = sceneId?.trim() || slugifyHotspotName(label);
+  const id = sceneId?.trim();
   const modelPath = model?.trim();
-  const tourLabel = tourTitle?.trim() || 'this facility';
-  const cardImage =
-    thumbnail?.trim() || buildDefaultSceneThumbnailWebPath(tour, id);
 
   if (!label) throw new Error('Scene title is required');
-  if (!id) throw new Error('Scene title must contain letters or numbers');
+  if (!id) throw new Error('Scene id is required');
+
+  const cardImage =
+    thumbnail?.trim() || buildDefaultSceneThumbnailWebPath(tour, id);
 
   const record = {
     id,
     title: label,
-    description:
-      description?.trim() || defaultSceneDescription(tourLabel, label),
     panorama: cardImage,
     thumbnail: cardImage,
     defaultView: normalizeDefaultView(defaultView ?? DEFAULT_3D_VIEW),
     hotspots: [],
   };
+  const nextDescription = description?.trim();
+  if (nextDescription) {
+    record.description = nextDescription;
+  }
 
   if (modelPath) {
     record.model = modelPath;
@@ -773,6 +791,45 @@ export async function saveUploadedHotspotPreviewWebp({
   return webPath;
 }
 
+export async function saveUploadedNamingDonorLogo({
+  assetsRoot,
+  root,
+  tour,
+  hotspotId,
+  fileBuffer,
+}) {
+  if (!fileBuffer?.length) {
+    throw new Error('Donor logo file is empty');
+  }
+  if (fileBuffer.length > MAX_PANORAMA_UPLOAD_BYTES) {
+    throw new Error('Donor logo file is too large (max 50 MB)');
+  }
+
+  const webPath = buildDefaultNamingDonorLogoWebPath(tour, hotspotId);
+  const filePath = resolvePanoramaFilePath(assetsRoot, webPath);
+  mkdirSync(dirname(filePath), { recursive: true });
+
+  // Write via temp + replace so Windows can overwrite a path that sharp or the
+  // static server still has mapped from a previous upload.
+  const tempPath = `${filePath}.${process.pid}.tmp.png`;
+  try {
+    await sharp(fileBuffer).png().toFile(tempPath);
+    if (existsSync(filePath)) unlinkSync(filePath);
+    renameSync(tempPath, filePath);
+  } catch (error) {
+    if (existsSync(tempPath)) unlinkSync(tempPath);
+    throw error;
+  }
+
+  const relative = webPath.replace(/^\/assets\//, '');
+  const publicPath = join(root, 'public', 'assets', relative);
+  mkdirSync(dirname(publicPath), { recursive: true });
+  if (existsSync(publicPath)) unlinkSync(publicPath);
+  copyFileSync(filePath, publicPath);
+
+  return webPath;
+}
+
 function syncAssetToPublic(root, assetsFilePath, webPath) {
   const relative = webPath.replace(/^\/assets\//, '');
   const publicPath = join(root, 'public', 'assets', relative);
@@ -832,12 +889,11 @@ export async function createScene({
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
-  const resolvedSceneId = sceneId?.trim() || slugifyHotspotName(title.trim());
+  const resolvedSceneId =
+    sceneId?.trim() || allocateOpaqueId('s_', Object.keys(tour.scenes ?? {}));
 
   if (!title.trim()) throw new Error('Scene title is required');
-  if (!resolvedSceneId) {
-    throw new Error('Scene title must contain letters or numbers');
-  }
+  assertEntityId(resolvedSceneId, 'Scene id');
   if (tour.scenes?.[resolvedSceneId]) {
     throw new Error(`Scene id already exists: ${resolvedSceneId}`);
   }
@@ -973,6 +1029,8 @@ export async function createNamingHotspot({
   body,
   videoUrl,
   image,
+  donor,
+  donorLogoFileBuffer,
   targetView,
   previewFileBuffer,
 }) {
@@ -987,10 +1045,33 @@ export async function createNamingHotspot({
     body,
     videoUrl,
     image,
+    donor,
     sceneTitle: hostScene?.title,
     sceneDescription: hostScene?.description,
     scenePreviewVideoUrl: hostScene?.previewVideoUrl,
   });
+
+  if (donorLogoFileBuffer?.length) {
+    if (!root || !assetsRoot) {
+      throw new Error('Donor logo upload requires dev asset paths');
+    }
+    if (!hotspot.popup.namingOpportunity.donor) {
+      throw new Error('Donor name is required before uploading a logo');
+    }
+    if (!namingDonorAllowsLogo(hotspot.popup.namingOpportunity.donor)) {
+      throw new Error(
+        'Donor affiliation is required before uploading a logo for a person',
+      );
+    }
+    const logoWebPath = await saveUploadedNamingDonorLogo({
+      assetsRoot,
+      root,
+      tour,
+      hotspotId: hotspot.id,
+      fileBuffer: donorLogoFileBuffer,
+    });
+    hotspot.popup.namingOpportunity.donor.logo = logoWebPath;
+  }
 
   if (tour.viewerType === 'model3d') {
     if (targetView) {
@@ -1157,6 +1238,9 @@ export async function updateNamingHotspot({
   body,
   videoUrl,
   image,
+  donor,
+  donorLogoFileBuffer,
+  clearDonorLogo,
   targetView,
   previewFileBuffer,
 }) {
@@ -1183,6 +1267,9 @@ export async function updateNamingHotspot({
   const nextBody = typeof body === 'string' ? body.trim() : undefined;
   const hasVideoUrl = videoUrl !== undefined;
   const hasImage = image !== undefined;
+  const hasDonor = donor !== undefined;
+  const hasDonorLogoFile = Boolean(donorLogoFileBuffer?.length);
+  const wantsClearDonorLogo = Boolean(clearDonorLogo);
 
   const hostScene = tour.scenes?.[sceneId];
   const inheritedTitle = hostScene?.title?.trim() ?? '';
@@ -1232,6 +1319,52 @@ export async function updateNamingHotspot({
     }
   }
 
+  const effectiveStatus = hotspot.popup.namingOpportunity.status;
+  if (hasDonor) {
+    const existingLogo = hotspot.popup.namingOpportunity.donor?.logo;
+    const normalizedDonor = normalizeNamingDonor(
+      {
+        ...(donor && typeof donor === 'object' ? donor : {}),
+        logo:
+          donor && typeof donor === 'object' && donor.logo !== undefined ?
+            donor.logo
+          : existingLogo,
+      },
+      { status: effectiveStatus },
+    );
+    if (normalizedDonor) {
+      hotspot.popup.namingOpportunity.donor = normalizedDonor;
+    } else {
+      delete hotspot.popup.namingOpportunity.donor;
+    }
+  } else if (nextStatus && nextStatus !== 'sold') {
+    delete hotspot.popup.namingOpportunity.donor;
+  }
+
+  if (hasDonorLogoFile) {
+    if (!root || !assetsRoot) {
+      throw new Error('Donor logo upload requires dev asset paths');
+    }
+    if (!hotspot.popup.namingOpportunity.donor) {
+      throw new Error('Donor name is required before uploading a logo');
+    }
+    if (!namingDonorAllowsLogo(hotspot.popup.namingOpportunity.donor)) {
+      throw new Error(
+        'Donor affiliation is required before uploading a logo for a person',
+      );
+    }
+    const logoWebPath = await saveUploadedNamingDonorLogo({
+      assetsRoot,
+      root,
+      tour,
+      hotspotId: resolvedHotspotId,
+      fileBuffer: donorLogoFileBuffer,
+    });
+    hotspot.popup.namingOpportunity.donor.logo = logoWebPath;
+  } else if (wantsClearDonorLogo && hotspot.popup.namingOpportunity.donor) {
+    delete hotspot.popup.namingOpportunity.donor.logo;
+  }
+
   const hasTargetView = targetView !== undefined && targetView !== null;
   const hasPreviewFile = previewFileBuffer !== undefined;
 
@@ -1260,11 +1393,14 @@ export async function updateNamingHotspot({
     !bodyProvided &&
     !hasVideoUrl &&
     !hasImage &&
+    !hasDonor &&
+    !hasDonorLogoFile &&
+    !wantsClearDonorLogo &&
     !hasTargetView &&
     !hasPreviewFile
   ) {
     throw new Error(
-      'At least one of title, price, status, body, videoUrl, image, targetView, or preview is required',
+      'At least one of title, price, status, body, videoUrl, image, donor, donor logo, targetView, or preview is required',
     );
   }
 

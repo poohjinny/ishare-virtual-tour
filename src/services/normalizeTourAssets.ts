@@ -17,10 +17,22 @@ function normalizePopupContent(popup: PopupContent): PopupContent {
 
   if (popup.namingOpportunity) {
     const price = parseNamingPriceInput(popup.namingOpportunity.price);
-    if (price != null && price !== popup.namingOpportunity.price) {
+    const donorLogo = popup.namingOpportunity.donor?.logo;
+    const nextDonorLogo = donorLogo ? withBaseUrl(donorLogo) : undefined;
+    const priceChanged =
+      price != null && price !== popup.namingOpportunity.price;
+    const logoChanged = Boolean(nextDonorLogo && nextDonorLogo !== donorLogo);
+
+    if (priceChanged || logoChanged) {
       next = {
         ...next,
-        namingOpportunity: { ...popup.namingOpportunity, price },
+        namingOpportunity: {
+          ...popup.namingOpportunity,
+          ...(priceChanged ? { price } : {}),
+          ...(logoChanged && popup.namingOpportunity.donor ?
+            { donor: { ...popup.namingOpportunity.donor, logo: nextDonorLogo } }
+          : {}),
+        },
       };
     }
   }
@@ -110,8 +122,37 @@ export function bustSceneThumbnailUrls(
 
   const { bustPanorama = false } = options;
 
+  const bustHotspot = (hotspot: Hotspot): Hotspot => {
+    const logo = hotspot.popup?.namingOpportunity?.donor?.logo?.trim();
+    if (!logo || !hotspot.popup?.namingOpportunity?.donor) return hotspot;
+    return {
+      ...hotspot,
+      popup: {
+        ...hotspot.popup,
+        namingOpportunity: {
+          ...hotspot.popup.namingOpportunity,
+          donor: {
+            ...hotspot.popup.namingOpportunity.donor,
+            logo: appendCacheBust(logo, version),
+          },
+        },
+      },
+    };
+  };
+
+  const bustHotspots = (hotspots: Hotspot[]): Hotspot[] => {
+    let changed = false;
+    const next = hotspots.map((hotspot) => {
+      const busted = bustHotspot(hotspot);
+      if (busted !== hotspot) changed = true;
+      return busted;
+    });
+    return changed ? next : hotspots;
+  };
+
   return {
     ...tour,
+    ...(tour.hotspots ? { hotspots: bustHotspots(tour.hotspots) } : {}),
     scenes: Object.fromEntries(
       Object.entries(tour.scenes).map(([id, scene]) => {
         const bustedThumbnail =
@@ -125,8 +166,15 @@ export function bustSceneThumbnailUrls(
           bustPanorama && scene.panorama ?
             appendCacheBust(scene.panorama, version)
           : undefined;
+        const bustedHotspots = bustHotspots(scene.hotspots);
 
-        if (!bustedThumbnail && !bustedPanorama) return [id, scene];
+        if (
+          !bustedThumbnail &&
+          !bustedPanorama &&
+          bustedHotspots === scene.hotspots
+        ) {
+          return [id, scene];
+        }
 
         return [
           id,
@@ -134,6 +182,9 @@ export function bustSceneThumbnailUrls(
             ...scene,
             ...(bustedThumbnail ? { thumbnail: bustedThumbnail } : {}),
             ...(bustedPanorama ? { panorama: bustedPanorama } : {}),
+            ...(bustedHotspots !== scene.hotspots ?
+              { hotspots: bustedHotspots }
+            : {}),
           },
         ];
       }),

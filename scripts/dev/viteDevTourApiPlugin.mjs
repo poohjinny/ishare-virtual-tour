@@ -411,6 +411,7 @@ function validateNamingHotspotUpdatePayload(body) {
     body: copy,
     videoUrl,
     image,
+    donor,
     targetView,
   } = body ?? {};
   const hasPrice = price !== undefined;
@@ -438,6 +439,13 @@ function validateNamingHotspotUpdatePayload(body) {
       throw new Error('Preview capture is empty');
     }
   }
+  let donorLogoFileBuffer;
+  if (body?.donorLogoFileBase64) {
+    donorLogoFileBuffer = Buffer.from(body.donorLogoFileBase64, 'base64');
+    if (!donorLogoFileBuffer.length) {
+      throw new Error('Donor logo file is empty');
+    }
+  }
   if (
     title === undefined &&
     !hasPrice &&
@@ -445,11 +453,14 @@ function validateNamingHotspotUpdatePayload(body) {
     copy === undefined &&
     videoUrl === undefined &&
     image === undefined &&
+    donor === undefined &&
+    donorLogoFileBuffer === undefined &&
+    !body?.clearDonorLogo &&
     !targetView &&
     previewFileBuffer === undefined
   ) {
     throw new Error(
-      'At least one of title, price, status, body, videoUrl, image, targetView, or preview is required',
+      'At least one of title, price, status, body, videoUrl, image, donor, donor logo, targetView, or preview is required',
     );
   }
   return {
@@ -462,6 +473,9 @@ function validateNamingHotspotUpdatePayload(body) {
     body: typeof copy === 'string' ? copy : undefined,
     videoUrl,
     image,
+    donor,
+    donorLogoFileBuffer,
+    clearDonorLogo: Boolean(body?.clearDonorLogo),
     targetView,
     previewFileBuffer,
   };
@@ -634,6 +648,7 @@ function validateCreateTourPayload(body) {
     immersivePlaylistManifest,
     immersiveVolume,
     clearImmersiveBackground,
+    firstSceneId,
   } = body ?? {};
 
   if (!clientId?.trim()) {
@@ -754,6 +769,10 @@ function validateCreateTourPayload(body) {
         Number(immersiveVolume)
       : undefined,
     clearImmersiveBackground: clearImmersiveBackground === true,
+    firstSceneId:
+      typeof firstSceneId === 'string' && firstSceneId.trim() ?
+        firstSceneId.trim()
+      : undefined,
   };
 }
 
@@ -834,6 +853,13 @@ function validateCreateNamingHotspotPayload(body) {
       throw new Error('Preview capture is empty');
     }
   }
+  let donorLogoFileBuffer;
+  if (body?.donorLogoFileBase64) {
+    donorLogoFileBuffer = Buffer.from(body.donorLogoFileBase64, 'base64');
+    if (!donorLogoFileBuffer.length) {
+      throw new Error('Donor logo file is empty');
+    }
+  }
   return {
     tourId,
     sceneId,
@@ -844,6 +870,8 @@ function validateCreateNamingHotspotPayload(body) {
     body: copy,
     videoUrl,
     image,
+    donor: body?.donor,
+    donorLogoFileBuffer,
     targetView,
     previewFileBuffer,
   };
@@ -1451,6 +1479,9 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              donor,
+              donorLogoFileBuffer,
+              clearDonorLogo,
               targetView,
               previewFileBuffer,
             } = validateNamingHotspotUpdatePayload(body);
@@ -1467,6 +1498,9 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              donor,
+              donorLogoFileBuffer,
+              clearDonorLogo,
               targetView,
               previewFileBuffer,
             });
@@ -1599,6 +1633,8 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              donor,
+              donorLogoFileBuffer,
               targetView,
               previewFileBuffer,
             } = validateCreateNamingHotspotPayload(body);
@@ -1615,6 +1651,8 @@ export function viteDevTourApiPlugin() {
               body: copy,
               videoUrl,
               image,
+              donor,
+              donorLogoFileBuffer,
               targetView,
               previewFileBuffer,
             });

@@ -648,6 +648,11 @@ export const devViewPanelManageListItemIdClassName = cn(
   'font-normal text-[#94a3b8]',
 );
 
+/** Floor / department secondary — still a human label, not a technical id. */
+export const devViewPanelManageListItemMetaClassName = cn(
+  'font-normal text-[#94a3b8]',
+);
+
 export type DevSceneManageBadgeKind = 'current' | 'first';
 
 export const devSceneManageBadgeVariants = cva(devManageBadgeBaseClassName, {

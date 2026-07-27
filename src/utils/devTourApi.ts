@@ -1,6 +1,7 @@
 import type {
   FaqEntry,
   Hotspot,
+  NamingDonor,
   NamingOpportunityStatus,
   NavHotspotVariant,
   PopupDisplay,
@@ -59,6 +60,8 @@ export interface DevNamingHotspotPayload extends Omit<
   body?: string;
   videoUrl?: string;
   image?: string;
+  donor?: NamingDonor | null;
+  donorLogoFile?: Blob | File | null;
   targetView?: ViewPosition;
   previewFile?: Blob | File | null;
 }
@@ -188,11 +191,15 @@ export function devCreateNavHotspot(payload: DevNavHotspotPayload) {
 
 export async function devCreateNamingHotspot({
   previewFile,
+  donorLogoFile,
   ...payload
 }: DevNamingHotspotPayload) {
   const body: Record<string, unknown> = { ...payload };
   if (previewFile) {
     body.previewFileBase64 = await fileToBase64(previewFile);
+  }
+  if (donorLogoFile) {
+    body.donorLogoFileBase64 = await fileToBase64(donorLogoFile);
   }
 
   return postDevTourJson<{ ok: true; hotspot: Hotspot }>(
@@ -399,6 +406,8 @@ export interface DevCreateTourPayload {
   brandingMode?: DevTourBrandingMode;
   viewerType?: 'panorama' | 'model3d';
   firstSceneTitle: string;
+  /** Opaque or custom; when omitted the server allocates `s_…`. */
+  firstSceneId?: string;
   panoramaFile?: File;
   modelFile?: File;
   thumbnailFile?: File;
@@ -722,6 +731,9 @@ export interface DevUpdateNamingHotspotPayload extends DevHotspotIdPayload {
   body?: string;
   videoUrl?: string;
   image?: string;
+  donor?: NamingDonor | null;
+  donorLogoFile?: Blob | File | null;
+  clearDonorLogo?: boolean;
   targetView?: ViewPosition;
   previewFile?: Blob | File | null;
   syncPreviewFromCurrentView?: boolean;
@@ -745,12 +757,16 @@ export function devUpdateNavHotspot(payload: DevUpdateNavHotspotPayload) {
 
 export async function devUpdateNamingHotspot({
   previewFile,
+  donorLogoFile,
   syncPreviewFromCurrentView: _syncPreviewFromCurrentView,
   ...payload
 }: DevUpdateNamingHotspotPayload) {
   const body: Record<string, unknown> = { ...payload };
   if (previewFile) {
     body.previewFileBase64 = await fileToBase64(previewFile);
+  }
+  if (donorLogoFile) {
+    body.donorLogoFileBase64 = await fileToBase64(donorLogoFile);
   }
 
   return postDevTourJson<{ ok: true; hotspot: Hotspot }>(

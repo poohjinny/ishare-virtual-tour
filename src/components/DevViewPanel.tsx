@@ -36,6 +36,7 @@ import {
   resolveSceneId,
 } from '../utils/tourPaths';
 import { getTourClientId } from '../utils/tourClientId';
+import { withBaseUrl } from '../utils/assetUrl';
 import {
   resolveTourBranding,
   tourUsesCustomBranding,
@@ -47,6 +48,7 @@ import {
 } from '../utils/namingPrice';
 import {
   DEV_INFO_DISPLAY_OPTIONS,
+  DEV_NAMING_DONOR_KIND_OPTIONS,
   DEV_NAMING_STATUS_OPTIONS,
   type DevHotspotTab,
   getDevHotspotSectionConfig,
@@ -70,6 +72,7 @@ import type { TourCategory } from '../constants/tourCategories';
 import type {
   FaqEntry,
   Hotspot,
+  NamingDonorKind,
   NamingOpportunityStatus,
   NavHotspotVariant,
   PopupDisplay,
@@ -79,6 +82,11 @@ import type {
   ViewPosition,
 } from '../types/tour';
 import { isWorldPosition } from '../types/tour';
+import { normalizeNamingDonor } from '../utils/namingDonor';
+import {
+  resolveHotspotHostScene,
+  resolveNamingPopup,
+} from '../utils/namingSceneInherit';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import { resolveNavHotspotLabel } from '../utils/navHotspotLabel';
 import {
@@ -94,6 +102,12 @@ import {
   toViewPosition,
   type DevSceneRef,
 } from '../utils/devHotspotLogger';
+import {
+  allocateOpaqueId,
+  createOpaqueId,
+  OPAQUE_SCENE_ID_PREFIX,
+  OPAQUE_TOUR_ID_PREFIX,
+} from '../utils/opaqueId';
 import {
   DevTourApiError,
   devApplySceneDefaultView,
@@ -141,8 +155,12 @@ import {
   listDevTourHotspots,
 } from '../utils/findTourHotspot';
 import { buildScenePlaceLeadFromNaming } from '../utils/resolveScenePlaceLead';
+import { isDefaultSceneDescription } from '../utils/sceneDescriptionPlaceholder';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
-import { buildSceneGroupSecondaryById } from '../viewer/sceneDepth';
+import {
+  buildSceneGroupSecondaryById,
+  sceneIdsWithTitleCollisions,
+} from '../viewer/sceneDepth';
 import { cn } from '../lib/cn';
 import {
   devViewPanelActionsClassName,
@@ -199,7 +217,7 @@ import {
   devViewPanelManageListItemHeadMainClassName,
   devViewPanelManageListItemTitleClassName,
   devViewPanelManageListItemBulletClassName,
-  devViewPanelManageListItemIdClassName,
+  devViewPanelManageListItemMetaClassName,
   devSceneManageBadgeVariants,
   devViewPanelManageListItemBadgesClassName,
   devHotspotKindBadgeVariants,
@@ -264,6 +282,25 @@ function isNamingInfoHotspot(hotspot: Hotspot): boolean {
   return hotspot.type === 'info' && Boolean(hotspot.popup?.namingOpportunity);
 }
 
+function buildDevNamingDonorPayload(options: {
+  status: NamingOpportunityStatus | '';
+  name: string;
+  kind: NamingDonorKind;
+  affiliation: string;
+  website: string;
+}) {
+  if (options.status !== 'sold') return null;
+  return normalizeNamingDonor(
+    {
+      name: options.name,
+      kind: options.kind,
+      affiliation: options.affiliation,
+      website: options.website,
+    },
+    { status: 'sold' },
+  );
+}
+
 function hotspotKindLabel(hotspot: Hotspot): string {
   if (hotspot.type === 'nav') {
     const variant = resolveNavHotspotVariant(hotspot);
@@ -283,12 +320,21 @@ function hotspotKindBadgeKind(hotspot: Hotspot): DevHotspotKindBadgeKind {
   return 'info';
 }
 
-function hotspotDisplayLabel(hotspot: Hotspot, tour: Tour): string {
+function hotspotDisplayLabel(
+  hotspot: Hotspot,
+  tour: Tour,
+  hostScene?: Scene | null,
+): string {
   if (hotspot.type === 'nav') return resolveNavHotspotLabel(hotspot, tour);
-  if (isNamingInfoHotspot(hotspot)) {
+  if (isNamingInfoHotspot(hotspot) && hotspot.popup) {
+    const found = findHotspotInTour(tour, hotspot.id);
+    const scene =
+      resolveHotspotHostScene(tour, hotspot, hostScene) ??
+      (found?.sceneId ? tour.scenes[found.sceneId] : undefined);
+    const resolved = resolveNamingPopup(hotspot.popup, scene);
     return (
-      hotspot.popup?.namingOpportunity?.name?.trim() ||
-      hotspot.popup?.title?.trim() ||
+      resolved.namingOpportunity?.name?.trim() ||
+      resolved.title?.trim() ||
       hotspot.id
     );
   }
@@ -316,13 +362,14 @@ function hotspotManageKindOrder(hotspot: Hotspot): number {
 function sortSceneHotspotsForManage(
   hotspots: Hotspot[],
   tour: Tour,
+  hostScene?: Scene | null,
 ): Hotspot[] {
   return [...hotspots].sort((a, b) => {
     const kindDiff = hotspotManageKindOrder(a) - hotspotManageKindOrder(b);
     if (kindDiff !== 0) return kindDiff;
 
-    const labelDiff = hotspotDisplayLabel(a, tour).localeCompare(
-      hotspotDisplayLabel(b, tour),
+    const labelDiff = hotspotDisplayLabel(a, tour, hostScene).localeCompare(
+      hotspotDisplayLabel(b, tour, hostScene),
       undefined,
       { sensitivity: 'base' },
     );
@@ -426,6 +473,16 @@ export function DevViewPanel({
   const [editNoStatus, setEditNoStatus] = useState<
     NamingOpportunityStatus | ''
   >('');
+  const [editNoDonorName, setEditNoDonorName] = useState('');
+  const [editNoDonorKind, setEditNoDonorKind] =
+    useState<NamingDonorKind>('organization');
+  const [editNoDonorAffiliation, setEditNoDonorAffiliation] = useState('');
+  const [editNoDonorWebsite, setEditNoDonorWebsite] = useState('');
+  const [editNoDonorLogoFile, setEditNoDonorLogoFile] = useState<File | null>(
+    null,
+  );
+  const [editNoDonorLogoPath, setEditNoDonorLogoPath] = useState('');
+  const [editNoClearDonorLogo, setEditNoClearDonorLogo] = useState(false);
   const [editNoBody, setEditNoBody] = useState('');
   const [editNoVideoUrl, setEditNoVideoUrl] = useState('');
   const [editNoImage, setEditNoImage] = useState('');
@@ -585,7 +642,7 @@ export function DevViewPanel({
     [tour.scenes],
   );
 
-  /** Dev Manage secondary — floor / department title; fall back to scene id. */
+  /** Dev Manage secondary — floor / department title only (not scene id). */
   const sceneManageSecondaryById = useMemo(
     () =>
       buildSceneGroupSecondaryById(
@@ -595,6 +652,10 @@ export function DevViewPanel({
         TOUR_DIRECTORY_GROUP_OTHER,
       ),
     [tour],
+  );
+  const collidingSceneTitleIds = useMemo(
+    () => sceneIdsWithTitleCollisions(tourScenes),
+    [tourScenes],
   );
   const knowledgeSceneDraftsRef = useRef<
     Record<string, TourKnowledge['scenes'][string]>
@@ -668,6 +729,12 @@ export function DevViewPanel({
   );
   const [noPrice, setNoPrice] = useState('');
   const [noStatus, setNoStatus] = useState<NamingOpportunityStatus | ''>('');
+  const [noDonorName, setNoDonorName] = useState('');
+  const [noDonorKind, setNoDonorKind] =
+    useState<NamingDonorKind>('organization');
+  const [noDonorAffiliation, setNoDonorAffiliation] = useState('');
+  const [noDonorWebsite, setNoDonorWebsite] = useState('');
+  const [noDonorLogoFile, setNoDonorLogoFile] = useState<File | null>(null);
   const [noBody, setNoBody] = useState('');
   const [noVideoUrl, setNoVideoUrl] = useState('');
   const [noImage, setNoImage] = useState('');
@@ -683,6 +750,18 @@ export function DevViewPanel({
   const [hotspotModeTab, setHotspotModeTab] =
     useState<DevCrudModeTab>('manage');
   const [sceneModeTab, setSceneModeTab] = useState<DevCrudModeTab>('manage');
+  const [pendingSceneId, setPendingSceneId] = useState(() =>
+    createOpaqueId(OPAQUE_SCENE_ID_PREFIX),
+  );
+  const [pendingTourId, setPendingTourId] = useState(() =>
+    createOpaqueId(OPAQUE_TOUR_ID_PREFIX),
+  );
+  const [pendingFirstSceneId, setPendingFirstSceneId] = useState(() =>
+    createOpaqueId(OPAQUE_SCENE_ID_PREFIX),
+  );
+  const [pendingNavTargetSceneId, setPendingNavTargetSceneId] = useState(() =>
+    createOpaqueId(OPAQUE_SCENE_ID_PREFIX),
+  );
   const [tourSwitchOpen, setTourSwitchOpen] = useState(false);
   const [tourSwitchMenuStyle, setTourSwitchMenuStyle] = useState<CSSProperties>(
     {},
@@ -707,9 +786,11 @@ export function DevViewPanel({
     if (isModel3dTour) {
       return sortSceneHotspotsForManage(listDevTourHotspots(tour), tour);
     }
+    const hostScene = tour.scenes[scene.id];
     return sortSceneHotspotsForManage(
-      tour.scenes[scene.id]?.hotspots ?? [],
+      hostScene?.hotspots ?? [],
       tour,
+      hostScene,
     );
   }, [isModel3dTour, scene.id, tour]);
 
@@ -771,10 +852,7 @@ export function DevViewPanel({
     [existingHotspotIds, infoSlug],
   );
   const trimmedSceneTitle = sceneTitle.trim();
-  const sceneSlug = useMemo(
-    () => (trimmedSceneTitle ? slugifyHotspotName(trimmedSceneTitle) : ''),
-    [trimmedSceneTitle],
-  );
+  const sceneSlug = pendingSceneId;
   const tourCategoryOptions = useMemo(() => listTourCategories(), []);
   const trimmedNewTourTitle = newTourTitle.trim();
   const selectedCreateCatalogClient = useMemo(
@@ -786,18 +864,12 @@ export function DevViewPanel({
     () => findCatalogClient(getTourClientId(tour)),
     [tour, catalogTick],
   );
-  const newTourSlug = useMemo(
-    () =>
-      newTourIdInput.trim() ? slugifyHotspotName(newTourIdInput)
-      : trimmedNewTourTitle ? slugifyHotspotName(trimmedNewTourTitle)
-      : '',
-    [newTourIdInput, trimmedNewTourTitle],
-  );
-  const newFirstSceneSlug = useMemo(
-    () =>
-      newFirstSceneTitle.trim() ? slugifyHotspotName(newFirstSceneTitle) : '',
-    [newFirstSceneTitle],
-  );
+  const newTourSlug = useMemo(() => {
+    const manual = newTourIdInput.trim();
+    if (!manual) return pendingTourId;
+    return slugifyHotspotName(manual) || pendingTourId;
+  }, [newTourIdInput, pendingTourId]);
+  const newFirstSceneSlug = pendingFirstSceneId;
 
   const canCreateNav = Boolean(scene.tourId && clickCoords && navTargetSceneId);
   const canCreateNaming = Boolean(
@@ -813,8 +885,25 @@ export function DevViewPanel({
     (isModel3dTour ? view : scenePanoramaFile),
   );
   const canCreateNewTour = Boolean(
-    newTourSlug && newFirstSceneSlug && newTourPanoramaFile && newTourClientId,
+    trimmedNewTourTitle &&
+    newFirstSceneTitle.trim() &&
+    newTourSlug &&
+    newFirstSceneSlug &&
+    newTourPanoramaFile &&
+    newTourClientId,
   );
+
+  const mintCreateSceneId = useCallback(() => {
+    setPendingSceneId(
+      allocateOpaqueId(OPAQUE_SCENE_ID_PREFIX, Object.keys(tour.scenes)),
+    );
+  }, [tour.scenes]);
+
+  const mintNavTargetSceneId = useCallback(() => {
+    setPendingNavTargetSceneId(
+      allocateOpaqueId(OPAQUE_SCENE_ID_PREFIX, Object.keys(tour.scenes)),
+    );
+  }, [tour.scenes]);
 
   const resetNewTourForm = useCallback((preferredClientId?: string) => {
     setNewTourTitle('');
@@ -846,6 +935,9 @@ export function DevViewPanel({
     setNewTourStatus('idle');
     setNewTourError(null);
     setNewTourClientId(preferredClientId ?? '');
+    const takenTours = listRoutableTourIds();
+    setPendingTourId(allocateOpaqueId(OPAQUE_TOUR_ID_PREFIX, takenTours));
+    setPendingFirstSceneId(createOpaqueId(OPAQUE_SCENE_ID_PREFIX));
   }, []);
 
   const openCreateTourTab = useCallback(
@@ -876,8 +968,9 @@ export function DevViewPanel({
 
   const openCreateSceneTab = useCallback(() => {
     setEditingSceneId(null);
+    mintCreateSceneId();
     setSceneModeTab('create');
-  }, []);
+  }, [mintCreateSceneId]);
 
   const canSaveEditTour = Boolean(editTourTitle.trim() && editTourCategory);
   const editTourProductNamePreview = useMemo(
@@ -935,13 +1028,7 @@ export function DevViewPanel({
   const showNavTargetQuickCreate =
     navTargetQuickCreateOpen || otherNavTargetSceneOptions.length === 0;
   const trimmedNavTargetSceneTitle = navTargetSceneTitle.trim();
-  const navTargetSceneSlug = useMemo(
-    () =>
-      trimmedNavTargetSceneTitle ?
-        slugifyHotspotName(trimmedNavTargetSceneTitle)
-      : '',
-    [trimmedNavTargetSceneTitle],
-  );
+  const navTargetSceneSlug = pendingNavTargetSceneId;
   const canCreateNavTargetScene = Boolean(
     scene.tourId &&
     trimmedNavTargetSceneTitle &&
@@ -1322,6 +1409,14 @@ export function DevViewPanel({
         body: noBody.trim() || undefined,
         videoUrl: noVideoUrl.trim() || undefined,
         image: noImage.trim() || undefined,
+        donor: buildDevNamingDonorPayload({
+          status: noStatus,
+          name: noDonorName,
+          kind: noDonorKind,
+          affiliation: noDonorAffiliation,
+          website: noDonorWebsite,
+        }),
+        donorLogoFile: noDonorLogoFile,
         targetView,
         previewFile,
       });
@@ -1329,6 +1424,11 @@ export function DevViewPanel({
       setNamingStatus('done');
       setNoName('');
       setNoPrice('');
+      setNoDonorName('');
+      setNoDonorKind('organization');
+      setNoDonorAffiliation('');
+      setNoDonorWebsite('');
+      setNoDonorLogoFile(null);
       setNoBody('');
       setNoVideoUrl('');
       setNoImage('');
@@ -1345,6 +1445,11 @@ export function DevViewPanel({
     captureModel3dNamingPreview,
     isModel3dTour,
     noBody,
+    noDonorAffiliation,
+    noDonorKind,
+    noDonorLogoFile,
+    noDonorName,
+    noDonorWebsite,
     noImage,
     noPrice,
     noStatus,
@@ -1404,7 +1509,11 @@ export function DevViewPanel({
   ]);
 
   const resolveModel3dSceneCreatePayload = useCallback(
-    async (title: string, manualThumbnailFile?: File | null) => {
+    async (
+      title: string,
+      manualThumbnailFile?: File | null,
+      sceneIdForFile?: string,
+    ) => {
       const liveView = getCurrentView?.() ?? view;
       if (!liveView) {
         throw new Error(
@@ -1418,7 +1527,7 @@ export function DevViewPanel({
       if (!thumbnailFile && captureSceneThumbnail) {
         const captured = await captureSceneThumbnail();
         if (captured) {
-          const slug = slugifyHotspotName(title) || 'scene';
+          const slug = sceneIdForFile?.trim() || 'scene';
           thumbnailFile = new File([captured], `${slug}.png`, {
             type: captured.type || 'image/png',
           });
@@ -1446,12 +1555,17 @@ export function DevViewPanel({
     try {
       const model3dPayload =
         isModel3dTour ?
-          await resolveModel3dSceneCreatePayload(trimmedSceneTitle)
+          await resolveModel3dSceneCreatePayload(
+            trimmedSceneTitle,
+            null,
+            pendingSceneId,
+          )
         : null;
 
       const result = await devCreateScene({
         tourId: scene.tourId,
         title: trimmedSceneTitle,
+        sceneId: pendingSceneId,
         ...(isModel3dTour ?
           {
             thumbnailFile: model3dPayload?.thumbnailFile,
@@ -1477,6 +1591,7 @@ export function DevViewPanel({
       setScenePreviewVideoUrl('');
       setSceneVideoUrl('');
       setScenePanoramaFile(null);
+      mintCreateSceneId();
       setSceneStatus('done');
       await onTourMutated?.({ navigateToScene: result.scene.id });
     } catch (error) {
@@ -1489,7 +1604,9 @@ export function DevViewPanel({
     }
   }, [
     isModel3dTour,
+    mintCreateSceneId,
     onTourMutated,
+    pendingSceneId,
     resolveModel3dSceneCreatePayload,
     scene.tourId,
     sceneDescription,
@@ -1514,11 +1631,13 @@ export function DevViewPanel({
           await resolveModel3dSceneCreatePayload(
             trimmedNavTargetSceneTitle,
             navTargetSceneFile,
+            pendingNavTargetSceneId,
           )
         : null;
       const result = await devCreateScene({
         tourId: scene.tourId,
         title: createdTitle,
+        sceneId: pendingNavTargetSceneId,
         ...(isModel3dTour ?
           {
             thumbnailFile: model3dPayload?.thumbnailFile,
@@ -1532,6 +1651,7 @@ export function DevViewPanel({
       setNavTargetSceneStatus('done');
       setNavTargetSceneId(result.scene.id);
       setNavTargetTouched(true);
+      mintNavTargetSceneId();
       if (!trimmedNavName) {
         setNavName(createdTitle);
       }
@@ -1546,8 +1666,10 @@ export function DevViewPanel({
     }
   }, [
     isModel3dTour,
+    mintNavTargetSceneId,
     navTargetSceneFile,
     onTourMutated,
+    pendingNavTargetSceneId,
     resolveModel3dSceneCreatePayload,
     scene.tourId,
     trimmedNavName,
@@ -1884,6 +2006,7 @@ export function DevViewPanel({
         tourSummary: newTourSummary.trim() || undefined,
         category: newTourCategory,
         firstSceneTitle: newFirstSceneTitle.trim(),
+        firstSceneId: newFirstSceneSlug,
         panoramaFile: newTourPanoramaFile,
         logoFile: newTourBrandingMode === 'custom' ? newTourLogoFile : null,
         faviconFile:
@@ -2077,6 +2200,21 @@ export function DevViewPanel({
           formatNamingPriceInput(hotspot.popup?.namingOpportunity?.price),
         );
         setEditNoStatus(hotspot.popup?.namingOpportunity?.status ?? '');
+        setEditNoDonorName(hotspot.popup?.namingOpportunity?.donor?.name ?? '');
+        setEditNoDonorKind(
+          hotspot.popup?.namingOpportunity?.donor?.kind ?? 'organization',
+        );
+        setEditNoDonorAffiliation(
+          hotspot.popup?.namingOpportunity?.donor?.affiliation ?? '',
+        );
+        setEditNoDonorWebsite(
+          hotspot.popup?.namingOpportunity?.donor?.website ?? '',
+        );
+        setEditNoDonorLogoFile(null);
+        setEditNoDonorLogoPath(
+          hotspot.popup?.namingOpportunity?.donor?.logo ?? '',
+        );
+        setEditNoClearDonorLogo(false);
         setEditNoBody(storedBody && storedBody !== sceneBody ? storedBody : '');
         setEditNoVideoUrl(
           storedVideo && storedVideo !== sceneVideo ? storedVideo : '',
@@ -2162,6 +2300,15 @@ export function DevViewPanel({
           body: editNoBody.trim(),
           videoUrl: editNoVideoUrl.trim(),
           image: editNoImage,
+          donor: buildDevNamingDonorPayload({
+            status: editNoStatus,
+            name: editNoDonorName,
+            kind: editNoDonorKind,
+            affiliation: editNoDonorAffiliation,
+            website: editNoDonorWebsite,
+          }),
+          donorLogoFile: editNoDonorLogoFile,
+          clearDonorLogo: editNoClearDonorLogo,
           targetView,
           previewFile,
         });
@@ -2201,6 +2348,12 @@ export function DevViewPanel({
     editNavLabel,
     editNavTarget,
     editNoBody,
+    editNoDonorAffiliation,
+    editNoDonorKind,
+    editNoDonorLogoFile,
+    editNoClearDonorLogo,
+    editNoDonorName,
+    editNoDonorWebsite,
     editNoImage,
     editNoPrice,
     editNoStatus,
@@ -2494,6 +2647,12 @@ export function DevViewPanel({
   );
   const stickyTourIcon =
     stickyTourBranding?.favicon ?? stickyTourBranding?.logo;
+  const editNoDonorLogoPreviewUrl = useMemo(() => {
+    if (editNoDonorLogoFile || editNoClearDonorLogo) return null;
+    const path = editNoDonorLogoPath.trim();
+    if (!path) return null;
+    return withBaseUrl(path);
+  }, [editNoClearDonorLogo, editNoDonorLogoFile, editNoDonorLogoPath]);
   const currentTourEntry = useMemo(
     () => tourOptions.find((option) => option.id === currentTourId),
     [currentTourId, tourOptions],
@@ -2848,27 +3007,19 @@ export function DevViewPanel({
                             className={
                               devViewPanelManageListItemHeadMainClassName
                             }
+                            title={hotspot.id}
                           >
                             <span
                               className={
                                 devViewPanelManageListItemTitleClassName
                               }
                             >
-                              {hotspotDisplayLabel(hotspot, tour)}
+                              {hotspotDisplayLabel(
+                                hotspot,
+                                tour,
+                                isModel3dTour ? null : tour.scenes[scene.id],
+                              )}
                             </span>
-                            <span
-                              className={
-                                devViewPanelManageListItemBulletClassName
-                              }
-                              aria-hidden='true'
-                            >
-                              ·
-                            </span>
-                            <code
-                              className={devViewPanelManageListItemIdClassName}
-                            >
-                              {hotspot.id}
-                            </code>
                           </div>
                           <Badge
                             variant='fill'
@@ -3045,7 +3196,9 @@ export function DevViewPanel({
                                   <option value=''>Select scene…</option>
                                   {sortedSceneOptions.map((entry) => (
                                     <option key={entry.id} value={entry.id}>
-                                      {entry.title} ({entry.id})
+                                      {collidingSceneTitleIds.has(entry.id) ?
+                                        `${entry.title} · id ${entry.id}`
+                                      : entry.title}
                                     </option>
                                   ))}
                                 </select>
@@ -3205,6 +3358,189 @@ export function DevViewPanel({
                                   ))}
                                 </select>
                               </label>
+                              {editNoStatus === 'sold' ?
+                                <>
+                                  <label className={devViewPanelFieldClassName}>
+                                    <span
+                                      className={
+                                        devViewPanelFieldLabelClassName
+                                      }
+                                    >
+                                      Donor kind
+                                    </span>
+                                    <select
+                                      className={devViewPanelSelectClassName}
+                                      value={editNoDonorKind}
+                                      onChange={(e) =>
+                                        setEditNoDonorKind(
+                                          e.target.value as NamingDonorKind,
+                                        )
+                                      }
+                                    >
+                                      {DEV_NAMING_DONOR_KIND_OPTIONS.map(
+                                        (option) => (
+                                          <option
+                                            key={option.value}
+                                            value={option.value}
+                                          >
+                                            {option.label}
+                                          </option>
+                                        ),
+                                      )}
+                                    </select>
+                                  </label>
+                                  <label className={devViewPanelFieldClassName}>
+                                    <span
+                                      className={
+                                        devViewPanelFieldLabelClassName
+                                      }
+                                    >
+                                      Donor name
+                                    </span>
+                                    <input
+                                      className={devViewPanelInputClassName}
+                                      type='text'
+                                      value={editNoDonorName}
+                                      onChange={(e) =>
+                                        setEditNoDonorName(e.target.value)
+                                      }
+                                      placeholder='e.g. Jane Smith'
+                                      spellCheck={false}
+                                      autoComplete='off'
+                                    />
+                                  </label>
+                                  {editNoDonorKind === 'person' ?
+                                    <label
+                                      className={devViewPanelFieldClassName}
+                                    >
+                                      <span
+                                        className={
+                                          devViewPanelFieldLabelClassName
+                                        }
+                                      >
+                                        Affiliation (optional)
+                                      </span>
+                                      <input
+                                        className={devViewPanelInputClassName}
+                                        type='text'
+                                        value={editNoDonorAffiliation}
+                                        onChange={(e) =>
+                                          setEditNoDonorAffiliation(
+                                            e.target.value,
+                                          )
+                                        }
+                                        placeholder='e.g. ABC Foundation'
+                                        spellCheck={false}
+                                        autoComplete='off'
+                                      />
+                                    </label>
+                                  : null}
+                                  {(
+                                    editNoDonorKind === 'organization' ||
+                                    (editNoDonorKind === 'person' &&
+                                      editNoDonorAffiliation.trim())
+                                  ) ?
+                                    <>
+                                      <label
+                                        className={devViewPanelFieldClassName}
+                                      >
+                                        <span
+                                          className={
+                                            devViewPanelFieldLabelClassName
+                                          }
+                                        >
+                                          {editNoDonorKind === 'person' ?
+                                            'Affiliation website (optional)'
+                                          : 'Donor website (optional)'}
+                                        </span>
+                                        <input
+                                          className={devViewPanelInputClassName}
+                                          type='url'
+                                          value={editNoDonorWebsite}
+                                          onChange={(e) =>
+                                            setEditNoDonorWebsite(
+                                              e.target.value,
+                                            )
+                                          }
+                                          placeholder='https://…'
+                                          spellCheck={false}
+                                          autoComplete='off'
+                                        />
+                                      </label>
+                                      <label
+                                        className={devViewPanelFieldClassName}
+                                      >
+                                        <span
+                                          className={
+                                            devViewPanelFieldLabelClassName
+                                          }
+                                        >
+                                          {editNoDonorLogoPreviewUrl ?
+                                            editNoDonorKind === 'person' ?
+                                              'Affiliation logo (replace)'
+                                            : 'Donor logo (replace)'
+                                          : editNoDonorKind === 'person' ?
+                                            'Affiliation logo (optional)'
+                                          : 'Donor logo (optional)'}
+                                        </span>
+                                        <DevPanelFileField
+                                          {...(editNoDonorLogoFile != null ?
+                                            { file: editNoDonorLogoFile }
+                                          : {})}
+                                          preview={
+                                            editNoDonorLogoFile ?
+                                              <DevLocalFilePreview
+                                                file={editNoDonorLogoFile}
+                                                className={
+                                                  devViewPanelBrandLogoClassName
+                                                }
+                                                alt='Donor logo preview'
+                                              />
+                                            : editNoDonorLogoPreviewUrl ?
+                                              <img
+                                                className={
+                                                  devViewPanelBrandLogoClassName
+                                                }
+                                                src={editNoDonorLogoPreviewUrl}
+                                                alt='Current donor logo'
+                                              />
+                                            : null
+                                          }
+                                          onClearPreview={() => {
+                                            if (editNoDonorLogoFile) {
+                                              setEditNoDonorLogoFile(null);
+                                              return;
+                                            }
+                                            if (editNoDonorLogoPath) {
+                                              setEditNoClearDonorLogo(true);
+                                            }
+                                          }}
+                                          showClear={Boolean(
+                                            editNoDonorLogoFile ||
+                                            editNoDonorLogoPreviewUrl,
+                                          )}
+                                          clearLabel={
+                                            editNoDonorLogoFile ? 'Clear' : (
+                                              'Remove'
+                                            )
+                                          }
+                                        >
+                                          <DevPanelFileInput
+                                            accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+                                            file={editNoDonorLogoFile}
+                                            onChange={(file) => {
+                                              setEditNoDonorLogoFile(file);
+                                              if (file) {
+                                                setEditNoClearDonorLogo(false);
+                                              }
+                                            }}
+                                          />
+                                        </DevPanelFileField>
+                                      </label>
+                                    </>
+                                  : null}
+                                </>
+                              : null}
                               <label className={devViewPanelFieldClassName}>
                                 <span
                                   className={devViewPanelFieldLabelClassName}
@@ -3466,7 +3802,9 @@ export function DevViewPanel({
                                   <option value=''>None</option>
                                   {sortedSceneOptions.map((entry) => (
                                     <option key={entry.id} value={entry.id}>
-                                      {entry.title} ({entry.id})
+                                      {collidingSceneTitleIds.has(entry.id) ?
+                                        `${entry.title} · id ${entry.id}`
+                                      : entry.title}
                                     </option>
                                   ))}
                                 </select>
@@ -3625,7 +3963,9 @@ export function DevViewPanel({
                         <option value=''>Select scene…</option>
                         {sortedSceneOptions.map((entry) => (
                           <option key={entry.id} value={entry.id}>
-                            {entry.title} ({entry.id})
+                            {collidingSceneTitleIds.has(entry.id) ?
+                              `${entry.title} · id ${entry.id}`
+                            : entry.title}
                           </option>
                         ))}
                       </select>
@@ -3693,7 +4033,7 @@ export function DevViewPanel({
 
                         {navTargetSceneSlug ?
                           <p className={devViewPanelSlugPreviewClassName}>
-                            id <code>{navTargetSceneSlug}</code>
+                            stable id <code>{navTargetSceneSlug}</code>
                           </p>
                         : null}
 
@@ -3747,7 +4087,10 @@ export function DevViewPanel({
                           devViewPanelBtnVariants({ tone: 'secondary' }),
                           'w-fit',
                         )}
-                        onClick={() => setNavTargetQuickCreateOpen(true)}
+                        onClick={() => {
+                          mintNavTargetSceneId();
+                          setNavTargetQuickCreateOpen(true);
+                        }}
                       >
                         + Create target scene
                       </button>
@@ -3924,6 +4267,112 @@ export function DevViewPanel({
                         ))}
                       </select>
                     </label>
+
+                    {noStatus === 'sold' ?
+                      <>
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Donor kind
+                          </span>
+                          <select
+                            className={devViewPanelSelectClassName}
+                            value={noDonorKind}
+                            onChange={(e) =>
+                              setNoDonorKind(e.target.value as NamingDonorKind)
+                            }
+                          >
+                            {DEV_NAMING_DONOR_KIND_OPTIONS.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Donor name
+                          </span>
+                          <input
+                            className={devViewPanelInputClassName}
+                            type='text'
+                            value={noDonorName}
+                            onChange={(e) => setNoDonorName(e.target.value)}
+                            placeholder='e.g. Jane Smith'
+                            spellCheck={false}
+                            autoComplete='off'
+                          />
+                        </label>
+                        {noDonorKind === 'person' ?
+                          <label className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
+                              Affiliation (optional)
+                            </span>
+                            <input
+                              className={devViewPanelInputClassName}
+                              type='text'
+                              value={noDonorAffiliation}
+                              onChange={(e) =>
+                                setNoDonorAffiliation(e.target.value)
+                              }
+                              placeholder='e.g. ABC Foundation'
+                              spellCheck={false}
+                              autoComplete='off'
+                            />
+                          </label>
+                        : null}
+                        {(
+                          noDonorKind === 'organization' ||
+                          (noDonorKind === 'person' &&
+                            noDonorAffiliation.trim())
+                        ) ?
+                          <>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                {noDonorKind === 'person' ?
+                                  'Affiliation website (optional)'
+                                : 'Donor website (optional)'}
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='url'
+                                value={noDonorWebsite}
+                                onChange={(e) =>
+                                  setNoDonorWebsite(e.target.value)
+                                }
+                                placeholder='https://…'
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                {noDonorKind === 'person' ?
+                                  'Affiliation logo (optional)'
+                                : 'Donor logo (optional)'}
+                              </span>
+                              <DevPanelFileField
+                                file={noDonorLogoFile}
+                                preview={
+                                  <DevLocalFilePreview
+                                    file={noDonorLogoFile}
+                                    className={devViewPanelBrandLogoClassName}
+                                    alt='Donor logo preview'
+                                  />
+                                }
+                                onClearPreview={() => setNoDonorLogoFile(null)}
+                                showClear={Boolean(noDonorLogoFile)}
+                              >
+                                <DevPanelFileInput
+                                  accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+                                  file={noDonorLogoFile}
+                                  onChange={setNoDonorLogoFile}
+                                />
+                              </DevPanelFileField>
+                            </label>
+                          </>
+                        : null}
+                      </>
+                    : null}
 
                     <label className={devViewPanelFieldClassName}>
                       <span className={devViewPanelFieldLabelClassName}>
@@ -4129,7 +4578,9 @@ export function DevViewPanel({
                         <option value=''>None</option>
                         {sortedSceneOptions.map((entry) => (
                           <option key={entry.id} value={entry.id}>
-                            {entry.title} ({entry.id})
+                            {collidingSceneTitleIds.has(entry.id) ?
+                              `${entry.title} · id ${entry.id}`
+                            : entry.title}
                           </option>
                         ))}
                       </select>
@@ -4203,7 +4654,10 @@ export function DevViewPanel({
               kind: tab.id,
               active: sceneModeTab === tab.id,
             })}
-            onClick={() => setSceneModeTab(tab.id)}
+            onClick={() => {
+              if (tab.id === 'create') mintCreateSceneId();
+              setSceneModeTab(tab.id);
+            }}
           >
             {tab.label}
           </button>
@@ -4223,8 +4677,7 @@ export function DevViewPanel({
                   const isFirst = entry.id === tour.firstScene;
                   const isEditing = editingSceneId === entry.id;
                   const canDelete = entry.id !== tour.firstScene;
-                  const secondaryLabel =
-                    sceneManageSecondaryById[entry.id] ?? entry.id;
+                  const groupSecondary = sceneManageSecondaryById[entry.id];
 
                   return (
                     <li
@@ -4247,19 +4700,25 @@ export function DevViewPanel({
                           >
                             {entry.title}
                           </span>
-                          <span
-                            className={
-                              devViewPanelManageListItemBulletClassName
-                            }
-                            aria-hidden='true'
-                          >
-                            ·
-                          </span>
-                          <span
-                            className={devViewPanelManageListItemIdClassName}
-                          >
-                            {secondaryLabel}
-                          </span>
+                          {groupSecondary ?
+                            <>
+                              <span
+                                className={
+                                  devViewPanelManageListItemBulletClassName
+                                }
+                                aria-hidden='true'
+                              >
+                                ·
+                              </span>
+                              <span
+                                className={
+                                  devViewPanelManageListItemMetaClassName
+                                }
+                              >
+                                {groupSecondary}
+                              </span>
+                            </>
+                          : null}
                         </div>
                         {isFirst || isCurrent ?
                           <div
@@ -4294,7 +4753,14 @@ export function DevViewPanel({
                           </div>
                         : null}
                       </div>
-                      {entry.description ?
+                      {(
+                        entry.description &&
+                        !isDefaultSceneDescription(
+                          entry.description,
+                          tour.title,
+                          entry.title,
+                        )
+                      ) ?
                         <p
                           className={devViewPanelManageListItemDescClassName}
                           title={entry.description}
@@ -4385,11 +4851,18 @@ export function DevViewPanel({
                             </span>
                             {(() => {
                               const draftDesc = editSceneDescription.trim();
+                              const usingRealDescription =
+                                Boolean(draftDesc) &&
+                                !isDefaultSceneDescription(
+                                  draftDesc,
+                                  tour.title,
+                                  entry.title,
+                                );
                               const autoLead =
                                 buildScenePlaceLeadFromNaming(tour, entry) ||
                                 entry.placeLead?.trim() ||
                                 '';
-                              if (draftDesc) {
+                              if (usingRealDescription) {
                                 return (
                                   <p
                                     className={devViewPanelSectionHintClassName}
@@ -4644,7 +5117,8 @@ export function DevViewPanel({
                 .
               </>
             : <>
-                Upload a panorama — title becomes scene id, image converts to{' '}
+                Upload a panorama — scene id is opaque (not from the title) and
+                stays fixed if you rename later. Image converts to{' '}
                 <code>
                   assets/&lt;client&gt;/{currentTourId}
                   /panoramas/&lt;id&gt;.webp
@@ -4743,7 +5217,7 @@ export function DevViewPanel({
 
             {sceneSlug ?
               <p className={devViewPanelSlugPreviewClassName}>
-                id <code>{sceneSlug}</code> ·{' '}
+                stable id <code>{sceneSlug}</code> ·{' '}
                 <code>
                   {isModel3dTour ?
                     buildDefaultSceneThumbnailRelativePath(sceneSlug)
@@ -5650,10 +6124,14 @@ export function DevViewPanel({
                               onChange={(e) =>
                                 setNewTourIdInput(e.target.value)
                               }
-                              placeholder='Auto from title if empty'
+                              placeholder={`Auto ${pendingTourId}`}
                               spellCheck={false}
                               autoComplete='off'
                             />
+                            <p className={devViewPanelSectionHintClassName}>
+                              Leave empty for an opaque id. Only fill this to
+                              force a custom kebab id.
+                            </p>
                           </label>
                         </DevPanelFormRow>
 
@@ -5817,8 +6295,8 @@ export function DevViewPanel({
 
                         {newTourSlug && newFirstSceneSlug ?
                           <p className={devViewPanelSlugPreviewClassName}>
-                            tour <code>{newTourSlug}</code> · scene{' '}
-                            <code>{newFirstSceneSlug}</code> ·{' '}
+                            stable tour id <code>{newTourSlug}</code> · stable
+                            scene id <code>{newFirstSceneSlug}</code> ·{' '}
                             <code>
                               assets/{newTourClientId}/{newTourSlug}/panoramas/
                               {newFirstSceneSlug}.webp
