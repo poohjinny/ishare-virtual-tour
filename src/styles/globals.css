@@ -456,8 +456,8 @@
     /* Computed — depend on primary */
     --ishare-active-item-bg: rgba(var(--ishare-primary-rgb), 0.08);
     --ishare-active-item-border: rgba(var(--ishare-primary-rgb), 0.2);
-    --ishare-active-item-closed-bg: rgba(71, 85, 105, 0.1);
-    --ishare-active-item-closed-border: rgba(71, 85, 105, 0.22);
+    --ishare-active-item-sold-bg: rgba(var(--ishare-primary-rgb), 0.1);
+    --ishare-active-item-sold-border: rgba(var(--ishare-primary-rgb), 0.22);
 
     --ishare-hotspot-active-glow:
       0 8px 24px rgba(15, 23, 42, 0.12),
@@ -467,17 +467,11 @@
       0 10px 28px rgba(15, 23, 42, 0.14),
       0 0 20px rgba(var(--ishare-primary-rgb), 0.36),
       0 0 40px rgba(var(--ishare-primary-rgb), 0.16);
-    --ishare-hotspot-active-glow-closed:
-      0 8px 24px rgba(15, 23, 42, 0.12),
-      0 0 16px rgba(71, 85, 105, 0.22),
-      0 0 32px rgba(71, 85, 105, 0.1);
-    --ishare-hotspot-active-glow-closed-strong:
-      0 10px 28px rgba(15, 23, 42, 0.14),
-      0 0 20px rgba(71, 85, 105, 0.3),
-      0 0 40px rgba(71, 85, 105, 0.12);
+    --ishare-hotspot-active-glow-sold: var(--ishare-hotspot-active-glow);
+    --ishare-hotspot-active-glow-sold-strong: var(--ishare-hotspot-active-glow-strong);
 
-    --ishare-active-icon-leading-closed-bg: rgba(71, 85, 105, 0.1);
-    --ishare-active-icon-leading-closed-ring: 0 0 0 2px rgba(71, 85, 105, 0.12);
+    --ishare-active-icon-leading-sold-bg: rgba(var(--ishare-primary-rgb), 0.1);
+    --ishare-active-icon-leading-sold-ring: 0 0 0 2px rgba(var(--ishare-primary-rgb), 0.12);
     --ishare-active-icon-dot-ring: 0 0 0 4px rgba(var(--ishare-primary-rgb), 0.15);
     --ishare-active-icon-leading-bg: rgba(var(--ishare-primary-rgb), 0.1);
     --ishare-active-icon-leading-ring: 0 0 0 2px rgba(var(--ishare-primary-rgb), 0.12);
@@ -539,8 +533,8 @@
     /* Naming status badges */
     --ishare-naming-status-open-bg: rgba(34, 197, 94, 0.14);
     --ishare-naming-status-open-color: var(--color-status-open);
-    --ishare-naming-status-closed-bg: rgba(15, 23, 42, 0.08);
-    --ishare-naming-status-closed-color: var(--color-muted);
+    --ishare-naming-status-sold-bg: rgba(var(--ishare-primary-rgb), 0.14);
+    --ishare-naming-status-sold-color: var(--ishare-primary);
     --ishare-naming-status-reserved-bg: var(--ishare-badge-accent-bg);
     --ishare-naming-status-reserved-color: var(--ishare-badge-accent-color);
     --ishare-naming-status-soon-bg: rgba(56, 189, 248, 0.14);
@@ -618,6 +612,8 @@
     --tour-gallery-hover-duration: 0.45s;
     --tour-gallery-hover-ease: cubic-bezier(0.22, 1, 0.36, 1);
     --tour-gallery-zoom-duration: 0.75s;
+    /* Idle scrim extends this far above the visible overlay copy. */
+    --tour-gallery-overlay-scrim-pad: 1.25rem;
   }
 
   .tour-nav-gallery-card-hero .preview-hero-skeleton {
@@ -638,7 +634,7 @@
     transition: grid-template-rows var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease);
   }
 
-  /* Shared bottom scrim — fixed default height so location + NO cards match */
+  /* Bottom scrim — idle height follows overlay content + pad above it */
   .tour-nav-gallery-card-hero-overlay::before {
     content: '';
     position: absolute;
@@ -646,15 +642,15 @@
     right: 0;
     bottom: 0;
     left: 0;
-    height: 3.25rem;
+    height: calc(100% + var(--tour-gallery-overlay-scrim-pad));
     pointer-events: none;
     background: linear-gradient(to top,
-        rgba(15, 23, 42, 0.8) 0%,
-        rgba(15, 23, 42, 0.6) 50%,
-        rgba(15, 23, 42, 0.3) 84%,
-        rgba(15, 23, 42, 0) 100%,
-        transparent 100%);
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0.3) 84%,
+        rgba(0, 0, 0, 0) 100%);
     transition:
+      top var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease),
       height var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease),
       background var(--tour-gallery-hover-duration) var(--tour-gallery-hover-ease);
   }
@@ -663,13 +659,9 @@
 
     .group\/card:hover .tour-nav-gallery-card-hero-overlay::before,
     .group\/card:focus-visible .tour-nav-gallery-card-hero-overlay::before {
-      height: 100%;
-      background: linear-gradient(to top,
-          rgba(15, 23, 42, 0.96) 0%,
-          rgba(15, 23, 42, 0.84) 38%,
-          rgba(15, 23, 42, 0.58) 72%,
-          rgba(15, 23, 42, 0.22) 92%,
-          rgba(15, 23, 42, 0) 100%);
+      top: 0;
+      height: auto;
+      background: rgba(0, 0, 0, 0.7);
     }
 
     .group\/card:hover .tour-nav-gallery-card-hero-media--zoomable,
@@ -681,6 +673,12 @@
   @media (prefers-reduced-motion: reduce) {
     .tour-nav-gallery-card-hero-media {
       transition: opacity 0.28s ease-out;
+    }
+
+    .group\/card:hover .tour-nav-gallery-card-hero-media--zoomable,
+    .group\/card:focus-visible .tour-nav-gallery-card-hero-media--zoomable,
+    .group\/card:focus-within .tour-nav-gallery-card-hero-media--zoomable {
+      scale: 1;
     }
 
     .tour-nav-gallery-card-hero-hover-body {

@@ -177,7 +177,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 10px;
   }
 
   .info-panel__intro .tour-glass-panel__title {
@@ -187,9 +187,11 @@
   }
 
   .info-panel__intro .tour-glass-panel__price--under-title {
-    font-size: var(--ishare-font-size-2xl);
+    font-size: var(--ishare-font-size-xl);
     line-height: 1.25;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--ishare-text-muted);
   }
 
   .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body button {
@@ -231,6 +233,9 @@
     border-radius: var(--ishare-panel-radius);
     box-shadow: var(--ishare-glass-dock-shadow);
     overflow: hidden;
+    /* Animate the article (shadow + chrome) as one unit — same model as Ask Guide.
+       Animating only the inner shell left the dock box at full size while content
+       scaled inside it (“container first, then content”). */
     transform-origin: top right;
   }
 
@@ -242,8 +247,7 @@
     border-radius: var(--ishare-panel-radius);
   }
 
-  /* Solid fill lives on the shell (the animated element) so it scales/fades with
-     the entrance — on the static root it would pop in fully before the content. */
+  /* Solid fill on the shell so it paints with the dock root when the root scales. */
   .tour-glass-panel--dock .tour-glass-panel__shell {
     border-radius: 0;
     max-height: var(--tour-chrome-top-panel-max-height);
@@ -260,13 +264,29 @@
     transform-origin: bottom center;
   }
 
+  /* Default shell enter/exit — used by non-dock callers; dock overrides below. */
   .tour-glass-panel__shell--enter {
-    animation: tour-glass-panel-in 0.15s ease-out forwards;
+    animation: tour-glass-panel-in 0.17s ease-out forwards;
   }
 
   .tour-glass-panel__shell--exit {
     animation: tour-glass-panel-out 0.14s ease-in forwards;
     pointer-events: none;
+  }
+
+  /* Dock chrome: drive enter/exit from the root; kill the inner shell animation. */
+  .tour-glass-panel--dock:has(.tour-glass-panel__shell--enter) {
+    animation: tour-glass-panel-in 0.17s ease-out forwards;
+  }
+
+  .tour-glass-panel--dock:has(.tour-glass-panel__shell--exit) {
+    animation: tour-glass-panel-out 0.14s ease-in forwards;
+    pointer-events: none;
+  }
+
+  .tour-glass-panel--dock .tour-glass-panel__shell--enter,
+  .tour-glass-panel--dock .tour-glass-panel__shell--exit {
+    animation: none;
   }
 
   .tour-glass-panel--anchored .tour-glass-panel__shell--enter {
@@ -532,11 +552,11 @@
     font-weight: 400;
   }
 
-  .tour-glass-panel__price--closed {
+  .tour-glass-panel__price--sold {
     opacity: 0.78;
   }
 
-  .tour-glass-panel__price--closed .tour-glass-panel__price-value {
+  .tour-glass-panel__price--sold .tour-glass-panel__price-value {
     text-decoration: line-through;
     text-decoration-color: rgba(15, 23, 42, 0.2);
   }
@@ -550,6 +570,45 @@
     font-size: var(--ishare-font-size-xs);
     font-weight: 500;
     color: var(--ishare-text-muted);
+  }
+
+  .tour-glass-panel__donor {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .tour-glass-panel__donor-logo {
+    display: block;
+    max-width: 120px;
+    max-height: 28px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .tour-glass-panel__donor-credit {
+    margin: 0;
+    font-size: var(--ishare-font-size-xs);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--ishare-text-muted);
+  }
+
+  .tour-glass-panel__donor-credit-link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .tour-glass-panel__donor-credit-link:hover,
+  .tour-glass-panel__donor-credit-link:focus-visible {
+    color: var(--ishare-primary);
   }
 
   .tour-glass-panel__body {
@@ -1323,27 +1382,29 @@
     outline: none;
   }
 
+  /* Dock chrome (Explore / Help / Share) — same language as Ask Guide
+     (`ai-panel-in`), but from the top-right instead of bottom-right. */
   @keyframes tour-glass-panel-in {
     from {
       opacity: 0;
-      transform: translateY(-6px) scale(0.98);
+      transform: translate(20px, -20px) scale(0.9);
     }
 
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translate(0, 0) scale(1);
     }
   }
 
   @keyframes tour-glass-panel-out {
     from {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translate(0, 0) scale(1);
     }
 
     to {
       opacity: 0;
-      transform: translateY(-6px) scale(0.98);
+      transform: translate(20px, -20px) scale(0.9);
     }
   }
 
@@ -1456,11 +1517,11 @@
     overflow-x: clip;
   }
 
-  /* Client intro picker � fixed panel height; gallery flexes when a category tab is empty */
+  /* Client intro picker — content height with max cap; gallery scrolls when capped */
   .tour-glass-panel--intro {
     width: min(640px, calc(100vw - 48px));
-    height: min(88vh, 760px);
-    min-height: min(88vh, 760px);
+    height: auto;
+    min-height: 0;
     max-height: min(88vh, 760px);
     min-width: 0;
     overflow: hidden;
@@ -1468,15 +1529,20 @@
 
   .tour-glass-panel--intro .tour-glass-panel__shell {
     flex: 1 1 auto;
-    height: 100%;
+    height: auto;
     min-height: 0;
-    max-height: none;
+    max-height: inherit;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .tour-glass-panel--intro .tour-glass-panel__body {
     gap: 12px;
     padding: 12px 0 20px;
     overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .tour-glass-panel--intro .client-intro__gallery {
@@ -1489,7 +1555,7 @@
   .tour-glass-panel--intro .client-intro__tab-panel {
     display: flex;
     flex-direction: column;
-    min-height: 100%;
+    min-height: 0;
     box-sizing: border-box;
     overflow: visible;
   }
@@ -1497,6 +1563,7 @@
   @media (max-width: 480px) {
     .tour-glass-panel--intro {
       width: min(100%, calc(100vw - 32px));
+      max-height: min(92vh, 760px);
     }
   }
 
@@ -1617,6 +1684,8 @@
 
     .tour-glass-panel__shell--enter,
     .tour-glass-panel__shell--exit,
+    .tour-glass-panel--dock:has(.tour-glass-panel__shell--enter),
+    .tour-glass-panel--dock:has(.tour-glass-panel__shell--exit),
     .tour-glass-panel--anchored .tour-glass-panel__shell--enter,
     .tour-glass-panel--anchored .tour-glass-panel__shell--exit,
     .tour-glass-panel--anchored.tour-glass-panel--anchored-enter,
@@ -1992,9 +2061,13 @@
   }
 
   .anchored-panel__body-toolbar {
+    flex: 0 0 auto;
     display: flex;
     justify-content: flex-end;
     margin: 0;
+    padding: 8px 8px 0;
+    background: var(--ishare-glass-body-bg);
+    z-index: 12;
   }
 
   .anchored-panel__toolbar-actions {
@@ -2008,25 +2081,15 @@
   }
 
   /*
-   * No-media chrome: hug panel corner like hero, without negative
-   * margins that expand scroll overflow. Shrink body pad around the toolbar
-   * row; keep content on the normal inline inset.
+   * No-media chrome lives above the scroll body. Shrink body top pad so title
+   * still sits close under the pinned share/close row.
    */
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body:has(> .anchored-panel__body-toolbar),
-  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar),
-  .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar),
-  .info-popup .anchored-panel__body:has(> .anchored-panel__body-toolbar),
-  .info-popup .info-popup__body:has(> .anchored-panel__body-toolbar) {
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
+  .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
+  .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
+  .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.info-popup__body {
     padding-top: 8px;
-    padding-right: 0;
-  }
-
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
-  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
-  .tour-glass-panel--nav-preview .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
-  .info-popup .anchored-panel__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar),
-  .info-popup .info-popup__body:has(> .anchored-panel__body-toolbar)> :not(.anchored-panel__body-toolbar) {
-    margin-right: var(--ishare-panel-inline-padding, 28px);
   }
 
   /* Body chrome (no media): same hit area as hero, ghost fill instead of glass disc. */
@@ -2272,7 +2335,7 @@
     white-space: nowrap;
   }
 
-  .nav-preview-panel__naming-trailing .nav-preview-panel__naming-price--closed {
+  .nav-preview-panel__naming-trailing .nav-preview-panel__naming-price--sold {
     color: var(--ishare-text-muted);
     text-decoration: line-through;
     text-decoration-color: rgba(15, 23, 42, 0.3);
@@ -2610,11 +2673,18 @@
     padding: var(--anchored-body-pad-top, 28px) var(--ishare-panel-inline-padding, 28px) 24px;
   }
 
-  .info-popup .info-panel__intro .info-popup__title,
-  .info-popup .info-panel__intro .tour-glass-panel__price--under-title {
+  .info-popup .info-panel__intro .info-popup__title {
     font-size: var(--ishare-font-size-2xl);
     line-height: 1.25;
     letter-spacing: -0.02em;
+  }
+
+  .info-popup .info-panel__intro .tour-glass-panel__price--under-title {
+    font-size: var(--ishare-font-size-xl);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--ishare-text-muted);
   }
 
   .info-popup .anchored-panel__hero--video .tour-glass-panel__video {
@@ -2636,9 +2706,11 @@
   }
 
   .info-popup .tour-glass-panel__price--under-title {
-    font-size: var(--ishare-font-size-2xl);
+    font-size: var(--ishare-font-size-xl);
     line-height: 1.25;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--ishare-text-muted);
   }
 
   .info-popup__title {
@@ -2756,9 +2828,12 @@
       padding: 14px 18px calc(20px + env(safe-area-inset-bottom, 0px));
     }
 
-    .info-popup__title,
-    .info-popup .tour-glass-panel__price--under-title {
+    .info-popup__title {
       font-size: var(--ishare-font-size-xl);
+    }
+
+    .info-popup .tour-glass-panel__price--under-title {
+      font-size: var(--ishare-font-size-lg);
     }
   }
 

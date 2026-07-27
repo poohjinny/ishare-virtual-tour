@@ -5,6 +5,7 @@ import {
   PopupCtaArrowIcon,
   PopupHeaderMeta,
   NamingOpportunityPrice,
+  NamingDonorCreditBlock,
   PopupCtasFooter,
   PopupVideoEmbed,
 } from './popupContentUi';
@@ -288,12 +289,13 @@ export function InfoPopup({
         }
         onClick={(e) => e.stopPropagation()}
         hero={hero}
+        toolbar={
+          !hasHero ?
+            <AnchoredPanelBodyToolbar>{chromeActions}</AnchoredPanelBodyToolbar>
+          : undefined
+        }
         footer={footer}
       >
-        {!hasHero ?
-          <AnchoredPanelBodyToolbar>{chromeActions}</AnchoredPanelBodyToolbar>
-        : null}
-
         <div className='info-panel__intro'>
           <div className={infoPopupTitleBlockClassName}>
             <div className={infoPopupTitleLineClassName}>
@@ -311,6 +313,9 @@ export function InfoPopup({
             )}
           </div>
           <PopupHeaderMeta popup={shown} />
+          {shown.namingOpportunity ?
+            <NamingDonorCreditBlock opportunity={shown.namingOpportunity} />
+          : null}
         </div>
 
         <PopupBodyCopy body={shown.body} />

@@ -35,6 +35,7 @@ import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
   NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
+  namingOpportunityStatusShowsBadge,
   resolvePopupContentCtas,
 } from '../data/namingOpportunityStatus';
 import {
@@ -69,6 +70,10 @@ import {
   youtubeEmbedUrl,
 } from '../utils/popupVideo';
 import { getUiScale } from '../utils/uiScale';
+import {
+  NAMING_DONOR_CREDIT_PREFIX,
+  resolveNamingDonorPresentation,
+} from '../utils/namingDonor';
 import {
   ANCHORED_PANEL_GAP_PX,
   NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
@@ -255,11 +260,11 @@ export const GLASS_PANEL = {
   price: 'tour-glass-panel__price',
   priceUnderTitle:
     'tour-glass-panel__price tour-glass-panel__price--under-title',
-  priceUnderTitleClosed:
-    'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--closed',
+  priceUnderTitleSold:
+    'tour-glass-panel__price tour-glass-panel__price--under-title tour-glass-panel__price--sold',
   priceInline: 'tour-glass-panel__price tour-glass-panel__price--inline',
-  priceInlineClosed:
-    'tour-glass-panel__price tour-glass-panel__price--inline tour-glass-panel__price--closed',
+  priceInlineSold:
+    'tour-glass-panel__price tour-glass-panel__price--inline tour-glass-panel__price--sold',
   priceSep: 'tour-glass-panel__price-sep',
   priceValue: 'tour-glass-panel__price-value',
   badgeStatus: (modifier: string) => BADGE_CLASS.fillLgStatus(modifier),
@@ -270,6 +275,10 @@ export const GLASS_PANEL = {
   meta: 'tour-glass-panel__meta',
   metaRow: 'tour-glass-panel__meta-row',
   priceLabel: 'tour-glass-panel__price-label',
+  donor: 'tour-glass-panel__donor',
+  donorLogo: 'tour-glass-panel__donor-logo',
+  donorCredit: 'tour-glass-panel__donor-credit',
+  donorCreditLink: 'tour-glass-panel__donor-credit-link',
   body: 'tour-glass-panel__body',
   footer: 'tour-glass-panel__footer',
   copy: 'tour-glass-panel__copy',
@@ -421,10 +430,10 @@ export function buildGlassPanelParagraphsHtml(body: string): string {
 
 export function buildNamingPriceUnderTitleHtml(
   price: number,
-  closed: boolean,
+  sold: boolean,
 ): string {
   const priceClass =
-    closed ? GLASS_PANEL.priceUnderTitleClosed : GLASS_PANEL.priceUnderTitle;
+    sold ? GLASS_PANEL.priceUnderTitleSold : GLASS_PANEL.priceUnderTitle;
   const displayPrice = formatNamingPriceDisplay(price);
 
   return `<p class="${priceClass}">
@@ -437,9 +446,17 @@ export function buildPopupBadgeHtml(popup: PopupContent): string {
     const { name, status } = popup.namingOpportunity;
     const statusConfig = namingOpportunityStatusConfig(status);
     const statusModifier = statusConfig.cssModifier;
+    const showStatusBadge = namingOpportunityStatusShowsBadge(status);
     const statusIconHtml =
-      isNamingStatusIconModifier(statusModifier) ?
+      showStatusBadge && isNamingStatusIconModifier(statusModifier) ?
         namingStatusBadgeIconHtml(statusModifier, GLASS_PANEL.badgeIcon)
+      : '';
+    const statusBadgeHtml =
+      showStatusBadge ?
+        `<span class="${GLASS_PANEL.badgeStatusIcon(escapeHtml(statusModifier))}">
+          ${statusIconHtml}
+          <span class="${GLASS_PANEL.badgeText}">${escapeHtml(statusConfig.label)}</span>
+        </span>`
       : '';
 
     return `<div class="${GLASS_PANEL.meta}" aria-label="${escapeHtml(name)}">
@@ -448,10 +465,7 @@ export function buildPopupBadgeHtml(popup: PopupContent): string {
           ${glassPanelNamingBadgeIconHtml()}
           <span class="${GLASS_PANEL.badgeText}">${escapeHtml(NAMING_OPPORTUNITY_BADGE_LABEL)}</span>
         </span>
-        <span class="${GLASS_PANEL.badgeStatusIcon(escapeHtml(statusModifier))}">
-          ${statusIconHtml}
-          <span class="${GLASS_PANEL.badgeText}">${escapeHtml(statusConfig.label)}</span>
-        </span>
+        ${statusBadgeHtml}
       </div>
     </div>`;
   }
@@ -647,8 +661,29 @@ export function buildAnchoredPopupHtml(
     naming ?
       buildNamingPriceUnderTitleHtml(
         naming.price,
-        namingOpportunityStatusConfig(naming.status).cssModifier === 'closed',
+        namingOpportunityStatusConfig(naming.status).cssModifier === 'sold',
       )
+    : '';
+  const donor = resolveNamingDonorPresentation(naming);
+  const donorCreditInner =
+    !donor ? ''
+    : donor.kind === 'organization' && donor.website ?
+      `${escapeHtml(NAMING_DONOR_CREDIT_PREFIX)} <a class="${GLASS_PANEL.donorCreditLink}" href="${escapeHtml(donor.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(donor.name)}</a>`
+    : donor.kind === 'person' && donor.affiliation ?
+      donor.website ?
+        `${escapeHtml(NAMING_DONOR_CREDIT_PREFIX)} ${escapeHtml(donor.name)}, <a class="${GLASS_PANEL.donorCreditLink}" href="${escapeHtml(donor.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(donor.affiliation)}</a>`
+      : `${escapeHtml(NAMING_DONOR_CREDIT_PREFIX)} ${escapeHtml(donor.name)}, ${escapeHtml(donor.affiliation)}`
+    : escapeHtml(donor.credit);
+  const donorCreditHtml =
+    donor ?
+      `<div class="${GLASS_PANEL.donor}">
+      ${
+        donor.logo ?
+          `<img class="${GLASS_PANEL.donorLogo}" src="${escapeHtml(donor.logo)}" alt="" decoding="async" />`
+        : ''
+      }
+      <p class="${GLASS_PANEL.donorCredit}">${donorCreditInner}</p>
+    </div>`
     : '';
   const titleSubHtml =
     naming?.priceLabel ?
@@ -717,7 +752,7 @@ export function buildAnchoredPopupHtml(
       </div>`
     : '';
 
-  const closeInBodyHtml =
+  const toolbarHtml =
     hasHero ? '' : (
       buildAnchoredPanelBodyToolbarHtml({
         shareHtml: shareInlineHtml,
@@ -730,10 +765,10 @@ export function buildAnchoredPopupHtml(
   const introHtml = `<div class="info-panel__intro">
       ${titleBlockHtml}
       ${badgeHtml}
+      ${donorCreditHtml}
     </div>`;
 
   const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
-    ${closeInBodyHtml}
     ${introHtml}
     ${copyHtml ? `<div class="${GLASS_PANEL.copy}">${copyHtml}</div>` : ''}
   </div>`;
@@ -769,6 +804,7 @@ export function buildAnchoredPopupHtml(
     titleId,
     animate: options?.animate ?? true,
     heroHtml,
+    toolbarHtml,
     bodyHtml,
     footerHtml: ctaFooterHtml + visitFooterHtml,
     rootDataAttrs: {
@@ -873,6 +909,8 @@ export function navPreviewPanelMarkerSize(
 }
 
 function buildNavPreviewNamingBadgeHtml(item: NavPreviewNamingItem): string {
+  if (!namingOpportunityStatusShowsBadge(item.statusModifier)) return '';
+
   return `<span class="${GLASS_PANEL.badgeStatus(escapeHtml(item.statusModifier))} nav-preview-panel__naming-status">
     <span class="${GLASS_PANEL.badgeText}">${escapeHtml(item.statusLabel)}</span>
   </span>`;
@@ -882,12 +920,12 @@ function buildNavPreviewNamingPriceHtml(item: NavPreviewNamingItem): string {
   const priceDisplay = formatNamingGalleryItemPrice(item);
   if (!priceDisplay) return '';
 
-  const closedModifier =
-    item.statusModifier === 'closed' ?
-      ' nav-preview-panel__naming-price--closed'
+  const soldModifier =
+    item.statusModifier === 'sold' ?
+      ' nav-preview-panel__naming-price--sold'
     : '';
 
-  return `<span class="nav-preview-panel__naming-price${closedModifier}">${escapeHtml(priceDisplay)}</span>`;
+  return `<span class="nav-preview-panel__naming-price${soldModifier}">${escapeHtml(priceDisplay)}</span>`;
 }
 
 export function buildNavPreviewNamingListHtml(
@@ -1081,7 +1119,7 @@ export function buildAnchoredNavPreviewHtml(
       </div>`
     : '';
 
-  const closeInBodyHtml =
+  const toolbarHtml =
     hasHero ? '' : (
       buildAnchoredPanelBodyToolbarHtml({
         shareHtml: navShareInlineHtml,
@@ -1135,7 +1173,6 @@ export function buildAnchoredNavPreviewHtml(
     : '';
 
   const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
-    ${closeInBodyHtml}
     ${introHtml}
     ${bodyVideoHtml}
     ${namingHtml}
@@ -1146,6 +1183,7 @@ export function buildAnchoredNavPreviewHtml(
     rootExtraClass: 'tour-glass-panel--nav-preview',
     animate: options?.animate ?? true,
     heroHtml,
+    toolbarHtml,
     bodyHtml,
     footerHtml,
     rootDataAttrs: {

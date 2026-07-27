@@ -436,11 +436,9 @@ export const tourNavLocationGalleryListClassName = cn(
 
 /** Client intro catalog cards — lighter chrome than explore gallery (no 2px border). */
 export const clientIntroGalleryCardClassName = cn(
-  'group/card flex w-full cursor-pointer flex-col overflow-hidden rounded-lg bg-white/72 p-0 text-left font-[inherit] shadow-[0_1px_4px_rgba(15,23,42,0.06)]',
-  'transition-[box-shadow,transform] duration-150',
+  'group/card flex w-full cursor-auto flex-col overflow-hidden rounded-lg bg-white/72 p-0 text-left font-[inherit] shadow-[0_1px_4px_rgba(15,23,42,0.06)]',
+  'transition-[box-shadow] duration-150',
   'hover:shadow-[0_4px_14px_rgba(15,23,42,0.1)]',
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
-  'disabled:cursor-not-allowed disabled:opacity-50',
 );
 
 export const tourNavLocationGalleryCardClassName = cva(
@@ -528,7 +526,7 @@ export const tourNavLocationGalleryStatusBadgeVariants = cva(
     variants: {
       status: {
         open: 'bg-[color-mix(in_srgb,var(--color-status-open)_70%,transparent)]',
-        closed: 'bg-[color-mix(in_srgb,#475569_70%,transparent)]',
+        sold: 'bg-[color-mix(in_srgb,rgb(var(--ishare-primary-rgb))_70%,transparent)]',
         reserved:
           'bg-[color-mix(in_srgb,var(--color-accent-dark)_70%,transparent)]',
         soon: 'bg-[color-mix(in_srgb,var(--color-status-soon)_70%,transparent)]',
@@ -538,8 +536,9 @@ export const tourNavLocationGalleryStatusBadgeVariants = cva(
 );
 
 export const tourNavLocationGalleryHeroBottomOverlayClassName = cn(
-  'tour-nav-gallery-card-hero-overlay pointer-events-none absolute inset-x-0 bottom-0 z-[2] px-2.5 py-1.5',
+  'tour-nav-gallery-card-hero-overlay pointer-events-none absolute inset-x-0 bottom-0 z-[2] flex flex-col justify-end px-2.5 py-1.5',
   'transition-[padding] duration-[var(--tour-gallery-hover-duration)] ease-[var(--tour-gallery-hover-ease)]',
+  'group-hover/card:inset-0 group-focus-visible/card:inset-0',
   'group-hover/card:py-2 group-focus-visible/card:py-2',
 );
 
@@ -674,11 +673,21 @@ export const tourNavLocationGalleryHeroPillCtaSecondaryClassName = cn(
 );
 
 export const tourNavLocationGalleryCenterCtaClassName = cn(
-  'inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-white max-[480px]:size-11',
+  'inline-flex size-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary p-0 text-white max-[480px]:size-14',
   'pointer-events-none scale-95 opacity-0 transition-[opacity,transform] duration-[var(--tour-gallery-hover-duration)] ease-[var(--tour-gallery-hover-ease)]',
   'group-hover/card:pointer-events-auto group-hover/card:scale-100 group-hover/card:opacity-100',
-  'group-focus-visible/card:pointer-events-auto group-focus-visible/card:scale-100 group-focus-visible/card:opacity-100',
-  'motion-reduce:scale-100 motion-reduce:opacity-100 motion-reduce:transition-none',
+  'group-focus-within/card:pointer-events-auto group-focus-within/card:scale-100 group-focus-within/card:opacity-100',
+  'focus-visible:pointer-events-auto focus-visible:scale-100 focus-visible:opacity-100',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+  'motion-reduce:pointer-events-auto motion-reduce:scale-100 motion-reduce:opacity-100 motion-reduce:transition-none',
+);
+
+/** Intro hero — full darken on hover so the center CTA reads clearly. */
+export const clientIntroGalleryHeroScrimClassName = cn(
+  'pointer-events-none absolute inset-0 z-[2]',
+  'bg-[rgba(15,23,42,0)] transition-colors duration-[var(--tour-gallery-hover-duration)] ease-[var(--tour-gallery-hover-ease)]',
+  'group-hover/card:bg-[rgba(15,23,42,0.52)] group-focus-within/card:bg-[rgba(15,23,42,0.52)]',
+  'motion-reduce:transition-none',
 );
 
 /** @deprecated Use {@link tourNavLocationGalleryCenterCtaClassName}. */
@@ -698,7 +707,7 @@ export const tourNavDirectoryItemVariants = cva(
         location: cn('group/listitem items-start px-3 py-3'),
         naming: cn('group/listitem items-start px-3.5 py-3'),
       },
-      statusTone: { default: '', closed: '' },
+      statusTone: { default: '', sold: '' },
       active: {
         false: cn(
           'cursor-pointer',
@@ -772,24 +781,21 @@ export const tourNavItemLeadingLocationClassName = cn(
   'mt-0.5',
 );
 
-/** Explore list row body — thumb spans both rows; row 2 opens for actions.
- * Single `grid-template-rows` transition drives thumb height (no separate
- * thumb height/max-height animation — that felt like a two-step leave). */
+/** Explore list row body — thumb | content; actions collapse inside content. */
 export const tourNavDirectoryListItemBodyClassName = cn(
-  'tour-nav-directory-list-item-body grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)] grid-rows-[auto_0fr] gap-x-3.5',
-  'group-hover/listitem:grid-rows-[auto_1fr] group-focus-within/listitem:grid-rows-[auto_1fr]',
-  'pointer-coarse:grid-rows-[auto_1fr]',
-  'transition-[grid-template-rows] duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
-  'motion-reduce:transition-none',
+  'tour-nav-directory-list-item-body grid w-full min-w-0 grid-cols-[auto_minmax(0,1fr)] items-stretch gap-x-3.5',
 );
 
-export const tourNavDirectoryListItemBodyMainClassName = cn(
-  'col-start-2 row-start-1 min-w-0',
+/** Title/desc + hover actions column. */
+export const tourNavDirectoryListItemContentClassName = cn(
+  'flex min-w-0 flex-col',
 );
 
-/** Explore list row thumb — stretches with the body grid (row-span 2). */
+export const tourNavDirectoryListItemBodyMainClassName = cn('min-w-0');
+
+/** Explore list row thumb — stretches with the content column height. */
 export const tourNavItemLeadingThumbClassName = cn(
-  'tour-nav-item-leading col-start-1 row-span-2 row-start-1 w-14 min-h-14 self-stretch overflow-hidden rounded-md',
+  'tour-nav-item-leading w-14 min-h-14 self-stretch overflow-hidden rounded-md',
   'bg-[rgba(15,23,42,0.06)]',
 );
 
@@ -836,9 +842,11 @@ export const tourNavItemNamingLocationClassName = cn(
   'tour-nav-item-meta min-w-0 shrink cursor-text truncate text-xs leading-[1.3] text-muted',
 );
 
-/** Description under location — no bottom margin; actions use the text-column gap. */
+/** Description under location — always visible; CTAs expand below on hover. */
 export const tourNavItemNamingDescriptionClassName = cn(
-  'tour-nav-item-description mt-1 line-clamp-2 cursor-text text-xs leading-[1.3] text-pretty break-words whitespace-normal text-muted',
+  'tour-nav-item-description mt-0.5 cursor-text text-xs leading-[1.5] text-pretty break-words whitespace-normal text-muted',
+  // Prefer max-height over line-clamp — WebKit line-clamp clips descenders on short copy.
+  'max-h-[3.15em] overflow-hidden',
 );
 
 /** Price mirrors the title type scale in a muted tone. */
@@ -860,7 +868,10 @@ export const tourNavItemMetaClassName = cn(
 );
 
 export const tourNavItemDescriptionClassName = cn(
-  'tour-nav-item-description mb-1.5 cursor-text text-xs leading-[1.35] text-muted line-clamp-2',
+  // Always under the title; CTAs expand in row 2 on hover.
+  // Avoid line-clamp — it clips descenders (p/g/y) on short single-line copy.
+  'tour-nav-item-description cursor-text text-xs leading-[1.5] text-muted',
+  'max-h-[3.15em] overflow-hidden',
 );
 
 export const tourNavItemBadgePlacementClassName = cn('shrink-0 self-center');
@@ -882,16 +893,23 @@ export const tourNavDirectoryListItemRevealClassName = cn(
   'motion-reduce:transition-none',
 );
 
-/** List row — hover-expand action slot (row height owned by body grid). */
+/** List row — nested 0fr→1fr collapse (same pattern as gallery hover body).
+ * Kept off the body grid so thumb min-height cannot inflate a 0fr track and
+ * leak CTA tops at rest. */
 export const tourNavDirectoryListItemActionsClassName = cn(
-  'tour-nav-directory-list-item-actions col-start-2 row-start-2 min-h-0 overflow-hidden',
+  'tour-nav-directory-list-item-actions grid min-w-0 grid-rows-[0fr]',
+  'group-hover/listitem:grid-rows-[1fr] group-focus-within/listitem:grid-rows-[1fr]',
+  'pointer-coarse:grid-rows-[1fr]',
+  'transition-[grid-template-rows] duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
+  'motion-reduce:transition-none',
 );
 
 export const tourNavDirectoryListItemActionsInnerClassName =
   'min-h-0 overflow-hidden';
 
+/** Room for the tighter list CTA shadow inside the overflow-hidden collapse. */
 export const tourNavDirectoryListItemActionsRowClassName = cn(
-  'flex min-w-0 items-center gap-2 pt-1.5',
+  'flex min-w-0 items-center gap-2 px-0.5 pt-2 pb-2',
 );
 
 export const tourNavDirectoryListItemDetailCtaClassName = cn(
@@ -906,6 +924,8 @@ export const tourNavDirectoryListItemDetailCtaClassName = cn(
 export const tourNavDirectoryListItemPrimaryCtaClassName = cn(
   tourNavLocationGalleryHeroPillCtaButtonClassName,
   'w-auto flex-none px-3.5',
+  // Tighter than gallery hero — h-7 pills look heavy with the 6/16 shadow.
+  'shadow-[0_2px_6px_rgba(var(--ishare-primary-rgb),0.22),0_1px_3px_rgba(var(--ishare-primary-rgb),0.12)]',
 );
 
 export const tourNavEmptyClassName = cn(
@@ -1250,9 +1270,9 @@ export const tourNavItemIconNamingVariants = cva(
   {
     variants: {
       active: { true: 'text-primary', false: 'text-[rgba(100,116,139,0.42)]' },
-      closed: { true: '', false: '' },
+      sold: { true: '', false: '' },
     },
-    defaultVariants: { active: false, closed: false },
+    defaultVariants: { active: false, sold: false },
   },
 );
 

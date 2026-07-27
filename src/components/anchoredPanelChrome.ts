@@ -126,13 +126,18 @@ export interface AnchoredMediaPanelShellOptions {
   animate?: boolean;
   rootDataAttrs?: Record<string, string>;
   heroHtml: string;
-  /** Full body element HTML (includes toolbar / intro / copy). */
+  /**
+   * Optional share/close chrome for no-hero panels.
+   * Rendered above the scroll body so it stays pinned.
+   */
+  toolbarHtml?: string;
+  /** Full body element HTML (scrollable copy). */
   bodyHtml: string;
   footerHtml?: string;
 }
 
 /**
- * Shared article shell: hero (optional) + main(body + footer).
+ * Shared article shell: hero (optional) + main(toolbar? + body + footer).
  */
 export function buildAnchoredMediaPanelHtml(
   options: AnchoredMediaPanelShellOptions,
@@ -143,6 +148,7 @@ export function buildAnchoredMediaPanelHtml(
     animate = true,
     rootDataAttrs = {},
     heroHtml,
+    toolbarHtml = '',
     bodyHtml,
     footerHtml = '',
   } = options;
@@ -163,6 +169,7 @@ export function buildAnchoredMediaPanelHtml(
       <div class="${SHELL}">
         ${heroHtml}
         <div class="${ANCHORED_PANEL.main}">
+          ${toolbarHtml}
           ${bodyHtml}
           ${footerHtml}
         </div>
