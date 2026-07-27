@@ -36,11 +36,9 @@ import {
   devViewPanelInputClassName,
   devViewPanelManageListClassName,
   devViewPanelManageListFooterClassName,
-  devViewPanelManageListItemBulletClassName,
   devViewPanelManageListItemClassName,
   devViewPanelManageListItemHeadClassName,
   devViewPanelManageListItemHeadMainClassName,
-  devViewPanelManageListItemIdClassName,
   devViewPanelManageListItemTitleClassName,
   devViewPanelSecondaryTabsClassName,
   devViewPanelSectionHintClassName,
@@ -139,9 +137,7 @@ export function DevClientPanel({
   );
 
   const showManagedFaviconPreview =
-    clientModeTab === 'manage' &&
-    Boolean(manageClientId) &&
-    !faviconFile;
+    clientModeTab === 'manage' && Boolean(manageClientId) && !faviconFile;
 
   const createClientSlug = useMemo(
     () =>
@@ -786,25 +782,13 @@ export function DevClientPanel({
                           className={
                             devViewPanelManageListItemHeadMainClassName
                           }
+                          title={catalogTour.id}
                         >
                           <span
                             className={devViewPanelManageListItemTitleClassName}
                           >
                             {catalogTour.name}
                           </span>
-                          <span
-                            className={
-                              devViewPanelManageListItemBulletClassName
-                            }
-                            aria-hidden='true'
-                          >
-                            ·
-                          </span>
-                          <code
-                            className={devViewPanelManageListItemIdClassName}
-                          >
-                            {catalogTour.id}
-                          </code>
                         </div>
                       </div>
                       <div className={devViewPanelActionsClassName}>

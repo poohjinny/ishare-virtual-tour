@@ -203,7 +203,7 @@ type PanelMode = 'explore' | 'help' | 'share' | null;
 type DisplayPanel = 'explore' | 'help' | 'share' | null;
 type PanelAnimPhase = 'enter' | 'exit' | 'idle';
 
-const PANEL_ENTER_MS = 150;
+const PANEL_ENTER_MS = 170;
 const PANEL_EXIT_MS = 140;
 const SEARCH_PILL_EXPAND_MS = 180;
 
@@ -1353,6 +1353,8 @@ export function TourNavFloat({
                     key={scene.id}
                     tourId={tourId}
                     scene={scene}
+                    tourHotspots={tourHotspots}
+                    tourViewerType={tourViewerType}
                     active={scene.id === currentSceneId}
                     isTourStart={scene.id === firstSceneId}
                     contextLabel={contextLabel}
@@ -1382,6 +1384,8 @@ export function TourNavFloat({
                     key={scene.id}
                     tourId={tourId}
                     scene={scene}
+                    tourHotspots={tourHotspots}
+                    tourViewerType={tourViewerType}
                     active={scene.id === currentSceneId}
                     isTourStart={scene.id === firstSceneId}
                     contextLabel={contextLabel}

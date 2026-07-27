@@ -4,8 +4,9 @@ import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
-import type { Scene } from '../types/tour';
+import type { Hotspot, Scene, TourViewerType } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
+import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import {
@@ -32,6 +33,8 @@ import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
 interface ExploreSceneGalleryCardProps {
   tourId: string;
   scene: Scene;
+  tourHotspots?: Hotspot[];
+  tourViewerType?: TourViewerType;
   active: boolean;
   isTourStart?: boolean;
   /** Floor / department when the same title appears on multiple scenes. */
@@ -44,6 +47,8 @@ interface ExploreSceneGalleryCardProps {
 export function ExploreSceneGalleryCard({
   tourId,
   scene,
+  tourHotspots,
+  tourViewerType,
   active,
   isTourStart = false,
   contextLabel,
@@ -65,7 +70,10 @@ export function ExploreSceneGalleryCard({
   } = usePreviewHeroReveal(previewSrc);
   const heroLoading =
     previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
-  const description = scene.description?.trim();
+  const description = resolveScenePlaceLead(
+    { hotspots: tourHotspots, viewerType: tourViewerType },
+    scene,
+  ).trim();
   const showInfo = Boolean(onShowDescription);
   const showHoverBody = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';

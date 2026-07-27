@@ -5,12 +5,14 @@ import { loadTour } from '../data/loadTour';
 import { resolveTourBranding } from '../utils/resolveTourBranding';
 import { useCatalogTourPreview } from '../hooks/useCatalogTourPreview';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
+import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import {
   clientIntroGalleryCardClassName,
+  clientIntroGalleryHeroScrimClassName,
   tourNavLocationGalleryCardHeroClassName,
   tourNavLocationGalleryCardHeroImageClassName,
   tourNavLocationGalleryCardHeroSkeletonClassName,
-  tourNavLocationGalleryCtaClassName,
+  tourNavLocationGalleryCenterCtaClassName,
   tourNavLocationGalleryFeaturedBadgeClassName,
   tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryHeroCtaOverlayClassName,
@@ -34,6 +36,7 @@ export function ClientIntroGalleryCard({
   entry,
   onSelect,
 }: ClientIntroGalleryCardProps) {
+  const { isCoarsePointer } = useTourChromeLayout();
   const tour = loadTour(entry.tourId);
   const {
     src: previewSrc,
@@ -46,15 +49,11 @@ export function ClientIntroGalleryCard({
     onLoad: onPreviewLoad,
   } = usePreviewHeroReveal(previewSrc);
   const logo = resolveTourBranding(tour)?.logo;
+  const ariaLabel = `${entry.tourName}, ${entry.clientName}${entry.featured ? ', featured' : ''}. ${CLIENT_INTRO_CTA}.`;
 
   return (
     <li className='m-0 flex min-h-0 list-none p-0'>
-      <button
-        type='button'
-        className={clientIntroGalleryCardClassName}
-        onClick={onSelect}
-        aria-label={`${entry.tourName}, ${entry.clientName}${entry.featured ? ', featured' : ''}. ${CLIENT_INTRO_CTA}.`}
-      >
+      <div className={cn(clientIntroGalleryCardClassName, 'relative w-full')}>
         <span
           className={cn(
             tourNavLocationGalleryCardHeroClassName,
@@ -65,6 +64,14 @@ export function ClientIntroGalleryCard({
           )}
           aria-busy={previewLoading || undefined}
         >
+          {isCoarsePointer ?
+            <button
+              type='button'
+              className='absolute inset-0 z-[2] block h-full w-full cursor-pointer rounded-none border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light'
+              onClick={onSelect}
+              aria-label={ariaLabel}
+            />
+          : null}
           {previewLoading ?
             <span
               className={tourNavLocationGalleryCardHeroSkeletonClassName}
@@ -91,11 +98,22 @@ export function ClientIntroGalleryCard({
               aria-hidden='true'
             />
           : null}
-          <span className={tourNavLocationGalleryHeroCtaOverlayClassName}>
-            <span className={tourNavLocationGalleryCtaClassName}>
-              <ExploreGalleryCtaArrowIcon />
+          <span
+            className={clientIntroGalleryHeroScrimClassName}
+            aria-hidden='true'
+          />
+          {!isCoarsePointer ?
+            <span className={tourNavLocationGalleryHeroCtaOverlayClassName}>
+              <button
+                type='button'
+                className={tourNavLocationGalleryCenterCtaClassName}
+                onClick={onSelect}
+                aria-label={ariaLabel}
+              >
+                <ExploreGalleryCtaArrowIcon />
+              </button>
             </span>
-          </span>
+          : null}
           <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
             {entry.featured ?
               <Badge
@@ -137,7 +155,7 @@ export function ClientIntroGalleryCard({
             </span>
           </span>
         </span>
-      </button>
+      </div>
     </li>
   );
 }

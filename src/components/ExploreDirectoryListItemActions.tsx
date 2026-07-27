@@ -9,7 +9,7 @@ interface ExploreDirectoryListItemActionsProps {
   children: ReactNode;
 }
 
-/** Hover-expand action row — height owned by the list-item body grid. */
+/** Nested 0fr→1fr CTA reveal — height owned by this grid, not the row body. */
 export function ExploreDirectoryListItemActions({
   children,
 }: ExploreDirectoryListItemActionsProps) {

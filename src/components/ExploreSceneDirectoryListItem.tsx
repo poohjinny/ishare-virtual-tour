@@ -2,8 +2,9 @@ import { type ReactNode } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { useScenePreview } from '../hooks/useScenePreview';
-import type { Scene } from '../types/tour';
+import type { Hotspot, Scene, TourViewerType } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
+import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
@@ -15,6 +16,7 @@ import {
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBodyClassName,
   tourNavDirectoryListItemBodyMainClassName,
+  tourNavDirectoryListItemContentClassName,
   tourNavDirectoryListItemPrimaryCtaClassName,
   tourNavDirectoryListItemSelectClassName,
   tourNavItemDescriptionClassName,
@@ -31,6 +33,8 @@ import { cn } from '../lib/cn';
 interface ExploreSceneDirectoryListItemProps {
   tourId: string;
   scene: Scene;
+  tourHotspots?: Hotspot[];
+  tourViewerType?: TourViewerType;
   active: boolean;
   isTourStart?: boolean;
   /** Floor / department when the same title appears on multiple scenes. */
@@ -45,6 +49,8 @@ interface ExploreSceneDirectoryListItemProps {
 export function ExploreSceneDirectoryListItem({
   tourId,
   scene,
+  tourHotspots,
+  tourViewerType,
   active,
   isTourStart = false,
   contextLabel,
@@ -61,7 +67,10 @@ export function ExploreSceneDirectoryListItem({
     inView,
   );
   const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
-  const description = scene.description?.trim();
+  const description = resolveScenePlaceLead(
+    { hotspots: tourHotspots, viewerType: tourViewerType },
+    scene,
+  ).trim();
   const showInfo = Boolean(onShowDescription);
   const showActions = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
@@ -103,59 +112,63 @@ export function ExploreSceneDirectoryListItem({
   const body = (
     <span className={tourNavDirectoryListItemBodyClassName}>
       {leading}
-      <span
-        className={cn(
-          tourNavDirectoryListItemBodyMainClassName,
-          tourNavItemTextClassName,
-        )}
-      >
-        {active ?
-          <ExploreCurrentHereLabel
-            className={tourNavCurrentInlineLabelClassName}
-          />
-        : null}
-        <span className={tourNavDirectoryItemTitleRowClassName}>
-          <span className={tourNavItemLabelClassName}>{scene.title}</span>
-          {contextLabel ?
-            <span className={tourNavItemMetaClassName}>{contextLabel}</span>
-          : null}
-        </span>
-        {description ?
-          <span className={tourNavItemDescriptionClassName}>{description}</span>
-        : null}
-      </span>
-      {showActions ?
-        <ExploreDirectoryListItemActions>
-          {showInfo ?
-            <ExploreSceneInfoButton
-              variant='listText'
-              sceneTitle={scene.title}
-              disabled={disabled}
-              onShow={onShowDescription!}
+      <span className={tourNavDirectoryListItemContentClassName}>
+        <span
+          className={cn(
+            tourNavDirectoryListItemBodyMainClassName,
+            tourNavItemTextClassName,
+          )}
+        >
+          {active ?
+            <ExploreCurrentHereLabel
+              className={tourNavCurrentInlineLabelClassName}
             />
           : null}
-          {isCoarsePointer ?
-            <span
-              className={tourNavDirectoryListItemPrimaryCtaClassName}
-              aria-hidden='true'
-            >
-              {visitCta}
+          <span className={tourNavDirectoryItemTitleRowClassName}>
+            <span className={tourNavItemLabelClassName}>{scene.title}</span>
+            {contextLabel ?
+              <span className={tourNavItemMetaClassName}>{contextLabel}</span>
+            : null}
+          </span>
+          {description ?
+            <span className={tourNavItemDescriptionClassName}>
+              {description}
             </span>
-          : <button
-              type='button'
-              role='option'
-              aria-selected={active}
-              data-tour-nav-directory-kind='location'
-              disabled={disabled}
-              className={tourNavDirectoryListItemPrimaryCtaClassName}
-              onClick={onSelect}
-              aria-label={ariaLabel}
-            >
-              {visitCta}
-            </button>
-          }
-        </ExploreDirectoryListItemActions>
-      : null}
+          : null}
+        </span>
+        {showActions ?
+          <ExploreDirectoryListItemActions>
+            {showInfo ?
+              <ExploreSceneInfoButton
+                variant='listText'
+                sceneTitle={scene.title}
+                disabled={disabled}
+                onShow={onShowDescription!}
+              />
+            : null}
+            {isCoarsePointer ?
+              <span
+                className={tourNavDirectoryListItemPrimaryCtaClassName}
+                aria-hidden='true'
+              >
+                {visitCta}
+              </span>
+            : <button
+                type='button'
+                role='option'
+                aria-selected={active}
+                data-tour-nav-directory-kind='location'
+                disabled={disabled}
+                className={tourNavDirectoryListItemPrimaryCtaClassName}
+                onClick={onSelect}
+                aria-label={ariaLabel}
+              >
+                {visitCta}
+              </button>
+            }
+          </ExploreDirectoryListItemActions>
+        : null}
+      </span>
     </span>
   );
 

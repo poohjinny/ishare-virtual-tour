@@ -48,7 +48,7 @@ function categoryFilterId(category: CategoryFilter): string {
 }
 
 const INTRO_PANEL_CLASS = cn(
-  'tour-glass-panel--intro relative z-[1] mx-auto flex w-[min(640px,calc(100vw-48px))] shrink-0 flex-col self-center',
+  'tour-glass-panel--intro relative z-[1] mx-auto flex w-[min(640px,calc(100vw-48px))] shrink-0 flex-col',
   'max-[480px]:w-[min(100%,calc(100vw-32px))]',
   '[&_.tour-glass-panel__header]:shrink-0',
 );
@@ -162,7 +162,7 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
   };
 
   return (
-    <div className='app relative flex min-h-full items-center justify-center overflow-hidden p-6 max-[480px]:items-end max-[480px]:p-4'>
+    <div className='app relative flex min-h-full items-center justify-center overflow-hidden px-6 py-6 max-[480px]:px-4 max-[480px]:py-4'>
       <div
         className='absolute inset-0 z-0 bg-page bg-[radial-gradient(ellipse_120%_80%_at_50%_20%,rgba(15,23,42,0.2),rgba(15,23,42,0.72)_72%)]'
         aria-hidden='true'
