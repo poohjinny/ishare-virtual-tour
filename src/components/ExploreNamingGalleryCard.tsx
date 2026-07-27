@@ -15,6 +15,7 @@ import {
   exploreNamingVisitPlaceAriaLabel,
 } from '../constants/tourDirectory';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
+import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
 import {
   tourNavCurrentHeroChipClassName,
   tourNavLocationGalleryCardClassName,
@@ -75,6 +76,7 @@ export function ExploreNamingGalleryCard({
   onVisitPlace,
 }: ExploreNamingGalleryCardProps) {
   const { isCoarsePointer } = useTourChromeLayout();
+  const groupMediaReady = useExploreGroupMediaReady();
   const { ref, inView } = useLazyInView<HTMLLIElement>();
 
   const scene = useMemo(
@@ -139,7 +141,9 @@ export function ExploreNamingGalleryCard({
   } = useScenePreview(
     tourId,
     previewScene,
-    inView && Boolean(previewScene.panorama || previewScene.thumbnail),
+    inView &&
+      groupMediaReady &&
+      Boolean(previewScene.panorama || previewScene.thumbnail),
     previewOptions,
   );
 
@@ -249,6 +253,8 @@ export function ExploreNamingGalleryCard({
               alt=''
               aria-hidden='true'
               draggable={false}
+              loading='lazy'
+              decoding='async'
               onLoad={onPreviewLoad}
             />
           : null}

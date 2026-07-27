@@ -36,8 +36,8 @@ export function useScenePreview(
 
   useEffect(() => {
     if (!enabled) {
-      setSrc(null);
-      setFailed(false);
+      // Keep any already-resolved preview so expand gating / scroll out of view
+      // does not flash a blank thumb; only skip starting new work.
       return;
     }
 

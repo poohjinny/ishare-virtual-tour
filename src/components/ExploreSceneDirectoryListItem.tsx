@@ -8,6 +8,7 @@ import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
+import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import {
@@ -60,11 +61,12 @@ export function ExploreSceneDirectoryListItem({
   locationIcon,
 }: ExploreSceneDirectoryListItemProps) {
   const { isCoarsePointer } = useTourChromeLayout();
+  const groupMediaReady = useExploreGroupMediaReady();
   const { ref: thumbRef, inView } = useLazyInView<HTMLSpanElement>();
   const { src: previewSrc, failed: previewFailed } = useScenePreview(
     tourId,
     scene,
-    inView,
+    inView && groupMediaReady,
   );
   const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
   const description = resolveScenePlaceLead(
@@ -103,6 +105,8 @@ export function ExploreSceneDirectoryListItem({
           alt=''
           aria-hidden='true'
           draggable={false}
+          loading='lazy'
+          decoding='async'
         />
       </span>
     : <span ref={thumbRef} className={tourNavItemLeadingThumbFallbackClassName}>

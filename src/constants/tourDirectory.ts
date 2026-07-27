@@ -16,6 +16,12 @@ export const TOUR_DIRECTORY_OVERVIEW_LABEL = 'Tour start';
 /** Header for scenes not reachable from the tour start via nav hotspots. */
 export const TOUR_DIRECTORY_GROUP_OTHER = 'More places';
 
+/**
+ * Must match `--tour-directory-group-expand-duration` (0.35s).
+ * Used to defer thumbnail loads until the expand animation finishes.
+ */
+export const TOUR_DIRECTORY_GROUP_EXPAND_MS = 350;
+
 export type TourDirectoryTab = 'all' | 'locations' | 'naming';
 
 export const TOUR_DIRECTORY_TABS: {

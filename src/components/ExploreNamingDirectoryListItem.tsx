@@ -12,6 +12,7 @@ import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import type { Scene, TourViewerType } from '../types/tour';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
+import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { NamingHeartIcon } from './icons/NamingHeartIcon';
 import type { NamingStatusModifier } from './ui/Badge';
@@ -71,6 +72,7 @@ export function ExploreNamingDirectoryListItem({
   onVisitPlace,
 }: ExploreNamingDirectoryListItemProps) {
   const { isCoarsePointer } = useTourChromeLayout();
+  const groupMediaReady = useExploreGroupMediaReady();
   const { ref: thumbRef, inView } = useLazyInView<HTMLSpanElement>();
   const isSold = item.statusModifier === 'sold';
   const description = item.description?.trim();
@@ -111,7 +113,9 @@ export function ExploreNamingDirectoryListItem({
   const { src: previewSrc, failed: previewFailed } = useScenePreview(
     tourId,
     previewScene,
-    inView && Boolean(previewScene.panorama || previewScene.thumbnail),
+    inView &&
+      groupMediaReady &&
+      Boolean(previewScene.panorama || previewScene.thumbnail),
   );
   const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
 
@@ -150,6 +154,8 @@ export function ExploreNamingDirectoryListItem({
           alt=''
           aria-hidden='true'
           draggable={false}
+          loading='lazy'
+          decoding='async'
         />
       </span>
     : <span ref={thumbRef} className={tourNavItemLeadingThumbFallbackClassName}>

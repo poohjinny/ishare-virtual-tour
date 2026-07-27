@@ -8,6 +8,7 @@ import type { Hotspot, Scene, TourViewerType } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
 import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
+import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import {
   tourNavCurrentHeroChipClassName,
@@ -57,12 +58,13 @@ export function ExploreSceneGalleryCard({
   onShowDescription,
 }: ExploreSceneGalleryCardProps) {
   const { isCoarsePointer } = useTourChromeLayout();
+  const groupMediaReady = useExploreGroupMediaReady();
   const { ref, inView } = useLazyInView<HTMLLIElement>();
   const {
     src: previewSrc,
     failed: previewFailed,
     loading: previewLoading,
-  } = useScenePreview(tourId, scene, inView);
+  } = useScenePreview(tourId, scene, inView && groupMediaReady);
   const {
     imgRef,
     revealed: previewLoaded,
@@ -152,6 +154,8 @@ export function ExploreSceneGalleryCard({
               alt=''
               aria-hidden='true'
               draggable={false}
+              loading='lazy'
+              decoding='async'
               onLoad={onPreviewLoad}
             />
           : null}
