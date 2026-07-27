@@ -518,8 +518,8 @@
           "id": "nav-to-main-entrance",
           "type": "nav",
           "position": {
-            "yaw": 114,
-            "pitch": -62.3
+            "yaw": 100.5,
+            "pitch": -60
           },
           "targetScene": "main-entrance"
         },
@@ -765,6 +765,24 @@
             "pitch": -42.7
           },
           "targetScene": "s_f24tksel8t"
+        },
+        {
+          "id": "nav-to-house-administration-hub",
+          "type": "nav",
+          "position": {
+            "yaw": 57.2,
+            "pitch": -71.5
+          },
+          "targetScene": "s_4epcuat8yv"
+        },
+        {
+          "id": "nav-to-main-level-storage-room",
+          "type": "nav",
+          "position": {
+            "yaw": 64.7,
+            "pitch": -35.6
+          },
+          "targetScene": "s_lc9a2b99af"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/main-floor.webp",
@@ -1011,8 +1029,8 @@
           "id": "nav-to-basement-corridor",
           "type": "nav",
           "position": {
-            "yaw": 129.6,
-            "pitch": -46.4
+            "yaw": 130.8,
+            "pitch": -42.3
           },
           "targetScene": "basement-corridor",
           "instant": true
@@ -1052,6 +1070,15 @@
             "pitch": -72
           },
           "targetScene": "s_osxxeptx4f"
+        },
+        {
+          "id": "nav-to-crawl-space",
+          "type": "nav",
+          "position": {
+            "yaw": 128.8,
+            "pitch": -49.4
+          },
+          "targetScene": "s_0j9sgtokj2"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/basement.webp",
@@ -1937,6 +1964,15 @@
             "pitch": -8.3
           },
           "targetScene": "s_eb2hcp3nla"
+        },
+        {
+          "id": "nav-to-crawl-space",
+          "type": "nav",
+          "position": {
+            "yaw": 2.8,
+            "pitch": -24.4
+          },
+          "targetScene": "s_0j9sgtokj2"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/basement-corridor.webp"
@@ -2515,6 +2551,15 @@
             "body": "The House Administration Office is the central hub of coordination, care, and connection within the Ken Sargent House. Located just off the main living area and at the start of the family corridor, this shared workspace is where staff and volunteers come together each day to ensure the home runs smoothly and families receive the support they need.\n\nBehind every comforting meal, clean room, thoughtful check-in, and quiet moment of reassurance is the work that happens in this office. It is here that schedules are managed, family needs are addressed, community supports are coordinated, and the day-to-day operations of the house come to life.\n\nThis space is the heart of our team’s efforts, where compassion is organized, where decisions are made with families in mind, and where the wellbeing of every guest is the focus. It is also a welcoming environment for volunteers, offering a place to learn, prepare, and come together in service of the families we support.\n\nBy choosing to name the House Administration Office, you are investing directly in the people and processes that keep the Ken Sargent House warm, responsive, and supportive. Your gift strengthens the backbone of our operations, empowering our staff\nand volunteers to provide exceptional care to every family who calls this house their temporary home.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/4f5dedec-1fb9-459f-a732-88fe81d79587"
           }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 147.1,
+            "pitch": -18.3
+          },
+          "targetScene": "main-floor"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/s_4epcuat8yv.webp",
@@ -2802,6 +2847,26 @@
             "body": "The Crawl Space at the Ken Sargent House is one of the most essential yet unseen parts of the home’s foundation. Quietly supporting the entire structure, this large and critical area provides access to the mechanical systems, plumbing, and infrastructure that keep the house safe, stable, and functioning smoothly for every family who stays here.\n\nWhile families may never walk through this space, they feel its impact every single day. The Crawl Space ensures that maintenance can be done efficiently, that systems remain protected, and that the home’s structure is well-supported throughout the changing seasons of northwestern Alberta. It is the backbone of the house, the steady, reliable layer that upholds everything above it. \n\nJust as families are strengthened by the support beneath them, the Crawl Space symbolizes the unseen foundation of care that makes healing possible. By naming this space, donors help sustain the core operations that make the Ken Sargent House a safe, warm, and dependable haven for those facing medical journeys far from home.\n\nYour gift strengthens the very foundation of the house, ensuring stability, comfort, and continuity of care for every family who walks through our doors.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8da31eb6-9664-41d0-9b42-cc1b131e4aaa"
           }
+        },
+        {
+          "id": "nav-to-corridor",
+          "type": "nav",
+          "position": {
+            "yaw": 37.6,
+            "pitch": -5.5
+          },
+          "targetScene": "basement-corridor"
+        },
+        {
+          "id": "nav-to-basement",
+          "type": "nav",
+          "position": {
+            "yaw": 272.5,
+            "pitch": -3.1
+          },
+          "targetScene": "basement",
+          "instant": true,
+          "navVariant": "back"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/s_0j9sgtokj2.webp",
@@ -2916,6 +2981,15 @@
             "body": "Tucked neatly beside the kitchen, washroom, and pantry, the general storage room is one of the quiet but essential spaces that keeps the Ken Sargent House running smoothly. This room plays a vital role in maintaining the warmth, order, and comfort that make the house feel like a true home.\n\nFrom storing everyday supplies to keeping household essentials organized and accessible, this space ensures that families always have what they need whether it’s kitchen items, seasonal supplies, or the small comforts that help create normalcy during a challenging time.\n\nIn a home that serves families travelling, sometimes unexpectedly, this storage room allows staff and volunteers to respond quickly, restock efficiently, and provide seamless support without ever interrupting the calm environment families depend on.\nBy choosing to name the General Storage Room, you are directly supporting the behind-the-scenes care that keeps the entire house functioning with dignity and compassion.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/29d1f9bd-a2ea-4718-a387-34e9447071f3"
           }
+        },
+        {
+          "id": "nav-to-main-floor",
+          "type": "nav",
+          "position": {
+            "yaw": 346.7,
+            "pitch": -8.7
+          },
+          "targetScene": "main-floor"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/ken-sargent-house/thumbnails/s_lc9a2b99af.webp",
