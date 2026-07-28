@@ -92,11 +92,6 @@ Engineering notes: [CODING_GUIDELINES.md](./CODING_GUIDELINES.md).
 - Hotspot types: `nav` | `info` | `nav-preview` | naming (see tour JSON).
 - Nav hotspots: `targetScene`, `targetView` (orientation after transition).
 
-### Knowledge (`tours/{tourId}-knowledge.json`)
-
-- `global` — facility name and summary.
-- Per scene: `facts[]`, `faqs[]`, `suggestedQuestions[]`.
-
 ### Catalog (`tours/catalog.json`)
 
 - `categories[]` — display order on client intro.

@@ -14,13 +14,13 @@ triggers tuning, work **top-down P0 → P5** below — do not duplicate tasks he
 
 Measured from a production `npm run build` and Ken Sargent House assets.
 
-| Area                      | Size                                                      | Notes                                             |
-| ------------------------- | --------------------------------------------------------- | ------------------------------------------------- |
-| **JS bundle**             | ~1,033 KB min (~**287 KB gzip**)                          | Single chunk; Vite warns above 500 KB             |
-| **CSS**                   | ~115 KB min (~**18 KB gzip**)                             | Shared glass panels, nav, hotspots                |
-| **Dependencies**          | PSV core + markers + virtual-tour, React 19, React Router | No extra UI/chart libraries                       |
-| **Panorama files**        | ~0.5–5.5 MB/scene @ **8192w**; Ken ~**51 MB**             | Encode defaults ≤8192w / q90; MB varies by detail |
-| **Tour JSON / knowledge** | Bundled inline                                            | Negligible vs JS and images                       |
+| Area               | Size                                                      | Notes                                             |
+| ------------------ | --------------------------------------------------------- | ------------------------------------------------- |
+| **JS bundle**      | ~1,033 KB min (~**287 KB gzip**)                          | Single chunk; Vite warns above 500 KB             |
+| **CSS**            | ~115 KB min (~**18 KB gzip**)                             | Shared glass panels, nav, hotspots                |
+| **Dependencies**   | PSV core + markers + virtual-tour, React 19, React Router | No extra UI/chart libraries                       |
+| **Panorama files** | ~0.5–5.5 MB/scene @ **8192w**; Ken ~**51 MB**             | Encode defaults ≤8192w / q90; MB varies by detail |
+| **Tour JSON**      | Bundled inline                                            | Negligible vs JS and images                       |
 
 **Runtime:** WebGL 360° viewer (Photo Sphere Viewer) — GPU use during drag/zoom
 is expected. React UI (FABs, panels, AI shell) is comparatively light.

@@ -85,7 +85,7 @@ Production host: **`https://tour.ishare.ca`**. Deploy steps:
 ```
 assets/{clientId}/     Per-client media (panoramas, brand logos)
 public/assets/         Auto-synced copy (served at /assets/...)
-tours/                 `{tourId}.json`, `{tourId}-knowledge.json`, `catalog.json`
+tours/                 `{tourId}.json`, `catalog.json`
 src/
   viewer/            Photo Sphere Viewer integration
   components/        UI (nav, popups, AI assistant)
@@ -129,7 +129,7 @@ http://localhost:5173/ken-sargent-house/overview?dev=1
 ## AI Assistant
 
 The bottom-right **AI** button opens a chat panel that knows your current scene.
-MVP uses mock responses from `tours/{tourId}-knowledge.json`. Replace
+MVP assembles answers from tour JSON + catalog (`assembleTourContext`). Replace
 `mockAssistant.ts` with an API call for production LLM integration.
 
 ## Tech Stack

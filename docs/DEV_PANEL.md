@@ -1,8 +1,8 @@
 # Dev panel — authoring & QA (`?dev=1`)
 
 > Local tour authoring and QA UI in the Vite viewer. Writes `tours/*.json`,
-> knowledge files, catalog entries, and assets via the dev API (`/__dev/api`).
-> **Not available in production builds** — precursor to Phase 2 Admin CMS.
+> catalog entries, and assets via the dev API (`/__dev/api`). **Not available in
+> production builds** — precursor to Phase 2 Admin CMS.
 
 ---
 
@@ -65,12 +65,12 @@ and `…/thumbnails/`.
 └─────────────────────────────────────────────┘
 ```
 
-| Tab        | Purpose                                                                  |
-| ---------- | ------------------------------------------------------------------------ |
-| **Scene**  | Current scene — panorama, hotspots                                       |
-| **Tour**   | Open tour — metadata, floor plan, knowledge, scenes, tour-only overrides |
-| **Client** | Catalog clients — contact, shared branding, create client _(see below)_  |
-| **Debug**  | URL flag toggles, embed QA                                               |
+| Tab        | Purpose                                                                 |
+| ---------- | ----------------------------------------------------------------------- |
+| **Scene**  | Current scene — panorama, hotspots                                      |
+| **Tour**   | Open tour — metadata, floor plan, scenes, tour-only overrides           |
+| **Client** | Catalog clients — contact, shared branding, create client _(see below)_ |
+| **Debug**  | URL flag toggles, embed QA                                              |
 
 **Code:** `src/components/DevTools.tsx`, `src/components/DevViewPanel.tsx`
 
@@ -189,11 +189,11 @@ Secondary tabs: **Manage** | **Create**
 
 Edits the tour currently loaded in the viewer.
 
-| Section         | Writes to                                           | Notes                                                                                           |
-| --------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Basics**      | `tours/{id}.json`, catalog tour entry               | Title, category, summary, visibility, featured, product name, transitions, immersive background |
-| **Branding**    | `tours/{id}.json` when custom                       | **Use client branding** inherits from Client tab; **Custom** overrides on this tour only        |
-| **Danger zone** | deletes tour JSON, knowledge, catalog entry, assets | Irreversible                                                                                    |
+| Section         | Writes to                                | Notes                                                                                           |
+| --------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Basics**      | `tours/{id}.json`, catalog tour entry    | Title, category, summary, visibility, featured, product name, transitions, immersive background |
+| **Branding**    | `tours/{id}.json` when custom            | **Use client branding** inherits from Client tab; **Custom** overrides on this tour only        |
+| **Danger zone** | deletes tour JSON, catalog entry, assets | Irreversible                                                                                    |
 
 Shared client contact and branding: **Client** tab.
 
@@ -208,20 +208,12 @@ Branding on create:
 - **Custom branding for this tour** — saves to `tours/{id}.json` `branding`
   only.
 
-`*-knowledge.json` is not created on tour create; use Knowledge accordion after
-open.
-
 Changes write to `tours/{tourId}.json` and `tours/catalog.json`.
 
 ### Floor plan
 
 Upload or replace `floorplan.svg`, set dimensions, edit per-scene `map` pin (x,
 y, heading).
-
-### Knowledge (AI assistant)
-
-Edit `tours/{tourId}-knowledge.json` — global intro, per-scene copy, FAQs. Used
-by the mock Guide until Phase 2 LLM integration.
 
 ### Scenes
 
@@ -310,7 +302,6 @@ preserving query flags (`dev`, `embed`, etc.).
 | Client contact / shared branding (Client tab) | `tours/catalog.json` `clients[]`                                  |
 | Tour-only branding                            | `tours/{id}.json` `branding`, `assets/{clientId}/{tourId}/brand/` |
 | Client branding                               | `catalog.json` `clients[].branding`, `assets/{clientId}/brand/`   |
-| Knowledge                                     | `tours/{id}-knowledge.json`                                       |
 | Scene / hotspot                               | `tours/{id}.json` (scene graph)                                   |
 | Panorama / scene thumb                        | `assets/{clientId}/{tourId}/panoramas/`, `…/thumbnails/`          |
 

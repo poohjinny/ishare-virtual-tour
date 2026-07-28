@@ -122,7 +122,7 @@ thumbnail exists.
 1. Create `assets/{clientId}/{tourId}/panoramas/` and `…/brand/`
 2. Add panorama JPGs, **convert each to WebP** (see above), reference `.webp` in
    JSON
-3. Add `tours/{tourId}.json` and `tours/{tourId}-knowledge.json`
+3. Add `tours/{tourId}.json`
 4. Register in `src/data/loadTour.ts` and `tours/catalog.json`
 5. Run `npm run sync-assets`
 

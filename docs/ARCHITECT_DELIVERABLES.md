@@ -279,8 +279,7 @@ You do **not** need to deliver:
 | ------------------------------- | ---------------------------------------------- |
 | Scene thumbnails                | `npm run generate-thumbnails`                  |
 | WebP re-compress (if oversized) | `scripts/convert-jpg-to-webp.mjs` or manual QA |
-| `tours/{tourId}.json`           | Hotspots, transitions, map coords              |
-| `tours/{tourId}-knowledge.json` | From client copy                               |
+| `tours/{tourId}.json`           | Hotspots, transitions, map coords, scene copy  |
 | Hotspot yaw/pitch/zoom          | Dev panel `?dev=1`                             |
 | Catalog entry                   | `tours/catalog.json`                           |
 | 3D model optimization           | Mesh merging, LOD if needed (model3d tours)    |

@@ -40,7 +40,7 @@ eventually replace the SeekBeak embed.
 | User doesn't know where they are          | Explore + breadcrumb with active location + history   |
 | Unclear where hotspot leads               | Nav label on hover + scene list                       |
 | Abrupt scene cuts                         | `transition.ts` — pan → zoom → fade → target view     |
-| No location-aware help                    | Guide with `currentSceneId` + knowledge JSON          |
+| No location-aware help                    | Guide with `currentSceneId` + assembled tour context  |
 
 These priorities shaped Phase 0: navigation first, then transitions, hotspots,
 popups, Guide, embed.

@@ -60,8 +60,8 @@ rendering engine.
 
 ### Mock AI (not LLM in MVP)
 
-The scene-aware assistant uses `tours/ken-sargent-knowledge.json` with FAQ and
-keyword matching. This allows:
+The scene-aware assistant assembles context from tour JSON + catalog
+(`assembleTourContext`) — scene copy, namings, and suggested chips. This allows:
 
 - Demo without API keys or backend
 - Controlled answers (important for care facility content)
@@ -164,7 +164,7 @@ ishare-virtual-tour/
 ├── public/assets/             # Auto-synced from assets/ (/assets/...)
 ├── tours/
 │   ├── ken-sargent.json       # Tour definition (scenes, hotspots)
-│   └── ken-sargent-knowledge.json  # AI knowledge base
+│   └── catalog.json           # Clients, tour ids, categories
 ├── docs/                      # Project documentation
 ├── src/
 │   ├── main.tsx
@@ -217,7 +217,7 @@ tours/{tourId}.json
         ├─► SceneNav (scene list)
         └─► transition.ts → virtualTour.setCurrentNode (panorama only)
 
-tours/{tourId}-knowledge.json
+assembleTourContext(tour, sceneId)
         │
         └─► mockAssistant.ts ◄── useTourAssistant ◄── currentSceneId
 

@@ -15,7 +15,7 @@
       ↓
 2. 3D architect models spaces + renders panoramas
       ↓  [ARCHITECT_DELIVERABLES.md]
-3. Engineering wires tour JSON, hotspots, AI knowledge, QA
+3. Engineering wires tour JSON, hotspots, Ask Guide context, QA
       ↓
 4. Client review → publish → embed on client site
 ```
@@ -116,20 +116,20 @@ panorama files (architect → engineering).
 
 ## 4. Scene copy (descriptions)
 
-Each scene has a **description** used in Explore, AI knowledge, and search.
+Each scene has a **description** used in Explore, Ask Guide, and search. Guide
+context is assembled from tour JSON + catalog (scene copy, namings) — there is
+no separate knowledge file.
 
-| Field                             | Required    | Guidance                                      |
-| --------------------------------- | ----------- | --------------------------------------------- |
-| Scene description (2–4 sentences) | Yes         | Donor-facing, warm, specific to what they see |
-| Pronunciation / preferred terms   | Optional    | e.g. official facility names                  |
-| Facts the AI should know          | Recommended | 3–5 bullets per important scene               |
-| FAQs                              | Recommended | 2–4 per scene for Virtual Tour Guide          |
-| Suggested questions (chips)       | Optional    | e.g. “Tell me about the reception area”       |
+| Field                             | Required | Guidance                                      |
+| --------------------------------- | -------- | --------------------------------------------- |
+| Scene description (2–4 sentences) | Yes      | Donor-facing, warm, specific to what they see |
+| Pronunciation / preferred terms   | Optional | e.g. official facility names                  |
 
 **Tone:** Fundraising and stewardship — help donors imagine impact, not a
 clinical spec sheet.
 
-**Stored as:** `tours/{tourId}-knowledge.json` (we can draft from client copy).
+**Stored as:** scene `description` (and related place-lead fields) in
+`tours/{tourId}.json`.
 
 ---
 
@@ -278,7 +278,6 @@ Copy for the client:
 | Panorama renders (WebP)                  | 3D architect → [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md) |
 | Hotspot coordinates (yaw / pitch / zoom) | Engineering (with `?dev=1` tuning)                                      |
 | `tours/{tourId}.json`                    | Engineering                                                             |
-| `tours/{tourId}-knowledge.json`          | Engineering (from client copy)                                          |
 | Scene thumbnails                         | Engineering                                                             |
 | Catalog registration                     | Engineering                                                             |
 

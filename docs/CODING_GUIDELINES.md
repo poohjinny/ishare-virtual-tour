@@ -92,7 +92,7 @@ Pages SPA routing — see `scripts/`.
 ishare-virtual-tour/
 ├── assets/              Source media (synced → public/assets/)
 ├── scripts/             Node build scripts (not bundled — run via package.json)
-├── tours/               Tour JSON + *-knowledge.json per client
+├── tours/               Tour JSON + catalog.json
 ├── public/              Static output + synced assets
 ├── src/
 │   ├── components/      React UI + feature CSS
@@ -210,7 +210,7 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 
 ## Tour content & new clients
 
-1. `assets/{clientId}/{tourId}/` + `tours/{tourId}.json` (+ `-knowledge.json`)
+1. `assets/{clientId}/{tourId}/` + `tours/{tourId}.json`
 2. Register in [`loadTour.ts`](../src/data/loadTour.ts)
 3. `clientId` / `tourId` layout — [`assets/README.md`](../assets/README.md)
 4. **Panoramas:** convert every JPG in `panoramas/` to WebP before commit; JSON

@@ -42,6 +42,6 @@ Project documentation for the iShare virtual tour platform.
 
 - [Root README](../README.md) — install and run
 - [Tour catalog](../tours/catalog.json) — clients, tour ids, categories
-- [Tour configs](../tours/) — `{tourId}.json` and `{tourId}-knowledge.json`
+- [Tour configs](../tours/) — `{tourId}.json` and `catalog.json`
 - [Assets workflow](../assets/README.md) — folder layout, JPG → WebP for
   panoramas

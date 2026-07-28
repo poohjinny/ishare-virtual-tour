@@ -114,9 +114,9 @@ Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 ### Sprint B½ — Dev panel authoring (`?dev=1`)
 
 Local JSON authoring in the Vite dev server — **precursor to Phase 2 Admin
-CMS**. The panel writes `tours/*.json`, `tours/*-knowledge.json`,
-`tours/catalog.json`, and `assets/{clientId}/{tourId}/` without redeploy. Admin
-will reuse the same schemas and API shapes; viewer stays iframe-only.
+CMS**. The panel writes `tours/*.json`, `tours/catalog.json`, and
+`assets/{clientId}/{tourId}/` without redeploy. Admin will reuse the same
+schemas and API shapes; viewer stays iframe-only.
 
 **Evolution:** `DevViewPanel` → `apps/admin` (Next.js) + authenticated dev API.
 Do not embed PSV in admin — preview via iframe to this viewer.
@@ -128,7 +128,7 @@ Do not embed PSV in admin — preview via iframe to this viewer.
 - [x] Create tour (new client or existing) — first scene, logo/favicon, branding
 - [x] Update tour — title, category, website, primary color, logo/favicon alt
 - [x] Catalog visibility (`public` / `unlisted` / `internal`) and featured flag
-- [x] Delete tour — JSON, knowledge, catalog entry, asset folder (danger zone)
+- [x] Delete tour — JSON, catalog entry, asset folder (danger zone)
 - [x] Live catalog snapshot — intro gallery updates without page reload
 - [x] Dev tour cache — create/edit/delete reflects in viewer without reload
 - [x] Bootstrap unknown tour in dev mode (`devFetchTour` when not in static
@@ -163,13 +163,9 @@ Do not embed PSV in admin — preview via iframe to this viewer.
 - [x] Edit info — title, body, display, video URL, image
 - [x] Delete hotspot
 
-**Floor plan & knowledge**
+**Floor plan**
 
 - [x] Floor plan CRUD — upload SVG/PNG/JPG/WebP, width/height, remove
-- [x] Knowledge JSON editor — global + per-scene facts, FAQs, suggested
-  ```
-  questions
-  ```
 
 **Viewer integration**
 
@@ -254,18 +250,15 @@ until Admin app exists; then port endpoints and retire duplicate UI.
 
 ### AI guide (Phase 1 — mock)
 
-Scene-aware assistant over static `tours/*-knowledge.json`. Live LLM backend is
+Scene-aware assistant over assembled tour + catalog context
+(`assembleTourContext`). Live LLM backend is
 [Phase 2 — Live AI assistant](#live-ai-assistant).
 
 **Delivered**
 
-- [x] Mock assistant — scene + tour knowledge FAQs, suggested question chips
+- [x] Mock assistant — scene/tour copy, namings, suggested question chips
 - [x] Guide FAB + chat panel (`AiAssistant`, `AiChatPanel`)
 - [x] CSS orb avatar (`GuideAvatar`) — shared mark, no per-tour guide image
-- [x] Dev panel knowledge editor — global + per-scene facts, FAQs, suggested
-  ```
-  questions
-  ```
 
 **Backlog**
 
@@ -368,13 +361,12 @@ Draft (DB)  →  Preview URL (?preview=token)
 
 ### 5 — Public API (MVP)
 
-| Method | Path                          | Purpose                           |
-| ------ | ----------------------------- | --------------------------------- |
-| `GET`  | `/v1/catalog`                 | intro gallery, client list        |
-| `GET`  | `/v1/tours/:tourId`           | `PublishedTourBundle` (viewer)    |
-| `GET`  | `/v1/tours/:tourId/knowledge` | AI knowledge (or in bundle)       |
-| `POST` | `/v1/tour/chat`               | live assistant                    |
-| `POST` | `/v1/analytics/events`        | scene view, hotspot click (batch) |
+| Method | Path                   | Purpose                           |
+| ------ | ---------------------- | --------------------------------- |
+| `GET`  | `/v1/catalog`          | intro gallery, client list        |
+| `GET`  | `/v1/tours/:tourId`    | `PublishedTourBundle` (viewer)    |
+| `POST` | `/v1/tour/chat`        | live assistant                    |
+| `POST` | `/v1/analytics/events` | scene view, hotspot click (batch) |
 
 Admin (auth required): CRUD clients/tours/scenes, asset upload URLs, publish,
 preview tokens.
@@ -384,8 +376,7 @@ preview tokens.
 Start with **JSONB** `draft_json` / `published_json` per tour; normalize scenes
 and hotspots when hotspot drag editor lands (Phase 3).
 
-Core tables: `clients`, `tours`, `tour_knowledge`, `assets`, `publish_log`,
-admin `users` / roles.
+Core tables: `clients`, `tours`, `assets`, `publish_log`, admin `users` / roles.
 
 ### 7 — Admin MVP pages
 
@@ -399,8 +390,7 @@ admin `users` / roles.
 | `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move                 |
 | `/tours/[tourId]/preview`          | iframe preview with token URL                      | — (viewer `?dev=1` is the preview today)     |
 
-Follow-ups: `/tours/[tourId]/knowledge` (dev panel ✅), `/tours/[tourId]/naming`
-(NO + CTA — partial via NO hotspot forms).
+Follow-ups: `/tours/[tourId]/naming` (NO + CTA — partial via NO hotspot forms).
 
 **Migration rule:** new authoring features land in dev panel first (JSON + dev
 API), then move to Admin when auth and publish exist — same payload shapes.
@@ -462,8 +452,8 @@ POST /v1/tour/chat
 }
 ```
 
-Server loads tour knowledge, builds system prompt, calls Azure OpenAI / OpenAI.
-API keys stay server-side.
+Server assembles tour context from published tour + catalog, builds system
+prompt, calls Azure OpenAI / OpenAI. API keys stay server-side.
 
 ### Database & API (product)
 
@@ -498,7 +488,6 @@ Onboard new clients:
 
 - `assets/{clientId}/` — panoramas, brand
 - `tours/{tourId}.json` — tour config
-- `tours/{tourId}-knowledge.json` — AI knowledge
 - Register tour JSON in `src/services/jsonTourRepository.ts` and
   `tours/catalog.json`
 
@@ -559,7 +548,7 @@ Prototype shipped in Phase 1. Production-readiness requires:
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Hotspot coordinates off          | `?dev=1` dev panel — click logger + CRUD                                                                           |
 | overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                             |
-| Mock AI limited until Phase 2    | Rich FAQs + suggested chips; dev knowledge editor                                                                  |
+| Mock AI limited until Phase 2    | Assemble from tour/catalog; live LLM in Phase 2                                                                    |
 | Large panorama load on mobile    | [PERFORMANCE P0](./PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./PERFORMANCE.md#p1--preload-strategy) |
 | React UI overlap on phone        | [MOBILE.md](./MOBILE.md) — layout pass M1–M2                                                                       |
 | JSON edits bypass admin audit    | Dev panel local-only; Admin + publish for production                                                               |
