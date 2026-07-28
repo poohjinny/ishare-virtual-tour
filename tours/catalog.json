@@ -6,7 +6,8 @@
     "Sporting Venues",
     "International Aid",
     "Social Services",
-    "Tourism"
+    "Tourism",
+    "Demo"
   ],
   "clients": [
     {
@@ -63,7 +64,7 @@
           "id": "t_8kx3m2p9qa",
           "category": "Healthcare",
           "name": "Cancer Research",
-          "visibility": "internal",
+          "visibility": "unlisted",
           "featured": true
         }
       ]
@@ -93,8 +94,8 @@
           "id": "t_r7v4n1c0wd",
           "category": "Culture",
           "name": "Holodomor Museum",
-          "visibility": "internal",
-          "featured": true
+          "visibility": "unlisted",
+          "featured": false
         }
       ]
     },
@@ -118,13 +119,6 @@
       },
       "tours": [
         {
-          "id": "t_2hf6y5b3ue",
-          "category": "Healthcare",
-          "name": "Queensway Carleton Hospital",
-          "visibility": "unlisted",
-          "featured": false
-        },
-        {
           "id": "t_9zs0j4a7xt",
           "category": "Healthcare",
           "name": "Queensway Carleton Hospital",
@@ -132,6 +126,47 @@
           "featured": true
         }
       ]
+    },
+    {
+      "id": "ishare-demos",
+      "name": "iShare®",
+      "website": "https://ishare.ca",
+      "tours": [
+        {
+          "id": "t_ctx4e6rkty",
+          "category": "Demo",
+          "name": "3D Walkthrough Demo",
+          "visibility": "unlisted",
+          "featured": false
+        },
+        {
+          "id": "t_fhvnghlrky",
+          "category": "Demo",
+          "name": "QCH Unreal (SketchUp)",
+          "visibility": "unlisted",
+          "featured": false
+        },
+        {
+          "id": "t_oyryn1va9b",
+          "category": "Demo",
+          "name": "Cozy Room",
+          "visibility": "unlisted",
+          "featured": false
+        },
+        {
+          "id": "t_ciqe1etmpq",
+          "category": "Demo",
+          "name": "London Skyscraper",
+          "visibility": "unlisted",
+          "featured": false
+        }
+      ],
+      "branding": {
+        "logo": "/assets/ishare-demos/brand/logo.png",
+        "logoAlt": "iShare®",
+        "primaryColor": "#d89c21",
+        "favicon": "/assets/ishare-demos/favicon.ico"
+      }
     }
   ]
 }

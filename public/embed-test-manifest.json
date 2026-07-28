@@ -1,6 +1,46 @@
 {
   "tours": [
     {
+      "id": "t_ctx4e6rkty",
+      "name": "3D Walkthrough Demo",
+      "clientName": "iShareÂ®",
+      "firstScene": "s_hpajghgqrv",
+      "scenes": [
+        {
+          "id": "s_xihtcolrwu",
+          "title": "1st Floor"
+        },
+        {
+          "id": "s_kanukh723s",
+          "title": "2nd Floor"
+        },
+        {
+          "id": "s_hpajghgqrv",
+          "title": "Overall"
+        }
+      ]
+    },
+    {
+      "id": "t_oyryn1va9b",
+      "name": "Cozy Room",
+      "clientName": "iShareÂ®",
+      "firstScene": "s_onaext778x",
+      "scenes": [
+        {
+          "id": "s_cabfp6pifi",
+          "title": "Bedroom"
+        },
+        {
+          "id": "s_onaext778x",
+          "title": "Living Area"
+        },
+        {
+          "id": "s_e83oo59bwl",
+          "title": "Workspace"
+        }
+      ]
+    },
+    {
       "id": "t_l01wnq8eh6",
       "name": "Ken Sargent House",
       "clientName": "Grande Prairie Regional Hospital Foundation",
@@ -177,6 +217,30 @@
       ]
     },
     {
+      "id": "t_ciqe1etmpq",
+      "name": "London Skyscraper",
+      "clientName": "iShareÂ®",
+      "firstScene": "s_g13yw9rqga",
+      "scenes": [
+        {
+          "id": "s_g13yw9rqga",
+          "title": "Exterior View"
+        }
+      ]
+    },
+    {
+      "id": "t_fhvnghlrky",
+      "name": "QCH Unreal (SketchUp)",
+      "clientName": "iShareÂ®",
+      "firstScene": "s_gyurkztn6y",
+      "scenes": [
+        {
+          "id": "s_gyurkztn6y",
+          "title": "QCH Unreal"
+        }
+      ]
+    },
+    {
       "id": "t_2hf6y5b3ue",
       "name": "Queensway Carleton Hospital",
       "clientName": "Queensway Carleton Hospital Foundation",
@@ -260,7 +324,7 @@
         },
         {
           "id": "s_d2s5ai83yt",
-          "title": "James Beech Health Care Centre"
+          "title": "James Beach Health Care Centre"
         },
         {
           "id": "s_8s40pp3yyo",

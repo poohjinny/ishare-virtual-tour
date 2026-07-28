@@ -6,43 +6,9 @@
     "summary": "Ken Sargent House is a home away from home for patients receiving treatment at the Grande Prairie Regional Hospital and their families — a program of the Grande Prairie Regional Hospital Foundation."
   },
   "scenes": {
-    "overview": {
-      "title": "Overview",
-      "description": "Take in an aerial view of Ken Sargent House and the surrounding campus. From here you can see the full building layout, the main entrance, visitor parking, and the landscaped grounds that welcome patients and families. The house sits within walking distance of the Grande Prairie Regional Hospital, making it a convenient home away from home during treatment.",
-      "facts": [
-        "The building has a main entrance on the front wooden deck.",
-        "Parking is available on the right side of the campus.",
-        "The facility is surrounded by green fields and landscaped grounds.",
-        "The house is within walking distance of the Grande Prairie Regional Hospital."
-      ],
-      "faqs": [
-        {
-          "q": "What is this building?",
-          "a": "This is Ken Sargent House — a home away from home for patients and families accessing healthcare in Grande Prairie, supported by the Grande Prairie Regional Hospital Foundation."
-        },
-        {
-          "q": "Where is the main entrance?",
-          "a": "The main entrance is on the front of the building, accessible via the wooden deck. Click the Main Entrance hotspot to go there."
-        },
-        {
-          "q": "Is there parking?",
-          "a": "Yes. Parking is located on the right side of the campus, visible from this overview."
-        },
-        {
-          "q": "How close is the hospital?",
-          "a": "Ken Sargent House is within walking distance of the Grande Prairie Regional Hospital — a short walk for patients and families."
-        }
-      ],
-      "suggestedQuestions": [
-        "What is this building?",
-        "Where is the main entrance?",
-        "Is there parking?",
-        "How close is the hospital?"
-      ]
-    },
     "s_hfiucp83au": {
       "title": "Kitchen",
-      "description": "The kitchen at Ken Sargent House is a shared space where guests and families can prepare meals, store food, and gather during their stay.",
+      "description": "Explore Kitchen as part of the Ken Sargent House virtual tour.",
       "facts": [
         "The kitchen is a shared amenity for guests staying at Ken Sargent House.",
         "Families can prepare meals and store food during extended stays."
@@ -58,7 +24,7 @@
       ]
     },
     "s_xl88jb8utx": {
-      "title": "Entrance to the Base Level",
+      "title": "Basement Entrance",
       "description": "Approach the base-level entrance of Ken Sargent House from the landscaped grounds. This lower entry provides access to guest spaces on the building's foundation level.",
       "facts": [
         "The base-level entrance is on the lower side of the building.",
@@ -75,8 +41,8 @@
       ]
     },
     "s_dehwdo8kx1": {
-      "title": "Comfort Corner",
-      "description": "The Comfort Corner at Ken Sargent House offers a welcoming space where guests can pause, connect, and find a moment of calm during their stay.",
+      "title": "Commual Space",
+      "description": "Explore Commual Space as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Comfort Corner is a welcoming lounge space for guests and families."
       ],
@@ -120,7 +86,7 @@
     },
     "s_vddzraqi1q": {
       "title": "Reception",
-      "description": "Step into the reception lobby at Ken Sargent House — the first point of contact for guests and families. Check in at the welcome desk, take a seat in the comfortable lounge area, and get directions to the dining hall and other guest spaces. Our reception team is here to help everyone feel informed, supported, and at home.",
+      "description": "Explore Reception as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Check in at the front desk with the WELCOME sign.",
         "Dining Hall is to the left past the elevator.",
@@ -147,30 +113,42 @@
       ]
     },
     "s_dtv27wfrbi": {
-      "title": "Overall",
-      "description": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
+      "title": "Overview",
+      "description": "Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of the Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
       "facts": [
-        "Overall is part of the Ken Sargent House virtual tour.",
-        "Use navigation markers to move between areas of Ken Sargent House."
+        "The building has a main entrance on the front wooden deck.",
+        "Parking is available on the right side of the campus.",
+        "The facility is surrounded by green fields and landscaped grounds.",
+        "The house is within walking distance of the Grande Prairie Regional Hospital."
       ],
       "faqs": [
         {
-          "q": "What can I see in Overall?",
-          "a": "A Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of a Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat."
+          "q": "What is this building?",
+          "a": "This is Ken Sargent House — a home away from home for patients and families accessing healthcare in Grande Prairie, supported by the Grande Prairie Regional Hospital Foundation."
         },
         {
-          "q": "What is Ken Sargent House?",
-          "a": "Ken Sargent House is an interactive virtual tour. Use navigation markers to move between scenes."
+          "q": "Where is the main entrance?",
+          "a": "The main entrance is on the front of the building, accessible via the wooden deck. Click the Main Entrance hotspot to go there."
+        },
+        {
+          "q": "Is there parking?",
+          "a": "Yes. Parking is located on the right side of the campus, visible from this overview."
+        },
+        {
+          "q": "How close is the hospital?",
+          "a": "Ken Sargent House is within walking distance of the Grande Prairie Regional Hospital — a short walk for patients and families."
         }
       ],
       "suggestedQuestions": [
-        "Tell me about Overall",
-        "What is available at Ken Sargent House?"
+        "What is this building?",
+        "Where is the main entrance?",
+        "Is there parking?",
+        "How close is the hospital?"
       ]
     },
     "s_h310pim38b": {
       "title": "Main Floor",
-      "description": "Explore Main Floor as part of the Ken Sargent House virtual tour.",
+      "description": "Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of the Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
       "facts": [
         "Main Floor is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -192,7 +170,7 @@
     },
     "s_ca8beuikkq": {
       "title": "Second Floor",
-      "description": "Explore Second Floor as part of the Ken Sargent House virtual tour.",
+      "description": "Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of the Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
       "facts": [
         "Second Floor is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -214,7 +192,7 @@
     },
     "s_t3it0l8bsk": {
       "title": "Basement",
-      "description": "Explore Basement as part of the Ken Sargent House virtual tour.",
+      "description": "Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of the Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat.",
       "facts": [
         "Basement is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -258,7 +236,7 @@
     },
     "s_3fh5x3humm": {
       "title": "Dining Area",
-      "description": "The Dining Area at the Ken Sargent House is for more than sharing a meal, it’s a space for connection and togetherness. It’s where families gather around the table, share stories, and support each other. As the hub of the home, it provides more than just nourishment—it’s a place of comfort, where conversations are plenty and family and friends can visit, play games, and share in conversation. Your support helps us maintain this special space, ensuring that families have a place to eat, share, and build lasting memories during their time here.",
+      "description": "Explore Dining Area as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Dining Area is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -279,8 +257,8 @@
       ]
     },
     "s_jfn7k06rhj": {
-      "title": "Family & Patient Communal Space",
-      "description": "The Family & Patient Communal Space at the Ken Sargent House is a haven designed to bring families together during difficult times to find comfort and connection, building a strong sense of community. This shared space fosters support and camaraderie, helping families navigate difficult times with emotional resilience. It’s a place, in the main area of the home where families share experiences, offer advice, and build lasting relationships that extend beyond their stay. \n\nThis is where the magic of natural support systems are created, where strangers become friends and friends turn into family. Your support helps us maintain this vital space, ensuring families have a safe, supportive environment to heal together.",
+      "title": "Families & Patients Communal Space",
+      "description": "Explore Families & Patients Communal Space as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Family & Patient Communal Space is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -301,8 +279,8 @@
       ]
     },
     "s_x6w0tq0sa5": {
-      "title": "Main Floor Stairs",
-      "description": "Explore Main Floor Stairs as part of the Ken Sargent House virtual tour.",
+      "title": "Stairwell",
+      "description": "Explore Stairwell as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Main Floor Stairs is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -323,8 +301,8 @@
       ]
     },
     "s_0vzggtgj1g": {
-      "title": "Accessible & Larger Suites",
-      "description": "At the Ken Sargent House, our two accessible and two larger suites offer families a private sanctuary during their loved one’s medical treatment.\n\nThese larger suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nThe accessible & larger suites include all the basic necessities—two beds, a bathroom with a shower, and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe, private and comforting environment during their time of need.",
+      "title": "Suite 'A2'",
+      "description": "Explore Suite 'A2' as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Accessible & Larger Suites is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -345,8 +323,8 @@
       ]
     },
     "s_sb851xh639": {
-      "title": "Suite A",
-      "description": "At the Ken Sargent House, Suite A offers families a private sanctuary on the main level during their loved one’s medical treatment.\n\nThis 476 square foot suite provides privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nWith its convenient location near the hospital, Suite A  in the Ken Sargent House reduces travel stress and ensures families can stay close to their loved ones when it matters most.\n\n        The suite includes all the basic necessities—two beds, a bathroom with a bathtub, and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe and comforting environment during their time of need.",
+      "title": "Suite 'A'",
+      "description": "Explore Suite 'A' as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Suite A is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -368,7 +346,7 @@
     },
     "s_c13b4lgg8f": {
       "title": "Gazebo",
-      "description": "The Gazebo at the Ken Sargent House offers a peaceful retreat, set against the serene backdrop of Northwestern Alberta’s breathtaking natural beauty. Surrounded by the quiet tranquility of the outdoors, it’s a space where families can unwind, reflect, and find peace amidst the challenges they face. \n\nFor caregivers and families alike, this space provides the perfect opportunity to recharge, away from the clinical environment. Whether you’re sitting in the stillness of winter or enjoying the cool northern breeze, the Gazebo is a sanctuary that promotes healing and connection. \n\nYour support ensures that this tranquil retreat continues to serve families in need of respite.",
+      "description": "Explore Gazebo as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Gazebo is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -390,7 +368,7 @@
     },
     "s_ps029p4kzn": {
       "title": "Pantry",
-      "description": "At the Ken Sargent House, our pantry is more than a place to store food—it’s a vital resource for families. The pantry offers convenient access to dry goods, snacks, and personal food storage, ensuring that families can focus on what matters most—being there for one another. \n\nIt also alleviates financial burdens by offering nutritious, cost-effective options that support the well-being of our families. Whether it’s the long winters or the unpredictable weather, the pantry helps families maintain healthy eating habits during challenging times. \n\nYour support allows us to continue offering this essential service, providing comfort and relief when it’s needed most.",
+      "description": "Explore Pantry as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Pantry is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -412,7 +390,7 @@
     },
     "s_91jpwd8ota": {
       "title": "Playroom",
-      "description": "The Playroom at the Ken Sargent House offers a burst of joy and creativity for children, allowing them to engage in playful activities and foster growth, even in the midst of adversity. \n\nIn Northwestern Alberta, where winters are long and isolation can set in, the Playroom is a vital space where children can reduce stress, express themselves, and experience moments of happiness. This safe and welcoming space encourages social interactions, while giving children a sense of normalcy and fun. \n\nYour support helps keep this haven alive, offering children and families a much-needed escape and the chance to create memories of joy, even in difficult times.",
+      "description": "Explore Playroom as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Playroom is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -433,8 +411,8 @@
       ]
     },
     "s_rmf30ndp5j": {
-      "title": "Main Floor Corridor",
-      "description": "Explore Main Floor Corridor as part of the Ken Sargent House virtual tour.",
+      "title": "Corridor",
+      "description": "Explore Corridor as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Main Floor Corridor is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -477,8 +455,8 @@
       ]
     },
     "s_pvcsd2t0w2": {
-      "title": "Laundry",
-      "description": "The Laundry Room at the Ken Sargent House is more than just a convenience—it’s one less hurdle a family has to navigate. It offers cost savings by eliminating the need for external laundry services and ensures hygiene and comfort with clean clothes and bedding. The laundry room, located in the basement of the home is accessible by elevator and is free for families to use. \n\nYour support keeps this essential space running, providing comfort and care when families need it most.",
+      "title": "Laundry Room",
+      "description": "Explore Laundry Room as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Laundry is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -499,8 +477,8 @@
       ]
     },
     "s_fb3dsuusxy": {
-      "title": "Basement Corridor",
-      "description": "Explore Basement Corridor as part of the Ken Sargent House virtual tour.",
+      "title": "Corridor",
+      "description": "Explore Corridor as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Basement Corridor is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -522,7 +500,7 @@
     },
     "s_c77nixtvmw": {
       "title": "Social Space",
-      "description": "Welcome to the Social Space at the Ken Sargent House—a space designed to bring families together. Grab a friend and make yourselves a hot coffee or tea, relax in the comfort of this space that encourages connection, allowing families to share experiences, form supportive relationships, and find comfort in one another. It's a place where stress melts away, and emotional support thrives, as families understand and uplift each other.\n\nWhether you’re spending quality time with loved ones or engaging in house activities, the social space promotes well-being and reduces stress. \n\nThe social space is a place to build lasting relationships, and natural support systems to guide families through their journey and create bonds that extend far beyond one’s stay.",
+      "description": "Explore Social Space as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Social Space is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -543,8 +521,8 @@
       ]
     },
     "s_leoc61fw42": {
-      "title": "Quite Space",
-      "description": "Shhhhhhhh, join us in The Quiet Space at the Ken Sargent House, a peaceful retreat—much like the stillness of Northwestern Alberta’s vast wilderness. Here, families can reflect, recharge, and regain their mental and emotional strength. \n\nWhether it’s a moment of silence to gather their thoughts, nestled up with a good book or a quiet conversation, this space provides the calm needed to stay centered and focused. The Quiet Space encourages self-care and offers a refuge where families can process their emotions and find renewal. \n\nYour support ensures that this sanctuary remains a calming and restorative space for families to gather strength.",
+      "title": "Quite Room",
+      "description": "Explore Quite Room as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Quite Space is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -565,8 +543,8 @@
       ]
     },
     "s_q5obngkupu": {
-      "title": "Suite B",
-      "description": "At the Ken Sargent House, we have 17 suites that offer families a private sanctuary during their loved one’s medical treatment.\n\nThese suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during challenging times.\n\nThese suites includes all the basic necessities—with either one or two beds, a bathroom with a shower or bathtub and storage for personal belongings—making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe, private and comforting environment during their time of need.",
+      "title": "Suite 'B'",
+      "description": "Explore Suite 'B' as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Suite B is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -587,8 +565,8 @@
       ]
     },
     "s_tcr44j461u": {
-      "title": "Comfort Corner",
-      "description": "Nestled in the heart of the Ken Sargent House is a small but meaningful comfort corner—a place designed to bring families together through shared experiences, much like the close-knit region of Northwestern Alberta. \n\nThis shared area provides emotional support, fostering a sense of belonging and connection, especially during tough times. Here, families can relax, share stories, and find strength in each other. It’s a space to create bonds that transcend their stay, offering comfort and reassurance that they’re never alone. \n\nYour support helps us maintain this vital area, ensuring that families can continue to find peace, community, and hope within our walls.",
+      "title": "Communal Space",
+      "description": "Explore Communal Space as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Comfort Corner on the second floor is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -609,8 +587,8 @@
       ]
     },
     "s_hxsjmv1tio": {
-      "title": "Fitness Room",
-      "description": "The Fitness Room at the Ken Sargent House is more than just a place to work out—it’s a place where families can build strength, resilience, and hope in the face of adversity. \n\nDuring the long northern winters or the endless daylight of summer, staying active is key to mental and physical well-being. Our fitness space helps families reduce stress, stay strong, and cope with the emotional strain of challenging times. \n\nFor caregivers, it’s an essential outlet, offering a place to release tension and restore balance. \n\nYour support keeps this space active, enabling families to take care of themselves as they care for their loved ones.",
+      "title": "Exercise Room",
+      "description": "Explore Exercise Room as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Fitness Room is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -785,8 +763,8 @@
       ]
     },
     "s_sw7dxt8z3g": {
-      "title": "Elevator Door Panel",
-      "description": "Explore Elevator Door Panel as part of the Ken Sargent House virtual tour.",
+      "title": "Elevator Door",
+      "description": "Explore Elevator Door as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Elevator Door Panel is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
@@ -852,7 +830,7 @@
     },
     "s_6e38qm2jc1": {
       "title": "Linen Room",
-      "description": "Located between the custodian room and the laundry room, the Linen Room is a small but vital space that helps ensure families at the Ken Sargent House experience comfort, warmth, and dignity throughout their stay. This room holds the essentials\nthat make a house feel like a home-fresh bedding, soft towels, and the comforting items that bring a sense of normalcy during challenging times. \n\nEvery clean sheet and folded towel represents a moment of care. Whether a family is arriving after a long drive, returning from a full day at the hospital, or settling in for the night, the linens stored here help create an environment that is restful, clean, and nurturing.",
+      "description": "Explore Linen Room as part of the Ken Sargent House virtual tour.",
       "facts": [
         "Linen Room is part of the Ken Sargent House virtual tour.",
         "Use navigation markers to move between areas of Ken Sargent House."
