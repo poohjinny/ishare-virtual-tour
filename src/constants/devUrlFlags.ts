@@ -14,7 +14,7 @@ export interface DevUrlFlagToggle {
   ) => Partial<Record<PreservedSearchKey, string | null>>;
 }
 
-/** QA URL flags — toggled from the dev panel when `?dev=1`. */
+/** General QA URL flags — Debug → URL flags. */
 export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
   {
     key: 'embed',
@@ -22,13 +22,6 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     hint: 'Iframe delivery — trim Share/Help, lighter splash, postMessage',
     isOn: (params) => params.embed,
     urlPatch: (enabled) => ({ embed: enabled ? '1' : null }),
-  },
-  {
-    key: 'chatTest',
-    label: 'chatTest',
-    hint: 'AI chat scroll test messages',
-    isOn: (params) => params.chatTest,
-    urlPatch: (enabled) => ({ chatTest: enabled ? '1' : null }),
   },
   {
     key: 'notFoundTest',
@@ -75,11 +68,41 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     isOn: (params) => params.firstVisitHint,
     urlPatch: (enabled) => ({ firstVisitHint: enabled ? '1' : null }),
   },
+];
+
+/**
+ * Ask Guide QA flags — Debug → Ask Guide.
+ *
+ * - `askGuide` — show the FAB/panel
+ * - `guideMock` — chat works with scripted replies (no OpenAI)
+ * - `guideUiTest` — frozen UI fixtures only (scroll + thinking); no composing
+ */
+export const DEV_ASK_GUIDE_FLAG_TOGGLES: DevUrlFlagToggle[] = [
   {
     key: 'askGuide',
     label: 'askGuide',
-    hint: 'Show Ask Guide FAB + panel (overrides product default off)',
+    hint: 'Show Ask Guide FAB + panel (product default is off)',
     isOn: (params) => params.askGuide,
     urlPatch: (enabled) => ({ askGuide: enabled ? '1' : null }),
+  },
+  {
+    key: 'guideMock',
+    label: 'guideMock',
+    hint: 'Chat with scripted mock replies + short think delay — no OpenAI tokens',
+    isOn: (params) => params.guideMock,
+    urlPatch: (enabled) => ({
+      guideMock: enabled ? '1' : null,
+      askGuideMock: null,
+    }),
+  },
+  {
+    key: 'guideUiTest',
+    label: 'guideUiTest',
+    hint: 'Frozen UI preview — scroll fixtures + thinking dots (no chat / no API)',
+    isOn: (params) => params.guideUiTest,
+    urlPatch: (enabled) => ({
+      guideUiTest: enabled ? '1' : null,
+      chatTest: null,
+    }),
   },
 ];

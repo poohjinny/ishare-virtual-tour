@@ -117,11 +117,8 @@ export function syncKnowledgeFromTour(tour, knowledge, options = {}) {
     const current = next.scenes[sceneId] ?? {};
 
     next.scenes[sceneId] = {
-      title: isBlank(current.title) ? defaults.title : current.title.trim(),
-      description:
-        isBlank(current.description) ?
-          defaults.description
-        : current.description.trim(),
+      title: defaults.title,
+      description: defaults.description,
       facts:
         Array.isArray(current.facts) && current.facts.length > 0 ?
           current.facts

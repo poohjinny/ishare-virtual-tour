@@ -160,12 +160,7 @@ export function updateKnowledge({
         tourScene?.description,
       );
 
-    if (scenePatch.title !== undefined) {
-      current.title = scenePatch.title.trim();
-    }
-    if (scenePatch.description !== undefined) {
-      current.description = scenePatch.description.trim();
-    }
+    // title/description are canonical on the tour scene — do not accept patches.
     if (scenePatch.facts !== undefined) {
       current.facts = scenePatch.facts;
     }
@@ -179,10 +174,12 @@ export function updateKnowledge({
     knowledge.scenes[sceneId] = current;
   }
 
+  // Always mirror narrative fields from tour after any update.
+  const mirrored = syncKnowledgeFromTour(tour, knowledge);
   writeFileSync(
     knowledgePath,
-    `${JSON.stringify(knowledge, null, 2)}\n`,
+    `${JSON.stringify(mirrored, null, 2)}\n`,
     'utf8',
   );
-  return { knowledgePath, knowledge, created: existing.missing };
+  return { knowledgePath, knowledge: mirrored, created: existing.missing };
 }

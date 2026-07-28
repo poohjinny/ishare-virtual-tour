@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { slugifyHotspotName } from './tourSceneDev.mjs';
 import {
@@ -12,6 +12,7 @@ import {
   readCatalogJson,
   writeCatalogJson,
 } from './tourCatalogDev.mjs';
+import { deleteTour } from './tourDeleteDev.mjs';
 
 const DEFAULT_PRIMARY_COLOR = '#007078';
 
@@ -220,4 +221,95 @@ export async function updateClient({
   writeCatalogJson(toursDir, catalog);
 
   return { clientId, client };
+}
+
+function removePathIfExists(path) {
+  if (!existsSync(path)) return false;
+  rmSync(path, { recursive: true, force: true });
+  return true;
+}
+
+export function validateDeleteClientPayload(body) {
+  const { clientId, confirmClientId } = body ?? {};
+  const normalizedClientId = clientId?.trim();
+  const normalizedConfirm = confirmClientId?.trim();
+
+  if (!normalizedClientId) {
+    throw new Error('clientId is required');
+  }
+  if (!normalizedConfirm) {
+    throw new Error('confirmClientId is required');
+  }
+  if (normalizedClientId !== normalizedConfirm) {
+    throw new Error('confirmClientId must match clientId');
+  }
+
+  return { clientId: normalizedClientId, confirmClientId: normalizedConfirm };
+}
+
+/**
+ * Cascade-delete a catalog client: every tour under it, then client assets.
+ * confirmClientId must match clientId (typed confirmation).
+ */
+export function deleteClient({ root, toursDir, assetsRoot, clientId }) {
+  const catalog = readCatalogJson(toursDir);
+  const client = findCatalogClientRecord(catalog, clientId);
+  if (!client) {
+    throw new Error(`Client not found in catalog: ${clientId}`);
+  }
+
+  const tourIds = (client.tours ?? []).map((entry) => entry.id);
+  const deletedTours = [];
+
+  for (const tourId of tourIds) {
+    const result = deleteTour({ root, toursDir, assetsRoot, tourId });
+    deletedTours.push(result.tourId);
+  }
+
+  // Empty clients (no tours) are not removed by deleteTour — drop explicitly.
+  const nextCatalog = readCatalogJson(toursDir);
+  const stillPresent = Boolean(findCatalogClientRecord(nextCatalog, clientId));
+  if (stillPresent) {
+    nextCatalog.clients = (nextCatalog.clients ?? []).filter(
+      (entry) => entry.id !== clientId,
+    );
+    writeCatalogJson(toursDir, nextCatalog);
+  }
+
+  const assetsDir = join(assetsRoot, clientId);
+  const publicAssetsDir = join(root, 'public', 'assets', clientId);
+  const removedAssetsDir = removePathIfExists(assetsDir);
+  const removedPublicAssetsDir = removePathIfExists(publicAssetsDir);
+
+  const redirectCatalog = readCatalogJson(toursDir);
+  let redirectTourId = null;
+  for (const entry of redirectCatalog.clients ?? []) {
+    for (const tour of entry.tours ?? []) {
+      if (tour.visibility !== 'internal') {
+        redirectTourId = tour.id;
+        break;
+      }
+    }
+    if (redirectTourId) break;
+  }
+  if (!redirectTourId) {
+    for (const entry of redirectCatalog.clients ?? []) {
+      const first = entry.tours?.[0];
+      if (first) {
+        redirectTourId = first.id;
+        break;
+      }
+    }
+  }
+
+  return {
+    clientId,
+    deletedTourIds: deletedTours,
+    redirectTourId,
+    removed: {
+      catalogEntry: true,
+      assetsDir: removedAssetsDir,
+      publicAssetsDir: removedPublicAssetsDir,
+    },
+  };
 }

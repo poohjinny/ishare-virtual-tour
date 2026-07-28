@@ -2,6 +2,7 @@ import type {
   FaqEntry,
   Hotspot,
   NamingDonor,
+  NamingOpportunityRecord,
   NamingOpportunityStatus,
   NavHotspotVariant,
   PopupDisplay,
@@ -49,10 +50,10 @@ export interface DevNavHotspotPayload extends Omit<
   previewImage?: string;
 }
 
-export interface DevNamingHotspotPayload extends Omit<
-  DevHotspotBasePayload,
-  'name'
-> {
+export interface DevNamingOpportunityPayload {
+  tourId: string;
+  /** Host scene for title/body inherit when catalog fields are omitted. */
+  sceneId: string;
   name?: string;
   price: number;
   status: NamingOpportunityStatus;
@@ -61,6 +62,13 @@ export interface DevNamingHotspotPayload extends Omit<
   image?: string;
   donor?: NamingDonor | null;
   donorLogoFile?: Blob | File | null;
+}
+
+export interface DevNamingHotspotPayload extends Omit<
+  DevHotspotBasePayload,
+  'name'
+> {
+  namingId: string;
   targetView?: ViewPosition;
   previewFile?: Blob | File | null;
 }
@@ -188,17 +196,28 @@ export function devCreateNavHotspot(payload: DevNavHotspotPayload) {
   );
 }
 
+export async function devCreateNamingOpportunity({
+  donorLogoFile,
+  ...payload
+}: DevNamingOpportunityPayload) {
+  const body: Record<string, unknown> = { ...payload };
+  if (donorLogoFile) {
+    body.donorLogoFileBase64 = await fileToBase64(donorLogoFile);
+  }
+
+  return postDevTourJson<{ ok: true; record: NamingOpportunityRecord }>(
+    '/naming-opportunity',
+    body,
+  );
+}
+
 export async function devCreateNamingHotspot({
   previewFile,
-  donorLogoFile,
   ...payload
 }: DevNamingHotspotPayload) {
   const body: Record<string, unknown> = { ...payload };
   if (previewFile) {
     body.previewFileBase64 = await fileToBase64(previewFile);
-  }
-  if (donorLogoFile) {
-    body.donorLogoFileBase64 = await fileToBase64(donorLogoFile);
   }
 
   return postDevTourJson<{ ok: true; hotspot: Hotspot }>(
@@ -516,6 +535,20 @@ export async function devUpdateClient({
   }>('/client/update', { ...payload, logoFileBase64, faviconFileBase64 });
 }
 
+export interface DevDeleteClientPayload {
+  clientId: string;
+  confirmClientId: string;
+}
+
+export function devDeleteClient(payload: DevDeleteClientPayload) {
+  return postDevTourJson<{
+    ok: true;
+    clientId: string;
+    deletedTourIds: string[];
+    redirectTourId: string | null;
+  }>('/client/delete', payload);
+}
+
 export async function devSuggestBranding(
   websiteUrl: string,
 ): Promise<DevSuggestBrandingResult> {
@@ -701,6 +734,7 @@ export interface DevUpdateScenePayload {
   placeLead?: string;
   previewVideoUrl?: string;
   videoUrl?: string;
+  visibility?: 'public' | 'unlisted' | 'internal';
   setAsFirstScene?: boolean;
 }
 
@@ -722,6 +756,8 @@ export interface DevUpdateNavHotspotPayload extends DevHotspotIdPayload {
 }
 
 export interface DevUpdateNamingHotspotPayload extends DevHotspotIdPayload {
+  /** Reassign this placement to another catalog entry (`no_*`). */
+  namingId?: string;
   title?: string;
   price?: number;
   status?: NamingOpportunityStatus;

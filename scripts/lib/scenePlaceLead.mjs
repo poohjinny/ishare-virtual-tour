@@ -32,6 +32,13 @@ export function abbreviateNamingBodyLead(
   return `${clipped.replace(/[.,;:!?–—-]+$/u, '').trimEnd()}…`;
 }
 
+function isNamingPin(hotspot) {
+  return (
+    hotspot?.type === 'info' &&
+    Boolean(hotspot.namingId?.trim() || hotspot.popup?.namingOpportunity)
+  );
+}
+
 function listSceneNamingBodies(tour, scene) {
   const bodies = [];
   const sceneHotspots = scene.hotspots ?? [];
@@ -39,10 +46,13 @@ function listSceneNamingBodies(tour, scene) {
     (hotspot) => hotspot.sceneId === scene.id,
   );
   const hotspots = [...sceneHotspots, ...tourHotspots];
+  const catalog = tour.namingOpportunities ?? {};
 
   for (const hotspot of hotspots) {
-    if (!hotspot.popup?.namingOpportunity) continue;
-    const body = hotspot.popup.body?.trim();
+    if (!isNamingPin(hotspot)) continue;
+    const namingId = hotspot.namingId?.trim();
+    const record = namingId ? catalog[namingId] : null;
+    const body = hotspot.popup?.body?.trim() || record?.body?.trim() || '';
     if (body) bodies.push(body);
   }
   return bodies;
