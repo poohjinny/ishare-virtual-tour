@@ -241,18 +241,19 @@ Single accordion card: **URL flags**. Toggles apply immediately via URL
 
 ### URL flags
 
-| Flag                | Effect                                                         |
-| ------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `embed`             | `?embed=1` — trim Share/Help FABs, lighter splash, postMessage |
-| `intro`             | `?intro=1                                                      | 0`— force or skip client tour picker at`/` (tri-state select + Open button) |
-| `chatTest`          | AI chat scroll test messages                                   |
-| `notFoundTest`      | Force tour not-found (404) screen                              |
-| `loadErrorTest`     | Force viewer load-error overlay (panorama + 3D)                |
-| `disableNavPreview` | Disable nav hotspot mini viewer                                |
-| `skipLanding`       | Skip landing zoom — start at `defaultView`                     |
-| `splashHold`        | Hold load splash longer (loader UX test)                       |
-| `firstVisitHint`    | Force first-visit coach pill (ignores localStorage)            |
-| `askGuide`          | Show Ask Guide FAB + panel (overrides product default off)     |
+| Flag                | Effect                                                              |
+| ------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `embed`             | `?embed=1` — trim Share/Help FABs, lighter splash, postMessage      |
+| `intro`             | `?intro=1                                                           | 0`— force or skip client tour picker at`/` (tri-state select + Open button) |
+| `notFoundTest`      | Force tour not-found (404) screen                                   |
+| `loadErrorTest`     | Force viewer load-error overlay (panorama + 3D)                     |
+| `disableNavPreview` | Disable nav hotspot mini viewer                                     |
+| `skipLanding`       | Skip landing zoom — start at `defaultView`                          |
+| `splashHold`        | Hold load splash longer (loader UX test)                            |
+| `firstVisitHint`    | Force first-visit coach pill (ignores localStorage)                 |
+| `askGuide`          | Show Ask Guide FAB + panel (overrides product default off)          |
+| `guideMock`         | Chat with scripted mock replies — no OpenAI (alias: `askGuideMock`) |
+| `guideUiTest`       | Frozen UI preview — scroll + thinking fixtures (alias: `chatTest`)  |
 
 Combine with `dev=1` as needed, e.g. `?dev=1&embed=1`.
 

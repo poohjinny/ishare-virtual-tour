@@ -28,6 +28,10 @@ assets/
 | `holodomor`             | `t_r7v4n1c0wd` | https://holodomor.ca/             | `assets/holodomor/t_r7v4n1c0wd/`             |
 | `qchfoundation`         | `t_2hf6y5b3ue` | https://qchfoundation.ca/         | `assets/qchfoundation/t_2hf6y5b3ue/`         |
 | `qchfoundation`         | `t_9zs0j4a7xt` | https://qchfoundation.ca/         | `assets/qchfoundation/t_9zs0j4a7xt/`         |
+| `ishare-demos`          | `t_ctx4e6rkty` | https://ishare.ca/                | `assets/ishare-demos/t_ctx4e6rkty/` (3D)     |
+| `ishare-demos`          | `t_fhvnghlrky` | https://ishare.ca/                | `assets/ishare-demos/t_fhvnghlrky/` (3D)     |
+| `ishare-demos`          | `t_oyryn1va9b` | https://ishare.ca/                | `assets/ishare-demos/t_oyryn1va9b/` (3D)     |
+| `ishare-demos`          | `t_ciqe1etmpq` | https://ishare.ca/                | `assets/ishare-demos/t_ciqe1etmpq/` (3D)     |
 
 ## Client id convention
 
