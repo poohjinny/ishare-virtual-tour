@@ -15,6 +15,7 @@ import {
   buildSceneVisitOrder,
   SCENE_GROUP_OTHER_ID,
 } from '../viewer/sceneDepth';
+import { isSceneVisibleInExplore } from './sceneVisibility';
 
 export interface TourDirectoryNamingItem {
   sceneId: string;
@@ -52,11 +53,15 @@ export interface NamingSectorGroup {
 }
 
 export function buildTourNamingDirectory(
-  tour: Pick<Tour, 'scenes' | 'hotspots' | 'viewerType'>,
+  tour: Pick<
+    Tour,
+    'scenes' | 'hotspots' | 'viewerType' | 'namingOpportunities'
+  >,
 ): TourDirectoryNamingItem[] {
   const items: TourDirectoryNamingItem[] = [];
 
   for (const scene of Object.values(tour.scenes)) {
+    if (!isSceneVisibleInExplore(scene)) continue;
     for (const naming of buildNavPreviewNamingItems(tour, scene)) {
       items.push({
         sceneId: scene.id,

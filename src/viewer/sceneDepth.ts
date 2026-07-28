@@ -66,7 +66,7 @@ export function buildSceneGroups(
     const scene = scenes[sceneId];
     if (!scene) continue;
 
-    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
+    for (const hotspot of resolveSceneNavHotspots({ ...tour, scenes }, scene)) {
       const target = hotspot.targetScene!;
       if (visited.has(target) || !scenes[target]) continue;
       visited.add(target);
@@ -129,7 +129,7 @@ export function buildSceneVisitOrder(
     if (!scene) continue;
     order.push(sceneId);
 
-    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
+    for (const hotspot of resolveSceneNavHotspots({ ...tour, scenes }, scene)) {
       const target = hotspot.targetScene!;
       if (visited.has(target) || !scenes[target]) continue;
       visited.add(target);
@@ -166,7 +166,7 @@ export function buildScenePath(
   const parent = new Map<string, string>();
   const queue = [firstSceneId];
   const visited = new Set<string>([firstSceneId]);
-  const tour = { hotspots: tourHotspots };
+  const tour = { hotspots: tourHotspots, scenes };
 
   while (queue.length > 0) {
     const sceneId = queue.shift()!;
