@@ -40,12 +40,13 @@
           "targetScene": "s_d2s5ai83yt"
         }
       ],
-      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_sxeq0eovm7.webp"
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_sxeq0eovm7.webp",
+      "suppressPlaceOverview": true
     },
     "s_7ezzd8nh4z": {
       "id": "s_7ezzd8nh4z",
       "title": "Emergency Department",
-      "description": "Queensway Carleton Hospitalâ€™s new Emergency Department expansion is being built to meet the urgent realities of Ottawaâ€™s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the cityâ€™s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project â€” it is a vital investment in readiness, safety, and care for families across Ottawaâ€™s west end.",
+      "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_7ezzd8nh4z.webp",
       "defaultView": {
         "yaw": 84.3,
@@ -164,12 +165,13 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_7ezzd8nh4z.webp",
-      "previewVideoUrl": "https://www.youtube.com/watch?v=UhIAhTf_4L0&t=2s"
+      "previewVideoUrl": "https://www.youtube.com/watch?v=UhIAhTf_4L0&t=2s",
+      "suppressPlaceOverview": true
     },
     "s_t0y42xbmsv": {
       "id": "s_t0y42xbmsv",
       "title": "Walk-in Entrance",
-      "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospitalâ€™s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imagingâ€”like CT scans and X-raysâ€”right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walkâ€‘in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawaâ€™s west end.",
+      "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_t0y42xbmsv.webp",
       "defaultView": {
         "yaw": 57,
@@ -248,7 +250,7 @@
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_8s40pp3yyo.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=qkgp5n5XZwA",
-      "placeLead": "When a health crisis happens, every minute matters. Queensway Carleton Hospitalâ€™s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying. Originally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, andâ€¦"
+      "placeLead": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying. Originally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and…"
     },
     "s_kl3j76w8q9": {
       "id": "s_kl3j76w8q9",
@@ -295,7 +297,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_kl3j76w8q9.webp",
-      "placeLead": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospitalâ€™s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity. This area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improvedâ€¦"
+      "placeLead": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity. This area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved…"
     },
     "s_d2s5ai83yt": {
       "id": "s_d2s5ai83yt",
@@ -461,7 +463,8 @@
           "namingId": "no_086npbauv3"
         }
       ],
-      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_d2s5ai83yt.webp"
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_d2s5ai83yt.webp",
+      "suppressPlaceOverview": true
     },
     "s_zyrfvgi4sg": {
       "id": "s_zyrfvgi4sg",
@@ -499,7 +502,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_zyrfvgi4sg.webp",
-      "description": "Explore Inpatient Suites as part of the Med/Surg Inpatient virtual tour."
+      "suppressPlaceOverview": true
     },
     "s_h8xx646a23": {
       "id": "s_h8xx646a23",
@@ -575,7 +578,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_vosd6uzi2u.webp",
-      "placeLead": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether itâ€™s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matterâ€”where comfort and community come together"
+      "placeLead": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
     },
     "s_1tdql8sfba": {
       "id": "s_1tdql8sfba",
@@ -613,7 +616,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_1tdql8sfba.webp",
-      "placeLead": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether youâ€™re arriving for a visit or seeking information, the QCH team is here to guide youâ€”answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+      "placeLead": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
     },
     "s_w0voges2yz": {
       "id": "s_w0voges2yz",
@@ -651,7 +654,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_w0voges2yz.webp",
-      "placeLead": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. Itâ€™s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patientâ€™s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+      "placeLead": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
     },
     "s_oh2aardnvw": {
       "id": "s_oh2aardnvw",
@@ -689,7 +692,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_oh2aardnvw.webp",
-      "placeLead": "The Allied Health Team Room is where professionals from many disciplinesâ€”like physiotherapy, occupational therapy, social work, and moreâ€”come together to collaborate, share insights, and plan patient-centered care. Where care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patientâ€™s journey. This space sparks innovation and strengthens teamworkâ€”fueling the expert care your community counts on. Be a part of the placeâ€¦"
+      "placeLead": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care. Where care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place…"
     },
     "s_j2qwfv4t1m": {
       "id": "s_j2qwfv4t1m",
@@ -726,12 +729,11 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_j2qwfv4t1m.webp",
-      "placeLead": "The Report Meeting Room is where vital conversations happenâ€”where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+      "placeLead": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
     },
     "s_x0w3usny9z": {
       "id": "s_x0w3usny9z",
       "title": "Galley / Servery",
-      "description": "Explore Galley / Servery as part of the Med/Surg Inpatient virtual tour.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_x0w3usny9z.webp",
       "defaultView": {
         "yaw": 293.6,
@@ -789,7 +791,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_0gnezew7qt.webp",
-      "placeLead": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens hereâ€”through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+      "placeLead": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
     },
     "s_k7h3wlz10z": {
       "id": "s_k7h3wlz10z",
@@ -877,7 +879,7 @@
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_ud8lmbrt5c.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=5maKWuGh0Wg&t=1s",
-      "placeLead": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospitalâ€™s Emergency Department has long been one of the regionâ€™s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre. The new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from theâ€¦"
+      "placeLead": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre. The new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the…"
     },
     "s_epo1xsg3qz": {
       "id": "s_epo1xsg3qz",
@@ -917,7 +919,7 @@
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_epo1xsg3qz.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=Ekza7eysssc&t=1s",
-      "placeLead": "Acute Care Pod A is a vital part of Queensway Carleton Hospitalâ€™s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery. As emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providingâ€¦",
+      "placeLead": "Acute Care Pod A is a vital part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery. As emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providing…",
       "description": "Acute Care Pods in the new Emergency Department will segment patients based on the severity of their illness, and monitoring and treatment needs.  This will allow emergency medical teams to provide care erffectively and efficiently while keeping the department running smoothly."
     },
     "s_rieg7s3uck": {
@@ -958,7 +960,7 @@
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_rieg7s3uck.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=DTWKUUtz1TI&t=2s",
-      "placeLead": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospitalâ€™s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention. As the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provideâ€¦",
+      "placeLead": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospital’s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention. As the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provide…",
       "description": "Acute Care Pods in the new Emergency Department will segment patients based on the severity of their illness, and monitoring and treatment needs.  This will allow emergency medical teams to provide care erffectively and efficiently while keeping the department running smoothly."
     },
     "s_9lpv5ehvnw": {
@@ -999,13 +1001,13 @@
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_9lpv5ehvnw.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=c7jEErgm8NI&t=1s",
-      "placeLead": "Acute Care Pod C is an important part of Queensway Carleton Hospitalâ€™s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawaâ€™s west end. As patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patientâ€¦",
+      "placeLead": "Acute Care Pod C is an important part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawa’s west end. As patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patient…",
       "description": "Acute Care Pods in the new Emergency Department will segment patients based on the severity of their illness, and monitoring and treatment needs.  This will allow emergency medical teams to provide care erffectively and efficiently while keeping the department running smoothly."
     },
     "s_g04g0ejaut": {
       "id": "s_g04g0ejaut",
       "title": "Mental Health Emergency Services Unit - 2",
-      "description": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospitalâ€™s Emergency Department has long been one of the regionâ€™s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the highâ€‘volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most.",
+      "description": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_g04g0ejaut.webp",
       "defaultView": {
         "yaw": 123.4,
@@ -1087,13 +1089,13 @@
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_smiksp7yqr.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=6iXzpq6F_vo",
-      "placeLead": "Acute Care Pod D is a vital component of Queensway Carleton Hospitalâ€™s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment. With emergency visits continuing to grow across Ottawaâ€™s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed toâ€¦",
+      "placeLead": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment. With emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to…",
       "description": "Acute Care Pods in the new Emergency Department will segment patients based on the severity of their illness, and monitoring and treatment needs.  This will allow emergency medical teams to provide care erffectively and efficiently while keeping the department running smoothly."
     },
     "s_5qt1e2v1kl": {
       "id": "s_5qt1e2v1kl",
       "title": "Acute Care Pod D - 2",
-      "description": "Acute Care Pod D is a vital component of Queensway Carleton Hospitalâ€™s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawaâ€™s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow â€” helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawaâ€™s west end.",
+      "description": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_5qt1e2v1kl.webp",
       "defaultView": {
         "yaw": 90,
@@ -1165,7 +1167,7 @@
       ],
       "previewVideoUrl": "https://www.youtube.com/watch?v=I5r4EkHZVBg",
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_uk608rqf4q.webp",
-      "placeLead": "The Satellite Imaging Unit will provide patients and clinical teams with immediate access to essential diagnostic imaging close to the Emergency Department, trauma services, and acute care treatment areas. Its strategic location will help reduce the need to transport vulnerable or critically ill patients through other parts of the hospital, supporting a safer, faster, and more coordinated care experience. Equipped to support timely assessment and clinical decision-makingâ€¦"
+      "placeLead": "The Satellite Imaging Unit will provide patients and clinical teams with immediate access to essential diagnostic imaging close to the Emergency Department, trauma services, and acute care treatment areas. Its strategic location will help reduce the need to transport vulnerable or critically ill patients through other parts of the hospital, supporting a safer, faster, and more coordinated care experience. Equipped to support timely assessment and clinical decision-making…"
     },
     "s_tzlpanycba": {
       "id": "s_tzlpanycba",
@@ -1193,7 +1195,7 @@
       ],
       "previewVideoUrl": "https://www.youtube.com/watch?v=hSoW1C5VyRY&t=1s",
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_tzlpanycba.webp",
-      "placeLead": "The Rapid Assessment Centre will create a dedicated environment where patients can be evaluated quickly, safely, and efficiently upon arrival at the Emergency Department. Designed to support early clinical assessment and faster decision-making, the Centre will bring together physicians, nurses, diagnostic services, and other members of the care team in a coordinated setting focused on identifying each patientâ€™s needs as soon as possible. By allowing appropriate testsâ€¦"
+      "placeLead": "The Rapid Assessment Centre will create a dedicated environment where patients can be evaluated quickly, safely, and efficiently upon arrival at the Emergency Department. Designed to support early clinical assessment and faster decision-making, the Centre will bring together physicians, nurses, diagnostic services, and other members of the care team in a coordinated setting focused on identifying each patient’s needs as soon as possible. By allowing appropriate tests…"
     },
     "s_5dwnzwkhwz": {
       "id": "s_5dwnzwkhwz",
@@ -1219,7 +1221,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_5dwnzwkhwz.webp",
-      "placeLead": "When a seriously injured patient arrives at the hospital, every minute matters. The trauma resuscitation centre is the part of the emergency department dedicated to those moments. It is where a trained trauma team comes together to rapidly assess, stabilize, and treat patients with lifeâ€‘threatening injuries. In this space, specialists work in parallelâ€”airway, breathing, circulation, imaging, and surgery planning happen at the same time, not in sequence. That coordinatedâ€¦"
+      "placeLead": "When a seriously injured patient arrives at the hospital, every minute matters. The trauma resuscitation centre is the part of the emergency department dedicated to those moments. It is where a trained trauma team comes together to rapidly assess, stabilize, and treat patients with life‑threatening injuries. In this space, specialists work in parallel—airway, breathing, circulation, imaging, and surgery planning happen at the same time, not in sequence. That coordinated…"
     }
   },
   "namingOpportunities": {
@@ -1234,14 +1236,14 @@
       "price": 10000000,
       "name": "Emergency Department Waiting Area",
       "status": "open",
-      "body": "When a health crisis happens, every minute matters. Queensway Carleton Hospitalâ€™s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imagingâ€”like CT scans and X-raysâ€”right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walkâ€‘in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawaâ€™s west end."
+      "body": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end."
     },
     "no_5lk0uyjstz": {
       "id": "no_5lk0uyjstz",
       "price": 500000,
       "name": "Ambulance Offload",
       "status": "open",
-      "body": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospitalâ€™s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawaâ€™s west end â€” one that supports patients, families, paramedics, and hospital staff when time matters most."
+      "body": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity.\n\nThis area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved access to care teams, patients can be assessed and moved to the right treatment area more efficiently.\n\nA dedicated offload area also helps improve patient flow throughout the Emergency Department. Instead of arriving into an overcrowded or unclear space, ambulance patients will enter a more coordinated environment built for urgent care, privacy, and safety.\n\nThis is an important part of creating a faster, stronger, and more responsive Emergency Department for Ottawa’s west end — one that supports patients, families, paramedics, and hospital staff when time matters most."
     },
     "no_086npbauv3": {
       "id": "no_086npbauv3",
@@ -1253,7 +1255,7 @@
       "price": 50000,
       "name": "Inpatient Bed Rooms",
       "status": "open",
-      "body": "Itâ€™s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of lifeâ€™s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unitâ€”known and loved by patients and care teams alikeâ€”these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens hereâ€”where healing, comfort, and compassion come together."
+      "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together."
     },
     "no_3g368pxzvv": {
       "id": "no_3g368pxzvv",
@@ -1267,42 +1269,42 @@
       "price": 250000,
       "name": "Multi Use Lounge / Activity Room",
       "status": "open",
-      "body": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether itâ€™s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matterâ€”where comfort and community come together"
+      "body": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
     },
     "no_y1bjxeed34": {
       "id": "no_y1bjxeed34",
       "price": 500000,
       "name": "Reception Centre",
       "status": "open",
-      "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether youâ€™re arriving for a visit or seeking information, the QCH team is here to guide youâ€”answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+      "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
     },
     "no_db8e1xnyxt": {
       "id": "no_db8e1xnyxt",
       "price": 100000,
       "name": "Quiet / Consultant",
       "status": "open",
-      "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. Itâ€™s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patientâ€™s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+      "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
     },
     "no_ay45meg3s4": {
       "id": "no_ay45meg3s4",
       "price": 100000,
       "name": "Allied Health Team Room",
       "status": "open",
-      "body": "The Allied Health Team Room is where professionals from many disciplinesâ€”like physiotherapy, occupational therapy, social work, and moreâ€”come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patientâ€™s journey. This space sparks innovation and strengthens teamworkâ€”fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape."
+      "body": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape."
     },
     "no_zqz4tno6t3": {
       "id": "no_zqz4tno6t3",
       "price": 100000,
       "name": "Report Meeting Room",
       "status": "open",
-      "body": "The Report Meeting Room is where vital conversations happenâ€”where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+      "body": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
     },
     "no_eiys6da6e3": {
       "id": "no_eiys6da6e3",
       "price": 250000,
       "name": "Dining / Activity Room",
       "status": "open",
-      "body": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens hereâ€”through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+      "body": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
     },
     "no_02ft2ioebi": {
       "id": "no_02ft2ioebi",
@@ -1316,35 +1318,35 @@
       "price": 1000000,
       "name": "Mental Health Emergency Services Unit",
       "status": "open",
-      "body": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospitalâ€™s Emergency Department has long been one of the regionâ€™s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the highâ€‘volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most."
+      "body": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most."
     },
     "no_x0vspsmm8b": {
       "id": "no_x0vspsmm8b",
       "price": 1000000,
       "name": "Acute Care Pod A",
       "status": "open",
-      "body": "Acute Care Pod A is a vital part of Queensway Carleton Hospitalâ€™s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery.\n\nAs emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providing dedicated spaces for patients who require urgent medical attention but may not need trauma or resuscitation-level care.\n\nThis pod will support faster clinical decision-making, better patient flow, and a calmer environment for both patients and frontline teams. Each treatment bay is planned to give staff clear visibility, efficient access to equipment, and enough space to provide safe, compassionate care.\n\nFor patients and families, Acute Care Pod A means less time waiting, more organized care, and a better experience during stressful and uncertain moments.\n\nThis is more than a group of treatment rooms. It is an essential part of a modern Emergency Department built to respond to the growing needs of Ottawaâ€™s west end â€” with care that is faster, safer, and closer to where it is needed most."
+      "body": "Acute Care Pod A is a vital part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to improve how patients move from arrival to assessment, treatment, and recovery.\n\nAs emergency volumes continue to rise, the hospital needs more flexible clinical space where patients can be seen sooner, monitored more effectively, and cared for with greater privacy and dignity. Acute Care Pod A will help reduce pressure on crowded treatment areas by providing dedicated spaces for patients who require urgent medical attention but may not need trauma or resuscitation-level care.\n\nThis pod will support faster clinical decision-making, better patient flow, and a calmer environment for both patients and frontline teams. Each treatment bay is planned to give staff clear visibility, efficient access to equipment, and enough space to provide safe, compassionate care.\n\nFor patients and families, Acute Care Pod A means less time waiting, more organized care, and a better experience during stressful and uncertain moments.\n\nThis is more than a group of treatment rooms. It is an essential part of a modern Emergency Department built to respond to the growing needs of Ottawa’s west end — with care that is faster, safer, and closer to where it is needed most."
     },
     "no_nwo2zfd5vp": {
       "id": "no_nwo2zfd5vp",
       "price": 1000000,
       "name": "Acute Care Pod B",
       "status": "open",
-      "body": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospitalâ€™s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention.\n\nAs the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provide individual patient bays designed for privacy, visibility, and quick access to staff, equipment, and support services.\n\nFor patients and families, this means a more structured care experience during stressful moments. Instead of waiting in overcrowded areas, patients can be moved into appropriate treatment spaces sooner, where care teams can respond with greater focus and coordination.\n\nFor frontline staff, Acute Care Pod B will help reduce congestion, improve workflow, and create a safer environment for delivering urgent care. The pod layout supports better communication between nurses, physicians, and support teams, helping decisions happen faster when time matters.\n\nAcute Care Pod B is more than a collection of treatment bays. It is part of a modern Emergency Department designed for Ottawaâ€™s growing west end â€” helping Queensway Carleton Hospital deliver care that is timely, compassionate, and ready for the needs of today and tomorrow."
+      "body": "Acute Care Pod B is a key clinical area within Queensway Carleton Hospital’s new Emergency Department expansion, created to support faster, safer, and more organized care for patients who need urgent medical attention.\n\nAs the Emergency Department continues to experience growing patient volumes, dedicated acute care pods will help improve patient flow by giving clinical teams the space they need to assess, treat, and monitor patients more efficiently. Pod B will provide individual patient bays designed for privacy, visibility, and quick access to staff, equipment, and support services.\n\nFor patients and families, this means a more structured care experience during stressful moments. Instead of waiting in overcrowded areas, patients can be moved into appropriate treatment spaces sooner, where care teams can respond with greater focus and coordination.\n\nFor frontline staff, Acute Care Pod B will help reduce congestion, improve workflow, and create a safer environment for delivering urgent care. The pod layout supports better communication between nurses, physicians, and support teams, helping decisions happen faster when time matters.\n\nAcute Care Pod B is more than a collection of treatment bays. It is part of a modern Emergency Department designed for Ottawa’s growing west end — helping Queensway Carleton Hospital deliver care that is timely, compassionate, and ready for the needs of today and tomorrow."
     },
     "no_kcg3mykn5l": {
       "id": "no_kcg3mykn5l",
       "price": 1000000,
       "name": "Acute Care Pod C",
       "status": "open",
-      "body": "Acute Care Pod C is an important part of Queensway Carleton Hospitalâ€™s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawaâ€™s west end.\n\nAs patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patient bays that support faster movement through the department and better coordination between nurses, physicians, and support teams.\n\nThis pod is designed to improve both clinical efficiency and patient experience. Patients will have more appropriate treatment spaces, greater privacy, and easier access to the care team. For staff, the layout supports clearer workflows, better visibility, and faster access to equipment and nearby services.\n\nAcute Care Pod C will help reduce bottlenecks, support timely decision-making, and create a calmer, safer environment during urgent medical situations.\n\nThis is more than additional space. It is a critical investment in a stronger, more responsive Emergency Department â€” one that is better prepared to care for families across Ottawaâ€™s west end when every minute matters."
+      "body": "Acute Care Pod C is an important part of Queensway Carleton Hospital’s new Emergency Department expansion, designed to help the hospital respond more effectively to the growing demand for urgent care in Ottawa’s west end.\n\nAs patient volumes continue to rise, the Emergency Department needs more dedicated treatment areas where patients can be assessed, cared for, and monitored without adding pressure to already crowded spaces. Acute Care Pod C will provide flexible patient bays that support faster movement through the department and better coordination between nurses, physicians, and support teams.\n\nThis pod is designed to improve both clinical efficiency and patient experience. Patients will have more appropriate treatment spaces, greater privacy, and easier access to the care team. For staff, the layout supports clearer workflows, better visibility, and faster access to equipment and nearby services.\n\nAcute Care Pod C will help reduce bottlenecks, support timely decision-making, and create a calmer, safer environment during urgent medical situations.\n\nThis is more than additional space. It is a critical investment in a stronger, more responsive Emergency Department — one that is better prepared to care for families across Ottawa’s west end when every minute matters."
     },
     "no_7wv90skdw0": {
       "id": "no_7wv90skdw0",
       "price": 1000000,
       "name": "Acute Care Pod D",
       "status": "open",
-      "body": "Acute Care Pod D is a vital component of Queensway Carleton Hospitalâ€™s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawaâ€™s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow â€” helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawaâ€™s west end."
+      "body": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end."
     },
     "no_uutrjfm27j": {
       "id": "no_uutrjfm27j",
@@ -1356,13 +1358,13 @@
       "id": "no_isl00d89od",
       "price": 5000000,
       "status": "open",
-      "body": "The Rapid Assessment Centre will create a dedicated environment where\npatients can be evaluated quickly, safely, and efficiently upon\narrival at the Emergency Department. Designed to support early\nclinical assessment and faster decision-making, the Centre will bring\ntogether physicians, nurses, diagnostic services, and other members of\nthe care team in a coordinated setting focused on identifying each\npatientâ€™s needs as soon as possible.\n\nBy allowing appropriate tests, consultations, and initial treatments\nto begin earlier, the Rapid Assessment Centre will help streamline the\npatient journey and reduce unnecessary delays. Patients may be\nassessed, monitored, treated, discharged, admitted, or transferred to\nanother area of the hospital based on the level of care they require.\nThis flexible model will support a more efficient use of emergency\nresources while helping clinical teams respond to changing patient\nvolumes and increasingly complex care needs.\n\nThe Centre will also provide a more comfortable and organized\nexperience for patients and families during what is often a stressful\nand uncertain time. Clearer care pathways, improved coordination, and\nearlier communication will help patients better understand what is\nhappening and what the next steps in their treatment will be. For\nhospital staff, the Centre will support collaboration, improve\nworkflow, and create a purpose-designed environment for delivering\ntimely, patient-centred emergency care.\n\nA $5 million naming investment in the Rapid Assessment Centre\nrepresents an exceptional opportunity to help transform the delivery\nof emergency care. This prominent naming opportunity will recognize\nvisionary generosity and a lasting commitment to faster access,\nclinical excellence, innovation, and better health outcomes for\npatients and families throughout the community."
+      "body": "The Rapid Assessment Centre will create a dedicated environment where\npatients can be evaluated quickly, safely, and efficiently upon\narrival at the Emergency Department. Designed to support early\nclinical assessment and faster decision-making, the Centre will bring\ntogether physicians, nurses, diagnostic services, and other members of\nthe care team in a coordinated setting focused on identifying each\npatient’s needs as soon as possible.\n\nBy allowing appropriate tests, consultations, and initial treatments\nto begin earlier, the Rapid Assessment Centre will help streamline the\npatient journey and reduce unnecessary delays. Patients may be\nassessed, monitored, treated, discharged, admitted, or transferred to\nanother area of the hospital based on the level of care they require.\nThis flexible model will support a more efficient use of emergency\nresources while helping clinical teams respond to changing patient\nvolumes and increasingly complex care needs.\n\nThe Centre will also provide a more comfortable and organized\nexperience for patients and families during what is often a stressful\nand uncertain time. Clearer care pathways, improved coordination, and\nearlier communication will help patients better understand what is\nhappening and what the next steps in their treatment will be. For\nhospital staff, the Centre will support collaboration, improve\nworkflow, and create a purpose-designed environment for delivering\ntimely, patient-centred emergency care.\n\nA $5 million naming investment in the Rapid Assessment Centre\nrepresents an exceptional opportunity to help transform the delivery\nof emergency care. This prominent naming opportunity will recognize\nvisionary generosity and a lasting commitment to faster access,\nclinical excellence, innovation, and better health outcomes for\npatients and families throughout the community."
     },
     "no_5f0c3r63zp": {
       "id": "no_5f0c3r63zp",
       "price": 1000000,
       "status": "open",
-      "body": "When a seriously injured patient arrives at the hospital, every minute\nmatters. The trauma resuscitation centre is the part of the emergency\ndepartment dedicated to those moments. It is where a trained trauma\nteam comes together to rapidly assess, stabilize, and treat patients\nwith lifeâ€‘threatening injuries.\n\nIn this space, specialists work in parallelâ€”airway, breathing,\ncirculation, imaging, and surgery planning happen at the same time,\nnot in sequence. That coordinated response shortens the time to\ncritical diagnostics like CT scans and speeds decisions about surgery\nor intensive care, which has been shown to reduce emergency department\nlength of stay and improve key indicators of trauma care quality.\n\nFor patients and families, the trauma resuscitation centre is where\nfear begins to turn into a sense of safety. Studies show that clear\nleadership, organized teamwork, and compassionate communication during\nresuscitation help patients feel they are in capable hands, even in\nthe most vulnerable moments.\n\nInvesting in the trauma resuscitation centre means investing in the\nsystems, equipment, and training that give people their best chance of\nsurvival and recovery when the unexpected happens."
+      "body": "When a seriously injured patient arrives at the hospital, every minute\nmatters. The trauma resuscitation centre is the part of the emergency\ndepartment dedicated to those moments. It is where a trained trauma\nteam comes together to rapidly assess, stabilize, and treat patients\nwith life‑threatening injuries.\n\nIn this space, specialists work in parallel—airway, breathing,\ncirculation, imaging, and surgery planning happen at the same time,\nnot in sequence. That coordinated response shortens the time to\ncritical diagnostics like CT scans and speeds decisions about surgery\nor intensive care, which has been shown to reduce emergency department\nlength of stay and improve key indicators of trauma care quality.\n\nFor patients and families, the trauma resuscitation centre is where\nfear begins to turn into a sense of safety. Studies show that clear\nleadership, organized teamwork, and compassionate communication during\nresuscitation help patients feel they are in capable hands, even in\nthe most vulnerable moments.\n\nInvesting in the trauma resuscitation centre means investing in the\nsystems, equipment, and training that give people their best chance of\nsurvival and recovery when the unexpected happens."
     }
   }
 }
