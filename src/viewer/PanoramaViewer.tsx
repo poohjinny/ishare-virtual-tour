@@ -22,6 +22,11 @@ import type {
 } from '../types/tour';
 import { isWorldPosition } from '../types/tour';
 import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
+import { isNamingHotspot } from '../utils/namingSceneInherit';
+import {
+  isSceneRoutable,
+  VIEWER_MARKER_AUDIENCE,
+} from '../utils/sceneVisibility';
 import { resolveTourSceneTransitionEffect } from '../utils/tourTransition';
 import {
   buildVirtualTourNodePatch,
@@ -41,7 +46,7 @@ import { applyShareButtonFeedback, shareTourView } from '../utils/shareTour';
 import { mountPopupVideoPlayer } from '../utils/popupVideo';
 import { releaseAllTourMedia } from '../utils/tourMediaCoordinator';
 import type { ClickCoords } from '../utils/devHotspotLogger';
-import { logHotspotClick, toViewPosition } from '../utils/devHotspotLogger';
+import { toViewPosition } from '../utils/devHotspotLogger';
 import {
   fromPsvZoom,
   PSV_MAX_FOV,
@@ -166,6 +171,8 @@ interface PanoramaViewerProps {
   activeNamingHotspotId?: string | null;
   /** `?embed=1` — hide glass-panel share controls (FAB Share is already hidden). */
   embed?: boolean;
+  /** `?dev=1` — allow nav hotspots to internal scenes. */
+  devMode?: boolean;
   disabled?: boolean;
   suppressKeyboard?: boolean;
   onSceneChange: (sceneId: string) => void;
@@ -230,6 +237,8 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       toolbarToggleAvailable = false,
       activeNamingHotspotId = null,
       embed = false,
+      // Reserved for authoring chrome; marker visibility uses visitor rules.
+      devMode: _devMode = false,
       disabled = false,
       suppressKeyboard = false,
       onSceneChange,
@@ -604,8 +613,10 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         if (options?.forceDefault) {
           const markers = markersRef.current;
           if (markers) {
-            closeAnchoredInfoPanel(markers, true);
-            closeAnchoredNavPreviewPanel(markers, true);
+            closeAnchoredInfoPanel(markers, true, { restoreCamera: false });
+            closeAnchoredNavPreviewPanel(markers, true, true, {
+              restoreCamera: false,
+            });
             onAnchoredPanelVisibilityChangeRef.current?.(false);
           }
           const view = tourRef.current.scenes[sceneId]?.defaultView;
@@ -632,8 +643,10 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
         const markers = markersRef.current;
         if (markers) {
-          closeAnchoredInfoPanel(markers, true);
-          closeAnchoredNavPreviewPanel(markers, true);
+          closeAnchoredInfoPanel(markers, true, { restoreCamera: false });
+          closeAnchoredNavPreviewPanel(markers, true, true, {
+            restoreCamera: false,
+          });
           onAnchoredPanelVisibilityChangeRef.current?.(false);
         }
 
@@ -788,7 +801,16 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           const navHotspot = nextScene.hotspots.find(
             (hotspot) => hotspot.id === openNavHostId,
           );
-          if (navHotspot?.type === 'nav' && navHotspot.targetScene) {
+          const targetScene =
+            navHotspot?.type === 'nav' && navHotspot.targetScene ?
+              nextTour.scenes[navHotspot.targetScene]
+            : undefined;
+          if (
+            navHotspot?.type === 'nav' &&
+            navHotspot.targetScene &&
+            targetScene &&
+            isSceneRoutable(targetScene, VIEWER_MARKER_AUDIENCE)
+          ) {
             const preview = buildNavPreview(navHotspot, nextTour, currentId);
             if (preview) {
               openAnchoredNavPreviewPanel(
@@ -1028,7 +1050,10 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       const unbindDesktopNavbarControls = bindPsvNavbarChromeControls(viewer);
       const virtualTour =
         viewer.getPlugin<VirtualTourPlugin>(VirtualTourPlugin);
-      bindVirtualTourLifecycleGuard(virtualTour, () => viewerActiveRef.current);
+      const unbindVirtualTourLifecycle = bindVirtualTourLifecycleGuard(
+        virtualTour,
+        () => viewerActiveRef.current,
+      );
       virtualTourRef.current = virtualTour;
 
       const tourNodes = buildVirtualTourNodes(tourData);
@@ -1468,11 +1493,18 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         try {
           if (transitioningRef.current || disabledRef.current) return;
 
-          if (hotspot.type === 'info' && hotspot.popup) {
+          if (
+            hotspot.type === 'info' &&
+            (hotspot.popup || isNamingHotspot(hotspot))
+          ) {
             closeAnchoredNavPreviewPanel(markers, false);
-            if (isAnchoredPopup(hotspot.popup)) {
+            // Naming pins always use anchored panels (catalog or legacy).
+            if (
+              isNamingHotspot(hotspot) ||
+              (hotspot.popup && isAnchoredPopup(hotspot.popup))
+            ) {
               onDismissModalPopupsRef.current?.();
-              if (hotspot.popup.namingOpportunity) {
+              if (isNamingHotspot(hotspot)) {
                 const sceneId = virtualTour.getCurrentNode()?.id;
                 if (!sceneId) return;
 
@@ -1495,6 +1527,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
               );
               return;
             }
+            if (!hotspot.popup) return;
             closeAnchoredInfoPanel(markers, false);
             setActiveInfoHotspot(markers, hotspot.id);
             onInfoHotspotRef.current(hotspot.popup);
@@ -1626,18 +1659,14 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           yaw: (e.data.yaw * 180) / Math.PI,
           pitch: (e.data.pitch * 180) / Math.PI,
         };
-        const sceneId = virtualTour.getCurrentNode()?.id ?? startSceneId;
-        logHotspotClick(coords, {
-          id: sceneId,
-          title: tourRef.current.scenes[sceneId]?.title,
-          tourId: tourRef.current.id,
-          clientId: tourRef.current.clientId ?? tourRef.current.id,
-        });
         onDevClickRef.current(coords);
       });
 
       return () => {
         active = false;
+        // Unbind before destroy so in-flight setCurrentNode cannot revive via
+        // Strict Mode remount flipping viewerActiveRef back to true.
+        unbindVirtualTourLifecycle();
         viewerActiveRef.current = false;
         deferredErrorRef.current = null;
         pendingNamingInfoHotspotRef.current = null;

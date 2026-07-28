@@ -22,6 +22,7 @@ interface DevToolsProps {
     hotspotId: string | null,
     options?: { animate?: boolean },
   ) => void;
+  openNamingOpportunity?: (sceneId: string, hotspotId: string) => void;
   panelStack?: TourPanelStack;
 }
 
@@ -36,6 +37,7 @@ export function DevTools({
   captureSceneThumbnail,
   getCurrentView,
   focusHotspot,
+  openNamingOpportunity,
   panelStack,
 }: DevToolsProps) {
   const [panelOpen, setPanelOpen] = useState(() => !prefersMobileTourChrome());
@@ -80,6 +82,7 @@ export function DevTools({
           captureSceneThumbnail={captureSceneThumbnail}
           getCurrentView={getCurrentView}
           focusHotspot={focusHotspot}
+          openNamingOpportunity={openNamingOpportunity}
           onClose={() => setPanelOpen(false)}
         />
       : <button

@@ -78,7 +78,13 @@ import {
   sceneIdsWithTitleCollisions,
   SCENE_GROUP_OTHER_ID,
 } from '../viewer/sceneDepth';
-import type { Hotspot, Scene, TourClient, TourViewerType } from '../types/tour';
+import type {
+  Hotspot,
+  NamingOpportunityRecord,
+  Scene,
+  TourClient,
+  TourViewerType,
+} from '../types/tour';
 import {
   buildNamingSectorGroups,
   buildTourNamingDirectory,
@@ -167,6 +173,8 @@ interface TourNavFloatProps {
   /** Tour-level hotspots — nav and info on `model3d` tours. */
   tourHotspots?: Hotspot[];
   tourViewerType?: TourViewerType;
+  /** Tour-level naming catalog — required for Explore naming list after migrate. */
+  namingOpportunities?: Record<string, NamingOpportunityRecord>;
   currentSceneId: string;
   firstSceneId: string;
   tourTitle?: string;
@@ -321,6 +329,7 @@ export function TourNavFloat({
   tourId,
   tourHotspots,
   tourViewerType,
+  namingOpportunities,
   currentSceneId,
   firstSceneId,
   tourTitle = 'Virtual Tour',
@@ -438,8 +447,9 @@ export function TourNavFloat({
       scenes: Object.fromEntries(scenes.map((scene) => [scene.id, scene])),
       hotspots: tourHotspots,
       viewerType: tourViewerType,
+      namingOpportunities,
     }),
-    [scenes, tourHotspots, tourViewerType],
+    [namingOpportunities, scenes, tourHotspots, tourViewerType],
   );
 
   const namingItems = useMemo(

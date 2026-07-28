@@ -155,9 +155,9 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
 
   const handleSelect = (tourId: string) => {
     const tour = loadTour(tourId);
+    // Push (not replace) so browser / in-app back returns to the intro picker.
     navigate(
       buildTourLocation(tourId, tour.firstScene, tour.firstScene, searchParams),
-      { replace: true },
     );
   };
 

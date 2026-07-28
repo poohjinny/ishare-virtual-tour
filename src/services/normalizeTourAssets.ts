@@ -1,5 +1,6 @@
 import type {
   Hotspot,
+  NamingOpportunityRecord,
   PopupContent,
   Tour,
   TourImmersiveBackground,
@@ -40,6 +41,42 @@ function normalizePopupContent(popup: PopupContent): PopupContent {
   return next;
 }
 
+function normalizeNamingRecord(
+  record: NamingOpportunityRecord,
+): NamingOpportunityRecord {
+  const price = parseNamingPriceInput(record.price);
+  const donorLogo = record.donor?.logo;
+  const nextDonorLogo = donorLogo ? withBaseUrl(donorLogo) : undefined;
+  const image = record.image?.trim();
+  const nextImage = image ? withBaseUrl(image) : undefined;
+  const videoUrl = record.videoUrl?.trim();
+  // Absolute / external URLs stay as-is; relative paths get base.
+  const nextVideoUrl =
+    videoUrl && !/^https?:\/\//i.test(videoUrl) ?
+      withBaseUrl(videoUrl)
+    : videoUrl;
+  const priceChanged = price != null && price !== record.price;
+  const logoChanged = Boolean(nextDonorLogo && nextDonorLogo !== donorLogo);
+  const imageChanged = Boolean(nextImage && nextImage !== record.image);
+  const videoChanged = Boolean(
+    nextVideoUrl && nextVideoUrl !== record.videoUrl,
+  );
+
+  if (!priceChanged && !logoChanged && !imageChanged && !videoChanged) {
+    return record;
+  }
+
+  return {
+    ...record,
+    ...(priceChanged ? { price: price! } : {}),
+    ...(logoChanged && record.donor ?
+      { donor: { ...record.donor, logo: nextDonorLogo } }
+    : {}),
+    ...(imageChanged ? { image: nextImage } : {}),
+    ...(videoChanged ? { videoUrl: nextVideoUrl } : {}),
+  };
+}
+
 function normalizeHotspot(hotspot: Hotspot): Hotspot {
   const preview =
     hotspot.preview?.image ?
@@ -74,9 +111,20 @@ function normalizeImmersiveBackground(
 
 /** Resolve relative asset paths for runtime (JSON files and API snapshots). */
 export function normalizeTourAssets(tour: Tour): Tour {
+  const namingOpportunities =
+    tour.namingOpportunities ?
+      Object.fromEntries(
+        Object.entries(tour.namingOpportunities).map(([id, record]) => [
+          id,
+          normalizeNamingRecord(record),
+        ]),
+      )
+    : undefined;
+
   return {
     ...tour,
     ...(tour.hotspots ? { hotspots: tour.hotspots.map(normalizeHotspot) } : {}),
+    ...(namingOpportunities ? { namingOpportunities } : {}),
     branding:
       tour.branding ?
         {
@@ -146,9 +194,34 @@ export function bustSceneThumbnailUrls(
     return changed ? next : hotspots;
   };
 
+  const bustNamingCatalog = (): Tour['namingOpportunities'] | undefined => {
+    const catalog = tour.namingOpportunities;
+    if (!catalog) return undefined;
+    let changed = false;
+    const next: NonNullable<Tour['namingOpportunities']> = {};
+    for (const [id, record] of Object.entries(catalog)) {
+      const logo = record.donor?.logo?.trim();
+      if (!logo || !record.donor) {
+        next[id] = record;
+        continue;
+      }
+      changed = true;
+      next[id] = {
+        ...record,
+        donor: { ...record.donor, logo: appendCacheBust(logo, version) },
+      };
+    }
+    return changed ? next : catalog;
+  };
+
+  const namingOpportunities = bustNamingCatalog();
+
   return {
     ...tour,
     ...(tour.hotspots ? { hotspots: bustHotspots(tour.hotspots) } : {}),
+    ...(namingOpportunities !== tour.namingOpportunities ?
+      { namingOpportunities }
+    : {}),
     scenes: Object.fromEntries(
       Object.entries(tour.scenes).map(([id, scene]) => {
         const bustedThumbnail =

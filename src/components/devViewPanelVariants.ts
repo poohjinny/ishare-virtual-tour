@@ -8,7 +8,7 @@ export const devViewPanelControlRadiusClassName = 'rounded-md';
 export const devToolsStackClassName = cn(
   'pointer-events-none absolute left-[var(--tour-chrome-inset-left)] z-[var(--tour-chrome-z-index)]',
   'top-[var(--tour-chrome-inset-top)]',
-  'flex w-[min(440px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)))] flex-col gap-2',
+  'flex w-[min(480px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)))] flex-col gap-2',
   '[&>*]:pointer-events-auto',
   'max-[1023px]:top-auto max-[1023px]:bottom-[var(--tour-chrome-inset-bottom)] max-[1023px]:flex-col-reverse',
 );
@@ -148,7 +148,7 @@ export const devViewPanelSectionChevronOpenClassName = cn(
 export const devViewPanelSectionDescriptionClassName = cn('space-y-1');
 
 export const devViewPanelSectionContentClassName = cn(
-  'mt-5 flex flex-col gap-3',
+  'mt-3 flex flex-col gap-3',
 );
 
 export const devViewPanelFormGroupClassName = cn(
@@ -167,9 +167,13 @@ export const devViewPanelInlineFormGroupClassName = cn(
   devViewPanelControlRadiusClassName,
 );
 
-/** Manage-tab inline edit — flows inside active list row (no nested card). */
+/**
+ * Manage-tab inline edit — flows inside active list row (no nested card).
+ * List items use `gap-1`; `mt-3` + that gap equals `pt-4` so the divider
+ * sits evenly under the Edit / Move / Delete row.
+ */
 export const devViewPanelManageEditFormClassName = cn(
-  'flex flex-col gap-3 border-t border-[rgba(100,116,139,0.22)] pt-3',
+  'mt-3 flex flex-col gap-3 border-t border-[rgba(100,116,139,0.22)] pt-4',
 );
 
 export const devViewPanelFormRowClassName = cn(
@@ -345,7 +349,18 @@ export const devViewPanelBtnVariants = cva(
           'border-[#64748b] bg-[#1e293b] text-[#f0fdf4] hover:enabled:bg-[#334155]',
         danger:
           'border-[#f87171] bg-[#7f1d1d] text-[#f0fdf4] hover:enabled:bg-[#991b1b]',
+        /** Scene tab (current view) — green */
+        scene:
+          'border-[#4ade80] bg-[rgba(74,222,128,0.28)] text-[#bbf7d0] hover:enabled:bg-[rgba(74,222,128,0.38)]',
+        /** Scenes catalog tab — teal */
+        scenes:
+          'border-[#2dd4bf] bg-[rgba(45,212,191,0.28)] text-[#99f6e4] hover:enabled:bg-[rgba(45,212,191,0.38)]',
         nav: 'border-[#38bdf8] bg-[rgba(56,189,248,0.28)] text-[#bae6fd] hover:enabled:bg-[rgba(56,189,248,0.38)]',
+        /** Client tab — sky (same family as nav) */
+        client:
+          'border-[#38bdf8] bg-[rgba(56,189,248,0.28)] text-[#bae6fd] hover:enabled:bg-[rgba(56,189,248,0.38)]',
+        /** Tour tab — violet */
+        tour: 'border-[#a78bfa] bg-[rgba(167,139,250,0.28)] text-[#ddd6fe] hover:enabled:bg-[rgba(167,139,250,0.38)]',
         naming:
           'border-[#f472b6] bg-[rgba(244,114,182,0.28)] text-[#fbcfe8] hover:enabled:bg-[rgba(244,114,182,0.38)]',
         info: 'border-[#facc15] bg-[rgba(250,204,21,0.28)] text-[#fef08a] hover:enabled:bg-[rgba(250,204,21,0.38)]',
@@ -448,6 +463,7 @@ export const devViewPanelTabVariants = cva(
         naming: '',
         info: '',
         scene: '',
+        scenes: '',
         client: '',
         tour: '',
         debug: '',
@@ -475,12 +491,6 @@ export const devViewPanelTabVariants = cva(
       },
       {
         depth: 'primary',
-        kind: 'scene',
-        active: true,
-        class: 'bg-[rgba(74,222,128,0.22)] text-[#86efac]',
-      },
-      {
-        depth: 'primary',
         kind: 'client',
         active: true,
         class: 'bg-[rgba(56,189,248,0.22)] text-[#7dd3fc]',
@@ -490,6 +500,24 @@ export const devViewPanelTabVariants = cva(
         kind: 'tour',
         active: true,
         class: 'bg-[rgba(167,139,250,0.22)] text-[#c4b5fd]',
+      },
+      {
+        depth: 'primary',
+        kind: 'scenes',
+        active: true,
+        class: 'bg-[rgba(45,212,191,0.22)] text-[#5eead4]',
+      },
+      {
+        depth: 'primary',
+        kind: 'naming',
+        active: true,
+        class: 'bg-[rgba(244,114,182,0.22)] text-[#f9a8d4]',
+      },
+      {
+        depth: 'primary',
+        kind: 'scene',
+        active: true,
+        class: 'bg-[rgba(74,222,128,0.22)] text-[#86efac]',
       },
       {
         depth: 'primary',
@@ -601,11 +629,43 @@ export const devViewPanelManageListFooterClassName = cn(
   'border-t border-[rgba(100,116,139,0.22)] pt-4',
 );
 
-export const devViewPanelManageListItemClassName = cn('flex flex-col gap-2');
+export const devViewPanelManageListItemClassName = cn(
+  'flex flex-col gap-1',
+  /* Title + desc stay a tight cluster; action rows sit a step lower. */
+  '[&>div.flex-wrap]:mt-1.5',
+);
 
 export const devViewPanelManageListItemActiveClassName = cn(
   'rounded-md border border-[rgba(56,189,248,0.55)] bg-[rgba(56,189,248,0.08)] px-2.5 py-2.5',
   devViewPanelControlRadiusClassName,
+);
+
+/** Compact circular client/tour logo in manage-list row heads. */
+export const devViewPanelManageListItemLogoWrapClassName = cn(
+  'flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1',
+);
+
+export const devViewPanelManageListItemLogoClassName = cn(
+  'block max-h-full max-w-full object-contain object-center',
+);
+
+/** Title + meta stack beside a list logo. */
+export const devViewPanelManageListItemTextStackClassName = cn(
+  'flex min-w-0 flex-1 flex-col',
+);
+
+/** Title + muted cluster (tight). */
+export const devViewPanelManageListItemCopyClassName = cn(
+  'flex min-w-0 flex-col gap-0.5',
+);
+
+/**
+ * Actions under muted meta inside a logo text-stack.
+ * Matches manage-list rows: item `gap-1` + action `mt-1.5` (Scenes pattern).
+ */
+export const devViewPanelManageListItemStackActionsClassName = cn(
+  devViewPanelActionsClassName,
+  'mt-2.5',
 );
 
 export const devViewPanelManageListItemDescClassName = cn(
@@ -653,7 +713,14 @@ export const devViewPanelManageListItemMetaClassName = cn(
   'font-normal text-[#94a3b8]',
 );
 
-export type DevSceneManageBadgeKind = 'current' | 'first';
+export type DevSceneManageBadgeKind =
+  | 'current'
+  | 'first'
+  | 'featured'
+  | 'public'
+  | 'unlisted'
+  | 'internal'
+  | 'instant';
 
 export const devSceneManageBadgeVariants = cva(devManageBadgeBaseClassName, {
   variants: {
@@ -662,12 +729,37 @@ export const devSceneManageBadgeVariants = cva(devManageBadgeBaseClassName, {
         'border border-[#4ade80] bg-[rgba(74,222,128,0.22)] text-[#86efac] shadow-[inset_0_0_0_1px_rgba(74,222,128,0.15)]',
       first:
         'border border-[rgba(148,163,184,0.45)] bg-[rgba(100,116,139,0.22)] text-[#cbd5e1]',
+      /** Gallery featured — gold. */
+      featured:
+        'border border-[#fbbf24] bg-[rgba(251,191,36,0.22)] text-[#fde68a] shadow-[inset_0_0_0_1px_rgba(251,191,36,0.18)]',
+      public:
+        'border border-[#38bdf8] bg-[rgba(56,189,248,0.22)] text-[#bae6fd] shadow-[inset_0_0_0_1px_rgba(56,189,248,0.15)]',
+      unlisted:
+        'border border-[rgba(148,163,184,0.5)] bg-[rgba(100,116,139,0.22)] text-[#cbd5e1]',
+      internal:
+        'border border-[rgba(100,116,139,0.4)] bg-[rgba(51,65,85,0.35)] text-[#94a3b8]',
+      /** Nav skip-transition — amber. */
+      instant:
+        'border border-[#fb923c] bg-[rgba(251,146,60,0.22)] text-[#fdba74] shadow-[inset_0_0_0_1px_rgba(251,146,60,0.15)]',
     },
   },
 });
 
 export const devViewPanelManageListItemBadgesClassName = cn(
   'flex shrink-0 flex-wrap items-center justify-end gap-1',
+);
+
+/** Vertical badge column for logo + text-stack rows (Tours / Clients). */
+export const devViewPanelManageListItemBadgesStackClassName = cn(
+  'flex shrink-0 flex-col items-end gap-1.5',
+);
+
+/**
+ * Tours manage row — equal-width badges (column sized to longest label).
+ */
+export const devViewPanelManageListItemTourBadgesStackClassName = cn(
+  'flex w-max shrink-0 flex-col items-stretch gap-1.5',
+  '[&>*]:w-full [&>*]:justify-center',
 );
 
 export const devViewPanelHotspotRowClassName = cn(

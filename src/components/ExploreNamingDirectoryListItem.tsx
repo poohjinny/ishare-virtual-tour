@@ -202,16 +202,16 @@ export function ExploreNamingDirectoryListItem({
             </span>
           </span>
           <span className={tourNavDirectoryListItemBadgeColumnClassName}>
-            <NamingStatusBadge
-              statusModifier={item.statusModifier as NamingStatusModifier}
-              label={item.statusLabel}
-              className={cn(tourNavItemBadgeClassName, 'ml-0')}
-            />
             {priceLabel ?
               <span className={tourNavItemNamingPriceClassName}>
                 {priceLabel}
               </span>
             : null}
+            <NamingStatusBadge
+              statusModifier={item.statusModifier as NamingStatusModifier}
+              label={item.statusLabel}
+              className={cn(tourNavItemBadgeClassName, 'ml-0')}
+            />
           </span>
         </span>
         {showActions ?

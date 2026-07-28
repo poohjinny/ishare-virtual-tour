@@ -209,11 +209,19 @@ input::placeholder {
   background: #000;
   --psv-toolbar-collapse-duration: 0.45s;
   --psv-toolbar-collapse-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /*
+   * Hotspot labels are screen-space overlays (not UI chrome). Keep them on a
+   * dedicated token so panel rem scale and panorama chips can diverge.
+   * ~11.5px at 16px root — between xs (11) and sm (12).
+   */
+  --ishare-hotspot-label-size: 0.71875rem;
+  --ishare-hotspot-label-weight: 500;
   --ishare-hotspot-glass-padding-block: 1px;
+  --ishare-hotspot-glass-padding-inline: 9px;
   --ishare-hotspot-glass-border-width: 1.5px;
   /* Match nav pill block size (label line box + padding + border). */
-  --ishare-hotspot-glass-block-size: max(26px,
-      calc(2 * var(--ishare-hotspot-glass-padding-block) + 2 * var(--ishare-hotspot-glass-border-width) + 2 * var(--ishare-font-size-sm)));
+  --ishare-hotspot-glass-block-size: max(24px,
+      calc(2 * var(--ishare-hotspot-glass-padding-block) + 2 * var(--ishare-hotspot-glass-border-width) + 2 * var(--ishare-hotspot-label-size)));
   /* Solid white + alpha (no backdrop blur) — pills skip a per-frame blur pass,
      cutting compositor cost. A faint border keeps them legible over bright
      panorama regions now that the frosted edge is gone. */
@@ -1026,7 +1034,7 @@ input::placeholder {
   gap: 6px;
   box-sizing: border-box;
   min-height: var(--ishare-hotspot-glass-block-size);
-  padding: var(--ishare-hotspot-glass-padding-block) 11px;
+  padding: var(--ishare-hotspot-glass-padding-block) var(--ishare-hotspot-glass-padding-inline);
   border-radius: 999px;
   background: var(--ishare-hotspot-glass-bg);
   border: var(--ishare-hotspot-glass-border-width) solid transparent;
@@ -1078,8 +1086,8 @@ input::placeholder {
 
 .hotspot-nav__label {
   font-family: var(--ishare-display-font);
-  font-size: var(--ishare-font-size-sm);
-  font-weight: 600;
+  font-size: var(--ishare-hotspot-label-size);
+  font-weight: var(--ishare-hotspot-label-weight);
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: var(--ishare-text);
@@ -1314,13 +1322,13 @@ input::placeholder {
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  min-height: 28px;
-  padding: 2px 12px 2px 9px;
+  gap: 4px;
+  min-height: var(--ishare-hotspot-glass-block-size);
+  padding: var(--ishare-hotspot-glass-padding-block) var(--ishare-hotspot-glass-padding-inline) var(--ishare-hotspot-glass-padding-block) 8px;
   border-radius: 999px;
   background: var(--ishare-primary);
   color: #fff;
-  border: 1.5px solid transparent;
+  border: var(--ishare-hotspot-glass-border-width) solid transparent;
   box-shadow: 0 8px 24px rgba(var(--ishare-primary-rgb), 0.28);
   transition:
     box-shadow 0.22s ease,
@@ -1334,8 +1342,8 @@ input::placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   overflow: visible;
   color: rgba(255, 255, 255, 0.58);
   border-radius: 50%;
@@ -1348,8 +1356,8 @@ input::placeholder {
 }
 
 .hotspot-info__icon {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   display: block;
   overflow: visible;
 }
@@ -1359,8 +1367,8 @@ input::placeholder {
   align-items: center;
   gap: 0.35em;
   font-family: var(--ishare-display-font);
-  font-size: var(--ishare-font-size-sm);
-  font-weight: 600;
+  font-size: var(--ishare-hotspot-label-size);
+  font-weight: var(--ishare-hotspot-label-weight);
   line-height: 1.1;
   letter-spacing: -0.01em;
   color: #fff;

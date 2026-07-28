@@ -11,7 +11,6 @@ import {
 } from '../utils/popupCtaLayout';
 import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
-  NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
   namingOpportunityStatusShowsBadge,
 } from '../data/namingOpportunityStatus';
@@ -55,14 +54,6 @@ export function splitPopupBody(body: string): string[] {
     .map((p) => p.trim())
     .filter(Boolean);
 }
-
-const NAMING_BADGE_ICON = (
-  <MaterialSymbol
-    name='favorite'
-    className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
-    sizePx={MATERIAL_SYMBOL_SIZE_18}
-  />
-);
 
 function StatusBadgeIcon({ modifier }: { modifier: string }) {
   if (!isNamingStatusIconModifier(modifier)) return null;
@@ -152,26 +143,19 @@ export function NamingOpportunityMeta({
 }) {
   const statusConfig = namingOpportunityStatusConfig(opportunity.status);
   const showStatusBadge = namingOpportunityStatusShowsBadge(opportunity.status);
+  if (!showStatusBadge) return null;
 
   return (
     <div className='tour-glass-panel__meta' aria-label={opportunity.name}>
       <div className='tour-glass-panel__meta-row'>
-        <span className={BADGE_CLASS.fillLgPrimaryIcon}>
-          {NAMING_BADGE_ICON}
-          <span className={BADGE_CLASS.label}>
-            {NAMING_OPPORTUNITY_BADGE_LABEL}
-          </span>
+        <span
+          className={BADGE_CLASS.fillLgStatusIcon(
+            statusConfig.cssModifier as NamingStatusModifier,
+          )}
+        >
+          <StatusBadgeIcon modifier={statusConfig.cssModifier} />
+          <span className={BADGE_CLASS.label}>{statusConfig.label}</span>
         </span>
-        {showStatusBadge ?
-          <span
-            className={BADGE_CLASS.fillLgStatusIcon(
-              statusConfig.cssModifier as NamingStatusModifier,
-            )}
-          >
-            <StatusBadgeIcon modifier={statusConfig.cssModifier} />
-            <span className={BADGE_CLASS.label}>{statusConfig.label}</span>
-          </span>
-        : null}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import {
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
+  DEV_ASK_GUIDE_FLAG_TOGGLES,
   DEV_URL_FLAG_TOGGLES,
   type DevUrlFlagToggle,
 } from '../constants/devUrlFlags';
@@ -29,6 +30,8 @@ import {
   listTourCategories,
   findCatalogClient,
   findCatalogTour,
+  listCatalogClients,
+  resolveCatalogTourVisibility,
 } from '../data/tourCatalog';
 import {
   buildTourLocation,
@@ -36,24 +39,35 @@ import {
   resolveSceneId,
 } from '../utils/tourPaths';
 import { getTourClientId } from '../utils/tourClientId';
-import { withBaseUrl } from '../utils/assetUrl';
+import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import {
   resolveTourBranding,
   tourUsesCustomBranding,
 } from '../utils/resolveTourBranding';
 import { getTourProductFullName } from '../utils/tourProductName';
+import { resolveSceneVisibility } from '../utils/sceneVisibility';
 import {
   formatNamingPriceInput,
   parseNamingPriceInput,
 } from '../utils/namingPrice';
 import {
+  DEV_HOTSPOT_MANAGE_FILTER_TABS,
   DEV_INFO_DISPLAY_OPTIONS,
   DEV_NAMING_DONOR_KIND_OPTIONS,
+  DEV_NAMING_MANAGE_FILTER_TABS,
   DEV_NAMING_STATUS_OPTIONS,
+  type DevHotspotManageFilter,
   type DevHotspotTab,
+  type DevNamingManageFilter,
   getDevHotspotSectionConfig,
+  getDevNamingCatalogSectionConfig,
   type DevHotspotManageScope,
 } from '../constants/devHotspot';
+import {
+  namingOpportunityStatusConfig,
+  namingOpportunityStatusShowsBadge,
+  resolveNamingOpportunityStatus,
+} from '../data/namingOpportunityStatus';
 import {
   NAV_HOTSPOT_VARIANT_DEFAULT,
   NAV_HOTSPOT_VARIANT_OPTIONS,
@@ -61,16 +75,14 @@ import {
   serializeNavHotspotVariant,
 } from '../constants/navHotspotVariant';
 import {
-  DEV_CRUD_MODE_TABS,
   DEV_PANEL_TABS,
   DEV_CATALOG_VISIBILITY_OPTIONS,
+  DEV_SCENE_VISIBILITY_OPTIONS,
   type DevCatalogTourVisibility,
-  type DevCrudModeTab,
   type DevPanelTab,
 } from '../constants/devPanel';
 import type { TourCategory } from '../constants/tourCategories';
 import type {
-  FaqEntry,
   Hotspot,
   NamingDonorKind,
   NamingOpportunityStatus,
@@ -78,12 +90,12 @@ import type {
   PopupDisplay,
   Scene,
   Tour,
-  TourKnowledge,
   ViewPosition,
 } from '../types/tour';
 import { isWorldPosition } from '../types/tour';
 import { normalizeNamingDonor } from '../utils/namingDonor';
 import {
+  isNamingHotspot,
   resolveHotspotHostScene,
   resolveNamingPopup,
 } from '../utils/namingSceneInherit';
@@ -113,6 +125,7 @@ import {
   devApplySceneDefaultView,
   devCreateInfoHotspot,
   devCreateNamingHotspot,
+  devCreateNamingOpportunity,
   devCreateNavHotspot,
   devCreateScene,
   devCreateTour,
@@ -122,9 +135,7 @@ import {
   devFetchTour,
   refreshDevCatalogSnapshot,
   devFetchCatalogClients,
-  devFetchKnowledge,
   devFetchTourRecord,
-  devUpdateKnowledge,
   devBase64ToImageFile,
   devReplaceScenePanorama,
   devSuggestBranding,
@@ -145,18 +156,15 @@ import {
   buildDefaultSceneThumbnailWebPath,
 } from '../utils/devScenePanoramaPath';
 import {
-  sceneKnowledgeFromForm,
-  sceneKnowledgeToForm,
-} from '../utils/devKnowledgeForm';
-import {
   findHotspotInTour,
+  findNamingHotspotByNamingId,
   listAllTourHotspotIds,
-  listDevTourHotspots,
 } from '../utils/findTourHotspot';
 import { buildScenePlaceLeadFromNaming } from '../utils/resolveScenePlaceLead';
 import { isDefaultSceneDescription } from '../utils/sceneDescriptionPlaceholder';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 import {
+  buildSceneGroups,
   buildSceneGroupSecondaryById,
   sceneIdsWithTitleCollisions,
 } from '../viewer/sceneDepth';
@@ -174,8 +182,6 @@ import {
   devViewPanelInputClassName,
   devViewPanelRootClassName,
   devViewPanelSectionHintClassName,
-  devViewPanelTabHintClassName,
-  devViewPanelSectionLeadClassName,
   devViewPanelSelectClassName,
   devViewPanelSlugPreviewClassName,
   devViewPanelStickyHeaderClassName,
@@ -184,7 +190,6 @@ import {
   devViewPanelStickyTourTitleClassName,
   devViewPanelFormGroupTitleClassName,
   devViewPanelPrimaryTabsClassName,
-  devViewPanelSecondaryTabsClassName,
   devViewPanelTabPanelBodyClassName,
   devViewPanelTabPanelClassName,
   devViewPanelTabVariants,
@@ -207,18 +212,23 @@ import {
   devViewPanelTourSwitchTriggerClassName,
   devViewPanelTourSwitcherClassName,
   devViewPanelManageListClassName,
-  devViewPanelManageListFooterClassName,
   devViewPanelStackedFormFooterClassName,
   devViewPanelManageListItemClassName,
   devViewPanelManageListItemActiveClassName,
+  devViewPanelManageListItemCopyClassName,
   devViewPanelManageListItemDescClassName,
   devViewPanelManageListItemHeadClassName,
   devViewPanelManageListItemHeadMainClassName,
+  devViewPanelManageListItemLogoClassName,
+  devViewPanelManageListItemLogoWrapClassName,
   devViewPanelManageListItemTitleClassName,
   devViewPanelManageListItemBulletClassName,
   devViewPanelManageListItemMetaClassName,
+  devViewPanelManageListItemStackActionsClassName,
+  devViewPanelManageListItemTextStackClassName,
   devSceneManageBadgeVariants,
   devViewPanelManageListItemBadgesClassName,
+  devViewPanelManageListItemTourBadgesStackClassName,
   devHotspotKindBadgeVariants,
   type DevHotspotKindBadgeKind,
 } from './devViewPanelVariants';
@@ -272,13 +282,14 @@ interface DevViewPanelProps {
     hotspotId: string | null,
     options?: { animate?: boolean },
   ) => void;
+  openNamingOpportunity?: (sceneId: string, hotspotId: string) => void;
   onClose?: () => void;
 }
 
 type ActionStatus = 'idle' | 'working' | 'done' | 'error';
 
 function isNamingInfoHotspot(hotspot: Hotspot): boolean {
-  return hotspot.type === 'info' && Boolean(hotspot.popup?.namingOpportunity);
+  return isNamingHotspot(hotspot);
 }
 
 function buildDevNamingDonorPayload(options: {
@@ -319,21 +330,31 @@ function hotspotKindBadgeKind(hotspot: Hotspot): DevHotspotKindBadgeKind {
   return 'info';
 }
 
+function matchesHotspotManageFilter(
+  hotspot: Hotspot,
+  filter: DevHotspotManageFilter,
+): boolean {
+  if (filter === 'all') return true;
+  if (filter === 'nav') return hotspot.type === 'nav';
+  if (filter === 'naming') return isNamingInfoHotspot(hotspot);
+  return hotspot.type === 'info' && !isNamingInfoHotspot(hotspot);
+}
+
 function hotspotDisplayLabel(
   hotspot: Hotspot,
   tour: Tour,
   hostScene?: Scene | null,
 ): string {
   if (hotspot.type === 'nav') return resolveNavHotspotLabel(hotspot, tour);
-  if (isNamingInfoHotspot(hotspot) && hotspot.popup) {
+  if (isNamingInfoHotspot(hotspot)) {
     const found = findHotspotInTour(tour, hotspot.id);
     const scene =
       resolveHotspotHostScene(tour, hotspot, hostScene) ??
       (found?.sceneId ? tour.scenes[found.sceneId] : undefined);
-    const resolved = resolveNamingPopup(hotspot.popup, scene);
+    const resolved = resolveNamingPopup(tour, hotspot, scene);
     return (
-      resolved.namingOpportunity?.name?.trim() ||
-      resolved.title?.trim() ||
+      resolved?.namingOpportunity?.name?.trim() ||
+      resolved?.title?.trim() ||
       hotspot.id
     );
   }
@@ -402,6 +423,7 @@ export function DevViewPanel({
   captureSceneThumbnail,
   getCurrentView,
   focusHotspot,
+  openNamingOpportunity,
   onClose,
 }: DevViewPanelProps) {
   const navigate = useNavigate();
@@ -461,31 +483,35 @@ export function DevViewPanel({
   );
   const [movingHotspotId, setMovingHotspotId] = useState<string | null>(null);
   const [editingHotspotId, setEditingHotspotId] = useState<string | null>(null);
+  const [catalogEditNamingId, setCatalogEditNamingId] = useState<string | null>(
+    null,
+  );
+  const [catalogEditName, setCatalogEditName] = useState('');
+  const [catalogEditPrice, setCatalogEditPrice] = useState('');
+  const [catalogEditStatus, setCatalogEditStatus] = useState<
+    NamingOpportunityStatus | ''
+  >('');
+  const [catalogEditBody, setCatalogEditBody] = useState('');
+  const [catalogEditVideoUrl, setCatalogEditVideoUrl] = useState('');
+  const [catalogEditImage, setCatalogEditImage] = useState('');
+  const [catalogEditDonorName, setCatalogEditDonorName] = useState('');
+  const [catalogEditDonorKind, setCatalogEditDonorKind] =
+    useState<NamingDonorKind>('organization');
+  const [catalogEditDonorAffiliation, setCatalogEditDonorAffiliation] =
+    useState('');
+  const [catalogEditDonorWebsite, setCatalogEditDonorWebsite] = useState('');
+  const [catalogEditDonorLogoFile, setCatalogEditDonorLogoFile] =
+    useState<File | null>(null);
+  const [catalogEditDonorLogoPath, setCatalogEditDonorLogoPath] = useState('');
+  const [catalogEditClearDonorLogo, setCatalogEditClearDonorLogo] =
+    useState(false);
   const [editNavLabel, setEditNavLabel] = useState('');
   const [editNavTarget, setEditNavTarget] = useState('');
   const [editNavInstant, setEditNavInstant] = useState(false);
   const [editNavVariant, setEditNavVariant] = useState<NavHotspotVariant>(
     NAV_HOTSPOT_VARIANT_DEFAULT,
   );
-  const [editNoTitle, setEditNoTitle] = useState('');
-  const [editNoPrice, setEditNoPrice] = useState('');
-  const [editNoStatus, setEditNoStatus] = useState<
-    NamingOpportunityStatus | ''
-  >('');
-  const [editNoDonorName, setEditNoDonorName] = useState('');
-  const [editNoDonorKind, setEditNoDonorKind] =
-    useState<NamingDonorKind>('organization');
-  const [editNoDonorAffiliation, setEditNoDonorAffiliation] = useState('');
-  const [editNoDonorWebsite, setEditNoDonorWebsite] = useState('');
-  const [editNoDonorLogoFile, setEditNoDonorLogoFile] = useState<File | null>(
-    null,
-  );
-  const [editNoDonorLogoPath, setEditNoDonorLogoPath] = useState('');
-  const [editNoClearDonorLogo, setEditNoClearDonorLogo] = useState(false);
-  const [editNoBody, setEditNoBody] = useState('');
-  const [editNoVideoUrl, setEditNoVideoUrl] = useState('');
-  const [editNoImage, setEditNoImage] = useState('');
-  const [editNoSyncPosition, setEditNoSyncPosition] = useState(false);
+  const [editNoNamingId, setEditNoNamingId] = useState('');
   const [editInfoTitle, setEditInfoTitle] = useState('');
   const [editInfoBody, setEditInfoBody] = useState('');
   const [editInfoDisplay, setEditInfoDisplay] =
@@ -498,11 +524,15 @@ export function DevViewPanel({
   const [editSceneDescription, setEditSceneDescription] = useState('');
   const [editScenePreviewVideoUrl, setEditScenePreviewVideoUrl] = useState('');
   const [editSceneVideoUrl, setEditSceneVideoUrl] = useState('');
+  const [editSceneVisibility, setEditSceneVisibility] =
+    useState<DevCatalogTourVisibility>('public');
   const [editSceneAsFirst, setEditSceneAsFirst] = useState(false);
   const [sceneManageStatus, setSceneManageStatus] =
     useState<ActionStatus>('idle');
   const [sceneManageError, setSceneManageError] = useState<string | null>(null);
-  const [tourModeTab, setTourModeTab] = useState<DevCrudModeTab>('manage');
+  const [tourCreateOpen, setTourCreateOpen] = useState(false);
+  const [editingTourId, setEditingTourId] = useState<string | null>(null);
+  const [deletingTourId, setDeletingTourId] = useState<string | null>(null);
   const [manageClientId, setManageClientId] = useState('');
   const [catalogClients, setCatalogClients] = useState<DevCatalogClient[]>([]);
   const [newTourClientId, setNewTourClientId] = useState('');
@@ -599,24 +629,6 @@ export function DevViewPanel({
   const [deleteTourStatus, setDeleteTourStatus] =
     useState<ActionStatus>('idle');
   const [deleteTourError, setDeleteTourError] = useState<string | null>(null);
-  const [knowledgeMissing, setKnowledgeMissing] = useState(false);
-  const [knowledgeLoadStatus, setKnowledgeLoadStatus] =
-    useState<ActionStatus>('idle');
-  const [knowledgeLoadError, setKnowledgeLoadError] = useState<string | null>(
-    null,
-  );
-  const [knowledgeUrl, setKnowledgeUrl] = useState('');
-  const [knowledgeFacilityName, setKnowledgeFacilityName] = useState('');
-  const [knowledgeSummary, setKnowledgeSummary] = useState('');
-  const [knowledgeSceneId, setKnowledgeSceneId] = useState('');
-  const [knowledgeSceneTitle, setKnowledgeSceneTitle] = useState('');
-  const [knowledgeSceneDescription, setKnowledgeSceneDescription] =
-    useState('');
-  const [knowledgeFactsText, setKnowledgeFactsText] = useState('');
-  const [knowledgeFaqs, setKnowledgeFaqs] = useState<FaqEntry[]>([]);
-  const [knowledgeSuggestedText, setKnowledgeSuggestedText] = useState('');
-  const [knowledgeStatus, setKnowledgeStatus] = useState<ActionStatus>('idle');
-  const [knowledgeError, setKnowledgeError] = useState<string | null>(null);
   const [replacePanoramaFile, setReplacePanoramaFile] = useState<File | null>(
     null,
   );
@@ -625,6 +637,8 @@ export function DevViewPanel({
   const [replacePanoramaError, setReplacePanoramaError] = useState<
     string | null
   >(null);
+
+  const [sceneManageFilter, setSceneManageFilter] = useState('all');
 
   const tourScenes = useMemo(
     () =>
@@ -643,46 +657,36 @@ export function DevViewPanel({
       ),
     [tour],
   );
+  const sceneManageGroups = useMemo(
+    () =>
+      buildSceneGroups(
+        tour,
+        tour.scenes,
+        tour.firstScene,
+        TOUR_DIRECTORY_GROUP_OTHER,
+      ),
+    [tour],
+  );
+  const filteredTourScenes = useMemo(() => {
+    if (sceneManageFilter === 'all') return tourScenes;
+    const group = sceneManageGroups.find(
+      (entry) => entry.id === sceneManageFilter,
+    );
+    if (!group) return tourScenes;
+    return [...group.scenes].sort((a, b) => a.title.localeCompare(b.title));
+  }, [sceneManageFilter, sceneManageGroups, tourScenes]);
+
+  useEffect(() => {
+    if (sceneManageFilter === 'all') return;
+    if (sceneManageGroups.some((group) => group.id === sceneManageFilter)) {
+      return;
+    }
+    setSceneManageFilter('all');
+  }, [sceneManageFilter, sceneManageGroups]);
+
   const collidingSceneTitleIds = useMemo(
     () => sceneIdsWithTitleCollisions(tourScenes),
     [tourScenes],
-  );
-  const knowledgeSceneDraftsRef = useRef<
-    Record<string, TourKnowledge['scenes'][string]>
-  >({});
-
-  const applyKnowledgeSceneForm = useCallback(
-    (sceneId: string) => {
-      const scene = tour.scenes[sceneId];
-      const draft = knowledgeSceneDraftsRef.current[sceneId];
-      const form = sceneKnowledgeToForm(draft, sceneId, scene?.title);
-      setKnowledgeSceneTitle(form.title);
-      setKnowledgeSceneDescription(form.description);
-      setKnowledgeFactsText(form.factsText);
-      setKnowledgeFaqs(form.faqs);
-      setKnowledgeSuggestedText(form.suggestedQuestionsText);
-    },
-    [tour.scenes],
-  );
-
-  const persistKnowledgeSceneDraft = useCallback(
-    (sceneId: string) => {
-      if (!sceneId) return;
-      knowledgeSceneDraftsRef.current[sceneId] = sceneKnowledgeFromForm({
-        title: knowledgeSceneTitle,
-        description: knowledgeSceneDescription,
-        factsText: knowledgeFactsText,
-        faqs: knowledgeFaqs,
-        suggestedQuestionsText: knowledgeSuggestedText,
-      });
-    },
-    [
-      knowledgeFaqs,
-      knowledgeFactsText,
-      knowledgeSceneDescription,
-      knowledgeSceneTitle,
-      knowledgeSuggestedText,
-    ],
   );
 
   const [sceneTitle, setSceneTitle] = useState(() =>
@@ -728,6 +732,13 @@ export function DevViewPanel({
   const [noBody, setNoBody] = useState('');
   const [noVideoUrl, setNoVideoUrl] = useState('');
   const [noImage, setNoImage] = useState('');
+  const [selectedNamingId, setSelectedNamingId] = useState('');
+  const [namingCatalogStatus, setNamingCatalogStatus] =
+    useState<ActionStatus>('idle');
+  const [namingCatalogError, setNamingCatalogError] = useState<string | null>(
+    null,
+  );
+  const [namingCatalogCreateOpen, setNamingCatalogCreateOpen] = useState(false);
   const [infoName, setInfoName] = useState('');
   const [infoBody, setInfoBody] = useState('');
   const [infoDisplay, setInfoDisplay] = useState<PopupDisplay>('anchored');
@@ -737,9 +748,8 @@ export function DevViewPanel({
   const [infoStatus, setInfoStatus] = useState<ActionStatus>('idle');
   const [infoError, setInfoError] = useState<string | null>(null);
   const [panelTab, setPanelTab] = useState<DevPanelTab>('scene');
-  const [hotspotModeTab, setHotspotModeTab] =
-    useState<DevCrudModeTab>('manage');
-  const [sceneModeTab, setSceneModeTab] = useState<DevCrudModeTab>('manage');
+  const [hotspotCreateOpen, setHotspotCreateOpen] = useState(false);
+  const [sceneCreateOpen, setSceneCreateOpen] = useState(false);
   const [pendingSceneId, setPendingSceneId] = useState(() =>
     createOpaqueId(OPAQUE_SCENE_ID_PREFIX),
   );
@@ -762,6 +772,10 @@ export function DevViewPanel({
   const panelBodyRef = useRef<HTMLDivElement>(null);
   const panelScrollTopRequestRef = useRef(false);
   const [hotspotTab, setHotspotTab] = useState<DevHotspotTab>('nav');
+  const [hotspotManageFilter, setHotspotManageFilter] =
+    useState<DevHotspotManageFilter>('all');
+  const [namingManageFilter, setNamingManageFilter] =
+    useState<DevNamingManageFilter>('all');
 
   const hotspotManageScope = useMemo((): DevHotspotManageScope => {
     return isModel3dTour ? 'model3d-tour' : 'panorama-scene';
@@ -772,11 +786,26 @@ export function DevViewPanel({
     [hotspotManageScope],
   );
 
+  const namingCatalogSectionConfig = useMemo(
+    () => getDevNamingCatalogSectionConfig(hotspotManageScope),
+    [hotspotManageScope],
+  );
+
   const managedHotspots = useMemo(() => {
-    if (isModel3dTour) {
-      return sortSceneHotspotsForManage(listDevTourHotspots(tour), tour);
-    }
     const hostScene = tour.scenes[scene.id];
+    if (isModel3dTour) {
+      const fromTour = (tour.hotspots ?? []).filter(
+        (hotspot) => !hotspot.sceneId || hotspot.sceneId === scene.id,
+      );
+      const legacy = (hostScene?.hotspots ?? []).filter(
+        (hotspot) => !fromTour.some((entry) => entry.id === hotspot.id),
+      );
+      return sortSceneHotspotsForManage(
+        [...fromTour, ...legacy],
+        tour,
+        hostScene,
+      );
+    }
     return sortSceneHotspotsForManage(
       hostScene?.hotspots ?? [],
       tour,
@@ -784,10 +813,44 @@ export function DevViewPanel({
     );
   }, [isModel3dTour, scene.id, tour]);
 
-  const showHotspotDevPanel =
-    !isModel3dTour ?
-      panelTab === 'scene'
-    : panelTab === 'tour' && tourModeTab === 'manage';
+  const filteredManagedHotspots = useMemo(
+    () =>
+      managedHotspots.filter((hotspot) =>
+        matchesHotspotManageFilter(hotspot, hotspotManageFilter),
+      ),
+    [hotspotManageFilter, managedHotspots],
+  );
+
+  const namingCatalogRows = useMemo(() => {
+    const catalog = tour.namingOpportunities ?? {};
+    return Object.values(catalog)
+      .map((record) => {
+        const placement = findNamingHotspotByNamingId(tour, record.id);
+        const hostScene =
+          placement ? tour.scenes[placement.sceneId] : undefined;
+        const displayName =
+          record.name?.trim() || hostScene?.title?.trim() || record.id;
+        return {
+          record,
+          placement,
+          displayName,
+          sceneTitle: hostScene?.title?.trim() || placement?.sceneId || '',
+        };
+      })
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }, [tour]);
+
+  const filteredNamingCatalogRows = useMemo(() => {
+    if (namingManageFilter === 'all') return namingCatalogRows;
+    return namingCatalogRows.filter(
+      (row) =>
+        resolveNamingOpportunityStatus(row.record.status) ===
+        namingManageFilter,
+    );
+  }, [namingCatalogRows, namingManageFilter]);
+
+  const showHotspotDevPanel = panelTab === 'scene';
+  const showNamingCatalogPanel = panelTab === 'naming';
 
   const hotspotCreateTabs = hotspotSectionConfig.createTabs;
 
@@ -811,10 +874,6 @@ export function DevViewPanel({
     () => (trimmedNavName ? slugifyHotspotName(trimmedNavName) : ''),
     [trimmedNavName],
   );
-  const noSlug = useMemo(() => {
-    const display = trimmedNoName || inheritedNoTitle;
-    return display ? slugifyHotspotName(display) : '';
-  }, [inheritedNoTitle, trimmedNoName]);
   const infoSlug = useMemo(
     () => (trimmedInfoName ? slugifyHotspotName(trimmedInfoName) : ''),
     [trimmedInfoName],
@@ -830,11 +889,6 @@ export function DevViewPanel({
     () =>
       navSlug ? previewHotspotId(existingHotspotIds, `nav-to-${navSlug}`) : '',
     [existingHotspotIds, navSlug],
-  );
-  const noHotspotIdPreview = useMemo(
-    () =>
-      noSlug ? previewHotspotId(existingHotspotIds, `info-${noSlug}`) : '',
-    [existingHotspotIds, noSlug],
   );
   const infoHotspotIdPreview = useMemo(
     () =>
@@ -854,6 +908,72 @@ export function DevViewPanel({
     () => findCatalogClient(getTourClientId(tour)),
     [tour, catalogTick],
   );
+  const currentClientId = useMemo(() => getTourClientId(tour), [tour]);
+  const catalogTourManageRows = useMemo(() => {
+    return listCatalogClients()
+      .flatMap((client) =>
+        client.tours.map((entry) => {
+          const loaded = tryLoadTour(entry.id);
+          const branding =
+            loaded ? resolveTourBranding(loaded) : client.branding;
+          return {
+            id: entry.id,
+            title: entry.name,
+            clientId: client.id,
+            clientName: client.name,
+            category: entry.category,
+            visibility: resolveCatalogTourVisibility(entry),
+            featured: entry.featured ?? false,
+            logoPath:
+              branding?.logo?.trim() || client.branding?.logo?.trim() || '',
+          };
+        }),
+      )
+      .sort((a, b) => {
+        const byClient = a.clientName.localeCompare(b.clientName, 'en');
+        if (byClient !== 0) return byClient;
+        return a.title.localeCompare(b.title, 'en');
+      });
+  }, [catalogTick]);
+  const [tourManageClientFilter, setTourManageClientFilter] = useState('all');
+  const tourManageClientGroups = useMemo(() => {
+    const byClient = new Map<
+      string,
+      { id: string; title: string; count: number }
+    >();
+    for (const row of catalogTourManageRows) {
+      const existing = byClient.get(row.clientId);
+      if (existing) {
+        existing.count += 1;
+        continue;
+      }
+      byClient.set(row.clientId, {
+        id: row.clientId,
+        title: row.clientName,
+        count: 1,
+      });
+    }
+    return [...byClient.values()].sort((a, b) =>
+      a.title.localeCompare(b.title, 'en'),
+    );
+  }, [catalogTourManageRows]);
+  const filteredCatalogTourManageRows = useMemo(() => {
+    if (tourManageClientFilter === 'all') return catalogTourManageRows;
+    return catalogTourManageRows.filter(
+      (row) => row.clientId === tourManageClientFilter,
+    );
+  }, [catalogTourManageRows, tourManageClientFilter]);
+  useEffect(() => {
+    if (tourManageClientFilter === 'all') return;
+    if (
+      tourManageClientGroups.some(
+        (group) => group.id === tourManageClientFilter,
+      )
+    ) {
+      return;
+    }
+    setTourManageClientFilter('all');
+  }, [tourManageClientFilter, tourManageClientGroups]);
   const newTourSlug = useMemo(() => {
     const manual = newTourIdInput.trim();
     if (!manual) return pendingTourId;
@@ -863,10 +983,10 @@ export function DevViewPanel({
 
   const canCreateNav = Boolean(scene.tourId && clickCoords && navTargetSceneId);
   const canCreateNaming = Boolean(
-    scene.tourId &&
-    clickCoords &&
-    parseNamingPriceInput(noPrice) != null &&
-    noStatus,
+    scene.tourId && clickCoords && selectedNamingId.trim(),
+  );
+  const canCreateNamingCatalog = Boolean(
+    scene.tourId && parseNamingPriceInput(noPrice) != null && noStatus,
   );
   const canCreateInfo = Boolean(scene.tourId && clickCoords && trimmedInfoName);
   const canCreateScene = Boolean(
@@ -933,52 +1053,54 @@ export function DevViewPanel({
   const openCreateTourTab = useCallback(
     (preferredClientId?: string) => {
       resetNewTourForm(preferredClientId);
-      setTourModeTab('create');
+      setEditingTourId(null);
+      setDeletingTourId(null);
+      setDeleteTourConfirm('');
+      setTourCreateOpen(true);
     },
     [resetNewTourForm],
-  );
-
-  const handleTourModeTabChange = useCallback(
-    (tab: DevCrudModeTab) => {
-      if (tab === 'create') {
-        openCreateTourTab();
-        return;
-      }
-      setTourModeTab(tab);
-    },
-    [openCreateTourTab],
   );
 
   const openCreateHotspotTab = useCallback(() => {
     setEditingHotspotId(null);
     setMovingHotspotId(null);
+    setCatalogEditNamingId(null);
     setHotspotTab(hotspotSectionConfig.createTabs[0]?.id ?? 'nav');
-    setHotspotModeTab('create');
+    setHotspotCreateOpen(true);
   }, [hotspotSectionConfig.createTabs]);
+
+  const openCreateNamingTab = useCallback(() => {
+    setEditingHotspotId(null);
+    setMovingHotspotId(null);
+    setCatalogEditNamingId(null);
+    setNamingCatalogCreateOpen(true);
+    setNamingCatalogError(null);
+    setNamingCatalogStatus('idle');
+  }, []);
 
   const openCreateSceneTab = useCallback(() => {
     setEditingSceneId(null);
     mintCreateSceneId();
-    setSceneModeTab('create');
+    setSceneCreateOpen(true);
   }, [mintCreateSceneId]);
 
   const canSaveEditTour = Boolean(editTourTitle.trim() && editTourCategory);
+  const editingTourSource = useMemo(() => {
+    if (!editingTourId) return tour;
+    if (editingTourId === tour.id) return tour;
+    return tryLoadTour(editingTourId) ?? tour;
+  }, [editingTourId, tour, catalogTick]);
   const editTourProductNamePreview = useMemo(
     () =>
       getTourProductFullName({
-        ...tour,
-        title: editTourTitle.trim() || tour.title,
+        ...editingTourSource,
+        title: editTourTitle.trim() || editingTourSource.title,
         productFullName: editTourProductFullName.trim() || undefined,
       }),
-    [editTourProductFullName, editTourTitle, tour],
+    [editTourProductFullName, editTourTitle, editingTourSource],
   );
-  const canDeleteTour = deleteTourConfirm.trim() === tour.id;
-  const canSaveKnowledge = Boolean(
-    tour.id &&
-    knowledgeSceneId &&
-    knowledgeFacilityName.trim() &&
-    knowledgeSceneTitle.trim() &&
-    knowledgeLoadStatus !== 'working',
+  const canDeleteTour = Boolean(
+    deletingTourId && deleteTourConfirm.trim() === deletingTourId,
   );
   const canReplacePanorama = Boolean(scene.tourId && replacePanoramaFile);
   const canMoveHotspot = Boolean(
@@ -1009,6 +1131,19 @@ export function DevViewPanel({
   );
   const showNavTargetQuickCreate =
     navTargetQuickCreateOpen || otherNavTargetSceneOptions.length === 0;
+  const namingIdsPlacedHere = useMemo(() => {
+    const ids = new Set<string>();
+    for (const hotspot of managedHotspots) {
+      if (!isNamingInfoHotspot(hotspot)) continue;
+      const namingId = hotspot.namingId?.trim();
+      if (!namingId) continue;
+      if (isModel3dTour && hotspot.sceneId && hotspot.sceneId !== scene.id) {
+        continue;
+      }
+      ids.add(namingId);
+    }
+    return ids;
+  }, [isModel3dTour, managedHotspots, scene.id]);
   const trimmedNavTargetSceneTitle = navTargetSceneTitle.trim();
   const navTargetSceneSlug = pendingNavTargetSceneId;
   const canCreateNavTargetScene = Boolean(
@@ -1041,19 +1176,88 @@ export function DevViewPanel({
   }, [panelTab, tour]);
 
   useEffect(() => {
-    if (panelTab !== 'tour' || !tour.id) return;
+    if (!editingTourId) return;
 
-    void devFetchTourRecord(tour.id)
+    const targetId = editingTourId;
+    const loaded =
+      targetId === tour.id ? tour : (tryLoadTour(targetId) ?? null);
+    let clientId = loaded ? getTourClientId(loaded) : '';
+    let catalogEntry =
+      clientId ? findCatalogTour(clientId, targetId) : undefined;
+    if (!catalogEntry) {
+      for (const client of listCatalogClients()) {
+        const entry = client.tours.find((item) => item.id === targetId);
+        if (entry) {
+          clientId = client.id;
+          catalogEntry = entry;
+          break;
+        }
+      }
+    }
+    const catalogClient = findCatalogClient(clientId);
+
+    setEditTourTitle(loaded?.title ?? catalogEntry?.name ?? '');
+    setEditTourSummary(catalogEntry?.summary ?? '');
+    setEditTourCategory(
+      (loaded?.category as TourCategory | undefined) ??
+        catalogEntry?.category ??
+        'Healthcare',
+    );
+    setEditTourVisibility(
+      catalogEntry ? resolveCatalogTourVisibility(catalogEntry) : 'unlisted',
+    );
+    setEditTourFeatured(catalogEntry?.featured ?? false);
+
+    const brandingTour = loaded ?? tour;
+    const usesCustomBranding = loaded ? tourUsesCustomBranding(loaded) : false;
+    setEditTourBrandingMode(usesCustomBranding ? 'custom' : 'client');
+    const brandingSource =
+      usesCustomBranding ? brandingTour.branding : catalogClient?.branding;
+    setEditTourPrimaryColor(
+      brandingSource?.primaryColor ?? DEFAULT_NEW_TOUR_PRIMARY_COLOR,
+    );
+    setEditTourLogoAlt(brandingSource?.logoAlt ?? catalogClient?.name ?? '');
+    setEditTourFontFamily(brandingSource?.fontFamily ?? '');
+    setEditTourFontSourceUrl(brandingSource?.fontSourceUrl ?? '');
+    setEditTourLogoFile(null);
+    setEditTourFaviconFile(null);
+    setEditTourSuggestNotes([]);
+    setEditTourSuggestStatus('idle');
+    setEditTourStatus('idle');
+    setEditTourError(null);
+
+    if (panelTab !== 'tour') return;
+
+    let cancelled = false;
+    void devFetchTourRecord(targetId)
       .then(({ tour: rawTour, catalog }) => {
+        if (cancelled) return;
+
         if (catalog) {
           setEditTourVisibility(catalog.visibility);
           setEditTourFeatured(catalog.featured);
           setEditTourSummary(catalog.summary);
         }
 
+        setEditTourTitle(rawTour.title);
         setEditTourProductFullName(rawTour.productFullName ?? '');
+        setEditTourCategory(
+          (rawTour.category as TourCategory | undefined) ?? 'Healthcare',
+        );
         setEditTransitionEffect(rawTour.defaultTransition?.effect ?? 'fade');
         setEditTransitionSpeed(rawTour.defaultTransition?.speed ?? '500ms');
+
+        const fetchClient = findCatalogClient(getTourClientId(rawTour));
+        const usesCustom = tourUsesCustomBranding(rawTour);
+        setEditTourBrandingMode(usesCustom ? 'custom' : 'client');
+        const fetchBranding =
+          usesCustom ? rawTour.branding : fetchClient?.branding;
+        setEditTourPrimaryColor(
+          fetchBranding?.primaryColor ?? DEFAULT_NEW_TOUR_PRIMARY_COLOR,
+        );
+        setEditTourLogoAlt(fetchBranding?.logoAlt ?? fetchClient?.name ?? '');
+        setEditTourFontFamily(fetchBranding?.fontFamily ?? '');
+        setEditTourFontSourceUrl(fetchBranding?.fontSourceUrl ?? '');
 
         const immersive = rawTour.immersiveBackground;
         if (!immersive) {
@@ -1094,91 +1298,11 @@ export function DevViewPanel({
       .catch(() => {
         /* catalog entry may be missing for legacy tours */
       });
-  }, [panelTab, tour.id]);
 
-  useEffect(() => {
-    if (panelTab !== 'tour' || !tour.id) return;
-
-    setKnowledgeLoadStatus('working');
-    setKnowledgeLoadError(null);
-
-    void devFetchKnowledge(tour.id)
-      .then(({ knowledge, missing }) => {
-        setKnowledgeMissing(missing);
-        setKnowledgeUrl(knowledge.url ?? '');
-        setKnowledgeFacilityName(knowledge.global?.facilityName ?? '');
-        setKnowledgeSummary(knowledge.global?.summary ?? '');
-
-        const drafts = { ...(knowledge.scenes ?? {}) };
-        for (const scene of Object.values(tour.scenes)) {
-          if (!drafts[scene.id]) {
-            drafts[scene.id] = sceneKnowledgeFromForm(
-              sceneKnowledgeToForm(undefined, scene.id, scene.title),
-            );
-          }
-        }
-        knowledgeSceneDraftsRef.current = drafts;
-
-        const initialSceneId =
-          tour.scenes[currentSceneId] ? currentSceneId : tour.firstScene;
-        setKnowledgeSceneId(initialSceneId);
-        applyKnowledgeSceneForm(initialSceneId);
-        setKnowledgeLoadStatus('idle');
-        setKnowledgeStatus('idle');
-        setKnowledgeError(null);
-      })
-      .catch((error) => {
-        setKnowledgeLoadStatus('error');
-        setKnowledgeLoadError(
-          error instanceof DevTourApiError ?
-            error.message
-          : 'Could not load knowledge',
-        );
-      });
-  }, [
-    applyKnowledgeSceneForm,
-    currentSceneId,
-    panelTab,
-    tour.firstScene,
-    tour.id,
-    tour.scenes,
-  ]);
-
-  useEffect(() => {
-    const catalogClient = findCatalogClient(getTourClientId(tour));
-
-    setEditTourTitle(tour.title);
-    setEditTourSummary(
-      findCatalogTour(getTourClientId(tour), tour.id)?.summary ?? '',
-    );
-    setEditTourCategory((tour.category as TourCategory) ?? 'Healthcare');
-    const usesCustomBranding = tourUsesCustomBranding(tour);
-    setEditTourBrandingMode(usesCustomBranding ? 'custom' : 'client');
-    const brandingSource =
-      usesCustomBranding ? tour.branding : catalogClient?.branding;
-    setEditTourPrimaryColor(
-      brandingSource?.primaryColor ?? DEFAULT_NEW_TOUR_PRIMARY_COLOR,
-    );
-    setEditTourLogoAlt(brandingSource?.logoAlt ?? catalogClient?.name ?? '');
-    setEditTourFontFamily(brandingSource?.fontFamily ?? '');
-    setEditTourFontSourceUrl(brandingSource?.fontSourceUrl ?? '');
-    setEditTourLogoFile(null);
-    setEditTourFaviconFile(null);
-    setEditTourSuggestNotes([]);
-    setEditTourSuggestStatus('idle');
-    setEditTourStatus('idle');
-    setEditTourError(null);
-  }, [
-    tour.branding?.fontFamily,
-    tour.branding?.fontSourceUrl,
-    tour.branding?.logoAlt,
-    tour.branding?.primaryColor,
-    tour.category,
-    tour.clientId,
-    tour.id,
-    tour.title,
-    catalogTick,
-  ]);
+    return () => {
+      cancelled = true;
+    };
+  }, [editingTourId, panelTab]);
 
   useEffect(() => {
     writeSessionValue(DEV_SCENE_TITLE_STORAGE_KEY, sceneTitle);
@@ -1357,10 +1481,78 @@ export function DevViewPanel({
     onTourMutated,
   ]);
 
+  const createNamingCatalogEntry = useCallback(async () => {
+    const priceAmount = parseNamingPriceInput(noPrice);
+    if (!scene.tourId || priceAmount == null || !noStatus) {
+      return;
+    }
+
+    setNamingCatalogStatus('working');
+    setNamingCatalogError(null);
+
+    try {
+      const result = await devCreateNamingOpportunity({
+        tourId: scene.tourId,
+        sceneId: scene.id,
+        name: trimmedNoName,
+        price: priceAmount,
+        status: noStatus,
+        body: noBody.trim() || undefined,
+        videoUrl: noVideoUrl.trim() || undefined,
+        image: noImage.trim() || undefined,
+        donor: buildDevNamingDonorPayload({
+          status: noStatus,
+          name: noDonorName,
+          kind: noDonorKind,
+          affiliation: noDonorAffiliation,
+          website: noDonorWebsite,
+        }),
+        donorLogoFile: noDonorLogoFile,
+      });
+      await onTourMutated?.({ keepCurrentScene: true });
+      setSelectedNamingId(result.record.id);
+      setNamingCatalogStatus('done');
+      setNoName('');
+      setNoPrice('');
+      setNoStatus('');
+      setNoDonorName('');
+      setNoDonorKind('organization');
+      setNoDonorAffiliation('');
+      setNoDonorWebsite('');
+      setNoDonorLogoFile(null);
+      setNoBody('');
+      setNoVideoUrl('');
+      setNoImage('');
+      setNamingCatalogCreateOpen(false);
+    } catch (error) {
+      setNamingCatalogStatus('error');
+      setNamingCatalogError(
+        error instanceof DevTourApiError ?
+          error.message
+        : 'Could not create naming opportunity',
+      );
+    }
+  }, [
+    noBody,
+    noDonorAffiliation,
+    noDonorKind,
+    noDonorLogoFile,
+    noDonorName,
+    noDonorWebsite,
+    noImage,
+    noPrice,
+    noStatus,
+    noVideoUrl,
+    onTourMutated,
+    scene.id,
+    scene.tourId,
+    trimmedNoName,
+  ]);
+
   const createNamingHotspot = useCallback(async () => {
     const position = buildHotspotPosition();
-    const priceAmount = parseNamingPriceInput(noPrice);
-    if (!scene.tourId || !position || priceAmount == null || !noStatus) {
+    const namingId = selectedNamingId.trim();
+    if (!scene.tourId || !position || !namingId) {
       return;
     }
 
@@ -1377,62 +1569,29 @@ export function DevViewPanel({
       await devCreateNamingHotspot({
         tourId: scene.tourId,
         sceneId: scene.id,
-        name: trimmedNoName,
+        namingId,
         position,
-        price: priceAmount,
-        status: noStatus,
-        body: noBody.trim() || undefined,
-        videoUrl: noVideoUrl.trim() || undefined,
-        image: noImage.trim() || undefined,
-        donor: buildDevNamingDonorPayload({
-          status: noStatus,
-          name: noDonorName,
-          kind: noDonorKind,
-          affiliation: noDonorAffiliation,
-          website: noDonorWebsite,
-        }),
-        donorLogoFile: noDonorLogoFile,
         targetView,
         previewFile,
       });
       await onTourMutated?.({ keepCurrentScene: true });
       setNamingStatus('done');
-      setNoName('');
-      setNoPrice('');
-      setNoDonorName('');
-      setNoDonorKind('organization');
-      setNoDonorAffiliation('');
-      setNoDonorWebsite('');
-      setNoDonorLogoFile(null);
-      setNoBody('');
-      setNoVideoUrl('');
-      setNoImage('');
     } catch (error) {
       setNamingStatus('error');
       setNamingError(
         error instanceof DevTourApiError ?
           error.message
-        : 'Could not create naming hotspot',
+        : 'Could not place naming hotspot',
       );
     }
   }, [
     buildHotspotPosition,
     captureModel3dNamingPreview,
     isModel3dTour,
-    noBody,
-    noDonorAffiliation,
-    noDonorKind,
-    noDonorLogoFile,
-    noDonorName,
-    noDonorWebsite,
-    noImage,
-    noPrice,
-    noStatus,
-    noVideoUrl,
+    onTourMutated,
     scene.id,
     scene.tourId,
-    trimmedNoName,
-    onTourMutated,
+    selectedNamingId,
   ]);
 
   const createInfoHotspotHandler = useCallback(async () => {
@@ -1568,7 +1727,9 @@ export function DevViewPanel({
       setScenePanoramaFile(null);
       mintCreateSceneId();
       setSceneStatus('done');
+      setSceneCreateOpen(false);
       await onTourMutated?.({ navigateToScene: result.scene.id });
+      setPanelTab('scene');
     } catch (error) {
       setSceneStatus('error');
       setSceneError(
@@ -1652,7 +1813,11 @@ export function DevViewPanel({
   ]);
 
   const suggestEditTourBranding = useCallback(async () => {
-    const websiteUrl = openCatalogClient?.website?.trim() ?? '';
+    const editClientId = getTourClientId(editingTourSource);
+    const websiteUrl =
+      findCatalogClient(editClientId)?.website?.trim() ??
+      openCatalogClient?.website?.trim() ??
+      '';
     if (!websiteUrl) return;
 
     setEditTourSuggestStatus('working');
@@ -1686,17 +1851,18 @@ export function DevViewPanel({
         : 'Could not suggest branding from website',
       ]);
     }
-  }, [openCatalogClient?.website]);
+  }, [editingTourSource, openCatalogClient?.website]);
 
   const saveEditTour = useCallback(async () => {
-    if (!canSaveEditTour || !tour.id) return;
+    const targetTourId = editingTourId;
+    if (!canSaveEditTour || !targetTourId) return;
 
     setEditTourStatus('working');
     setEditTourError(null);
 
     try {
       await devUpdateTour({
-        tourId: tour.id,
+        tourId: targetTourId,
         tourTitle: editTourTitle.trim(),
         tourSummary: editTourSummary,
         category: editTourCategory,
@@ -1722,9 +1888,14 @@ export function DevViewPanel({
       });
       setEditTourLogoFile(null);
       setEditTourFaviconFile(null);
-      await onTourMutated?.({ refreshKnowledge: true });
+      if (targetTourId !== tour.id) {
+        removeDevTourCache(targetTourId);
+      } else {
+        await onTourMutated?.();
+      }
       await refreshDevCatalogSnapshot();
       setEditTourStatus('done');
+      setEditingTourId(null);
     } catch (error) {
       setEditTourStatus('error');
       setEditTourError(
@@ -1755,24 +1926,37 @@ export function DevViewPanel({
     editTourTitle,
     editTourSummary,
     editTourVisibility,
+    editingTourId,
     onTourMutated,
     tour.id,
   ]);
 
-  const deleteCurrentTour = useCallback(async () => {
-    if (!canDeleteTour || !tour.id) return;
+  const deleteManagedTour = useCallback(async () => {
+    if (!canDeleteTour || !deletingTourId) return;
 
+    const targetTourId = deletingTourId;
     setDeleteTourStatus('working');
     setDeleteTourError(null);
 
     try {
       const result = await devDeleteTour({
-        tourId: tour.id,
+        tourId: targetTourId,
         confirmTourId: deleteTourConfirm.trim(),
       });
 
-      removeDevTourCache(tour.id);
+      removeDevTourCache(targetTourId);
       await refreshDevCatalogSnapshot();
+      setDeletingTourId(null);
+      setDeleteTourConfirm('');
+      setEditingTourId((current) =>
+        current === targetTourId ? null : current,
+      );
+
+      const wasOpenTour = targetTourId === tour.id;
+      if (!wasOpenTour) {
+        setDeleteTourStatus('done');
+        return;
+      }
 
       const resolveNextTour = async (tourId: string): Promise<Tour | null> => {
         try {
@@ -1814,65 +1998,79 @@ export function DevViewPanel({
         : 'Could not delete tour',
       );
     }
-  }, [canDeleteTour, deleteTourConfirm, navigate, searchParams, tour.id]);
-
-  const handleKnowledgeSceneChange = useCallback(
-    (nextSceneId: string) => {
-      persistKnowledgeSceneDraft(knowledgeSceneId);
-      setKnowledgeSceneId(nextSceneId);
-      applyKnowledgeSceneForm(nextSceneId);
-    },
-    [applyKnowledgeSceneForm, knowledgeSceneId, persistKnowledgeSceneDraft],
-  );
-
-  const saveKnowledge = useCallback(async () => {
-    if (!canSaveKnowledge || !tour.id || !knowledgeSceneId) return;
-
-    persistKnowledgeSceneDraft(knowledgeSceneId);
-    const scene = knowledgeSceneDraftsRef.current[knowledgeSceneId];
-    if (!scene) return;
-
-    setKnowledgeStatus('working');
-    setKnowledgeError(null);
-
-    try {
-      const result = await devUpdateKnowledge({
-        tourId: tour.id,
-        url: knowledgeUrl.trim(),
-        global: {
-          facilityName: knowledgeFacilityName.trim(),
-          summary: knowledgeSummary.trim(),
-        },
-        sceneId: knowledgeSceneId,
-        scene,
-      });
-      knowledgeSceneDraftsRef.current = {
-        ...knowledgeSceneDraftsRef.current,
-        ...(result.knowledge.scenes ?? {}),
-      };
-      if (result.created) {
-        setKnowledgeMissing(false);
-      }
-      await onTourMutated?.({ refreshKnowledge: true });
-      setKnowledgeStatus('done');
-    } catch (error) {
-      setKnowledgeStatus('error');
-      setKnowledgeError(
-        error instanceof DevTourApiError ?
-          error.message
-        : 'Could not save knowledge',
-      );
-    }
   }, [
-    canSaveKnowledge,
-    knowledgeFacilityName,
-    knowledgeSceneId,
-    knowledgeSummary,
-    knowledgeUrl,
-    onTourMutated,
-    persistKnowledgeSceneDraft,
+    canDeleteTour,
+    deleteTourConfirm,
+    deletingTourId,
+    navigate,
+    searchParams,
     tour.id,
   ]);
+
+  const startDeleteTour = useCallback((tourId: string) => {
+    setTourCreateOpen(false);
+    setEditingTourId(null);
+    setDeletingTourId(tourId);
+    setDeleteTourConfirm('');
+    setDeleteTourStatus('idle');
+    setDeleteTourError(null);
+  }, []);
+
+  const cancelDeleteTour = useCallback(() => {
+    setDeletingTourId(null);
+    setDeleteTourConfirm('');
+    setDeleteTourStatus('idle');
+    setDeleteTourError(null);
+  }, []);
+
+  const handleClientDeleted = useCallback(
+    async (result: {
+      clientId: string;
+      deletedTourIds: string[];
+      redirectTourId: string | null;
+    }) => {
+      for (const tourId of result.deletedTourIds) {
+        removeDevTourCache(tourId);
+      }
+
+      const openClientDeleted = result.deletedTourIds.includes(tour.id);
+      if (!openClientDeleted) return;
+
+      const resolveNextTour = async (tourId: string): Promise<Tour | null> => {
+        try {
+          const fresh = normalizeTourAssets(await devFetchTour(tourId));
+          setDevTourCache(fresh);
+          return fresh;
+        } catch {
+          return tryLoadTour(tourId);
+        }
+      };
+
+      const nextTourId =
+        result.redirectTourId ?? listRoutableTourIds()[0] ?? null;
+
+      if (nextTourId) {
+        const nextTour = await resolveNextTour(nextTourId);
+        if (nextTour) {
+          navigate(
+            buildTourLocation(
+              nextTour.id,
+              nextTour.firstScene,
+              nextTour.firstScene,
+              searchParams,
+            ),
+            { replace: true },
+          );
+          return;
+        }
+      }
+
+      navigate(`/${preservedSearchStringFrom(searchParams)}`, {
+        replace: true,
+      });
+    },
+    [navigate, searchParams, tour.id],
+  );
 
   const suggestNewTourBranding = useCallback(async () => {
     const websiteUrl = createTourClientWebsite.trim();
@@ -2012,9 +2210,13 @@ export function DevViewPanel({
       const label =
         found ? hotspotDisplayLabel(found.hotspot, tour) : hotspotId;
       const deleteScopeLabel = isModel3dTour ? 'tour' : `scene “${scene.id}”`;
+      const isNamingHotspotDelete =
+        found ? isNamingInfoHotspot(found.hotspot) : false;
       if (
         !confirmDevPanelDelete(
-          `Delete hotspot “${label}” (${hotspotId}) from ${deleteScopeLabel}?`,
+          isNamingHotspotDelete ?
+            `Delete naming hotspot “${label}” (${hotspotId})? If this is the last placement, the catalog entry is removed too.`
+          : `Delete hotspot “${label}” (${hotspotId}) from ${deleteScopeLabel}?`,
         )
       ) {
         return;
@@ -2024,9 +2226,10 @@ export function DevViewPanel({
       setHotspotManageError(null);
 
       try {
+        const hostSceneId = found?.sceneId ?? scene.id;
         await devDeleteHotspot({
           tourId: scene.tourId,
-          sceneId: scene.id,
+          sceneId: hostSceneId,
           hotspotId,
         });
         if (movingHotspotId === hotspotId) {
@@ -2034,6 +2237,12 @@ export function DevViewPanel({
         }
         if (editingHotspotId === hotspotId) {
           setEditingHotspotId(null);
+        }
+        if (
+          found?.hotspot.namingId &&
+          catalogEditNamingId === found.hotspot.namingId
+        ) {
+          setCatalogEditNamingId(null);
         }
         await onTourMutated?.();
         setHotspotManageStatus('done');
@@ -2047,6 +2256,7 @@ export function DevViewPanel({
       }
     },
     [
+      catalogEditNamingId,
       editingHotspotId,
       isModel3dTour,
       movingHotspotId,
@@ -2093,6 +2303,7 @@ export function DevViewPanel({
   const startEditHotspot = useCallback(
     (hotspot: Hotspot) => {
       setEditingHotspotId(hotspot.id);
+      setCatalogEditNamingId(null);
       setMovingHotspotId(null);
       if (hotspot.type === 'nav') {
         const targetTitle =
@@ -2105,41 +2316,7 @@ export function DevViewPanel({
         return;
       }
       if (isNamingInfoHotspot(hotspot)) {
-        const hostScene = tour.scenes[scene.id];
-        const sceneTitle = hostScene?.title?.trim() ?? '';
-        const sceneBody = hostScene?.description?.trim() ?? '';
-        const sceneVideo = hostScene?.previewVideoUrl?.trim() ?? '';
-        const storedTitle = hotspot.popup?.title?.trim() ?? '';
-        const storedBody = hotspot.popup?.body?.trim() ?? '';
-        const storedVideo = hotspot.popup?.videoUrl?.trim() ?? '';
-        setEditNoTitle(
-          storedTitle && storedTitle !== sceneTitle ? storedTitle : '',
-        );
-        setEditNoPrice(
-          formatNamingPriceInput(hotspot.popup?.namingOpportunity?.price),
-        );
-        setEditNoStatus(hotspot.popup?.namingOpportunity?.status ?? '');
-        setEditNoDonorName(hotspot.popup?.namingOpportunity?.donor?.name ?? '');
-        setEditNoDonorKind(
-          hotspot.popup?.namingOpportunity?.donor?.kind ?? 'organization',
-        );
-        setEditNoDonorAffiliation(
-          hotspot.popup?.namingOpportunity?.donor?.affiliation ?? '',
-        );
-        setEditNoDonorWebsite(
-          hotspot.popup?.namingOpportunity?.donor?.website ?? '',
-        );
-        setEditNoDonorLogoFile(null);
-        setEditNoDonorLogoPath(
-          hotspot.popup?.namingOpportunity?.donor?.logo ?? '',
-        );
-        setEditNoClearDonorLogo(false);
-        setEditNoBody(storedBody && storedBody !== sceneBody ? storedBody : '');
-        setEditNoVideoUrl(
-          storedVideo && storedVideo !== sceneVideo ? storedVideo : '',
-        );
-        setEditNoImage(hotspot.popup?.image ?? '');
-        setEditNoSyncPosition(false);
+        setEditNoNamingId(hotspot.namingId?.trim() ?? '');
         return;
       }
       setEditInfoTitle(hotspot.popup?.title ?? '');
@@ -2149,7 +2326,158 @@ export function DevViewPanel({
       setEditInfoImage(hotspot.popup?.image ?? '');
       setEditInfoVisitScene(hotspot.popup?.visitScene ?? '');
     },
-    [tour.scenes],
+    [scene.id, tour],
+  );
+
+  const startCatalogNamingEdit = useCallback(
+    (namingId: string) => {
+      const record = tour.namingOpportunities?.[namingId];
+      if (!record) return;
+      const placement = findNamingHotspotByNamingId(tour, namingId);
+      const hostScene =
+        placement ? tour.scenes[placement.sceneId] : tour.scenes[scene.id];
+      const sceneBody = hostScene?.description?.trim() ?? '';
+      const sceneVideo = hostScene?.previewVideoUrl?.trim() ?? '';
+      const storedBody = record.body?.trim() ?? '';
+      const storedVideo = record.videoUrl?.trim() ?? '';
+      setCatalogEditNamingId(namingId);
+      setEditingHotspotId(null);
+      setMovingHotspotId(null);
+      setNamingCatalogCreateOpen(false);
+      setCatalogEditName(record.name?.trim() ?? '');
+      setCatalogEditPrice(formatNamingPriceInput(record.price));
+      setCatalogEditStatus(record.status ?? '');
+      setCatalogEditBody(
+        storedBody && storedBody !== sceneBody ? storedBody : '',
+      );
+      setCatalogEditVideoUrl(
+        storedVideo && storedVideo !== sceneVideo ? storedVideo : '',
+      );
+      setCatalogEditImage(record.image?.trim() ?? '');
+      setCatalogEditDonorName(record.donor?.name ?? '');
+      setCatalogEditDonorKind(record.donor?.kind ?? 'organization');
+      setCatalogEditDonorAffiliation(record.donor?.affiliation ?? '');
+      setCatalogEditDonorWebsite(record.donor?.website ?? '');
+      setCatalogEditDonorLogoFile(null);
+      setCatalogEditDonorLogoPath(record.donor?.logo ?? '');
+      setCatalogEditClearDonorLogo(false);
+    },
+    [scene.id, tour],
+  );
+
+  const saveCatalogNamingEdit = useCallback(async () => {
+    if (!scene.tourId || !catalogEditNamingId) return;
+    const placement = findNamingHotspotByNamingId(tour, catalogEditNamingId);
+    if (!placement) {
+      setHotspotManageStatus('error');
+      setHotspotManageError('No placement hotspot for this naming opportunity');
+      return;
+    }
+
+    setHotspotManageStatus('working');
+    setHotspotManageError(null);
+
+    try {
+      await devUpdateNamingHotspot({
+        tourId: scene.tourId,
+        sceneId: placement.sceneId,
+        hotspotId: placement.hotspot.id,
+        title: catalogEditName.trim(),
+        price: parseNamingPriceInput(catalogEditPrice) ?? undefined,
+        status: catalogEditStatus || undefined,
+        body: catalogEditBody.trim(),
+        videoUrl: catalogEditVideoUrl.trim(),
+        image: catalogEditImage,
+        donor: buildDevNamingDonorPayload({
+          status: catalogEditStatus,
+          name: catalogEditDonorName,
+          kind: catalogEditDonorKind,
+          affiliation: catalogEditDonorAffiliation,
+          website: catalogEditDonorWebsite,
+        }),
+        donorLogoFile: catalogEditDonorLogoFile,
+        clearDonorLogo: catalogEditClearDonorLogo,
+      });
+      setCatalogEditNamingId(null);
+      await onTourMutated?.({ keepCurrentScene: true });
+      setHotspotManageStatus('done');
+    } catch (error) {
+      setHotspotManageStatus('error');
+      setHotspotManageError(
+        error instanceof DevTourApiError ?
+          error.message
+        : 'Could not save naming opportunity',
+      );
+    }
+  }, [
+    catalogEditBody,
+    catalogEditClearDonorLogo,
+    catalogEditDonorAffiliation,
+    catalogEditDonorKind,
+    catalogEditDonorLogoFile,
+    catalogEditDonorName,
+    catalogEditDonorWebsite,
+    catalogEditImage,
+    catalogEditName,
+    catalogEditNamingId,
+    catalogEditPrice,
+    catalogEditStatus,
+    catalogEditVideoUrl,
+    onTourMutated,
+    scene.tourId,
+    tour,
+  ]);
+
+  const deleteNamingCatalogEntry = useCallback(
+    async (namingId: string) => {
+      if (!scene.tourId) return;
+      const placement = findNamingHotspotByNamingId(tour, namingId);
+      const record = tour.namingOpportunities?.[namingId];
+      const label =
+        record?.name?.trim() ||
+        (placement ? hotspotDisplayLabel(placement.hotspot, tour) : namingId);
+      if (
+        !confirmDevPanelDelete(
+          `Delete naming opportunity “${label}” from the catalog? This also removes its hotspot(s).`,
+        )
+      ) {
+        return;
+      }
+      if (!placement) {
+        setHotspotManageStatus('error');
+        setHotspotManageError(
+          'No placement hotspot to delete for this naming id',
+        );
+        return;
+      }
+
+      setHotspotManageStatus('working');
+      setHotspotManageError(null);
+
+      try {
+        await devDeleteHotspot({
+          tourId: scene.tourId,
+          sceneId: placement.sceneId,
+          hotspotId: placement.hotspot.id,
+        });
+        if (catalogEditNamingId === namingId) {
+          setCatalogEditNamingId(null);
+        }
+        if (editingHotspotId === placement.hotspot.id) {
+          setEditingHotspotId(null);
+        }
+        await onTourMutated?.({ keepCurrentScene: true });
+        setHotspotManageStatus('done');
+      } catch (error) {
+        setHotspotManageStatus('error');
+        setHotspotManageError(
+          error instanceof DevTourApiError ?
+            error.message
+          : 'Could not delete naming opportunity',
+        );
+      }
+    },
+    [catalogEditNamingId, editingHotspotId, onTourMutated, scene.tourId, tour],
   );
 
   const openNavTargetScene = useCallback(
@@ -2163,8 +2491,18 @@ export function DevViewPanel({
           searchParams,
         ),
       );
+      setPanelTab('scene');
     },
     [navigate, scene.tourId, searchParams, tour.firstScene],
+  );
+
+  const openNamingHotspot = useCallback(
+    (sceneId: string, hotspotId: string) => {
+      if (!openNamingOpportunity) return;
+      openNamingOpportunity(sceneId, hotspotId);
+      setPanelTab('scene');
+    },
+    [openNamingOpportunity],
   );
 
   const saveHotspotEdit = useCallback(async () => {
@@ -2177,10 +2515,11 @@ export function DevViewPanel({
     setHotspotManageError(null);
 
     try {
+      const hostSceneId = found.sceneId ?? scene.id;
       if (hotspot.type === 'nav') {
         await devUpdateNavHotspot({
           tourId: scene.tourId,
-          sceneId: scene.id,
+          sceneId: hostSceneId,
           hotspotId: editingHotspotId,
           label: editNavLabel.trim(),
           targetSceneId: editNavTarget.trim() || undefined,
@@ -2188,21 +2527,6 @@ export function DevViewPanel({
           navVariant: editNavVariant,
         });
       } else if (isNamingInfoHotspot(hotspot)) {
-        if (editNoSyncPosition) {
-          const position = buildHotspotPosition();
-          if (!position) {
-            throw new Error(
-              `Click the ${isModel3dTour ? 'model' : 'panorama'} to set a new position first`,
-            );
-          }
-          await devUpdateHotspotPosition({
-            tourId: scene.tourId,
-            sceneId: scene.id,
-            hotspotId: editingHotspotId,
-            position,
-          });
-        }
-
         let targetView: ViewPosition | undefined;
         let previewFile: Blob | null = null;
         if (isModel3dTour) {
@@ -2211,30 +2535,16 @@ export function DevViewPanel({
 
         await devUpdateNamingHotspot({
           tourId: scene.tourId,
-          sceneId: scene.id,
+          sceneId: hostSceneId,
           hotspotId: editingHotspotId,
-          title: editNoTitle.trim(),
-          price: parseNamingPriceInput(editNoPrice) ?? undefined,
-          status: editNoStatus || undefined,
-          body: editNoBody.trim(),
-          videoUrl: editNoVideoUrl.trim(),
-          image: editNoImage,
-          donor: buildDevNamingDonorPayload({
-            status: editNoStatus,
-            name: editNoDonorName,
-            kind: editNoDonorKind,
-            affiliation: editNoDonorAffiliation,
-            website: editNoDonorWebsite,
-          }),
-          donorLogoFile: editNoDonorLogoFile,
-          clearDonorLogo: editNoClearDonorLogo,
+          namingId: editNoNamingId.trim() || undefined,
           targetView,
           previewFile,
         });
       } else {
         await devUpdateInfoHotspot({
           tourId: scene.tourId,
-          sceneId: scene.id,
+          sceneId: hostSceneId,
           hotspotId: editingHotspotId,
           title: editInfoTitle.trim() || undefined,
           body: editInfoBody.trim() || undefined,
@@ -2266,20 +2576,7 @@ export function DevViewPanel({
     editNavVariant,
     editNavLabel,
     editNavTarget,
-    editNoBody,
-    editNoDonorAffiliation,
-    editNoDonorKind,
-    editNoDonorLogoFile,
-    editNoClearDonorLogo,
-    editNoDonorName,
-    editNoDonorWebsite,
-    editNoImage,
-    editNoPrice,
-    editNoStatus,
-    editNoTitle,
-    editNoVideoUrl,
-    editNoSyncPosition,
-    buildHotspotPosition,
+    editNoNamingId,
     editingHotspotId,
     captureModel3dNamingPreview,
     isModel3dTour,
@@ -2339,6 +2636,7 @@ export function DevViewPanel({
   const openTourScene = useCallback(
     async (sceneId: string) => {
       await onTourMutated?.({ navigateToScene: sceneId });
+      setPanelTab('scene');
     },
     [onTourMutated],
   );
@@ -2350,6 +2648,7 @@ export function DevViewPanel({
       setEditSceneDescription(entry.description ?? '');
       setEditScenePreviewVideoUrl(entry.previewVideoUrl ?? '');
       setEditSceneVideoUrl(entry.videoUrl ?? '');
+      setEditSceneVisibility(resolveSceneVisibility(entry));
       setEditSceneAsFirst(entry.id === tour.firstScene);
     },
     [tour.firstScene],
@@ -2369,6 +2668,8 @@ export function DevViewPanel({
         sceneId: editingSceneId,
         title: editSceneTitle.trim() || undefined,
         description: editSceneDescription,
+        visibility:
+          isAlreadyFirst || editSceneAsFirst ? 'public' : editSceneVisibility,
         ...(!isModel3dTour ?
           {
             previewVideoUrl: editScenePreviewVideoUrl,
@@ -2394,13 +2695,13 @@ export function DevViewPanel({
     editScenePreviewVideoUrl,
     editSceneVideoUrl,
     editSceneTitle,
+    editSceneVisibility,
     editingSceneId,
     isModel3dTour,
     onTourMutated,
     scene.tourId,
     tour.firstScene,
   ]);
-
   const replacePanorama = useCallback(async () => {
     if (!scene.tourId || !replacePanoramaFile) return;
 
@@ -2542,12 +2843,16 @@ export function DevViewPanel({
   );
   const stickyTourIcon =
     stickyTourBranding?.favicon ?? stickyTourBranding?.logo;
-  const editNoDonorLogoPreviewUrl = useMemo(() => {
-    if (editNoDonorLogoFile || editNoClearDonorLogo) return null;
-    const path = editNoDonorLogoPath.trim();
+  const catalogEditDonorLogoPreviewUrl = useMemo(() => {
+    if (catalogEditDonorLogoFile || catalogEditClearDonorLogo) return null;
+    const path = catalogEditDonorLogoPath.trim();
     if (!path) return null;
     return withBaseUrl(path);
-  }, [editNoClearDonorLogo, editNoDonorLogoFile, editNoDonorLogoPath]);
+  }, [
+    catalogEditClearDonorLogo,
+    catalogEditDonorLogoFile,
+    catalogEditDonorLogoPath,
+  ]);
   const currentTourEntry = useMemo(
     () => tourOptions.find((option) => option.id === currentTourId),
     [currentTourId, tourOptions],
@@ -2624,6 +2929,21 @@ export function DevViewPanel({
     [currentSceneId, currentTourId, navigate, searchParams],
   );
 
+  const startEditTour = useCallback((tourId: string) => {
+    setTourCreateOpen(false);
+    setDeletingTourId(null);
+    setDeleteTourConfirm('');
+    setDeleteTourStatus('idle');
+    setDeleteTourError(null);
+    setEditingTourId(tourId);
+  }, []);
+
+  const cancelEditTour = useCallback(() => {
+    setEditingTourId(null);
+    setEditTourStatus('idle');
+    setEditTourError(null);
+  }, []);
+
   const openIntroGallery = useCallback(() => {
     navigate(`/${preservedSearchStringFrom(searchParams, { intro: '1' })}`, {
       replace: true,
@@ -2640,33 +2960,6 @@ export function DevViewPanel({
     [location.pathname, navigate, searchParams],
   );
 
-  const handleOpenTourFromClient = useCallback(
-    (tourId: string) => {
-      panelScrollTopRequestRef.current = true;
-      const loadedTour = loadTour(tourId);
-      navigate(
-        buildTourLocation(
-          tourId,
-          loadedTour.firstScene,
-          loadedTour.firstScene,
-          searchParams,
-        ),
-      );
-      setTourModeTab('manage');
-      setPanelTab('tour');
-    },
-    [navigate, searchParams],
-  );
-
-  const handleCreateTourForClient = useCallback(
-    (clientId: string) => {
-      panelScrollTopRequestRef.current = true;
-      openCreateTourTab(clientId);
-      setPanelTab('tour');
-    },
-    [openCreateTourTab],
-  );
-
   useLayoutEffect(() => {
     setEditingHotspotId(null);
     setMovingHotspotId(null);
@@ -2678,7 +2971,7 @@ export function DevViewPanel({
     if (!panelScrollTopRequestRef.current) return;
     panelScrollTopRequestRef.current = false;
     panelBodyRef.current?.scrollTo({ top: 0, left: 0 });
-  }, [panelTab, tourModeTab]);
+  }, [panelTab, tourCreateOpen]);
 
   const createTourBrandingSection = (
     <DevPanelFormSection
@@ -2831,6 +3124,730 @@ export function DevViewPanel({
     </DevPanelFormSection>
   );
 
+  const renderNamingCatalogSection = () => {
+    if (!showNamingCatalogPanel) return null;
+
+    return (
+      <DevPanelSection
+        title={namingCatalogSectionConfig.title}
+        description={namingCatalogSectionConfig.description}
+      >
+        {namingCatalogCreateOpen ? null : (
+          <div className={devViewPanelActionsClassName}>
+            <button
+              type='button'
+              className={devViewPanelBtnVariants({ tone: 'naming' })}
+              onClick={openCreateNamingTab}
+              disabled={hotspotManageStatus === 'working'}
+            >
+              {namingCatalogSectionConfig.addButtonLabel}
+            </button>
+          </div>
+        )}
+        {namingCatalogCreateOpen ?
+          <DevPanelFormGroup title='New naming opportunity'>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Name (optional)
+              </span>
+              <input
+                className={devViewPanelInputClassName}
+                type='text'
+                value={noName}
+                onChange={(e) => setNoName(e.target.value)}
+                placeholder={inheritedNoTitle || 'Uses scene title'}
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>Price</span>
+              <input
+                className={devViewPanelInputClassName}
+                type='text'
+                value={noPrice}
+                onChange={(e) => setNoPrice(e.target.value)}
+                placeholder='e.g. 75000'
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>Status</span>
+              <select
+                className={devViewPanelSelectClassName}
+                value={noStatus}
+                onChange={(e) =>
+                  setNoStatus(e.target.value as NamingOpportunityStatus | '')
+                }
+              >
+                <option value=''>Select status…</option>
+                {DEV_NAMING_STATUS_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {noStatus === 'sold' ?
+              <>
+                <label className={devViewPanelFieldClassName}>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Donor kind
+                  </span>
+                  <select
+                    className={devViewPanelSelectClassName}
+                    value={noDonorKind}
+                    onChange={(e) =>
+                      setNoDonorKind(e.target.value as NamingDonorKind)
+                    }
+                  >
+                    {DEV_NAMING_DONOR_KIND_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className={devViewPanelFieldClassName}>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Donor name
+                  </span>
+                  <input
+                    className={devViewPanelInputClassName}
+                    type='text'
+                    value={noDonorName}
+                    onChange={(e) => setNoDonorName(e.target.value)}
+                    placeholder='e.g. Jane Smith'
+                    spellCheck={false}
+                    autoComplete='off'
+                  />
+                </label>
+                {noDonorKind === 'person' ?
+                  <label className={devViewPanelFieldClassName}>
+                    <span className={devViewPanelFieldLabelClassName}>
+                      Affiliation (optional)
+                    </span>
+                    <input
+                      className={devViewPanelInputClassName}
+                      type='text'
+                      value={noDonorAffiliation}
+                      onChange={(e) => setNoDonorAffiliation(e.target.value)}
+                      placeholder='e.g. ABC Foundation'
+                      spellCheck={false}
+                      autoComplete='off'
+                    />
+                  </label>
+                : null}
+                {(
+                  noDonorKind === 'organization' ||
+                  (noDonorKind === 'person' && noDonorAffiliation.trim())
+                ) ?
+                  <>
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        {noDonorKind === 'person' ?
+                          'Affiliation website (optional)'
+                        : 'Donor website (optional)'}
+                      </span>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='url'
+                        value={noDonorWebsite}
+                        onChange={(e) => setNoDonorWebsite(e.target.value)}
+                        placeholder='https://…'
+                        spellCheck={false}
+                        autoComplete='off'
+                      />
+                    </label>
+                    <label className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        {noDonorKind === 'person' ?
+                          'Affiliation logo (optional)'
+                        : 'Donor logo (optional)'}
+                      </span>
+                      <DevPanelFileField
+                        {...(noDonorLogoFile != null ?
+                          { file: noDonorLogoFile }
+                        : {})}
+                        preview={
+                          noDonorLogoFile ?
+                            <DevLocalFilePreview
+                              file={noDonorLogoFile}
+                              className={devViewPanelBrandLogoClassName}
+                              alt='Donor logo preview'
+                            />
+                          : null
+                        }
+                        onClearPreview={() => setNoDonorLogoFile(null)}
+                        showClear={Boolean(noDonorLogoFile)}
+                      >
+                        <DevPanelFileInput
+                          accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+                          file={noDonorLogoFile}
+                          onChange={setNoDonorLogoFile}
+                        />
+                      </DevPanelFileField>
+                    </label>
+                  </>
+                : null}
+              </>
+            : null}
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Body (optional)
+              </span>
+              <textarea
+                className={devViewPanelTextareaClassName}
+                value={noBody}
+                onChange={(e) => setNoBody(e.target.value)}
+                placeholder={inheritedNoBody || 'Uses scene description'}
+                rows={3}
+                spellCheck={true}
+              />
+            </label>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Video URL (optional)
+              </span>
+              <input
+                className={devViewPanelInputClassName}
+                type='url'
+                value={noVideoUrl}
+                onChange={(e) => setNoVideoUrl(e.target.value)}
+                placeholder={inheritedNoVideo || 'Uses scene preview video URL'}
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Image path (optional)
+              </span>
+              <input
+                className={devViewPanelInputClassName}
+                type='text'
+                value={noImage}
+                onChange={(e) => setNoImage(e.target.value)}
+                placeholder='/assets/…/photo.webp'
+                spellCheck={false}
+                autoComplete='off'
+              />
+            </label>
+            {namingCatalogError ?
+              <p className={devViewPanelSectionHintClassName}>
+                {namingCatalogError}
+              </p>
+            : null}
+            <div className={devViewPanelActionsClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                onClick={() => {
+                  setNamingCatalogCreateOpen(false);
+                  setNamingCatalogError(null);
+                  setNamingCatalogStatus('idle');
+                }}
+                disabled={namingCatalogStatus === 'working'}
+              >
+                Cancel
+              </button>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'naming' })}
+                onClick={() => void createNamingCatalogEntry()}
+                disabled={
+                  !canCreateNamingCatalog || namingCatalogStatus === 'working'
+                }
+              >
+                {namingCatalogStatus === 'working' ?
+                  'Creating…'
+                : namingCatalogStatus === 'done' ?
+                  'NO created!'
+                : 'Create naming opportunity'}
+              </button>
+            </div>
+          </DevPanelFormGroup>
+        : <>
+            <DevPanelTertiaryTabs
+              aria-label='Filter naming opportunities by status'
+              value={namingManageFilter}
+              onChange={(filter) => {
+                setNamingManageFilter(filter);
+                setCatalogEditNamingId(null);
+              }}
+              tabs={DEV_NAMING_MANAGE_FILTER_TABS.map((tab) => ({
+                id: tab.id,
+                label: tab.label,
+                kind: 'naming',
+              }))}
+            />
+            <DevPanelFormGroup>
+              {filteredNamingCatalogRows.length > 0 ?
+                <ul className={devViewPanelManageListClassName}>
+                  {filteredNamingCatalogRows.map((row) => {
+                    const isEditing = catalogEditNamingId === row.record.id;
+                    const hostSceneBody =
+                      row.placement ?
+                        tour.scenes[
+                          row.placement.sceneId
+                        ]?.description?.trim() || ''
+                      : '';
+                    const statusConfig =
+                      (
+                        row.record.status &&
+                        namingOpportunityStatusShowsBadge(row.record.status)
+                      ) ?
+                        namingOpportunityStatusConfig(row.record.status)
+                      : null;
+                    return (
+                      <li
+                        key={row.record.id}
+                        className={cn(
+                          devViewPanelManageListItemClassName,
+                          isEditing &&
+                            devViewPanelManageListItemActiveClassName,
+                        )}
+                      >
+                        <div
+                          className={devViewPanelManageListItemHeadClassName}
+                        >
+                          <div
+                            className={
+                              devViewPanelManageListItemHeadMainClassName
+                            }
+                          >
+                            <span
+                              className={
+                                devViewPanelManageListItemTitleClassName
+                              }
+                            >
+                              {row.displayName}
+                            </span>
+                            {row.record.price ?
+                              <>
+                                <span
+                                  className={
+                                    devViewPanelManageListItemBulletClassName
+                                  }
+                                  aria-hidden='true'
+                                >
+                                  ·
+                                </span>
+                                <span
+                                  className={
+                                    devViewPanelManageListItemMetaClassName
+                                  }
+                                >
+                                  {formatNamingPriceInput(row.record.price)}
+                                </span>
+                              </>
+                            : null}
+                          </div>
+                          {statusConfig ?
+                            <Badge
+                              variant='fill'
+                              size='sm'
+                              statusModifier={statusConfig.cssModifier}
+                              uppercase
+                              className='shrink-0'
+                            >
+                              {statusConfig.shortLabel}
+                            </Badge>
+                          : null}
+                        </div>
+                        {row.sceneTitle ?
+                          <p className={devViewPanelSectionHintClassName}>
+                            Hotspot in {row.sceneTitle}
+                          </p>
+                        : null}
+                        <div className={devViewPanelActionsClassName}>
+                          {row.placement && openNamingOpportunity ?
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              disabled={hotspotManageStatus === 'working'}
+                              onClick={() =>
+                                openNamingHotspot(
+                                  row.placement!.sceneId,
+                                  row.placement!.hotspot.id,
+                                )
+                              }
+                            >
+                              Open
+                            </button>
+                          : null}
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'secondary',
+                            })}
+                            disabled={
+                              hotspotManageStatus === 'working' || isEditing
+                            }
+                            onClick={() =>
+                              startCatalogNamingEdit(row.record.id)
+                            }
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'danger',
+                            })}
+                            disabled={hotspotManageStatus === 'working'}
+                            onClick={() =>
+                              void deleteNamingCatalogEntry(row.record.id)
+                            }
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        {isEditing ?
+                          <DevPanelFormGroup inline manageEdit>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Name (optional)
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='text'
+                                value={catalogEditName}
+                                onChange={(e) =>
+                                  setCatalogEditName(e.target.value)
+                                }
+                                placeholder={
+                                  row.sceneTitle || 'Uses scene title'
+                                }
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Price
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='text'
+                                value={catalogEditPrice}
+                                onChange={(e) =>
+                                  setCatalogEditPrice(e.target.value)
+                                }
+                              />
+                            </label>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Status
+                              </span>
+                              <select
+                                className={devViewPanelSelectClassName}
+                                value={catalogEditStatus}
+                                onChange={(e) =>
+                                  setCatalogEditStatus(
+                                    e.target.value as
+                                      | NamingOpportunityStatus
+                                      | '',
+                                  )
+                                }
+                              >
+                                <option value=''>Select status…</option>
+                                {DEV_NAMING_STATUS_OPTIONS.map((option) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+                            {catalogEditStatus === 'sold' ?
+                              <>
+                                <label className={devViewPanelFieldClassName}>
+                                  <span
+                                    className={devViewPanelFieldLabelClassName}
+                                  >
+                                    Donor kind
+                                  </span>
+                                  <select
+                                    className={devViewPanelSelectClassName}
+                                    value={catalogEditDonorKind}
+                                    onChange={(e) =>
+                                      setCatalogEditDonorKind(
+                                        e.target.value as NamingDonorKind,
+                                      )
+                                    }
+                                  >
+                                    {DEV_NAMING_DONOR_KIND_OPTIONS.map(
+                                      (option) => (
+                                        <option
+                                          key={option.value}
+                                          value={option.value}
+                                        >
+                                          {option.label}
+                                        </option>
+                                      ),
+                                    )}
+                                  </select>
+                                </label>
+                                <label className={devViewPanelFieldClassName}>
+                                  <span
+                                    className={devViewPanelFieldLabelClassName}
+                                  >
+                                    Donor name
+                                  </span>
+                                  <input
+                                    className={devViewPanelInputClassName}
+                                    type='text'
+                                    value={catalogEditDonorName}
+                                    onChange={(e) =>
+                                      setCatalogEditDonorName(e.target.value)
+                                    }
+                                    placeholder='e.g. Jane Smith'
+                                    spellCheck={false}
+                                    autoComplete='off'
+                                  />
+                                </label>
+                                {catalogEditDonorKind === 'person' ?
+                                  <label className={devViewPanelFieldClassName}>
+                                    <span
+                                      className={
+                                        devViewPanelFieldLabelClassName
+                                      }
+                                    >
+                                      Affiliation (optional)
+                                    </span>
+                                    <input
+                                      className={devViewPanelInputClassName}
+                                      type='text'
+                                      value={catalogEditDonorAffiliation}
+                                      onChange={(e) =>
+                                        setCatalogEditDonorAffiliation(
+                                          e.target.value,
+                                        )
+                                      }
+                                      placeholder='e.g. ABC Foundation'
+                                      spellCheck={false}
+                                      autoComplete='off'
+                                    />
+                                  </label>
+                                : null}
+                                {(
+                                  catalogEditDonorKind === 'organization' ||
+                                  (catalogEditDonorKind === 'person' &&
+                                    catalogEditDonorAffiliation.trim())
+                                ) ?
+                                  <>
+                                    <label
+                                      className={devViewPanelFieldClassName}
+                                    >
+                                      <span
+                                        className={
+                                          devViewPanelFieldLabelClassName
+                                        }
+                                      >
+                                        {catalogEditDonorKind === 'person' ?
+                                          'Affiliation website (optional)'
+                                        : 'Donor website (optional)'}
+                                      </span>
+                                      <input
+                                        className={devViewPanelInputClassName}
+                                        type='url'
+                                        value={catalogEditDonorWebsite}
+                                        onChange={(e) =>
+                                          setCatalogEditDonorWebsite(
+                                            e.target.value,
+                                          )
+                                        }
+                                        placeholder='https://…'
+                                        spellCheck={false}
+                                        autoComplete='off'
+                                      />
+                                    </label>
+                                    <label
+                                      className={devViewPanelFieldClassName}
+                                    >
+                                      <span
+                                        className={
+                                          devViewPanelFieldLabelClassName
+                                        }
+                                      >
+                                        {catalogEditDonorLogoPreviewUrl ?
+                                          catalogEditDonorKind === 'person' ?
+                                            'Affiliation logo (replace)'
+                                          : 'Donor logo (replace)'
+                                        : catalogEditDonorKind === 'person' ?
+                                          'Affiliation logo (optional)'
+                                        : 'Donor logo (optional)'}
+                                      </span>
+                                      <DevPanelFileField
+                                        {...(catalogEditDonorLogoFile != null ?
+                                          { file: catalogEditDonorLogoFile }
+                                        : {})}
+                                        preview={
+                                          catalogEditDonorLogoFile ?
+                                            <DevLocalFilePreview
+                                              file={catalogEditDonorLogoFile}
+                                              className={
+                                                devViewPanelBrandLogoClassName
+                                              }
+                                              alt='Donor logo preview'
+                                            />
+                                          : catalogEditDonorLogoPreviewUrl ?
+                                            <img
+                                              className={
+                                                devViewPanelBrandLogoClassName
+                                              }
+                                              src={
+                                                catalogEditDonorLogoPreviewUrl
+                                              }
+                                              alt='Current donor logo'
+                                            />
+                                          : null
+                                        }
+                                        onClearPreview={() => {
+                                          if (catalogEditDonorLogoFile) {
+                                            setCatalogEditDonorLogoFile(null);
+                                            return;
+                                          }
+                                          if (catalogEditDonorLogoPath) {
+                                            setCatalogEditClearDonorLogo(true);
+                                          }
+                                        }}
+                                        showClear={Boolean(
+                                          catalogEditDonorLogoFile ||
+                                          catalogEditDonorLogoPreviewUrl,
+                                        )}
+                                        clearLabel={
+                                          catalogEditDonorLogoFile ? 'Clear' : (
+                                            'Remove'
+                                          )
+                                        }
+                                      >
+                                        <DevPanelFileInput
+                                          accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+                                          file={catalogEditDonorLogoFile}
+                                          onChange={(file) => {
+                                            setCatalogEditDonorLogoFile(file);
+                                            if (file) {
+                                              setCatalogEditClearDonorLogo(
+                                                false,
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      </DevPanelFileField>
+                                    </label>
+                                  </>
+                                : null}
+                              </>
+                            : null}
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Body (optional)
+                              </span>
+                              <textarea
+                                className={devViewPanelTextareaClassName}
+                                value={catalogEditBody}
+                                onChange={(e) =>
+                                  setCatalogEditBody(e.target.value)
+                                }
+                                placeholder={
+                                  hostSceneBody || 'Uses scene description'
+                                }
+                                rows={3}
+                              />
+                            </label>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Video URL (optional)
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='url'
+                                value={catalogEditVideoUrl}
+                                onChange={(e) =>
+                                  setCatalogEditVideoUrl(e.target.value)
+                                }
+                                placeholder={
+                                  (row.placement ?
+                                    tour.scenes[row.placement.sceneId]
+                                      ?.previewVideoUrl
+                                  : undefined) || 'Uses scene preview video URL'
+                                }
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Image path (optional)
+                              </span>
+                              <input
+                                className={devViewPanelInputClassName}
+                                type='text'
+                                value={catalogEditImage}
+                                onChange={(e) =>
+                                  setCatalogEditImage(e.target.value)
+                                }
+                                placeholder='/assets/…/photo.webp'
+                                spellCheck={false}
+                                autoComplete='off'
+                              />
+                            </label>
+                            <div className={devViewPanelActionsClassName}>
+                              <button
+                                type='button'
+                                className={devViewPanelBtnVariants({
+                                  tone: 'secondary',
+                                })}
+                                onClick={() => setCatalogEditNamingId(null)}
+                                disabled={hotspotManageStatus === 'working'}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type='button'
+                                className={devViewPanelBtnVariants({
+                                  tone: 'primary',
+                                })}
+                                onClick={() => void saveCatalogNamingEdit()}
+                                disabled={hotspotManageStatus === 'working'}
+                              >
+                                Save catalog
+                              </button>
+                            </div>
+                          </DevPanelFormGroup>
+                        : null}
+                      </li>
+                    );
+                  })}
+                </ul>
+              : <p className={devViewPanelSectionHintClassName}>
+                  {namingCatalogRows.length === 0 ?
+                    namingCatalogSectionConfig.emptyMessage
+                  : namingManageFilter === 'all' ?
+                    namingCatalogSectionConfig.emptyMessage
+                  : `No ${namingOpportunityStatusConfig(namingManageFilter).label.toLowerCase()} naming opportunities.`
+                  }
+                </p>
+              }
+              {hotspotManageError && catalogEditNamingId ?
+                <p className={devViewPanelSectionHintClassName}>
+                  {hotspotManageError}
+                </p>
+              : null}
+            </DevPanelFormGroup>
+          </>
+        }
+      </DevPanelSection>
+    );
+  };
+
   const renderHotspotDevSection = () => {
     if (!showHotspotDevPanel) return null;
 
@@ -2839,48 +3856,39 @@ export function DevViewPanel({
         title={hotspotSectionConfig.title}
         description={hotspotSectionConfig.description}
       >
-        <div
-          className={devViewPanelSecondaryTabsClassName}
-          role='tablist'
-          aria-label='Hotspot actions'
-        >
-          {DEV_CRUD_MODE_TABS.map((tab) => (
+        {!hotspotCreateOpen ?
+          <div className={devViewPanelActionsClassName}>
             <button
-              key={tab.id}
               type='button'
-              role='tab'
-              id={`dev-hotspot-mode-tab-${tab.id}`}
-              aria-selected={hotspotModeTab === tab.id}
-              aria-controls={`dev-hotspot-mode-panel-${tab.id}`}
-              className={devViewPanelTabVariants({
-                depth: 'secondary',
-                kind: tab.id,
-                active: hotspotModeTab === tab.id,
-              })}
-              onClick={() => setHotspotModeTab(tab.id)}
+              className={devViewPanelBtnVariants({ tone: 'scene' })}
+              onClick={openCreateHotspotTab}
+              disabled={hotspotManageStatus === 'working'}
             >
-              {tab.label}
+              {hotspotSectionConfig.addButtonLabel}
             </button>
-          ))}
-        </div>
-
-        {isModel3dTour ?
-          <p className={devViewPanelSectionHintClassName}>
-            Stored in <code>tour.json → hotspots[]</code>. Info / naming
-            hotspots use <code>sceneId</code> (defaults to the scene you are
-            viewing: <code>{scene.id}</code>).
-          </p>
+          </div>
         : null}
 
-        {hotspotModeTab === 'manage' ?
+        {!hotspotCreateOpen ?
           <>
-            <p className={devViewPanelTabHintClassName}>
-              {hotspotSectionConfig.manageHint}
-            </p>
+            <DevPanelTertiaryTabs
+              aria-label='Filter hotspots'
+              value={hotspotManageFilter}
+              onChange={(filter) => {
+                setHotspotManageFilter(filter);
+                setEditingHotspotId(null);
+                setMovingHotspotId(null);
+              }}
+              tabs={DEV_HOTSPOT_MANAGE_FILTER_TABS.map((tab) => ({
+                id: tab.id,
+                label: tab.label,
+                kind: tab.id === 'all' ? 'scene' : tab.id,
+              }))}
+            />
             <DevPanelFormGroup>
-              {managedHotspots.length > 0 ?
+              {filteredManagedHotspots.length > 0 ?
                 <ul className={devViewPanelManageListClassName}>
-                  {managedHotspots.map((hotspot) => {
+                  {filteredManagedHotspots.map((hotspot) => {
                     const isMoving = movingHotspotId === hotspot.id;
                     const isEditing = editingHotspotId === hotspot.id;
 
@@ -2916,16 +3924,34 @@ export function DevViewPanel({
                               )}
                             </span>
                           </div>
-                          <Badge
-                            variant='fill'
-                            size='sm'
-                            tone='none'
-                            className={devHotspotKindBadgeVariants({
-                              kind: hotspotKindBadgeKind(hotspot),
-                            })}
+                          <div
+                            className={
+                              devViewPanelManageListItemBadgesClassName
+                            }
                           >
-                            {hotspotKindLabel(hotspot)}
-                          </Badge>
+                            <Badge
+                              variant='fill'
+                              size='sm'
+                              tone='none'
+                              className={devHotspotKindBadgeVariants({
+                                kind: hotspotKindBadgeKind(hotspot),
+                              })}
+                            >
+                              {hotspotKindLabel(hotspot)}
+                            </Badge>
+                            {hotspot.instant ?
+                              <Badge
+                                variant='fill'
+                                size='sm'
+                                tone='none'
+                                className={devSceneManageBadgeVariants({
+                                  kind: 'instant',
+                                })}
+                              >
+                                Instant
+                              </Badge>
+                            : null}
+                          </div>
                         </div>
                         <p className={devViewPanelSectionHintClassName}>
                           {formatHotspotPosition(hotspot)}
@@ -2950,6 +3976,30 @@ export function DevViewPanel({
                               onClick={() =>
                                 openNavTargetScene(hotspot.targetScene!)
                               }
+                              disabled={hotspotManageStatus === 'working'}
+                            >
+                              Open
+                            </button>
+                          : null}
+                          {(
+                            isNamingInfoHotspot(hotspot) &&
+                            openNamingOpportunity
+                          ) ?
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              onClick={() => {
+                                const found = findHotspotInTour(
+                                  tour,
+                                  hotspot.id,
+                                );
+                                openNamingHotspot(
+                                  found?.sceneId ?? scene.id,
+                                  hotspot.id,
+                                );
+                              }}
                               disabled={hotspotManageStatus === 'working'}
                             >
                               Open
@@ -3194,357 +4244,35 @@ export function DevViewPanel({
                                 <span
                                   className={devViewPanelFieldLabelClassName}
                                 >
-                                  Title (optional)
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={editNoTitle}
-                                  onChange={(e) =>
-                                    setEditNoTitle(e.target.value)
-                                  }
-                                  placeholder={
-                                    inheritedNoTitle || 'Uses scene title'
-                                  }
-                                  spellCheck={false}
-                                  autoComplete='off'
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Price
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={editNoPrice}
-                                  onChange={(e) =>
-                                    setEditNoPrice(e.target.value)
-                                  }
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Status
+                                  Naming opportunity
                                 </span>
                                 <select
                                   className={devViewPanelSelectClassName}
-                                  value={editNoStatus}
+                                  value={editNoNamingId}
                                   onChange={(e) =>
-                                    setEditNoStatus(
-                                      e.target.value as
-                                        | NamingOpportunityStatus
-                                        | '',
-                                    )
+                                    setEditNoNamingId(e.target.value)
                                   }
                                 >
-                                  <option value=''>Select status…</option>
-                                  {DEV_NAMING_STATUS_OPTIONS.map((option) => (
+                                  <option value=''>
+                                    Select naming opportunity…
+                                  </option>
+                                  {namingCatalogRows.map((row) => (
                                     <option
-                                      key={option.value}
-                                      value={option.value}
+                                      key={row.record.id}
+                                      value={row.record.id}
                                     >
-                                      {option.label}
+                                      {row.displayName}
+                                      {' · '}
+                                      {row.record.id}
                                     </option>
                                   ))}
                                 </select>
                               </label>
-                              {editNoStatus === 'sold' ?
-                                <>
-                                  <label className={devViewPanelFieldClassName}>
-                                    <span
-                                      className={
-                                        devViewPanelFieldLabelClassName
-                                      }
-                                    >
-                                      Donor kind
-                                    </span>
-                                    <select
-                                      className={devViewPanelSelectClassName}
-                                      value={editNoDonorKind}
-                                      onChange={(e) =>
-                                        setEditNoDonorKind(
-                                          e.target.value as NamingDonorKind,
-                                        )
-                                      }
-                                    >
-                                      {DEV_NAMING_DONOR_KIND_OPTIONS.map(
-                                        (option) => (
-                                          <option
-                                            key={option.value}
-                                            value={option.value}
-                                          >
-                                            {option.label}
-                                          </option>
-                                        ),
-                                      )}
-                                    </select>
-                                  </label>
-                                  <label className={devViewPanelFieldClassName}>
-                                    <span
-                                      className={
-                                        devViewPanelFieldLabelClassName
-                                      }
-                                    >
-                                      Donor name
-                                    </span>
-                                    <input
-                                      className={devViewPanelInputClassName}
-                                      type='text'
-                                      value={editNoDonorName}
-                                      onChange={(e) =>
-                                        setEditNoDonorName(e.target.value)
-                                      }
-                                      placeholder='e.g. Jane Smith'
-                                      spellCheck={false}
-                                      autoComplete='off'
-                                    />
-                                  </label>
-                                  {editNoDonorKind === 'person' ?
-                                    <label
-                                      className={devViewPanelFieldClassName}
-                                    >
-                                      <span
-                                        className={
-                                          devViewPanelFieldLabelClassName
-                                        }
-                                      >
-                                        Affiliation (optional)
-                                      </span>
-                                      <input
-                                        className={devViewPanelInputClassName}
-                                        type='text'
-                                        value={editNoDonorAffiliation}
-                                        onChange={(e) =>
-                                          setEditNoDonorAffiliation(
-                                            e.target.value,
-                                          )
-                                        }
-                                        placeholder='e.g. ABC Foundation'
-                                        spellCheck={false}
-                                        autoComplete='off'
-                                      />
-                                    </label>
-                                  : null}
-                                  {(
-                                    editNoDonorKind === 'organization' ||
-                                    (editNoDonorKind === 'person' &&
-                                      editNoDonorAffiliation.trim())
-                                  ) ?
-                                    <>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          {editNoDonorKind === 'person' ?
-                                            'Affiliation website (optional)'
-                                          : 'Donor website (optional)'}
-                                        </span>
-                                        <input
-                                          className={devViewPanelInputClassName}
-                                          type='url'
-                                          value={editNoDonorWebsite}
-                                          onChange={(e) =>
-                                            setEditNoDonorWebsite(
-                                              e.target.value,
-                                            )
-                                          }
-                                          placeholder='https://…'
-                                          spellCheck={false}
-                                          autoComplete='off'
-                                        />
-                                      </label>
-                                      <label
-                                        className={devViewPanelFieldClassName}
-                                      >
-                                        <span
-                                          className={
-                                            devViewPanelFieldLabelClassName
-                                          }
-                                        >
-                                          {editNoDonorLogoPreviewUrl ?
-                                            editNoDonorKind === 'person' ?
-                                              'Affiliation logo (replace)'
-                                            : 'Donor logo (replace)'
-                                          : editNoDonorKind === 'person' ?
-                                            'Affiliation logo (optional)'
-                                          : 'Donor logo (optional)'}
-                                        </span>
-                                        <DevPanelFileField
-                                          {...(editNoDonorLogoFile != null ?
-                                            { file: editNoDonorLogoFile }
-                                          : {})}
-                                          preview={
-                                            editNoDonorLogoFile ?
-                                              <DevLocalFilePreview
-                                                file={editNoDonorLogoFile}
-                                                className={
-                                                  devViewPanelBrandLogoClassName
-                                                }
-                                                alt='Donor logo preview'
-                                              />
-                                            : editNoDonorLogoPreviewUrl ?
-                                              <img
-                                                className={
-                                                  devViewPanelBrandLogoClassName
-                                                }
-                                                src={editNoDonorLogoPreviewUrl}
-                                                alt='Current donor logo'
-                                              />
-                                            : null
-                                          }
-                                          onClearPreview={() => {
-                                            if (editNoDonorLogoFile) {
-                                              setEditNoDonorLogoFile(null);
-                                              return;
-                                            }
-                                            if (editNoDonorLogoPath) {
-                                              setEditNoClearDonorLogo(true);
-                                            }
-                                          }}
-                                          showClear={Boolean(
-                                            editNoDonorLogoFile ||
-                                            editNoDonorLogoPreviewUrl,
-                                          )}
-                                          clearLabel={
-                                            editNoDonorLogoFile ? 'Clear' : (
-                                              'Remove'
-                                            )
-                                          }
-                                        >
-                                          <DevPanelFileInput
-                                            accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
-                                            file={editNoDonorLogoFile}
-                                            onChange={(file) => {
-                                              setEditNoDonorLogoFile(file);
-                                              if (file) {
-                                                setEditNoClearDonorLogo(false);
-                                              }
-                                            }}
-                                          />
-                                        </DevPanelFileField>
-                                      </label>
-                                    </>
-                                  : null}
-                                </>
-                              : null}
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Body (optional)
-                                </span>
-                                <textarea
-                                  className={devViewPanelTextareaClassName}
-                                  value={editNoBody}
-                                  onChange={(e) =>
-                                    setEditNoBody(e.target.value)
-                                  }
-                                  placeholder={
-                                    inheritedNoBody || 'Uses scene description'
-                                  }
-                                  rows={3}
-                                />
-                              </label>
                               <p className={devViewPanelSectionHintClassName}>
-                                Leave title/body/video empty to inherit from
-                                this scene (stays in sync when the scene
-                                changes).
+                                Like nav target scene — this hotspot points at a
+                                catalog NO. Edit name / price / status / media
+                                in Naming catalog. Use Move to reposition.
                               </p>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Video URL (optional)
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='url'
-                                  value={editNoVideoUrl}
-                                  onChange={(e) =>
-                                    setEditNoVideoUrl(e.target.value)
-                                  }
-                                  placeholder={
-                                    inheritedNoVideo ||
-                                    'Uses scene preview video URL'
-                                  }
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Image path (optional)
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={editNoImage}
-                                  onChange={(e) =>
-                                    setEditNoImage(e.target.value)
-                                  }
-                                  placeholder='/assets/…/photo.webp'
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Hotspot position
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  readOnly
-                                  tabIndex={-1}
-                                  value={formatHotspotPosition(hotspot)}
-                                />
-                              </label>
-                              <label
-                                className={devViewPanelToggleLabelClassName}
-                              >
-                                <input
-                                  className={devViewPanelToggleInputClassName}
-                                  type='checkbox'
-                                  checked={editNoSyncPosition}
-                                  onChange={(e) =>
-                                    setEditNoSyncPosition(e.target.checked)
-                                  }
-                                />
-                                <span
-                                  className={devViewPanelToggleNameClassName}
-                                >
-                                  Update position from latest click
-                                </span>
-                              </label>
-                              {editNoSyncPosition ?
-                                <label className={devViewPanelFieldClassName}>
-                                  <span
-                                    className={devViewPanelFieldLabelClassName}
-                                  >
-                                    New position
-                                  </span>
-                                  <input
-                                    className={devViewPanelInputClassName}
-                                    type='text'
-                                    readOnly
-                                    tabIndex={-1}
-                                    value={
-                                      clickCoords ? markerCoords : (
-                                        devViewerClickPlaceholder
-                                      )
-                                    }
-                                  />
-                                </label>
-                              : null}
                               {isModel3dTour ?
                                 <label className={devViewPanelFieldClassName}>
                                   <span
@@ -3556,9 +4284,8 @@ export function DevViewPanel({
                                     className={devViewPanelSectionHintClassName}
                                   >
                                     Orbit to frame the opening shot — saved on
-                                    Save NO with Explore{' '}
-                                    <code>preview.image</code>. Scene landing
-                                    unchanged.
+                                    Save with Explore <code>preview.image</code>
+                                    . Scene landing unchanged.
                                   </p>
                                   <input
                                     className={devViewPanelInputClassName}
@@ -3587,9 +4314,12 @@ export function DevViewPanel({
                                     tone: 'primary',
                                   })}
                                   onClick={() => void saveHotspotEdit()}
-                                  disabled={hotspotManageStatus === 'working'}
+                                  disabled={
+                                    hotspotManageStatus === 'working' ||
+                                    !editNoNamingId.trim()
+                                  }
                                 >
-                                  Save NO
+                                  Save hotspot
                                 </button>
                               </div>
                             </DevPanelFormGroup>
@@ -3740,7 +4470,16 @@ export function DevViewPanel({
                   })}
                 </ul>
               : <p className={devViewPanelSectionHintClassName}>
-                  {hotspotSectionConfig.emptyMessage}
+                  {managedHotspots.length === 0 ?
+                    hotspotSectionConfig.emptyMessage
+                  : hotspotManageFilter === 'all' ?
+                    hotspotSectionConfig.emptyMessage
+                  : `No ${
+                      hotspotManageFilter === 'naming' ? 'NO'
+                      : hotspotManageFilter === 'nav' ? 'nav'
+                      : 'info'
+                    } hotspots in this list.`
+                  }
                 </p>
               }
               {hotspotManageError ?
@@ -3748,25 +4487,9 @@ export function DevViewPanel({
                   {hotspotManageError}
                 </p>
               : null}
-
-              <div className={devViewPanelManageListFooterClassName}>
-                <button
-                  type='button'
-                  className={devViewPanelBtnVariants({ tone: 'secondary' })}
-                  onClick={openCreateHotspotTab}
-                >
-                  {hotspotSectionConfig.addButtonLabel}
-                </button>
-              </div>
             </DevPanelFormGroup>
           </>
         : <>
-            <p className={devViewPanelTabHintClassName}>
-              {hotspotSectionConfig.createHint}{' '}
-              {isModel3dTour ?
-                devViewerClickHint
-              : 'Click the panorama to set position.'}
-            </p>
             <div className={devViewPanelTabPanelBodyClassName}>
               <DevPanelTertiaryTabs
                 aria-label='Hotspot type'
@@ -3874,15 +4597,7 @@ export function DevViewPanel({
                     : null}
 
                     {showNavTargetQuickCreate ?
-                      <DevPanelFormGroup
-                        title='Create target scene'
-                        hint={
-                          <p className={devViewPanelSectionHintClassName}>
-                            Stays on this scene — hotspot position is kept. New
-                            scene is selected as the nav target.
-                          </p>
-                        }
-                      >
+                      <DevPanelFormGroup title='Create target scene'>
                         <label className={devViewPanelFieldClassName}>
                           <span className={devViewPanelFieldLabelClassName}>
                             Title
@@ -3898,6 +4613,10 @@ export function DevViewPanel({
                             spellCheck={false}
                             autoComplete='off'
                           />
+                          <p className={devViewPanelSectionHintClassName}>
+                            New scene becomes the nav target; you stay on this
+                            scene and keep the hotspot click position.
+                          </p>
                         </label>
 
                         {!isModel3dTour ?
@@ -4055,6 +4774,16 @@ export function DevViewPanel({
                     <div className={devViewPanelActionsClassName}>
                       <button
                         type='button'
+                        className={devViewPanelBtnVariants({
+                          tone: 'secondary',
+                        })}
+                        onClick={() => setHotspotCreateOpen(false)}
+                        disabled={navStatus === 'working'}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type='button'
                         className={devViewPanelBtnVariants({ tone: 'primary' })}
                         onClick={() => void createNavHotspot()}
                         disabled={!canCreateNav || navStatus === 'working'}
@@ -4085,15 +4814,15 @@ export function DevViewPanel({
                         Hotspot position
                       </span>
                       <p className={devViewPanelSectionHintClassName}>
-                        {devViewerClickHint} — naming opportunity popup on this
-                        scene.
+                        {devViewerClickHint} — place a catalog naming
+                        opportunity here.
                         {isModel3dTour ?
                           <>
                             {' '}
-                            Saves the current camera on this NO as{' '}
-                            <code>targetView</code> + Explore{' '}
-                            <code>preview.image</code> — scene landing is
-                            unchanged.
+                            Saves the current camera as <code>
+                              targetView
+                            </code>{' '}
+                            + Explore <code>preview.image</code>.
                           </>
                         : null}
                       </p>
@@ -4109,233 +4838,55 @@ export function DevViewPanel({
 
                     <label className={devViewPanelFieldClassName}>
                       <span className={devViewPanelFieldLabelClassName}>
-                        Name (optional)
-                      </span>
-                      <input
-                        className={devViewPanelInputClassName}
-                        type='text'
-                        value={noName}
-                        onChange={(e) => setNoName(e.target.value)}
-                        placeholder={inheritedNoTitle || 'Uses scene title'}
-                        spellCheck={false}
-                        autoComplete='off'
-                      />
-                    </label>
-                    <p className={devViewPanelSectionHintClassName}>
-                      Optional overrides. Empty name/body/video inherit from
-                      this scene and stay in sync.
-                    </p>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Price
-                      </span>
-                      <input
-                        className={devViewPanelInputClassName}
-                        type='text'
-                        value={noPrice}
-                        onChange={(e) => setNoPrice(e.target.value)}
-                        placeholder='e.g. 75000'
-                        spellCheck={false}
-                        autoComplete='off'
-                      />
-                    </label>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Status
+                        Naming opportunity
                       </span>
                       <select
                         className={devViewPanelSelectClassName}
-                        value={noStatus}
-                        onChange={(e) =>
-                          setNoStatus(
-                            e.target.value as NamingOpportunityStatus | '',
-                          )
-                        }
+                        value={selectedNamingId}
+                        onChange={(e) => setSelectedNamingId(e.target.value)}
                       >
-                        <option value=''>Select status…</option>
-                        {DEV_NAMING_STATUS_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
+                        <option value=''>Select naming opportunity…</option>
+                        {namingCatalogRows.map((row) => (
+                          <option key={row.record.id} value={row.record.id}>
+                            {row.displayName}
+                            {namingIdsPlacedHere.has(row.record.id) ?
+                              ' · placed here'
+                            : ''}
+                            {' · '}
+                            {row.record.id}
                           </option>
                         ))}
                       </select>
                     </label>
 
-                    {noStatus === 'sold' ?
-                      <>
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Donor kind
-                          </span>
-                          <select
-                            className={devViewPanelSelectClassName}
-                            value={noDonorKind}
-                            onChange={(e) =>
-                              setNoDonorKind(e.target.value as NamingDonorKind)
-                            }
-                          >
-                            {DEV_NAMING_DONOR_KIND_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Donor name
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='text'
-                            value={noDonorName}
-                            onChange={(e) => setNoDonorName(e.target.value)}
-                            placeholder='e.g. Jane Smith'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-                        {noDonorKind === 'person' ?
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Affiliation (optional)
-                            </span>
-                            <input
-                              className={devViewPanelInputClassName}
-                              type='text'
-                              value={noDonorAffiliation}
-                              onChange={(e) =>
-                                setNoDonorAffiliation(e.target.value)
-                              }
-                              placeholder='e.g. ABC Foundation'
-                              spellCheck={false}
-                              autoComplete='off'
-                            />
-                          </label>
-                        : null}
-                        {(
-                          noDonorKind === 'organization' ||
-                          (noDonorKind === 'person' &&
-                            noDonorAffiliation.trim())
-                        ) ?
-                          <>
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                {noDonorKind === 'person' ?
-                                  'Affiliation website (optional)'
-                                : 'Donor website (optional)'}
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='url'
-                                value={noDonorWebsite}
-                                onChange={(e) =>
-                                  setNoDonorWebsite(e.target.value)
-                                }
-                                placeholder='https://…'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                {noDonorKind === 'person' ?
-                                  'Affiliation logo (optional)'
-                                : 'Donor logo (optional)'}
-                              </span>
-                              <DevPanelFileField
-                                file={noDonorLogoFile}
-                                preview={
-                                  <DevLocalFilePreview
-                                    file={noDonorLogoFile}
-                                    className={devViewPanelBrandLogoClassName}
-                                    alt='Donor logo preview'
-                                  />
-                                }
-                                onClearPreview={() => setNoDonorLogoFile(null)}
-                                showClear={Boolean(noDonorLogoFile)}
-                              >
-                                <DevPanelFileInput
-                                  accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
-                                  file={noDonorLogoFile}
-                                  onChange={setNoDonorLogoFile}
-                                />
-                              </DevPanelFileField>
-                            </label>
-                          </>
-                        : null}
-                      </>
-                    : null}
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Body (optional)
-                      </span>
-                      <textarea
-                        className={devViewPanelTextareaClassName}
-                        value={noBody}
-                        onChange={(e) => setNoBody(e.target.value)}
-                        placeholder={
-                          inheritedNoBody || 'Uses scene description'
-                        }
-                        rows={3}
-                        spellCheck={true}
-                      />
-                    </label>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Video URL (optional)
-                      </span>
-                      <input
-                        className={devViewPanelInputClassName}
-                        type='url'
-                        value={noVideoUrl}
-                        onChange={(e) => setNoVideoUrl(e.target.value)}
-                        placeholder={
-                          inheritedNoVideo || 'Uses scene preview video URL'
-                        }
-                        spellCheck={false}
-                        autoComplete='off'
-                      />
-                    </label>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Image path (optional)
-                      </span>
-                      <input
-                        className={devViewPanelInputClassName}
-                        type='text'
-                        value={noImage}
-                        onChange={(e) => setNoImage(e.target.value)}
-                        placeholder='/assets/…/photo.webp'
-                        spellCheck={false}
-                        autoComplete='off'
-                      />
-                    </label>
-
-                    {noHotspotIdPreview ?
-                      <p className={devViewPanelSlugPreviewClassName}>
-                        id <code>{noHotspotIdPreview}</code>
-                        {noHotspotIdPreview !== `info-${noSlug}` ?
-                          <>
-                            {' '}
-                            · suffix added — name slug already used on this
-                            scene
-                          </>
-                        : null}{' '}
-                        · deep link{' '}
-                        <code>
-                          ?no=
-                          {noHotspotIdPreview.replace(/^info-/, '')}
-                        </code>
+                    {namingCatalogRows.length === 0 ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        No naming opportunities yet — create one in Naming
+                        catalog, then come back to place the hotspot.
                       </p>
                     : null}
+                    <button
+                      type='button'
+                      className={cn(
+                        devViewPanelBtnVariants({ tone: 'secondary' }),
+                        'w-fit',
+                      )}
+                      onClick={openCreateNamingTab}
+                    >
+                      + Create in Naming catalog
+                    </button>
 
                     <div className={devViewPanelActionsClassName}>
+                      <button
+                        type='button'
+                        className={devViewPanelBtnVariants({
+                          tone: 'secondary',
+                        })}
+                        onClick={() => setHotspotCreateOpen(false)}
+                        disabled={namingStatus === 'working'}
+                      >
+                        Cancel
+                      </button>
                       <button
                         type='button'
                         className={devViewPanelBtnVariants({ tone: 'primary' })}
@@ -4345,10 +4896,10 @@ export function DevViewPanel({
                         }
                       >
                         {namingStatus === 'working' ?
-                          'Creating…'
+                          'Placing…'
                         : namingStatus === 'done' ?
-                          'NO created!'
-                        : 'Create NO'}
+                          'Hotspot placed!'
+                        : 'Place hotspot'}
                       </button>
                     </div>
                     {namingError ?
@@ -4497,6 +5048,16 @@ export function DevViewPanel({
                     <div className={devViewPanelActionsClassName}>
                       <button
                         type='button'
+                        className={devViewPanelBtnVariants({
+                          tone: 'secondary',
+                        })}
+                        onClick={() => setHotspotCreateOpen(false)}
+                        disabled={infoStatus === 'working'}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type='button'
                         className={devViewPanelBtnVariants({ tone: 'primary' })}
                         onClick={() => void createInfoHotspotHandler()}
                         disabled={!canCreateInfo || infoStatus === 'working'}
@@ -4531,48 +5092,54 @@ export function DevViewPanel({
         : 'Open and edit tour scenes, or upload a new panorama.'
       }
     >
-      <div
-        className={devViewPanelSecondaryTabsClassName}
-        role='tablist'
-        aria-label='Scene actions'
-      >
-        {DEV_CRUD_MODE_TABS.map((tab) => (
+      {!sceneCreateOpen ?
+        <div className={devViewPanelActionsClassName}>
           <button
-            key={tab.id}
             type='button'
-            role='tab'
-            id={`dev-scene-mode-tab-${tab.id}`}
-            aria-selected={sceneModeTab === tab.id}
-            aria-controls={`dev-scene-mode-panel-${tab.id}`}
-            className={devViewPanelTabVariants({
-              depth: 'secondary',
-              kind: tab.id,
-              active: sceneModeTab === tab.id,
-            })}
-            onClick={() => {
-              if (tab.id === 'create') mintCreateSceneId();
-              setSceneModeTab(tab.id);
-            }}
+            className={devViewPanelBtnVariants({ tone: 'scenes' })}
+            onClick={openCreateSceneTab}
+            disabled={sceneManageStatus === 'working'}
           >
-            {tab.label}
+            Add scene to this tour
           </button>
-        ))}
-      </div>
+        </div>
+      : null}
 
-      {sceneModeTab === 'manage' ?
+      {!sceneCreateOpen ?
         <>
-          <p className={devViewPanelTabHintClassName}>
-            Open scenes on this tour, edit metadata, or delete.
-          </p>
+          {sceneManageGroups.length > 0 ?
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Filter by group
+              </span>
+              <select
+                className={devViewPanelSelectClassName}
+                value={sceneManageFilter}
+                onChange={(e) => {
+                  setSceneManageFilter(e.target.value);
+                  setEditingSceneId(null);
+                }}
+                disabled={sceneManageStatus === 'working'}
+              >
+                <option value='all'>All scenes</option>
+                {sceneManageGroups.map((group) => (
+                  <option key={group.id} value={group.id}>
+                    {group.title} ({group.scenes.length})
+                  </option>
+                ))}
+              </select>
+            </label>
+          : null}
           <DevPanelFormGroup>
-            {tourScenes.length > 0 ?
+            {filteredTourScenes.length > 0 ?
               <ul className={devViewPanelManageListClassName}>
-                {tourScenes.map((entry) => {
+                {filteredTourScenes.map((entry) => {
                   const isCurrent = entry.id === scene.id;
                   const isFirst = entry.id === tour.firstScene;
                   const isEditing = editingSceneId === entry.id;
                   const canDelete = entry.id !== tour.firstScene;
                   const groupSecondary = sceneManageSecondaryById[entry.id];
+                  const sceneVisibility = resolveSceneVisibility(entry);
 
                   return (
                     <li
@@ -4615,38 +5182,48 @@ export function DevViewPanel({
                             </>
                           : null}
                         </div>
-                        {isFirst || isCurrent ?
-                          <div
-                            className={
-                              devViewPanelManageListItemBadgesClassName
-                            }
+                        <div
+                          className={devViewPanelManageListItemBadgesClassName}
+                        >
+                          {isFirst ?
+                            <Badge
+                              variant='fill'
+                              size='sm'
+                              tone='none'
+                              className={devSceneManageBadgeVariants({
+                                kind: 'first',
+                              })}
+                            >
+                              First
+                            </Badge>
+                          : null}
+                          {isCurrent ?
+                            <Badge
+                              variant='fill'
+                              size='sm'
+                              tone='none'
+                              className={devSceneManageBadgeVariants({
+                                kind: 'current',
+                              })}
+                            >
+                              Current
+                            </Badge>
+                          : null}
+                          <Badge
+                            variant='fill'
+                            size='sm'
+                            tone='none'
+                            className={devSceneManageBadgeVariants({
+                              kind: sceneVisibility,
+                            })}
                           >
-                            {isFirst ?
-                              <Badge
-                                variant='fill'
-                                size='sm'
-                                tone='none'
-                                className={devSceneManageBadgeVariants({
-                                  kind: 'first',
-                                })}
-                              >
-                                First
-                              </Badge>
-                            : null}
-                            {isCurrent ?
-                              <Badge
-                                variant='fill'
-                                size='sm'
-                                tone='none'
-                                className={devSceneManageBadgeVariants({
-                                  kind: 'current',
-                                })}
-                              >
-                                Current
-                              </Badge>
-                            : null}
-                          </div>
-                        : null}
+                            {sceneVisibility === 'public' ?
+                              'Public'
+                            : sceneVisibility === 'unlisted' ?
+                              'Unlisted'
+                            : 'Internal'}
+                          </Badge>
+                        </div>
                       </div>
                       {(
                         entry.description &&
@@ -4845,6 +5422,37 @@ export function DevViewPanel({
                               </label>
                             </>
                           : null}
+                          <label className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
+                              Visibility
+                            </span>
+                            <select
+                              className={devViewPanelSelectClassName}
+                              value={
+                                isFirst || editSceneAsFirst ? 'public' : (
+                                  editSceneVisibility
+                                )
+                              }
+                              onChange={(e) =>
+                                setEditSceneVisibility(
+                                  e.target.value as DevCatalogTourVisibility,
+                                )
+                              }
+                              disabled={isFirst || editSceneAsFirst}
+                            >
+                              {DEV_SCENE_VISIBILITY_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            <p className={devViewPanelSectionHintClassName}>
+                              {isFirst || editSceneAsFirst ?
+                                'firstScene must stay Public.'
+                              : 'Explore shows Public only. Unlisted is link/share. Internal needs ?dev=1.'
+                              }
+                            </p>
+                          </label>
                           <div className={devViewPanelToggleListClassName}>
                             {!isFirst ?
                               <label
@@ -4854,9 +5462,13 @@ export function DevViewPanel({
                                   type='checkbox'
                                   className={devViewPanelToggleInputClassName}
                                   checked={editSceneAsFirst}
-                                  onChange={(e) =>
-                                    setEditSceneAsFirst(e.currentTarget.checked)
-                                  }
+                                  onChange={(e) => {
+                                    const checked = e.currentTarget.checked;
+                                    setEditSceneAsFirst(checked);
+                                    if (checked) {
+                                      setEditSceneVisibility('public');
+                                    }
+                                  }}
                                 />
                                 <span
                                   className={devViewPanelToggleTextClassName}
@@ -4898,7 +5510,11 @@ export function DevViewPanel({
                 })}
               </ul>
             : <p className={devViewPanelSectionHintClassName}>
-                No scenes on this tour yet.
+                {tourScenes.length === 0 ?
+                  'No scenes on this tour yet.'
+                : sceneManageFilter === 'all' ?
+                  'No scenes on this tour yet.'
+                : 'No scenes in this group.'}
               </p>
             }
             {sceneManageError ?
@@ -4906,43 +5522,9 @@ export function DevViewPanel({
                 {sceneManageError}
               </p>
             : null}
-
-            <div className={devViewPanelManageListFooterClassName}>
-              <button
-                type='button'
-                className={devViewPanelBtnVariants({ tone: 'secondary' })}
-                onClick={openCreateSceneTab}
-              >
-                Add scene to this tour
-              </button>
-            </div>
           </DevPanelFormGroup>
         </>
       : <>
-          <p className={devViewPanelTabHintClassName}>
-            {isModel3dTour ?
-              <>
-                Add a viewpoint on the tour&apos;s shared model — orbit to the
-                desired camera pose first (saved as <code>defaultView</code>{' '}
-                with orbit <code>target</code>). Card image captures from the
-                current view, or upload manually to{' '}
-                <code>
-                  assets/&lt;client&gt;/{currentTourId}
-                  /thumbnails/&lt;id&gt;.webp
-                </code>
-                .
-              </>
-            : <>
-                Upload a panorama — scene id is opaque (not from the title) and
-                stays fixed if you rename later. Image converts to{' '}
-                <code>
-                  assets/&lt;client&gt;/{currentTourId}
-                  /panoramas/&lt;id&gt;.webp
-                </code>{' '}
-                automatically.
-              </>
-            }
-          </p>
           <DevPanelFormGroup>
             <label className={devViewPanelFieldClassName}>
               <span className={devViewPanelFieldLabelClassName}>Title</span>
@@ -4955,6 +5537,15 @@ export function DevViewPanel({
                 spellCheck={false}
                 autoComplete='off'
               />
+              {!isModel3dTour ?
+                <p className={devViewPanelSectionHintClassName}>
+                  Scene id is opaque and stays fixed if you rename later.
+                </p>
+              : <p className={devViewPanelSectionHintClassName}>
+                  Orbit the model first — current camera is saved as{' '}
+                  <code>defaultView</code> on create.
+                </p>
+              }
             </label>
 
             <label className={devViewPanelFieldClassName}>
@@ -4975,6 +5566,14 @@ export function DevViewPanel({
                   onChange={setScenePanoramaFile}
                 />
               </DevPanelFileField>
+              {isModel3dTour ?
+                <p className={devViewPanelSectionHintClassName}>
+                  Optional upload; otherwise captures from the current 3D view.
+                </p>
+              : <p className={devViewPanelSectionHintClassName}>
+                  Converts to webp under this tour&apos;s panoramas folder.
+                </p>
+              }
             </label>
 
             <label className={devViewPanelFieldClassName}>
@@ -5064,6 +5663,14 @@ export function DevViewPanel({
             : null}
 
             <div className={devViewPanelActionsClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                onClick={() => setSceneCreateOpen(false)}
+                disabled={sceneStatus === 'working'}
+              >
+                Cancel
+              </button>
               <button
                 type='button'
                 className={devViewPanelBtnVariants({ tone: 'primary' })}
@@ -5369,22 +5976,43 @@ export function DevViewPanel({
           >
             <DevPanelSectionAccordion>
               <DevPanelSection
-                title='Client'
-                description='Catalog clients — shared contact and branding. Tour-only settings stay on the Tour tab.'
+                title='Clients'
+                description='Catalog clients — shared contact and branding. Tour settings stay on the Tour tab.'
               >
                 <DevClientPanel
                   catalogClients={catalogClients}
                   catalogTick={catalogTick}
+                  currentClientId={currentClientId}
                   manageClientId={manageClientId}
                   onManageClientIdChange={setManageClientId}
                   onCatalogRefresh={async () => {
                     await refreshDevCatalogSnapshot();
                   }}
-                  onOpenTour={handleOpenTourFromClient}
-                  onEditTour={handleOpenTourFromClient}
-                  onCreateTourForClient={handleCreateTourForClient}
+                  onClientDeleted={handleClientDeleted}
                 />
               </DevPanelSection>
+            </DevPanelSectionAccordion>
+          </div>
+        : panelTab === 'scenes' ?
+          <div
+            id='dev-panel-scenes'
+            role='tabpanel'
+            aria-labelledby='dev-panel-tab-scenes'
+            className={devViewPanelTabPanelClassName}
+          >
+            <DevPanelSectionAccordion>
+              {renderScenesDevSection()}
+            </DevPanelSectionAccordion>
+          </div>
+        : panelTab === 'naming' ?
+          <div
+            id='dev-panel-naming'
+            role='tabpanel'
+            aria-labelledby='dev-panel-tab-naming'
+            className={devViewPanelTabPanelClassName}
+          >
+            <DevPanelSectionAccordion>
+              {renderNamingCatalogSection()}
             </DevPanelSectionAccordion>
           </div>
         : panelTab === 'tour' ?
@@ -5395,490 +6023,968 @@ export function DevViewPanel({
             className={devViewPanelTabPanelClassName}
           >
             <DevPanelSectionAccordion>
-              {isModel3dTour ?
-                <>
-                  {renderHotspotDevSection()}
-                  {renderScenesDevSection()}
-                </>
-              : <>
-                  {renderScenesDevSection()}
-                  {renderHotspotDevSection()}
-                </>
-              }
               <DevPanelSection
-                title='Tour'
-                description='Edit the open tour or create a new one under a client.'
+                title='Tours'
+                description='All catalog tours — open one in the viewer, or edit settings inline. Add creates under a client.'
               >
-                <div
-                  className={devViewPanelSecondaryTabsClassName}
-                  role='tablist'
-                  aria-label='Tour mode'
-                >
-                  {DEV_CRUD_MODE_TABS.map((tab) => (
+                {!tourCreateOpen ?
+                  <div className={devViewPanelActionsClassName}>
                     <button
-                      key={tab.id}
                       type='button'
-                      role='tab'
-                      aria-selected={tourModeTab === tab.id}
-                      className={devViewPanelTabVariants({
-                        depth: 'secondary',
-                        kind: tab.id === 'manage' ? 'manage' : 'create',
-                        active: tourModeTab === tab.id,
-                      })}
-                      onClick={() => handleTourModeTabChange(tab.id)}
+                      className={devViewPanelBtnVariants({ tone: 'tour' })}
+                      onClick={() => openCreateTourTab()}
                     >
-                      {tab.label}
+                      Add tour
                     </button>
-                  ))}
-                </div>
+                  </div>
+                : null}
 
-                {tourModeTab === 'manage' ?
+                {!tourCreateOpen ?
                   <>
-                    <p className={devViewPanelTabHintClassName}>
-                      Edit the open tour.
-                    </p>
-
-                    <DevPanelFormGroup stacked>
-                      <DevPanelFormSection title='Basics'>
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Tour title
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='text'
-                            value={editTourTitle}
-                            onChange={(e) => setEditTourTitle(e.target.value)}
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Tour summary (optional)
-                          </span>
-                          <textarea
-                            className={devViewPanelTextareaClassName}
-                            value={editTourSummary}
-                            onChange={(e) => setEditTourSummary(e.target.value)}
-                            placeholder='Short marketing blurb for gallery cards and share previews'
-                            rows={2}
-                            spellCheck={true}
-                          />
-                          <p className={devViewPanelSectionHintClassName}>
-                            Stored in <code>catalog.json</code> (1–2 sentences).
-                            Not the AI knowledge summary or scene descriptions.
-                          </p>
-                        </label>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Product full name (optional)
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='text'
-                            value={editTourProductFullName}
-                            onChange={(e) =>
-                              setEditTourProductFullName(e.target.value)
-                            }
-                            placeholder='Leave empty for “{client} Virtual Tour”'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-                        <p className={devViewPanelSectionHintClassName}>
-                          Tab title, splash, and in-tour chrome preview:{' '}
-                          <strong>{editTourProductNamePreview}</strong>
-                        </p>
-
-                        <DevPanelFormRow>
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Category
-                            </span>
-                            <select
-                              className={devViewPanelSelectClassName}
-                              value={editTourCategory}
-                              onChange={(e) =>
-                                setEditTourCategory(
-                                  e.target.value as TourCategory,
-                                )
-                              }
-                            >
-                              {tourCategoryOptions.map((category) => (
-                                <option key={category} value={category}>
-                                  {category}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Catalog visibility
-                            </span>
-                            <select
-                              className={devViewPanelSelectClassName}
-                              value={editTourVisibility}
-                              onChange={(e) =>
-                                setEditTourVisibility(
-                                  e.target.value as DevCatalogTourVisibility,
-                                )
-                              }
-                            >
-                              {DEV_CATALOG_VISIBILITY_OPTIONS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        </DevPanelFormRow>
-
-                        <DevPanelFormRow>
-                          <div className='col-span-2 flex flex-col gap-1'>
-                            <label
-                              className={devViewPanelFormCheckboxLabelClassName}
-                            >
-                              <input
-                                className={
-                                  devViewPanelFormCheckboxInputClassName
-                                }
-                                type='checkbox'
-                                checked={editTourFeatured}
-                                onChange={(e) =>
-                                  setEditTourFeatured(e.target.checked)
-                                }
-                              />
-                              <span className={devViewPanelToggleNameClassName}>
-                                Featured on home gallery
-                              </span>
-                            </label>
-                            <p className={devViewPanelSectionHintClassName}>
-                              Badge on the card and listed first on{' '}
-                              <code>/</code>. Use <code>?featured=1</code> for a
-                              featured-only gallery.
-                            </p>
-                          </div>
-                        </DevPanelFormRow>
-                      </DevPanelFormSection>
-
-                      <DevPanelExperienceSection
-                        divided
-                        transitionEffect={editTransitionEffect}
-                        onTransitionEffectChange={setEditTransitionEffect}
-                        transitionSpeed={editTransitionSpeed}
-                        onTransitionSpeedChange={setEditTransitionSpeed}
-                        immersiveMode={editImmersiveMode}
-                        onImmersiveModeChange={setEditImmersiveMode}
-                        immersiveAudio={editImmersiveAudio}
-                        onImmersiveAudioChange={setEditImmersiveAudio}
-                        immersivePlaylistText={editImmersivePlaylistText}
-                        onImmersivePlaylistTextChange={
-                          setEditImmersivePlaylistText
-                        }
-                        immersivePlaylistManifest={
-                          editImmersivePlaylistManifest
-                        }
-                        onImmersivePlaylistManifestChange={
-                          setEditImmersivePlaylistManifest
-                        }
-                        immersiveVolume={editImmersiveVolume}
-                        onImmersiveVolumeChange={setEditImmersiveVolume}
-                      />
-
-                      <DevPanelFormSection title='Branding' divided>
-                        <div className='flex flex-col gap-2'>
-                          <label
-                            className={devViewPanelFormCheckboxLabelClassName}
-                          >
-                            <input
-                              className={devViewPanelFormCheckboxInputClassName}
-                              type='radio'
-                              name='edit-tour-branding-mode'
-                              checked={editTourBrandingMode === 'client'}
-                              onChange={() => setEditTourBrandingMode('client')}
-                            />
-                            <span className={devViewPanelToggleNameClassName}>
-                              Use client branding (shared)
-                            </span>
-                          </label>
-                          <label
-                            className={devViewPanelFormCheckboxLabelClassName}
-                          >
-                            <input
-                              className={devViewPanelFormCheckboxInputClassName}
-                              type='radio'
-                              name='edit-tour-branding-mode'
-                              checked={editTourBrandingMode === 'custom'}
-                              onChange={() => setEditTourBrandingMode('custom')}
-                            />
-                            <span className={devViewPanelToggleNameClassName}>
-                              Custom branding for this tour only
-                            </span>
-                          </label>
-                        </div>
-                        <p className={devViewPanelSectionHintClassName}>
-                          {editTourBrandingMode === 'client' ?
-                            'Inherits shared branding from the Client tab. Switch to custom to override on this tour only.'
-                          : 'Stored on this tour JSON only — overrides the client brand.'
-                          }
-                        </p>
-
-                        {editTourBrandingMode === 'custom' ?
-                          <>
-                            <div className='flex flex-col gap-1'>
-                              <div className={devViewPanelActionsClassName}>
-                                <button
-                                  type='button'
-                                  className={devViewPanelBtnVariants({
-                                    tone: 'secondary',
-                                  })}
-                                  onClick={() => void suggestEditTourBranding()}
-                                  disabled={
-                                    !openCatalogClient?.website?.trim() ||
-                                    editTourSuggestStatus === 'working'
-                                  }
-                                >
-                                  {editTourSuggestStatus === 'working' ?
-                                    'Suggesting…'
-                                  : 'Suggest from website'}
-                                </button>
-                              </div>
-                              <p className={devViewPanelSectionHintClassName}>
-                                Uses the client website from the Client tab to
-                                draft logo, favicon, and primary color — review
-                                before saving.
-                              </p>
-                            </div>
-
-                            {editTourSuggestNotes.length > 0 ?
-                              <ul className={devViewPanelSectionHintClassName}>
-                                {editTourSuggestNotes.map((note) => (
-                                  <li key={note}>{note}</li>
-                                ))}
-                              </ul>
-                            : null}
-
-                            <DevPanelColorField
-                              label='Primary color'
-                              value={editTourPrimaryColor}
-                              onChange={setEditTourPrimaryColor}
-                              defaultColor={DEFAULT_NEW_TOUR_PRIMARY_COLOR}
-                              pickerAriaLabel='Edit tour primary color picker'
-                            />
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Logo alt
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={editTourLogoAlt}
-                                onChange={(e) =>
-                                  setEditTourLogoAlt(e.target.value)
-                                }
-                                placeholder='Accessible logo label'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Font family (CSS stack)
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='text'
-                                value={editTourFontFamily}
-                                onChange={(e) =>
-                                  setEditTourFontFamily(e.target.value)
-                                }
-                                placeholder="'Montserrat', sans-serif"
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-
-                            <label className={devViewPanelFieldClassName}>
-                              <span className={devViewPanelFieldLabelClassName}>
-                                Google Fonts URL
-                              </span>
-                              <input
-                                className={devViewPanelInputClassName}
-                                type='url'
-                                value={editTourFontSourceUrl}
-                                onChange={(e) =>
-                                  setEditTourFontSourceUrl(e.target.value)
-                                }
-                                placeholder='https://fonts.googleapis.com/css2?family=…'
-                                spellCheck={false}
-                                autoComplete='off'
-                              />
-                            </label>
-                            <p className={devViewPanelSectionHintClassName}>
-                              Must be{' '}
-                              <code>https://fonts.googleapis.com/…</code>. Clear
-                              both font fields to revert to platform defaults.
-                            </p>
-
-                            <DevPanelFormRow>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Logo (replace)
-                                </span>
-                                <DevPanelFileField
-                                  file={editTourLogoFile}
-                                  preview={
-                                    <DevLocalFilePreview
-                                      file={editTourLogoFile}
-                                      className={devViewPanelBrandLogoClassName}
-                                      alt='Logo preview'
-                                    />
-                                  }
-                                  onClearPreview={() =>
-                                    setEditTourLogoFile(null)
-                                  }
-                                  showClear={Boolean(editTourLogoFile)}
-                                >
-                                  <DevPanelFileInput
-                                    accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
-                                    file={editTourLogoFile}
-                                    onChange={setEditTourLogoFile}
-                                  />
-                                </DevPanelFileField>
-                              </label>
-
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Favicon (replace)
-                                </span>
-                                <DevPanelFileField
-                                  file={editTourFaviconFile}
-                                  preview={
-                                    <DevLocalFilePreview
-                                      file={editTourFaviconFile}
-                                      className={
-                                        devViewPanelBrandFaviconClassName
-                                      }
-                                      alt='Favicon preview'
-                                    />
-                                  }
-                                  onClearPreview={() =>
-                                    setEditTourFaviconFile(null)
-                                  }
-                                  showClear={Boolean(editTourFaviconFile)}
-                                >
-                                  <DevPanelFileInput
-                                    accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
-                                    file={editTourFaviconFile}
-                                    onChange={setEditTourFaviconFile}
-                                  />
-                                </DevPanelFileField>
-                              </label>
-                            </DevPanelFormRow>
-                          </>
-                        : null}
-
-                        {editTourError ?
-                          <p className={devViewPanelSectionHintClassName}>
-                            {editTourError}
-                          </p>
-                        : null}
-
-                        <div className={devViewPanelActionsClassName}>
-                          <button
-                            type='button'
-                            className={devViewPanelBtnVariants({
-                              tone: 'primary',
-                            })}
-                            onClick={() => void saveEditTour()}
-                            disabled={
-                              !canSaveEditTour || editTourStatus === 'working'
-                            }
-                          >
-                            {editTourStatus === 'working' ?
-                              'Saving…'
-                            : editTourStatus === 'done' ?
-                              'Saved!'
-                            : 'Save tour'}
-                          </button>
-                        </div>
-                      </DevPanelFormSection>
-                    </DevPanelFormGroup>
-
-                    <div
-                      className={cn(
-                        'flex flex-col gap-2.5 border border-[rgba(248,113,113,0.35)] bg-[rgba(69,10,10,0.35)] p-3',
-                        devViewPanelControlRadiusClassName,
-                      )}
-                    >
-                      <h4 className={devViewPanelFormGroupTitleClassName}>
-                        Danger zone
-                      </h4>
-                      <p className={devViewPanelSectionHintClassName}>
-                        Permanently deletes <code>tours/{tour.id}.json</code>,{' '}
-                        <code>tours/{tour.id}-knowledge.json</code>, catalog
-                        entry, and{' '}
-                        <code>
-                          assets/{tour.clientId ?? tour.id}/{tour.id}/
-                        </code>
-                        . This cannot be undone.
-                      </p>
-
+                    {tourManageClientGroups.length > 0 ?
                       <label className={devViewPanelFieldClassName}>
                         <span className={devViewPanelFieldLabelClassName}>
-                          Type <code>{tour.id}</code> to confirm
+                          Filter by client
                         </span>
-                        <input
-                          className={devViewPanelInputClassName}
-                          type='text'
-                          value={deleteTourConfirm}
-                          onChange={(e) => setDeleteTourConfirm(e.target.value)}
-                          placeholder={tour.id}
-                          spellCheck={false}
-                          autoComplete='off'
-                          disabled={deleteTourStatus === 'working'}
-                        />
-                      </label>
-
-                      <div className={devViewPanelActionsClassName}>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'danger',
-                          })}
-                          onClick={() => void deleteCurrentTour()}
+                        <select
+                          className={devViewPanelSelectClassName}
+                          value={tourManageClientFilter}
+                          onChange={(e) => {
+                            setTourManageClientFilter(e.target.value);
+                            setEditingTourId(null);
+                            setDeletingTourId(null);
+                          }}
                           disabled={
-                            !canDeleteTour || deleteTourStatus === 'working'
+                            editTourStatus === 'working' ||
+                            deleteTourStatus === 'working'
                           }
                         >
-                          {deleteTourStatus === 'working' ?
-                            'Deleting…'
-                          : 'Delete tour permanently'}
-                        </button>
-                      </div>
-                      {deleteTourError ?
-                        <p className={devViewPanelSectionHintClassName}>
-                          {deleteTourError}
+                          <option value='all'>
+                            All tours ({catalogTourManageRows.length})
+                          </option>
+                          {tourManageClientGroups.map((group) => (
+                            <option key={group.id} value={group.id}>
+                              {group.title} ({group.count})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    : null}
+                    <DevPanelFormGroup>
+                      {filteredCatalogTourManageRows.length > 0 ?
+                        <ul className={devViewPanelManageListClassName}>
+                          {filteredCatalogTourManageRows.map((entry) => {
+                            const isCurrent = entry.id === tour.id;
+                            const isEditing = editingTourId === entry.id;
+                            const isDeleting = deletingTourId === entry.id;
+                            const logoUrl =
+                              entry.logoPath ?
+                                withBaseUrl(
+                                  appendCacheBust(entry.logoPath, catalogTick),
+                                )
+                              : null;
+                            const busy =
+                              editTourStatus === 'working' ||
+                              deleteTourStatus === 'working';
+                            return (
+                              <li
+                                key={entry.id}
+                                className={cn(
+                                  devViewPanelManageListItemClassName,
+                                  (isEditing || isCurrent || isDeleting) &&
+                                    devViewPanelManageListItemActiveClassName,
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    devViewPanelManageListItemHeadClassName,
+                                    'items-start',
+                                  )}
+                                >
+                                  <div
+                                    className={cn(
+                                      devViewPanelManageListItemHeadMainClassName,
+                                      'flex-nowrap items-center gap-2.5',
+                                    )}
+                                    title={entry.id}
+                                  >
+                                    {logoUrl ?
+                                      <span
+                                        className={
+                                          devViewPanelManageListItemLogoWrapClassName
+                                        }
+                                      >
+                                        <img
+                                          className={
+                                            devViewPanelManageListItemLogoClassName
+                                          }
+                                          src={logoUrl}
+                                          alt=''
+                                        />
+                                      </span>
+                                    : null}
+                                    <div
+                                      className={
+                                        devViewPanelManageListItemTextStackClassName
+                                      }
+                                    >
+                                      <div
+                                        className={
+                                          devViewPanelManageListItemCopyClassName
+                                        }
+                                      >
+                                        <span
+                                          className={
+                                            devViewPanelManageListItemTitleClassName
+                                          }
+                                        >
+                                          {entry.title}
+                                        </span>
+                                        <p
+                                          className={cn(
+                                            devViewPanelManageListItemDescClassName,
+                                            'm-0 line-clamp-1',
+                                          )}
+                                        >
+                                          <span
+                                            className={
+                                              devViewPanelManageListItemMetaClassName
+                                            }
+                                          >
+                                            {entry.clientName}
+                                          </span>
+                                        </p>
+                                      </div>
+                                      <div
+                                        className={
+                                          devViewPanelManageListItemStackActionsClassName
+                                        }
+                                      >
+                                        <button
+                                          type='button'
+                                          className={devViewPanelBtnVariants({
+                                            tone: 'secondary',
+                                          })}
+                                          onClick={() => {
+                                            setDeletingTourId(null);
+                                            setEditingTourId(null);
+                                            handleSwitchTour(entry.id);
+                                          }}
+                                          disabled={busy}
+                                        >
+                                          Open
+                                        </button>
+                                        <button
+                                          type='button'
+                                          className={devViewPanelBtnVariants({
+                                            tone: 'secondary',
+                                          })}
+                                          onClick={() =>
+                                            startEditTour(entry.id)
+                                          }
+                                          disabled={busy || isEditing}
+                                        >
+                                          Edit
+                                        </button>
+                                        <button
+                                          type='button'
+                                          className={devViewPanelBtnVariants({
+                                            tone: 'danger',
+                                          })}
+                                          onClick={() =>
+                                            startDeleteTour(entry.id)
+                                          }
+                                          disabled={busy || isDeleting}
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div
+                                    className={
+                                      devViewPanelManageListItemTourBadgesStackClassName
+                                    }
+                                  >
+                                    {isCurrent ?
+                                      <Badge
+                                        variant='fill'
+                                        size='sm'
+                                        tone='none'
+                                        className={devSceneManageBadgeVariants({
+                                          kind: 'current',
+                                        })}
+                                      >
+                                        Current
+                                      </Badge>
+                                    : null}
+                                    {entry.featured ?
+                                      <Badge
+                                        variant='fill'
+                                        size='sm'
+                                        tone='none'
+                                        className={devSceneManageBadgeVariants({
+                                          kind: 'featured',
+                                        })}
+                                      >
+                                        Featured
+                                      </Badge>
+                                    : null}
+                                    <Badge
+                                      variant='fill'
+                                      size='sm'
+                                      tone='none'
+                                      className={devSceneManageBadgeVariants({
+                                        kind: entry.visibility,
+                                      })}
+                                    >
+                                      {entry.visibility === 'public' ?
+                                        'Public'
+                                      : entry.visibility === 'unlisted' ?
+                                        'Unlisted'
+                                      : 'Internal'}
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                {isDeleting ?
+                                  <div
+                                    className={cn(
+                                      'mt-2 flex flex-col gap-2.5 border border-[rgba(248,113,113,0.35)] bg-[rgba(69,10,10,0.35)] p-3',
+                                      devViewPanelControlRadiusClassName,
+                                    )}
+                                  >
+                                    <h4
+                                      className={
+                                        devViewPanelFormGroupTitleClassName
+                                      }
+                                    >
+                                      Danger zone
+                                    </h4>
+                                    <p
+                                      className={
+                                        devViewPanelSectionHintClassName
+                                      }
+                                    >
+                                      Permanently deletes{' '}
+                                      <code>tours/{entry.id}.json</code>,{' '}
+                                      <code>
+                                        tours/{entry.id}-knowledge.json
+                                      </code>
+                                      , catalog entry, and{' '}
+                                      <code>
+                                        assets/{entry.clientId}/{entry.id}/
+                                      </code>
+                                      . This cannot be undone.
+                                    </p>
+                                    <label
+                                      className={devViewPanelFieldClassName}
+                                    >
+                                      <span
+                                        className={
+                                          devViewPanelFieldLabelClassName
+                                        }
+                                      >
+                                        Type <code>{entry.id}</code> to confirm
+                                      </span>
+                                      <input
+                                        className={devViewPanelInputClassName}
+                                        type='text'
+                                        value={deleteTourConfirm}
+                                        onChange={(e) =>
+                                          setDeleteTourConfirm(e.target.value)
+                                        }
+                                        placeholder={entry.id}
+                                        spellCheck={false}
+                                        autoComplete='off'
+                                        disabled={
+                                          deleteTourStatus === 'working'
+                                        }
+                                      />
+                                    </label>
+                                    <div
+                                      className={devViewPanelActionsClassName}
+                                    >
+                                      <button
+                                        type='button'
+                                        className={devViewPanelBtnVariants({
+                                          tone: 'secondary',
+                                        })}
+                                        onClick={cancelDeleteTour}
+                                        disabled={
+                                          deleteTourStatus === 'working'
+                                        }
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        type='button'
+                                        className={devViewPanelBtnVariants({
+                                          tone: 'danger',
+                                        })}
+                                        onClick={() => void deleteManagedTour()}
+                                        disabled={
+                                          !canDeleteTour ||
+                                          deleteTourStatus === 'working'
+                                        }
+                                      >
+                                        {deleteTourStatus === 'working' ?
+                                          'Deleting…'
+                                        : 'Delete tour permanently'}
+                                      </button>
+                                    </div>
+                                    {deleteTourError ?
+                                      <p
+                                        className={
+                                          devViewPanelSectionHintClassName
+                                        }
+                                      >
+                                        {deleteTourError}
+                                      </p>
+                                    : null}
+                                  </div>
+                                : null}
+
+                                {isEditing ?
+                                  <>
+                                    <DevPanelFormGroup inline manageEdit>
+                                      <DevPanelFormSection title='Basics'>
+                                        <label
+                                          className={devViewPanelFieldClassName}
+                                        >
+                                          <span
+                                            className={
+                                              devViewPanelFieldLabelClassName
+                                            }
+                                          >
+                                            Tour title
+                                          </span>
+                                          <input
+                                            className={
+                                              devViewPanelInputClassName
+                                            }
+                                            type='text'
+                                            value={editTourTitle}
+                                            onChange={(e) =>
+                                              setEditTourTitle(e.target.value)
+                                            }
+                                            spellCheck={false}
+                                            autoComplete='off'
+                                          />
+                                        </label>
+
+                                        <label
+                                          className={devViewPanelFieldClassName}
+                                        >
+                                          <span
+                                            className={
+                                              devViewPanelFieldLabelClassName
+                                            }
+                                          >
+                                            Tour summary (optional)
+                                          </span>
+                                          <textarea
+                                            className={
+                                              devViewPanelTextareaClassName
+                                            }
+                                            value={editTourSummary}
+                                            onChange={(e) =>
+                                              setEditTourSummary(e.target.value)
+                                            }
+                                            placeholder='Short marketing blurb for gallery cards and share previews'
+                                            rows={2}
+                                            spellCheck={true}
+                                          />
+                                          <p
+                                            className={
+                                              devViewPanelSectionHintClassName
+                                            }
+                                          >
+                                            Stored in <code>catalog.json</code>{' '}
+                                            (1–2 sentences). Not scene
+                                            descriptions.
+                                          </p>
+                                        </label>
+
+                                        <label
+                                          className={devViewPanelFieldClassName}
+                                        >
+                                          <span
+                                            className={
+                                              devViewPanelFieldLabelClassName
+                                            }
+                                          >
+                                            Product full name (optional)
+                                          </span>
+                                          <input
+                                            className={
+                                              devViewPanelInputClassName
+                                            }
+                                            type='text'
+                                            value={editTourProductFullName}
+                                            onChange={(e) =>
+                                              setEditTourProductFullName(
+                                                e.target.value,
+                                              )
+                                            }
+                                            placeholder='Leave empty for “{client} Virtual Tour”'
+                                            spellCheck={false}
+                                            autoComplete='off'
+                                          />
+                                        </label>
+                                        <p
+                                          className={
+                                            devViewPanelSectionHintClassName
+                                          }
+                                        >
+                                          Tab title, splash, and in-tour chrome
+                                          preview:{' '}
+                                          <strong>
+                                            {editTourProductNamePreview}
+                                          </strong>
+                                        </p>
+
+                                        <DevPanelFormRow>
+                                          <label
+                                            className={
+                                              devViewPanelFieldClassName
+                                            }
+                                          >
+                                            <span
+                                              className={
+                                                devViewPanelFieldLabelClassName
+                                              }
+                                            >
+                                              Category
+                                            </span>
+                                            <select
+                                              className={
+                                                devViewPanelSelectClassName
+                                              }
+                                              value={editTourCategory}
+                                              onChange={(e) =>
+                                                setEditTourCategory(
+                                                  e.target
+                                                    .value as TourCategory,
+                                                )
+                                              }
+                                            >
+                                              {tourCategoryOptions.map(
+                                                (category) => (
+                                                  <option
+                                                    key={category}
+                                                    value={category}
+                                                  >
+                                                    {category}
+                                                  </option>
+                                                ),
+                                              )}
+                                            </select>
+                                          </label>
+
+                                          <label
+                                            className={
+                                              devViewPanelFieldClassName
+                                            }
+                                          >
+                                            <span
+                                              className={
+                                                devViewPanelFieldLabelClassName
+                                              }
+                                            >
+                                              Catalog visibility
+                                            </span>
+                                            <select
+                                              className={
+                                                devViewPanelSelectClassName
+                                              }
+                                              value={editTourVisibility}
+                                              onChange={(e) =>
+                                                setEditTourVisibility(
+                                                  e.target
+                                                    .value as DevCatalogTourVisibility,
+                                                )
+                                              }
+                                            >
+                                              {DEV_CATALOG_VISIBILITY_OPTIONS.map(
+                                                (option) => (
+                                                  <option
+                                                    key={option.value}
+                                                    value={option.value}
+                                                  >
+                                                    {option.label}
+                                                  </option>
+                                                ),
+                                              )}
+                                            </select>
+                                          </label>
+                                        </DevPanelFormRow>
+
+                                        <DevPanelFormRow>
+                                          <div className='col-span-2 flex flex-col gap-1'>
+                                            <label
+                                              className={
+                                                devViewPanelFormCheckboxLabelClassName
+                                              }
+                                            >
+                                              <input
+                                                className={
+                                                  devViewPanelFormCheckboxInputClassName
+                                                }
+                                                type='checkbox'
+                                                checked={editTourFeatured}
+                                                onChange={(e) =>
+                                                  setEditTourFeatured(
+                                                    e.target.checked,
+                                                  )
+                                                }
+                                              />
+                                              <span
+                                                className={
+                                                  devViewPanelToggleNameClassName
+                                                }
+                                              >
+                                                Featured on home gallery
+                                              </span>
+                                            </label>
+                                            <p
+                                              className={
+                                                devViewPanelSectionHintClassName
+                                              }
+                                            >
+                                              Badge on the card and listed first
+                                              on <code>/</code>. Use{' '}
+                                              <code>?featured=1</code> for a
+                                              featured-only gallery.
+                                            </p>
+                                          </div>
+                                        </DevPanelFormRow>
+                                      </DevPanelFormSection>
+
+                                      <DevPanelExperienceSection
+                                        divided
+                                        transitionEffect={editTransitionEffect}
+                                        onTransitionEffectChange={
+                                          setEditTransitionEffect
+                                        }
+                                        transitionSpeed={editTransitionSpeed}
+                                        onTransitionSpeedChange={
+                                          setEditTransitionSpeed
+                                        }
+                                        immersiveMode={editImmersiveMode}
+                                        onImmersiveModeChange={
+                                          setEditImmersiveMode
+                                        }
+                                        immersiveAudio={editImmersiveAudio}
+                                        onImmersiveAudioChange={
+                                          setEditImmersiveAudio
+                                        }
+                                        immersivePlaylistText={
+                                          editImmersivePlaylistText
+                                        }
+                                        onImmersivePlaylistTextChange={
+                                          setEditImmersivePlaylistText
+                                        }
+                                        immersivePlaylistManifest={
+                                          editImmersivePlaylistManifest
+                                        }
+                                        onImmersivePlaylistManifestChange={
+                                          setEditImmersivePlaylistManifest
+                                        }
+                                        immersiveVolume={editImmersiveVolume}
+                                        onImmersiveVolumeChange={
+                                          setEditImmersiveVolume
+                                        }
+                                      />
+
+                                      <DevPanelFormSection
+                                        title='Branding'
+                                        divided
+                                      >
+                                        <div className='flex flex-col gap-2'>
+                                          <label
+                                            className={
+                                              devViewPanelFormCheckboxLabelClassName
+                                            }
+                                          >
+                                            <input
+                                              className={
+                                                devViewPanelFormCheckboxInputClassName
+                                              }
+                                              type='radio'
+                                              name='edit-tour-branding-mode'
+                                              checked={
+                                                editTourBrandingMode ===
+                                                'client'
+                                              }
+                                              onChange={() =>
+                                                setEditTourBrandingMode(
+                                                  'client',
+                                                )
+                                              }
+                                            />
+                                            <span
+                                              className={
+                                                devViewPanelToggleNameClassName
+                                              }
+                                            >
+                                              Use client branding (shared)
+                                            </span>
+                                          </label>
+                                          <label
+                                            className={
+                                              devViewPanelFormCheckboxLabelClassName
+                                            }
+                                          >
+                                            <input
+                                              className={
+                                                devViewPanelFormCheckboxInputClassName
+                                              }
+                                              type='radio'
+                                              name='edit-tour-branding-mode'
+                                              checked={
+                                                editTourBrandingMode ===
+                                                'custom'
+                                              }
+                                              onChange={() =>
+                                                setEditTourBrandingMode(
+                                                  'custom',
+                                                )
+                                              }
+                                            />
+                                            <span
+                                              className={
+                                                devViewPanelToggleNameClassName
+                                              }
+                                            >
+                                              Custom branding for this tour only
+                                            </span>
+                                          </label>
+                                        </div>
+                                        <p
+                                          className={
+                                            devViewPanelSectionHintClassName
+                                          }
+                                        >
+                                          {editTourBrandingMode === 'client' ?
+                                            'Inherits shared branding from the Client tab. Switch to custom to override on this tour only.'
+                                          : 'Stored on this tour JSON only — overrides the client brand.'
+                                          }
+                                        </p>
+
+                                        {editTourBrandingMode === 'custom' ?
+                                          <>
+                                            <div className='flex flex-col gap-1'>
+                                              <div
+                                                className={
+                                                  devViewPanelActionsClassName
+                                                }
+                                              >
+                                                <button
+                                                  type='button'
+                                                  className={devViewPanelBtnVariants(
+                                                    { tone: 'secondary' },
+                                                  )}
+                                                  onClick={() =>
+                                                    void suggestEditTourBranding()
+                                                  }
+                                                  disabled={
+                                                    !openCatalogClient?.website?.trim() ||
+                                                    editTourSuggestStatus ===
+                                                      'working'
+                                                  }
+                                                >
+                                                  {(
+                                                    editTourSuggestStatus ===
+                                                    'working'
+                                                  ) ?
+                                                    'Suggesting…'
+                                                  : 'Suggest from website'}
+                                                </button>
+                                              </div>
+                                              <p
+                                                className={
+                                                  devViewPanelSectionHintClassName
+                                                }
+                                              >
+                                                Uses the client website from the
+                                                Client tab to draft logo,
+                                                favicon, and primary color —
+                                                review before saving.
+                                              </p>
+                                            </div>
+
+                                            {editTourSuggestNotes.length > 0 ?
+                                              <ul
+                                                className={
+                                                  devViewPanelSectionHintClassName
+                                                }
+                                              >
+                                                {editTourSuggestNotes.map(
+                                                  (note) => (
+                                                    <li key={note}>{note}</li>
+                                                  ),
+                                                )}
+                                              </ul>
+                                            : null}
+
+                                            <DevPanelColorField
+                                              label='Primary color'
+                                              value={editTourPrimaryColor}
+                                              onChange={setEditTourPrimaryColor}
+                                              defaultColor={
+                                                DEFAULT_NEW_TOUR_PRIMARY_COLOR
+                                              }
+                                              pickerAriaLabel='Edit tour primary color picker'
+                                            />
+
+                                            <label
+                                              className={
+                                                devViewPanelFieldClassName
+                                              }
+                                            >
+                                              <span
+                                                className={
+                                                  devViewPanelFieldLabelClassName
+                                                }
+                                              >
+                                                Logo alt
+                                              </span>
+                                              <input
+                                                className={
+                                                  devViewPanelInputClassName
+                                                }
+                                                type='text'
+                                                value={editTourLogoAlt}
+                                                onChange={(e) =>
+                                                  setEditTourLogoAlt(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                placeholder='Accessible logo label'
+                                                spellCheck={false}
+                                                autoComplete='off'
+                                              />
+                                            </label>
+
+                                            <label
+                                              className={
+                                                devViewPanelFieldClassName
+                                              }
+                                            >
+                                              <span
+                                                className={
+                                                  devViewPanelFieldLabelClassName
+                                                }
+                                              >
+                                                Font family (CSS stack)
+                                              </span>
+                                              <input
+                                                className={
+                                                  devViewPanelInputClassName
+                                                }
+                                                type='text'
+                                                value={editTourFontFamily}
+                                                onChange={(e) =>
+                                                  setEditTourFontFamily(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                placeholder="'Montserrat', sans-serif"
+                                                spellCheck={false}
+                                                autoComplete='off'
+                                              />
+                                            </label>
+
+                                            <label
+                                              className={
+                                                devViewPanelFieldClassName
+                                              }
+                                            >
+                                              <span
+                                                className={
+                                                  devViewPanelFieldLabelClassName
+                                                }
+                                              >
+                                                Google Fonts URL
+                                              </span>
+                                              <input
+                                                className={
+                                                  devViewPanelInputClassName
+                                                }
+                                                type='url'
+                                                value={editTourFontSourceUrl}
+                                                onChange={(e) =>
+                                                  setEditTourFontSourceUrl(
+                                                    e.target.value,
+                                                  )
+                                                }
+                                                placeholder='https://fonts.googleapis.com/css2?family=…'
+                                                spellCheck={false}
+                                                autoComplete='off'
+                                              />
+                                            </label>
+                                            <p
+                                              className={
+                                                devViewPanelSectionHintClassName
+                                              }
+                                            >
+                                              Must be{' '}
+                                              <code>
+                                                https://fonts.googleapis.com/…
+                                              </code>
+                                              . Clear both font fields to revert
+                                              to platform defaults.
+                                            </p>
+
+                                            <DevPanelFormRow>
+                                              <label
+                                                className={
+                                                  devViewPanelFieldClassName
+                                                }
+                                              >
+                                                <span
+                                                  className={
+                                                    devViewPanelFieldLabelClassName
+                                                  }
+                                                >
+                                                  Logo (replace)
+                                                </span>
+                                                <DevPanelFileField
+                                                  file={editTourLogoFile}
+                                                  preview={
+                                                    <DevLocalFilePreview
+                                                      file={editTourLogoFile}
+                                                      className={
+                                                        devViewPanelBrandLogoClassName
+                                                      }
+                                                      alt='Logo preview'
+                                                    />
+                                                  }
+                                                  onClearPreview={() =>
+                                                    setEditTourLogoFile(null)
+                                                  }
+                                                  showClear={Boolean(
+                                                    editTourLogoFile,
+                                                  )}
+                                                >
+                                                  <DevPanelFileInput
+                                                    accept='image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg'
+                                                    file={editTourLogoFile}
+                                                    onChange={
+                                                      setEditTourLogoFile
+                                                    }
+                                                  />
+                                                </DevPanelFileField>
+                                              </label>
+
+                                              <label
+                                                className={
+                                                  devViewPanelFieldClassName
+                                                }
+                                              >
+                                                <span
+                                                  className={
+                                                    devViewPanelFieldLabelClassName
+                                                  }
+                                                >
+                                                  Favicon (replace)
+                                                </span>
+                                                <DevPanelFileField
+                                                  file={editTourFaviconFile}
+                                                  preview={
+                                                    <DevLocalFilePreview
+                                                      file={editTourFaviconFile}
+                                                      className={
+                                                        devViewPanelBrandFaviconClassName
+                                                      }
+                                                      alt='Favicon preview'
+                                                    />
+                                                  }
+                                                  onClearPreview={() =>
+                                                    setEditTourFaviconFile(null)
+                                                  }
+                                                  showClear={Boolean(
+                                                    editTourFaviconFile,
+                                                  )}
+                                                >
+                                                  <DevPanelFileInput
+                                                    accept='image/png,image/jpeg,image/webp,image/x-icon,.png,.jpg,.jpeg,.webp,.ico'
+                                                    file={editTourFaviconFile}
+                                                    onChange={
+                                                      setEditTourFaviconFile
+                                                    }
+                                                  />
+                                                </DevPanelFileField>
+                                              </label>
+                                            </DevPanelFormRow>
+                                          </>
+                                        : null}
+
+                                        {editTourError ?
+                                          <p
+                                            className={
+                                              devViewPanelSectionHintClassName
+                                            }
+                                          >
+                                            {editTourError}
+                                          </p>
+                                        : null}
+
+                                        <div
+                                          className={
+                                            devViewPanelActionsClassName
+                                          }
+                                        >
+                                          <button
+                                            type='button'
+                                            className={devViewPanelBtnVariants({
+                                              tone: 'secondary',
+                                            })}
+                                            onClick={cancelEditTour}
+                                            disabled={
+                                              editTourStatus === 'working'
+                                            }
+                                          >
+                                            Cancel
+                                          </button>
+                                          <button
+                                            type='button'
+                                            className={devViewPanelBtnVariants({
+                                              tone: 'primary',
+                                            })}
+                                            onClick={() => void saveEditTour()}
+                                            disabled={
+                                              !canSaveEditTour ||
+                                              editTourStatus === 'working'
+                                            }
+                                          >
+                                            {editTourStatus === 'working' ?
+                                              'Saving…'
+                                            : editTourStatus === 'done' ?
+                                              'Saved!'
+                                            : 'Save tour'}
+                                          </button>
+                                        </div>
+                                      </DevPanelFormSection>
+                                    </DevPanelFormGroup>{' '}
+                                  </>
+                                : null}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      : <p className={devViewPanelSectionHintClassName}>
+                          {catalogTourManageRows.length === 0 ?
+                            'No tours in the catalog yet — add one to get started.'
+                          : tourManageClientFilter === 'all' ?
+                            'No tours match this filter.'
+                          : 'No tours for this client.'}
                         </p>
-                      : null}
-                    </div>
+                      }
+                    </DevPanelFormGroup>
                   </>
                 : <>
-                    <p className={devViewPanelTabHintClassName}>
-                      Create a tour under an existing catalog client. Add new
-                      clients on the Client tab first.
-                    </p>
-
                     <DevPanelFormGroup stacked>
                       <DevPanelFormSection title='Client'>
                         <label className={devViewPanelFieldClassName}>
@@ -5904,6 +7010,10 @@ export function DevViewPanel({
                               </>
                             }
                           </select>
+                          <p className={devViewPanelSectionHintClassName}>
+                            Tours belong to a catalog client. Create clients on
+                            the Client tab first if needed.
+                          </p>
                         </label>
                         {catalogClients.length === 0 ?
                           <p className={devViewPanelSectionHintClassName}>
@@ -6139,6 +7249,16 @@ export function DevViewPanel({
                           <button
                             type='button'
                             className={devViewPanelBtnVariants({
+                              tone: 'secondary',
+                            })}
+                            onClick={() => setTourCreateOpen(false)}
+                            disabled={newTourStatus === 'working'}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
                               tone: 'primary',
                             })}
                             onClick={() => void createNewTour()}
@@ -6157,299 +7277,6 @@ export function DevViewPanel({
                     </DevPanelFormGroup>
                   </>
                 }
-              </DevPanelSection>
-
-              <DevPanelSection
-                title='Knowledge (AI assistant)'
-                description={
-                  <>
-                    Edits <code>{tour.id}-knowledge.json</code> — facts, FAQs,
-                    and suggested questions for the chat assistant.
-                  </>
-                }
-              >
-                {knowledgeMissing ?
-                  <p className={devViewPanelSectionHintClassName}>
-                    No knowledge file yet — saving will create{' '}
-                    <code>tours/{tour.id}-knowledge.json</code>.
-                  </p>
-                : null}
-                {knowledgeLoadError ?
-                  <p className={devViewPanelSectionHintClassName}>
-                    {knowledgeLoadError}
-                  </p>
-                : null}
-
-                <DevPanelFormGroup stacked>
-                  <DevPanelFormSection title='Global'>
-                    <DevPanelFormRow>
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Website URL
-                        </span>
-                        <input
-                          className={devViewPanelInputClassName}
-                          type='url'
-                          value={knowledgeUrl}
-                          onChange={(e) => setKnowledgeUrl(e.target.value)}
-                          placeholder='https://…'
-                          spellCheck={false}
-                          autoComplete='off'
-                          disabled={knowledgeLoadStatus === 'working'}
-                        />
-                      </label>
-
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Facility name
-                        </span>
-                        <input
-                          className={devViewPanelInputClassName}
-                          type='text'
-                          value={knowledgeFacilityName}
-                          onChange={(e) =>
-                            setKnowledgeFacilityName(e.target.value)
-                          }
-                          spellCheck={false}
-                          autoComplete='off'
-                          disabled={knowledgeLoadStatus === 'working'}
-                        />
-                      </label>
-                    </DevPanelFormRow>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Global summary
-                      </span>
-                      <textarea
-                        className={devViewPanelTextareaClassName}
-                        value={knowledgeSummary}
-                        onChange={(e) => setKnowledgeSummary(e.target.value)}
-                        rows={3}
-                        spellCheck={true}
-                        disabled={knowledgeLoadStatus === 'working'}
-                      />
-                    </label>
-                  </DevPanelFormSection>
-
-                  <DevPanelFormSection title='Scene content' divided>
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Scene
-                      </span>
-                      <select
-                        className={devViewPanelSelectClassName}
-                        value={knowledgeSceneId}
-                        onChange={(e) =>
-                          handleKnowledgeSceneChange(e.target.value)
-                        }
-                        disabled={knowledgeLoadStatus === 'working'}
-                      >
-                        {tourScenes.map((sceneOption) => (
-                          <option key={sceneOption.id} value={sceneOption.id}>
-                            {sceneOption.title} ({sceneOption.id})
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Scene title
-                      </span>
-                      <input
-                        className={devViewPanelInputClassName}
-                        type='text'
-                        value={knowledgeSceneTitle}
-                        onChange={(e) => setKnowledgeSceneTitle(e.target.value)}
-                        spellCheck={false}
-                        autoComplete='off'
-                        disabled={knowledgeLoadStatus === 'working'}
-                      />
-                    </label>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Scene description
-                      </span>
-                      <textarea
-                        className={devViewPanelTextareaClassName}
-                        value={knowledgeSceneDescription}
-                        onChange={(e) =>
-                          setKnowledgeSceneDescription(e.target.value)
-                        }
-                        rows={4}
-                        spellCheck={true}
-                        disabled={knowledgeLoadStatus === 'working'}
-                      />
-                    </label>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Facts (one per line)
-                      </span>
-                      <textarea
-                        className={devViewPanelTextareaClassName}
-                        value={knowledgeFactsText}
-                        onChange={(e) => setKnowledgeFactsText(e.target.value)}
-                        rows={4}
-                        spellCheck={true}
-                        disabled={knowledgeLoadStatus === 'working'}
-                      />
-                    </label>
-
-                    <label className={devViewPanelFieldClassName}>
-                      <span className={devViewPanelFieldLabelClassName}>
-                        Suggested questions (one per line)
-                      </span>
-                      <textarea
-                        className={devViewPanelTextareaClassName}
-                        value={knowledgeSuggestedText}
-                        onChange={(e) =>
-                          setKnowledgeSuggestedText(e.target.value)
-                        }
-                        rows={3}
-                        spellCheck={true}
-                        disabled={knowledgeLoadStatus === 'working'}
-                      />
-                    </label>
-                  </DevPanelFormSection>
-
-                  <DevPanelFormSection
-                    title='FAQs'
-                    divided
-                    description={
-                      knowledgeSceneId ?
-                        <p className={devViewPanelSectionLeadClassName}>
-                          Q&amp;A pairs for{' '}
-                          <code>{knowledgeSceneTitle || knowledgeSceneId}</code>
-                          .
-                        </p>
-                      : undefined
-                    }
-                  >
-                    <DevPanelFormGroup inline className='mt-0'>
-                      {knowledgeFaqs.length > 0 ?
-                        <ul className={devViewPanelManageListClassName}>
-                          {knowledgeFaqs.map((faq, index) => (
-                            <li
-                              key={`${knowledgeSceneId}-faq-${index}`}
-                              className={devViewPanelManageListItemClassName}
-                            >
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Question
-                                </span>
-                                <input
-                                  className={devViewPanelInputClassName}
-                                  type='text'
-                                  value={faq.q}
-                                  onChange={(e) => {
-                                    const next = [...knowledgeFaqs];
-                                    next[index] = {
-                                      ...next[index],
-                                      q: e.target.value,
-                                    };
-                                    setKnowledgeFaqs(next);
-                                  }}
-                                  placeholder='Question'
-                                  spellCheck={true}
-                                  disabled={knowledgeLoadStatus === 'working'}
-                                />
-                              </label>
-                              <label className={devViewPanelFieldClassName}>
-                                <span
-                                  className={devViewPanelFieldLabelClassName}
-                                >
-                                  Answer
-                                </span>
-                                <textarea
-                                  className={devViewPanelTextareaClassName}
-                                  value={faq.a}
-                                  onChange={(e) => {
-                                    const next = [...knowledgeFaqs];
-                                    next[index] = {
-                                      ...next[index],
-                                      a: e.target.value,
-                                    };
-                                    setKnowledgeFaqs(next);
-                                  }}
-                                  placeholder='Answer'
-                                  rows={2}
-                                  spellCheck={true}
-                                  disabled={knowledgeLoadStatus === 'working'}
-                                />
-                              </label>
-                              <div className={devViewPanelActionsClassName}>
-                                <button
-                                  type='button'
-                                  className={devViewPanelBtnVariants({
-                                    tone: 'danger',
-                                  })}
-                                  onClick={() =>
-                                    setKnowledgeFaqs((current) =>
-                                      current.filter(
-                                        (_, faqIndex) => faqIndex !== index,
-                                      ),
-                                    )
-                                  }
-                                  disabled={knowledgeLoadStatus === 'working'}
-                                >
-                                  Remove FAQ
-                                </button>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      : null}
-
-                      <div className={devViewPanelManageListFooterClassName}>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'secondary',
-                          })}
-                          onClick={() =>
-                            setKnowledgeFaqs((current) => [
-                              ...current,
-                              { q: '', a: '' },
-                            ])
-                          }
-                          disabled={knowledgeLoadStatus === 'working'}
-                        >
-                          Add FAQ
-                        </button>
-                      </div>
-                    </DevPanelFormGroup>
-                  </DevPanelFormSection>
-
-                  <div className={devViewPanelStackedFormFooterClassName}>
-                    {knowledgeError ?
-                      <p className={devViewPanelSectionHintClassName}>
-                        {knowledgeError}
-                      </p>
-                    : null}
-
-                    <div className={devViewPanelActionsClassName}>
-                      <button
-                        type='button'
-                        className={devViewPanelBtnVariants({ tone: 'primary' })}
-                        onClick={() => void saveKnowledge()}
-                        disabled={
-                          !canSaveKnowledge || knowledgeStatus === 'working'
-                        }
-                      >
-                        {knowledgeStatus === 'working' ?
-                          'Saving…'
-                        : knowledgeStatus === 'done' ?
-                          'Knowledge saved!'
-                        : 'Save knowledge'}
-                      </button>
-                    </div>
-                  </div>
-                </DevPanelFormGroup>
               </DevPanelSection>
             </DevPanelSectionAccordion>
           </div>
@@ -6508,6 +7335,49 @@ export function DevViewPanel({
                       firstSceneId={tour.firstScene}
                     />
                   : null}
+                </DevPanelFormGroup>
+              </DevPanelSection>
+              <DevPanelSection
+                title='Ask Guide'
+                description='Show the guide, chat without OpenAI tokens, or preview frozen UI fixtures.'
+              >
+                <DevPanelFormGroup stacked>
+                  <ul className={devViewPanelToggleListClassName}>
+                    {DEV_ASK_GUIDE_FLAG_TOGGLES.map((toggle) => {
+                      const checked = toggle.isOn(appSearchParams);
+
+                      return (
+                        <li key={toggle.key}>
+                          <label
+                            className={
+                              devViewPanelToggleLabelMultilineClassName
+                            }
+                          >
+                            <input
+                              type='checkbox'
+                              className={devViewPanelToggleInputClassName}
+                              checked={checked}
+                              onChange={(event) =>
+                                setDevUrlFlag(
+                                  toggle,
+                                  event.currentTarget.checked,
+                                )
+                              }
+                            />
+                            <span className={devViewPanelToggleTextClassName}>
+                              <span className={devViewPanelToggleNameClassName}>
+                                <code>{toggle.label}</code>
+                              </span>
+                              <span className={devViewPanelToggleHintClassName}>
+                                {' '}
+                                — {toggle.hint}
+                              </span>
+                            </span>
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </DevPanelFormGroup>
               </DevPanelSection>
             </DevPanelSectionAccordion>

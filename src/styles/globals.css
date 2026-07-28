@@ -3,6 +3,7 @@
 @import './components-layer.css';
 @import './glass-panels-layer.css';
 @import './psv-layer.css';
+@import './viewer-3d-layer.css';
 
 /*
  * Tailwind-first design system — @theme is the single source of hex/rgb values.
@@ -88,6 +89,8 @@
   --animate-ai-fab-out: ai-fab-out 0.14s ease-in forwards;
   --animate-ai-panel-in: ai-panel-in 0.17s ease-out forwards;
   --animate-ai-panel-out: ai-panel-out 0.14s ease-in forwards;
+  --animate-ai-thinking-dot: ai-thinking-dot 1.05s ease-in-out infinite;
+  --animate-ai-thinking-label: ai-thinking-label 0.35s ease-out both;
   --animate-hotspot-nav-dot-glow: hotspot-nav-dot-glow 2.8s ease-out infinite;
   --animate-tour-nav-dot-glow: tour-nav-dot-glow 4.3s ease-out infinite;
   --animate-tour-nav-dot-pulse: tour-nav-dot-pulse 4.3s ease-out infinite backwards;
@@ -253,6 +256,33 @@
   to {
     opacity: 0;
     transform: translate(20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes ai-thinking-dot {
+
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+
+  35% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+@keyframes ai-thinking-label {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

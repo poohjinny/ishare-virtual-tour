@@ -23,8 +23,18 @@ export {
   toNamingOpportunitySearchValue,
 };
 
-/** Old paths that used client id as the first segment → canonical tour id. */
+/**
+ * Legacy URL segments → canonical opaque tour id.
+ * Includes former kebab tour ids and older `/{clientId}/…` paths.
+ */
 const LEGACY_TOUR_PATH_ALIASES: Record<string, string> = {
+  // Former kebab tour ids (pre opaque `t_*` migration)
+  'ken-sargent-house': 't_l01wnq8eh6',
+  'cancer-research': 't_8kx3m2p9qa',
+  'holodomor-museum': 't_r7v4n1c0wd',
+  'queensway-carleton-hospital': 't_2hf6y5b3ue',
+  'queensway-carleton-general-hospital': 't_9zs0j4a7xt',
+  // Older client-id-as-tour-segment paths
   gphospitalfoundation: 't_l01wnq8eh6',
   cancerresearchsociety: 't_8kx3m2p9qa',
   holodomor: 't_r7v4n1c0wd',
@@ -141,7 +151,6 @@ export const PRESERVED_SEARCH_KEYS = [
   'embed',
   'intro',
   'dev',
-  'chatTest',
   'notFoundTest',
   'loadErrorTest',
   'panoramaErrorTest',
@@ -150,6 +159,12 @@ export const PRESERVED_SEARCH_KEYS = [
   'splashHold',
   'firstVisitHint',
   'askGuide',
+  'guideMock',
+  'guideUiTest',
+  /** @deprecated Prefer `guideUiTest`. */
+  'chatTest',
+  /** @deprecated Prefer `guideMock`. */
+  'askGuideMock',
   NAMING_OPPORTUNITY_SEARCH_KEY,
 ] as const;
 

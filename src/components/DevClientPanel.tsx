@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { findCatalogClient } from '../data/tourCatalog';
-import { loadTour } from '../data/loadTour';
-import { DEV_CRUD_MODE_TABS, type DevCrudModeTab } from '../constants/devPanel';
 import { slugifyHotspotName } from '../utils/devHotspotLogger';
 import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import { DevBrandFaviconPreview } from './DevBrandFaviconPreview';
@@ -9,6 +7,7 @@ import {
   DevTourApiError,
   devBase64ToImageFile,
   devCreateClient,
+  devDeleteClient,
   devSuggestBranding,
   devSuggestContact,
   devUpdateClient,
@@ -26,28 +25,37 @@ import {
 import { DevPanelFileField } from './DevPanelFileField';
 import { DevPanelFileInput } from './DevPanelFileInput';
 import { DevLocalFilePreview } from './DevLocalFilePreview';
+import { Badge } from './ui/Badge';
+import { cn } from '../lib/cn';
 import {
+  devSceneManageBadgeVariants,
   devViewPanelActionsClassName,
   devViewPanelBtnVariants,
   devViewPanelFieldClassName,
   devViewPanelFieldLabelClassName,
   devViewPanelBrandFaviconClassName,
   devViewPanelBrandLogoClassName,
+  devViewPanelControlRadiusClassName,
+  devViewPanelFormGroupTitleClassName,
   devViewPanelInputClassName,
   devViewPanelManageListClassName,
-  devViewPanelManageListFooterClassName,
+  devViewPanelManageListItemActiveClassName,
+  devViewPanelManageListItemBadgesStackClassName,
+  devViewPanelManageListItemBulletClassName,
   devViewPanelManageListItemClassName,
+  devViewPanelManageListItemDescClassName,
   devViewPanelManageListItemHeadClassName,
   devViewPanelManageListItemHeadMainClassName,
+  devViewPanelManageListItemLogoClassName,
+  devViewPanelManageListItemLogoWrapClassName,
+  devViewPanelManageListItemMetaClassName,
+  devViewPanelManageListItemCopyClassName,
+  devViewPanelManageListItemStackActionsClassName,
+  devViewPanelManageListItemTextStackClassName,
   devViewPanelManageListItemTitleClassName,
-  devViewPanelSecondaryTabsClassName,
   devViewPanelSectionHintClassName,
-  devViewPanelSelectClassName,
   devViewPanelSlugPreviewClassName,
   devViewPanelStackedFormFooterClassName,
-  devViewPanelTabHintClassName,
-  devViewPanelTabPanelBodyClassName,
-  devViewPanelTabVariants,
   devViewPanelTextareaClassName,
 } from './devViewPanelVariants';
 
@@ -58,25 +66,35 @@ type ActionStatus = 'idle' | 'working' | 'done' | 'error';
 type DevClientPanelProps = {
   catalogClients: DevCatalogClient[];
   catalogTick: number;
+  /** Open tour's client — Current badge. */
+  currentClientId: string;
   manageClientId: string;
   onManageClientIdChange: (clientId: string) => void;
   onCatalogRefresh: () => Promise<void>;
-  onOpenTour: (tourId: string) => void;
-  onEditTour: (tourId: string) => void;
-  onCreateTourForClient: (clientId: string) => void;
+  onCreateOpenChange?: (open: boolean) => void;
+  onClientDeleted?: (result: {
+    clientId: string;
+    deletedTourIds: string[];
+    redirectTourId: string | null;
+  }) => Promise<void>;
 };
 
 export function DevClientPanel({
   catalogClients,
   catalogTick,
+  currentClientId,
   manageClientId,
   onManageClientIdChange,
   onCatalogRefresh,
-  onOpenTour,
-  onEditTour,
-  onCreateTourForClient,
+  onCreateOpenChange,
+  onClientDeleted,
 }: DevClientPanelProps) {
-  const [clientModeTab, setClientModeTab] = useState<DevCrudModeTab>('manage');
+  const [clientCreateOpen, setClientCreateOpen] = useState(false);
+  const [editingClientId, setEditingClientId] = useState<string | null>(null);
+  const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
+  const [deleteClientConfirm, setDeleteClientConfirm] = useState('');
+  const [deleteStatus, setDeleteStatus] = useState<ActionStatus>('idle');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [clientName, setClientName] = useState('');
   const [website, setWebsite] = useState('');
@@ -118,14 +136,20 @@ export function DevClientPanel({
     [catalogClients, manageClientId],
   );
 
+  const sortedClients = useMemo(
+    () =>
+      [...catalogClients].sort((a, b) => a.name.localeCompare(b.name, 'en')),
+    [catalogClients],
+  );
+
   const managedLogoPreviewUrl = useMemo(() => {
-    if (clientModeTab !== 'manage' || logoFile) return null;
+    if (clientCreateOpen || logoFile) return null;
     const path = selectedManageCatalogClient?.branding?.logo;
     if (!path) return null;
     return withBaseUrl(appendCacheBust(path, catalogTick));
   }, [
     catalogTick,
-    clientModeTab,
+    clientCreateOpen,
     logoFile,
     selectedManageCatalogClient?.branding?.logo,
   ]);
@@ -137,7 +161,9 @@ export function DevClientPanel({
   );
 
   const showManagedFaviconPreview =
-    clientModeTab === 'manage' && Boolean(manageClientId) && !faviconFile;
+    !clientCreateOpen &&
+    Boolean(editingClientId && manageClientId) &&
+    !faviconFile;
 
   const createClientSlug = useMemo(
     () =>
@@ -196,23 +222,111 @@ export function DevClientPanel({
     setCreateError(null);
   }, []);
 
-  const handleClientModeTabChange = useCallback(
-    (tab: DevCrudModeTab) => {
-      if (tab === 'create') {
-        resetCreateClientForm();
-      }
-      setClientModeTab(tab);
+  const openCreateClient = useCallback(() => {
+    resetCreateClientForm();
+    setEditingClientId(null);
+    setDeletingClientId(null);
+    setDeleteClientConfirm('');
+    setDeleteStatus('idle');
+    setDeleteError(null);
+    setClientCreateOpen(true);
+  }, [resetCreateClientForm]);
+
+  const startEditClient = useCallback(
+    (client: DevCatalogClient) => {
+      setClientCreateOpen(false);
+      setDeletingClientId(null);
+      setDeleteClientConfirm('');
+      setDeleteStatus('idle');
+      setDeleteError(null);
+      onManageClientIdChange(client.id);
+      setEditingClientId(client.id);
+      hydrateManagedClientForm(client);
     },
-    [resetCreateClientForm],
+    [hydrateManagedClientForm, onManageClientIdChange],
+  );
+
+  const cancelEditClient = useCallback(() => {
+    setEditingClientId(null);
+    setSaveStatus('idle');
+    setSaveError(null);
+  }, []);
+
+  const startDeleteClient = useCallback((clientId: string) => {
+    setClientCreateOpen(false);
+    setEditingClientId(null);
+    setDeletingClientId(clientId);
+    setDeleteClientConfirm('');
+    setDeleteStatus('idle');
+    setDeleteError(null);
+  }, []);
+
+  const cancelDeleteClient = useCallback(() => {
+    setDeletingClientId(null);
+    setDeleteClientConfirm('');
+    setDeleteStatus('idle');
+    setDeleteError(null);
+  }, []);
+
+  const deleteClientEntry = useCallback(
+    async (clientId: string) => {
+      if (deleteClientConfirm.trim() !== clientId) return;
+
+      setDeleteStatus('working');
+      setDeleteError(null);
+
+      try {
+        const result = await devDeleteClient({
+          clientId,
+          confirmClientId: deleteClientConfirm.trim(),
+        });
+        setDeletingClientId(null);
+        setDeleteClientConfirm('');
+        if (manageClientId === clientId) {
+          onManageClientIdChange('');
+        }
+        setEditingClientId((current) =>
+          current === clientId ? null : current,
+        );
+        await onCatalogRefresh();
+        await onClientDeleted?.(result);
+        setDeleteStatus('done');
+      } catch (error) {
+        setDeleteStatus('error');
+        setDeleteError(
+          error instanceof DevTourApiError ?
+            error.message
+          : 'Could not delete client',
+        );
+      }
+    },
+    [
+      deleteClientConfirm,
+      manageClientId,
+      onCatalogRefresh,
+      onClientDeleted,
+      onManageClientIdChange,
+    ],
   );
 
   useEffect(() => {
-    if (clientModeTab !== 'manage' || !selectedManageCatalogClient) return;
-    hydrateManagedClientForm(selectedManageCatalogClient);
+    onCreateOpenChange?.(clientCreateOpen);
+  }, [clientCreateOpen, onCreateOpenChange]);
+
+  useEffect(() => {
+    if (clientCreateOpen || !editingClientId) return;
+    const client = catalogClients.find((entry) => entry.id === editingClientId);
+    if (!client) {
+      setEditingClientId(null);
+      return;
+    }
+    hydrateManagedClientForm(client);
+    // Re-hydrate when catalog snapshot refreshes, not on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- catalogClients identity churns
   }, [
-    clientModeTab,
-    selectedManageCatalogClient,
     catalogTick,
+    clientCreateOpen,
+    editingClientId,
     hydrateManagedClientForm,
   ]);
 
@@ -304,6 +418,7 @@ export function DevClientPanel({
       setFaviconFile(null);
       await onCatalogRefresh();
       setSaveStatus('done');
+      setEditingClientId(null);
     } catch (error) {
       setSaveStatus('error');
       setSaveError(
@@ -358,7 +473,8 @@ export function DevClientPanel({
       await onCatalogRefresh();
       onManageClientIdChange(result.clientId);
       resetCreateClientForm();
-      setClientModeTab('manage');
+      setClientCreateOpen(false);
+      setEditingClientId(null);
       setCreateStatus('done');
     } catch (error) {
       setCreateStatus('error');
@@ -552,7 +668,7 @@ export function DevClientPanel({
       <DevPanelFormRow>
         <label className={devViewPanelFieldClassName}>
           <span className={devViewPanelFieldLabelClassName}>
-            {clientModeTab === 'manage' && managedLogoPreviewUrl ?
+            {!clientCreateOpen && managedLogoPreviewUrl ?
               'Logo (replace)'
             : 'Logo'}
           </span>
@@ -654,268 +770,409 @@ export function DevClientPanel({
 
   return (
     <>
-      <div
-        className={devViewPanelSecondaryTabsClassName}
-        role='tablist'
-        aria-label='Client mode'
-      >
-        {DEV_CRUD_MODE_TABS.map((tab) => (
+      {!clientCreateOpen ?
+        <div className={devViewPanelActionsClassName}>
           <button
-            key={tab.id}
             type='button'
-            role='tab'
-            aria-selected={clientModeTab === tab.id}
-            className={devViewPanelTabVariants({
-              depth: 'secondary',
-              kind: tab.id === 'manage' ? 'manage' : 'create',
-              active: clientModeTab === tab.id,
-            })}
-            onClick={() => handleClientModeTabChange(tab.id)}
+            className={devViewPanelBtnVariants({ tone: 'client' })}
+            onClick={openCreateClient}
           >
-            {tab.label}
+            Add client
           </button>
-        ))}
-      </div>
+        </div>
+      : null}
 
-      {clientModeTab === 'manage' ?
-        <div className={devViewPanelTabPanelBodyClassName}>
-          <p className={devViewPanelTabHintClassName}>
-            Shared contact and branding for all tours under this client.
-          </p>
+      {!clientCreateOpen ?
+        <DevPanelFormGroup>
+          {sortedClients.length > 0 ?
+            <ul className={devViewPanelManageListClassName}>
+              {sortedClients.map((client) => {
+                const isCurrent = client.id === currentClientId;
+                const isEditing = editingClientId === client.id;
+                const isDeleting = deletingClientId === client.id;
+                const canConfirmDelete =
+                  deleteClientConfirm.trim() === client.id;
+                const tourLabel =
+                  client.tourCount === 1 ?
+                    '1 tour'
+                  : `${client.tourCount} tours`;
+                const logoPath = client.branding?.logo?.trim();
+                const logoUrl =
+                  logoPath ?
+                    withBaseUrl(appendCacheBust(logoPath, catalogTick))
+                  : null;
+                const busy =
+                  saveStatus === 'working' || deleteStatus === 'working';
 
-          <DevPanelFormGroup stacked>
-            <DevPanelFormSection title='Catalog client'>
-              <label className={devViewPanelFieldClassName}>
-                <span className={devViewPanelFieldLabelClassName}>Client</span>
-                <select
-                  className={devViewPanelSelectClassName}
-                  value={manageClientId}
-                  onChange={(e) => onManageClientIdChange(e.target.value)}
-                >
-                  {catalogClients.length === 0 ?
-                    <option value=''>Loading clients…</option>
-                  : catalogClients.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name} ({client.id}) · {client.tourCount} tour
-                        {client.tourCount === 1 ? '' : 's'}
-                      </option>
-                    ))
-                  }
-                </select>
-              </label>
-
-              {selectedClient ?
-                <>
-                  <label className={devViewPanelFieldClassName}>
-                    <span className={devViewPanelFieldLabelClassName}>
-                      Display name
-                    </span>
-                    <input
-                      className={devViewPanelInputClassName}
-                      type='text'
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      spellCheck={false}
-                    />
-                    <p className={devViewPanelSectionHintClassName}>
-                      Client id <code>{selectedClient.id}</code> (read-only)
-                    </p>
-                  </label>
-                </>
-              : null}
-            </DevPanelFormSection>
-
-            {selectedClient ?
-              <>
-                <DevPanelFormSection title='Contact' divided>
-                  {contactFields}
-                </DevPanelFormSection>
-
-                <DevPanelFormSection
-                  title='Shared branding'
-                  divided
-                  description='Saved to catalog.json — every tour for this client inherits unless a tour overrides.'
-                >
-                  {brandingFields}
-                </DevPanelFormSection>
-
-                <div className={devViewPanelStackedFormFooterClassName}>
-                  {saveError ?
-                    <p className={devViewPanelSectionHintClassName}>
-                      {saveError}
-                    </p>
-                  : null}
-
-                  <div className={devViewPanelActionsClassName}>
-                    <button
-                      type='button'
-                      className={devViewPanelBtnVariants({ tone: 'primary' })}
-                      onClick={() => void saveClient()}
-                      disabled={!canSaveClient || saveStatus === 'working'}
+                return (
+                  <li
+                    key={client.id}
+                    className={cn(
+                      devViewPanelManageListItemClassName,
+                      (isEditing || isCurrent || isDeleting) &&
+                        devViewPanelManageListItemActiveClassName,
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        devViewPanelManageListItemHeadClassName,
+                        'items-start',
+                      )}
                     >
-                      {saveStatus === 'working' ?
-                        'Saving…'
-                      : saveStatus === 'done' ?
-                        'Saved!'
-                      : 'Save client'}
-                    </button>
-                  </div>
-                </div>
-              </>
-            : null}
-          </DevPanelFormGroup>
-
-          {selectedClient ?
-            <DevPanelFormGroup
-              title='Tours'
-              hint='Open a tour to edit it in the Tour tab, or add a new one for this client.'
-            >
-              {selectedClient.tours.length > 0 ?
-                <ul className={devViewPanelManageListClassName}>
-                  {selectedClient.tours.map((catalogTour) => (
-                    <li
-                      key={catalogTour.id}
-                      className={devViewPanelManageListItemClassName}
-                    >
-                      <div className={devViewPanelManageListItemHeadClassName}>
+                      <div
+                        className={cn(
+                          devViewPanelManageListItemHeadMainClassName,
+                          'flex-nowrap items-center gap-2.5',
+                        )}
+                        title={client.id}
+                      >
+                        {logoUrl ?
+                          <span
+                            className={
+                              devViewPanelManageListItemLogoWrapClassName
+                            }
+                          >
+                            <img
+                              className={
+                                devViewPanelManageListItemLogoClassName
+                              }
+                              src={logoUrl}
+                              alt=''
+                            />
+                          </span>
+                        : null}
                         <div
                           className={
-                            devViewPanelManageListItemHeadMainClassName
+                            devViewPanelManageListItemTextStackClassName
                           }
-                          title={catalogTour.id}
                         >
-                          <span
-                            className={devViewPanelManageListItemTitleClassName}
+                          <div
+                            className={devViewPanelManageListItemCopyClassName}
                           >
-                            {catalogTour.name}
-                          </span>
+                            <span
+                              className={
+                                devViewPanelManageListItemTitleClassName
+                              }
+                            >
+                              {client.name}
+                            </span>
+                            <p
+                              className={cn(
+                                devViewPanelManageListItemDescClassName,
+                                'm-0 line-clamp-1',
+                              )}
+                            >
+                              <span
+                                className={
+                                  devViewPanelManageListItemMetaClassName
+                                }
+                              >
+                                {client.id}
+                              </span>
+                              <span
+                                className={
+                                  devViewPanelManageListItemBulletClassName
+                                }
+                                aria-hidden='true'
+                              >
+                                {' '}
+                                ·{' '}
+                              </span>
+                              <span
+                                className={
+                                  devViewPanelManageListItemMetaClassName
+                                }
+                              >
+                                {tourLabel}
+                              </span>
+                            </p>
+                          </div>
+                          <div
+                            className={
+                              devViewPanelManageListItemStackActionsClassName
+                            }
+                          >
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              onClick={() => startEditClient(client)}
+                              disabled={busy || isEditing}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'danger',
+                              })}
+                              onClick={() => startDeleteClient(client.id)}
+                              disabled={busy || isDeleting}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <div className={devViewPanelActionsClassName}>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'secondary',
-                          })}
-                          onClick={() => {
-                            loadTour(catalogTour.id);
-                            onOpenTour(catalogTour.id);
-                          }}
+                      {isCurrent ?
+                        <div
+                          className={
+                            devViewPanelManageListItemBadgesStackClassName
+                          }
                         >
-                          Open
-                        </button>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'secondary',
-                          })}
-                          onClick={() => {
-                            loadTour(catalogTour.id);
-                            onEditTour(catalogTour.id);
-                          }}
-                        >
-                          Edit
-                        </button>
+                          <Badge
+                            variant='fill'
+                            size='sm'
+                            tone='none'
+                            className={devSceneManageBadgeVariants({
+                              kind: 'current',
+                            })}
+                          >
+                            Current
+                          </Badge>
+                        </div>
+                      : null}
+                    </div>
+
+                    {isDeleting ?
+                      <div
+                        className={cn(
+                          'mt-2 flex flex-col gap-2.5 border border-[rgba(248,113,113,0.35)] bg-[rgba(69,10,10,0.35)] p-3',
+                          devViewPanelControlRadiusClassName,
+                        )}
+                      >
+                        <h4 className={devViewPanelFormGroupTitleClassName}>
+                          Danger zone
+                        </h4>
+                        <p className={devViewPanelSectionHintClassName}>
+                          Permanently deletes this client
+                          {client.tourCount > 0 ?
+                            <>
+                              , its{' '}
+                              <strong>
+                                {client.tourCount} tour
+                                {client.tourCount === 1 ? '' : 's'}
+                              </strong>
+                              , tour JSON/knowledge, and{' '}
+                            </>
+                          : ' and '}
+                          <code>assets/{client.id}/</code>. This cannot be
+                          undone.
+                        </p>
+                        <label className={devViewPanelFieldClassName}>
+                          <span className={devViewPanelFieldLabelClassName}>
+                            Type <code>{client.id}</code> to confirm
+                          </span>
+                          <input
+                            className={devViewPanelInputClassName}
+                            type='text'
+                            value={deleteClientConfirm}
+                            onChange={(e) =>
+                              setDeleteClientConfirm(e.target.value)
+                            }
+                            placeholder={client.id}
+                            spellCheck={false}
+                            autoComplete='off'
+                            disabled={deleteStatus === 'working'}
+                          />
+                        </label>
+                        <div className={devViewPanelActionsClassName}>
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'secondary',
+                            })}
+                            onClick={cancelDeleteClient}
+                            disabled={deleteStatus === 'working'}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type='button'
+                            className={devViewPanelBtnVariants({
+                              tone: 'danger',
+                            })}
+                            onClick={() => void deleteClientEntry(client.id)}
+                            disabled={
+                              !canConfirmDelete || deleteStatus === 'working'
+                            }
+                          >
+                            {deleteStatus === 'working' ?
+                              'Deleting…'
+                            : 'Delete client permanently'}
+                          </button>
+                        </div>
+                        {deleteError ?
+                          <p className={devViewPanelSectionHintClassName}>
+                            {deleteError}
+                          </p>
+                        : null}
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              : <p className={devViewPanelSectionHintClassName}>
-                  No tours yet.
-                </p>
-              }
+                    : null}
 
-              <div className={devViewPanelManageListFooterClassName}>
-                <button
-                  type='button'
-                  className={devViewPanelBtnVariants({ tone: 'secondary' })}
-                  onClick={() => onCreateTourForClient(manageClientId)}
-                >
-                  Add tour for this client
-                </button>
-              </div>
-            </DevPanelFormGroup>
-          : null}
-        </div>
-      : <>
-          <p className={devViewPanelTabHintClassName}>
-            Create a catalog client without a tour. Add tours from Manage or
-            Tour → Create.
-          </p>
+                    {isEditing && selectedClient ?
+                      <DevPanelFormGroup inline manageEdit>
+                        <DevPanelFormSection title='Catalog client'>
+                          <label className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
+                              Display name
+                            </span>
+                            <input
+                              className={devViewPanelInputClassName}
+                              type='text'
+                              value={clientName}
+                              onChange={(e) => setClientName(e.target.value)}
+                              spellCheck={false}
+                            />
+                            <p className={devViewPanelSectionHintClassName}>
+                              Client id <code>{selectedClient.id}</code>{' '}
+                              (read-only)
+                            </p>
+                          </label>
+                        </DevPanelFormSection>
 
-          <DevPanelFormGroup stacked>
-            <DevPanelFormSection title='Identity'>
-              <DevPanelFormRow>
-                <label className={devViewPanelFieldClassName}>
-                  <span className={devViewPanelFieldLabelClassName}>
-                    Client name
-                  </span>
-                  <input
-                    className={devViewPanelInputClassName}
-                    type='text'
-                    value={createClientName}
-                    onChange={(e) => setCreateClientName(e.target.value)}
-                    placeholder='e.g. Example Foundation'
-                    spellCheck={false}
-                  />
-                </label>
-                <label className={devViewPanelFieldClassName}>
-                  <span className={devViewPanelFieldLabelClassName}>
-                    Client id
-                  </span>
-                  <input
-                    className={devViewPanelInputClassName}
-                    type='text'
-                    value={createClientIdInput}
-                    onChange={(e) => setCreateClientIdInput(e.target.value)}
-                    placeholder='e.g. example-foundation'
-                    spellCheck={false}
-                  />
-                </label>
-              </DevPanelFormRow>
-              {createClientSlug ?
-                <p className={devViewPanelSlugPreviewClassName}>
-                  client id <code>{createClientSlug}</code>
-                </p>
-              : null}
-            </DevPanelFormSection>
+                        <DevPanelFormSection title='Contact' divided>
+                          {contactFields}
+                        </DevPanelFormSection>
 
-            <DevPanelFormSection title='Contact' divided>
-              {contactFields}
-            </DevPanelFormSection>
+                        <DevPanelFormSection
+                          title='Shared branding'
+                          divided
+                          description='Saved to catalog.json — every tour for this client inherits unless a tour overrides.'
+                        >
+                          {brandingFields}
+                        </DevPanelFormSection>
 
-            <DevPanelFormSection
-              title='Shared branding'
-              divided
-              description='Saved to catalog.json — every tour for this client inherits unless a tour overrides.'
-            >
-              {brandingFields}
-            </DevPanelFormSection>
+                        <div className={devViewPanelStackedFormFooterClassName}>
+                          {saveError ?
+                            <p className={devViewPanelSectionHintClassName}>
+                              {saveError}
+                            </p>
+                          : null}
 
-            <div className={devViewPanelStackedFormFooterClassName}>
-              {createError ?
+                          <div className={devViewPanelActionsClassName}>
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              onClick={cancelEditClient}
+                              disabled={saveStatus === 'working'}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type='button'
+                              className={devViewPanelBtnVariants({
+                                tone: 'primary',
+                              })}
+                              onClick={() => void saveClient()}
+                              disabled={
+                                !canSaveClient || saveStatus === 'working'
+                              }
+                            >
+                              {saveStatus === 'working' ?
+                                'Saving…'
+                              : saveStatus === 'done' ?
+                                'Saved!'
+                              : 'Save client'}
+                            </button>
+                          </div>
+                        </div>
+                      </DevPanelFormGroup>
+                    : null}
+                  </li>
+                );
+              })}
+            </ul>
+          : <p className={devViewPanelSectionHintClassName}>
+              No clients yet — add one to get started.
+            </p>
+          }
+        </DevPanelFormGroup>
+      : <DevPanelFormGroup stacked>
+          <DevPanelFormSection title='Identity'>
+            <DevPanelFormRow>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Client name
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={createClientName}
+                  onChange={(e) => setCreateClientName(e.target.value)}
+                  placeholder='e.g. Example Foundation'
+                  spellCheck={false}
+                />
                 <p className={devViewPanelSectionHintClassName}>
-                  {createError}
+                  Creates a catalog client only — add tours afterward from the
+                  Tour tab.
                 </p>
-              : null}
+              </label>
+              <label className={devViewPanelFieldClassName}>
+                <span className={devViewPanelFieldLabelClassName}>
+                  Client id
+                </span>
+                <input
+                  className={devViewPanelInputClassName}
+                  type='text'
+                  value={createClientIdInput}
+                  onChange={(e) => setCreateClientIdInput(e.target.value)}
+                  placeholder='e.g. example-foundation'
+                  spellCheck={false}
+                />
+              </label>
+            </DevPanelFormRow>
+            {createClientSlug ?
+              <p className={devViewPanelSlugPreviewClassName}>
+                client id <code>{createClientSlug}</code>
+              </p>
+            : null}
+          </DevPanelFormSection>
 
-              <div className={devViewPanelActionsClassName}>
-                <button
-                  type='button'
-                  className={devViewPanelBtnVariants({ tone: 'primary' })}
-                  onClick={() => void createClient()}
-                  disabled={!canCreateClient || createStatus === 'working'}
-                >
-                  {createStatus === 'working' ?
-                    'Creating…'
-                  : createStatus === 'done' ?
-                    'Client created!'
-                  : 'Create client'}
-                </button>
-              </div>
+          <DevPanelFormSection title='Contact' divided>
+            {contactFields}
+          </DevPanelFormSection>
+
+          <DevPanelFormSection
+            title='Shared branding'
+            divided
+            description='Saved to catalog.json — every tour for this client inherits unless a tour overrides.'
+          >
+            {brandingFields}
+          </DevPanelFormSection>
+
+          <div className={devViewPanelStackedFormFooterClassName}>
+            {createError ?
+              <p className={devViewPanelSectionHintClassName}>{createError}</p>
+            : null}
+
+            <div className={devViewPanelActionsClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                onClick={() => setClientCreateOpen(false)}
+                disabled={createStatus === 'working'}
+              >
+                Cancel
+              </button>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'primary' })}
+                onClick={() => void createClient()}
+                disabled={!canCreateClient || createStatus === 'working'}
+              >
+                {createStatus === 'working' ?
+                  'Creating…'
+                : createStatus === 'done' ?
+                  'Client created!'
+                : 'Create client'}
+              </button>
             </div>
-          </DevPanelFormGroup>
-        </>
+          </div>
+        </DevPanelFormGroup>
       }
     </>
   );

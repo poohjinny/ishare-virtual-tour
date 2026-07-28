@@ -5,6 +5,7 @@ import { withBaseUrl } from './assetUrl';
 import { buildAbsoluteShareUrl, buildShareMessage } from './buildShareUrl';
 import { findHotspotInTour } from './findTourHotspot';
 import {
+  isNamingHotspot,
   resolveHotspotHostScene,
   resolveNamingPopup,
 } from './namingSceneInherit';
@@ -80,7 +81,7 @@ function resolveNamingOpportunityName(
   if (!namingHotspotId) return null;
 
   const found = findHotspotInTour(tour, namingHotspotId);
-  if (!found?.hotspot.popup?.namingOpportunity) return null;
+  if (!found?.hotspot || !isNamingHotspot(found.hotspot)) return null;
   if (found.sceneId && found.sceneId !== sceneId) return null;
 
   const hostScene = resolveHotspotHostScene(
@@ -88,8 +89,8 @@ function resolveNamingOpportunityName(
     found.hotspot,
     tour.scenes[sceneId],
   );
-  const popup = resolveNamingPopup(found.hotspot.popup, hostScene);
-  return popup.namingOpportunity?.name?.trim() || popup.title?.trim() || null;
+  const popup = resolveNamingPopup(tour, found.hotspot, hostScene);
+  return popup?.namingOpportunity?.name?.trim() || popup?.title?.trim() || null;
 }
 
 function resolveSceneShareImagePath(
