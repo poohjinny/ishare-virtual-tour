@@ -118,7 +118,8 @@ export async function fetchAskGuideLiveStatus(force = false): Promise<boolean> {
   if (!force && cachedLiveStatus !== null) return cachedLiveStatus;
   if (!force && liveStatusInflight) return liveStatusInflight;
 
-  const request = (async () => {
+  let request!: Promise<boolean>;
+  request = (async () => {
     try {
       const response = await fetch(ASK_GUIDE_STATUS_URL);
       if (!response.ok) {

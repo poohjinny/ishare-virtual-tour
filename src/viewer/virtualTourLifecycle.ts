@@ -9,12 +9,14 @@ export type VirtualTourActiveCheck = () => boolean;
  */
 const PSV_NEVER_LINKED_WARN = /^PhotoSphereViewer: Node .+ is never linked to$/;
 
-type VirtualTourWithDatasource = VirtualTourPlugin & {
+type VirtualTourWithDatasource = {
   datasource?: { loadNode?: unknown };
 };
 
 function hasDatasource(virtualTour: VirtualTourPlugin): boolean {
-  return Boolean((virtualTour as VirtualTourWithDatasource).datasource);
+  return Boolean(
+    (virtualTour as unknown as VirtualTourWithDatasource).datasource,
+  );
 }
 
 function isVirtualTourTeardownError(err: unknown): boolean {
