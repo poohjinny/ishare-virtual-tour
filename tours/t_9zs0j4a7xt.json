@@ -61,8 +61,7 @@
             "pitch": -24
           },
           "popup": {
-            "display": "anchored",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/c299f173-bd3c-4ac9-bc10-03f17e8814f3"
+            "display": "anchored"
           },
           "namingId": "no_kew3djcwfv"
         },
@@ -1226,8 +1225,7 @@
   "namingOpportunities": {
     "no_kew3djcwfv": {
       "id": "no_kew3djcwfv",
-      "price": 10000000,
-      "name": "Emergency Department",
+      "price": 15000000,
       "status": "open",
       "body": "The new Emergency Department will be more than double the size of our existing facilities, giving our emergency medicine professionals the space and resources they need to provide you and those you love with fast, effective care when it matters most. Designed for the realities of modern healthcare it will support enhanced patient intake processes, improved patient flow, shorter wait times from arrival to physician assessement, and technology for quick diagnosis and safe and effective treatment."
     },
