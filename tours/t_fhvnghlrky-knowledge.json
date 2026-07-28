@@ -1,0 +1,19 @@
+{
+  "tourId": "t_fhvnghlrky",
+  "overview": {
+    "facilityName": "QCH Unreal",
+    "summary": "SketchUp 3D model test scene — QCH."
+  },
+  "scenes": {
+    "s_gyurkztn6y": {
+      "title": "QCH Unreal",
+      "description": "SketchUp export test scene.",
+      "suggestedQuestions": []
+    }
+  },
+  "id": "t_fhvnghlrky",
+  "url": "https://ishare.ca",
+  "global": {
+    "facilityName": "iShare®"
+  }
+}
