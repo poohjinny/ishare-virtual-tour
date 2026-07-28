@@ -9,7 +9,17 @@ export function parseNamingPriceInput(
     return Number.isFinite(value) ? Math.round(value) : null;
   }
 
-  const cleaned = String(value).replace(/[^0-9.]/g, '');
+  const trimmed = String(value).trim();
+  // Allow authoring shorthand: "15M", "$1.5m", "525K".
+  const abbrev = trimmed.match(/^\$?\s*([\d.,]+)\s*([MmKk])\s*$/);
+  if (abbrev) {
+    const amount = Number.parseFloat(abbrev[1].replace(/,/g, ''));
+    if (!Number.isFinite(amount)) return null;
+    const mult = abbrev[2].toLowerCase() === 'm' ? 1_000_000 : 1_000;
+    return Math.round(amount * mult);
+  }
+
+  const cleaned = trimmed.replace(/[^0-9.]/g, '');
   if (!cleaned) return null;
 
   const parsed = Number.parseFloat(cleaned);

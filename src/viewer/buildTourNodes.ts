@@ -103,6 +103,18 @@ function navTargetPreviewSourcesChanged(
   return false;
 }
 
+/** Catalog price/status/body/etc. — baked into NO panels and Explore cards. */
+function namingCatalogChanged(
+  previousTour: Tour | undefined,
+  nextTour: Tour,
+): boolean {
+  if (!previousTour) return true;
+  return (
+    JSON.stringify(previousTour.namingOpportunities ?? {}) !==
+    JSON.stringify(nextTour.namingOpportunities ?? {})
+  );
+}
+
 /** True when current-scene markers should rebuild after a tour save. */
 export function currentSceneMarkersNeedRefresh(
   prevScene: Scene | undefined,
@@ -115,7 +127,8 @@ export function currentSceneMarkersNeedRefresh(
     JSON.stringify(prevScene.hotspots) !== JSON.stringify(nextScene.hotspots) ||
     inheritedNamingSceneFieldsChanged(prevScene, nextScene) ||
     inheritedNavLabelsChanged(nextScene, previousTour, nextTour) ||
-    navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour)
+    navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour) ||
+    namingCatalogChanged(previousTour, nextTour)
   );
 }
 
@@ -164,7 +177,8 @@ export function buildVirtualTourNodePatch(
     resolveSceneVisibility(prevScene) !== resolveSceneVisibility(nextScene) ||
     inheritedNavLabelsChanged(nextScene, previousTour, nextTour) ||
     inheritedNamingSceneFieldsChanged(prevScene, nextScene) ||
-    navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour)
+    navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour) ||
+    namingCatalogChanged(previousTour, nextTour)
   ) {
     patch.markers = markersForScene(nextTour, nextScene);
     changed = true;
