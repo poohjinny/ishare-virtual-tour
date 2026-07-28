@@ -6,18 +6,9 @@
       "clientName": "iShareÂ®",
       "firstScene": "s_hpajghgqrv",
       "scenes": [
-        {
-          "id": "s_xihtcolrwu",
-          "title": "1st Floor"
-        },
-        {
-          "id": "s_kanukh723s",
-          "title": "2nd Floor"
-        },
-        {
-          "id": "s_hpajghgqrv",
-          "title": "Overall"
-        }
+        { "id": "s_xihtcolrwu", "title": "1st Floor" },
+        { "id": "s_kanukh723s", "title": "2nd Floor" },
+        { "id": "s_hpajghgqrv", "title": "Overall" }
       ]
     },
     {
@@ -26,18 +17,9 @@
       "clientName": "iShareÂ®",
       "firstScene": "s_onaext778x",
       "scenes": [
-        {
-          "id": "s_cabfp6pifi",
-          "title": "Bedroom"
-        },
-        {
-          "id": "s_onaext778x",
-          "title": "Living Area"
-        },
-        {
-          "id": "s_e83oo59bwl",
-          "title": "Workspace"
-        }
+        { "id": "s_cabfp6pifi", "title": "Bedroom" },
+        { "id": "s_onaext778x", "title": "Living Area" },
+        { "id": "s_e83oo59bwl", "title": "Workspace" }
       ]
     },
     {
@@ -46,174 +28,48 @@
       "clientName": "Grande Prairie Regional Hospital Foundation",
       "firstScene": "s_dtv27wfrbi",
       "scenes": [
-        {
-          "id": "s_t3it0l8bsk",
-          "title": "Basement"
-        },
-        {
-          "id": "s_xl88jb8utx",
-          "title": "Basement Entrance"
-        },
-        {
-          "id": "s_dehwdo8kx1",
-          "title": "Commual Space"
-        },
-        {
-          "id": "s_tcr44j461u",
-          "title": "Communal Space"
-        },
-        {
-          "id": "s_rmf30ndp5j",
-          "title": "Corridor"
-        },
-        {
-          "id": "s_fb3dsuusxy",
-          "title": "Corridor"
-        },
-        {
-          "id": "s_9kkz24dle7",
-          "title": "Corridor"
-        },
-        {
-          "id": "s_e5k3wjy72q",
-          "title": "Covered Porch"
-        },
-        {
-          "id": "s_0j9sgtokj2",
-          "title": "Crawl Space"
-        },
-        {
-          "id": "s_eb2hcp3nla",
-          "title": "Custodian Room"
-        },
-        {
-          "id": "s_3fh5x3humm",
-          "title": "Dining Area"
-        },
-        {
-          "id": "s_f24tksel8t",
-          "title": "Donor Wall"
-        },
-        {
-          "id": "s_sw7dxt8z3g",
-          "title": "Elevator Door"
-        },
-        {
-          "id": "s_hxsjmv1tio",
-          "title": "Exercise Room"
-        },
-        {
-          "id": "s_jfn7k06rhj",
-          "title": "Families & Patients Communal Space"
-        },
-        {
-          "id": "s_c13b4lgg8f",
-          "title": "Gazebo"
-        },
-        {
-          "id": "s_osxxeptx4f",
-          "title": "Home Essentials Room"
-        },
-        {
-          "id": "s_4epcuat8yv",
-          "title": "House Administration Hub"
-        },
-        {
-          "id": "s_6bewbri9s0",
-          "title": "Housekeeping Centre"
-        },
-        {
-          "id": "s_hfiucp83au",
-          "title": "Kitchen"
-        },
-        {
-          "id": "s_pvcsd2t0w2",
-          "title": "Laundry Room"
-        },
-        {
-          "id": "s_6e38qm2jc1",
-          "title": "Linen Room"
-        },
-        {
-          "id": "s_zlz39v1fjz",
-          "title": "Main Entrance"
-        },
-        {
-          "id": "s_h310pim38b",
-          "title": "Main Floor"
-        },
-        {
-          "id": "s_lc9a2b99af",
-          "title": "Main Level Storage Room"
-        },
-        {
-          "id": "s_be8euh4oit",
-          "title": "Operation Hub"
-        },
-        {
-          "id": "s_dtv27wfrbi",
-          "title": "Overview"
-        },
-        {
-          "id": "s_ps029p4kzn",
-          "title": "Pantry"
-        },
-        {
-          "id": "s_yz800wucno",
-          "title": "Parking Space"
-        },
-        {
-          "id": "s_91jpwd8ota",
-          "title": "Playroom"
-        },
-        {
-          "id": "s_leoc61fw42",
-          "title": "Quite Room"
-        },
-        {
-          "id": "s_vddzraqi1q",
-          "title": "Reception"
-        },
-        {
-          "id": "s_ca8beuikkq",
-          "title": "Second Floor"
-        },
-        {
-          "id": "s_c77nixtvmw",
-          "title": "Social Space"
-        },
-        {
-          "id": "s_y9dmsf7zmk",
-          "title": "Staff Room"
-        },
-        {
-          "id": "s_x6w0tq0sa5",
-          "title": "Stairwell"
-        },
-        {
-          "id": "s_sb851xh639",
-          "title": "Suite 'A'"
-        },
-        {
-          "id": "s_0vzggtgj1g",
-          "title": "Suite 'A2'"
-        },
-        {
-          "id": "s_0g101b6iul",
-          "title": "Suite 'A3'"
-        },
-        {
-          "id": "s_q5obngkupu",
-          "title": "Suite 'B'"
-        },
-        {
-          "id": "s_px8i95h8ei",
-          "title": "Wash Room"
-        },
-        {
-          "id": "s_dm33cannkj",
-          "title": "Welcome Walk"
-        }
+        { "id": "s_t3it0l8bsk", "title": "Basement" },
+        { "id": "s_xl88jb8utx", "title": "Basement Entrance" },
+        { "id": "s_dehwdo8kx1", "title": "Commual Space" },
+        { "id": "s_tcr44j461u", "title": "Communal Space" },
+        { "id": "s_rmf30ndp5j", "title": "Corridor" },
+        { "id": "s_fb3dsuusxy", "title": "Corridor" },
+        { "id": "s_9kkz24dle7", "title": "Corridor" },
+        { "id": "s_e5k3wjy72q", "title": "Covered Porch" },
+        { "id": "s_0j9sgtokj2", "title": "Crawl Space" },
+        { "id": "s_eb2hcp3nla", "title": "Custodian Room" },
+        { "id": "s_3fh5x3humm", "title": "Dining Area" },
+        { "id": "s_f24tksel8t", "title": "Donor Wall" },
+        { "id": "s_sw7dxt8z3g", "title": "Elevator Door" },
+        { "id": "s_hxsjmv1tio", "title": "Exercise Room" },
+        { "id": "s_jfn7k06rhj", "title": "Families & Patients Communal Space" },
+        { "id": "s_c13b4lgg8f", "title": "Gazebo" },
+        { "id": "s_osxxeptx4f", "title": "Home Essentials Room" },
+        { "id": "s_4epcuat8yv", "title": "House Administration Hub" },
+        { "id": "s_6bewbri9s0", "title": "Housekeeping Centre" },
+        { "id": "s_hfiucp83au", "title": "Kitchen" },
+        { "id": "s_pvcsd2t0w2", "title": "Laundry Room" },
+        { "id": "s_6e38qm2jc1", "title": "Linen Room" },
+        { "id": "s_zlz39v1fjz", "title": "Main Entrance" },
+        { "id": "s_h310pim38b", "title": "Main Floor" },
+        { "id": "s_lc9a2b99af", "title": "Main Level Storage Room" },
+        { "id": "s_be8euh4oit", "title": "Operation Hub" },
+        { "id": "s_dtv27wfrbi", "title": "Overview" },
+        { "id": "s_ps029p4kzn", "title": "Pantry" },
+        { "id": "s_yz800wucno", "title": "Parking Space" },
+        { "id": "s_91jpwd8ota", "title": "Playroom" },
+        { "id": "s_leoc61fw42", "title": "Quiet Room" },
+        { "id": "s_vddzraqi1q", "title": "Reception" },
+        { "id": "s_ca8beuikkq", "title": "Second Floor" },
+        { "id": "s_c77nixtvmw", "title": "Social Space" },
+        { "id": "s_y9dmsf7zmk", "title": "Staff Room" },
+        { "id": "s_x6w0tq0sa5", "title": "Stairwell" },
+        { "id": "s_sb851xh639", "title": "Suite 'A'" },
+        { "id": "s_0vzggtgj1g", "title": "Suite 'A2'" },
+        { "id": "s_0g101b6iul", "title": "Suite 'A3'" },
+        { "id": "s_q5obngkupu", "title": "Suite 'B'" },
+        { "id": "s_px8i95h8ei", "title": "Wash Room" },
+        { "id": "s_dm33cannkj", "title": "Welcome Walk" }
       ]
     },
     {
@@ -221,24 +77,14 @@
       "name": "London Skyscraper",
       "clientName": "iShareÂ®",
       "firstScene": "s_g13yw9rqga",
-      "scenes": [
-        {
-          "id": "s_g13yw9rqga",
-          "title": "Exterior View"
-        }
-      ]
+      "scenes": [{ "id": "s_g13yw9rqga", "title": "Exterior View" }]
     },
     {
       "id": "t_fhvnghlrky",
       "name": "QCH Unreal (SketchUp)",
       "clientName": "iShareÂ®",
       "firstScene": "s_gyurkztn6y",
-      "scenes": [
-        {
-          "id": "s_gyurkztn6y",
-          "title": "QCH Unreal"
-        }
-      ]
+      "scenes": [{ "id": "s_gyurkztn6y", "title": "QCH Unreal" }]
     },
     {
       "id": "t_2hf6y5b3ue",
@@ -246,30 +92,12 @@
       "clientName": "Queensway Carleton Hospital Foundation",
       "firstScene": "s_sjfdkbqs8b",
       "scenes": [
-        {
-          "id": "s_7zym2qikw3",
-          "title": "Ambulance of Load"
-        },
-        {
-          "id": "s_m1tpkghyku",
-          "title": "Corridor"
-        },
-        {
-          "id": "s_sjfdkbqs8b",
-          "title": "Overview"
-        },
-        {
-          "id": "s_3705yxl10z",
-          "title": "Satalite Imaging Waiting Area"
-        },
-        {
-          "id": "s_99m6qgg3rk",
-          "title": "Waiting Area"
-        },
-        {
-          "id": "s_iuv5nruzh8",
-          "title": "Zone - 1: Walk In Entrace"
-        }
+        { "id": "s_7zym2qikw3", "title": "Ambulance of Load" },
+        { "id": "s_m1tpkghyku", "title": "Corridor" },
+        { "id": "s_sjfdkbqs8b", "title": "Overview" },
+        { "id": "s_3705yxl10z", "title": "Satalite Imaging Waiting Area" },
+        { "id": "s_99m6qgg3rk", "title": "Waiting Area" },
+        { "id": "s_iuv5nruzh8", "title": "Zone - 1: Walk In Entrace" }
       ]
     },
     {
@@ -278,58 +106,19 @@
       "clientName": "Queensway Carleton Hospital Foundation",
       "firstScene": "s_sxeq0eovm7",
       "scenes": [
-        {
-          "id": "s_epo1xsg3qz",
-          "title": "Acute Care Pod A"
-        },
-        {
-          "id": "s_rieg7s3uck",
-          "title": "Acute Care Pod B"
-        },
-        {
-          "id": "s_9lpv5ehvnw",
-          "title": "Acute Care Pod C"
-        },
-        {
-          "id": "s_smiksp7yqr",
-          "title": "Acute Care Pod D"
-        },
-        {
-          "id": "s_5qt1e2v1kl",
-          "title": "Acute Care Pod D - 2"
-        },
-        {
-          "id": "s_oh2aardnvw",
-          "title": "Allied Health Team Room"
-        },
-        {
-          "id": "s_kl3j76w8q9",
-          "title": "Ambulance Off-Load"
-        },
-        {
-          "id": "s_0gnezew7qt",
-          "title": "Dining / Activity Room"
-        },
-        {
-          "id": "s_7ezzd8nh4z",
-          "title": "Emergency Department"
-        },
-        {
-          "id": "s_x0w3usny9z",
-          "title": "Galley / Servery"
-        },
-        {
-          "id": "s_zyrfvgi4sg",
-          "title": "Inpatient Suites"
-        },
-        {
-          "id": "s_d2s5ai83yt",
-          "title": "James Beach Health Care Centre"
-        },
-        {
-          "id": "s_8s40pp3yyo",
-          "title": "Main Entrance and Waiting Area"
-        },
+        { "id": "s_epo1xsg3qz", "title": "Acute Care Pod A" },
+        { "id": "s_rieg7s3uck", "title": "Acute Care Pod B" },
+        { "id": "s_9lpv5ehvnw", "title": "Acute Care Pod C" },
+        { "id": "s_smiksp7yqr", "title": "Acute Care Pod D" },
+        { "id": "s_5qt1e2v1kl", "title": "Acute Care Pod D - 2" },
+        { "id": "s_oh2aardnvw", "title": "Allied Health Team Room" },
+        { "id": "s_kl3j76w8q9", "title": "Ambulance Off-Load" },
+        { "id": "s_0gnezew7qt", "title": "Dining / Activity Room" },
+        { "id": "s_7ezzd8nh4z", "title": "Emergency Department" },
+        { "id": "s_x0w3usny9z", "title": "Galley / Servery" },
+        { "id": "s_zyrfvgi4sg", "title": "Inpatient Suites" },
+        { "id": "s_d2s5ai83yt", "title": "James Beach Health Care Centre" },
+        { "id": "s_8s40pp3yyo", "title": "Main Entrance and Waiting Area" },
         {
           "id": "s_ud8lmbrt5c",
           "title": "Mental Health Emergency Services Unit"
@@ -338,50 +127,17 @@
           "id": "s_g04g0ejaut",
           "title": "Mental Health Emergency Services Unit - 2"
         },
-        {
-          "id": "s_vosd6uzi2u",
-          "title": "Multi Use Lounge / Activity Room"
-        },
-        {
-          "id": "s_h8xx646a23",
-          "title": "Nursing Station"
-        },
-        {
-          "id": "s_sxeq0eovm7",
-          "title": "Overview"
-        },
-        {
-          "id": "s_w0voges2yz",
-          "title": "Quiet / Consultant"
-        },
-        {
-          "id": "s_tzlpanycba",
-          "title": "Rapid Assessment Centre"
-        },
-        {
-          "id": "s_1tdql8sfba",
-          "title": "Reception Centre"
-        },
-        {
-          "id": "s_j2qwfv4t1m",
-          "title": "Report Meeting Room"
-        },
-        {
-          "id": "s_uk608rqf4q",
-          "title": "Satellite Imaging Unit"
-        },
-        {
-          "id": "s_k7h3wlz10z",
-          "title": "Staff Facility / Lounge"
-        },
-        {
-          "id": "s_5dwnzwkhwz",
-          "title": "Trauma Resuscitation"
-        },
-        {
-          "id": "s_t0y42xbmsv",
-          "title": "Walk-in Entrance"
-        }
+        { "id": "s_vosd6uzi2u", "title": "Multi Use Lounge / Activity Room" },
+        { "id": "s_h8xx646a23", "title": "Nursing Station" },
+        { "id": "s_sxeq0eovm7", "title": "Overview" },
+        { "id": "s_w0voges2yz", "title": "Quiet / Consultant" },
+        { "id": "s_tzlpanycba", "title": "Rapid Assessment Centre" },
+        { "id": "s_1tdql8sfba", "title": "Reception Centre" },
+        { "id": "s_j2qwfv4t1m", "title": "Report Meeting Room" },
+        { "id": "s_uk608rqf4q", "title": "Satellite Imaging Unit" },
+        { "id": "s_k7h3wlz10z", "title": "Staff Facility / Lounge" },
+        { "id": "s_5dwnzwkhwz", "title": "Trauma Resuscitation" },
+        { "id": "s_t0y42xbmsv", "title": "Walk-in Entrance" }
       ]
     }
   ]

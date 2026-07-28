@@ -55,10 +55,13 @@ function syncHeroHeight(hero: HTMLElement): void {
     marker instanceof HTMLElement && marker.offsetWidth > 0 ?
       marker.offsetWidth
     : resolveNavPreviewPanelWidth();
-  const video =
-    hero.classList.contains('anchored-panel__hero--video') ||
-    hero.classList.contains('anchored-panel__hero--image');
-  hero.style.height = `${resolveNavPreviewHeroHeight(width, { video })}px`;
+  const useVideoAspect =
+    hero.getAttribute('data-hero-aspect') !== 'panorama' &&
+    (hero.classList.contains('anchored-panel__hero--video') ||
+      hero.classList.contains('anchored-panel__hero--image'));
+  hero.style.height = `${resolveNavPreviewHeroHeight(width, {
+    video: useVideoAspect,
+  })}px`;
 }
 
 function markHeroLoaded(hero: HTMLElement): void {
