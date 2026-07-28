@@ -10,6 +10,9 @@ export const TOUR_DIRECTORY_SECTION_NAMING = 'Naming opportunities';
 /** Pinned section header highlighting the viewer's current scene. */
 export const TOUR_DIRECTORY_CURRENT_LOCATION_LABEL = 'You are here';
 
+/** Place-overview hotspot tooltip / aria — action, not location identity. */
+export const PLACE_OVERVIEW_HOTSPOT_LABEL = 'About this place';
+
 /** Pinned section header for the tour's root/overview scene. */
 export const TOUR_DIRECTORY_OVERVIEW_LABEL = 'Tour start';
 
@@ -91,7 +94,7 @@ export const TOUR_DIRECTORY_SCENE_DETAIL_BACK = 'Back to places';
 export const TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD =
   'Step inside and look around this space.';
 
-/** Soft lead from an NO body when the place has no scene description. */
+/** Soft lead from an NO body when the place has no scene description (sentence-complete, no ellipsis). */
 export const TOUR_DIRECTORY_SCENE_NAMING_LEAD_MAX_CHARS = 480;
 
 /** Detail panel primary CTA — room for the place name (unlike compact gallery cards). */

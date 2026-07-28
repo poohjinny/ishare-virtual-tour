@@ -6,7 +6,31 @@ import type {
   Scene,
   Tour,
 } from '../types/tour';
+import { resolveFirstPublicNamingBody } from './firstPublicNamingBody';
+import { defaultNamingDescription } from './namingDescriptionPlaceholder';
+import { isPlaceOverviewHotspot } from './placeOverview';
+import { isDefaultSceneDescription } from './sceneDescriptionPlaceholder';
 
+function resolvePlaceOverviewPopupBody(
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'namingOpportunities'> & {
+    title?: string;
+  },
+  host: Scene | undefined,
+  fallback: string,
+): string {
+  if (!host) return fallback;
+  const tourTitle = tour.title?.trim();
+  const description = host.description?.trim();
+  if (
+    description &&
+    !isDefaultSceneDescription(description, tourTitle, host.title)
+  ) {
+    return description;
+  }
+  const namingBody = resolveFirstPublicNamingBody(tour, host);
+  if (namingBody) return namingBody;
+  return fallback;
+}
 /** Naming title derived from a scene title when catalog `name` is omitted. */
 export function inheritedNamingOpportunityName(sceneTitle: string): string {
   return sceneTitle.trim();
@@ -82,14 +106,68 @@ export function resolveHotspotNamingOpportunity(
 
 /**
  * Merge catalog + scene inherit + popup placement overrides into a display popup.
- * Non-naming info popups are returned unchanged.
+ * Place-overview pins inherit scene title/description; other non-naming info is unchanged.
  */
 export function resolveNamingPopup(
-  tour: Pick<Tour, 'namingOpportunities'>,
+  tour: Pick<Tour, 'namingOpportunities' | 'hotspots' | 'viewerType'> & {
+    scenes?: Tour['scenes'];
+    title?: string;
+  },
   hotspot: Hotspot,
   scene?: Scene | null,
 ): PopupContent | undefined {
-  if (!hotspot.popup && !isNamingHotspot(hotspot)) return undefined;
+  if (
+    !hotspot.popup &&
+    !isNamingHotspot(hotspot) &&
+    !isPlaceOverviewHotspot(hotspot)
+  ) {
+    return undefined;
+  }
+
+  if (isPlaceOverviewHotspot(hotspot)) {
+    const host = resolveHotspotHostScene(
+      { scenes: tour.scenes ?? {} },
+      hotspot,
+      scene,
+    );
+    const title =
+      host?.title?.trim() || hotspot.popup?.title?.trim() || 'Place';
+    const body = resolvePlaceOverviewPopupBody(
+      tour,
+      host,
+      hotspot.popup?.body?.trim() || title,
+    );
+    const base = hotspot.popup ?? {
+      title: '',
+      body: '',
+      display: 'anchored' as const,
+    };
+    const videoUrl =
+      base.videoUrl?.trim() || host?.previewVideoUrl?.trim() || undefined;
+    const image = base.image?.trim() || host?.thumbnail?.trim() || undefined;
+    const next: PopupContent = {
+      ...base,
+      title,
+      body,
+      display: base.display ?? 'anchored',
+    };
+    if (image) {
+      next.image = image;
+    } else {
+      delete next.image;
+    }
+    if (videoUrl) {
+      next.videoUrl = videoUrl;
+      if (!base.videoUrl?.trim() && host?.videoPoster?.trim()) {
+        next.videoPoster = host.videoPoster.trim();
+      }
+    } else {
+      delete next.videoUrl;
+      delete next.videoPoster;
+    }
+    return next;
+  }
+
   if (!isNamingHotspot(hotspot)) return hotspot.popup;
 
   const naming = resolveHotspotNamingOpportunity(tour, hotspot, scene);
@@ -106,8 +184,10 @@ export function resolveNamingPopup(
   const title = popup.title?.trim() || naming.name || sceneTitle;
   const catalogBody =
     record && 'body' in record ? record.body?.trim() : undefined;
-  const body =
+  const resolvedBody =
     popup.body?.trim() || catalogBody || scene?.description?.trim() || '';
+  const body =
+    resolvedBody || defaultNamingDescription(naming.name, tour.title);
   const catalogVideo =
     record && 'videoUrl' in record ? record.videoUrl?.trim() : undefined;
   const catalogImage =
@@ -122,7 +202,7 @@ export function resolveNamingPopup(
   const next: PopupContent = {
     ...popup,
     title: title || popup.title || '',
-    body: body || popup.body || '',
+    body,
     namingOpportunity: naming,
   };
 
@@ -150,7 +230,10 @@ export function resolveNamingPopup(
 
 /** @deprecated Prefer {@link resolveNamingPopup}(tour, hotspot, scene). */
 export function resolveNamingHotspotPopup(
-  tour: Pick<Tour, 'namingOpportunities'>,
+  tour: Pick<Tour, 'namingOpportunities' | 'hotspots' | 'viewerType'> & {
+    scenes?: Tour['scenes'];
+    title?: string;
+  },
   hotspot: Hotspot,
   scene?: Scene | null,
 ): PopupContent | undefined {

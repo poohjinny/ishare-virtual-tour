@@ -1286,6 +1286,15 @@ input::placeholder {
   box-shadow: var(--ishare-hotspot-active-glow-strong);
 }
 
+/* Place-overview — square chip; side matches nav pill height (optical bump:
+ * equal px circles read smaller than pills, so +2px keeps perceived size aligned). */
+.hotspot-general-info--place-overview .hotspot-general-info__chip {
+  width: calc(var(--ishare-hotspot-glass-block-size) + 2px);
+  height: calc(var(--ishare-hotspot-glass-block-size) + 2px);
+  min-width: calc(var(--ishare-hotspot-glass-block-size) + 2px);
+  min-height: calc(var(--ishare-hotspot-glass-block-size) + 2px);
+}
+
 /* ?? Info hotspot ? naming opportunity pill (primary + heart) ?? */
 
 .hotspot-info {

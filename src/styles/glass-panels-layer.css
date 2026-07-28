@@ -435,6 +435,12 @@
     display: none;
   }
 
+  .tour-glass-panel__title-line>.ishare-badge {
+    flex: 0 0 auto;
+    margin: 0 0 0 auto;
+    white-space: nowrap;
+  }
+
   .tour-glass-panel__title-block .tour-glass-panel__title {
     flex: none;
     width: auto;

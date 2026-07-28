@@ -1,7 +1,8 @@
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import type { Viewer } from '@photo-sphere-viewer/core';
-import type { PopupContent, Tour, ViewPosition } from '../types/tour';
+import type { PopupContent, Hotspot, Tour, ViewPosition } from '../types/tour';
 import {
+  findHotspotInTour,
   findNamingHotspotInTour,
   isModel3dTour,
   resolveModel3dNamingTargetView,
@@ -11,6 +12,7 @@ import {
   resolveHotspotHostScene,
   resolveNamingPopup,
 } from '../utils/namingSceneInherit';
+import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import { toPsvZoom } from '../utils/psvZoom';
 import { glassPanelMarkerSize } from '../components/tourGlassPanelHtml';
 import {
@@ -22,6 +24,27 @@ import { setActiveInfoHotspot } from './infoHotspotActive';
 import { computeAnchoredPanelFramedView } from './anchoredPanelCameraNudge';
 
 const NAMING_VIEW_ANIMATION_MS = 800;
+
+function findFramableInfoHotspotInTour(
+  tour: Tour,
+  hotspotId: string,
+  fallbackSceneId: string,
+): { sceneId: string; hotspot: Hotspot } | null {
+  const naming = findNamingHotspotInTour(tour, hotspotId);
+  if (naming) return naming;
+
+  // Place-overview pins share id `info-place` — prefer the requested scene.
+  const onPreferred = tour.scenes[fallbackSceneId]?.hotspots?.find(
+    (entry) => entry.id === hotspotId,
+  );
+  if (onPreferred && isPlaceOverviewHotspot(onPreferred)) {
+    return { sceneId: fallbackSceneId, hotspot: onPreferred };
+  }
+
+  const hit = findHotspotInTour(tour, hotspotId);
+  if (!hit?.hotspot || !isPlaceOverviewHotspot(hit.hotspot)) return null;
+  return { sceneId: hit.sceneId ?? fallbackSceneId, hotspot: hit.hotspot };
+}
 
 function toDeg(deg: number): string {
   return `${deg}deg`;
@@ -116,8 +139,8 @@ export function resolveNamingOpportunityView(
   sceneId: string,
   hotspotId: string,
 ): ViewPosition | undefined {
-  const found = findNamingHotspotInTour(tour, hotspotId);
-  if (!found?.hotspot.popup) return undefined;
+  const found = findFramableInfoHotspotInTour(tour, hotspotId, sceneId);
+  if (!found?.hotspot) return undefined;
 
   if (isModel3dTour(tour)) {
     return resolveModel3dNamingTargetView(
@@ -128,6 +151,9 @@ export function resolveNamingOpportunityView(
   }
 
   const pos = found.hotspot.position as ViewPosition;
+  if (typeof pos?.yaw !== 'number' || typeof pos?.pitch !== 'number') {
+    return undefined;
+  }
   const scene = tour.scenes[found.sceneId ?? sceneId];
   return {
     yaw: pos.yaw,
@@ -137,7 +163,7 @@ export function resolveNamingOpportunityView(
 }
 
 /**
- * NO target view pre-tilted so the anchored panel above the hotspot lands fully
+ * Target view pre-tilted so the anchored panel above the hotspot lands fully
  * framed in one camera move — lets the entry animation replace the old
  * "aim at hotspot, then nudge up" two-step. Falls back to the plain hotspot view
  * for model3d tours and modal (non-anchored) popups, which aren't camera-framed.
@@ -153,7 +179,7 @@ export function resolveNamingOpportunityFramedView(
 
   if (isModel3dTour(tour)) return base;
 
-  const found = findNamingHotspotInTour(tour, hotspotId);
+  const found = findFramableInfoHotspotInTour(tour, hotspotId, sceneId);
   if (!found?.hotspot) return base;
   const resolvedPopup = resolveNamingPopup(
     tour,
@@ -166,7 +192,15 @@ export function resolveNamingOpportunityFramedView(
   );
   if (!resolvedPopup || !isAnchoredPopup(resolvedPopup)) return base;
 
-  const { height } = glassPanelMarkerSize(resolvedPopup, hotspotId, tour);
+  const { height } = glassPanelMarkerSize(
+    resolvedPopup,
+    hotspotId,
+    tour,
+    false,
+    isPlaceOverviewHotspot(found.hotspot) ?
+      { shareAsLocation: true }
+    : undefined,
+  );
   const framed = computeAnchoredPanelFramedView(
     viewer,
     { yawDeg: base.yaw, pitchDeg: base.pitch },
@@ -264,7 +298,14 @@ export function openNamingInfoHotspot(
   const hotspot =
     tour.scenes[sceneId]?.hotspots.find((h) => h.id === hotspotId) ??
     tour.hotspots?.find((h) => h.id === hotspotId && h.sceneId === sceneId);
-  if (!hotspot || (!hotspot.popup && !isNamingHotspot(hotspot))) return false;
+  if (
+    !hotspot ||
+    (!hotspot.popup &&
+      !isNamingHotspot(hotspot) &&
+      !isPlaceOverviewHotspot(hotspot))
+  ) {
+    return false;
+  }
 
   const hostScene = resolveHotspotHostScene(
     tour,
@@ -278,6 +319,8 @@ export function openNamingInfoHotspot(
   if (isAnchoredPopup(popup)) {
     openAnchoredInfoPanel(viewer, markers, resolvedHotspot, tour, hideShare, {
       skipCameraNudge,
+      hostScene,
+      hostSceneId: sceneId,
     });
   } else {
     setActiveInfoHotspot(markers, hotspot.id);

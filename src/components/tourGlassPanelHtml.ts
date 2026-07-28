@@ -32,6 +32,7 @@ import {
   shouldShowPopupCtaIcon,
 } from '../utils/popupCtaIcon';
 import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
+import { TOUR_DIRECTORY_CURRENT_LOCATION_LABEL } from '../constants/tourDirectory';
 import {
   namingOpportunityStatusConfig,
   namingOpportunityStatusShowsBadge,
@@ -189,6 +190,7 @@ export function measureAnchoredGlassPanelHeight(
   hotspotId: string,
   tour?: Tour,
   hideShare = false,
+  options?: { shareAsLocation?: boolean },
 ): number {
   if (typeof document === 'undefined') return GLASS_PANEL_SIZE.minHeight;
 
@@ -208,6 +210,7 @@ export function measureAnchoredGlassPanelHeight(
     animate: false,
     tour,
     hideShare,
+    shareAsLocation: options?.shareAsLocation,
   }).replace(
     GLASS_PANEL.rootAnchored,
     `${GLASS_PANEL.rootAnchored} tour-glass-panel--measure`,
@@ -222,6 +225,7 @@ export function glassPanelMarkerSize(
   hotspotId: string,
   tour?: Tour,
   hideShare = false,
+  options?: { shareAsLocation?: boolean },
 ): { width: number; height: number } {
   const width = resolveGlassPanelWidth(popup, tour);
   const contentHeight = measureAnchoredGlassPanelHeight(
@@ -229,6 +233,7 @@ export function glassPanelMarkerSize(
     hotspotId,
     tour,
     hideShare,
+    options,
   );
   const maxHeight = resolveGlassPanelMaxHeight(popup);
 
@@ -379,6 +384,16 @@ export function glassPanelNamingBadgeIconHtml(): string {
     className: GLASS_PANEL.badgeIcon,
     sizePx: MATERIAL_SYMBOL_SIZE_16,
   });
+}
+
+export function glassPanelYouAreHereBadgeHtml(): string {
+  return `<span class="${GLASS_PANEL.badgeNaming}">
+    ${materialSymbolHtml('flag', {
+      className: GLASS_PANEL.badgeIcon,
+      sizePx: MATERIAL_SYMBOL_SIZE_16,
+    })}
+    <span class="${GLASS_PANEL.badgeText}">${escapeHtml(TOUR_DIRECTORY_CURRENT_LOCATION_LABEL)}</span>
+  </span>`;
 }
 
 export function buildPopupImageHtml(popup: PopupContent): string {
@@ -645,11 +660,27 @@ export function buildTourGlassPanelHtml(
 export function buildAnchoredPopupHtml(
   popup: PopupContent,
   hotspotId: string,
-  options?: { animate?: boolean; tour?: Tour; hideShare?: boolean },
+  options?: {
+    animate?: boolean;
+    tour?: Tour;
+    hideShare?: boolean;
+    /** Place-overview — share scene link (not naming opportunity). */
+    shareAsLocation?: boolean;
+  },
 ): string {
   const titleId = `info-panel-title-${hotspotId}`;
   const naming = popup.namingOpportunity;
   const hideShare = options?.hideShare ?? false;
+  const shareAsOpportunity = Boolean(naming) && !hideShare;
+  const shareAsLocation =
+    !naming && Boolean(options?.shareAsLocation) && !hideShare;
+  const showShare = shareAsOpportunity || shareAsLocation;
+  const shareAria =
+    shareAsOpportunity ? TOUR_SHARE_OPPORTUNITY_ARIA : TOUR_SHARE_LOCATION_ARIA;
+  const shareLabel =
+    shareAsOpportunity ?
+      TOUR_SHARE_OPPORTUNITY_LABEL
+    : TOUR_SHARE_LOCATION_LABEL;
 
   const titleAfterHtml =
     naming ?
@@ -657,6 +688,7 @@ export function buildAnchoredPopupHtml(
         naming.price,
         namingOpportunityStatusConfig(naming.status).cssModifier === 'sold',
       )
+    : options?.shareAsLocation ? glassPanelYouAreHereBadgeHtml()
     : '';
   const donor = resolveNamingDonorPresentation(naming);
   const donorCreditInner =
@@ -701,24 +733,28 @@ export function buildAnchoredPopupHtml(
   const hasVideo = Boolean(trimmedVideoUrl);
   const hasImage = Boolean(trimmedImage) && !hasVideo;
   const hasHero = hasVideo || hasImage;
+  // Place-overview matches default nav panorama strip (8/16), not 16:9 video.
+  const matchNavPanoramaHero = Boolean(options?.shareAsLocation);
   const heroHeight = resolveNavPreviewHeroHeight(undefined, {
-    video: hasVideo || hasImage,
+    video: matchNavPanoramaHero ? false : hasVideo,
   });
+  const heroAspectAttr =
+    matchNavPanoramaHero ? ' data-hero-aspect="panorama"' : '';
 
   const shareHtml =
-    naming && !hideShare ?
+    showShare ?
       buildAnchoredPanelShareButtonHtml({
         dataAttr: 'info-panel-share',
-        ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
-        tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
+        ariaLabel: shareAria,
+        tooltipLabel: shareLabel,
       })
     : '';
   const shareInlineHtml =
-    naming && !hideShare ?
+    showShare ?
       buildAnchoredPanelShareButtonHtml({
         dataAttr: 'info-panel-share',
-        ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
-        tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
+        ariaLabel: shareAria,
+        tooltipLabel: shareLabel,
         inline: true,
       })
     : '';
@@ -730,13 +766,13 @@ export function buildAnchoredPopupHtml(
 
   const heroHtml =
     hasVideo ?
-      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroVideo} ${ANCHORED_PANEL.heroLoading}" style="height:${heroHeight}px" aria-busy="true">
+      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroVideo} ${ANCHORED_PANEL.heroLoading}" style="height:${heroHeight}px" aria-busy="true"${heroAspectAttr}>
         <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
         ${buildPopupVideoHtml(popup)}
         ${heroActionsHtml}
       </div>`
     : hasImage ?
-      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroImage} ${ANCHORED_PANEL.heroLoading}" style="height:${heroHeight}px" aria-busy="true">
+      `<div class="${ANCHORED_PANEL.hero} ${ANCHORED_PANEL.heroImage} ${ANCHORED_PANEL.heroLoading}" style="height:${heroHeight}px" aria-busy="true"${heroAspectAttr}>
         <div class="${PREVIEW_HERO_SKELETON_CLASS}" aria-hidden="true"></div>
         <img
           src="${escapeHtml(trimmedImage!)}"

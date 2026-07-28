@@ -1,6 +1,13 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
-import type { Hotspot, PopupContent, Tour, ViewPosition } from '../types/tour';
+import type {
+  Hotspot,
+  PopupContent,
+  Scene,
+  Tour,
+  ViewPosition,
+} from '../types/tour';
+import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import {
   isNamingHotspot,
   resolveHotspotHostScene,
@@ -63,6 +70,34 @@ function panelMarkerId(hotspotId: string): string {
 
 function clearInfoPanelPositionTrack(): void {
   infoPanelPositionTrack = null;
+}
+
+/**
+ * Resolve which panorama scene owns this hotspot instance.
+ * Place-overview pins share id `info-place` across scenes — never use a bare
+ * id lookup across Object.values(scenes).
+ */
+function findSceneOwningHotspot(
+  tour: Tour,
+  hotspot: Hotspot,
+  preferredSceneId?: string,
+): Scene | undefined {
+  if (preferredSceneId) {
+    const preferred = tour.scenes[preferredSceneId];
+    if (preferred?.hotspots?.includes(hotspot)) return preferred;
+    if (preferred?.hotspots?.some((entry) => entry.id === hotspot.id)) {
+      return preferred;
+    }
+  }
+
+  for (const scene of Object.values(tour.scenes ?? {})) {
+    if (scene.hotspots?.includes(hotspot)) return scene;
+  }
+
+  const matches = Object.values(tour.scenes ?? {}).filter((scene) =>
+    scene.hotspots?.some((entry) => entry.id === hotspot.id),
+  );
+  return matches.length === 1 ? matches[0] : undefined;
 }
 
 export function syncInfoPanelPosition(markers: MarkersPlugin): void {
@@ -166,37 +201,53 @@ export function openAnchoredInfoPanel(
   hotspot: Hotspot,
   tour: Tour,
   hideShare = false,
-  options?: { skipCameraNudge?: boolean },
+  options?: {
+    skipCameraNudge?: boolean;
+    /** Owning scene — required when hotspot ids collide (place-overview). */
+    hostScene?: Scene | null;
+    hostSceneId?: string;
+  },
 ): void {
-  if (!hotspot.popup && !isNamingHotspot(hotspot)) return;
+  if (
+    !hotspot.popup &&
+    !isNamingHotspot(hotspot) &&
+    !isPlaceOverviewHotspot(hotspot)
+  ) {
+    return;
+  }
 
   closeAnchoredInfoPanel(markers, false);
 
   const hostScene = resolveHotspotHostScene(
     tour,
     hotspot,
-    // Prefer scene that currently owns this marker id when present.
-    Object.values(tour.scenes).find((scene) =>
-      scene.hotspots.some((entry) => entry.id === hotspot.id),
-    ),
+    options?.hostScene ??
+      findSceneOwningHotspot(tour, hotspot, options?.hostSceneId),
   );
   const popup =
-    isNamingHotspot(hotspot) ?
+    isNamingHotspot(hotspot) || isPlaceOverviewHotspot(hotspot) ?
       resolveNamingPopup(tour, hotspot, hostScene)
     : hotspot.popup;
   if (!popup) return;
 
+  const shareAsLocation = isPlaceOverviewHotspot(hotspot);
   const id = panelMarkerId(hotspot.id);
   const hostMarker = markers.getMarker(hotspot.id);
   const halfHeight = measureHotspotHalfHeightPx(
     hostMarker?.domElement,
     INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
   );
-  const markerSize = glassPanelMarkerSize(popup, hotspot.id, tour, hideShare);
+  const markerSize = glassPanelMarkerSize(popup, hotspot.id, tour, hideShare, {
+    shareAsLocation,
+  });
 
   markers.addMarker({
     id,
-    html: buildAnchoredPopupHtml(popup, hotspot.id, { tour, hideShare }),
+    html: buildAnchoredPopupHtml(popup, hotspot.id, {
+      tour,
+      hideShare,
+      shareAsLocation,
+    }),
     size: markerSize,
     position: anchoredPanelMarkerPosition(
       viewer,

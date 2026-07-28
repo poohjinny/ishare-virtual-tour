@@ -4,25 +4,31 @@ import {
   filterHotspotsForAudience,
   resolveSceneVisibility,
   VIEWER_MARKER_AUDIENCE,
+  type SceneVisibilityAudience,
 } from '../utils/sceneVisibility';
 import { hotspotToMarkerConfig } from './buildMarkers';
 
-function markersForScene(tour: Tour, scene: Scene) {
-  return filterHotspotsForAudience(
-    tour,
-    scene.hotspots ?? [],
-    VIEWER_MARKER_AUDIENCE,
-  ).map((hotspot) => hotspotToMarkerConfig(hotspot, tour, scene));
+function markersForScene(
+  tour: Tour,
+  scene: Scene,
+  audience: SceneVisibilityAudience = VIEWER_MARKER_AUDIENCE,
+) {
+  return filterHotspotsForAudience(tour, scene.hotspots ?? [], audience).map(
+    (hotspot) => hotspotToMarkerConfig(hotspot, tour, scene),
+  );
 }
 
 /** VirtualTourPlugin node list from tour JSON. */
-export function buildVirtualTourNodes(tour: Tour) {
+export function buildVirtualTourNodes(
+  tour: Tour,
+  audience: SceneVisibilityAudience = VIEWER_MARKER_AUDIENCE,
+) {
   return Object.values(tour.scenes).map((scene) => ({
     id: scene.id,
     name: scene.title,
     panorama: scene.panorama,
     links: [],
-    markers: markersForScene(tour, scene),
+    markers: markersForScene(tour, scene, audience),
   }));
 }
 
@@ -61,7 +67,6 @@ export function inheritedNamingSceneFieldsChanged(
   return (
     prevScene.title !== nextScene.title ||
     prevScene.description !== nextScene.description ||
-    prevScene.placeLead !== nextScene.placeLead ||
     prevScene.previewVideoUrl !== nextScene.previewVideoUrl ||
     prevScene.videoUrl !== nextScene.videoUrl ||
     prevScene.videoPoster !== nextScene.videoPoster
@@ -150,6 +155,7 @@ export function buildVirtualTourNodePatch(
   nextScene: Scene,
   nextTour: Tour,
   previousTour?: Tour,
+  audience: SceneVisibilityAudience = VIEWER_MARKER_AUDIENCE,
 ): VirtualTourNodePatch | null {
   if (!prevScene) {
     return {
@@ -157,7 +163,7 @@ export function buildVirtualTourNodePatch(
       name: nextScene.title,
       panorama: nextScene.panorama,
       links: [],
-      markers: markersForScene(nextTour, nextScene),
+      markers: markersForScene(nextTour, nextScene, audience),
     };
   }
 
@@ -180,7 +186,7 @@ export function buildVirtualTourNodePatch(
     navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour) ||
     namingCatalogChanged(previousTour, nextTour)
   ) {
-    patch.markers = markersForScene(nextTour, nextScene);
+    patch.markers = markersForScene(nextTour, nextScene, audience);
     changed = true;
   }
 

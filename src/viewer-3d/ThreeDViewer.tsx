@@ -1090,7 +1090,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
               resolveSceneHotspots(
                 tourRef.current,
                 sceneData,
-                VIEWER_MARKER_AUDIENCE,
+                _devMode ? { dev: true } : VIEWER_MARKER_AUDIENCE,
               ),
               scene3d,
             );
@@ -1108,7 +1108,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
               resolveSceneHotspots(
                 tourRef.current,
                 sceneData,
-                VIEWER_MARKER_AUDIENCE,
+                _devMode ? { dev: true } : VIEWER_MARKER_AUDIENCE,
               ),
               scene3d,
             );
@@ -1228,6 +1228,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
         onNavigateRef.current?.(targetSceneId, targetView);
         return true;
       },
+      togglePlaceOverview: () => false,
       recenterToDefaultView: (_options?: { forceDefault?: boolean }) => {
         handleRecenter();
       },

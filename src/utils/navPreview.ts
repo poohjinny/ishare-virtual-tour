@@ -18,7 +18,11 @@ import {
 } from './namingPrice';
 import { resolveNavHotspotLabel } from './navHotspotLabel';
 import { resolveNamingDonorCredit } from './namingDonor';
-import { resolveNamingPopup } from './namingSceneInherit';
+import {
+  resolveHotspotNamingRecord,
+  resolveNamingPopup,
+} from './namingSceneInherit';
+import { isNamingVisibleInExplore } from './namingVisibility';
 import { resolveScenePlaceLead } from './resolveScenePlaceLead';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 
@@ -39,6 +43,9 @@ export function buildNavPreviewNamingItems(
 
   for (const hotspot of listSceneInfoHotspots(tour, scene)) {
     if (!hotspot.popup && !hotspot.namingId) continue;
+    if (!isNamingVisibleInExplore(resolveHotspotNamingRecord(tour, hotspot))) {
+      continue;
+    }
     const popup = resolveNamingPopup(tour, hotspot, scene);
     const resolvedNaming = popup?.namingOpportunity;
     if (!resolvedNaming || !popup) continue;

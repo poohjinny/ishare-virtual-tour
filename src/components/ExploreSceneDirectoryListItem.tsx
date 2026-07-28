@@ -2,7 +2,12 @@ import { type ReactNode } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { useScenePreview } from '../hooks/useScenePreview';
-import type { Hotspot, Scene, TourViewerType } from '../types/tour';
+import type {
+  Hotspot,
+  NamingOpportunityRecord,
+  Scene,
+  TourViewerType,
+} from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
 import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
@@ -37,6 +42,7 @@ interface ExploreSceneDirectoryListItemProps {
   tourTitle?: string;
   tourHotspots?: Hotspot[];
   tourViewerType?: TourViewerType;
+  namingOpportunities?: Record<string, NamingOpportunityRecord>;
   active: boolean;
   isTourStart?: boolean;
   /** Floor / department when the same title appears on multiple scenes. */
@@ -54,6 +60,7 @@ export function ExploreSceneDirectoryListItem({
   tourTitle,
   tourHotspots,
   tourViewerType,
+  namingOpportunities,
   active,
   isTourStart = false,
   contextLabel,
@@ -77,6 +84,7 @@ export function ExploreSceneDirectoryListItem({
       title: tourTitle ?? '',
       hotspots: tourHotspots,
       viewerType: tourViewerType,
+      namingOpportunities,
     },
     scene,
   ).trim();

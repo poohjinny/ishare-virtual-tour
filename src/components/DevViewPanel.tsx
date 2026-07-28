@@ -46,6 +46,7 @@ import {
 } from '../utils/resolveTourBranding';
 import { getTourProductFullName } from '../utils/tourProductName';
 import { resolveSceneVisibility } from '../utils/sceneVisibility';
+import { resolveNamingVisibility } from '../utils/namingVisibility';
 import {
   formatNamingPriceInput,
   parseNamingPriceInput,
@@ -124,6 +125,7 @@ import {
   DevTourApiError,
   devApplySceneDefaultView,
   devCreateInfoHotspot,
+  devCreatePlaceOverviewHotspot,
   devCreateNamingHotspot,
   devCreateNamingOpportunity,
   devCreateNavHotspot,
@@ -161,6 +163,7 @@ import {
   listAllTourHotspotIds,
 } from '../utils/findTourHotspot';
 import { buildScenePlaceLeadFromNaming } from '../utils/resolveScenePlaceLead';
+import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import { isDefaultSceneDescription } from '../utils/sceneDescriptionPlaceholder';
 import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 import {
@@ -228,7 +231,9 @@ import {
   devViewPanelManageListItemTextStackClassName,
   devSceneManageBadgeVariants,
   devViewPanelManageListItemBadgesClassName,
+  devViewPanelManageListItemSceneBadgesClassName,
   devViewPanelManageListItemTourBadgesStackClassName,
+  devNamingManageStatusBadgeClassName,
   devHotspotKindBadgeVariants,
   type DevHotspotKindBadgeKind,
 } from './devViewPanelVariants';
@@ -320,6 +325,7 @@ function hotspotKindLabel(hotspot: Hotspot): string {
     return `Nav · ${variantLabel}`;
   }
   if (isNamingInfoHotspot(hotspot)) return 'NO';
+  if (isPlaceOverviewHotspot(hotspot)) return 'Overview';
   if (hotspot.type === 'info') return 'Info';
   return hotspot.type;
 }
@@ -346,6 +352,12 @@ function hotspotDisplayLabel(
   hostScene?: Scene | null,
 ): string {
   if (hotspot.type === 'nav') return resolveNavHotspotLabel(hotspot, tour);
+  if (isPlaceOverviewHotspot(hotspot)) {
+    const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
+    return (
+      scene?.title?.trim() || hotspot.popup?.title?.trim() || 'Place overview'
+    );
+  }
   if (isNamingInfoHotspot(hotspot)) {
     const found = findHotspotInTour(tour, hotspot.id);
     const scene =
@@ -373,10 +385,11 @@ function formatHotspotPosition(hotspot: Hotspot): string {
 }
 
 function hotspotManageKindOrder(hotspot: Hotspot): number {
-  if (hotspot.type === 'nav') return 0;
-  if (isNamingInfoHotspot(hotspot)) return 1;
-  if (hotspot.type === 'info') return 2;
-  return 3;
+  if (isPlaceOverviewHotspot(hotspot)) return 0;
+  if (hotspot.type === 'nav') return 1;
+  if (isNamingInfoHotspot(hotspot)) return 2;
+  if (hotspot.type === 'info') return 3;
+  return 4;
 }
 
 function sortSceneHotspotsForManage(
@@ -491,6 +504,8 @@ export function DevViewPanel({
   const [catalogEditStatus, setCatalogEditStatus] = useState<
     NamingOpportunityStatus | ''
   >('');
+  const [catalogEditVisibility, setCatalogEditVisibility] =
+    useState<DevCatalogTourVisibility>('public');
   const [catalogEditBody, setCatalogEditBody] = useState('');
   const [catalogEditVideoUrl, setCatalogEditVideoUrl] = useState('');
   const [catalogEditImage, setCatalogEditImage] = useState('');
@@ -694,6 +709,8 @@ export function DevViewPanel({
   );
   const [scenePanoramaFile, setScenePanoramaFile] = useState<File | null>(null);
   const [sceneDescription, setSceneDescription] = useState('');
+  const [sceneCreatePlaceOverview, setSceneCreatePlaceOverview] =
+    useState(false);
   const [scenePreviewVideoUrl, setScenePreviewVideoUrl] = useState('');
   const [sceneVideoUrl, setSceneVideoUrl] = useState('');
 
@@ -723,6 +740,8 @@ export function DevViewPanel({
   );
   const [noPrice, setNoPrice] = useState('');
   const [noStatus, setNoStatus] = useState<NamingOpportunityStatus | ''>('');
+  const [noVisibility, setNoVisibility] =
+    useState<DevCatalogTourVisibility>('public');
   const [noDonorName, setNoDonorName] = useState('');
   const [noDonorKind, setNoDonorKind] =
     useState<NamingDonorKind>('organization');
@@ -747,6 +766,8 @@ export function DevViewPanel({
   const [infoVisitScene, setInfoVisitScene] = useState('');
   const [infoStatus, setInfoStatus] = useState<ActionStatus>('idle');
   const [infoError, setInfoError] = useState<string | null>(null);
+  const [overviewStatus, setOverviewStatus] = useState<ActionStatus>('idle');
+  const [overviewError, setOverviewError] = useState<string | null>(null);
   const [panelTab, setPanelTab] = useState<DevPanelTab>('scene');
   const [hotspotCreateOpen, setHotspotCreateOpen] = useState(false);
   const [sceneCreateOpen, setSceneCreateOpen] = useState(false);
@@ -860,6 +881,14 @@ export function DevViewPanel({
   );
   const canCreateInfoHotspot = hotspotCreateTabs.some(
     (tab) => tab.id === 'info',
+  );
+  const canCreateOverviewHotspot = hotspotCreateTabs.some(
+    (tab) => tab.id === 'overview',
+  );
+
+  const sceneHasPlaceOverview = useMemo(
+    () => managedHotspots.some((entry) => isPlaceOverviewHotspot(entry)),
+    [managedHotspots],
   );
 
   const canWriteTour = Boolean(scene.tourId && view);
@@ -989,6 +1018,9 @@ export function DevViewPanel({
     scene.tourId && parseNamingPriceInput(noPrice) != null && noStatus,
   );
   const canCreateInfo = Boolean(scene.tourId && clickCoords && trimmedInfoName);
+  const canCreateOverview = Boolean(
+    scene.tourId && clickCoords && !isModel3dTour && !sceneHasPlaceOverview,
+  );
   const canCreateScene = Boolean(
     scene.tourId &&
     trimmedSceneTitle &&
@@ -1497,6 +1529,7 @@ export function DevViewPanel({
         name: trimmedNoName,
         price: priceAmount,
         status: noStatus,
+        visibility: noVisibility,
         body: noBody.trim() || undefined,
         videoUrl: noVideoUrl.trim() || undefined,
         image: noImage.trim() || undefined,
@@ -1515,6 +1548,7 @@ export function DevViewPanel({
       setNoName('');
       setNoPrice('');
       setNoStatus('');
+      setNoVisibility('public');
       setNoDonorName('');
       setNoDonorKind('organization');
       setNoDonorAffiliation('');
@@ -1542,6 +1576,7 @@ export function DevViewPanel({
     noImage,
     noPrice,
     noStatus,
+    noVisibility,
     noVideoUrl,
     onTourMutated,
     scene.id,
@@ -1642,6 +1677,38 @@ export function DevViewPanel({
     onTourMutated,
   ]);
 
+  const createPlaceOverviewHotspotHandler = useCallback(async () => {
+    const position = buildHotspotPosition();
+    if (!scene.tourId || !position || isModel3dTour) return;
+
+    setOverviewStatus('working');
+    setOverviewError(null);
+
+    try {
+      await devCreatePlaceOverviewHotspot({
+        tourId: scene.tourId,
+        sceneId: scene.id,
+        position,
+      });
+      await onTourMutated?.();
+      setOverviewStatus('done');
+      setHotspotCreateOpen(false);
+    } catch (error) {
+      setOverviewStatus('error');
+      setOverviewError(
+        error instanceof DevTourApiError ?
+          error.message
+        : 'Could not create place overview hotspot',
+      );
+    }
+  }, [
+    buildHotspotPosition,
+    isModel3dTour,
+    onTourMutated,
+    scene.id,
+    scene.tourId,
+  ]);
+
   const resolveModel3dSceneCreatePayload = useCallback(
     async (
       _title: string,
@@ -1717,11 +1784,13 @@ export function DevViewPanel({
           {
             previewVideoUrl: scenePreviewVideoUrl.trim() || undefined,
             videoUrl: sceneVideoUrl.trim() || undefined,
+            createPlaceOverview: sceneCreatePlaceOverview,
           }
         : {}),
       });
       setSceneTitle('');
       setSceneDescription('');
+      setSceneCreatePlaceOverview(false);
       setScenePreviewVideoUrl('');
       setSceneVideoUrl('');
       setScenePanoramaFile(null);
@@ -1745,6 +1814,7 @@ export function DevViewPanel({
     pendingSceneId,
     resolveModel3dSceneCreatePayload,
     scene.tourId,
+    sceneCreatePlaceOverview,
     sceneDescription,
     scenePreviewVideoUrl,
     sceneVideoUrl,
@@ -2206,7 +2276,15 @@ export function DevViewPanel({
     async (hotspotId: string) => {
       if (!scene.tourId) return;
 
-      const found = findHotspotInTour(tour, hotspotId);
+      // Prefer the current scene's hotspot — place-overview pins share id
+      // `info-place` across scenes, so a global find hits the wrong scene.
+      const onCurrentScene = managedHotspots.find(
+        (entry) => entry.id === hotspotId,
+      );
+      const found =
+        onCurrentScene ?
+          { hotspot: onCurrentScene, sceneId: scene.id }
+        : findHotspotInTour(tour, hotspotId);
       const label =
         found ? hotspotDisplayLabel(found.hotspot, tour) : hotspotId;
       const deleteScopeLabel = isModel3dTour ? 'tour' : `scene “${scene.id}”`;
@@ -2259,6 +2337,7 @@ export function DevViewPanel({
       catalogEditNamingId,
       editingHotspotId,
       isModel3dTour,
+      managedHotspots,
       movingHotspotId,
       onTourMutated,
       scene.id,
@@ -2319,6 +2398,10 @@ export function DevViewPanel({
         setEditNoNamingId(hotspot.namingId?.trim() ?? '');
         return;
       }
+      if (isPlaceOverviewHotspot(hotspot)) {
+        // Title/body inherit from the scene — no popup copy fields to edit.
+        return;
+      }
       setEditInfoTitle(hotspot.popup?.title ?? '');
       setEditInfoBody(hotspot.popup?.body ?? '');
       setEditInfoDisplay(hotspot.popup?.display ?? 'anchored');
@@ -2347,6 +2430,7 @@ export function DevViewPanel({
       setCatalogEditName(record.name?.trim() ?? '');
       setCatalogEditPrice(formatNamingPriceInput(record.price));
       setCatalogEditStatus(record.status ?? '');
+      setCatalogEditVisibility(resolveNamingVisibility(record));
       setCatalogEditBody(
         storedBody && storedBody !== sceneBody ? storedBody : '',
       );
@@ -2385,6 +2469,7 @@ export function DevViewPanel({
         title: catalogEditName.trim(),
         price: parseNamingPriceInput(catalogEditPrice) ?? undefined,
         status: catalogEditStatus || undefined,
+        visibility: catalogEditVisibility,
         body: catalogEditBody.trim(),
         videoUrl: catalogEditVideoUrl.trim(),
         image: catalogEditImage,
@@ -2422,6 +2507,7 @@ export function DevViewPanel({
     catalogEditNamingId,
     catalogEditPrice,
     catalogEditStatus,
+    catalogEditVisibility,
     catalogEditVideoUrl,
     onTourMutated,
     scene.tourId,
@@ -2507,9 +2593,21 @@ export function DevViewPanel({
 
   const saveHotspotEdit = useCallback(async () => {
     if (!scene.tourId || !editingHotspotId) return;
-    const found = findHotspotInTour(tour, editingHotspotId);
+    // Prefer current-scene hotspot — place-overview shares id `info-place`.
+    const onCurrentScene = managedHotspots.find(
+      (entry) => entry.id === editingHotspotId,
+    );
+    const found =
+      onCurrentScene ?
+        { hotspot: onCurrentScene, sceneId: scene.id }
+      : findHotspotInTour(tour, editingHotspotId);
     const hotspot = found?.hotspot;
     if (!hotspot) return;
+
+    if (isPlaceOverviewHotspot(hotspot)) {
+      setEditingHotspotId(null);
+      return;
+    }
 
     setHotspotManageStatus('working');
     setHotspotManageError(null);
@@ -2580,6 +2678,7 @@ export function DevViewPanel({
     editingHotspotId,
     captureModel3dNamingPreview,
     isModel3dTour,
+    managedHotspots,
     onTourMutated,
     scene.id,
     scene.tourId,
@@ -3161,6 +3260,24 @@ export function DevViewPanel({
               />
             </label>
             <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Visibility
+              </span>
+              <select
+                className={devViewPanelSelectClassName}
+                value={noVisibility}
+                onChange={(e) =>
+                  setNoVisibility(e.target.value as DevCatalogTourVisibility)
+                }
+              >
+                {DEV_SCENE_VISIBILITY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={devViewPanelFieldClassName}>
               <span className={devViewPanelFieldLabelClassName}>Price</span>
               <input
                 className={devViewPanelInputClassName}
@@ -3400,6 +3517,9 @@ export function DevViewPanel({
                       ) ?
                         namingOpportunityStatusConfig(row.record.status)
                       : null;
+                    const namingVisibility = resolveNamingVisibility(
+                      row.record,
+                    );
                     return (
                       <li
                         key={row.record.id}
@@ -3408,6 +3528,12 @@ export function DevViewPanel({
                           isEditing &&
                             devViewPanelManageListItemActiveClassName,
                         )}
+                        onMouseEnter={() => {
+                          if (row.placement?.sceneId === currentSceneId) {
+                            previewHotspotHighlight(row.placement.hotspot.id);
+                          }
+                        }}
+                        onMouseLeave={restoreLockedHotspotHighlight}
                       >
                         <div
                           className={devViewPanelManageListItemHeadClassName}
@@ -3444,17 +3570,37 @@ export function DevViewPanel({
                               </>
                             : null}
                           </div>
-                          {statusConfig ?
+                          <div
+                            className={
+                              devViewPanelManageListItemSceneBadgesClassName
+                            }
+                          >
+                            {statusConfig ?
+                              <Badge
+                                variant='fill'
+                                size='sm'
+                                statusModifier={statusConfig.cssModifier}
+                                uppercase
+                                className={devNamingManageStatusBadgeClassName}
+                              >
+                                {statusConfig.shortLabel}
+                              </Badge>
+                            : null}
                             <Badge
                               variant='fill'
                               size='sm'
-                              statusModifier={statusConfig.cssModifier}
-                              uppercase
-                              className='shrink-0'
+                              tone='none'
+                              className={devSceneManageBadgeVariants({
+                                kind: namingVisibility,
+                              })}
                             >
-                              {statusConfig.shortLabel}
+                              {namingVisibility === 'public' ?
+                                'Public'
+                              : namingVisibility === 'unlisted' ?
+                                'Unlisted'
+                              : 'Internal'}
                             </Badge>
-                          : null}
+                          </div>
                         </div>
                         {row.sceneTitle ?
                           <p className={devViewPanelSectionHintClassName}>
@@ -3525,6 +3671,29 @@ export function DevViewPanel({
                                 spellCheck={false}
                                 autoComplete='off'
                               />
+                            </label>
+                            <label className={devViewPanelFieldClassName}>
+                              <span className={devViewPanelFieldLabelClassName}>
+                                Visibility
+                              </span>
+                              <select
+                                className={devViewPanelSelectClassName}
+                                value={catalogEditVisibility}
+                                onChange={(e) =>
+                                  setCatalogEditVisibility(
+                                    e.target.value as DevCatalogTourVisibility,
+                                  )
+                                }
+                              >
+                                {DEV_SCENE_VISIBILITY_OPTIONS.map((option) => (
+                                  <option
+                                    key={option.value}
+                                    value={option.value}
+                                  >
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </select>
                             </label>
                             <label className={devViewPanelFieldClassName}>
                               <span className={devViewPanelFieldLabelClassName}>
@@ -3982,7 +4151,8 @@ export function DevViewPanel({
                             </button>
                           : null}
                           {(
-                            isNamingInfoHotspot(hotspot) &&
+                            (isNamingInfoHotspot(hotspot) ||
+                              isPlaceOverviewHotspot(hotspot)) &&
                             openNamingOpportunity
                           ) ?
                             <button
@@ -3991,14 +4161,14 @@ export function DevViewPanel({
                                 tone: 'secondary',
                               })}
                               onClick={() => {
-                                const found = findHotspotInTour(
-                                  tour,
-                                  hotspot.id,
-                                );
-                                openNamingHotspot(
-                                  found?.sceneId ?? scene.id,
-                                  hotspot.id,
-                                );
+                                // Place-overview pins share id `info-place` —
+                                // always use this manage row's scene.
+                                const hostSceneId =
+                                  isPlaceOverviewHotspot(hotspot) ?
+                                    scene.id
+                                  : (findHotspotInTour(tour, hotspot.id)
+                                      ?.sceneId ?? scene.id);
+                                openNamingHotspot(hostSceneId, hotspot.id);
                               }}
                               disabled={hotspotManageStatus === 'working'}
                             >
@@ -4323,6 +4493,26 @@ export function DevViewPanel({
                                 </button>
                               </div>
                             </DevPanelFormGroup>
+                          : isPlaceOverviewHotspot(hotspot) ?
+                            <DevPanelFormGroup inline manageEdit>
+                              <p className={devViewPanelSectionHintClassName}>
+                                Place overview copy inherits the scene title and
+                                Description (or the first public naming body).
+                                Edit those on the Scene form. Use Move to
+                                reposition.
+                              </p>
+                              <div className={devViewPanelActionsClassName}>
+                                <button
+                                  type='button'
+                                  className={devViewPanelBtnVariants({
+                                    tone: 'secondary',
+                                  })}
+                                  onClick={() => setEditingHotspotId(null)}
+                                >
+                                  Done
+                                </button>
+                              </div>
+                            </DevPanelFormGroup>
                           : <DevPanelFormGroup inline manageEdit>
                               <label className={devViewPanelFieldClassName}>
                                 <span
@@ -4498,7 +4688,7 @@ export function DevViewPanel({
                 tabs={hotspotCreateTabs.map((tab) => ({
                   id: tab.id,
                   label: tab.label,
-                  kind: tab.id,
+                  kind: tab.id === 'overview' ? 'info' : tab.id,
                   htmlId: `dev-hotspot-tab-${tab.id}`,
                   ariaControls: `dev-hotspot-panel-${tab.id}`,
                 }))}
@@ -4909,7 +5099,7 @@ export function DevViewPanel({
                     : null}
                   </DevPanelFormGroup>
                 </div>
-              : canCreateInfoHotspot ?
+              : canCreateInfoHotspot && hotspotTab === 'info' ?
                 <div
                   id='dev-hotspot-panel-info'
                   role='tabpanel'
@@ -5076,6 +5266,72 @@ export function DevViewPanel({
                     : null}
                   </DevPanelFormGroup>
                 </div>
+              : canCreateOverviewHotspot && hotspotTab === 'overview' ?
+                <div
+                  id='dev-hotspot-panel-overview'
+                  role='tabpanel'
+                  aria-labelledby='dev-hotspot-tab-overview'
+                >
+                  <DevPanelFormGroup>
+                    <div className={devViewPanelFieldClassName}>
+                      <span className={devViewPanelFieldLabelClassName}>
+                        Hotspot position
+                      </span>
+                      <p className={devViewPanelSectionHintClassName}>
+                        {devViewerClickHint} — place overview pin for this
+                        scene. Title/body inherit the scene (or first public
+                        naming body). One per scene.
+                      </p>
+                      <input
+                        className={devViewPanelInputClassName}
+                        type='text'
+                        readOnly
+                        tabIndex={-1}
+                        value={clickCoords ? formatCoords(clickCoords) : ''}
+                        placeholder={devViewerClickPlaceholder}
+                      />
+                    </div>
+
+                    {sceneHasPlaceOverview ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        This scene already has a place overview hotspot. Delete
+                        it first to place another.
+                      </p>
+                    : null}
+
+                    <div className={devViewPanelActionsClassName}>
+                      <button
+                        type='button'
+                        className={devViewPanelBtnVariants({
+                          tone: 'secondary',
+                        })}
+                        onClick={() => setHotspotCreateOpen(false)}
+                        disabled={overviewStatus === 'working'}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type='button'
+                        className={devViewPanelBtnVariants({ tone: 'primary' })}
+                        onClick={() => void createPlaceOverviewHotspotHandler()}
+                        disabled={
+                          !canCreateOverview || overviewStatus === 'working'
+                        }
+                      >
+                        {overviewStatus === 'working' ?
+                          'Creating…'
+                        : overviewStatus === 'done' ?
+                          'Overview created!'
+                        : 'Create overview'}
+                      </button>
+                    </div>
+                    {overviewError ?
+                      <p className={devViewPanelSectionHintClassName}>
+                        {overviewError}
+                      </p>
+                    : null}
+                  </DevPanelFormGroup>
+                </div>
               : null}
             </div>
           </>
@@ -5183,7 +5439,9 @@ export function DevViewPanel({
                           : null}
                         </div>
                         <div
-                          className={devViewPanelManageListItemBadgesClassName}
+                          className={
+                            devViewPanelManageListItemSceneBadgesClassName
+                          }
                         >
                           {isFirst ?
                             <Badge
@@ -5239,14 +5497,23 @@ export function DevViewPanel({
                         >
                           {entry.description}
                         </p>
-                      : entry.placeLead ?
-                        <p
-                          className={devViewPanelManageListItemDescClassName}
-                          title={entry.placeLead}
-                        >
-                          Auto soft lead · {entry.placeLead}
-                        </p>
-                      : null}
+                      : (() => {
+                          const lead = buildScenePlaceLeadFromNaming(
+                            tour,
+                            entry,
+                          );
+                          return lead ?
+                              <p
+                                className={
+                                  devViewPanelManageListItemDescClassName
+                                }
+                                title={lead}
+                              >
+                                From NO · {lead}
+                              </p>
+                            : null;
+                        })()
+                      }
                       <div className={devViewPanelActionsClassName}>
                         <button
                           type='button'
@@ -5301,6 +5568,37 @@ export function DevViewPanel({
                           </label>
                           <label className={devViewPanelFieldClassName}>
                             <span className={devViewPanelFieldLabelClassName}>
+                              Visibility
+                            </span>
+                            <select
+                              className={devViewPanelSelectClassName}
+                              value={
+                                isFirst || editSceneAsFirst ? 'public' : (
+                                  editSceneVisibility
+                                )
+                              }
+                              onChange={(e) =>
+                                setEditSceneVisibility(
+                                  e.target.value as DevCatalogTourVisibility,
+                                )
+                              }
+                              disabled={isFirst || editSceneAsFirst}
+                            >
+                              {DEV_SCENE_VISIBILITY_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            <p className={devViewPanelSectionHintClassName}>
+                              {isFirst || editSceneAsFirst ?
+                                'firstScene must stay Public.'
+                              : 'Explore shows Public only. Unlisted is link/share. Internal needs ?dev=1.'
+                              }
+                            </p>
+                          </label>
+                          <label className={devViewPanelFieldClassName}>
+                            <span className={devViewPanelFieldLabelClassName}>
                               Description
                             </span>
                             <textarea
@@ -5313,13 +5611,15 @@ export function DevViewPanel({
                               placeholder='Optional client place copy — leave empty to remove'
                             />
                             <p className={devViewPanelSectionHintClassName}>
-                              Wins over soft lead in Explore / nav preview when
-                              set. Leave empty to use auto soft lead from NO.
+                              When set, Explore / nav and place overview use
+                              this copy. Leave empty to inherit the first public
+                              naming body (short in nav, full in place
+                              overview).
                             </p>
                           </label>
                           <div className={devViewPanelFieldClassName}>
                             <span className={devViewPanelFieldLabelClassName}>
-                              Soft lead
+                              Inherited place copy
                             </span>
                             {(() => {
                               const draftDesc = editSceneDescription.trim();
@@ -5332,15 +5632,14 @@ export function DevViewPanel({
                                 );
                               const autoLead =
                                 buildScenePlaceLeadFromNaming(tour, entry) ||
-                                entry.placeLead?.trim() ||
                                 '';
                               if (usingRealDescription) {
                                 return (
                                   <p
                                     className={devViewPanelSectionHintClassName}
                                   >
-                                    Using Description — soft lead is ignored
-                                    while Description is set.
+                                    Using Description — naming inherit is
+                                    ignored while Description is set.
                                   </p>
                                 );
                               }
@@ -5353,15 +5652,16 @@ export function DevViewPanel({
                                       }
                                       title={autoLead}
                                     >
-                                      Auto from NO · {autoLead}
+                                      From NO (nav teaser) · {autoLead}
                                     </p>
                                     <p
                                       className={
                                         devViewPanelSectionHintClassName
                                       }
                                     >
-                                      Updates automatically when NO copy changes
-                                      (Description empty).
+                                      Updates automatically when NO copy
+                                      changes. Place overview shows the full NO
+                                      body.
                                     </p>
                                   </>
                                 );
@@ -5422,37 +5722,6 @@ export function DevViewPanel({
                               </label>
                             </>
                           : null}
-                          <label className={devViewPanelFieldClassName}>
-                            <span className={devViewPanelFieldLabelClassName}>
-                              Visibility
-                            </span>
-                            <select
-                              className={devViewPanelSelectClassName}
-                              value={
-                                isFirst || editSceneAsFirst ? 'public' : (
-                                  editSceneVisibility
-                                )
-                              }
-                              onChange={(e) =>
-                                setEditSceneVisibility(
-                                  e.target.value as DevCatalogTourVisibility,
-                                )
-                              }
-                              disabled={isFirst || editSceneAsFirst}
-                            >
-                              {DEV_SCENE_VISIBILITY_OPTIONS.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                            <p className={devViewPanelSectionHintClassName}>
-                              {isFirst || editSceneAsFirst ?
-                                'firstScene must stay Public.'
-                              : 'Explore shows Public only. Unlisted is link/share. Internal needs ?dev=1.'
-                              }
-                            </p>
-                          </label>
                           <div className={devViewPanelToggleListClassName}>
                             {!isFirst ?
                               <label
@@ -5588,6 +5857,29 @@ export function DevViewPanel({
                 spellCheck={true}
               />
             </label>
+
+            {!isModel3dTour ?
+              <label className={devViewPanelToggleLabelMultilineClassName}>
+                <input
+                  type='checkbox'
+                  className={devViewPanelToggleInputClassName}
+                  checked={sceneCreatePlaceOverview}
+                  onChange={(e) =>
+                    setSceneCreatePlaceOverview(e.currentTarget.checked)
+                  }
+                />
+                <span className={devViewPanelToggleTextClassName}>
+                  <span className={devViewPanelToggleNameClassName}>
+                    Create place overview hotspot
+                  </span>
+                  <span className={devViewPanelToggleHintClassName}>
+                    {' '}
+                    — Off by default. When off, this scene won&apos;t get an
+                    auto overview pin (even after you add a description later).
+                  </span>
+                </span>
+              </label>
+            : null}
 
             {!isModel3dTour ?
               <>
@@ -6267,11 +6559,8 @@ export function DevViewPanel({
                                       }
                                     >
                                       Permanently deletes{' '}
-                                      <code>tours/{entry.id}.json</code>,{' '}
-                                      <code>
-                                        tours/{entry.id}-knowledge.json
-                                      </code>
-                                      , catalog entry, and{' '}
+                                      <code>tours/{entry.id}.json</code>,
+                                      catalog entry, and{' '}
                                       <code>
                                         assets/{entry.clientId}/{entry.id}/
                                       </code>

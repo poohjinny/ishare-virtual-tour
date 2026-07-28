@@ -49,6 +49,7 @@ import { ExploreSceneDescriptionView } from './ExploreSceneDescriptionView';
 import { ExploreSceneDetailPanel } from './ExploreSceneDetailPanel';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
+import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
   TOUR_NAV_ACTION_SHARE,
@@ -198,6 +199,11 @@ interface TourNavFloatProps {
   onBreadcrumbNavigate: (sceneId: string) => void;
   /** Recenter the live scene to its default view — used when "Visiting" the current place. */
   onRecenterCurrentScene?: () => void;
+  /**
+   * Toggle in-scene place-overview panel. Returns false when no pin exists
+   * (breadcrumb falls back to Explore detail).
+   */
+  onTogglePlaceOverview?: () => boolean;
   /** Info hotspot id when a naming opportunity panel is open in-scene. */
   activeNamingHotspotId?: string | null;
   /** `?embed=1` — hide Share/Help FAB; PSV control pill stays on. */
@@ -349,6 +355,7 @@ export function TourNavFloat({
   onVisitNamingPlace,
   onBreadcrumbNavigate,
   onRecenterCurrentScene,
+  onTogglePlaceOverview,
   activeNamingHotspotId = null,
   embed = false,
   panelStack,
@@ -517,10 +524,19 @@ export function TourNavFloat({
 
   const currentSceneHasDetails = Boolean(currentScene);
 
+  const placeOverviewOpen = Boolean(
+    activeNamingHotspotId &&
+    currentScene?.hotspots?.some(
+      (hotspot) =>
+        hotspot.id === activeNamingHotspotId && isPlaceOverviewHotspot(hotspot),
+    ),
+  );
+
   const currentSceneDetailOpen =
-    (panelMode === 'explore' || displayPanel === 'explore') &&
-    exploreSceneDetailId === currentSceneId &&
-    !exploreSceneDetailExiting;
+    placeOverviewOpen ||
+    ((panelMode === 'explore' || displayPanel === 'explore') &&
+      exploreSceneDetailId === currentSceneId &&
+      !exploreSceneDetailExiting);
 
   const activeNamingItem = useMemo(() => {
     if (!activeNamingHotspotId) return null;
@@ -952,9 +968,8 @@ export function TourNavFloat({
         !exploreSceneDetailExiting;
 
       if (showingSameDetail) {
-        // Drop detail immediately so exit doesn't briefly flash the directory.
-        setExploreSceneDetailExiting(false);
-        setExploreSceneDetailId(null);
+        // Keep detail mounted through the panel exit — clearing it first flashes
+        // the directory/gallery under the closing animation.
         closePanel();
         return;
       }
@@ -982,9 +997,26 @@ export function TourNavFloat({
     ],
   );
 
+  /**
+   * Breadcrumb info — prefer in-scene place-overview; fall back to Explore detail
+   * when the scene has no auto pin (e.g. no description / NO body, or suppressed).
+   */
   const handleBreadcrumbSceneDetails = useCallback(() => {
+    if (onTogglePlaceOverview?.()) {
+      if (panelMode === 'explore' || displayPanel === 'explore') {
+        closePanel();
+      }
+      return;
+    }
     openExploreWithSceneDetail(currentSceneId);
-  }, [currentSceneId, openExploreWithSceneDetail]);
+  }, [
+    closePanel,
+    currentSceneId,
+    displayPanel,
+    onTogglePlaceOverview,
+    openExploreWithSceneDetail,
+    panelMode,
+  ]);
 
   useEffect(() => {
     if (targetPanel === displayPanel) {
@@ -1366,6 +1398,7 @@ export function TourNavFloat({
                     tourTitle={tourTitle}
                     tourHotspots={tourHotspots}
                     tourViewerType={tourViewerType}
+                    namingOpportunities={namingOpportunities}
                     active={scene.id === currentSceneId}
                     isTourStart={scene.id === firstSceneId}
                     contextLabel={contextLabel}
@@ -1398,6 +1431,7 @@ export function TourNavFloat({
                     tourTitle={tourTitle}
                     tourHotspots={tourHotspots}
                     tourViewerType={tourViewerType}
+                    namingOpportunities={namingOpportunities}
                     active={scene.id === currentSceneId}
                     isTourStart={scene.id === firstSceneId}
                     contextLabel={contextLabel}
@@ -1890,6 +1924,7 @@ export function TourNavFloat({
                   tourTitle={tourTitle}
                   tourHotspots={tourHotspots}
                   tourViewerType={tourViewerType}
+                  namingOpportunities={namingOpportunities}
                   active={exploreSceneDetail.id === currentSceneId}
                   disabled={locationNavDisabled}
                   onBack={requestCloseExploreSceneDetail}

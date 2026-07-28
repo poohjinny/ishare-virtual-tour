@@ -380,10 +380,14 @@ function TourExperience() {
     if (!tour) return null;
     const noSearchValue = urlSearchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
     if (!noSearchValue) return null;
-    const resolved = resolveNamingOpportunityFromSearch(tour, noSearchValue);
+    const resolved = resolveNamingOpportunityFromSearch(
+      tour,
+      noSearchValue,
+      sceneAudience,
+    );
     if (!resolved || resolved.sceneId !== initialScene) return null;
     return resolved.hotspotId;
-  }, [initialScene, tour, urlSearchParams]);
+  }, [initialScene, sceneAudience, tour, urlSearchParams]);
 
   const landingTargetView = useMemo(() => {
     if (!tour || !landingNamingHotspotId) return undefined;
@@ -560,6 +564,7 @@ function TourExperience() {
     currentSceneId,
     isTransitioning,
     splashDone: splashPhase === 'done',
+    audience: sceneAudience,
     viewerRef,
     pendingNamingSelectionRef,
     setActiveNamingHotspotId,
@@ -1088,6 +1093,9 @@ function TourExperience() {
           onVisitNamingPlace={handleVisitNamingPlace}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
           onRecenterCurrentScene={handleVisitCurrentScene}
+          onTogglePlaceOverview={() =>
+            viewerRef.current?.togglePlaceOverview() ?? false
+          }
           activeNamingHotspotId={activeNamingHotspotId}
           embed={searchParams.embed}
           panelStack={panelStack}

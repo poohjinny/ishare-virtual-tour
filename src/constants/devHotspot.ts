@@ -34,10 +34,10 @@ export const DEV_NAMING_DONOR_KIND_OPTIONS: {
   { value: 'person', label: 'Person' },
 ];
 
-export type DevHotspotTab = 'nav' | 'naming' | 'info';
+export type DevHotspotTab = 'nav' | 'naming' | 'info' | 'overview';
 
 /** Manage-list filter — includes All plus create-type buckets. */
-export type DevHotspotManageFilter = 'all' | DevHotspotTab;
+export type DevHotspotManageFilter = 'all' | 'nav' | 'naming' | 'info';
 
 export const DEV_INFO_DISPLAY_OPTIONS: {
   value: 'modal' | 'anchored';
@@ -48,10 +48,15 @@ export const DEV_INFO_DISPLAY_OPTIONS: {
 ];
 
 export const DEV_HOTSPOT_TABS: { id: DevHotspotTab; label: string }[] = [
+  { id: 'overview', label: 'Overview' },
   { id: 'nav', label: 'Navigation' },
   { id: 'naming', label: 'Naming' },
   { id: 'info', label: 'Info' },
 ];
+
+/** model3d — no place-overview pins. */
+export const DEV_HOTSPOT_TABS_MODEL3D: { id: DevHotspotTab; label: string }[] =
+  DEV_HOTSPOT_TABS.filter((tab) => tab.id !== 'overview');
 
 export const DEV_HOTSPOT_MANAGE_FILTER_TABS: {
   id: DevHotspotManageFilter;
@@ -117,13 +122,13 @@ export function getDevHotspotSectionConfig(
           'Placements on the current viewpoint — nav, naming (where), and info. Naming business fields live on the Naming tab.',
         emptyMessage: 'No hotspots on this viewpoint yet.',
         addButtonLabel: 'Add hotspot',
-        createTabs: DEV_HOTSPOT_TABS,
+        createTabs: DEV_HOTSPOT_TABS_MODEL3D,
       };
     default:
       return {
         title: 'Hotspots',
         description:
-          'Placements on this scene — nav, naming (where), and info. Naming business fields live on the Naming tab.',
+          'Placements on this scene — nav, naming (where), info, and place overview. Naming business fields live on the Naming tab.',
         emptyMessage: 'No hotspots on this scene yet.',
         addButtonLabel: 'Add hotspot',
         createTabs: DEV_HOTSPOT_TABS,

@@ -7,6 +7,7 @@ import {
   createNamingHotspot,
   createNamingOpportunity,
   createInfoHotspot,
+  createPlaceOverviewHotspot,
   createNavHotspot,
   createScene,
   deleteHotspot,
@@ -44,12 +45,6 @@ import {
   suggestBrandingFromWebsite,
 } from '../lib/tourBrandDev.mjs';
 import { suggestContactFromWebsite } from '../lib/tourContactDev.mjs';
-import {
-  readKnowledgeJson,
-  updateKnowledge,
-  validateUpdateKnowledgePayload,
-  buildKnowledgeStub,
-} from '../lib/tourKnowledgeDev.mjs';
 import { createTour, listCatalogClients } from '../lib/tourCreateDev.mjs';
 
 const RESERVED_TOUR_API_IDS = new Set([
@@ -154,6 +149,7 @@ function validateCreateScenePayload(body, toursDir) {
     sceneId,
     previewVideoUrl,
     videoUrl,
+    createPlaceOverview,
   } = body ?? {};
   if (!tourId || !title) {
     throw new Error('tourId and title are required');
@@ -240,6 +236,7 @@ function validateCreateScenePayload(body, toursDir) {
     previewVideoUrl:
       typeof previewVideoUrl === 'string' ? previewVideoUrl : undefined,
     videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
+    createPlaceOverview: createPlaceOverview === true,
   };
 }
 
@@ -318,7 +315,6 @@ function validateUpdateScenePayload(body) {
     sceneId,
     title,
     description,
-    placeLead,
     previewVideoUrl,
     videoUrl,
     visibility,
@@ -330,14 +326,13 @@ function validateUpdateScenePayload(body) {
   if (
     !title?.trim() &&
     description === undefined &&
-    placeLead === undefined &&
     previewVideoUrl === undefined &&
     videoUrl === undefined &&
     visibility === undefined &&
     setAsFirstScene !== true
   ) {
     throw new Error(
-      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, visibility, or setAsFirstScene is required',
+      'At least one of title, description, previewVideoUrl, videoUrl, visibility, or setAsFirstScene is required',
     );
   }
 
@@ -346,7 +341,6 @@ function validateUpdateScenePayload(body) {
     sceneId: sceneId.trim(),
     title,
     description,
-    placeLead: typeof placeLead === 'string' ? placeLead : undefined,
     previewVideoUrl:
       typeof previewVideoUrl === 'string' ? previewVideoUrl : undefined,
     videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
@@ -411,6 +405,7 @@ function validateNamingHotspotUpdatePayload(body) {
     videoUrl,
     image,
     donor,
+    visibility,
     targetView,
   } = body ?? {};
   const hasPrice = price !== undefined;
@@ -454,13 +449,14 @@ function validateNamingHotspotUpdatePayload(body) {
     videoUrl === undefined &&
     image === undefined &&
     donor === undefined &&
+    visibility === undefined &&
     donorLogoFileBuffer === undefined &&
     !body?.clearDonorLogo &&
     !targetView &&
     previewFileBuffer === undefined
   ) {
     throw new Error(
-      'At least one of namingId, title, price, status, body, videoUrl, image, donor, donor logo, targetView, or preview is required',
+      'At least one of namingId, title, price, status, body, videoUrl, image, donor, visibility, donor logo, targetView, or preview is required',
     );
   }
   return {
@@ -475,6 +471,10 @@ function validateNamingHotspotUpdatePayload(body) {
     videoUrl,
     image,
     donor,
+    visibility:
+      typeof visibility === 'string' || visibility === null ?
+        visibility
+      : undefined,
     donorLogoFileBuffer,
     clearDonorLogo: Boolean(body?.clearDonorLogo),
     targetView,
@@ -848,6 +848,7 @@ function validateCreateNamingOpportunityPayload(body) {
     videoUrl: body?.videoUrl,
     image: body?.image,
     donor: body?.donor,
+    visibility: body?.visibility,
     donorLogoFileBuffer,
   };
 }
@@ -905,6 +906,13 @@ function validateCreateInfoHotspotPayload(body) {
     image,
     visitScene,
   };
+}
+
+function validateCreatePlaceOverviewHotspotPayload(body) {
+  const { tourId, sceneId, position } = validateHotspotPayload(body, {
+    requireName: false,
+  });
+  return { tourId, sceneId, position };
 }
 
 function validateSuggestBrandingPayload(body) {
@@ -1095,25 +1103,6 @@ export function viteDevTourApiPlugin() {
             return;
           }
 
-          const knowledgeFetchMatch = req.url.match(
-            /^\/__dev\/api\/knowledge\/([^/?]+)/,
-          );
-          if (knowledgeFetchMatch && req.method === 'GET') {
-            const tourId = decodeURIComponent(knowledgeFetchMatch[1]);
-            const { knowledgePath, knowledge, missing } = readKnowledgeJson(
-              toursDir,
-              tourId,
-            );
-            sendJson(res, 200, {
-              ok: true,
-              tourId,
-              knowledgePath,
-              knowledge: knowledge ?? buildKnowledgeStub(toursDir, tourId),
-              missing,
-            });
-            return;
-          }
-
           if (
             req.url === '/__dev/api/catalog/clients' &&
             req.method === 'GET'
@@ -1267,19 +1256,6 @@ export function viteDevTourApiPlugin() {
             return;
           }
 
-          if (req.url === '/__dev/api/knowledge/update') {
-            const payload = validateUpdateKnowledgePayload(body);
-            const result = updateKnowledge({ toursDir, ...payload });
-            sendJson(res, 200, {
-              ok: true,
-              tourId: payload.tourId,
-              knowledgePath: result.knowledgePath,
-              knowledge: result.knowledge,
-              created: result.created,
-            });
-            return;
-          }
-
           if (req.url === '/__dev/api/tour/create') {
             const payload = validateCreateTourPayload(body);
             const result = await createTour({
@@ -1344,6 +1320,7 @@ export function viteDevTourApiPlugin() {
               sceneId,
               previewVideoUrl,
               videoUrl,
+              createPlaceOverview,
             } = validateCreateScenePayload(body, toursDir);
             const result = await createScene({
               root,
@@ -1360,6 +1337,7 @@ export function viteDevTourApiPlugin() {
               description,
               previewVideoUrl,
               videoUrl,
+              createPlaceOverview,
             });
             sendJson(res, 200, {
               ok: true,
@@ -1418,7 +1396,6 @@ export function viteDevTourApiPlugin() {
               sceneId,
               title,
               description,
-              placeLead,
               previewVideoUrl,
               videoUrl,
               visibility,
@@ -1430,7 +1407,6 @@ export function viteDevTourApiPlugin() {
               sceneId,
               title,
               description,
-              placeLead,
               previewVideoUrl,
               videoUrl,
               visibility,
@@ -1506,6 +1482,7 @@ export function viteDevTourApiPlugin() {
               videoUrl,
               image,
               donor,
+              visibility,
               donorLogoFileBuffer,
               clearDonorLogo,
               targetView,
@@ -1526,6 +1503,7 @@ export function viteDevTourApiPlugin() {
               videoUrl,
               image,
               donor,
+              visibility,
               donorLogoFileBuffer,
               clearDonorLogo,
               targetView,
@@ -1660,6 +1638,7 @@ export function viteDevTourApiPlugin() {
               videoUrl,
               image,
               donor,
+              visibility,
               donorLogoFileBuffer,
             } = validateCreateNamingOpportunityPayload(body);
             const result = await createNamingOpportunity({
@@ -1675,6 +1654,7 @@ export function viteDevTourApiPlugin() {
               videoUrl,
               image,
               donor,
+              visibility,
               donorLogoFileBuffer,
             });
             sendJson(res, 200, {
@@ -1741,6 +1721,25 @@ export function viteDevTourApiPlugin() {
               videoUrl,
               image,
               visitScene,
+            });
+            sendJson(res, 200, {
+              ok: true,
+              tourId,
+              sceneId,
+              hotspot: result.hotspot,
+              tourPath: result.tourPath,
+            });
+            return;
+          }
+
+          if (req.url === '/__dev/api/hotspot/place-overview') {
+            const { tourId, sceneId, position } =
+              validateCreatePlaceOverviewHotspotPayload(body);
+            const result = createPlaceOverviewHotspot({
+              toursDir,
+              tourId,
+              sceneId,
+              position,
             });
             sendJson(res, 200, {
               ok: true,

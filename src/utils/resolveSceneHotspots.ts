@@ -10,7 +10,9 @@ import {
  * Scene wins on duplicate `id`.
  */
 export function resolveSceneHotspots(
-  tour: Pick<Tour, 'hotspots'> & { scenes?: Tour['scenes'] },
+  tour: Pick<Tour, 'hotspots' | 'namingOpportunities'> & {
+    scenes?: Tour['scenes'];
+  },
   scene: Pick<Scene, 'hotspots'>,
   audience: SceneVisibilityAudience = {},
 ): Hotspot[] {
@@ -34,7 +36,9 @@ export function resolveSceneHotspots(
 
 /** Nav hotspots reachable from a scene — used for breadcrumbs and depth graph. */
 export function resolveSceneNavHotspots(
-  tour: Pick<Tour, 'hotspots'> & { scenes?: Tour['scenes'] },
+  tour: Pick<Tour, 'hotspots' | 'namingOpportunities'> & {
+    scenes?: Tour['scenes'];
+  },
   scene: Pick<Scene, 'hotspots'>,
   audience: SceneVisibilityAudience = {},
 ): Hotspot[] {

@@ -4,6 +4,7 @@ import {
   navHotspotVariantModifierClass,
   resolveNavHotspotVariant,
 } from '../constants/navHotspotVariant';
+import { PLACE_OVERVIEW_HOTSPOT_LABEL } from '../constants/tourDirectory';
 import { isGeneralInfoHotspot } from '../data/generalInfoHotspot';
 import {
   namingOpportunityStatusConfig,
@@ -16,6 +17,7 @@ import {
   resolveNamingPopup,
   isNamingHotspot,
 } from '../utils/namingSceneInherit';
+import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import type { Hotspot, Scene, Tour, ViewPosition } from '../types/tour';
 
 export function escapeHtml(text: string): string {
@@ -129,20 +131,46 @@ function buildNavHtml(hotspot: Hotspot, tour: Tour): string {
   `;
 }
 
+const HOTSPOT_GENERAL_INFO_ICON_SIZE_PX = 16;
+
 const HOTSPOT_GENERAL_INFO_ICON_HTML = materialSymbolHtml('info_i', {
   className: 'hotspot-general-info__icon-symbol',
-  sizePx: 18,
+  sizePx: HOTSPOT_GENERAL_INFO_ICON_SIZE_PX,
 });
 
-function buildGeneralInfoHtml(hotspot: Hotspot): string {
-  const title = hotspot.popup?.title?.trim() ?? hotspot.label?.trim();
-  const ariaLabel = title ?? 'Information';
-  const tooltipLabel = title ?? 'Learn more';
+const HOTSPOT_PLACE_OVERVIEW_ICON_HTML = materialSymbolHtml('flag', {
+  className: 'hotspot-general-info__icon-symbol',
+  sizePx: HOTSPOT_GENERAL_INFO_ICON_SIZE_PX,
+});
+
+function buildGeneralInfoHtml(
+  hotspot: Hotspot,
+  tour: Tour,
+  hostScene?: Scene,
+): string {
+  const placeOverview = isPlaceOverviewHotspot(hotspot);
+  const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
+  const title =
+    placeOverview ?
+      scene?.title?.trim() || hotspot.popup?.title?.trim() || 'Place'
+    : (hotspot.popup?.title?.trim() ?? hotspot.label?.trim());
+  const ariaLabel =
+    placeOverview ?
+      `${title} — ${PLACE_OVERVIEW_HOTSPOT_LABEL}`
+    : (title ?? 'Information');
+  const tooltipLabel =
+    placeOverview ? PLACE_OVERVIEW_HOTSPOT_LABEL : (title ?? 'Learn more');
+  const modifierClass =
+    placeOverview ? ' hotspot-general-info--place-overview' : '';
+  const iconHtml =
+    placeOverview ?
+      HOTSPOT_PLACE_OVERVIEW_ICON_HTML
+    : HOTSPOT_GENERAL_INFO_ICON_HTML;
 
   return `
-    <button type="button" class="hotspot-general-info ishare-tooltip-host" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}" data-ishare-tooltip="${escapeHtml(tooltipLabel)}" data-ishare-tooltip-placement="top">
+    <button type="button" class="hotspot-general-info${modifierClass} ishare-tooltip-host" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}" data-ishare-tooltip="${escapeHtml(tooltipLabel)}" data-ishare-tooltip-placement="top">
       <span class="hotspot-general-info__chip" aria-hidden="true">
-        <span class="hotspot-general-info__icon">${HOTSPOT_GENERAL_INFO_ICON_HTML}</span>
+        <span class="hotspot-general-info__icon">${iconHtml}</span>
       </span>
     </button>
   `;
@@ -197,7 +225,7 @@ export function hotspotToMarkerConfig(
   const html =
     displayHotspot.type === 'nav' ? buildNavHtml(displayHotspot, tour)
     : isGeneralInfoHotspot(displayHotspot) ?
-      buildGeneralInfoHtml(displayHotspot)
+      buildGeneralInfoHtml(displayHotspot, tour, hostScene)
     : buildInfoHtml(displayHotspot, tour, hostScene);
 
   const pos = hotspot.position as ViewPosition;

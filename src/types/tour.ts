@@ -110,6 +110,12 @@ export interface NamingOpportunityRecord {
   videoUrl?: string;
   /** Optional panel image. */
   image?: string;
+  /**
+   * Discoverability — omit / undefined = public.
+   * Same tiers as scenes: Explore + markers = public; unlisted = `?no=` link;
+   * internal = `?dev=1` only.
+   */
+  visibility?: 'public' | 'unlisted' | 'internal';
 }
 
 export interface PopupSponsor {
@@ -165,6 +171,13 @@ export interface Hotspot {
    * Per-hotspot camera + Explore thumbnail live on `targetView` / `preview.image`.
    */
   sceneId?: string;
+  /**
+   * Auto place-overview pin — inherits scene title/description at display time.
+   * Stable id is typically `info-place`.
+   */
+  role?: 'placeOverview';
+  /** Author moved this place-overview pin — stop syncing position to defaultView. */
+  placeOverviewManual?: boolean;
 }
 
 /** Naming opportunity summary — accordion row in nav preview. */
@@ -217,15 +230,14 @@ export interface Scene {
   title: string;
   description?: string;
   /**
-   * Soft place lead when `description` is empty (or only the auto placeholder) —
-   * often generated from NO copy. Real client `description` still wins.
-   */
-  placeLead?: string;
-  /**
    * Discoverability — same tiers as catalog tours (`undefined` = public).
    * Explore shows public only; unlisted is URL/share; internal needs `?dev=1`.
    */
   visibility?: 'public' | 'unlisted' | 'internal';
+  /**
+   * Author deleted the auto place-overview pin — do not recreate while set.
+   */
+  suppressPlaceOverview?: boolean;
   /** Optional hero video — Synthesia embed or hosted mp4/webm; Explore + nav preview hero. */
   previewVideoUrl?: string;
   /** Optional body video — YouTube; Explore scene detail + nav preview body. */
@@ -327,26 +339,6 @@ export interface Tour {
 /** Live viewer orientation for dev tooling */
 export interface ViewerOrientation extends ViewPosition {
   hFov: number;
-}
-
-export interface FaqEntry {
-  q: string;
-  a: string;
-}
-
-export interface SceneKnowledge {
-  title: string;
-  description: string;
-  facts: string[];
-  faqs: FaqEntry[];
-  suggestedQuestions: string[];
-}
-
-export interface TourKnowledge {
-  id: string;
-  url: string;
-  global: { facilityName: string; summary: string };
-  scenes: Record<string, SceneKnowledge>;
 }
 
 /** Ask Guide interactive card — place or naming opportunity. */

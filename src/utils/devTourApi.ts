@@ -1,5 +1,4 @@
 import type {
-  FaqEntry,
   Hotspot,
   NamingDonor,
   NamingOpportunityRecord,
@@ -7,7 +6,6 @@ import type {
   NavHotspotVariant,
   PopupDisplay,
   Tour,
-  TourKnowledge,
   ViewPosition,
 } from '../types/tour';
 import {
@@ -62,6 +60,7 @@ export interface DevNamingOpportunityPayload {
   image?: string;
   donor?: NamingDonor | null;
   donorLogoFile?: Blob | File | null;
+  visibility?: 'public' | 'unlisted' | 'internal';
 }
 
 export interface DevNamingHotspotPayload extends Omit<
@@ -80,6 +79,12 @@ export interface DevInfoHotspotPayload extends DevHotspotBasePayload {
   videoUrl?: string;
   image?: string;
   visitScene?: string;
+}
+
+export interface DevPlaceOverviewHotspotPayload {
+  tourId: string;
+  sceneId: string;
+  position: ViewPosition | { x: number; y: number; z: number };
 }
 
 async function patchDevTourJson<T>(path: string, payload: unknown): Promise<T> {
@@ -144,6 +149,8 @@ export interface DevCreateScenePayload {
   previewVideoUrl?: string;
   videoUrl?: string;
   sceneId?: string;
+  /** Panorama only — opt-in place-overview pin (default false → suppress). */
+  createPlaceOverview?: boolean;
 }
 
 export async function devApplySceneDefaultView({
@@ -229,6 +236,15 @@ export async function devCreateNamingHotspot({
 export function devCreateInfoHotspot(payload: DevInfoHotspotPayload) {
   return postDevTourJson<{ ok: true; hotspot: Hotspot }>(
     '/hotspot/info',
+    payload,
+  );
+}
+
+export function devCreatePlaceOverviewHotspot(
+  payload: DevPlaceOverviewHotspotPayload,
+) {
+  return postDevTourJson<{ ok: true; hotspot: Hotspot }>(
+    '/hotspot/place-overview',
     payload,
   );
 }
@@ -643,48 +659,6 @@ export async function devFetchTour(tourId: string): Promise<Tour> {
   return tour;
 }
 
-export async function devFetchKnowledge(
-  tourId: string,
-): Promise<{ knowledge: TourKnowledge; missing: boolean }> {
-  const response = await fetch(
-    `${DEV_API_BASE}/knowledge/${encodeURIComponent(tourId)}`,
-  );
-  const data = (await response.json()) as {
-    error?: string;
-    knowledge?: TourKnowledge;
-    missing?: boolean;
-  };
-  if (!response.ok || !data.knowledge) {
-    throw new DevTourApiError(
-      data.error ?? `Dev API failed (${response.status})`,
-    );
-  }
-  return { knowledge: data.knowledge, missing: data.missing ?? false };
-}
-
-export interface DevUpdateKnowledgePayload {
-  tourId: string;
-  url?: string;
-  global?: { facilityName?: string; summary?: string };
-  sceneId?: string;
-  scene?: {
-    title?: string;
-    description?: string;
-    facts?: string[];
-    faqs?: FaqEntry[];
-    suggestedQuestions?: string[];
-  };
-}
-
-export function devUpdateKnowledge(payload: DevUpdateKnowledgePayload) {
-  return postDevTourJson<{
-    ok: true;
-    tourId: string;
-    knowledge: TourKnowledge;
-    created: boolean;
-  }>('/knowledge/update', payload);
-}
-
 export interface DevDeleteTourPayload {
   tourId: string;
   confirmTourId: string;
@@ -731,7 +705,6 @@ export interface DevUpdateScenePayload {
   sceneId: string;
   title?: string;
   description?: string;
-  placeLead?: string;
   previewVideoUrl?: string;
   videoUrl?: string;
   visibility?: 'public' | 'unlisted' | 'internal';
@@ -767,6 +740,7 @@ export interface DevUpdateNamingHotspotPayload extends DevHotspotIdPayload {
   donor?: NamingDonor | null;
   donorLogoFile?: Blob | File | null;
   clearDonorLogo?: boolean;
+  visibility?: 'public' | 'unlisted' | 'internal';
   targetView?: ViewPosition;
   previewFile?: Blob | File | null;
   syncPreviewFromCurrentView?: boolean;

@@ -33,7 +33,10 @@ export const DEV_SCENE_VISIBILITY_OPTIONS: {
   label: string;
 }[] = [
   { value: 'public', label: 'Public (Explore)' },
-  { value: 'unlisted', label: 'Unlisted (direct link / share)' },
+  {
+    value: 'unlisted',
+    label: 'Unlisted (link only — hidden from Explore & nav)',
+  },
   { value: 'internal', label: 'Internal (?dev=1 only)' },
 ];
 

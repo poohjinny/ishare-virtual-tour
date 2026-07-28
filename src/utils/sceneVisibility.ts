@@ -1,4 +1,6 @@
 import type { Hotspot, Scene, Tour } from '../types/tour';
+import { isNamingHotspot } from './namingSceneInherit';
+import { isNamingHotspotVisibleInExplore } from './namingVisibility';
 
 /** Same tiers as catalog tours — omit / undefined = public. */
 export type SceneVisibility = 'public' | 'unlisted' | 'internal';
@@ -9,9 +11,9 @@ export type SceneVisibilityAudience = {
 };
 
 /**
- * In-viewer hotspot markers always use visitor routing rules so authors in
- * `?dev=1` see the same nav set as the public tour. Internal destinations stay
- * reachable via Dev panel / direct URL when `?dev=1`.
+ * In-viewer hotspot markers use Explore visibility for nav destinations:
+ * public only. Unlisted/internal stay reachable via direct URL (and Dev panel /
+ * `?dev=1` for internal), not as in-space nav pills.
  */
 export const VIEWER_MARKER_AUDIENCE: SceneVisibilityAudience = {};
 
@@ -31,8 +33,9 @@ export function isSceneVisibleInExplore(
 }
 
 /**
- * Direct URL / share / nav hotspot destination.
+ * Direct URL / share / programmatic navigate destination.
  * public + unlisted always; internal only when `dev`.
+ * In-space nav markers use {@link isSceneVisibleInExplore} instead.
  */
 export function isSceneRoutable(
   scene: Pick<Scene, 'visibility'> | null | undefined,
@@ -75,20 +78,36 @@ export function resolveRoutableSceneId(
   return tour.firstScene;
 }
 
-/** Drop nav markers whose destination is not routable for this audience. */
+/**
+ * Drop nav markers whose destination is not Explore-visible (public), and
+ * naming pins whose catalog visibility is not Explore-public.
+ * Unlisted/internal stay reachable via direct URL / `?no=` (and `?dev=1`
+ * for internal), not as in-space markers — including authoring (`?dev=1`).
+ */
 export function filterHotspotsForAudience(
-  tour: { scenes?: Tour['scenes'] },
+  tour: {
+    scenes?: Tour['scenes'];
+    namingOpportunities?: Tour['namingOpportunities'];
+  },
   hotspots: Hotspot[],
-  audience: SceneVisibilityAudience = {},
+  _audience: SceneVisibilityAudience = {},
 ): Hotspot[] {
   const scenes = tour.scenes;
   // Callers that only merge hotspot lists (no scene map) skip visibility filtering.
   if (!scenes) return hotspots;
 
   return hotspots.filter((hotspot) => {
-    if (hotspot.type !== 'nav' || !hotspot.targetScene) return true;
-    const target = scenes[hotspot.targetScene];
-    if (!target) return false;
-    return isSceneRoutable(target, audience);
+    if (hotspot.type === 'nav') {
+      if (!hotspot.targetScene) return true;
+      const target = scenes[hotspot.targetScene];
+      if (!target) return false;
+      return isSceneVisibleInExplore(target);
+    }
+
+    if (isNamingHotspot(hotspot)) {
+      return isNamingHotspotVisibleInExplore(tour, hotspot);
+    }
+
+    return true;
   });
 }

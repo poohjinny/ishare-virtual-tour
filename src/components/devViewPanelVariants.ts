@@ -675,11 +675,12 @@ export const devViewPanelManageListItemDescClassName = cn(
 
 export type DevHotspotKindBadgeKind = 'nav' | 'naming' | 'info';
 
-const devManageBadgeBaseClassName =
+/** Shared chip size for Dev manage-list badges (Scenes / Hotspots / Namings). */
+export const devManageListBadgeClassName =
   'px-2 py-0.5 text-[0.5625rem] font-medium leading-[1.35]';
 
 /** Matches dev hotspot tertiary tab colors (nav / naming / info). */
-export const devHotspotKindBadgeVariants = cva(devManageBadgeBaseClassName, {
+export const devHotspotKindBadgeVariants = cva(devManageListBadgeClassName, {
   variants: {
     kind: {
       nav: 'border border-[#38bdf8] bg-[rgba(56,189,248,0.28)] text-[#bae6fd] shadow-[inset_0_0_0_1px_rgba(56,189,248,0.18)]',
@@ -722,7 +723,7 @@ export type DevSceneManageBadgeKind =
   | 'internal'
   | 'instant';
 
-export const devSceneManageBadgeVariants = cva(devManageBadgeBaseClassName, {
+export const devSceneManageBadgeVariants = cva(devManageListBadgeClassName, {
   variants: {
     kind: {
       current:
@@ -747,6 +748,23 @@ export const devSceneManageBadgeVariants = cva(devManageBadgeBaseClassName, {
 
 export const devViewPanelManageListItemBadgesClassName = cn(
   'flex shrink-0 flex-wrap items-center justify-end gap-1',
+);
+
+/**
+ * Scenes manage row — horizontal equal-width chips (column width = longest label).
+ */
+export const devViewPanelManageListItemSceneBadgesClassName = cn(
+  'grid w-max shrink-0 grid-flow-col gap-1 [grid-auto-columns:1fr]',
+  '[&>*]:w-full [&>*]:justify-center',
+);
+
+/**
+ * Namings manage status chip — same size as Scenes/Hotspots manage badges
+ * (overrides global fill-sm + status font-semibold).
+ */
+export const devNamingManageStatusBadgeClassName = cn(
+  'shrink-0',
+  devManageListBadgeClassName,
 );
 
 /** Vertical badge column for logo + text-stack rows (Tours / Clients). */

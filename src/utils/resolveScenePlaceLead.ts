@@ -5,8 +5,14 @@ import {
 import { stripNamingOpportunitySuffix } from '../data/namingOpportunityStatus';
 import type { Scene, Tour } from '../types/tour';
 import { listSceneInfoHotspots } from './findTourHotspot';
+import { resolveFirstPublicNamingBody } from './firstPublicNamingBody';
 import { formatNamingPriceDisplay, parseNamingPrice } from './namingPrice';
-import { resolveNamingPopup } from './namingSceneInherit';
+import {
+  resolveHotspotNamingRecord,
+  resolveNamingPopup,
+} from './namingSceneInherit';
+import { isDefaultNamingDescription } from './namingDescriptionPlaceholder';
+import { isNamingUsableForPlaceLead } from './namingVisibility';
 import { isDefaultSceneDescription } from './sceneDescriptionPlaceholder';
 
 interface SceneNamingLeadItem {
@@ -16,11 +22,10 @@ interface SceneNamingLeadItem {
 }
 
 /**
- * Soft place copy for Explore / nav preview:
+ * Place teaser for Explore / nav preview:
  * 1. Client `description` (ignores auto placeholders)
- * 2. Baked `placeLead` (generated from NO copy)
- * 3. Abbreviated NO body
- * 4. General empty-place phrase
+ * 2. Abbreviated first public NO body (or name · price fallback)
+ * 3. General empty-place phrase
  */
 export function resolveScenePlaceLead(
   tour: Pick<
@@ -38,30 +43,38 @@ export function resolveScenePlaceLead(
     return description;
   }
 
-  const placeLead = scene.placeLead?.trim();
-  if (placeLead) return placeLead;
-
   return (
     buildScenePlaceLeadFromNaming(tour, scene) ||
     TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD
   );
 }
 
+export { resolveFirstPublicNamingBody };
+
 function listSceneNamingLeadItems(
-  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'namingOpportunities'>,
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'title' | 'namingOpportunities'>,
   scene: Scene,
 ): SceneNamingLeadItem[] {
   const items: SceneNamingLeadItem[] = [];
+  const tourTitle = tour.title?.trim();
 
   for (const hotspot of listSceneInfoHotspots(tour, scene)) {
+    const record = resolveHotspotNamingRecord(tour, hotspot);
+    if (!isNamingUsableForPlaceLead(record)) continue;
+
     const popup = resolveNamingPopup(tour, hotspot, scene);
     const naming = popup?.namingOpportunity;
     if (!naming || !popup) continue;
 
+    const body = popup.body?.trim() ?? '';
     items.push({
       name: stripNamingOpportunitySuffix(naming.name),
       price: naming.price,
-      body: popup.body?.trim() ?? '',
+      // Empty-state contribute copy is display-only — not a place teaser.
+      body:
+        body && !isDefaultNamingDescription(body, naming.name, tourTitle) ?
+          body
+        : '',
     });
   }
 
@@ -77,7 +90,10 @@ function firstParagraphs(body: string, count = 2): string {
   return paragraphs.slice(0, count).join(' ');
 }
 
-/** Soften NO body for place lead — first ~2 paragraphs, word-aware ellipsis. */
+/**
+ * Soften NO body for place teaser — first ~2 paragraphs, sentence-complete.
+ * Never appends ellipsis (UI may line-clamp).
+ */
 export function abbreviateNamingBodyLead(
   body: string,
   maxChars = TOUR_DIRECTORY_SCENE_NAMING_LEAD_MAX_CHARS,
@@ -86,21 +102,41 @@ export function abbreviateNamingBodyLead(
   if (!text) return '';
   if (text.length <= maxChars) return text;
 
-  const slice = text.slice(0, maxChars);
-  const lastSpace = slice.lastIndexOf(' ');
+  const withinBudget = text.slice(0, maxChars);
+  const lastSentenceEnd = lastCompleteSentenceEnd(withinBudget);
+  if (lastSentenceEnd > Math.floor(maxChars * 0.4)) {
+    return withinBudget.slice(0, lastSentenceEnd).trimEnd();
+  }
+
+  const firstSentenceEnd = lastCompleteSentenceEnd(text);
+  if (firstSentenceEnd > 0) {
+    return text.slice(0, firstSentenceEnd).trimEnd();
+  }
+
+  const lastSpace = withinBudget.lastIndexOf(' ');
   const clipped =
-    lastSpace > Math.floor(maxChars * 0.6) ? slice.slice(0, lastSpace) : slice;
-  return `${clipped.replace(/[.,;:!?–—-]+$/u, '').trimEnd()}…`;
+    lastSpace > Math.floor(maxChars * 0.6) ?
+      withinBudget.slice(0, lastSpace)
+    : withinBudget;
+  return clipped.replace(/[,;:–—-]+$/u, '').trimEnd();
+}
+
+function lastCompleteSentenceEnd(text: string): number {
+  const pattern = /[.!?…]["'”’)]*(?=\s|$)/gu;
+  let last = -1;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) {
+    last = match.index + match[0].length;
+  }
+  return last;
 }
 
 /**
- * Soft lead text derived from this scene's naming opportunities (no API).
+ * Teaser from this scene's naming opportunities (no API).
  * Prefers abbreviated NO body; falls back to name · price summary.
- * Skips name-only leads that merely echo the scene title (common for
- * whole-scene NOs that inherit name and have no body yet).
  */
 export function buildScenePlaceLeadFromNaming(
-  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'namingOpportunities'>,
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'title' | 'namingOpportunities'>,
   scene: Scene,
 ): string | null {
   const namingItems = listSceneNamingLeadItems(tour, scene);
@@ -132,8 +168,6 @@ function formatSceneNamingLead(
     const item = items[0]!;
     const price = formatNamingPriceDisplay(item.price);
     const name = item.name.trim();
-    // Whole-scene NO with no body: name === scene title would duplicate the
-    // nav/Explore title — prefer empty-place fallback instead of echoing it.
     if (namingNameMatchesSceneTitle(name, sceneTitle)) {
       return '';
     }

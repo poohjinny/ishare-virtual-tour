@@ -23,8 +23,9 @@ import type {
 import { isWorldPosition } from '../types/tour';
 import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
 import { isNamingHotspot } from '../utils/namingSceneInherit';
+import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import {
-  isSceneRoutable,
+  isSceneVisibleInExplore,
   VIEWER_MARKER_AUDIENCE,
 } from '../utils/sceneVisibility';
 import { resolveTourSceneTransitionEffect } from '../utils/tourTransition';
@@ -237,8 +238,8 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       toolbarToggleAvailable = false,
       activeNamingHotspotId = null,
       embed = false,
-      // Reserved for authoring chrome; marker visibility uses visitor rules.
-      devMode: _devMode = false,
+      // Authoring chrome; also unlocks unlisted/internal naming markers.
+      devMode = false,
       disabled = false,
       suppressKeyboard = false,
       onSceneChange,
@@ -284,6 +285,9 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     const disabledRef = useRef(disabled);
     const suppressKeyboardRef = useLatestRef(suppressKeyboard);
     const tourRef = useLatestRef(tour);
+    const markerAudienceRef = useLatestRef(
+      devMode ? { dev: true as const } : VIEWER_MARKER_AUDIENCE,
+    );
     const embedRef = useLatestRef(embed);
     const fullscreenRootRefLatest = useLatestRef(fullscreenRootRef);
     /** Fixed at mount — URL scene changes must not recreate the PSV viewer (causes black flash). */
@@ -593,6 +597,49 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       goToNamingOpportunity: (sceneId, hotspotId) => {
         return goToNamingOpportunityRef.current(sceneId, hotspotId);
       },
+      togglePlaceOverview: () => {
+        const viewer = viewerRef.current;
+        const markers = markersRef.current;
+        const virtualTour = virtualTourRef.current;
+        if (
+          !viewer ||
+          !markers ||
+          !virtualTour ||
+          disabledRef.current ||
+          transitioningRef.current
+        ) {
+          return false;
+        }
+
+        const sceneId = virtualTour.getCurrentNode()?.id;
+        if (!sceneId) return false;
+
+        const tour = tourRef.current;
+        const scene = tour.scenes[sceneId];
+        if (!scene) return false;
+
+        const hotspot =
+          (scene.hotspots ?? []).find((entry) =>
+            isPlaceOverviewHotspot(entry),
+          ) ??
+          (tour.hotspots ?? []).find(
+            (entry) =>
+              isPlaceOverviewHotspot(entry) &&
+              (entry.sceneId === sceneId || !entry.sceneId),
+          );
+        if (!hotspot) return false;
+
+        const openHostId = getOpenAnchoredPanelHostId(markers);
+        if (openHostId === hotspot.id) {
+          closeAnchoredInfoPanel(markers, true);
+          onAnchoredPanelVisibilityChangeRef.current?.(false);
+          return true;
+        }
+
+        closeAnchoredNavPreviewPanel(markers, false);
+        onDismissModalPopupsRef.current?.();
+        return goToNamingOpportunityRef.current(sceneId, hotspot.id);
+      },
       recenterToDefaultView: (options) => {
         const viewer = viewerRef.current;
         const virtualTour = virtualTourRef.current;
@@ -662,7 +709,10 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         const currentId =
           virtualTour.getCurrentNode()?.id ?? previousTour.firstScene;
 
-        const nodeConfigs = buildVirtualTourNodes(nextTour);
+        const nodeConfigs = buildVirtualTourNodes(
+          nextTour,
+          markerAudienceRef.current,
+        );
         const prevSceneIds = new Set(Object.keys(previousTour.scenes));
         const hasStructuralSceneChange =
           nodeConfigs.some((node) => !prevSceneIds.has(node.id)) ||
@@ -688,6 +738,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           nextScene,
           nextTour,
           previousTour,
+          markerAudienceRef.current,
         );
         const markersNeedRefresh = currentSceneMarkersNeedRefresh(
           previousTour.scenes[currentId],
@@ -729,6 +780,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
                 scene,
                 nextTour,
                 previousTour,
+                markerAudienceRef.current,
               );
           if (!patch) continue;
 
@@ -792,7 +844,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
               refreshed,
               nextTour,
               embedRef.current,
-              { skipCameraNudge: true },
+              { skipCameraNudge: true, hostScene: nextScene },
             );
           }
         }
@@ -809,7 +861,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
             navHotspot?.type === 'nav' &&
             navHotspot.targetScene &&
             targetScene &&
-            isSceneRoutable(targetScene, VIEWER_MARKER_AUDIENCE)
+            isSceneVisibleInExplore(targetScene)
           ) {
             const preview = buildNavPreview(navHotspot, nextTour, currentId);
             if (preview) {
@@ -1056,7 +1108,10 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       );
       virtualTourRef.current = virtualTour;
 
-      const tourNodes = buildVirtualTourNodes(tourData);
+      const tourNodes = buildVirtualTourNodes(
+        tourData,
+        markerAudienceRef.current,
+      );
       const resolvedStartSceneId =
         tourData.scenes[startSceneId] ? startSceneId : tourData.firstScene;
       if (tourNodes.length > 0) {
@@ -1504,7 +1559,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
               (hotspot.popup && isAnchoredPopup(hotspot.popup))
             ) {
               onDismissModalPopupsRef.current?.();
-              if (isNamingHotspot(hotspot)) {
+              if (isNamingHotspot(hotspot) || isPlaceOverviewHotspot(hotspot)) {
                 const sceneId = virtualTour.getCurrentNode()?.id;
                 if (!sceneId) return;
 

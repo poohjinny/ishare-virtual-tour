@@ -34,12 +34,20 @@ import { normalizeNamingPriceStorage } from './namingPrice.mjs';
 import { namingDonorAllowsLogo, normalizeNamingDonor } from './namingDonor.mjs';
 import { encodePanoramaWebp } from './panoramaEncode.mjs';
 import { persistTourContentPlaceholders } from './tourContentSync.mjs';
-import { syncScenePlaceLeadFromNaming } from './scenePlaceLead.mjs';
 import {
   assertSceneVisibility,
   isScenePublic,
   resolveSceneVisibility,
 } from './sceneVisibility.mjs';
+import { assertNamingVisibility } from './namingVisibility.mjs';
+import {
+  clearPlaceOverviewSuppressIfNoDescription,
+  markPlaceOverviewManual,
+  suppressPlaceOverviewOnDelete,
+  syncPlaceOverviewFromScene,
+  syncPlaceOverviewPositionToView,
+  ensurePlaceOverviewHotspot,
+} from './placeOverview.mjs';
 
 const THUMBNAIL_WIDTH = Number(process.env.THUMBNAIL_WIDTH ?? 640);
 const THUMBNAIL_QUALITY = Number(process.env.THUMBNAIL_QUALITY ?? 85);
@@ -291,6 +299,7 @@ export function buildNamingCatalogRecord({
   videoUrl,
   image,
   donor,
+  visibility,
   sceneTitle,
   sceneDescription,
   scenePreviewVideoUrl,
@@ -305,6 +314,7 @@ export function buildNamingCatalogRecord({
   const priceValue = normalizeNamingPriceStorage(price);
   const statusValue = status?.trim() || 'soon';
   const resolvedNamingId = namingId?.trim();
+  const nextVisibility = assertNamingVisibility(visibility);
 
   if (!Number.isFinite(priceValue)) throw new Error('Price is required');
   if (!NAMING_STATUSES.has(statusValue)) {
@@ -342,6 +352,9 @@ export function buildNamingCatalogRecord({
   }
   if (normalizedDonor) {
     record.donor = normalizedDonor;
+  }
+  if (nextVisibility && nextVisibility !== 'public') {
+    record.visibility = nextVisibility;
   }
 
   return record;
@@ -479,6 +492,7 @@ export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
   const { hotspot, scene } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
   const wasNaming = isNamingHotspotRecord(hotspot);
   const namingId = hotspot.namingId?.trim();
+  suppressPlaceOverviewOnDelete(scene, hotspot);
 
   if (tour.viewerType === 'model3d') {
     tour.hotspots = (tour.hotspots ?? []).filter(
@@ -504,7 +518,7 @@ export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
   }
 
   if (wasNaming) {
-    syncScenePlaceLeadFromNaming(tour, scene);
+    syncPlaceOverviewFromScene(tour, scene);
   }
 
   writeTourJson(tourPath, tour);
@@ -533,6 +547,7 @@ export function updateHotspotPosition({
   const tour = readTourJson(tourPath);
   const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
   hotspot.position = normalizeHotspotPosition(position);
+  markPlaceOverviewManual(hotspot);
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
 }
@@ -952,6 +967,7 @@ export async function createScene({
   description,
   previewVideoUrl,
   videoUrl,
+  createPlaceOverview = false,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
@@ -1048,6 +1064,13 @@ export async function createScene({
     view: record.defaultView,
   });
 
+  if (createPlaceOverview) {
+    delete record.suppressPlaceOverview;
+    syncPlaceOverviewFromScene(tour, record);
+  } else {
+    record.suppressPlaceOverview = true;
+  }
+
   writeTourJson(tourPath, tour);
   persistTourContentPlaceholders(toursDir, tourId);
   return { tourPath, scene: record };
@@ -1095,6 +1118,7 @@ export async function createNamingOpportunity({
   videoUrl,
   image,
   donor,
+  visibility,
   donorLogoFileBuffer,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
@@ -1110,6 +1134,7 @@ export async function createNamingOpportunity({
     videoUrl,
     image,
     donor,
+    visibility,
     sceneTitle: hostScene?.title,
     sceneDescription: hostScene?.description,
     scenePreviewVideoUrl: hostScene?.previewVideoUrl,
@@ -1195,7 +1220,7 @@ export async function createNamingHotspot({
 
   appendSceneHotspot(tour, sceneId, hotspot);
   if (hostScene) {
-    syncScenePlaceLeadFromNaming(tour, hostScene);
+    syncPlaceOverviewFromScene(tour, hostScene);
   }
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot, record };
@@ -1228,6 +1253,29 @@ export async function createInfoHotspot({
     tourTitle: tour.title,
   });
   appendSceneHotspot(tour, sceneId, hotspot);
+  writeTourJson(tourPath, tour);
+  return { tourPath, hotspot };
+}
+
+export function createPlaceOverviewHotspot({
+  toursDir,
+  tourId,
+  sceneId,
+  position,
+}) {
+  const resolvedSceneId = sceneId?.trim();
+  if (!resolvedSceneId) {
+    throw new Error('sceneId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const scene = tour.scenes?.[resolvedSceneId];
+  if (!scene) {
+    throw new Error(`Scene not found: ${resolvedSceneId}`);
+  }
+
+  const { hotspot } = ensurePlaceOverviewHotspot(tour, scene, position);
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
 }
@@ -1341,6 +1389,7 @@ export async function updateNamingHotspot({
   videoUrl,
   image,
   donor,
+  visibility,
   donorLogoFileBuffer,
   clearDonorLogo,
   targetView,
@@ -1421,6 +1470,9 @@ export async function updateNamingHotspot({
   const hasVideoUrl = videoUrl !== undefined;
   const hasImage = image !== undefined;
   const hasDonor = donor !== undefined;
+  const hasVisibility = visibility !== undefined;
+  const nextVisibility =
+    hasVisibility ? assertNamingVisibility(visibility) : undefined;
   const hasDonorLogoFile = Boolean(donorLogoFileBuffer?.length);
   const wantsClearDonorLogo = Boolean(clearDonorLogo);
 
@@ -1473,6 +1525,13 @@ export async function updateNamingHotspot({
       delete record.image;
     }
     delete hotspot.popup.image;
+  }
+  if (hasVisibility) {
+    if (!nextVisibility || nextVisibility === 'public') {
+      delete record.visibility;
+    } else {
+      record.visibility = nextVisibility;
+    }
   }
 
   const effectiveStatus = record.status;
@@ -1562,7 +1621,7 @@ export async function updateNamingHotspot({
   }
 
   if (hostScene) {
-    syncScenePlaceLeadFromNaming(tour, hostScene);
+    syncPlaceOverviewFromScene(tour, hostScene);
   }
 
   writeTourJson(tourPath, tour);
@@ -1742,7 +1801,6 @@ export function updateScene({
   sceneId,
   title,
   description,
-  placeLead,
   previewVideoUrl,
   videoUrl,
   visibility,
@@ -1763,8 +1821,6 @@ export function updateScene({
   const nextTitle = title?.trim();
   const hasDescription = description !== undefined;
   const nextDescription = description?.trim();
-  const hasPlaceLead = placeLead !== undefined;
-  const nextPlaceLead = placeLead?.trim();
   const hasPreviewVideoUrl = previewVideoUrl !== undefined;
   const hasVideoUrl = videoUrl !== undefined;
   const hasVisibility = visibility !== undefined;
@@ -1775,14 +1831,13 @@ export function updateScene({
   if (
     !nextTitle &&
     !hasDescription &&
-    !hasPlaceLead &&
     !hasPreviewVideoUrl &&
     !hasVideoUrl &&
     !hasVisibility &&
     !wantsFirstScene
   ) {
     throw new Error(
-      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, visibility, or setAsFirstScene is required',
+      'At least one of title, description, previewVideoUrl, videoUrl, visibility, or setAsFirstScene is required',
     );
   }
 
@@ -1805,15 +1860,9 @@ export function updateScene({
     }
   }
 
-  if (hasPlaceLead) {
-    if (nextPlaceLead) {
-      scene.placeLead = nextPlaceLead;
-    } else {
-      delete scene.placeLead;
-    }
-  } else if (hasDescription && !scene.description?.trim()) {
-    // Description cleared — refresh auto soft lead from NO bodies.
-    syncScenePlaceLeadFromNaming(tour, scene);
+  // Legacy bake field — drop if still present.
+  if ('placeLead' in scene) {
+    delete scene.placeLead;
   }
 
   if (hasPreviewVideoUrl) {
@@ -1868,6 +1917,9 @@ export function updateScene({
       'firstScene must stay public — cannot set visibility to unlisted or internal',
     );
   }
+
+  clearPlaceOverviewSuppressIfNoDescription(tour, scene);
+  syncPlaceOverviewFromScene(tour, scene);
 
   writeTourJson(tourPath, tour);
   persistTourContentPlaceholders(toursDir, tourId);
@@ -2027,6 +2079,7 @@ export async function applySceneLanding({
   }
 
   const defaultView = updateSceneDefaultView(tour, sceneId, view);
+  syncPlaceOverviewPositionToView(tour, scene, defaultView);
 
   const is3D = tour.viewerType === 'model3d';
   let thumbnail;

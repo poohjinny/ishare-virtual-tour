@@ -27,6 +27,11 @@ export interface TourViewerHandle {
   closeAnchoredPanels: () => void;
   goToNamingOpportunity: (sceneId: string, hotspotId: string) => boolean;
   /**
+   * Toggle the auto place-overview info pin on the current scene.
+   * @returns false when no place-overview pin exists (caller may fall back).
+   */
+  togglePlaceOverview: () => boolean;
+  /**
    * Animate to the scene default view (navbar recenter button). Normally frames
    * an open naming opportunity if one is active; pass `forceDefault` to ignore
    * it and go to the bare scene default (used when "Visiting" the current place).

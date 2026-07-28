@@ -4,7 +4,12 @@ import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
-import type { Hotspot, Scene, TourViewerType } from '../types/tour';
+import type {
+  Hotspot,
+  NamingOpportunityRecord,
+  Scene,
+  TourViewerType,
+} from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
 import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
@@ -37,6 +42,7 @@ interface ExploreSceneGalleryCardProps {
   tourTitle?: string;
   tourHotspots?: Hotspot[];
   tourViewerType?: TourViewerType;
+  namingOpportunities?: Record<string, NamingOpportunityRecord>;
   active: boolean;
   isTourStart?: boolean;
   /** Floor / department when the same title appears on multiple scenes. */
@@ -52,6 +58,7 @@ export function ExploreSceneGalleryCard({
   tourTitle,
   tourHotspots,
   tourViewerType,
+  namingOpportunities,
   active,
   isTourStart = false,
   contextLabel,
@@ -80,6 +87,7 @@ export function ExploreSceneGalleryCard({
       title: tourTitle ?? '',
       hotspots: tourHotspots,
       viewerType: tourViewerType,
+      namingOpportunities,
     },
     scene,
   ).trim();

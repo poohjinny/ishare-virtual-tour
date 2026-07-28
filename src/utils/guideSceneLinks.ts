@@ -7,7 +7,11 @@ import {
   abbreviateNamingBodyLead,
   resolveScenePlaceLead,
 } from './resolveScenePlaceLead';
-import { resolveNamingPopup } from './namingSceneInherit';
+import {
+  resolveHotspotNamingRecord,
+  resolveNamingPopup,
+} from './namingSceneInherit';
+import { isNamingVisibleInExplore } from './namingVisibility';
 import { buildTourNamingDirectory } from './tourDirectory';
 import { isSceneVisibleInExplore } from './sceneVisibility';
 
@@ -71,6 +75,9 @@ function buildNamingLinkFromHotspot(
   const popup = resolveNamingPopup(tour, hotspot, scene);
   const naming = popup?.namingOpportunity;
   if (!naming) return null;
+  if (!isNamingVisibleInExplore(resolveHotspotNamingRecord(tour, hotspot))) {
+    return null;
+  }
 
   const priceLabel =
     naming.priceLabel?.trim() || formatNamingPriceDisplay(naming.price);

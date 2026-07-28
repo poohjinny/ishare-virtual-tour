@@ -8,8 +8,11 @@ import {
 import {
   isNamingHotspot,
   resolveHotspotHostScene,
+  resolveHotspotNamingRecord,
   resolveNamingPopup,
 } from './namingSceneInherit';
+import { isNamingRoutable } from './namingVisibility';
+import type { SceneVisibilityAudience } from './sceneVisibility';
 
 /** Deep link — open naming opportunity panel (`?no={kebab-case-name}`). */
 export const NAMING_OPPORTUNITY_SEARCH_KEY = 'no';
@@ -116,25 +119,48 @@ export function toNamingOpportunitySearchValue(
   return null;
 }
 
+function isLinkRoutable(
+  tour: Tour,
+  item: Pick<NamingOpportunityLink, 'hotspotId' | 'namingId' | 'sceneId'>,
+  audience: SceneVisibilityAudience,
+): boolean {
+  const found =
+    findNamingHotspotInTour(tour, item.hotspotId) ??
+    (item.namingId ? findNamingHotspotByNamingId(tour, item.namingId) : null);
+  const hotspot = found?.hotspot;
+  if (!hotspot) return false;
+  return isNamingRoutable(resolveHotspotNamingRecord(tour, hotspot), audience);
+}
+
 /** Resolve `?no=` to a naming-opportunity hotspot (kebab-case name; legacy formats accepted). */
 export function resolveNamingOpportunityFromSearch(
   tour: Tour,
   searchValue: string,
+  audience: SceneVisibilityAudience = {},
 ): { hotspotId: string; sceneId: string } | null {
   const trimmed = searchValue.trim();
   if (!trimmed) return null;
 
   const links = listNamingOpportunityLinks(tour);
 
+  const accept = (
+    item: NamingOpportunityLink,
+  ): { hotspotId: string; sceneId: string } | null => {
+    if (!isLinkRoutable(tour, item, audience)) return null;
+    return { hotspotId: item.hotspotId, sceneId: item.sceneId };
+  };
+
   for (const item of links) {
     if (item.searchValue === trimmed) {
-      return { hotspotId: item.hotspotId, sceneId: item.sceneId };
+      const match = accept(item);
+      if (match) return match;
     }
   }
 
   for (const item of links) {
     if (item.searchValue.toLowerCase() === trimmed.toLowerCase()) {
-      return { hotspotId: item.hotspotId, sceneId: item.sceneId };
+      const match = accept(item);
+      if (match) return match;
     }
   }
 
@@ -143,7 +169,8 @@ export function resolveNamingOpportunityFromSearch(
       item.legacyCamelCase === trimmed ||
       item.legacyCamelCase.toLowerCase() === trimmed.toLowerCase()
     ) {
-      return { hotspotId: item.hotspotId, sceneId: item.sceneId };
+      const match = accept(item);
+      if (match) return match;
     }
   }
 
@@ -154,26 +181,42 @@ export function resolveNamingOpportunityFromSearch(
       item.hotspotId === trimmed ||
       item.namingId === trimmed
     ) {
-      return { hotspotId: item.hotspotId, sceneId: item.sceneId };
+      const match = accept(item);
+      if (match) return match;
     }
   }
 
   if (trimmed.startsWith('no_')) {
     const byNamingId = findNamingHotspotByNamingId(tour, trimmed);
-    if (byNamingId) {
+    if (
+      byNamingId &&
+      isNamingRoutable(
+        resolveHotspotNamingRecord(tour, byNamingId.hotspot),
+        audience,
+      )
+    ) {
       return { hotspotId: byNamingId.hotspot.id, sceneId: byNamingId.sceneId };
     }
   }
 
   const direct = findNamingHotspotInTour(tour, trimmed);
-  if (direct) {
+  if (
+    direct &&
+    isNamingRoutable(resolveHotspotNamingRecord(tour, direct.hotspot), audience)
+  ) {
     return { hotspotId: trimmed, sceneId: direct.sceneId };
   }
 
   if (!trimmed.startsWith(NAMING_OPPORTUNITY_HOTSPOT_PREFIX)) {
     const prefixedId = `${NAMING_OPPORTUNITY_HOTSPOT_PREFIX}${trimmed}`;
     const prefixed = findNamingHotspotInTour(tour, prefixedId);
-    if (prefixed) {
+    if (
+      prefixed &&
+      isNamingRoutable(
+        resolveHotspotNamingRecord(tour, prefixed.hotspot),
+        audience,
+      )
+    ) {
       return { hotspotId: prefixedId, sceneId: prefixed.sceneId };
     }
   }

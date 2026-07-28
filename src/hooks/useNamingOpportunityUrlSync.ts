@@ -14,6 +14,8 @@ interface UseNamingOpportunityUrlSyncOptions {
   currentSceneId: string;
   isTransitioning: boolean;
   splashDone: boolean;
+  /** `?dev=1` — required for internal naming deep links. */
+  audience?: { dev?: boolean };
   viewerRef: RefObject<TourViewerHandle | null>;
   pendingNamingSelectionRef: RefObject<{
     sceneId: string;
@@ -27,6 +29,7 @@ export function useNamingOpportunityUrlSync({
   currentSceneId,
   isTransitioning,
   splashDone,
+  audience = {},
   viewerRef,
   pendingNamingSelectionRef,
   setActiveNamingHotspotId,
@@ -116,7 +119,11 @@ export function useNamingOpportunityUrlSync({
       return;
     }
 
-    const resolved = resolveNamingOpportunityFromSearch(tour, noSearchValue);
+    const resolved = resolveNamingOpportunityFromSearch(
+      tour,
+      noSearchValue,
+      audience,
+    );
     if (!resolved) {
       clearNamingOpportunityFromUrl();
       return;
@@ -142,6 +149,7 @@ export function useNamingOpportunityUrlSync({
     }
     syncNamingOpportunityToUrl(hotspotId, sceneId);
   }, [
+    audience,
     clearNamingOpportunityFromUrl,
     isTransitioning,
     noSearchValue,

@@ -1,6 +1,11 @@
 import { useScenePreview } from '../hooks/useScenePreview';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
-import type { Hotspot, Scene, TourViewerType } from '../types/tour';
+import type {
+  Hotspot,
+  NamingOpportunityRecord,
+  Scene,
+  TourViewerType,
+} from '../types/tour';
 import {
   TOUR_DIRECTORY_CURRENT_LOCATION_LABEL,
   TOUR_DIRECTORY_SCENE_DETAIL_BACK,
@@ -37,6 +42,7 @@ interface ExploreSceneDescriptionViewProps {
   tourTitle?: string;
   tourHotspots?: Hotspot[];
   tourViewerType?: TourViewerType;
+  namingOpportunities?: Record<string, NamingOpportunityRecord>;
   active: boolean;
   disabled?: boolean;
   onBack: () => void;
@@ -49,6 +55,7 @@ export function ExploreSceneDescriptionView({
   tourTitle,
   tourHotspots,
   tourViewerType,
+  namingOpportunities,
   active,
   disabled = false,
   onBack,
@@ -60,6 +67,7 @@ export function ExploreSceneDescriptionView({
       title: tourTitle ?? '',
       hotspots: tourHotspots,
       viewerType: tourViewerType,
+      namingOpportunities,
     },
     scene,
   );
