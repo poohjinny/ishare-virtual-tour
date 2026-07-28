@@ -27,3 +27,4 @@ export function allocateOpaqueId(
 
 export const OPAQUE_SCENE_ID_PREFIX = 's_';
 export const OPAQUE_TOUR_ID_PREFIX = 't_';
+export const OPAQUE_NAMING_ID_PREFIX = 'no_';

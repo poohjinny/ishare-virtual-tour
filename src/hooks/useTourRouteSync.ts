@@ -19,10 +19,13 @@ import {
   buildTourLocation,
   legacyQueryRedirectPath,
   legacyTourPathRedirect,
-  resolveSceneId,
   resolveTourRoute,
   toNamingOpportunitySearchValue,
 } from '../utils/tourPaths';
+import {
+  isSceneRoutable,
+  resolveRoutableSceneId,
+} from '../utils/sceneVisibility';
 
 export interface SyncSceneToUrlOptions {
   /** Drop `?no=` when updating the scene path (normal scene navigation). */
@@ -71,9 +74,14 @@ export function useTourRouteSync({
     [sceneParam, tourId, tourOrScene],
   );
 
+  const sceneAudience = useMemo(
+    () => ({ dev: searchParams.get('dev') === '1' }),
+    [searchParams],
+  );
+
   const routeSceneId = useMemo(
-    () => resolveSceneId(route.tourId, route.sceneId),
-    [route.sceneId, route.tourId],
+    () => resolveRoutableSceneId(tour, route.sceneId, sceneAudience),
+    [route.sceneId, sceneAudience, tour],
   );
 
   useEffect(() => {
@@ -84,6 +92,34 @@ export function useTourRouteSync({
       navigate(legacyPath, { replace: true });
     }
   }, [location.pathname, location.search, navigate, searchParams]);
+
+  // Internal scenes are not routable without `?dev=1` — rewrite URL to firstScene.
+  useEffect(() => {
+    if (route.tourId !== tour.id) return;
+    const requested = route.sceneId;
+    if (!requested) return;
+    const scene = tour.scenes[requested];
+    if (!scene) return;
+    if (isSceneRoutable(scene, sceneAudience)) return;
+    navigate(
+      buildTourLocation(
+        tour.id,
+        tour.firstScene,
+        tour.firstScene,
+        searchParams,
+      ),
+      { replace: true },
+    );
+  }, [
+    navigate,
+    route.sceneId,
+    route.tourId,
+    sceneAudience,
+    searchParams,
+    tour.firstScene,
+    tour.id,
+    tour.scenes,
+  ]);
 
   useEffect(() => {
     if (route.tourId !== tour.id) {

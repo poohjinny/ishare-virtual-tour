@@ -4,22 +4,75 @@ import type { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin
 export type VirtualTourActiveCheck = () => boolean;
 
 /**
+ * PSV client-side tours warn when a node is not the target of any `links[]` entry.
+ * This app navigates with markers instead, so every node would warn on `setNodes`.
+ */
+const PSV_NEVER_LINKED_WARN = /^PhotoSphereViewer: Node .+ is never linked to$/;
+
+type VirtualTourWithDatasource = {
+  datasource?: { loadNode?: unknown };
+};
+
+function hasDatasource(virtualTour: VirtualTourPlugin): boolean {
+  return Boolean(
+    (virtualTour as unknown as VirtualTourWithDatasource).datasource,
+  );
+}
+
+function isVirtualTourTeardownError(err: unknown): boolean {
+  if (err == null) return false;
+  if (typeof err === 'object' && 'name' in err && err.name === 'AbortError') {
+    return true;
+  }
+  const message = err instanceof Error ? err.message : String(err);
+  // destroy() deletes `datasource` while setCurrentNode's promise chain still runs.
+  return (
+    message.includes("reading 'loadNode'") ||
+    (message.includes('loadNode') && message.includes('undefined'))
+  );
+}
+
+function withNeverLinkedWarningsSuppressed(run: () => void): void {
+  const originalWarn = console.warn;
+  console.warn = (...args: unknown[]) => {
+    const first = args[0];
+    if (typeof first === 'string' && PSV_NEVER_LINKED_WARN.test(first)) {
+      return;
+    }
+    Reflect.apply(originalWarn, console, args);
+  };
+  try {
+    run();
+  } finally {
+    console.warn = originalWarn;
+  }
+}
+
+/**
  * Wrap VirtualTourPlugin navigation so async node loads that outlive teardown
  * do not reject with "Cannot read properties of undefined (reading 'loadNode')".
+ *
+ * Also suppresses expected "never linked" warnings (marker nav, empty `links`).
+ *
+ * @returns Unbind — call before `viewer.destroy()` so Strict Mode remount cannot
+ * revive an old instance via a shared `isActive` ref.
  */
 export function bindVirtualTourLifecycleGuard(
   virtualTour: VirtualTourPlugin,
   isActive: VirtualTourActiveCheck,
-): void {
+): () => void {
+  let bound = true;
+  const stillSafe = () => bound && isActive() && hasDatasource(virtualTour);
+
   const setCurrentNodeOriginal = virtualTour.setCurrentNode.bind(virtualTour);
   virtualTour.setCurrentNode = (nodeId, options, fromLink) => {
-    if (!isActive()) {
+    if (!stillSafe()) {
       return Promise.resolve(false);
     }
 
     return setCurrentNodeOriginal(nodeId, options, fromLink).catch(
       (err: unknown) => {
-        if (!isActive()) {
+        if (!stillSafe() || isVirtualTourTeardownError(err)) {
           return false;
         }
         throw err;
@@ -29,14 +82,23 @@ export function bindVirtualTourLifecycleGuard(
 
   const setNodesOriginal = virtualTour.setNodes.bind(virtualTour);
   virtualTour.setNodes = (nodes, startNodeId) => {
-    if (!isActive()) {
+    if (!stillSafe()) {
       return;
     }
 
     try {
-      setNodesOriginal(nodes, startNodeId);
-    } catch {
-      // Ignore sync validation errors during teardown races.
+      withNeverLinkedWarningsSuppressed(() => {
+        setNodesOriginal(nodes, startNodeId);
+      });
+    } catch (err) {
+      if (!stillSafe() || isVirtualTourTeardownError(err)) {
+        return;
+      }
+      throw err;
     }
+  };
+
+  return () => {
+    bound = false;
   };
 }

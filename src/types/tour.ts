@@ -76,6 +76,10 @@ export interface NamingDonor {
   logo?: string;
 }
 
+/**
+ * Resolved naming opportunity for UI (name always filled via inherit).
+ * Prefer reading via {@link resolveNamingPopup} / catalog lookup — not raw JSON.
+ */
 export interface NamingOpportunity {
   /** Naming opportunity display name (e.g. "Reception Desk") — no suffix. */
   name: string;
@@ -86,6 +90,26 @@ export interface NamingOpportunity {
   status?: NamingOpportunityStatus;
   /** Sold opportunities — shown as “Named by {name}”. */
   donor?: NamingDonor;
+}
+
+/**
+ * Tour-level naming catalog entry (`tour.namingOpportunities[no_*]`).
+ * Business fields live here; panorama pins reference via {@link Hotspot.namingId}.
+ */
+export interface NamingOpportunityRecord {
+  id: string;
+  /** Omit to inherit host scene title at resolve time. */
+  name?: string;
+  price: number;
+  priceLabel?: string;
+  status?: NamingOpportunityStatus;
+  donor?: NamingDonor;
+  /** Optional NO copy; omit to inherit host scene description. */
+  body?: string;
+  /** Optional panel video; omit to inherit host scene previewVideoUrl. */
+  videoUrl?: string;
+  /** Optional panel image. */
+  image?: string;
 }
 
 export interface PopupSponsor {
@@ -101,7 +125,7 @@ export interface PopupContent {
   body: string;
   /** modal = screen overlay (default), anchored = HTML marker on panorama */
   display?: PopupDisplay;
-  /** Panel width in px, or preset tier. Defaults to dock panel width (440px) when omitted. */
+  /** Panel width in px, or preset tier. Defaults to dock panel width (480px) when omitted. */
   width?: number | PopupWidthTier;
   namingOpportunity?: NamingOpportunity;
   image?: string;
@@ -125,6 +149,11 @@ export interface Hotspot {
   targetScene?: string;
   targetView?: ViewPosition;
   popup?: PopupContent;
+  /**
+   * Naming catalog id (`no_*`) — pin references {@link Tour.namingOpportunities}.
+   * Legacy tours may still embed `popup.namingOpportunity` until migrated.
+   */
+  namingId?: string;
   /** Skip preview card and navigate immediately (e.g. back links). */
   instant?: boolean;
   /** Nav marker + default UX — discover (dot), back, or hub (firstScene). */
@@ -192,6 +221,11 @@ export interface Scene {
    * often generated from NO copy. Real client `description` still wins.
    */
   placeLead?: string;
+  /**
+   * Discoverability — same tiers as catalog tours (`undefined` = public).
+   * Explore shows public only; unlisted is URL/share; internal needs `?dev=1`.
+   */
+  visibility?: 'public' | 'unlisted' | 'internal';
   /** Optional hero video — Synthesia embed or hosted mp4/webm; Explore + nav preview hero. */
   previewVideoUrl?: string;
   /** Optional body video — YouTube; Explore scene detail + nav preview body. */
@@ -266,6 +300,11 @@ export interface Tour {
    * naming opportunities. Panorama tours keep hotspots on each {@link Scene}.
    */
   hotspots?: Hotspot[];
+  /**
+   * Naming opportunity catalog — business fields (name/price/status/donor).
+   * Scene/tour hotspots place pins with {@link Hotspot.namingId}.
+   */
+  namingOpportunities?: Record<string, NamingOpportunityRecord>;
   /** Owning client id — defaults to `id` when one tour per client. */
   clientId?: string;
   /** Platform category — e.g. Healthcare, Education. */
@@ -310,8 +349,40 @@ export interface TourKnowledge {
   scenes: Record<string, SceneKnowledge>;
 }
 
+/** Ask Guide interactive card — place or naming opportunity. */
+export interface ChatGuideLink {
+  kind: 'scene' | 'naming';
+  sceneId: string;
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  /** `naming` only — catalog id (`no_*`) or legacy hotspot id. */
+  namingId?: string;
+  /** `naming` only — pin id for opening the opportunity. */
+  hotspotId?: string;
+  statusLabel?: string;
+  priceLabel?: string;
+}
+
+/** External action under an Ask Guide reply (Website / Donate / Contact). */
+export interface ChatGuideCta {
+  id: string;
+  label: string;
+  url: string;
+  kind: 'website' | 'donate' | 'contact';
+}
+
+/** @deprecated Prefer {@link ChatGuideLink}. */
+export type ChatGuideSceneLink = ChatGuideLink;
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  /** Optional place / naming cards under an assistant reply. */
+  guideLinks?: ChatGuideLink[];
+  /** Optional Website / Donate actions under the reply. */
+  guideCtas?: ChatGuideCta[];
+  /** Contextual follow-up questions (max 3). */
+  followUps?: string[];
 }

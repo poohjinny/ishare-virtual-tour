@@ -1257,7 +1257,7 @@ export const tourNavDirectoryListItemNamingMainClassName = cn(
   'flex min-w-0 flex-1 items-start gap-6',
 );
 
-/** Directory list — trailing status + price stack (badge above amount). */
+/** Directory list — trailing price + status stack (badge under amount). */
 export const tourNavDirectoryListItemBadgeColumnClassName = cn(
   'flex w-max shrink-0 flex-col items-end justify-start gap-1 self-start',
 );

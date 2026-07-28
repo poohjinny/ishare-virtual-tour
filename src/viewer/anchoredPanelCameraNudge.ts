@@ -215,6 +215,61 @@ function normalizeYawDeltaDeg(deg: number): number {
 }
 
 /**
+ * Pre-reveal camera pose — restored when the panel closes after an off-view
+ * reveal. Clip nudges never set this. Cleared on scene transitions / forced
+ * camera moves that shouldn't reverse.
+ */
+type AnchoredPanelCameraRestore = {
+  viewer: Viewer;
+  yawDeg: number;
+  pitchDeg: number;
+};
+
+let pendingOffViewCameraRestore: AnchoredPanelCameraRestore | null = null;
+
+export function clearAnchoredPanelCameraRestore(): void {
+  pendingOffViewCameraRestore = null;
+}
+
+function captureOffViewCameraRestore(viewer: Viewer): void {
+  if (pendingOffViewCameraRestore) return;
+  const position = viewer.getPosition();
+  pendingOffViewCameraRestore = {
+    viewer,
+    yawDeg: radToDeg(position.yaw),
+    pitchDeg: radToDeg(position.pitch),
+  };
+}
+
+/**
+ * Reverse an off-view reveal when the panel closes. No-op for clip-only nudges
+ * or when restore was cleared (scene change, forceDefault, etc.).
+ */
+export async function restoreAnchoredPanelCameraIfNeeded(): Promise<boolean> {
+  const target = pendingOffViewCameraRestore;
+  pendingOffViewCameraRestore = null;
+  if (!target) return false;
+
+  const position = target.viewer.getPosition();
+  const currentYaw = radToDeg(position.yaw);
+  const currentPitch = radToDeg(position.pitch);
+  const yawDelta = normalizeYawDeltaDeg(target.yawDeg - currentYaw);
+  if (
+    Math.abs(yawDelta) < 0.25 &&
+    Math.abs(target.pitchDeg - currentPitch) < 0.25
+  ) {
+    return false;
+  }
+
+  await animateCameraOrientation(
+    target.viewer,
+    currentYaw + yawDelta,
+    target.pitchDeg,
+  );
+  return true;
+}
+
+/**
  * Top safe inset (px, in viewer-container space): the greater of the base margin
  * and the floating breadcrumb's bottom edge + clearance, so a nudged panel never
  * tucks under the breadcrumb. Falls back to the base margin when the breadcrumb
@@ -481,6 +536,7 @@ export async function revealCameraForOffViewPanel(
   getPanelEl?: () => HTMLElement | null | undefined,
 ): Promise<boolean> {
   let moved = false;
+  let capturedRestore = false;
 
   // Up to two reveal steps when the host sits far outside the frustum.
   for (let step = 0; step < 2; step++) {
@@ -506,6 +562,11 @@ export async function revealCameraForOffViewPanel(
       break;
     }
 
+    if (!capturedRestore) {
+      captureOffViewCameraRestore(viewer);
+      capturedRestore = true;
+    }
+
     await animateCameraOrientation(viewer, targetYaw, targetPitch);
     moved = true;
   }
@@ -513,6 +574,10 @@ export async function revealCameraForOffViewPanel(
   const panelEl = getPanelEl?.();
   if (panelEl && !isPanelMarkerOffView(panelEl)) {
     if (await nudgeCameraForClippedPanel(viewer, panelEl)) moved = true;
+  }
+
+  if (!moved && capturedRestore) {
+    clearAnchoredPanelCameraRestore();
   }
 
   return moved;

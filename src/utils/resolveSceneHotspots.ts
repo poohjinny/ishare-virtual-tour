@@ -1,4 +1,8 @@
 import type { Hotspot, Scene, Tour } from '../types/tour';
+import {
+  filterHotspotsForAudience,
+  type SceneVisibilityAudience,
+} from './sceneVisibility';
 
 /**
  * Hotspots active for a scene — tour-level world markers merged with legacy
@@ -6,30 +10,35 @@ import type { Hotspot, Scene, Tour } from '../types/tour';
  * Scene wins on duplicate `id`.
  */
 export function resolveSceneHotspots(
-  tour: Pick<Tour, 'hotspots'>,
+  tour: Pick<Tour, 'hotspots'> & { scenes?: Tour['scenes'] },
   scene: Pick<Scene, 'hotspots'>,
+  audience: SceneVisibilityAudience = {},
 ): Hotspot[] {
   const tourHotspots = tour.hotspots ?? [];
   const sceneHotspots = scene.hotspots ?? [];
-  if (tourHotspots.length === 0) return [...sceneHotspots];
-  if (sceneHotspots.length === 0) return [...tourHotspots];
-
-  const byId = new Map<string, Hotspot>();
-  for (const hotspot of tourHotspots) {
-    byId.set(hotspot.id, hotspot);
+  let merged: Hotspot[];
+  if (tourHotspots.length === 0) merged = [...sceneHotspots];
+  else if (sceneHotspots.length === 0) merged = [...tourHotspots];
+  else {
+    const byId = new Map<string, Hotspot>();
+    for (const hotspot of tourHotspots) {
+      byId.set(hotspot.id, hotspot);
+    }
+    for (const hotspot of sceneHotspots) {
+      byId.set(hotspot.id, hotspot);
+    }
+    merged = [...byId.values()];
   }
-  for (const hotspot of sceneHotspots) {
-    byId.set(hotspot.id, hotspot);
-  }
-  return [...byId.values()];
+  return filterHotspotsForAudience(tour, merged, audience);
 }
 
 /** Nav hotspots reachable from a scene — used for breadcrumbs and depth graph. */
 export function resolveSceneNavHotspots(
-  tour: Pick<Tour, 'hotspots'>,
+  tour: Pick<Tour, 'hotspots'> & { scenes?: Tour['scenes'] },
   scene: Pick<Scene, 'hotspots'>,
+  audience: SceneVisibilityAudience = {},
 ): Hotspot[] {
-  return resolveSceneHotspots(tour, scene).filter(
+  return resolveSceneHotspots(tour, scene, audience).filter(
     (hotspot) => hotspot.type === 'nav' && hotspot.targetScene,
   );
 }

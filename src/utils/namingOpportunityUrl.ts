@@ -1,8 +1,12 @@
 import { stripNamingOpportunitySuffix } from '../data/namingOpportunityStatus';
 import type { Hotspot, Tour } from '../types/tour';
 import { slugifyHotspotName } from './devHotspotLogger';
-import { findNamingHotspotInTour } from './tourDirectory';
 import {
+  findNamingHotspotByNamingId,
+  findNamingHotspotInTour,
+} from './findTourHotspot';
+import {
+  isNamingHotspot,
   resolveHotspotHostScene,
   resolveNamingPopup,
 } from './namingSceneInherit';
@@ -42,10 +46,10 @@ function namingOpportunityDisplayName(
   sceneId: string,
   hotspot: Hotspot,
 ): string | null {
-  if (!hotspot.popup?.namingOpportunity) return null;
+  if (!isNamingHotspot(hotspot)) return null;
   const scene = resolveHotspotHostScene(tour, hotspot, tour.scenes[sceneId]);
-  const popup = resolveNamingPopup(hotspot.popup, scene);
-  const name = popup.namingOpportunity?.name?.trim();
+  const popup = resolveNamingPopup(tour, hotspot, scene);
+  const name = popup?.namingOpportunity?.name?.trim();
   if (!name) return null;
   return stripNamingOpportunitySuffix(name);
 }
@@ -59,6 +63,7 @@ function legacyKebabFromHotspotId(hotspotId: string): string {
 interface NamingOpportunityLink {
   sceneId: string;
   hotspotId: string;
+  namingId?: string;
   searchValue: string;
   legacyCamelCase: string;
   legacyKebab: string;
@@ -70,11 +75,12 @@ function listNamingOpportunityLinks(tour: Tour): NamingOpportunityLink[] {
 
   const appendLink = (sceneId: string, hotspot: Hotspot) => {
     const displayName = namingOpportunityDisplayName(tour, sceneId, hotspot);
-    if (hotspot.type !== 'info' || !displayName) return;
+    if (!isNamingHotspot(hotspot) || !displayName) return;
 
     items.push({
       sceneId,
       hotspotId: hotspot.id,
+      namingId: hotspot.namingId?.trim() || undefined,
       searchValue: namingOpportunityNameToKebabCase(displayName),
       legacyCamelCase: namingOpportunityNameToCamelCase(displayName),
       legacyKebab: legacyKebabFromHotspotId(hotspot.id),
@@ -83,7 +89,7 @@ function listNamingOpportunityLinks(tour: Tour): NamingOpportunityLink[] {
   };
 
   for (const hotspot of tour.hotspots ?? []) {
-    if (hotspot.type !== 'info' || !hotspot.popup?.namingOpportunity) continue;
+    if (!isNamingHotspot(hotspot)) continue;
     appendLink(hotspot.sceneId ?? tour.firstScene, hotspot);
   }
 
@@ -145,9 +151,17 @@ export function resolveNamingOpportunityFromSearch(
     if (
       item.legacyKebab === trimmed ||
       item.nameSlug === trimmed ||
-      item.hotspotId === trimmed
+      item.hotspotId === trimmed ||
+      item.namingId === trimmed
     ) {
       return { hotspotId: item.hotspotId, sceneId: item.sceneId };
+    }
+  }
+
+  if (trimmed.startsWith('no_')) {
+    const byNamingId = findNamingHotspotByNamingId(tour, trimmed);
+    if (byNamingId) {
+      return { hotspotId: byNamingId.hotspot.id, sceneId: byNamingId.sceneId };
     }
   }
 

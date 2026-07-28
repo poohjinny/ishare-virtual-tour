@@ -31,6 +31,10 @@ export function allocateOpaqueId(prefix, taken, length = 10) {
   throw new Error(`Could not allocate unique id with prefix ${prefix}`);
 }
 
+export const OPAQUE_SCENE_ID_PREFIX = 's_';
+export const OPAQUE_TOUR_ID_PREFIX = 't_';
+export const OPAQUE_NAMING_ID_PREFIX = 'no_';
+
 /** Tour / scene ids: classic kebab slugs or opaque `t_` / `s_` tokens. */
 export function assertEntityId(value, label) {
   const id = String(value ?? '')

@@ -33,7 +33,6 @@ import {
 } from '../utils/popupCtaIcon';
 import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
-  NAMING_OPPORTUNITY_BADGE_LABEL,
   namingOpportunityStatusConfig,
   namingOpportunityStatusShowsBadge,
   resolvePopupContentCtas,
@@ -84,7 +83,7 @@ export { youtubeEmbedUrl, initPopupVideoPlayers };
 export const GLASS_PANEL_SIZE = {
   minWidth: 320,
   maxWidth: 500,
-  defaultWidth: 440,
+  defaultWidth: 480,
   minHeight: 0,
   maxHeight: 840,
   maxHeightRatio: 0.7,
@@ -92,8 +91,8 @@ export const GLASS_PANEL_SIZE = {
   viewportMarginMobile: 32,
 } as const;
 
-/** Shared dock width — dev panel, nav preview, info panels. */
-export const TOUR_DOCK_PANEL_WIDTH = 440;
+/** Shared dock width — nav preview, info / naming anchored panels. */
+export const TOUR_DOCK_PANEL_WIDTH = 480;
 
 /**
  * Per-side breathing room used to cap anchored panel height. Kept larger than
@@ -109,7 +108,7 @@ const ANCHORED_PANEL_FIT_MIN_HEIGHT_PX = 200;
 const GLASS_PANEL_WIDTH_TIER: Record<PopupWidthTier, number> = {
   compact: 320,
   standard: 380,
-  rich: 440,
+  rich: 480,
   wide: 500,
 };
 
@@ -253,6 +252,7 @@ export const GLASS_PANEL = {
   titleBlock: 'tour-glass-panel__title-block',
   titleLine: 'tour-glass-panel__title-line',
   title: 'tour-glass-panel__title',
+
   close: 'tour-glass-panel__close',
   closeIcon: 'tour-glass-panel__close-icon',
   badge: BADGE_CLASS.fillLgAccentIcon,
@@ -447,25 +447,19 @@ export function buildPopupBadgeHtml(popup: PopupContent): string {
     const statusConfig = namingOpportunityStatusConfig(status);
     const statusModifier = statusConfig.cssModifier;
     const showStatusBadge = namingOpportunityStatusShowsBadge(status);
+    if (!showStatusBadge) return '';
+
     const statusIconHtml =
-      showStatusBadge && isNamingStatusIconModifier(statusModifier) ?
+      isNamingStatusIconModifier(statusModifier) ?
         namingStatusBadgeIconHtml(statusModifier, GLASS_PANEL.badgeIcon)
-      : '';
-    const statusBadgeHtml =
-      showStatusBadge ?
-        `<span class="${GLASS_PANEL.badgeStatusIcon(escapeHtml(statusModifier))}">
-          ${statusIconHtml}
-          <span class="${GLASS_PANEL.badgeText}">${escapeHtml(statusConfig.label)}</span>
-        </span>`
       : '';
 
     return `<div class="${GLASS_PANEL.meta}" aria-label="${escapeHtml(name)}">
       <div class="${GLASS_PANEL.metaRow}">
-        <span class="${GLASS_PANEL.badgeNaming}">
-          ${glassPanelNamingBadgeIconHtml()}
-          <span class="${GLASS_PANEL.badgeText}">${escapeHtml(NAMING_OPPORTUNITY_BADGE_LABEL)}</span>
+        <span class="${GLASS_PANEL.badgeStatusIcon(escapeHtml(statusModifier))}">
+          ${statusIconHtml}
+          <span class="${GLASS_PANEL.badgeText}">${escapeHtml(statusConfig.label)}</span>
         </span>
-        ${statusBadgeHtml}
       </div>
     </div>`;
   }
@@ -689,6 +683,7 @@ export function buildAnchoredPopupHtml(
     naming?.priceLabel ?
       `<p class="${GLASS_PANEL.priceLabel}">${escapeHtml(naming.priceLabel)}</p>`
     : '';
+  const badgeHtml = naming ? buildPopupBadgeHtml(popup) : '';
 
   const titleBlockHtml = `<div class="${GLASS_PANEL.titleBlock}">
       <div class="${GLASS_PANEL.titleLine}">
@@ -698,6 +693,7 @@ export function buildAnchoredPopupHtml(
         ${titleAfterHtml}
       </div>
       ${titleSubHtml}
+      ${badgeHtml}
     </div>`;
 
   const trimmedVideoUrl = popup.videoUrl?.trim();
@@ -760,11 +756,10 @@ export function buildAnchoredPopupHtml(
       })
     );
 
-  const badgeHtml = buildPopupBadgeHtml(popup);
   const copyHtml = buildGlassPanelParagraphsHtml(popup.body);
   const introHtml = `<div class="info-panel__intro">
       ${titleBlockHtml}
-      ${badgeHtml}
+      ${naming ? '' : badgeHtml}
       ${donorCreditHtml}
     </div>`;
 

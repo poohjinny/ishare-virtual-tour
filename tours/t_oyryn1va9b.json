@@ -1,0 +1,135 @@
+{
+  "id": "t_oyryn1va9b",
+  "clientId": "ishare-demos",
+  "viewerType": "model3d",
+  "model": "/assets/ishare-demos/t_oyryn1va9b/models/scene.glb",
+  "title": "Cozy Room",
+  "category": "Demo",
+  "firstScene": "s_onaext778x",
+  "hotspots": [
+    {
+      "id": "nav-to-workspace",
+      "type": "nav",
+      "label": "Workspace",
+      "position": {
+        "x": 0.43,
+        "y": 8.47,
+        "z": 5.51
+      },
+      "targetScene": "s_e83oo59bwl",
+      "targetView": {
+        "yaw": -89.7,
+        "pitch": -25.1,
+        "zoom": 7.49,
+        "target": {
+          "x": 7.22,
+          "y": 10.38,
+          "z": 5.57
+        }
+      }
+    },
+    {
+      "id": "nav-to-bedroom",
+      "type": "nav",
+      "label": "Bedroom",
+      "position": {
+        "x": 14.47,
+        "y": 3.04,
+        "z": 8.94
+      },
+      "targetScene": "s_cabfp6pifi"
+    },
+    {
+      "id": "nav-to-living-area",
+      "type": "nav",
+      "label": "Living Area",
+      "position": {
+        "x": 6,
+        "y": 2,
+        "z": 6
+      },
+      "targetScene": "s_onaext778x",
+      "navVariant": "hub"
+    },
+    {
+      "id": "monitor-screen",
+      "type": "info",
+      "label": "Monitor Station",
+      "sceneId": "s_onaext778x",
+      "position": {
+        "x": -0.95,
+        "y": 10.79,
+        "z": 6.01
+      },
+      "popup": {
+        "title": "Monitor Station",
+        "body": "A dual-screen workstation setup for productive remote work sessions.",
+        "namingOpportunity": {
+          "status": "open",
+          "name": "Monitor Station Naming Opportunity",
+          "price": 5000
+        }
+      }
+    }
+  ],
+  "scenes": {
+    "s_onaext778x": {
+      "id": "s_onaext778x",
+      "title": "Living Area",
+      "description": "A cozy seating area with a plush sofa and warm lighting.",
+      "panorama": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_onaext778x.webp",
+      "thumbnail": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_onaext778x.webp",
+      "defaultView": {
+        "yaw": -134.9,
+        "pitch": -15.1,
+        "zoom": 29.62,
+        "target": {
+          "x": 7.48,
+          "y": 6.64,
+          "z": 7.51
+        }
+      },
+      "hotspots": []
+    },
+    "s_e83oo59bwl": {
+      "id": "s_e83oo59bwl",
+      "title": "Workspace",
+      "description": "A compact workspace tucked into the corner — ideal for remote work.",
+      "panorama": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_e83oo59bwl.webp",
+      "thumbnail": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_e83oo59bwl.webp",
+      "defaultView": {
+        "yaw": -89.7,
+        "pitch": -25.1,
+        "zoom": 7.49,
+        "target": {
+          "x": 7.22,
+          "y": 10.38,
+          "z": 5.57
+        }
+      },
+      "hotspots": []
+    },
+    "s_cabfp6pifi": {
+      "id": "s_cabfp6pifi",
+      "title": "Bedroom",
+      "description": "A warm and inviting bedroom with a comfortable bed and soft lighting.",
+      "panorama": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_cabfp6pifi.webp",
+      "thumbnail": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_cabfp6pifi.webp",
+      "defaultView": {
+        "yaw": 94,
+        "pitch": -48.7,
+        "zoom": 7.49,
+        "target": {
+          "x": 7.05,
+          "y": 10.66,
+          "z": 7.12
+        }
+      },
+      "hotspots": []
+    }
+  },
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  }
+}

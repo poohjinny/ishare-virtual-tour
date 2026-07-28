@@ -1,0 +1,331 @@
+/**
+ * Dev-only Ask Guide chat — OpenAI behind Vite `/__dev/api/ask-guide/*`.
+ *
+ * Env (server-only, never VITE_*):
+ *   OPENAI_API_KEY          required for live replies
+ *   OPENAI_ASK_GUIDE_MODEL  optional (default gpt-4o-mini)
+ *
+ * Put secrets in `.env.local` (not `.env.local.example`) and restart Vite.
+ */
+
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const DEFAULT_MODEL = 'gpt-4o-mini';
+const DEFAULT_TEMPERATURE = 0.3;
+const MAX_HISTORY_MESSAGES = 16;
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+/** Minimal .env parser — Vite may not put non-VITE_ keys on process.env yet. */
+function readEnvFile(fileName) {
+  const filePath = join(root, fileName);
+  if (!existsSync(filePath)) return {};
+  const out = {};
+  for (const line of readFileSync(filePath, 'utf8').split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq <= 0) continue;
+    const key = trimmed.slice(0, eq).trim();
+    let value = trimmed.slice(eq + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    out[key] = value;
+  }
+  return out;
+}
+
+function resolveAskGuideEnv() {
+  const fromFiles = { ...readEnvFile('.env'), ...readEnvFile('.env.local') };
+  return {
+    apiKey: (
+      process.env.OPENAI_API_KEY ||
+      fromFiles.OPENAI_API_KEY ||
+      ''
+    ).trim(),
+    model: (
+      process.env.OPENAI_ASK_GUIDE_MODEL ||
+      fromFiles.OPENAI_ASK_GUIDE_MODEL ||
+      DEFAULT_MODEL
+    ).trim(),
+  };
+}
+
+function askGuideModel() {
+  return resolveAskGuideEnv().model || DEFAULT_MODEL;
+}
+
+export function askGuideModelName() {
+  return askGuideModel();
+}
+
+export function isAskGuideLiveConfigured() {
+  return Boolean(resolveAskGuideEnv().apiKey);
+}
+
+function formatOtherAreas(otherAreas) {
+  if (!Array.isArray(otherAreas) || otherAreas.length === 0) {
+    return '- (none)';
+  }
+  return otherAreas
+    .map((area) => {
+      if (area && typeof area === 'object') {
+        const id = area.id || '';
+        const title = area.title || id;
+        return id ? `- ${id} | ${title}` : `- ${title}`;
+      }
+      return `- ${area}`;
+    })
+    .join('\n');
+}
+
+function formatTourNamings(tourNamings) {
+  if (!Array.isArray(tourNamings) || tourNamings.length === 0) {
+    return '- (none)';
+  }
+  return tourNamings
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      const id = entry.id || '';
+      const name = entry.name || id;
+      const sceneTitle = entry.sceneTitle || entry.sceneId || '';
+      const status = entry.statusLabel || '';
+      if (!id) return null;
+      return `- ${id} | ${name} | ${sceneTitle} | ${status}`;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+function formatContextBlock(context) {
+  if (!context || typeof context !== 'object') return '(no scene context)';
+
+  const namings = Array.isArray(context.namings) ? context.namings : [];
+  const namingLines =
+    namings.length === 0 ?
+      '- (none in this scene)'
+    : namings
+        .map((entry) => {
+          const bits = [entry.name, entry.statusLabel, entry.priceLabel].filter(
+            Boolean,
+          );
+          const head = `- ${bits.join(' · ')}`;
+          return entry.body ? `${head}\n  ${entry.body}` : head;
+        })
+        .join('\n');
+
+  return [
+    `Tour: ${context.tourTitle || context.tourId || ''}`,
+    `Organization: ${context.clientName || '(none)'}`,
+    `Website: ${context.websiteUrl || '(none)'}`,
+    `Facility summary: ${context.facilitySummary || '(none)'}`,
+    `Current scene id: ${context.sceneId || '(none)'}`,
+    `Current scene: ${context.sceneTitle || context.sceneId || ''}`,
+    `Place copy: ${context.placeCopy || '(none)'}`,
+    `Scene description: ${context.sceneDescription || '(none)'}`,
+    'Other areas in this tour (id | title) — use these ids in sceneLinks:',
+    formatOtherAreas(context.otherAreas),
+    'Tour naming opportunities (id | name | scene | status) — use these ids in namingLinks:',
+    formatTourNamings(context.tourNamings),
+    'Naming opportunities in this scene (details):',
+    namingLines,
+  ].join('\n');
+}
+
+function buildSystemPrompt(context) {
+  return `You are a virtual tour guide for a nonprofit fundraising experience.
+
+Tone & manner:
+- Warm, kind, and approachable — like a welcoming in-person guide, not a chatbot or sales script
+- Friendly and human: natural phrasing, light encouragement, genuine hospitality
+- Clear and calm; never stiff, corporate, sarcastic, or overly formal
+- Empathetic when someone is unsure; invite curiosity without pressure
+- Use “we / this place / you’re welcome to…” energy; avoid hype, slang overload, or emoji
+- Keep dignity for naming gifts and donors — appreciative, never pushy
+
+Content guidance — use the context below. Prefer:
+- Facility summary + organization for questions about the tour, facility, “what is this place”, or why it exists
+- Current scene place copy / description for questions about this place
+- Naming opportunity details for naming, gift, price, or status questions
+- Other areas list when visitors ask what else they can explore
+- Tour naming list when recommending a specific naming opportunity
+
+Interest / purchase / “how do I buy or support a naming opportunity” playbook:
+- Do not invent checkout, cart, or payment steps. Naming is not a typical retail purchase.
+- If status is open: say they can express interest with the foundation team, and may explore tax-efficient giving options when available. Point them to the on-screen actions (interest / give) rather than inventing a process.
+- If reserved: a commitment is in progress — suggest speaking with the team; do not promise it is available.
+- If coming soon: it is not open yet — suggest asking to be notified.
+- If sold: it is already named — thank partners and suggest other open opportunities or supporting the mission.
+- Mention price/status only when present in context.
+
+Share what you do know, even if some details are missing. Only say you lack information for a specific missing fact (e.g. an unlisted price or policy) — then briefly and kindly suggest reception or a related question.
+Do not invent prices, statuses, medical advice, or policies.
+Keep answers short (2–4 sentences), still warm. Match the visitor’s language (reply in Korean if they wrote in Korean).
+
+Respond with ONLY valid JSON (no markdown fences):
+{"reply":"string","sceneLinks":[{"sceneId":"id-from-other-areas","label":"optional title"}],"namingLinks":[{"namingId":"id-from-tour-namings","label":"optional name"}],"followUps":["short follow-up question"]}
+Rules for links (combined max 4):
+- sceneLinks: 0–3 other areas the visitor can go to; sceneId MUST be from “Other areas” (never invent; never current scene)
+- namingLinks: 0–3 naming opportunities to open; namingId MUST be from “Tour naming opportunities”
+- For interest/purchase questions, include the relevant naming id in namingLinks when known
+- Use [] for either array when not needed
+Rules for followUps:
+- 0–3 short questions the visitor might ask next (same language as the reply)
+- Ground each follow-up in THIS reply — name a place or naming you just mentioned when possible (e.g. “Tell me about the Kitchen”, “What does the Pantry naming cost?”)
+- Vary by reply topic: place details → nearby places / namings here; naming → price, availability, how to support; directions → another place
+- Stay within tour context; do not invent facts
+- Do not suggest visiting the website/homepage as a follow-up question (that is a separate button when relevant)
+- Do not repeat the visitor’s last question
+- Use [] when none fit
+
+Context:
+${formatContextBlock(context)}`;
+}
+
+function normalizeMessages(messages) {
+  if (!Array.isArray(messages)) return [];
+  const cleaned = [];
+  for (const entry of messages) {
+    if (!entry || typeof entry !== 'object') continue;
+    const role = entry.role === 'assistant' ? 'assistant' : 'user';
+    const content =
+      typeof entry.content === 'string' ? entry.content.trim() : '';
+    if (!content) continue;
+    cleaned.push({ role, content });
+  }
+  return cleaned.slice(-MAX_HISTORY_MESSAGES);
+}
+
+function parseGuideModelContent(raw) {
+  const text = typeof raw === 'string' ? raw.trim() : '';
+  if (!text) {
+    return { reply: '', sceneLinks: [], namingLinks: [], followUps: [] };
+  }
+
+  const tryParse = (value) => {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== 'object') {
+      throw new Error('not an object');
+    }
+    const reply =
+      typeof parsed.reply === 'string' ? parsed.reply.trim()
+      : typeof parsed.message === 'string' ? parsed.message.trim()
+      : '';
+    const sceneLinks =
+      Array.isArray(parsed.sceneLinks) ? parsed.sceneLinks : [];
+    const namingLinks =
+      Array.isArray(parsed.namingLinks) ? parsed.namingLinks : [];
+    const followUps = Array.isArray(parsed.followUps) ? parsed.followUps : [];
+    return {
+      reply,
+      sceneLinks: sceneLinks
+        .map((entry) => ({
+          sceneId:
+            typeof entry?.sceneId === 'string' ? entry.sceneId
+            : typeof entry?.id === 'string' && entry?.type !== 'naming' ?
+              entry.id
+            : '',
+          label:
+            typeof entry?.label === 'string' ? entry.label
+            : typeof entry?.title === 'string' ? entry.title
+            : undefined,
+        }))
+        .filter((entry) => entry.sceneId),
+      namingLinks: namingLinks
+        .map((entry) => ({
+          namingId:
+            typeof entry?.namingId === 'string' ? entry.namingId
+            : typeof entry?.id === 'string' ? entry.id
+            : '',
+          label:
+            typeof entry?.label === 'string' ? entry.label
+            : typeof entry?.title === 'string' ? entry.title
+            : typeof entry?.name === 'string' ? entry.name
+            : undefined,
+        }))
+        .filter((entry) => entry.namingId),
+      followUps: followUps
+        .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+        .filter(Boolean)
+        .slice(0, 3),
+    };
+  };
+
+  try {
+    return tryParse(text);
+  } catch {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (match) {
+      try {
+        return tryParse(match[0]);
+      } catch {
+        /* fall through */
+      }
+    }
+  }
+
+  return { reply: text, sceneLinks: [], namingLinks: [], followUps: [] };
+}
+
+export async function askGuideChat({ context, messages }) {
+  const { apiKey, model } = resolveAskGuideEnv();
+  if (!apiKey) {
+    const error = new Error(
+      'OPENAI_API_KEY is not set. Add it to .env.local (not .env.local.example) and restart Vite.',
+    );
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const history = normalizeMessages(messages);
+  if (history.length === 0) {
+    throw new Error('messages must include at least one user turn');
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      temperature: DEFAULT_TEMPERATURE,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: buildSystemPrompt(context) },
+        ...history,
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    const error = new Error(
+      `OpenAI ${response.status}: ${detail.slice(0, 400)}`,
+    );
+    error.statusCode = 502;
+    throw error;
+  }
+
+  const data = await response.json();
+  const raw = data.choices?.[0]?.message?.content?.trim() ?? '';
+  const parsed = parseGuideModelContent(raw);
+  if (!parsed.reply) {
+    throw new Error('OpenAI returned an empty reply');
+  }
+
+  return {
+    reply: parsed.reply,
+    sceneLinks: parsed.sceneLinks,
+    namingLinks: parsed.namingLinks,
+    followUps: parsed.followUps,
+    model,
+  };
+}

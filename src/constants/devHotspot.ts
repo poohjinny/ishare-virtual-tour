@@ -12,6 +12,20 @@ export const DEV_NAMING_STATUS_OPTIONS: {
   label: namingOpportunityStatusConfig(value).label,
 }));
 
+/** Manage-list filter — All plus each naming status. */
+export type DevNamingManageFilter = 'all' | NamingOpportunityStatus;
+
+export const DEV_NAMING_MANAGE_FILTER_TABS: {
+  id: DevNamingManageFilter;
+  label: string;
+}[] = [
+  { id: 'all', label: 'All' },
+  ...NAMING_OPPORTUNITY_STATUS_ORDER.map((value) => ({
+    id: value,
+    label: namingOpportunityStatusConfig(value).label,
+  })),
+];
+
 export const DEV_NAMING_DONOR_KIND_OPTIONS: {
   value: NamingDonorKind;
   label: string;
@@ -21,6 +35,9 @@ export const DEV_NAMING_DONOR_KIND_OPTIONS: {
 ];
 
 export type DevHotspotTab = 'nav' | 'naming' | 'info';
+
+/** Manage-list filter — includes All plus create-type buckets. */
+export type DevHotspotManageFilter = 'all' | DevHotspotTab;
 
 export const DEV_INFO_DISPLAY_OPTIONS: {
   value: 'modal' | 'anchored';
@@ -32,21 +49,61 @@ export const DEV_INFO_DISPLAY_OPTIONS: {
 
 export const DEV_HOTSPOT_TABS: { id: DevHotspotTab; label: string }[] = [
   { id: 'nav', label: 'Navigation' },
-  { id: 'naming', label: 'Naming opportunity' },
+  { id: 'naming', label: 'Naming' },
+  { id: 'info', label: 'Info' },
+];
+
+export const DEV_HOTSPOT_MANAGE_FILTER_TABS: {
+  id: DevHotspotManageFilter;
+  label: string;
+}[] = [
+  { id: 'all', label: 'All' },
+  { id: 'nav', label: 'Nav' },
+  { id: 'naming', label: 'NO' },
   { id: 'info', label: 'Info' },
 ];
 
 /** Which hotspot bucket the dev panel is editing. */
 export type DevHotspotManageScope = 'panorama-scene' | 'model3d-tour';
 
+export interface DevNamingCatalogSectionConfig {
+  title: string;
+  description: string;
+  emptyMessage: string;
+  addButtonLabel: string;
+}
+
 export interface DevHotspotSectionConfig {
   title: string;
   description: string;
-  manageHint: string;
-  createHint: string;
   emptyMessage: string;
   addButtonLabel: string;
   createTabs: { id: DevHotspotTab; label: string }[];
+}
+
+export function getDevNamingCatalogSectionConfig(
+  scope: DevHotspotManageScope,
+): DevNamingCatalogSectionConfig {
+  switch (scope) {
+    case 'model3d-tour':
+      return {
+        title: 'Naming catalog',
+        description:
+          'Tour-level naming opportunities (what) — name, price, status, donor, body, video, image. Place them under Scene → Hotspots.',
+        emptyMessage:
+          'No naming opportunities yet. Add one, then place under Scene → Hotspots.',
+        addButtonLabel: 'Add naming opportunity',
+      };
+    default:
+      return {
+        title: 'Naming catalog',
+        description:
+          'Tour-level naming opportunities (what) — name, price, status, donor, body, video, image. Place them under Scene → Hotspots.',
+        emptyMessage:
+          'No naming opportunities yet. Add one, then place under Scene → Hotspots.',
+        addButtonLabel: 'Add naming opportunity',
+      };
+  }
 }
 
 export function getDevHotspotSectionConfig(
@@ -57,12 +114,8 @@ export function getDevHotspotSectionConfig(
       return {
         title: 'Hotspots',
         description:
-          'Nav, naming, and info hotspots on the shared GLB. Scenes are camera viewpoints only.',
-        manageHint:
-          'Move, edit, or delete tour-level hotspots (stored in tour.json → hotspots[]).',
-        createHint:
-          'Add hotspots from a 3D viewer click (world x/y/z). Info / naming use the current scene as viewpoint (sceneId).',
-        emptyMessage: 'No hotspots on this tour yet.',
+          'Placements on the current viewpoint — nav, naming (where), and info. Naming business fields live on the Naming tab.',
+        emptyMessage: 'No hotspots on this viewpoint yet.',
         addButtonLabel: 'Add hotspot',
         createTabs: DEV_HOTSPOT_TABS,
       };
@@ -70,10 +123,7 @@ export function getDevHotspotSectionConfig(
       return {
         title: 'Hotspots',
         description:
-          'Manage hotspots on this scene — nav, naming opportunity, and info.',
-        manageHint: 'Move, edit, or delete existing hotspots on this scene.',
-        createHint:
-          'Add nav, naming opportunity, or info hotspots from a panorama click.',
+          'Placements on this scene — nav, naming (where), and info. Naming business fields live on the Naming tab.',
         emptyMessage: 'No hotspots on this scene yet.',
         addButtonLabel: 'Add hotspot',
         createTabs: DEV_HOTSPOT_TABS,

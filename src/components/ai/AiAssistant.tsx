@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
+import type { ChatGuideLink } from '../../types/tour';
 import type { useTourAssistant } from '../../hooks/useTourAssistant';
 import { AiAssistantFab } from './AiAssistantFab';
 import { AiChatPanelFallback } from './AiChatPanelFallback';
@@ -14,21 +15,41 @@ type AssistantState = ReturnType<typeof useTourAssistant>;
 
 interface AiAssistantProps {
   assistant: AssistantState;
-  chatTest?: boolean;
+  guideUiTest?: boolean;
+  guideMock?: boolean;
+  currentSceneId?: string;
+  onNavigateScene?: (sceneId: string) => void;
+  onSelectNaming?: (sceneId: string, hotspotId: string) => void;
+  onVisitNaming?: (sceneId: string, hotspotId: string) => void;
+  onCopyGuideLink?: (link: ChatGuideLink) => Promise<boolean> | boolean;
 }
 
 type AnimPhase = 'idle' | 'enter' | 'exit';
 
-export function AiAssistant({ assistant, chatTest = false }: AiAssistantProps) {
+export function AiAssistant({
+  assistant,
+  guideUiTest = false,
+  guideMock = false,
+  currentSceneId,
+  onNavigateScene,
+  onSelectNaming,
+  onVisitNaming,
+  onCopyGuideLink,
+}: AiAssistantProps) {
   const {
     isOpen,
     toggle,
     close,
     resetChat,
+    clearSendError,
     messages,
     locationTitle,
+    tourTitle,
     suggestedQuestions,
     sendMessage,
+    isSending,
+    liveMode,
+    sendError,
   } = assistant;
 
   const [fabShown, setFabShown] = useState(true);
@@ -119,13 +140,24 @@ export function AiAssistant({ assistant, chatTest = false }: AiAssistantProps) {
         <Suspense fallback={<AiChatPanelFallback />}>
           <AiChatPanelLazy
             panelPhase={panelPhase}
-            chatTest={chatTest}
+            guideUiTest={guideUiTest}
+            guideMock={guideMock}
             messages={messages}
             locationTitle={locationTitle}
+            tourTitle={tourTitle}
             suggestedQuestions={suggestedQuestions}
+            currentSceneId={currentSceneId}
+            isSending={isSending}
+            liveMode={liveMode}
+            sendError={sendError}
             onClose={handleClose}
             onReset={resetChat}
+            onDismissError={clearSendError}
             onSend={sendMessage}
+            onNavigateScene={onNavigateScene}
+            onSelectNaming={onSelectNaming}
+            onVisitNaming={onVisitNaming}
+            onCopyGuideLink={onCopyGuideLink}
           />
         </Suspense>
       )}

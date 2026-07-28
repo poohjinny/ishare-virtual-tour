@@ -32,18 +32,17 @@ function navPreviewNamingDescription(body: string): string {
 }
 
 export function buildNavPreviewNamingItems(
-  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'namingOpportunities'>,
   scene: Scene,
 ): NavPreviewNamingItem[] {
   const items: NavPreviewNamingItem[] = [];
 
   for (const hotspot of listSceneInfoHotspots(tour, scene)) {
-    const rawPopup = hotspot.popup;
-    const naming = rawPopup?.namingOpportunity;
-    if (!naming || !rawPopup) continue;
+    if (!hotspot.popup && !hotspot.namingId) continue;
+    const popup = resolveNamingPopup(tour, hotspot, scene);
+    const resolvedNaming = popup?.namingOpportunity;
+    if (!resolvedNaming || !popup) continue;
 
-    const popup = resolveNamingPopup(rawPopup, scene);
-    const resolvedNaming = popup.namingOpportunity!;
     const statusConfig = namingOpportunityStatusConfig(resolvedNaming.status);
     const description =
       popup.body?.trim() ? navPreviewNamingDescription(popup.body) : undefined;

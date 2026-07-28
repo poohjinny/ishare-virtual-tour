@@ -1,4 +1,5 @@
 import type { Hotspot, Scene, Tour, ViewPosition } from '../types/tour';
+import { isNamingHotspot } from './namingSceneInherit';
 import { resolveSceneHotspots } from './resolveSceneHotspots';
 
 export function isModel3dTour(tour: Pick<Tour, 'viewerType'>): boolean {
@@ -41,10 +42,7 @@ export function findNamingHotspotInTour(
   hotspotId: string,
 ): { sceneId: string; hotspot: Hotspot } | null {
   const tourHit = tour.hotspots?.find(
-    (entry) =>
-      entry.id === hotspotId &&
-      entry.type === 'info' &&
-      entry.popup?.namingOpportunity,
+    (entry) => entry.id === hotspotId && isNamingHotspot(entry),
   );
   if (tourHit) {
     return { sceneId: tourHit.sceneId ?? tour.firstScene, hotspot: tourHit };
@@ -52,10 +50,34 @@ export function findNamingHotspotInTour(
 
   for (const [sceneId, scene] of Object.entries(tour.scenes ?? {})) {
     const hotspot = scene.hotspots?.find(
-      (entry) =>
-        entry.id === hotspotId &&
-        entry.type === 'info' &&
-        entry.popup?.namingOpportunity,
+      (entry) => entry.id === hotspotId && isNamingHotspot(entry),
+    );
+    if (hotspot) {
+      return { sceneId, hotspot };
+    }
+  }
+
+  return null;
+}
+
+/** First placement hotspot for a catalog naming id (`no_*`). */
+export function findNamingHotspotByNamingId(
+  tour: Tour,
+  namingId: string,
+): { sceneId: string; hotspot: Hotspot } | null {
+  const id = namingId.trim();
+  if (!id) return null;
+
+  const tourHit = tour.hotspots?.find(
+    (entry) => entry.namingId?.trim() === id && isNamingHotspot(entry),
+  );
+  if (tourHit) {
+    return { sceneId: tourHit.sceneId ?? tour.firstScene, hotspot: tourHit };
+  }
+
+  for (const [sceneId, scene] of Object.entries(tour.scenes ?? {})) {
+    const hotspot = scene.hotspots?.find(
+      (entry) => entry.namingId?.trim() === id && isNamingHotspot(entry),
     );
     if (hotspot) {
       return { sceneId, hotspot };
@@ -74,20 +96,25 @@ export function listSceneInfoHotspots(
     const tourInfo = (tour.hotspots ?? []).filter(
       (hotspot) =>
         hotspot.type === 'info' &&
-        hotspot.popup &&
+        (hotspot.popup || isNamingHotspot(hotspot)) &&
         hotspot.sceneId === scene.id,
     );
     const legacySceneInfo = scene.hotspots.filter(
-      (hotspot) => hotspot.type === 'info' && hotspot.popup,
+      (hotspot) =>
+        hotspot.type === 'info' && (hotspot.popup || isNamingHotspot(hotspot)),
     );
     return resolveSceneHotspots(
       { hotspots: tourInfo },
       { hotspots: legacySceneInfo },
-    ).filter((hotspot) => hotspot.type === 'info' && hotspot.popup);
+    ).filter(
+      (hotspot) =>
+        hotspot.type === 'info' && (hotspot.popup || isNamingHotspot(hotspot)),
+    );
   }
 
   return scene.hotspots.filter(
-    (hotspot) => hotspot.type === 'info' && hotspot.popup,
+    (hotspot) =>
+      hotspot.type === 'info' && (hotspot.popup || isNamingHotspot(hotspot)),
   );
 }
 

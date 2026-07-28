@@ -56,19 +56,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 150000,
-              "status": "sold",
-              "donor": {
-                "name": "Birchcliff Energy",
-                "kind": "organization",
-                "website": "https://www.birchcliffenergy.com/",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-kitchen/donor-logo.png"
-              }
-            },
-            "body": "The Kitchen at the Ken Sargent House is the heart of our home, just as it is in many of your homes, only bigger. \n\nIt’s more than just a place to cook - it’s a gathering spot where patients & their families can prepare meals together, creating a sense of normalcy and connection. \n\nThis communal space fosters togetherness, allowing families to share experiences, support one another, and build bonds. The kitchen also provides a cost-effective alternative to dining out, easing financial strain while offering emotional comfort through familiar, home-cooked meals. \n\nYour support ensures that this vital space remains a cornerstone of care and continues to nourish both bodies and hearts.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cc45c26c-fda8-45f7-a6ae-96d7a7c8bc10"
-          }
+          },
+          "namingId": "no_vdqq3f4hfw"
         },
         {
           "id": "nav-to-main-floor",
@@ -197,7 +187,8 @@
           "targetScene": "s_c13b4lgg8f"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_xl88jb8utx.webp"
+      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_xl88jb8utx.webp",
+      "visibility": "unlisted"
     },
     "s_dehwdo8kx1": {
       "id": "s_dehwdo8kx1",
@@ -218,20 +209,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "sold",
-              "name": "Comfort Corner",
-              "donor": {
-                "name": "Dynamudr®",
-                "kind": "organization",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-comfort-corner/donor-logo.png"
-              }
-            },
-            "body": "Nestled on each floor of the Ken Sargent House is a small but meaningful communal space. Comfort Corner is designed to bring families together through shared experiences, much like the close-knit region of northwestern Alberta.\n\nThese shared areas provide emotional support, fostering a sense of belonging and connection, especially during tough times. Families can relax, share stories, and find strength in each other. It’s a space to create bonds that may transcend their stay, offering comfort and reassurance that they are never alone.\n\nYour support helps us maintain this area, ensuring that families can continue to find peace, community, and hope within our walls.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/510e41aa-d14b-4bc7-8b13-54c8517fac66",
-            "title": "Comfort Corner"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/510e41aa-d14b-4bc7-8b13-54c8517fac66"
+          },
+          "namingId": "no_4q7bxizw9o"
         },
         {
           "id": "nav-to-main-floor",
@@ -339,19 +319,13 @@
           },
           "popup": {
             "display": "anchored",
-            "title": "Reception Area",
-            "namingOpportunity": {
-              "name": "Reception Area",
-              "price": 150000,
-              "status": "open"
-            },
             "cta": {
               "product": "giftabulator",
               "url": "https://gphospitalfoundation.giftabulatornow.com/give-now?locale=en-CA&view=result&zoom=100&calc=eyJwcm92aW5jZSI6IkFCIiwiaW5jb21lIjoiMTUwMDAwIiwiYXNzZXQiOiJzdG9jayIsImFzc2V0VmFsdWUiOiIxMDAwMDAiLCJhc3NldENvc3QiOiI0NTAwMCIsImRvbmF0aW9uIjoiMTUwMDAwIiwicGxlZGdlUGVyaW9kIjoiNSJ9"
             },
-            "body": "As the first point of contact at the Ken Sargent House, the reception area serves as the heart of this home away from home, where families are greeted with care and compassion during their most challenging times. \n\nNaming this space offers a unique opportunity to leave a lasting legacy, honouring the values of generosity and kindness that the Ken Sargent House embodies. \n\nBy supporting this initiative, you help provide a welcoming environment for families when they need it most, ensuring they feel comforted and supported as they navigate difficult journeys together.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/7d557c98-18e9-4b4d-955b-da24d88eab0f"
-          }
+          },
+          "namingId": "no_iv5uzns09e"
         },
         {
           "id": "nav-to-kitchen",
@@ -1167,13 +1141,9 @@
             "pitch": -33.1
           },
           "popup": {
-            "display": "anchored",
-            "namingOpportunity": {
-              "price": 150000,
-              "status": "open"
-            },
-            "body": "The outside covered porch at the Ken Sargent House offers families a peaceful escape, where they can step outside and reconnect with nature, much like the expansive, quiet beauty of northwestern Alberta’s landscapes.\n\nThis space promotes relaxation, helping families recharge and find comfort in the natural world. \n\nWhether it’s taking in the sunrise, gazing at the aurora borealis or breathing in the fresh northern air, the porch offers a moment of respite and connection away from the hustle of the healthcare journey.\n\nYour support helps maintain this peaceful retreat, providing families with a sanctuary to refresh and find peace."
-          }
+            "display": "anchored"
+          },
+          "namingId": "no_yohppm1k3q"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_e5k3wjy72q.webp",
@@ -1198,19 +1168,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 150000,
-              "status": "sold",
-              "donor": {
-                "name": "Birchcliff Energy",
-                "kind": "organization",
-                "website": "https://www.birchcliffenergy.com/",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-dining-area/donor-logo.png"
-              }
-            },
-            "body": "The dining area at the Ken Sargent House is for more than sharing a meal, it’s a space for connection and togetherness. It’s where families gather around the table, share stories, and support each other. \n\nAs the hub of the home, it provides more than just nourishment - it’s a place of comfort, where conversations are plenty and family and friends can visit, play games, and share in conversation.\n\nYour support helps us maintain this special space, ensuring that families have a place to eat, share, and build lasting memories during their time here.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/0f9ccf86-f6fb-4739-8c03-6e0aa8abff08"
-          }
+          },
+          "namingId": "no_2roymsyadr"
         },
         {
           "id": "nav-to-kitchen",
@@ -1326,13 +1286,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 250000,
-              "status": "open"
-            },
-            "body": "The Family and Patient Communal Space at the Ken Sargent House is a haven designed to bring families together during difficult times to find comfort and connection, building a strong sense of community. This shared space fosters support and camaraderie, helping families navigate difficult times with emotional resilience.\n\nIt’s a place, in the main area of the home where families share experiences, offer advice, and build lasting relationships that extend beyond their stay.\n\nThis is where the magic of natural support systems are created, where strangers become friends and friends turn into family.\n\nYour support helps us maintain this vital space, ensuring families have a safe, supportive environment to heal together.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/9227b641-562a-49f2-b1cf-19eac55ec6d6"
-          }
+          },
+          "namingId": "no_6k2x96yalr"
         },
         {
           "id": "nav-to-dining-area",
@@ -1439,15 +1395,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 35000,
-              "status": "open",
-              "name": "Stairwell"
-            },
-            "title": "Stairwell",
-            "body": "The Stairwell connects families and staff to every part of the home, providing a safe and reliable pathway throughout the space. More than just a transition point, it represents movement, access, and continuity in daily life. Your support ensures that this essential connection remains secure, accessible, and welcoming for all.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8431074c-e271-4083-be66-189dd064148f"
-          }
+          },
+          "namingId": "no_4lng3uiyfs"
         },
         {
           "id": "nav-to-second-floor",
@@ -1501,15 +1451,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 75000,
-              "status": "open",
-              "name": "Accessible Suite"
-            },
-            "body": "At the Ken Sargent House, our two accessible suites offer families privacy and comfort, giving them a personal space to rest, recharge, and find solace during challenging times.\n\nThese suites are designed similarly to suites A in terms of functionality and layout, but are specifically adapted to meet the needs of individuals with disabilities. These adaptations ensure that everyone, regardless of physical limitations enjoy the same privacy and comfort as other guests at the Ken Sargent House.\n\nEach suite includes the necessities - two beds, a bathroom with a shower, and storage for personal belongings - making it a true home away from home.\n\nYour support will help us maintain this essential space.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788",
-            "title": "Accessible Suite"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788"
+          },
+          "namingId": "no_qslvzqne8a"
         },
         {
           "id": "nav-to-main-floor",
@@ -1556,15 +1500,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "open",
-              "name": "Suite A"
-            },
-            "body": "Suite A offers families a private sanctuary on the main level of the Ken Sargent House during their loved one’s medical treatment.\n\nEach of these eight suites provides privacy and comfort, giving families a personal place to rest, recharge, and find solace during challenging times.\n\nHaving an afforadble suite in the Ken Sargent House reduces travel stress and financial burden. It provides a safe place for families to be near their loved ones receiving medical care at GPRH.\n\nAll suites include the basic necessities - two beds, a bathroom with a bathtub, and storage for personal belongings - making it a true home away from home.\n\nYour support will help us maintain this safe and comforting environment for families during their time of need.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/28feffbb-caed-43f8-bfa1-ac8addf0c1c3",
-            "title": "Suite A"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/28feffbb-caed-43f8-bfa1-ac8addf0c1c3"
+          },
+          "namingId": "no_geeclddv9n"
         },
         {
           "id": "nav-to-main-floor",
@@ -1601,18 +1539,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "sold",
-              "donor": {
-                "name": "Gamehost Inc.",
-                "kind": "organization",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-gazebo/donor-logo.png"
-              }
-            },
-            "body": "The Gazebo at the Ken Sargent House offers a peaceful retreat, set against the serene backdrop of Northwestern Alberta’s breathtaking natural beauty. \n\nSurrounded by the quiet tranquility of the outdoors, it’s a space where families can unwind, reflect, and find peace amidst the challenges they face. \n\nFor caregivers and families alike, this space provides the perfect opportunity to recharge, away from the clinical environment. \n\nWhether you’re sitting in the stillness of winter or enjoying the cool northern breeze, the Gazebo is a sanctuary that promotes healing and connection. \n\nYour support ensures that this tranquil retreat continues to serve families in need of respite.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/b650328c-722e-4a11-93b0-69110088a77a"
-          }
+          },
+          "namingId": "no_4uzx2f0hs7"
         },
         {
           "id": "nav-to-main-floor",
@@ -1649,18 +1578,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "sold",
-              "donor": {
-                "name": "NuVista Energy Ltd.",
-                "kind": "organization",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-pantry/donor-logo.png"
-              }
-            },
-            "body": "At the Ken Sargent House, our pantry is more than a place to store food - it’s a vital resource for families.\n\nThe pantry offers convenient access to dry goods, snacks, and personal food storage, ensuring that families can focus on what matters most - being there for one another.\n\nIt also alleviates financial burdens by offering nutritious, cost-effective options that support the wellbeing of our families. Whether it’s the long winters or the unpredictable weather, the pantry helps families maintain healthy eating habits during challenging times. \n\nYour support allows us to continue offering this essential service, providing comfort and relief when it’s needed most.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8c273fc2-9b00-4c9a-9869-02e4c60c9a82"
-          }
+          },
+          "namingId": "no_7m5xquxs2v"
         },
         {
           "id": "nav-to-main-floor",
@@ -1697,19 +1617,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 75000,
-              "status": "sold",
-              "donor": {
-                "name": "CatWauk Compression",
-                "kind": "organization",
-                "website": "https://www.catwaukcompression.com/",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-playroom/donor-logo.png"
-              }
-            },
-            "body": "The Playroom at the Ken Sargent House offers a burst of joy and creativity for children, allowing them to engage in playful activities and foster growth, even in the midst of adversity. \n\nIn Northwestern Alberta, where winters are long and isolation can set in, the Playroom is a vital space where children can reduce stress, express themselves, and experience moments of happiness. \n\nThis safe and welcoming space encourages social interactions, while giving children a sense of normalcy and fun. \n\nYour support helps keep this haven alive, offering children and families a much-needed escape and the chance to create memories of joy, even in difficult times.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/6219e1bf-98ed-45c4-837e-d0e1ced62cbe"
-          }
+          },
+          "namingId": "no_0eace8xncd"
         },
         {
           "id": "nav-to-main-floor",
@@ -1801,15 +1711,9 @@
             "pitch": -15.8
           },
           "popup": {
-            "display": "anchored",
-            "namingOpportunity": {
-              "price": 100000,
-              "status": "open",
-              "name": "Family Corridor"
-            },
-            "body": "Often called the heart of the Ken Sargent House, your family corridor is where families return after long days at the hospital and where moments of quiet, comfort, and connection unfold. Lined with private suites, this wing is more than a hallway; it is a sanctuary that leads families to their temporary home.\n\nEach corridor witnesses the full spectrum of the human experience: hope, exhaustion, relief, tears, and gratitude. It is where families pause to take a breath before opening their door, where they walk hand-in-hand after visiting a loved one, and where families begin and end each day surrounded by the warmth and safety of the Ken Sargent House.\n\nBy choosing to name a Family Corridor, you are supporting a space that plays a central role in the family journey, one that offers a sense of stability and grounding during uncertain times. Your generosity becomes part of the path families walk each morning as they gather strength, and each evening as they return to rest.\n\nEach corridor is thoughtfully designed to be quiet, calming, and accessible, providing a seamless transition from the lively energy of the home’s common areas to the privacy and peace of the suites.\n\nYour gift ensures that these hallways remain places of comfort, dignity, and hope, guiding hundreds of families each year toward the rest and connection they need most. This naming opportunity offers a powerful and visible legacy, honouring your commitment to supporting families as they navigate their healthcare journey, one step at a time.",
-            "title": "Family Corridor"
-          }
+            "display": "anchored"
+          },
+          "namingId": "no_0s9nr1ie12"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_rmf30ndp5j.webp",
@@ -1867,19 +1771,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "sold",
-              "donor": {
-                "name": "Victoria's Attic Support the Girls",
-                "kind": "organization",
-                "website": "https://victoriasattic.ca/",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-laundry/donor-logo.png"
-              }
-            },
-            "body": "The laundry room at the Ken Sargent House is more than just a convenience - it’s one less hurdle a family has to navigate.\n\nIt offers cost savings by eliminating the need for external laundry services and it ensures hygiene and comfort with clean clothes and bedding.\n\nThe laundry room, located in the basement of the home, is accessible by elevator and is free for families to use. \n\nYour support keeps this essential space running, providing comfort and care when families need it most.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8841a848-6936-469d-8992-8d0447f2d42d"
-          }
+          },
+          "namingId": "no_2e79wndqcc"
         },
         {
           "id": "nav-to-basement",
@@ -2004,20 +1898,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "sold",
-              "donor": {
-                "name": "Jim and Dorothea Bulford and Family",
-                "kind": "person",
-                "affiliation": "MNP",
-                "website": "https://www.mnp.ca/",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-social-space/donor-logo.png"
-              }
-            },
-            "body": "Welcome to the Social Space at the Ken Sargent House—a space designed to bring families together. Grab a friend and make yourselves a hot coffee or tea, relax in the comfort of this space that encourages connection, allowing families to share experiences, form supportive relationships, and find comfort in one another. It's a place where stress melts away, and emotional support thrives, as families understand and uplift each other.\n\nWhether you’re spending quality time with loved ones or engaging in house activities, the social space promotes well-being and reduces stress. \n\nThe social space is a place to build lasting relationships, and natural support systems to guide families through their journey and create bonds that extend far beyond one’s stay.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/29ab5a30-8c4b-46a7-8e45-6ea7773f5e0f"
-          }
+          },
+          "namingId": "no_42bkm6h2zd"
         },
         {
           "id": "nav-to-quite-space",
@@ -2081,15 +1964,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 100000,
-              "status": "open",
-              "name": "Quite Space / Library"
-            },
-            "body": "Shhhhhhhh, join us in the quiet space/library at the Ken Sargent House, a peaceful retreat - much like the stillness of northwestern Alberta’s vast wilderness.\n\nHere, families can reflect, recharge, and regain their mental and emotional strength. Whether it’s a moment of silence to gather their thoughts, nestled up \nwith a good book or a quiet conversation, this space provides the calm needed to stay centered and focused.\n\nThe quiet space encourages self care and offers a refuge where families can process their emotions and find renewal. \n\nYour support ensures that this sanctuary remains a calming and restorative space for families to gather strength.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/4665eae4-a333-4968-b7a8-16a8fdd3318d",
-            "title": "Quite Space / Library"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/4665eae4-a333-4968-b7a8-16a8fdd3318d"
+          },
+          "namingId": "no_0ldb9bludk"
         },
         {
           "id": "nav-to-social-space",
@@ -2130,20 +2007,14 @@
           "id": "info-suite-b",
           "type": "info",
           "position": {
-            "yaw": 50.1,
-            "pitch": -7.3
+            "yaw": 50.6,
+            "pitch": -20.9
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "open",
-              "name": "Suite B"
-            },
-            "body": "Suite B offers families a private room on the second floor of the Ken Sargent House during their loved one’s medical treatment at GPRH.\n\nWith nine suites available, each room provides a private, comfortable space for families to rest, recharge, and find solace during challenging times.\n\nStaying at the Ken Sargent House has the benefit of reducing travel stress and financial burden. It also ensures families can stay close to their loved ones when it matters most.\n\nAll suites include the basic necessities - one bed, a bathroom with a shower, and storage for personal belongings - making it a true home away from home.\n\nYour support will help us maintain this safe and comforting environment for families a during their time of need.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/9775faff-a2ce-4620-9e5a-8cbe822b1efe",
-            "title": "Suite B"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/9775faff-a2ce-4620-9e5a-8cbe822b1efe"
+          },
+          "namingId": "no_f95cxxxi4c"
         },
         {
           "id": "nav-to-second-floor",
@@ -2180,20 +2051,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "sold",
-              "name": "Comfort Corner",
-              "donor": {
-                "name": "Dynamudr®",
-                "kind": "organization",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-second-floor-comfort-corner/donor-logo.png"
-              }
-            },
-            "body": "Nestled on each floor of the Ken Sargent House is a small but meaningful communal space. Comfort Corner is designed to bring families together through shared experiences, much like the close-knit region of northwestern Alberta.\n\nThese shared areas provide emotional support, fostering a sense of belonging and connection, especially during tough times. Families can relax, share stories, and find strength in each other. It’s a space to create bonds that may transcend their stay, offering comfort and reassurance that they are never alone.\n\nYour support helps us maintain this area, ensuring that families can continue to find peace, community, and hope within our walls.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/f1fc94b3-9b5c-4c8c-843f-173c1459bd1e",
-            "title": "Comfort Corner"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/f1fc94b3-9b5c-4c8c-843f-173c1459bd1e"
+          },
+          "namingId": "no_tfkzkw1ex1"
         },
         {
           "id": "nav-to-second-floor",
@@ -2248,21 +2108,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "sold",
-              "name": "Fitness Room",
-              "donor": {
-                "name": "TARA Energy Services",
-                "kind": "organization",
-                "website": "https://taraenergyservices.com/",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-fitness-room/donor-logo.png"
-              }
-            },
-            "body": "The fitness room at the Ken Sargent House is more than just a place to work out - it’s a place where families can build strength, resilience, and hope in the face of adversity. \n\nWhether it’s the long northern winters or the endless light of summer, staying active is key to mental and physical wellbeing.Our fitness space helps families reduce stress, stay strong, and cope with the emotional strain of challenging times. For caregivers, it’s an essential outlet, offering a place to release tension and restore balance.\n\nYour support keeps this space active, enabling families to take care of themselves as they care for their loved ones.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/be369002-6a25-4ef4-bf60-310e11612a99",
-            "title": "Fitness Room"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/be369002-6a25-4ef4-bf60-310e11612a99"
+          },
+          "namingId": "no_29qjjy8422"
         },
         {
           "id": "nav-to-comfort-corner",
@@ -2363,15 +2211,9 @@
             "pitch": -14.1
           },
           "popup": {
-            "display": "anchored",
-            "namingOpportunity": {
-              "price": 100000,
-              "status": "open",
-              "name": "Family Corridor"
-            },
-            "title": "Family Corridor",
-            "body": "Often called the heart of the Ken Sargent House, your family corridor is where families return after long days at the hospital and where moments of quiet, comfort, and connection unfold. Lined with private suites, this wing is more than a hallway; it is a sanctuary that leads families to their temporary home.\n\nEach corridor witnesses the full spectrum of the human experience: hope, exhaustion, relief, tears, and gratitude. It is where families pause to take a breath before opening their door, where they walk hand-in-hand after visiting a loved one, and where families begin and end each day surrounded by the warmth and safety of the Ken Sargent House.\n\nBy choosing to name a Family Corridor, you are supporting a space that plays a central role in the family journey, one that offers a sense of stability and grounding during uncertain times. Your generosity becomes part of the path families walk each morning as they gather strength, and each evening as they return to rest.\n\nEach corridor is thoughtfully designed to be quiet, calming, and accessible, providing a seamless transition from the lively energy of the home’s common areas to the privacy and peace of the suites.\n\nYour gift ensures that these hallways remain places of comfort, dignity, and hope, guiding hundreds of families each year toward the rest and connection they need most. This naming opportunity offers a powerful and visible legacy, honouring your commitment to supporting families as they navigate their healthcare journey, one step at a time."
-          }
+            "display": "anchored"
+          },
+          "namingId": "no_iv4wwz1tpn"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_9kkz24dle7.webp",
@@ -2420,15 +2262,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 75000,
-              "status": "open",
-              "name": "Large A3 Suite"
-            },
-            "body": "At the Ken Sargent House, our two large suites offer families a private sanctuary during their loved one’s medical treatment.\n\nThese larger suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during hallenging times.\n\nSuite A3 in the Ken Sargent House reduces travel stress and ensures families can stay close to their loved ones when it matters most.\n\nEach suite includes all the basic necessities - two beds, a bathroom with a shower, and storage for personal belongings - making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe and comforting environment during their time of need.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788",
-            "title": "Large A3 Suite"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788"
+          },
+          "namingId": "no_u2odcp0f8q"
         },
         {
           "id": "nav-to-second-floor",
@@ -2464,20 +2300,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 10000,
-              "status": "sold",
-              "donor": {
-                "name": "Kenny Lambert",
-                "kind": "person",
-                "affiliation": "Cinch Oilfield Hauling & Cranes Ltd.",
-                "website": "https://www.cinchoilfield.com/",
-                "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-parking-space/donor-logo.png"
-              }
-            },
-            "body": "The parking spaces at the Ken Sargent House may seem simple, but for families navigating some of the hardest moments of their lives, they are a source of relief, comfort, and stability. After long drives from communities across northwestern Alberta, having a safe, dedicated place to park means one less barrier, one less worry, and one more moment to focus on what matters most, their sick loved one.\n\nWhether families are arriving in the early morning for medical appointments, returning late at night after long days at the hospital, or juggling multiple trips back and forth, convenient parking provides peace of mind and immediate access to their home away from home.\n\nYour support ensures that this essential convenience remains available to every family who walks through our doors. By choosing to name a parking space, you are helping reduce stress, create a sense of normalcy, and offer a small but meaningful comfort that has a lasting impact during uncertain times.\n\nYour parking space becomes the first welcome families experience, a reminder that they are supported, cared for, and not alone.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/6fde2df4-1cdc-429b-b46a-bafeb7245e07"
-          }
+          },
+          "namingId": "no_8st1iyzvpi"
         },
         {
           "id": "nav-to-main-entrance",
@@ -2521,13 +2346,9 @@
             "pitch": -3.2
           },
           "popup": {
-            "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "open"
-            },
-            "body": "The Housekeeping Centre is one of the most essential spaces within the Ken Sargent House. It is the heart of our behind-the-scenes operations, ensuring that the home remains clean, safe, and welcoming for every family who walks through our doors.\nFrom linens and cleaning supplies to seasonal items and daily essentials, this dedicated storage and preparation area allows staff and volunteers to respond quickly to the needs of families. It is here that rooms are reset with care, common spaces are refreshed, and the comforting feeling of “home” is quietly preserved each day.\n\nA clean, well-maintained environment is more than a convenience, it is a source of dignity, relief, and stability for families navigating medical uncertainty. When they return from long days at the hospital, they step into a space that feels orderly, cared for, and thoughtfully prepared.\n\nBy choosing to name the Housekeeping Centre, you are supporting the vital work that keeps the Ken Sargent House running smoothly and compassionately.\n\nYour gift ensures that every family is welcomed into a space that feels warm, refreshed, and ready to support them through their journey.\n\nYour generosity helps us uphold the highest standard of care, quietly, consistently, and with heart."
-          }
+            "display": "anchored"
+          },
+          "namingId": "no_201r3riftw"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_6bewbri9s0.webp",
@@ -2552,13 +2373,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "open"
-            },
-            "body": "The House Administration Office is the central hub of coordination, care, and connection within the Ken Sargent House. Located just off the main living area and at the start of the family corridor, this shared workspace is where staff and volunteers come together each day to ensure the home runs smoothly and families receive the support they need.\n\nBehind every comforting meal, clean room, thoughtful check-in, and quiet moment of reassurance is the work that happens in this office. It is here that schedules are managed, family needs are addressed, community supports are coordinated, and the day-to-day operations of the house come to life.\n\nThis space is the heart of our team’s efforts, where compassion is organized, where decisions are made with families in mind, and where the wellbeing of every guest is the focus. It is also a welcoming environment for volunteers, offering a place to learn, prepare, and come together in service of the families we support.\n\nBy choosing to name the House Administration Office, you are investing directly in the people and processes that keep the Ken Sargent House warm, responsive, and supportive. Your gift strengthens the backbone of our operations, empowering our staff\nand volunteers to provide exceptional care to every family who calls this house their temporary home.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/4f5dedec-1fb9-459f-a732-88fe81d79587"
-          }
+          },
+          "namingId": "no_ulg3poh16m"
         },
         {
           "id": "nav-to-main-floor",
@@ -2591,13 +2408,9 @@
             "pitch": -21.1
           },
           "popup": {
-            "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "open"
-            },
-            "body": "The moment families step into the Ken Sargent House, they enter through the Welcome Walk, a warm and inviting passage that gently transitions them from the outside world into a place of comfort, safety, and hope. This space is more than a hallway; it is the first embrace of the home, offering reassurance and setting the tone for their stay. It is here that the weight of worry begins to ease, replaced by a sense of belonging and the comfort of knowing they are not alone.\n\nAs the threshold between uncertainty and support, this space quietly reflects the heart of the Ken Sargent House, warm, inclusive, and grounded in compassion. Every guest begins their journey through this passage, making it one of the most meaningful and symbolically rich areas within the home."
-          }
+            "display": "anchored"
+          },
+          "namingId": "no_cxz5nh0a4w"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_dm33cannkj.webp",
@@ -2608,8 +2421,8 @@
       "title": "Elevator Door",
       "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_sw7dxt8z3g.webp",
       "defaultView": {
-        "yaw": 16,
-        "pitch": -2.4,
+        "yaw": 70.9,
+        "pitch": -4,
         "zoom": 1
       },
       "hotspots": [
@@ -2622,15 +2435,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "open",
-              "name": "Elevator Door Panel"
-            },
-            "body": "The elevator at the Ken Sargent House is more than a means of moving between floors, it is a daily touchpoint for every family who calls this house their temporary home. Each time a loved one heads to the hospital for an early-morning appointment, a family member returns after sitting beside a loved one, they pass through this space.\n\nBy naming one of the nine elevator door panels, you are helping transform this essential feature into a place of comfort, encouragement, and hope. Each panel offers a visible, meaningful opportunity to stand with families during their healthcare journey. \n\nYour branded panel becomes part of a powerful visual moment, one that families will see countless times throughout their stay. It is a chance to leave a message of compassion, strength, and community support exactly where families need it most.\nThis sponsorship offers a unique blend of visibility and impact, a prominent physical presence combined with the emotional significance of supporting the movement, accessibility, and flow of the home.\n\nYour panel on the elevator door becomes a reminder, every day, that this community cares deeply for the families walking through its doors.\n\nThis unique opportunity will allow the donor to have one third of the vinyl wrapped elevator door branded with a message and can be updated annually.",
-            "videoUrl": "https://share.synthesia.io/embeds/videos/65b119dd-4256-4646-b077-f40ee3301ce4",
-            "title": "Elevator Door Panel"
-          }
+            "videoUrl": "https://share.synthesia.io/embeds/videos/65b119dd-4256-4646-b077-f40ee3301ce4"
+          },
+          "namingId": "no_enqqoiso2d"
         },
         {
           "id": "nav-to-stairwell",
@@ -2727,13 +2534,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "open"
-            },
-            "body": "At the heart of the Ken Sargent House stands our donor wall, a place of gratitude, storytelling, and legacy. It is where the generosity of our community is celebrated, and where every family who walks through our doors is reminded that they are supported by compassionate people who believe in the power of healing together.\n\nBy becoming the Donor Wall Sponsor, you will be supporting one of the most significant and visible features of the home. The donor wall is more than an installation; it is a symbol of hope. It honours those who make the Ken Sargent House possible and inspires others to give, connect, and stand alongside families during their most challenging times.\n\nProminently displayed within the home, the donor wall reflects the collective strength of our region, businesses, organizations, families, and individuals who ensure that no one faces their medical journey alone. Your sponsorship helps us honour these contributions with dignity, beauty, and permanence.\n\nAs the Donor Wall Sponsor, your commitment will be recognized every time a family, visitor, volunteer, or supporter stops to read the names and stories of those who help the Ken Sargent House thrive. \n\nYour support becomes part of the legacy of care that uplifts hundreds of families each year, a lasting tribute to generosity, community, and compassion.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/77123de7-e58b-4233-b466-6f5280dac24d"
-          }
+          },
+          "namingId": "no_lwq3eoqpv4"
         },
         {
           "id": "nav-to-corridor",
@@ -2848,13 +2651,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 25000,
-              "status": "open"
-            },
-            "body": "The Crawl Space at the Ken Sargent House is one of the most essential yet unseen parts of the home’s foundation. Quietly supporting the entire structure, this large and critical area provides access to the mechanical systems, plumbing, and infrastructure that keep the house safe, stable, and functioning smoothly for every family who stays here.\n\nWhile families may never walk through this space, they feel its impact every single day. The Crawl Space ensures that maintenance can be done efficiently, that systems remain protected, and that the home’s structure is well-supported throughout the changing seasons of northwestern Alberta. It is the backbone of the house, the steady, reliable layer that upholds everything above it. \n\nJust as families are strengthened by the support beneath them, the Crawl Space symbolizes the unseen foundation of care that makes healing possible. By naming this space, donors help sustain the core operations that make the Ken Sargent House a safe, warm, and dependable haven for those facing medical journeys far from home.\n\nYour gift strengthens the very foundation of the house, ensuring stability, comfort, and continuity of care for every family who walks through our doors.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8da31eb6-9664-41d0-9b42-cc1b131e4aaa"
-          }
+          },
+          "namingId": "no_x5f8d2vk43"
         },
         {
           "id": "nav-to-corridor",
@@ -2899,13 +2698,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 10000,
-              "status": "open"
-            },
-            "body": "Located between the custodian room and the laundry room, the Linen Room is a small but vital space that helps ensure families at the Ken Sargent House experience comfort, warmth, and dignity throughout their stay. This room holds the essentials\nthat make a house feel like a home-fresh bedding, soft towels, and the comforting items that bring a sense of normalcy during challenging times. \n\nEvery clean sheet and folded towel represents a moment of care. Whether a family is arriving after a long drive, returning from a full day at the hospital, or settling in for the night, the linens stored here help create an environment that is restful, clean, and nurturing.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/bf5c4261-4ff4-4bfc-9e2c-d68071c6fd9d"
-          }
+          },
+          "namingId": "no_edshzrdub5"
         },
         {
           "id": "nav-to-basement",
@@ -2940,13 +2735,9 @@
             "pitch": -1.7
           },
           "popup": {
-            "display": "anchored",
-            "namingOpportunity": {
-              "price": 10000,
-              "status": "open"
-            },
-            "body": "A clean home contributes to a healthy home. Located in the sublevel on the path to the laundry room, the Custodian Room is an essential behind-the-scenes space that supports the smooth, dignified operation of the Ken Sargent House playing a vital role in keeping the home clean, safe, and welcoming for every family we serve.\n\nFrom storing cleaning supplies and equipment to supporting the daily work of our team, this room enables staff and volunteers to respond quickly and efficiently to the needs of families. It ensures that common areas remain tidy, suites stay refreshed, and the house maintains the calm, orderly environment that brings comfort to families facing medical uncertainty."
-          }
+            "display": "anchored"
+          },
+          "namingId": "no_b4sebwu5uv"
         },
         {
           "id": "nav-to-basement",
@@ -2982,13 +2773,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 10000,
-              "status": "open"
-            },
-            "body": "Tucked neatly beside the kitchen, washroom, and pantry, the general storage room is one of the quiet but essential spaces that keeps the Ken Sargent House running smoothly. This room plays a vital role in maintaining the warmth, order, and comfort that make the house feel like a true home.\n\nFrom storing everyday supplies to keeping household essentials organized and accessible, this space ensures that families always have what they need whether it’s kitchen items, seasonal supplies, or the small comforts that help create normalcy during a challenging time.\n\nIn a home that serves families travelling, sometimes unexpectedly, this storage room allows staff and volunteers to respond quickly, restock efficiently, and provide seamless support without ever interrupting the calm environment families depend on.\nBy choosing to name the General Storage Room, you are directly supporting the behind-the-scenes care that keeps the entire house functioning with dignity and compassion.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/29d1f9bd-a2ea-4718-a387-34e9447071f3"
-          }
+          },
+          "namingId": "no_x3eqslki43"
         },
         {
           "id": "nav-to-main-floor",
@@ -3022,13 +2809,9 @@
           },
           "popup": {
             "display": "anchored",
-            "namingOpportunity": {
-              "price": 10000,
-              "status": "open"
-            },
-            "body": "Located in the sublevel of the Ken Sargent House, the Home Essentials Room is a key support space that ensures families have access to the comforts and supplies that help make their stay feel safe, calm, and cared for. At 300 square feet, this room stores the items that keep the home running smoothly, from seasonal supplies to extra household essentials and the resources needed to support daily operations.\n\nThis space allows staff and volunteers to stay organized, replenish spaces efficiently, and ensure the house is always ready to meet the needs of those arriving from across northwestern Alberta.\n\nWhether decorating for the many seasons throughout the year, or storing additional items needed for one’s stay such as play pens, replacement items, or simple comforts during their stay, the Home Essentials Room plays a quiet but meaningful role in making sure the house remains warm, responsive, and well-prepared.",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e638cb9a-e8a3-4c4b-98b8-4253b535a639"
-          }
+          },
+          "namingId": "no_z7nyd4zmse"
         },
         {
           "id": "nav-to-corridor",
@@ -3063,17 +2846,290 @@
             "pitch": -37.9
           },
           "popup": {
-            "display": "anchored",
-            "namingOpportunity": {
-              "price": 50000,
-              "status": "open"
-            },
-            "body": "Within the basement of the Ken Sargent House is one of the most important and hard-working spaces in the entire home, the Operations Centre. At more than 700 square feet, this room houses the essential systems that bring comfort, safety, and connection to every family who stays with us.\n\nFrom heating, mechanical controls, and building infrastructure to the technology that powers our internet, Wi-Fi, television, and communications, this space ensures that the house runs seamlessly, quietly supporting families through every moment of their stay. When families unwind after a long day at the hospital with a favourite show or when they connect with loved ones back home through video calls, or when staff rely on stable systems to coordinate care, it is the Operations Centre that makes these moments possible."
-          }
+            "display": "anchored"
+          },
+          "namingId": "no_lqpoee5q46"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_be8euh4oit.webp",
       "placeLead": "Within the basement of the Ken Sargent House is one of the most important and hard-working spaces in the entire home, the Operations Centre. At more than 700 square feet, this room houses the essential systems that bring comfort, safety, and connection to every family who stays with us. From heating, mechanical controls, and building infrastructure to the technology that powers our internet, Wi-Fi, television, and communications, this space ensures that the house runs…"
+    }
+  },
+  "namingOpportunities": {
+    "no_vdqq3f4hfw": {
+      "id": "no_vdqq3f4hfw",
+      "price": 150000,
+      "status": "sold",
+      "donor": {
+        "name": "Birchcliff Energy",
+        "kind": "organization",
+        "website": "https://www.birchcliffenergy.com/",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-kitchen/donor-logo.png"
+      },
+      "body": "The Kitchen at the Ken Sargent House is the heart of our home, just as it is in many of your homes, only bigger. \n\nIt’s more than just a place to cook - it’s a gathering spot where patients & their families can prepare meals together, creating a sense of normalcy and connection. \n\nThis communal space fosters togetherness, allowing families to share experiences, support one another, and build bonds. The kitchen also provides a cost-effective alternative to dining out, easing financial strain while offering emotional comfort through familiar, home-cooked meals. \n\nYour support ensures that this vital space remains a cornerstone of care and continues to nourish both bodies and hearts."
+    },
+    "no_4q7bxizw9o": {
+      "id": "no_4q7bxizw9o",
+      "price": 25000,
+      "name": "Comfort Corner",
+      "status": "sold",
+      "donor": {
+        "name": "Dynamudr®",
+        "kind": "organization",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-comfort-corner/donor-logo.png"
+      },
+      "body": "Nestled on each floor of the Ken Sargent House is a small but meaningful communal space. Comfort Corner is designed to bring families together through shared experiences, much like the close-knit region of northwestern Alberta.\n\nThese shared areas provide emotional support, fostering a sense of belonging and connection, especially during tough times. Families can relax, share stories, and find strength in each other. It’s a space to create bonds that may transcend their stay, offering comfort and reassurance that they are never alone.\n\nYour support helps us maintain this area, ensuring that families can continue to find peace, community, and hope within our walls."
+    },
+    "no_iv5uzns09e": {
+      "id": "no_iv5uzns09e",
+      "price": 150000,
+      "name": "Reception Area",
+      "status": "open",
+      "body": "As the first point of contact at the Ken Sargent House, the reception area serves as the heart of this home away from home, where families are greeted with care and compassion during their most challenging times. \n\nNaming this space offers a unique opportunity to leave a lasting legacy, honouring the values of generosity and kindness that the Ken Sargent House embodies. \n\nBy supporting this initiative, you help provide a welcoming environment for families when they need it most, ensuring they feel comforted and supported as they navigate difficult journeys together."
+    },
+    "no_yohppm1k3q": {
+      "id": "no_yohppm1k3q",
+      "price": 150000,
+      "status": "open",
+      "body": "The outside covered porch at the Ken Sargent House offers families a peaceful escape, where they can step outside and reconnect with nature, much like the expansive, quiet beauty of northwestern Alberta’s landscapes.\n\nThis space promotes relaxation, helping families recharge and find comfort in the natural world. \n\nWhether it’s taking in the sunrise, gazing at the aurora borealis or breathing in the fresh northern air, the porch offers a moment of respite and connection away from the hustle of the healthcare journey.\n\nYour support helps maintain this peaceful retreat, providing families with a sanctuary to refresh and find peace."
+    },
+    "no_2roymsyadr": {
+      "id": "no_2roymsyadr",
+      "price": 150000,
+      "status": "sold",
+      "donor": {
+        "name": "Birchcliff Energy",
+        "kind": "organization",
+        "website": "https://www.birchcliffenergy.com/",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-dining-area/donor-logo.png"
+      },
+      "body": "The dining area at the Ken Sargent House is for more than sharing a meal, it’s a space for connection and togetherness. It’s where families gather around the table, share stories, and support each other. \n\nAs the hub of the home, it provides more than just nourishment - it’s a place of comfort, where conversations are plenty and family and friends can visit, play games, and share in conversation.\n\nYour support helps us maintain this special space, ensuring that families have a place to eat, share, and build lasting memories during their time here."
+    },
+    "no_6k2x96yalr": {
+      "id": "no_6k2x96yalr",
+      "price": 250000,
+      "status": "open",
+      "body": "The Family and Patient Communal Space at the Ken Sargent House is a haven designed to bring families together during difficult times to find comfort and connection, building a strong sense of community. This shared space fosters support and camaraderie, helping families navigate difficult times with emotional resilience.\n\nIt’s a place, in the main area of the home where families share experiences, offer advice, and build lasting relationships that extend beyond their stay.\n\nThis is where the magic of natural support systems are created, where strangers become friends and friends turn into family.\n\nYour support helps us maintain this vital space, ensuring families have a safe, supportive environment to heal together."
+    },
+    "no_4lng3uiyfs": {
+      "id": "no_4lng3uiyfs",
+      "price": 35000,
+      "name": "Stairwell",
+      "status": "open",
+      "body": "The Stairwell connects families and staff to every part of the home, providing a safe and reliable pathway throughout the space. More than just a transition point, it represents movement, access, and continuity in daily life. Your support ensures that this essential connection remains secure, accessible, and welcoming for all."
+    },
+    "no_qslvzqne8a": {
+      "id": "no_qslvzqne8a",
+      "price": 75000,
+      "name": "Accessible Suite",
+      "status": "open",
+      "body": "At the Ken Sargent House, our two accessible suites offer families privacy and comfort, giving them a personal space to rest, recharge, and find solace during challenging times.\n\nThese suites are designed similarly to suites A in terms of functionality and layout, but are specifically adapted to meet the needs of individuals with disabilities. These adaptations ensure that everyone, regardless of physical limitations enjoy the same privacy and comfort as other guests at the Ken Sargent House.\n\nEach suite includes the necessities - two beds, a bathroom with a shower, and storage for personal belongings - making it a true home away from home.\n\nYour support will help us maintain this essential space."
+    },
+    "no_geeclddv9n": {
+      "id": "no_geeclddv9n",
+      "price": 50000,
+      "name": "Suite A",
+      "status": "open",
+      "body": "Suite A offers families a private sanctuary on the main level of the Ken Sargent House during their loved one’s medical treatment.\n\nEach of these eight suites provides privacy and comfort, giving families a personal place to rest, recharge, and find solace during challenging times.\n\nHaving an afforadble suite in the Ken Sargent House reduces travel stress and financial burden. It provides a safe place for families to be near their loved ones receiving medical care at GPRH.\n\nAll suites include the basic necessities - two beds, a bathroom with a bathtub, and storage for personal belongings - making it a true home away from home.\n\nYour support will help us maintain this safe and comforting environment for families during their time of need."
+    },
+    "no_4uzx2f0hs7": {
+      "id": "no_4uzx2f0hs7",
+      "price": 25000,
+      "status": "sold",
+      "donor": {
+        "name": "Gamehost Inc.",
+        "kind": "organization",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-gazebo/donor-logo.png"
+      },
+      "body": "The Gazebo at the Ken Sargent House offers a peaceful retreat, set against the serene backdrop of Northwestern Alberta’s breathtaking natural beauty. \n\nSurrounded by the quiet tranquility of the outdoors, it’s a space where families can unwind, reflect, and find peace amidst the challenges they face. \n\nFor caregivers and families alike, this space provides the perfect opportunity to recharge, away from the clinical environment. \n\nWhether you’re sitting in the stillness of winter or enjoying the cool northern breeze, the Gazebo is a sanctuary that promotes healing and connection. \n\nYour support ensures that this tranquil retreat continues to serve families in need of respite."
+    },
+    "no_7m5xquxs2v": {
+      "id": "no_7m5xquxs2v",
+      "price": 25000,
+      "status": "sold",
+      "donor": {
+        "name": "NuVista Energy Ltd.",
+        "kind": "organization",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-pantry/donor-logo.png"
+      },
+      "body": "At the Ken Sargent House, our pantry is more than a place to store food - it’s a vital resource for families.\n\nThe pantry offers convenient access to dry goods, snacks, and personal food storage, ensuring that families can focus on what matters most - being there for one another.\n\nIt also alleviates financial burdens by offering nutritious, cost-effective options that support the wellbeing of our families. Whether it’s the long winters or the unpredictable weather, the pantry helps families maintain healthy eating habits during challenging times. \n\nYour support allows us to continue offering this essential service, providing comfort and relief when it’s needed most."
+    },
+    "no_0eace8xncd": {
+      "id": "no_0eace8xncd",
+      "price": 75000,
+      "status": "sold",
+      "donor": {
+        "name": "CatWauk Compression",
+        "kind": "organization",
+        "website": "https://www.catwaukcompression.com/",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-playroom/donor-logo.png"
+      },
+      "body": "The Playroom at the Ken Sargent House offers a burst of joy and creativity for children, allowing them to engage in playful activities and foster growth, even in the midst of adversity. \n\nIn Northwestern Alberta, where winters are long and isolation can set in, the Playroom is a vital space where children can reduce stress, express themselves, and experience moments of happiness. \n\nThis safe and welcoming space encourages social interactions, while giving children a sense of normalcy and fun. \n\nYour support helps keep this haven alive, offering children and families a much-needed escape and the chance to create memories of joy, even in difficult times."
+    },
+    "no_0s9nr1ie12": {
+      "id": "no_0s9nr1ie12",
+      "price": 100000,
+      "name": "Family Corridor",
+      "status": "open",
+      "body": "Often called the heart of the Ken Sargent House, your family corridor is where families return after long days at the hospital and where moments of quiet, comfort, and connection unfold. Lined with private suites, this wing is more than a hallway; it is a sanctuary that leads families to their temporary home.\n\nEach corridor witnesses the full spectrum of the human experience: hope, exhaustion, relief, tears, and gratitude. It is where families pause to take a breath before opening their door, where they walk hand-in-hand after visiting a loved one, and where families begin and end each day surrounded by the warmth and safety of the Ken Sargent House.\n\nBy choosing to name a Family Corridor, you are supporting a space that plays a central role in the family journey, one that offers a sense of stability and grounding during uncertain times. Your generosity becomes part of the path families walk each morning as they gather strength, and each evening as they return to rest.\n\nEach corridor is thoughtfully designed to be quiet, calming, and accessible, providing a seamless transition from the lively energy of the home’s common areas to the privacy and peace of the suites.\n\nYour gift ensures that these hallways remain places of comfort, dignity, and hope, guiding hundreds of families each year toward the rest and connection they need most. This naming opportunity offers a powerful and visible legacy, honouring your commitment to supporting families as they navigate their healthcare journey, one step at a time."
+    },
+    "no_2e79wndqcc": {
+      "id": "no_2e79wndqcc",
+      "price": 50000,
+      "status": "sold",
+      "donor": {
+        "name": "Victoria's Attic Support the Girls",
+        "kind": "organization",
+        "website": "https://victoriasattic.ca/",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-laundry/donor-logo.png"
+      },
+      "body": "The laundry room at the Ken Sargent House is more than just a convenience - it’s one less hurdle a family has to navigate.\n\nIt offers cost savings by eliminating the need for external laundry services and it ensures hygiene and comfort with clean clothes and bedding.\n\nThe laundry room, located in the basement of the home, is accessible by elevator and is free for families to use. \n\nYour support keeps this essential space running, providing comfort and care when families need it most."
+    },
+    "no_42bkm6h2zd": {
+      "id": "no_42bkm6h2zd",
+      "price": 50000,
+      "status": "sold",
+      "donor": {
+        "name": "Jim and Dorothea Bulford and Family",
+        "kind": "person",
+        "affiliation": "MNP",
+        "website": "https://www.mnp.ca/",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-social-space/donor-logo.png"
+      },
+      "body": "Welcome to the Social Space at the Ken Sargent House—a space designed to bring families together. Grab a friend and make yourselves a hot coffee or tea, relax in the comfort of this space that encourages connection, allowing families to share experiences, form supportive relationships, and find comfort in one another. It's a place where stress melts away, and emotional support thrives, as families understand and uplift each other.\n\nWhether you’re spending quality time with loved ones or engaging in house activities, the social space promotes well-being and reduces stress. \n\nThe social space is a place to build lasting relationships, and natural support systems to guide families through their journey and create bonds that extend far beyond one’s stay."
+    },
+    "no_0ldb9bludk": {
+      "id": "no_0ldb9bludk",
+      "price": 100000,
+      "name": "Quite Space / Library",
+      "status": "open",
+      "body": "Shhhhhhhh, join us in the quiet space/library at the Ken Sargent House, a peaceful retreat - much like the stillness of northwestern Alberta’s vast wilderness.\n\nHere, families can reflect, recharge, and regain their mental and emotional strength. Whether it’s a moment of silence to gather their thoughts, nestled up \nwith a good book or a quiet conversation, this space provides the calm needed to stay centered and focused.\n\nThe quiet space encourages self care and offers a refuge where families can process their emotions and find renewal. \n\nYour support ensures that this sanctuary remains a calming and restorative space for families to gather strength."
+    },
+    "no_f95cxxxi4c": {
+      "id": "no_f95cxxxi4c",
+      "price": 50000,
+      "name": "Suite B",
+      "status": "open",
+      "body": "Suite B offers families a private room on the second floor of the Ken Sargent House during their loved one’s medical treatment at GPRH.\n\nWith nine suites available, each room provides a private, comfortable space for families to rest, recharge, and find solace during challenging times.\n\nStaying at the Ken Sargent House has the benefit of reducing travel stress and financial burden. It also ensures families can stay close to their loved ones when it matters most.\n\nAll suites include the basic necessities - one bed, a bathroom with a shower, and storage for personal belongings - making it a true home away from home.\n\nYour support will help us maintain this safe and comforting environment for families a during their time of need."
+    },
+    "no_tfkzkw1ex1": {
+      "id": "no_tfkzkw1ex1",
+      "price": 25000,
+      "name": "Comfort Corner",
+      "status": "sold",
+      "donor": {
+        "name": "Dynamudr®",
+        "kind": "organization",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-second-floor-comfort-corner/donor-logo.png"
+      },
+      "body": "Nestled on each floor of the Ken Sargent House is a small but meaningful communal space. Comfort Corner is designed to bring families together through shared experiences, much like the close-knit region of northwestern Alberta.\n\nThese shared areas provide emotional support, fostering a sense of belonging and connection, especially during tough times. Families can relax, share stories, and find strength in each other. It’s a space to create bonds that may transcend their stay, offering comfort and reassurance that they are never alone.\n\nYour support helps us maintain this area, ensuring that families can continue to find peace, community, and hope within our walls."
+    },
+    "no_29qjjy8422": {
+      "id": "no_29qjjy8422",
+      "price": 50000,
+      "name": "Fitness Room",
+      "status": "sold",
+      "donor": {
+        "name": "TARA Energy Services",
+        "kind": "organization",
+        "website": "https://taraenergyservices.com/",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-fitness-room/donor-logo.png"
+      },
+      "body": "The fitness room at the Ken Sargent House is more than just a place to work out - it’s a place where families can build strength, resilience, and hope in the face of adversity. \n\nWhether it’s the long northern winters or the endless light of summer, staying active is key to mental and physical wellbeing.Our fitness space helps families reduce stress, stay strong, and cope with the emotional strain of challenging times. For caregivers, it’s an essential outlet, offering a place to release tension and restore balance.\n\nYour support keeps this space active, enabling families to take care of themselves as they care for their loved ones."
+    },
+    "no_iv4wwz1tpn": {
+      "id": "no_iv4wwz1tpn",
+      "price": 100000,
+      "name": "Family Corridor",
+      "status": "open",
+      "body": "Often called the heart of the Ken Sargent House, your family corridor is where families return after long days at the hospital and where moments of quiet, comfort, and connection unfold. Lined with private suites, this wing is more than a hallway; it is a sanctuary that leads families to their temporary home.\n\nEach corridor witnesses the full spectrum of the human experience: hope, exhaustion, relief, tears, and gratitude. It is where families pause to take a breath before opening their door, where they walk hand-in-hand after visiting a loved one, and where families begin and end each day surrounded by the warmth and safety of the Ken Sargent House.\n\nBy choosing to name a Family Corridor, you are supporting a space that plays a central role in the family journey, one that offers a sense of stability and grounding during uncertain times. Your generosity becomes part of the path families walk each morning as they gather strength, and each evening as they return to rest.\n\nEach corridor is thoughtfully designed to be quiet, calming, and accessible, providing a seamless transition from the lively energy of the home’s common areas to the privacy and peace of the suites.\n\nYour gift ensures that these hallways remain places of comfort, dignity, and hope, guiding hundreds of families each year toward the rest and connection they need most. This naming opportunity offers a powerful and visible legacy, honouring your commitment to supporting families as they navigate their healthcare journey, one step at a time."
+    },
+    "no_u2odcp0f8q": {
+      "id": "no_u2odcp0f8q",
+      "price": 75000,
+      "name": "Large A3 Suite",
+      "status": "open",
+      "body": "At the Ken Sargent House, our two large suites offer families a private sanctuary during their loved one’s medical treatment.\n\nThese larger suites provide privacy and comfort, giving families a personal space to rest, recharge, and find solace during hallenging times.\n\nSuite A3 in the Ken Sargent House reduces travel stress and ensures families can stay close to their loved ones when it matters most.\n\nEach suite includes all the basic necessities - two beds, a bathroom with a shower, and storage for personal belongings - making it a true home away from home.\n\nYour support can help us maintain this vital space, offering families a safe and comforting environment during their time of need."
+    },
+    "no_8st1iyzvpi": {
+      "id": "no_8st1iyzvpi",
+      "price": 10000,
+      "status": "sold",
+      "donor": {
+        "name": "Kenny Lambert",
+        "kind": "person",
+        "affiliation": "Cinch Oilfield Hauling & Cranes Ltd.",
+        "website": "https://www.cinchoilfield.com/",
+        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-parking-space/donor-logo.png"
+      },
+      "body": "The parking spaces at the Ken Sargent House may seem simple, but for families navigating some of the hardest moments of their lives, they are a source of relief, comfort, and stability. After long drives from communities across northwestern Alberta, having a safe, dedicated place to park means one less barrier, one less worry, and one more moment to focus on what matters most, their sick loved one.\n\nWhether families are arriving in the early morning for medical appointments, returning late at night after long days at the hospital, or juggling multiple trips back and forth, convenient parking provides peace of mind and immediate access to their home away from home.\n\nYour support ensures that this essential convenience remains available to every family who walks through our doors. By choosing to name a parking space, you are helping reduce stress, create a sense of normalcy, and offer a small but meaningful comfort that has a lasting impact during uncertain times.\n\nYour parking space becomes the first welcome families experience, a reminder that they are supported, cared for, and not alone."
+    },
+    "no_201r3riftw": {
+      "id": "no_201r3riftw",
+      "price": 50000,
+      "status": "open",
+      "body": "The Housekeeping Centre is one of the most essential spaces within the Ken Sargent House. It is the heart of our behind-the-scenes operations, ensuring that the home remains clean, safe, and welcoming for every family who walks through our doors.\nFrom linens and cleaning supplies to seasonal items and daily essentials, this dedicated storage and preparation area allows staff and volunteers to respond quickly to the needs of families. It is here that rooms are reset with care, common spaces are refreshed, and the comforting feeling of “home” is quietly preserved each day.\n\nA clean, well-maintained environment is more than a convenience, it is a source of dignity, relief, and stability for families navigating medical uncertainty. When they return from long days at the hospital, they step into a space that feels orderly, cared for, and thoughtfully prepared.\n\nBy choosing to name the Housekeeping Centre, you are supporting the vital work that keeps the Ken Sargent House running smoothly and compassionately.\n\nYour gift ensures that every family is welcomed into a space that feels warm, refreshed, and ready to support them through their journey.\n\nYour generosity helps us uphold the highest standard of care, quietly, consistently, and with heart."
+    },
+    "no_ulg3poh16m": {
+      "id": "no_ulg3poh16m",
+      "price": 50000,
+      "status": "open",
+      "body": "The House Administration Office is the central hub of coordination, care, and connection within the Ken Sargent House. Located just off the main living area and at the start of the family corridor, this shared workspace is where staff and volunteers come together each day to ensure the home runs smoothly and families receive the support they need.\n\nBehind every comforting meal, clean room, thoughtful check-in, and quiet moment of reassurance is the work that happens in this office. It is here that schedules are managed, family needs are addressed, community supports are coordinated, and the day-to-day operations of the house come to life.\n\nThis space is the heart of our team’s efforts, where compassion is organized, where decisions are made with families in mind, and where the wellbeing of every guest is the focus. It is also a welcoming environment for volunteers, offering a place to learn, prepare, and come together in service of the families we support.\n\nBy choosing to name the House Administration Office, you are investing directly in the people and processes that keep the Ken Sargent House warm, responsive, and supportive. Your gift strengthens the backbone of our operations, empowering our staff\nand volunteers to provide exceptional care to every family who calls this house their temporary home."
+    },
+    "no_cxz5nh0a4w": {
+      "id": "no_cxz5nh0a4w",
+      "price": 25000,
+      "status": "open",
+      "body": "The moment families step into the Ken Sargent House, they enter through the Welcome Walk, a warm and inviting passage that gently transitions them from the outside world into a place of comfort, safety, and hope. This space is more than a hallway; it is the first embrace of the home, offering reassurance and setting the tone for their stay. It is here that the weight of worry begins to ease, replaced by a sense of belonging and the comfort of knowing they are not alone.\n\nAs the threshold between uncertainty and support, this space quietly reflects the heart of the Ken Sargent House, warm, inclusive, and grounded in compassion. Every guest begins their journey through this passage, making it one of the most meaningful and symbolically rich areas within the home."
+    },
+    "no_enqqoiso2d": {
+      "id": "no_enqqoiso2d",
+      "price": 25000,
+      "name": "Elevator Door Panel",
+      "status": "open",
+      "body": "The elevator at the Ken Sargent House is more than a means of moving between floors, it is a daily touchpoint for every family who calls this house their temporary home. Each time a loved one heads to the hospital for an early-morning appointment, a family member returns after sitting beside a loved one, they pass through this space.\n\nBy naming one of the nine elevator door panels, you are helping transform this essential feature into a place of comfort, encouragement, and hope. Each panel offers a visible, meaningful opportunity to stand with families during their healthcare journey. \n\nYour branded panel becomes part of a powerful visual moment, one that families will see countless times throughout their stay. It is a chance to leave a message of compassion, strength, and community support exactly where families need it most.\nThis sponsorship offers a unique blend of visibility and impact, a prominent physical presence combined with the emotional significance of supporting the movement, accessibility, and flow of the home.\n\nYour panel on the elevator door becomes a reminder, every day, that this community cares deeply for the families walking through its doors.\n\nThis unique opportunity will allow the donor to have one third of the vinyl wrapped elevator door branded with a message and can be updated annually."
+    },
+    "no_lwq3eoqpv4": {
+      "id": "no_lwq3eoqpv4",
+      "price": 25000,
+      "status": "open",
+      "body": "At the heart of the Ken Sargent House stands our donor wall, a place of gratitude, storytelling, and legacy. It is where the generosity of our community is celebrated, and where every family who walks through our doors is reminded that they are supported by compassionate people who believe in the power of healing together.\n\nBy becoming the Donor Wall Sponsor, you will be supporting one of the most significant and visible features of the home. The donor wall is more than an installation; it is a symbol of hope. It honours those who make the Ken Sargent House possible and inspires others to give, connect, and stand alongside families during their most challenging times.\n\nProminently displayed within the home, the donor wall reflects the collective strength of our region, businesses, organizations, families, and individuals who ensure that no one faces their medical journey alone. Your sponsorship helps us honour these contributions with dignity, beauty, and permanence.\n\nAs the Donor Wall Sponsor, your commitment will be recognized every time a family, visitor, volunteer, or supporter stops to read the names and stories of those who help the Ken Sargent House thrive. \n\nYour support becomes part of the legacy of care that uplifts hundreds of families each year, a lasting tribute to generosity, community, and compassion."
+    },
+    "no_x5f8d2vk43": {
+      "id": "no_x5f8d2vk43",
+      "price": 25000,
+      "status": "open",
+      "body": "The Crawl Space at the Ken Sargent House is one of the most essential yet unseen parts of the home’s foundation. Quietly supporting the entire structure, this large and critical area provides access to the mechanical systems, plumbing, and infrastructure that keep the house safe, stable, and functioning smoothly for every family who stays here.\n\nWhile families may never walk through this space, they feel its impact every single day. The Crawl Space ensures that maintenance can be done efficiently, that systems remain protected, and that the home’s structure is well-supported throughout the changing seasons of northwestern Alberta. It is the backbone of the house, the steady, reliable layer that upholds everything above it. \n\nJust as families are strengthened by the support beneath them, the Crawl Space symbolizes the unseen foundation of care that makes healing possible. By naming this space, donors help sustain the core operations that make the Ken Sargent House a safe, warm, and dependable haven for those facing medical journeys far from home.\n\nYour gift strengthens the very foundation of the house, ensuring stability, comfort, and continuity of care for every family who walks through our doors."
+    },
+    "no_edshzrdub5": {
+      "id": "no_edshzrdub5",
+      "price": 10000,
+      "status": "open",
+      "body": "Located between the custodian room and the laundry room, the Linen Room is a small but vital space that helps ensure families at the Ken Sargent House experience comfort, warmth, and dignity throughout their stay. This room holds the essentials\nthat make a house feel like a home-fresh bedding, soft towels, and the comforting items that bring a sense of normalcy during challenging times. \n\nEvery clean sheet and folded towel represents a moment of care. Whether a family is arriving after a long drive, returning from a full day at the hospital, or settling in for the night, the linens stored here help create an environment that is restful, clean, and nurturing."
+    },
+    "no_b4sebwu5uv": {
+      "id": "no_b4sebwu5uv",
+      "price": 10000,
+      "status": "open",
+      "body": "A clean home contributes to a healthy home. Located in the sublevel on the path to the laundry room, the Custodian Room is an essential behind-the-scenes space that supports the smooth, dignified operation of the Ken Sargent House playing a vital role in keeping the home clean, safe, and welcoming for every family we serve.\n\nFrom storing cleaning supplies and equipment to supporting the daily work of our team, this room enables staff and volunteers to respond quickly and efficiently to the needs of families. It ensures that common areas remain tidy, suites stay refreshed, and the house maintains the calm, orderly environment that brings comfort to families facing medical uncertainty."
+    },
+    "no_x3eqslki43": {
+      "id": "no_x3eqslki43",
+      "price": 10000,
+      "status": "open",
+      "body": "Tucked neatly beside the kitchen, washroom, and pantry, the general storage room is one of the quiet but essential spaces that keeps the Ken Sargent House running smoothly. This room plays a vital role in maintaining the warmth, order, and comfort that make the house feel like a true home.\n\nFrom storing everyday supplies to keeping household essentials organized and accessible, this space ensures that families always have what they need whether it’s kitchen items, seasonal supplies, or the small comforts that help create normalcy during a challenging time.\n\nIn a home that serves families travelling, sometimes unexpectedly, this storage room allows staff and volunteers to respond quickly, restock efficiently, and provide seamless support without ever interrupting the calm environment families depend on.\nBy choosing to name the General Storage Room, you are directly supporting the behind-the-scenes care that keeps the entire house functioning with dignity and compassion."
+    },
+    "no_z7nyd4zmse": {
+      "id": "no_z7nyd4zmse",
+      "price": 10000,
+      "status": "open",
+      "body": "Located in the sublevel of the Ken Sargent House, the Home Essentials Room is a key support space that ensures families have access to the comforts and supplies that help make their stay feel safe, calm, and cared for. At 300 square feet, this room stores the items that keep the home running smoothly, from seasonal supplies to extra household essentials and the resources needed to support daily operations.\n\nThis space allows staff and volunteers to stay organized, replenish spaces efficiently, and ensure the house is always ready to meet the needs of those arriving from across northwestern Alberta.\n\nWhether decorating for the many seasons throughout the year, or storing additional items needed for one’s stay such as play pens, replacement items, or simple comforts during their stay, the Home Essentials Room plays a quiet but meaningful role in making sure the house remains warm, responsive, and well-prepared."
+    },
+    "no_lqpoee5q46": {
+      "id": "no_lqpoee5q46",
+      "price": 50000,
+      "status": "open",
+      "body": "Within the basement of the Ken Sargent House is one of the most important and hard-working spaces in the entire home, the Operations Centre. At more than 700 square feet, this room houses the essential systems that bring comfort, safety, and connection to every family who stays with us.\n\nFrom heating, mechanical controls, and building infrastructure to the technology that powers our internet, Wi-Fi, television, and communications, this space ensures that the house runs seamlessly, quietly supporting families through every moment of their stay. When families unwind after a long day at the hospital with a favourite show or when they connect with loved ones back home through video calls, or when staff rely on stable systems to coordinate care, it is the Operations Centre that makes these moments possible."
     }
   }
 }

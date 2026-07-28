@@ -1,15 +1,120 @@
-import { copyFileSync, mkdirSync } from 'node:fs';
+import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import sharp from 'sharp';
 
 const MAX_BRAND_FETCH_BYTES = 2 * 1024 * 1024;
 const FETCH_USER_AGENT = 'ishare-dev-tour/1.0';
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
 
 function syncAssetToPublic(root, assetsFilePath, webPath) {
   const relative = webPath.replace(/^\/assets\//, '');
   const publicPath = join(root, 'public', 'assets', relative);
   mkdirSync(dirname(publicPath), { recursive: true });
   copyFileSync(assetsFilePath, publicPath);
+}
+
+/** Windows ICONDIR — type 1 = icon. Sharp cannot decode ICO containers. */
+function isIcoBuffer(buffer) {
+  return (
+    Buffer.isBuffer(buffer) &&
+    buffer.length >= 6 &&
+    buffer.readUInt16LE(0) === 0 &&
+    buffer.readUInt16LE(2) === 1
+  );
+}
+
+/**
+ * Modern .ico files often embed PNG images. Extract the largest PNG payload
+ * so we can rasterize with sharp (no new dependency).
+ */
+function extractLargestPngFromIco(buffer) {
+  if (!isIcoBuffer(buffer)) return null;
+  const count = buffer.readUInt16LE(4);
+  if (count < 1 || buffer.length < 6 + count * 16) return null;
+
+  let best = null;
+  let bestArea = -1;
+  for (let i = 0; i < count; i += 1) {
+    const entryOffset = 6 + i * 16;
+    const widthByte = buffer[entryOffset] ?? 0;
+    const heightByte = buffer[entryOffset + 1] ?? 0;
+    const width = widthByte === 0 ? 256 : widthByte;
+    const height = heightByte === 0 ? 256 : heightByte;
+    const bytesInRes = buffer.readUInt32LE(entryOffset + 8);
+    const imageOffset = buffer.readUInt32LE(entryOffset + 12);
+    if (
+      !Number.isFinite(bytesInRes) ||
+      !Number.isFinite(imageOffset) ||
+      bytesInRes < 8 ||
+      imageOffset + bytesInRes > buffer.length
+    ) {
+      continue;
+    }
+    const slice = buffer.subarray(imageOffset, imageOffset + bytesInRes);
+    if (!slice.subarray(0, 4).equals(PNG_MAGIC)) continue;
+    const area = width * height;
+    if (area >= bestArea) {
+      bestArea = area;
+      best = Buffer.from(slice);
+    }
+  }
+  return best;
+}
+
+/**
+ * Normalize uploaded / fetched brand rasters to PNG.
+ * ICO → embedded PNG when present; otherwise callers may fall back to raw .ico.
+ */
+async function brandImageToPngBuffer(buffer, { resize } = {}) {
+  let source = buffer;
+  if (isIcoBuffer(buffer)) {
+    const png = extractLargestPngFromIco(buffer);
+    if (!png) {
+      const error = new Error(
+        'Favicon .ico has no embedded PNG (legacy BMP-only ICO).',
+      );
+      error.code = 'ICO_WITHOUT_PNG';
+      throw error;
+    }
+    source = png;
+  }
+
+  let pipeline = sharp(source);
+  if (resize) {
+    pipeline = pipeline.resize(resize, resize, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    });
+  }
+  return pipeline.png().toBuffer();
+}
+
+async function writeFaviconAsset({
+  root,
+  faviconBuffer,
+  pngFilePath,
+  pngWebPath,
+  icoFilePath,
+  icoWebPath,
+}) {
+  try {
+    const pngBuffer = await brandImageToPngBuffer(faviconBuffer, {
+      resize: 32,
+    });
+    mkdirSync(dirname(pngFilePath), { recursive: true });
+    writeFileSync(pngFilePath, pngBuffer);
+    syncAssetToPublic(root, pngFilePath, pngWebPath);
+    return pngWebPath;
+  } catch (error) {
+    if (isIcoBuffer(faviconBuffer)) {
+      // BMP-only / undecodable ICO — keep the original file browsers still accept.
+      mkdirSync(dirname(icoFilePath), { recursive: true });
+      writeFileSync(icoFilePath, faviconBuffer);
+      syncAssetToPublic(root, icoFilePath, icoWebPath);
+      return icoWebPath;
+    }
+    throw error;
+  }
 }
 
 export function normalizePrimaryColor(color) {
@@ -131,8 +236,19 @@ function pickPrimaryColorGuess(html) {
 async function tryFetchImageAsBase64(url) {
   try {
     const buffer = await fetchImageBuffer(url);
-    const pngBuffer = await sharp(buffer).png().toBuffer();
-    return { base64: pngBuffer.toString('base64'), fileName: 'suggested.png' };
+    try {
+      const pngBuffer = await brandImageToPngBuffer(buffer);
+      return {
+        base64: pngBuffer.toString('base64'),
+        fileName: 'suggested.png',
+      };
+    } catch (error) {
+      // BMP-only favicon.ico — keep raw bytes so save can write .ico.
+      if (error?.code === 'ICO_WITHOUT_PNG' && isIcoBuffer(buffer)) {
+        return { base64: buffer.toString('base64'), fileName: 'suggested.ico' };
+      }
+      return null;
+    }
   } catch {
     return null;
   }
@@ -232,41 +348,38 @@ export async function saveClientBrandAssets({
   faviconFileBuffer,
 }) {
   const logoWebPath = `/assets/${clientId}/brand/logo.png`;
-  const faviconWebPath = `/assets/${clientId}/favicon.png`;
   const logoFilePath = join(assetsRoot, clientId, 'brand', 'logo.png');
-  const faviconFilePath = join(assetsRoot, clientId, 'favicon.png');
+  const faviconPngWebPath = `/assets/${clientId}/favicon.png`;
+  const faviconPngFilePath = join(assetsRoot, clientId, 'favicon.png');
+  const faviconIcoWebPath = `/assets/${clientId}/favicon.ico`;
+  const faviconIcoFilePath = join(assetsRoot, clientId, 'favicon.ico');
 
   let savedLogo = false;
   let savedFavicon = false;
+  let faviconWebPath = faviconPngWebPath;
 
   if (logoFileBuffer?.length) {
     mkdirSync(dirname(logoFilePath), { recursive: true });
-    await sharp(logoFileBuffer).png().toFile(logoFilePath);
+    const logoPng = await brandImageToPngBuffer(logoFileBuffer);
+    writeFileSync(logoFilePath, logoPng);
     syncAssetToPublic(root, logoFilePath, logoWebPath);
     savedLogo = true;
   }
 
   let faviconBuffer = faviconFileBuffer;
   if (!faviconBuffer?.length && logoFileBuffer?.length) {
-    faviconBuffer = await sharp(logoFileBuffer)
-      .resize(32, 32, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
+    faviconBuffer = await brandImageToPngBuffer(logoFileBuffer, { resize: 32 });
   }
 
   if (faviconBuffer?.length) {
-    mkdirSync(dirname(faviconFilePath), { recursive: true });
-    await sharp(faviconBuffer)
-      .resize(32, 32, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toFile(faviconFilePath);
-    syncAssetToPublic(root, faviconFilePath, faviconWebPath);
+    faviconWebPath = await writeFaviconAsset({
+      root,
+      faviconBuffer,
+      pngFilePath: faviconPngFilePath,
+      pngWebPath: faviconPngWebPath,
+      icoFilePath: faviconIcoFilePath,
+      icoWebPath: faviconIcoWebPath,
+    });
     savedFavicon = true;
   }
 
@@ -282,41 +395,38 @@ export async function saveTourBrandAssets({
   faviconFileBuffer,
 }) {
   const logoWebPath = `/assets/${clientId}/${tourId}/brand/logo.png`;
-  const faviconWebPath = `/assets/${clientId}/${tourId}/favicon.png`;
   const logoFilePath = join(assetsRoot, clientId, tourId, 'brand', 'logo.png');
-  const faviconFilePath = join(assetsRoot, clientId, tourId, 'favicon.png');
+  const faviconPngWebPath = `/assets/${clientId}/${tourId}/favicon.png`;
+  const faviconPngFilePath = join(assetsRoot, clientId, tourId, 'favicon.png');
+  const faviconIcoWebPath = `/assets/${clientId}/${tourId}/favicon.ico`;
+  const faviconIcoFilePath = join(assetsRoot, clientId, tourId, 'favicon.ico');
 
   let savedLogo = false;
   let savedFavicon = false;
+  let faviconWebPath = faviconPngWebPath;
 
   if (logoFileBuffer?.length) {
     mkdirSync(dirname(logoFilePath), { recursive: true });
-    await sharp(logoFileBuffer).png().toFile(logoFilePath);
+    const logoPng = await brandImageToPngBuffer(logoFileBuffer);
+    writeFileSync(logoFilePath, logoPng);
     syncAssetToPublic(root, logoFilePath, logoWebPath);
     savedLogo = true;
   }
 
   let faviconBuffer = faviconFileBuffer;
   if (!faviconBuffer?.length && logoFileBuffer?.length) {
-    faviconBuffer = await sharp(logoFileBuffer)
-      .resize(32, 32, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
+    faviconBuffer = await brandImageToPngBuffer(logoFileBuffer, { resize: 32 });
   }
 
   if (faviconBuffer?.length) {
-    mkdirSync(dirname(faviconFilePath), { recursive: true });
-    await sharp(faviconBuffer)
-      .resize(32, 32, {
-        fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toFile(faviconFilePath);
-    syncAssetToPublic(root, faviconFilePath, faviconWebPath);
+    faviconWebPath = await writeFaviconAsset({
+      root,
+      faviconBuffer,
+      pngFilePath: faviconPngFilePath,
+      pngWebPath: faviconPngWebPath,
+      icoFilePath: faviconIcoFilePath,
+      icoWebPath: faviconIcoWebPath,
+    });
     savedFavicon = true;
   }
 

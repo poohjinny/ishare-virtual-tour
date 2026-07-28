@@ -23,7 +23,10 @@ interface SceneNamingLeadItem {
  * 4. General empty-place phrase
  */
 export function resolveScenePlaceLead(
-  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'title' | 'id'>,
+  tour: Pick<
+    Tour,
+    'hotspots' | 'viewerType' | 'title' | 'id' | 'namingOpportunities'
+  >,
   scene: Scene,
 ): string {
   const tourTitle = tour.title?.trim() || tour.id;
@@ -45,18 +48,15 @@ export function resolveScenePlaceLead(
 }
 
 function listSceneNamingLeadItems(
-  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'namingOpportunities'>,
   scene: Scene,
 ): SceneNamingLeadItem[] {
   const items: SceneNamingLeadItem[] = [];
 
   for (const hotspot of listSceneInfoHotspots(tour, scene)) {
-    const rawPopup = hotspot.popup;
-    if (!rawPopup?.namingOpportunity) continue;
-
-    const popup = resolveNamingPopup(rawPopup, scene);
-    const naming = popup.namingOpportunity;
-    if (!naming) continue;
+    const popup = resolveNamingPopup(tour, hotspot, scene);
+    const naming = popup?.namingOpportunity;
+    if (!naming || !popup) continue;
 
     items.push({
       name: stripNamingOpportunitySuffix(naming.name),
@@ -100,7 +100,7 @@ export function abbreviateNamingBodyLead(
  * whole-scene NOs that inherit name and have no body yet).
  */
 export function buildScenePlaceLeadFromNaming(
-  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'namingOpportunities'>,
   scene: Scene,
 ): string | null {
   const namingItems = listSceneNamingLeadItems(tour, scene);

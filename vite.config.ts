@@ -15,4 +15,7 @@ export default defineConfig(({ mode, command }) => ({
   ].filter(Boolean),
   /** Production (`npm run build`) → `/` for tour.ishare.ca. `ghpages` → GitHub project demo. */
   base: mode === 'ghpages' ? GITHUB_PAGES_BASE : '/',
+  // PSV + viewer-3d both import three; one copy avoids "Multiple instances" warnings.
+  resolve: { dedupe: ['three'] },
+  optimizeDeps: { include: ['three'] },
 }));

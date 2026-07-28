@@ -16,7 +16,11 @@ import sharp from 'sharp';
 // "unable to open for write". Disabling the cache releases the handle after each
 // write — negligible cost for dev-only image conversions.
 sharp.cache(false);
-import { allocateOpaqueId, assertEntityId } from './opaqueId.mjs';
+import {
+  allocateOpaqueId,
+  assertEntityId,
+  OPAQUE_NAMING_ID_PREFIX,
+} from './opaqueId.mjs';
 import {
   renderEquirectPreviewToFile,
   resolveThumbnailFilePath,
@@ -31,6 +35,11 @@ import { namingDonorAllowsLogo, normalizeNamingDonor } from './namingDonor.mjs';
 import { encodePanoramaWebp } from './panoramaEncode.mjs';
 import { persistTourContentPlaceholders } from './tourContentSync.mjs';
 import { syncScenePlaceLeadFromNaming } from './scenePlaceLead.mjs';
+import {
+  assertSceneVisibility,
+  isScenePublic,
+  resolveSceneVisibility,
+} from './sceneVisibility.mjs';
 
 const THUMBNAIL_WIDTH = Number(process.env.THUMBNAIL_WIDTH ?? 640);
 const THUMBNAIL_QUALITY = Number(process.env.THUMBNAIL_QUALITY ?? 85);
@@ -224,9 +233,58 @@ function inheritedNamingOpportunityName(sceneTitle) {
   return (sceneTitle ?? '').trim();
 }
 
-export function buildNamingHotspotRecord({
+function isNamingHotspotRecord(hotspot) {
+  return (
+    hotspot?.type === 'info' &&
+    Boolean(hotspot.namingId?.trim() || hotspot.popup?.namingOpportunity)
+  );
+}
+
+function ensureNamingCatalog(tour) {
+  if (
+    !tour.namingOpportunities ||
+    typeof tour.namingOpportunities !== 'object'
+  ) {
+    tour.namingOpportunities = {};
+  }
+  return tour.namingOpportunities;
+}
+
+function allocateNamingId(tour) {
+  const catalog = ensureNamingCatalog(tour);
+  return allocateOpaqueId(OPAQUE_NAMING_ID_PREFIX, Object.keys(catalog));
+}
+
+function getNamingRecordForHotspot(tour, hotspot) {
+  const namingId = hotspot.namingId?.trim();
+  if (namingId && tour.namingOpportunities?.[namingId]) {
+    return tour.namingOpportunities[namingId];
+  }
+  return null;
+}
+
+/**
+ * Build naming pin + catalog record fields (catalog written by caller).
+ * @deprecated Prefer {@link buildNamingCatalogRecord} + {@link buildNamingPlacementHotspot}.
+ */
+export function buildNamingHotspotRecord(options) {
+  const record = buildNamingCatalogRecord(options);
+  const hotspot = buildNamingPlacementHotspot({
+    namingId: options.namingId,
+    displayName:
+      options.name?.trim() ||
+      options.sceneTitle?.trim() ||
+      record.name ||
+      'naming',
+    position: options.position,
+  });
+  return { hotspot, record };
+}
+
+/** Tour-level naming catalog entry (`no_*`) — business fields only. */
+export function buildNamingCatalogRecord({
+  namingId,
   name,
-  position,
   price,
   status,
   body,
@@ -241,57 +299,77 @@ export function buildNamingHotspotRecord({
   const overrideTitle = (name ?? '').trim();
   const displayTitle = overrideTitle || inheritedTitle;
   if (!displayTitle) {
-    throw new Error('Hotspot name or scene title is required');
+    throw new Error('Naming name or scene title is required');
   }
 
-  const slug = slugifyHotspotName(displayTitle);
   const priceValue = normalizeNamingPriceStorage(price);
   const statusValue = status?.trim() || 'soon';
+  const resolvedNamingId = namingId?.trim();
 
-  if (!slug) throw new Error('Hotspot name must contain letters or numbers');
   if (!Number.isFinite(priceValue)) throw new Error('Price is required');
   if (!NAMING_STATUSES.has(statusValue)) {
     throw new Error(`Invalid naming status: ${statusValue}`);
+  }
+  if (!resolvedNamingId) {
+    throw new Error('namingId is required');
   }
 
   const inheritedBody = (sceneDescription ?? '').trim();
   const overrideBody = (body ?? '').trim();
   const inheritedVideo = (scenePreviewVideoUrl ?? '').trim();
   const overrideVideo = (videoUrl ?? '').trim();
+  const overrideImage = (image ?? '').trim();
   const normalizedDonor = normalizeNamingDonor(donor, { status: statusValue });
 
-  const popup = {
-    display: 'anchored',
-    namingOpportunity: { price: priceValue, status: statusValue },
+  /** @type {Record<string, unknown>} */
+  const record = {
+    id: resolvedNamingId,
+    price: priceValue,
+    status: statusValue,
   };
 
-  if (normalizedDonor) {
-    popup.namingOpportunity.donor = normalizedDonor;
-  }
-
   if (overrideTitle && overrideTitle !== inheritedTitle) {
-    popup.title = overrideTitle;
-    popup.namingOpportunity.name =
-      inheritedNamingOpportunityName(overrideTitle);
+    record.name = inheritedNamingOpportunityName(overrideTitle);
   }
-
   if (overrideBody && overrideBody !== inheritedBody) {
-    popup.body = overrideBody;
+    record.body = overrideBody;
+  }
+  if (overrideVideo && overrideVideo !== inheritedVideo) {
+    record.videoUrl = overrideVideo;
+  }
+  if (overrideImage) {
+    record.image = overrideImage;
+  }
+  if (normalizedDonor) {
+    record.donor = normalizedDonor;
   }
 
-  applyPopupMediaFields(popup, {
-    videoUrl:
-      overrideVideo && overrideVideo !== inheritedVideo ?
-        overrideVideo
-      : undefined,
-    image,
-  });
+  return record;
+}
+
+/** Scene/tour placement hotspot for an existing catalog naming id. */
+export function buildNamingPlacementHotspot({
+  namingId,
+  displayName,
+  position,
+}) {
+  const resolvedNamingId = namingId?.trim();
+  if (!resolvedNamingId) {
+    throw new Error('namingId is required');
+  }
+
+  const slugSource = (displayName ?? '').trim();
+  const slug = slugifyHotspotName(slugSource);
+  if (!slug) {
+    throw new Error('Naming display name must contain letters or numbers');
+  }
 
   return {
     id: `info-${slug}`,
     type: 'info',
+    namingId: resolvedNamingId,
     position: normalizeHotspotPosition(position),
-    popup,
+    popup: { display: 'anchored' },
   };
 }
 
@@ -399,7 +477,8 @@ export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
   const { hotspot, scene } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
-  const wasNaming = Boolean(hotspot.popup?.namingOpportunity);
+  const wasNaming = isNamingHotspotRecord(hotspot);
+  const namingId = hotspot.namingId?.trim();
 
   if (tour.viewerType === 'model3d') {
     tour.hotspots = (tour.hotspots ?? []).filter(
@@ -409,6 +488,19 @@ export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
     scene.hotspots = scene.hotspots.filter(
       (entry) => entry.id !== resolvedHotspotId,
     );
+  }
+
+  if (wasNaming && namingId && tour.namingOpportunities?.[namingId]) {
+    const stillPlaced = [
+      ...(tour.hotspots ?? []),
+      ...Object.values(tour.scenes ?? {}).flatMap((s) => s.hotspots ?? []),
+    ].some((entry) => entry.namingId?.trim() === namingId);
+    if (!stillPlaced) {
+      delete tour.namingOpportunities[namingId];
+      if (Object.keys(tour.namingOpportunities).length === 0) {
+        delete tour.namingOpportunities;
+      }
+    }
   }
 
   if (wasNaming) {
@@ -990,14 +1082,13 @@ export async function createNavHotspot({
   return { tourPath, hotspot };
 }
 
-export async function createNamingHotspot({
+export async function createNamingOpportunity({
   root,
   assetsRoot,
   toursDir,
   tourId,
   sceneId,
   name,
-  position,
   price,
   status,
   body,
@@ -1005,15 +1096,14 @@ export async function createNamingHotspot({
   image,
   donor,
   donorLogoFileBuffer,
-  targetView,
-  previewFileBuffer,
 }) {
   const tourPath = resolveTourJsonPath(toursDir, tourId);
   const tour = readTourJson(tourPath);
   const hostScene = tour.scenes?.[sceneId?.trim()];
-  const hotspot = buildNamingHotspotRecord({
+  const namingId = allocateNamingId(tour);
+  const record = buildNamingCatalogRecord({
+    namingId,
     name,
-    position,
     price,
     status,
     body,
@@ -1029,10 +1119,10 @@ export async function createNamingHotspot({
     if (!root || !assetsRoot) {
       throw new Error('Donor logo upload requires dev asset paths');
     }
-    if (!hotspot.popup.namingOpportunity.donor) {
+    if (!record.donor) {
       throw new Error('Donor name is required before uploading a logo');
     }
-    if (!namingDonorAllowsLogo(hotspot.popup.namingOpportunity.donor)) {
+    if (!namingDonorAllowsLogo(record.donor)) {
       throw new Error(
         'Donor affiliation is required before uploading a logo for a person',
       );
@@ -1041,11 +1131,48 @@ export async function createNamingHotspot({
       assetsRoot,
       root,
       tour,
-      hotspotId: hotspot.id,
+      hotspotId: namingId,
       fileBuffer: donorLogoFileBuffer,
     });
-    hotspot.popup.namingOpportunity.donor.logo = logoWebPath;
+    record.donor.logo = logoWebPath;
   }
+
+  ensureNamingCatalog(tour)[namingId] = record;
+  writeTourJson(tourPath, tour);
+  return { tourPath, record };
+}
+
+export async function createNamingHotspot({
+  root,
+  assetsRoot,
+  toursDir,
+  tourId,
+  sceneId,
+  namingId,
+  position,
+  targetView,
+  previewFileBuffer,
+}) {
+  const resolvedNamingId = namingId?.trim();
+  if (!resolvedNamingId) {
+    throw new Error('namingId is required');
+  }
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const hostScene = tour.scenes?.[sceneId?.trim()];
+  const record = tour.namingOpportunities?.[resolvedNamingId];
+  if (!record) {
+    throw new Error(`Naming opportunity not found: ${resolvedNamingId}`);
+  }
+
+  const displayName =
+    record.name?.trim() || hostScene?.title?.trim() || resolvedNamingId;
+  const hotspot = buildNamingPlacementHotspot({
+    namingId: resolvedNamingId,
+    displayName,
+    position,
+  });
 
   if (tour.viewerType === 'model3d') {
     if (targetView) {
@@ -1071,7 +1198,7 @@ export async function createNamingHotspot({
     syncScenePlaceLeadFromNaming(tour, hostScene);
   }
   writeTourJson(tourPath, tour);
-  return { tourPath, hotspot };
+  return { tourPath, hotspot, record };
 }
 
 export async function createInfoHotspot({
@@ -1206,6 +1333,7 @@ export async function updateNamingHotspot({
   tourId,
   sceneId,
   hotspotId,
+  namingId: nextNamingIdInput,
   title,
   price,
   status,
@@ -1227,11 +1355,62 @@ export async function updateNamingHotspot({
   const tour = readTourJson(tourPath);
   const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
 
-  if (hotspot.type !== 'info' || !hotspot.popup?.namingOpportunity) {
+  if (!isNamingHotspotRecord(hotspot)) {
     throw new Error(
       `Hotspot is not a naming opportunity: ${resolvedHotspotId}`,
     );
   }
+
+  if (!hotspot.popup) {
+    hotspot.popup = { display: 'anchored' };
+  }
+
+  let namingId = hotspot.namingId?.trim();
+  if (!namingId) {
+    // Legacy embed still present — promote into catalog
+    namingId = allocateNamingId(tour);
+    hotspot.namingId = namingId;
+    const legacy = hotspot.popup.namingOpportunity ?? { price: 0 };
+    ensureNamingCatalog(tour)[namingId] = {
+      id: namingId,
+      price: normalizeNamingPriceStorage(legacy.price ?? 0),
+      ...(legacy.name?.trim() ? { name: legacy.name.trim() } : {}),
+      ...(legacy.priceLabel?.trim() ?
+        { priceLabel: legacy.priceLabel.trim() }
+      : {}),
+      ...(legacy.status?.trim() ? { status: legacy.status.trim() } : {}),
+      ...(legacy.donor ? { donor: legacy.donor } : {}),
+    };
+    delete hotspot.popup.namingOpportunity;
+  }
+
+  const catalog = ensureNamingCatalog(tour);
+  const namingIdProvided = nextNamingIdInput !== undefined;
+  const nextNamingId =
+    typeof nextNamingIdInput === 'string' ?
+      nextNamingIdInput.trim()
+    : undefined;
+
+  if (namingIdProvided) {
+    if (!nextNamingId) {
+      throw new Error('namingId cannot be empty');
+    }
+    if (!catalog[nextNamingId]) {
+      throw new Error(`Naming opportunity not found: ${nextNamingId}`);
+    }
+    if (nextNamingId !== namingId) {
+      hotspot.namingId = nextNamingId;
+      // Drop placement copy overrides — they belonged to the previous NO.
+      delete hotspot.popup.title;
+      delete hotspot.popup.body;
+      delete hotspot.popup.videoUrl;
+      delete hotspot.popup.image;
+      namingId = nextNamingId;
+    }
+  }
+
+  const record = catalog[namingId] ?? { id: namingId, price: 0 };
+  catalog[namingId] = record;
 
   const titleProvided = title !== undefined;
   const nextTitle = typeof title === 'string' ? title.trim() : undefined;
@@ -1253,49 +1432,52 @@ export async function updateNamingHotspot({
   if (titleProvided) {
     if (!nextTitle || nextTitle === inheritedTitle) {
       delete hotspot.popup.title;
-      delete hotspot.popup.namingOpportunity.name;
+      delete record.name;
     } else {
       hotspot.popup.title = nextTitle;
-      hotspot.popup.namingOpportunity.name =
-        inheritedNamingOpportunityName(nextTitle);
+      record.name = inheritedNamingOpportunityName(nextTitle);
     }
   }
   if (hasPrice) {
-    hotspot.popup.namingOpportunity.price = normalizeNamingPriceStorage(price);
+    record.price = normalizeNamingPriceStorage(price);
   }
   if (nextStatus) {
     if (!NAMING_STATUSES.has(nextStatus)) {
       throw new Error(`Invalid naming status: ${nextStatus}`);
     }
-    hotspot.popup.namingOpportunity.status = nextStatus;
+    record.status = nextStatus;
   }
   if (bodyProvided) {
     if (!nextBody || nextBody === inheritedBody) {
       delete hotspot.popup.body;
+      delete record.body;
     } else {
-      hotspot.popup.body = nextBody;
+      record.body = nextBody;
+      delete hotspot.popup.body;
     }
   }
   if (hasVideoUrl) {
     const nextVideoUrl = videoUrl?.trim();
     if (!nextVideoUrl || nextVideoUrl === inheritedVideo) {
-      delete hotspot.popup.videoUrl;
+      delete record.videoUrl;
     } else {
-      hotspot.popup.videoUrl = nextVideoUrl;
+      record.videoUrl = nextVideoUrl;
     }
+    delete hotspot.popup.videoUrl;
   }
   if (hasImage) {
     const nextImage = image?.trim();
     if (nextImage) {
-      hotspot.popup.image = nextImage;
+      record.image = nextImage;
     } else {
-      delete hotspot.popup.image;
+      delete record.image;
     }
+    delete hotspot.popup.image;
   }
 
-  const effectiveStatus = hotspot.popup.namingOpportunity.status;
+  const effectiveStatus = record.status;
   if (hasDonor) {
-    const existingLogo = hotspot.popup.namingOpportunity.donor?.logo;
+    const existingLogo = record.donor?.logo;
     const normalizedDonor = normalizeNamingDonor(
       {
         ...(donor && typeof donor === 'object' ? donor : {}),
@@ -1307,22 +1489,22 @@ export async function updateNamingHotspot({
       { status: effectiveStatus },
     );
     if (normalizedDonor) {
-      hotspot.popup.namingOpportunity.donor = normalizedDonor;
+      record.donor = normalizedDonor;
     } else {
-      delete hotspot.popup.namingOpportunity.donor;
+      delete record.donor;
     }
   } else if (nextStatus && nextStatus !== 'sold') {
-    delete hotspot.popup.namingOpportunity.donor;
+    delete record.donor;
   }
 
   if (hasDonorLogoFile) {
     if (!root || !assetsRoot) {
       throw new Error('Donor logo upload requires dev asset paths');
     }
-    if (!hotspot.popup.namingOpportunity.donor) {
+    if (!record.donor) {
       throw new Error('Donor name is required before uploading a logo');
     }
-    if (!namingDonorAllowsLogo(hotspot.popup.namingOpportunity.donor)) {
+    if (!namingDonorAllowsLogo(record.donor)) {
       throw new Error(
         'Donor affiliation is required before uploading a logo for a person',
       );
@@ -1334,9 +1516,9 @@ export async function updateNamingHotspot({
       hotspotId: resolvedHotspotId,
       fileBuffer: donorLogoFileBuffer,
     });
-    hotspot.popup.namingOpportunity.donor.logo = logoWebPath;
-  } else if (wantsClearDonorLogo && hotspot.popup.namingOpportunity.donor) {
-    delete hotspot.popup.namingOpportunity.donor.logo;
+    record.donor.logo = logoWebPath;
+  } else if (wantsClearDonorLogo && record.donor) {
+    delete record.donor.logo;
   }
 
   const hasTargetView = targetView !== undefined && targetView !== null;
@@ -1361,6 +1543,7 @@ export async function updateNamingHotspot({
   }
 
   if (
+    !namingIdProvided &&
     !titleProvided &&
     !hasPrice &&
     !nextStatus &&
@@ -1374,7 +1557,7 @@ export async function updateNamingHotspot({
     !hasPreviewFile
   ) {
     throw new Error(
-      'At least one of title, price, status, body, videoUrl, image, donor, donor logo, targetView, or preview is required',
+      'At least one of namingId, title, price, status, body, videoUrl, image, donor, donor logo, targetView, or preview is required',
     );
   }
 
@@ -1407,13 +1590,19 @@ export function updateInfoHotspot({
   const tour = readTourJson(tourPath);
   const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
 
-  if (hotspot.type !== 'info' || !hotspot.popup) {
+  if (
+    hotspot.type !== 'info' ||
+    (!hotspot.popup && !isNamingHotspotRecord(hotspot))
+  ) {
     throw new Error(`Hotspot is not info: ${resolvedHotspotId}`);
   }
-  if (hotspot.popup.namingOpportunity) {
+  if (isNamingHotspotRecord(hotspot)) {
     throw new Error(
       `Hotspot is a naming opportunity — use naming update: ${resolvedHotspotId}`,
     );
+  }
+  if (!hotspot.popup) {
+    throw new Error(`Hotspot is not info: ${resolvedHotspotId}`);
   }
 
   const nextTitle = title?.trim();
@@ -1498,6 +1687,7 @@ function clearMatchingNavLabelsForTargetScene(tour, targetSceneId, oldTitle) {
 
 /** Drop NO copy overrides that still matched the previous host-scene values. */
 function clearMatchingNamingInheritFields(
+  tour,
   scene,
   { oldTitle, oldDescription, oldPreviewVideoUrl },
 ) {
@@ -1505,28 +1695,43 @@ function clearMatchingNamingInheritFields(
 
   const oldInheritedName =
     oldTitle ? inheritedNamingOpportunityName(oldTitle) : '';
+  const catalog = tour.namingOpportunities ?? {};
 
   for (const hotspot of scene.hotspots) {
-    if (hotspot.type !== 'info' || !hotspot.popup?.namingOpportunity) continue;
-    const popup = hotspot.popup;
+    if (!isNamingHotspotRecord(hotspot)) continue;
+    const popup = hotspot.popup ?? {};
+    const record = getNamingRecordForHotspot(tour, hotspot);
 
     if (oldTitle && popup.title?.trim() === oldTitle) {
       delete popup.title;
     }
     if (
+      record &&
       oldInheritedName &&
-      popup.namingOpportunity.name?.trim() === oldInheritedName
+      record.name?.trim() === oldInheritedName
     ) {
-      delete popup.namingOpportunity.name;
+      delete record.name;
     }
-    if (oldDescription != null && popup.body?.trim() === oldDescription) {
-      delete popup.body;
+    if (oldDescription != null) {
+      if (popup.body?.trim() === oldDescription) {
+        delete popup.body;
+      }
+      if (record?.body?.trim() === oldDescription) {
+        delete record.body;
+      }
     }
     if (
       oldPreviewVideoUrl != null &&
       popup.videoUrl?.trim() === oldPreviewVideoUrl
     ) {
       delete popup.videoUrl;
+    }
+    if (
+      record &&
+      oldPreviewVideoUrl != null &&
+      record.videoUrl?.trim() === oldPreviewVideoUrl
+    ) {
+      delete record.videoUrl;
     }
   }
 }
@@ -1540,6 +1745,7 @@ export function updateScene({
   placeLead,
   previewVideoUrl,
   videoUrl,
+  visibility,
   setAsFirstScene,
 }) {
   const resolvedSceneId = sceneId?.trim();
@@ -1561,6 +1767,9 @@ export function updateScene({
   const nextPlaceLead = placeLead?.trim();
   const hasPreviewVideoUrl = previewVideoUrl !== undefined;
   const hasVideoUrl = videoUrl !== undefined;
+  const hasVisibility = visibility !== undefined;
+  const nextVisibility =
+    hasVisibility ? assertSceneVisibility(visibility) : undefined;
   const wantsFirstScene = Boolean(setAsFirstScene);
 
   if (
@@ -1569,10 +1778,11 @@ export function updateScene({
     !hasPlaceLead &&
     !hasPreviewVideoUrl &&
     !hasVideoUrl &&
+    !hasVisibility &&
     !wantsFirstScene
   ) {
     throw new Error(
-      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, or setAsFirstScene is required',
+      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, visibility, or setAsFirstScene is required',
     );
   }
 
@@ -1616,7 +1826,7 @@ export function updateScene({
     (hasPreviewVideoUrl &&
       oldPreviewVideoUrl !== (scene.previewVideoUrl?.trim() ?? ''))
   ) {
-    clearMatchingNamingInheritFields(scene, {
+    clearMatchingNamingInheritFields(tour, scene, {
       oldTitle: nextTitle && oldTitle !== nextTitle ? oldTitle : undefined,
       oldDescription:
         hasDescription && oldDescription !== (scene.description?.trim() ?? '') ?
@@ -1636,13 +1846,40 @@ export function updateScene({
     applySceneVideoField(scene, videoUrl);
   }
 
+  if (hasVisibility) {
+    if (nextVisibility === undefined || nextVisibility === 'public') {
+      delete scene.visibility;
+    } else {
+      scene.visibility = nextVisibility;
+    }
+  }
+
   if (wantsFirstScene) {
+    if (!isScenePublic(scene)) {
+      throw new Error(
+        'firstScene must stay public — set visibility to Public before making this the first scene',
+      );
+    }
     tour.firstScene = resolvedSceneId;
+  }
+
+  if (resolvedSceneId === tour.firstScene && !isScenePublic(scene)) {
+    throw new Error(
+      'firstScene must stay public — cannot set visibility to unlisted or internal',
+    );
   }
 
   writeTourJson(tourPath, tour);
   persistTourContentPlaceholders(toursDir, tourId);
-  return { tourPath, scene, firstScene: tour.firstScene };
+  return {
+    tourPath,
+    scene: {
+      id: scene.id,
+      title: scene.title,
+      visibility: resolveSceneVisibility(scene),
+    },
+    firstScene: tour.firstScene,
+  };
 }
 
 export function deleteScene({ toursDir, tourId, sceneId }) {

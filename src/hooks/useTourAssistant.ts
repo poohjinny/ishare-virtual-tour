@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChatMessage, TourKnowledge } from '../types/tour';
+import type { ChatMessage, Tour } from '../types/tour';
+import { askTourGuide, fetchAskGuideLiveStatus } from '../services/askGuide';
 import {
-  askMockAssistant,
   getLocationChangeNote,
+  getNamingOpenNote,
   getSceneTitle,
   getSuggestedQuestions,
 } from '../services/mockAssistant';
@@ -13,91 +14,237 @@ function nextId(): string {
   return `msg-${messageId}`;
 }
 
-export function useTourAssistant(
-  knowledge: TourKnowledge,
-  currentSceneId: string,
-) {
+export type GuideNavNoteKind = 'scene' | 'naming';
+
+export type GuideNavNote = { kind: GuideNavNoteKind; namingName?: string };
+
+type LastAutoNavNote =
+  | { kind: 'scene'; sceneId: string }
+  | { kind: 'naming'; hotspotId: string };
+
+function noteContent(
+  tour: Tour,
+  sceneId: string,
+  note: GuideNavNote | null | undefined,
+): string {
+  if (note?.kind === 'naming') {
+    return getNamingOpenNote(tour, sceneId, note.namingName);
+  }
+  return getLocationChangeNote(tour, sceneId);
+}
+
+function isSameAutoNavNote(
+  last: LastAutoNavNote | null,
+  next: LastAutoNavNote,
+): boolean {
+  if (!last || last.kind !== next.kind) return false;
+  if (next.kind === 'scene') {
+    return last.kind === 'scene' && last.sceneId === next.sceneId;
+  }
+  return last.kind === 'naming' && last.hotspotId === next.hotspotId;
+}
+
+export function useTourAssistant(tour: Tour, currentSceneId: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [liveMode, setLiveMode] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const prevSceneRef = useRef(currentSceneId);
+  /** Next scene-change effect should use this note (scene Visit). */
+  const pendingNavNoteRef = useRef<GuideNavNote | null>(null);
+  /** Naming open already posted / will post a note — skip the automatic place note. */
+  const suppressNextSceneNoteRef = useRef(false);
+  /** Last auto place/NO note — skip consecutive duplicates. */
+  const lastAutoNavNoteRef = useRef<LastAutoNavNote | null>(null);
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const isOpenRef = useRef(isOpen);
+  isOpenRef.current = isOpen;
 
-  const suggestedQuestions = getSuggestedQuestions(knowledge, currentSceneId);
-  const locationTitle = getSceneTitle(knowledge, currentSceneId);
+  const suggestedQuestions = getSuggestedQuestions(tour, currentSceneId);
+  const locationTitle = getSceneTitle(tour, currentSceneId);
+  const tourTitle = tour.title?.trim() || tour.id;
 
   useEffect(() => {
-    if (prevSceneRef.current !== currentSceneId) {
-      prevSceneRef.current = currentSceneId;
-      if (isOpen) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: nextId(),
-            role: 'assistant',
-            content: getLocationChangeNote(knowledge, currentSceneId),
-          },
-        ]);
-      }
+    if (!import.meta.env.DEV || !isOpen) return;
+    void fetchAskGuideLiveStatus(true).then(setLiveMode);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (prevSceneRef.current === currentSceneId) return;
+    prevSceneRef.current = currentSceneId;
+
+    if (suppressNextSceneNoteRef.current) {
+      suppressNextSceneNoteRef.current = false;
+      pendingNavNoteRef.current = null;
+      return;
     }
-  }, [currentSceneId, isOpen, knowledge]);
+
+    if (!isOpen) {
+      pendingNavNoteRef.current = null;
+      return;
+    }
+
+    const pending = pendingNavNoteRef.current;
+    pendingNavNoteRef.current = null;
+    const key: LastAutoNavNote = { kind: 'scene', sceneId: currentSceneId };
+    if (isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
+
+    lastAutoNavNoteRef.current = key;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: nextId(),
+        role: 'assistant',
+        content: noteContent(tour, currentSceneId, pending),
+      },
+    ]);
+  }, [currentSceneId, isOpen, tour]);
+
+  /** Next scene change uses this note kind (default: place visit). */
+  const prepareNavNote = useCallback((note: GuideNavNote) => {
+    pendingNavNoteRef.current = note;
+  }, []);
+
+  /**
+   * Naming opportunity opened while Ask Guide is open — post the NO note.
+   * Skips when the same hotspot was the last auto note (chat / panorama / Explore).
+   */
+  const noteNamingOpened = useCallback(
+    (sceneId: string, namingName?: string, hotspotId?: string) => {
+      if (!isOpenRef.current) return;
+
+      const namingKey = hotspotId?.trim();
+      if (namingKey) {
+        const key: LastAutoNavNote = { kind: 'naming', hotspotId: namingKey };
+        if (isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
+        lastAutoNavNoteRef.current = key;
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId(),
+          role: 'assistant',
+          content: getNamingOpenNote(tour, sceneId, namingName),
+        },
+      ]);
+    },
+    [tour],
+  );
+
+  /** Skip the next automatic place-change note (e.g. navigating to open a NO). */
+  const suppressNextLocationNote = useCallback(() => {
+    suppressNextSceneNoteRef.current = true;
+    pendingNavNoteRef.current = null;
+  }, []);
+
+  const applyGuideResult = useCallback(
+    (result: Awaited<ReturnType<typeof askTourGuide>>) => {
+      if (result.error) {
+        setSendError(result.error);
+        return;
+      }
+      setSendError(null);
+      setLiveMode(result.live);
+      if (!result.reply) return;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId(),
+          role: 'assistant',
+          content: result.reply,
+          ...(result.guideLinks?.length ?
+            { guideLinks: result.guideLinks }
+          : {}),
+          ...(result.guideCtas?.length ? { guideCtas: result.guideCtas } : {}),
+          ...(result.followUps?.length ? { followUps: result.followUps } : {}),
+        },
+      ]);
+    },
+    [],
+  );
 
   const sendMessage = useCallback(
     (text: string) => {
       const trimmed = text.trim();
-      if (!trimmed) return;
+      if (!trimmed || isSending) return;
 
       const userMsg: ChatMessage = {
         id: nextId(),
         role: 'user',
         content: trimmed,
       };
-      const answer = askMockAssistant(knowledge, currentSceneId, trimmed);
-      const assistantMsg: ChatMessage = {
-        id: nextId(),
-        role: 'assistant',
-        content: answer,
-      };
+      const prior = messagesRef.current;
+      setSendError(null);
+      setMessages((prev) => [...prev, userMsg]);
+      setIsSending(true);
 
-      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+      void askTourGuide(tour, currentSceneId, trimmed, prior)
+        .then(applyGuideResult)
+        .finally(() => {
+          setIsSending(false);
+        });
     },
-    [knowledge, currentSceneId],
+    [applyGuideResult, currentSceneId, isSending, tour],
   );
 
   const toggle = useCallback(() => setIsOpen((v) => !v), []);
   const close = useCallback(() => setIsOpen(false), []);
-  const resetChat = useCallback(() => setMessages([]), []);
+  const clearSendError = useCallback(() => setSendError(null), []);
+  const resetChat = useCallback(() => {
+    setMessages([]);
+    setIsSending(false);
+    setSendError(null);
+    pendingNavNoteRef.current = null;
+    suppressNextSceneNoteRef.current = false;
+    lastAutoNavNoteRef.current = null;
+  }, []);
 
   const openAndAskAboutScene = useCallback(
     (sceneId: string) => {
-      const title = getSceneTitle(knowledge, sceneId);
-      const question = `Tell me about ${title}`;
+      const question = 'Tell me about this place';
 
       setIsOpen(true);
+      if (isSending) return;
 
       const userMsg: ChatMessage = {
         id: nextId(),
         role: 'user',
         content: question,
       };
-      const assistantMsg: ChatMessage = {
-        id: nextId(),
-        role: 'assistant',
-        content: askMockAssistant(knowledge, sceneId, question),
-      };
+      const prior = messagesRef.current;
+      setSendError(null);
+      setMessages((prev) => [...prev, userMsg]);
+      setIsSending(true);
 
-      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+      void askTourGuide(tour, sceneId, question, prior)
+        .then(applyGuideResult)
+        .finally(() => {
+          setIsSending(false);
+        });
     },
-    [knowledge],
+    [applyGuideResult, isSending, tour],
   );
 
   return {
     messages,
     isOpen,
+    isSending,
+    liveMode,
+    sendError,
     toggle,
     close,
     resetChat,
+    clearSendError,
     sendMessage,
     openAndAskAboutScene,
+    prepareNavNote,
+    noteNamingOpened,
+    suppressNextLocationNote,
     suggestedQuestions,
     locationTitle,
+    tourTitle,
   };
 }

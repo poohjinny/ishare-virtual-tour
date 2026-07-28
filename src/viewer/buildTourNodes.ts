@@ -1,6 +1,19 @@
 import type { Scene, Tour } from '../types/tour';
 import { resolveNavHotspotLabel } from '../utils/navHotspotLabel';
+import {
+  filterHotspotsForAudience,
+  resolveSceneVisibility,
+  VIEWER_MARKER_AUDIENCE,
+} from '../utils/sceneVisibility';
 import { hotspotToMarkerConfig } from './buildMarkers';
+
+function markersForScene(tour: Tour, scene: Scene) {
+  return filterHotspotsForAudience(
+    tour,
+    scene.hotspots ?? [],
+    VIEWER_MARKER_AUDIENCE,
+  ).map((hotspot) => hotspotToMarkerConfig(hotspot, tour, scene));
+}
 
 /** VirtualTourPlugin node list from tour JSON. */
 export function buildVirtualTourNodes(tour: Tour) {
@@ -9,9 +22,7 @@ export function buildVirtualTourNodes(tour: Tour) {
     name: scene.title,
     panorama: scene.panorama,
     links: [],
-    markers: scene.hotspots.map((hotspot) =>
-      hotspotToMarkerConfig(hotspot, tour, scene),
-    ),
+    markers: markersForScene(tour, scene),
   }));
 }
 
@@ -78,6 +89,11 @@ function navTargetPreviewSourcesChanged(
     if (!prevTarget || !nextTarget) return true;
     if (inheritedNamingSceneFieldsChanged(prevTarget, nextTarget)) return true;
     if (
+      resolveSceneVisibility(prevTarget) !== resolveSceneVisibility(nextTarget)
+    ) {
+      return true;
+    }
+    if (
       JSON.stringify(prevTarget.hotspots) !==
       JSON.stringify(nextTarget.hotspots)
     ) {
@@ -128,9 +144,7 @@ export function buildVirtualTourNodePatch(
       name: nextScene.title,
       panorama: nextScene.panorama,
       links: [],
-      markers: nextScene.hotspots.map((hotspot) =>
-        hotspotToMarkerConfig(hotspot, nextTour, nextScene),
-      ),
+      markers: markersForScene(nextTour, nextScene),
     };
   }
 
@@ -147,13 +161,12 @@ export function buildVirtualTourNodePatch(
   }
   if (
     JSON.stringify(prevScene.hotspots) !== JSON.stringify(nextScene.hotspots) ||
+    resolveSceneVisibility(prevScene) !== resolveSceneVisibility(nextScene) ||
     inheritedNavLabelsChanged(nextScene, previousTour, nextTour) ||
     inheritedNamingSceneFieldsChanged(prevScene, nextScene) ||
     navTargetPreviewSourcesChanged(nextScene, previousTour, nextTour)
   ) {
-    patch.markers = nextScene.hotspots.map((hotspot) =>
-      hotspotToMarkerConfig(hotspot, nextTour, nextScene),
-    );
+    patch.markers = markersForScene(nextTour, nextScene);
     changed = true;
   }
 

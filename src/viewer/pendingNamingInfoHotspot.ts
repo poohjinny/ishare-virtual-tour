@@ -7,6 +7,7 @@ import {
   resolveModel3dNamingTargetView,
 } from '../utils/findTourHotspot';
 import {
+  isNamingHotspot,
   resolveHotspotHostScene,
   resolveNamingPopup,
 } from '../utils/namingSceneInherit';
@@ -153,16 +154,17 @@ export function resolveNamingOpportunityFramedView(
   if (isModel3dTour(tour)) return base;
 
   const found = findNamingHotspotInTour(tour, hotspotId);
-  const popup = found?.hotspot.popup;
-  if (!popup || !isAnchoredPopup(popup)) return base;
-
-  const hostScene = resolveHotspotHostScene(
+  if (!found?.hotspot) return base;
+  const resolvedPopup = resolveNamingPopup(
     tour,
     found.hotspot,
-    tour.scenes[found.sceneId ?? sceneId],
+    resolveHotspotHostScene(
+      tour,
+      found.hotspot,
+      tour.scenes[found.sceneId ?? sceneId],
+    ),
   );
-  const resolvedPopup =
-    popup.namingOpportunity ? resolveNamingPopup(popup, hostScene) : popup;
+  if (!resolvedPopup || !isAnchoredPopup(resolvedPopup)) return base;
 
   const { height } = glassPanelMarkerSize(resolvedPopup, hotspotId, tour);
   const framed = computeAnchoredPanelFramedView(
@@ -186,19 +188,21 @@ export function resolveOpenNamingHotspotOnScene(
   const scene = tour.scenes[sceneId];
   if (!scene) return null;
 
-  const isNamingHotspot = (hotspotId: string) => {
-    const hotspot = scene.hotspots.find((item) => item.id === hotspotId);
-    return Boolean(hotspot?.popup?.namingOpportunity);
+  const isNamingPin = (hotspotId: string) => {
+    const hotspot =
+      scene.hotspots.find((item) => item.id === hotspotId) ??
+      tour.hotspots?.find((item) => item.id === hotspotId);
+    return hotspot ? isNamingHotspot(hotspot) : false;
   };
 
   if (markers) {
     const openHostId = getOpenAnchoredPanelHostId(markers);
-    if (openHostId && isNamingHotspot(openHostId)) {
+    if (openHostId && isNamingPin(openHostId)) {
       return openHostId;
     }
   }
 
-  if (activeNamingHotspotId && isNamingHotspot(activeNamingHotspotId)) {
+  if (activeNamingHotspotId && isNamingPin(activeNamingHotspotId)) {
     return activeNamingHotspotId;
   }
 
@@ -257,20 +261,18 @@ export function openNamingInfoHotspot(
   hideShare = false,
   skipCameraNudge = false,
 ): boolean {
-  const hotspot = tour.scenes[sceneId]?.hotspots.find(
-    (h) => h.id === hotspotId,
-  );
-  if (!hotspot?.popup) return false;
+  const hotspot =
+    tour.scenes[sceneId]?.hotspots.find((h) => h.id === hotspotId) ??
+    tour.hotspots?.find((h) => h.id === hotspotId && h.sceneId === sceneId);
+  if (!hotspot || (!hotspot.popup && !isNamingHotspot(hotspot))) return false;
 
   const hostScene = resolveHotspotHostScene(
     tour,
     hotspot,
     tour.scenes[sceneId],
   );
-  const popup =
-    hotspot.popup.namingOpportunity ?
-      resolveNamingPopup(hotspot.popup, hostScene)
-    : hotspot.popup;
+  const popup = resolveNamingPopup(tour, hotspot, hostScene) ?? hotspot.popup;
+  if (!popup) return false;
   const resolvedHotspot = { ...hotspot, popup };
 
   if (isAnchoredPopup(popup)) {

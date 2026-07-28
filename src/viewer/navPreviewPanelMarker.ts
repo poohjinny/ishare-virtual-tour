@@ -28,7 +28,9 @@ import {
 import { bindNavPreviewNamingAccordion } from './navPreviewNamingAccordion';
 import { animateNavPreviewTotal } from './navPreviewTotalCount';
 import {
+  clearAnchoredPanelCameraRestore,
   revealCameraForOffViewPanel,
+  restoreAnchoredPanelCameraIfNeeded,
   scheduleNudgeCameraForClippedPanel,
   waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
@@ -93,11 +95,15 @@ export function closeAnchoredNavPreviewPanel(
   markers: MarkersPlugin,
   animate = true,
   clearActive = true,
+  options?: { restoreCamera?: boolean },
 ): void {
   let clearingActive = false;
+  let closedAny = false;
+  const restoreCamera = options?.restoreCamera ?? animate;
 
   for (const marker of markers.getMarkers()) {
     if (!marker.data?.navPanel) continue;
+    closedAny = true;
 
     clearNavPanelPositionTrack();
 
@@ -154,6 +160,10 @@ export function closeAnchoredNavPreviewPanel(
     }, PANEL_EXIT_MS);
     closingPanelTimeouts.set(id, timeoutId);
   }
+
+  if (!closedAny) return;
+  if (restoreCamera) void restoreAnchoredPanelCameraIfNeeded();
+  else clearAnchoredPanelCameraRestore();
 }
 
 export function getOpenNavPreviewHostId(markers: MarkersPlugin): string | null {

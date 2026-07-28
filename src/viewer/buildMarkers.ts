@@ -14,6 +14,7 @@ import { resolveNavHotspotLabel } from '../utils/navHotspotLabel';
 import {
   resolveHotspotHostScene,
   resolveNamingPopup,
+  isNamingHotspot,
 } from '../utils/namingSceneInherit';
 import type { Hotspot, Scene, Tour, ViewPosition } from '../types/tour';
 
@@ -26,8 +27,14 @@ export function escapeHtml(text: string): string {
 }
 
 /** NO pill: name · status (status in muted tone via CSS). */
-export function buildNamingHotspotPillLabelHtml(hotspot: Hotspot): string {
-  const naming = hotspot.popup?.namingOpportunity;
+export function buildNamingHotspotPillLabelHtml(
+  hotspot: Hotspot,
+  tour: Tour,
+  hostScene?: Scene,
+): string {
+  const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
+  const popup = resolveNamingPopup(tour, hotspot, scene);
+  const naming = popup?.namingOpportunity;
   if (!naming) {
     const fallback =
       hotspot.popup?.title?.trim() ?? hotspot.label?.trim() ?? 'Learn more';
@@ -49,8 +56,14 @@ export function buildNamingHotspotPillLabelHtml(hotspot: Hotspot): string {
   return `<span class="hotspot-info__name">${escapeHtml(name)}</span><span class="hotspot-info__label-sep" aria-hidden="true">·</span><span class="hotspot-info__status">${escapeHtml(statusConfig.label)}</span>`;
 }
 
-export function buildNamingHotspotAriaLabel(hotspot: Hotspot): string {
-  const naming = hotspot.popup?.namingOpportunity;
+export function buildNamingHotspotAriaLabel(
+  hotspot: Hotspot,
+  tour: Tour,
+  hostScene?: Scene,
+): string {
+  const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
+  const popup = resolveNamingPopup(tour, hotspot, scene);
+  const naming = popup?.namingOpportunity;
   if (!naming) {
     return (
       hotspot.popup?.title?.trim() ?? hotspot.label?.trim() ?? 'Information'
@@ -139,11 +152,17 @@ const INFO_HEART_SVG = `<svg class="hotspot-info__icon" viewBox="0 0 24 24" aria
   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
 </svg>`;
 
-function buildInfoHtml(hotspot: Hotspot): string {
-  const naming = hotspot.popup?.namingOpportunity;
+function buildInfoHtml(
+  hotspot: Hotspot,
+  tour: Tour,
+  hostScene?: Scene,
+): string {
+  const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
+  const popup = resolveNamingPopup(tour, hotspot, scene);
+  const naming = popup?.namingOpportunity;
   const ariaLabel =
     naming ?
-      buildNamingHotspotAriaLabel(hotspot)
+      buildNamingHotspotAriaLabel(hotspot, tour, hostScene)
     : (hotspot.popup?.title?.trim() ?? hotspot.label?.trim() ?? 'Information');
   const statusClass =
     (
@@ -158,7 +177,7 @@ function buildInfoHtml(hotspot: Hotspot): string {
       <span class="hotspot-info__pulse" aria-hidden="true"></span>
       <span class="hotspot-info__pill">
         <span class="hotspot-info__icon-wrap">${INFO_HEART_SVG}</span>
-        <span class="hotspot-info__label">${buildNamingHotspotPillLabelHtml(hotspot)}</span>
+        <span class="hotspot-info__label">${buildNamingHotspotPillLabelHtml(hotspot, tour, hostScene)}</span>
       </span>
     </button>
   `;
@@ -171,15 +190,15 @@ export function hotspotToMarkerConfig(
 ) {
   const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
   const displayHotspot =
-    hotspot.popup?.namingOpportunity ?
-      { ...hotspot, popup: resolveNamingPopup(hotspot.popup, scene) }
+    isNamingHotspot(hotspot) ?
+      { ...hotspot, popup: resolveNamingPopup(tour, hotspot, scene) }
     : hotspot;
 
   const html =
     displayHotspot.type === 'nav' ? buildNavHtml(displayHotspot, tour)
     : isGeneralInfoHotspot(displayHotspot) ?
       buildGeneralInfoHtml(displayHotspot)
-    : buildInfoHtml(displayHotspot);
+    : buildInfoHtml(displayHotspot, tour, hostScene);
 
   const pos = hotspot.position as ViewPosition;
   return {

@@ -2,6 +2,7 @@ import type { Viewer } from '@photo-sphere-viewer/core';
 import type { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 import type { Hotspot, PopupContent, Tour, ViewPosition } from '../types/tour';
 import {
+  isNamingHotspot,
   resolveHotspotHostScene,
   resolveNamingPopup,
 } from '../utils/namingSceneInherit';
@@ -25,7 +26,9 @@ import {
   measureHotspotHalfHeightPx,
 } from './anchoredPanelPosition';
 import {
+  clearAnchoredPanelCameraRestore,
   revealCameraForOffViewPanel,
+  restoreAnchoredPanelCameraIfNeeded,
   scheduleNudgeCameraForClippedPanel,
   waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
@@ -80,12 +83,16 @@ export function syncInfoPanelPosition(markers: MarkersPlugin): void {
 export function closeAnchoredInfoPanel(
   markers: MarkersPlugin,
   animate = true,
+  options?: { restoreCamera?: boolean },
 ): void {
   releaseAllTourMedia();
   let clearingActive = false;
+  let closedAny = false;
+  const restoreCamera = options?.restoreCamera ?? animate;
 
   for (const marker of markers.getMarkers()) {
     if (!marker.data?.infoPanel) continue;
+    closedAny = true;
 
     clearInfoPanelPositionTrack();
 
@@ -137,6 +144,10 @@ export function closeAnchoredInfoPanel(
     }, PANEL_EXIT_MS);
     closingPanelTimeouts.set(id, timeoutId);
   }
+
+  if (!closedAny) return;
+  if (restoreCamera) void restoreAnchoredPanelCameraIfNeeded();
+  else clearAnchoredPanelCameraRestore();
 }
 
 export function getOpenAnchoredPanelHostId(
@@ -157,7 +168,7 @@ export function openAnchoredInfoPanel(
   hideShare = false,
   options?: { skipCameraNudge?: boolean },
 ): void {
-  if (!hotspot.popup) return;
+  if (!hotspot.popup && !isNamingHotspot(hotspot)) return;
 
   closeAnchoredInfoPanel(markers, false);
 
@@ -170,9 +181,10 @@ export function openAnchoredInfoPanel(
     ),
   );
   const popup =
-    hotspot.popup.namingOpportunity ?
-      resolveNamingPopup(hotspot.popup, hostScene)
+    isNamingHotspot(hotspot) ?
+      resolveNamingPopup(tour, hotspot, hostScene)
     : hotspot.popup;
+  if (!popup) return;
 
   const id = panelMarkerId(hotspot.id);
   const hostMarker = markers.getMarker(hotspot.id);
@@ -224,9 +236,7 @@ export function openAnchoredInfoPanel(
     if (!(live?.domElement instanceof HTMLElement)) return;
     if (live.domElement.querySelector('.anchored-panel__hero--video')) {
       mountNavPreviewVideoHero(live.domElement);
-    } else if (
-      live.domElement.querySelector('.anchored-panel__hero--image')
-    ) {
+    } else if (live.domElement.querySelector('.anchored-panel__hero--image')) {
       mountNavPreviewImageHero(live.domElement);
     }
   };

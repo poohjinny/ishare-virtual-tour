@@ -404,7 +404,7 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 8px;
   }
 
   .tour-glass-panel__title-line {
@@ -591,8 +591,8 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 12px;
-    margin-top: 2px;
-    padding-top: 10px;
+    margin-top: 4px;
+    padding-top: 14px;
     border-top: 1px solid rgba(15, 23, 42, 0.08);
   }
 
@@ -1581,8 +1581,8 @@
   }
 
   .tour-glass-panel--modal {
-    width: min(440px, calc(100vw - 48px));
-    max-width: min(440px, calc(100vw - 48px));
+    width: min(480px, calc(100vw - 48px));
+    max-width: min(480px, calc(100vw - 48px));
     max-height: min(90vh, 720px);
   }
 
@@ -1606,9 +1606,9 @@
   }
 
   .tour-glass-panel--ai {
-    width: 380px;
-    height: min(560px, calc(100vh - 112px));
-    max-height: 560px;
+    width: 440px;
+    height: min(640px, calc(100vh - 112px));
+    max-height: 640px;
     transform-origin: bottom right;
   }
 
@@ -2078,7 +2078,7 @@
     display: flex;
     justify-content: flex-end;
     margin: 0;
-    padding: 8px 8px 0;
+    padding: 8px 8px 4px;
     background: var(--ishare-glass-body-bg);
     z-index: 12;
   }
@@ -2094,15 +2094,15 @@
   }
 
   /*
-   * No-media chrome lives above the scroll body. Shrink body top pad so title
-   * still sits close under the pinned share/close row.
+   * No-media chrome lives above the scroll body. Keep a clear gap under the
+   * pinned share/close row so title/meta don't crowd the buttons.
    */
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.info-popup__body {
-    padding-top: 8px;
+    padding-top: 16px;
   }
 
   /* Body chrome (no media): same hit area as hero, ghost fill instead of glass disc. */

@@ -302,17 +302,17 @@ export function InfoPopup({
               <h2 id='info-popup-title' className={infoPopupTitleClassName}>
                 {shown.title}
               </h2>
-              {shown.namingOpportunity && (
+              {shown.namingOpportunity ?
                 <NamingOpportunityPrice opportunity={shown.namingOpportunity} />
-              )}
+              : null}
             </div>
-            {shown.namingOpportunity?.priceLabel && (
+            {shown.namingOpportunity?.priceLabel ?
               <p className={infoPopupPriceLabelClassName}>
                 {shown.namingOpportunity.priceLabel}
               </p>
-            )}
+            : null}
+            <PopupHeaderMeta popup={shown} />
           </div>
-          <PopupHeaderMeta popup={shown} />
           {shown.namingOpportunity ?
             <NamingDonorCreditBlock opportunity={shown.namingOpportunity} />
           : null}

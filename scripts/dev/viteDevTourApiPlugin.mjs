@@ -5,6 +5,7 @@ import {
   applySceneLanding,
   assertPanoramaUploadFileName,
   createNamingHotspot,
+  createNamingOpportunity,
   createInfoHotspot,
   createNavHotspot,
   createScene,
@@ -22,7 +23,17 @@ import {
   updateScene,
 } from '../lib/tourSceneDev.mjs';
 import { normalizeNamingPriceStorage } from '../lib/namingPrice.mjs';
-import { createClient, updateClient } from '../lib/clientDev.mjs';
+import {
+  askGuideChat,
+  askGuideModelName,
+  isAskGuideLiveConfigured,
+} from '../lib/askGuideDev.mjs';
+import {
+  createClient,
+  updateClient,
+  deleteClient,
+  validateDeleteClientPayload,
+} from '../lib/clientDev.mjs';
 import { updateTour, findCatalogTourEntry } from '../lib/tourUpdateDev.mjs';
 import {
   deleteTour,
@@ -310,6 +321,7 @@ function validateUpdateScenePayload(body) {
     placeLead,
     previewVideoUrl,
     videoUrl,
+    visibility,
     setAsFirstScene,
   } = body ?? {};
   if (!tourId || !sceneId?.trim()) {
@@ -321,10 +333,11 @@ function validateUpdateScenePayload(body) {
     placeLead === undefined &&
     previewVideoUrl === undefined &&
     videoUrl === undefined &&
+    visibility === undefined &&
     setAsFirstScene !== true
   ) {
     throw new Error(
-      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, or setAsFirstScene is required',
+      'At least one of title, description, placeLead, previewVideoUrl, videoUrl, visibility, or setAsFirstScene is required',
     );
   }
 
@@ -337,6 +350,10 @@ function validateUpdateScenePayload(body) {
     previewVideoUrl:
       typeof previewVideoUrl === 'string' ? previewVideoUrl : undefined,
     videoUrl: typeof videoUrl === 'string' ? videoUrl : undefined,
+    visibility:
+      typeof visibility === 'string' || visibility === null ?
+        visibility
+      : undefined,
     setAsFirstScene: setAsFirstScene === true,
   };
 }
@@ -386,6 +403,7 @@ function validateNamingHotspotUpdatePayload(body) {
     tourId,
     sceneId,
     hotspotId,
+    namingId,
     title,
     price,
     status,
@@ -428,6 +446,7 @@ function validateNamingHotspotUpdatePayload(body) {
     }
   }
   if (
+    namingId === undefined &&
     title === undefined &&
     !hasPrice &&
     !status?.trim() &&
@@ -441,13 +460,14 @@ function validateNamingHotspotUpdatePayload(body) {
     previewFileBuffer === undefined
   ) {
     throw new Error(
-      'At least one of title, price, status, body, videoUrl, image, donor, donor logo, targetView, or preview is required',
+      'At least one of namingId, title, price, status, body, videoUrl, image, donor, donor logo, targetView, or preview is required',
     );
   }
   return {
     tourId,
     sceneId,
     hotspotId: hotspotId.trim(),
+    namingId: typeof namingId === 'string' ? namingId : undefined,
     title: typeof title === 'string' ? title : undefined,
     price: hasPrice ? normalizeNamingPriceStorage(price) : undefined,
     status,
@@ -800,19 +820,47 @@ function validateInfoHotspotUpdatePayload(body) {
   };
 }
 
-function validateCreateNamingHotspotPayload(body) {
-  const { tourId, sceneId, name, position } = validateHotspotPayload(body, {
-    requireName: false,
-  });
+function validateCreateNamingOpportunityPayload(body) {
+  const tourId = body?.tourId?.trim();
+  const sceneId = body?.sceneId?.trim();
+  if (!tourId) throw new Error('tourId is required');
+  if (!sceneId) throw new Error('sceneId is required (for scene inherit)');
   const status = body?.status;
   const copy = body?.body;
-  const videoUrl = body?.videoUrl;
-  const image = body?.image;
-  const targetView = body?.targetView;
   const price = normalizeNamingPriceStorage(body?.price);
   if (!status?.trim()) {
     throw new Error('status is required');
   }
+  let donorLogoFileBuffer;
+  if (body?.donorLogoFileBase64) {
+    donorLogoFileBuffer = Buffer.from(body.donorLogoFileBase64, 'base64');
+    if (!donorLogoFileBuffer.length) {
+      throw new Error('Donor logo file is empty');
+    }
+  }
+  return {
+    tourId,
+    sceneId,
+    name: body?.name,
+    price,
+    status,
+    body: copy,
+    videoUrl: body?.videoUrl,
+    image: body?.image,
+    donor: body?.donor,
+    donorLogoFileBuffer,
+  };
+}
+
+function validateCreateNamingHotspotPayload(body) {
+  const { tourId, sceneId, position } = validateHotspotPayload(body, {
+    requireName: false,
+  });
+  const namingId = body?.namingId?.trim();
+  if (!namingId) {
+    throw new Error('namingId is required');
+  }
+  const targetView = body?.targetView;
   if (
     targetView &&
     (typeof targetView.yaw !== 'number' || typeof targetView.pitch !== 'number')
@@ -834,28 +882,7 @@ function validateCreateNamingHotspotPayload(body) {
       throw new Error('Preview capture is empty');
     }
   }
-  let donorLogoFileBuffer;
-  if (body?.donorLogoFileBase64) {
-    donorLogoFileBuffer = Buffer.from(body.donorLogoFileBase64, 'base64');
-    if (!donorLogoFileBuffer.length) {
-      throw new Error('Donor logo file is empty');
-    }
-  }
-  return {
-    tourId,
-    sceneId,
-    name,
-    position,
-    price,
-    status,
-    body: copy,
-    videoUrl,
-    image,
-    donor: body?.donor,
-    donorLogoFileBuffer,
-    targetView,
-    previewFileBuffer,
-  };
+  return { tourId, sceneId, namingId, position, targetView, previewFileBuffer };
 }
 
 function validateCreateInfoHotspotPayload(body) {
@@ -1105,12 +1132,45 @@ export function viteDevTourApiPlugin() {
             return;
           }
 
+          if (
+            req.url === '/__dev/api/ask-guide/status' &&
+            req.method === 'GET'
+          ) {
+            sendJson(res, 200, {
+              ok: true,
+              enabled: isAskGuideLiveConfigured(),
+              model: isAskGuideLiveConfigured() ? askGuideModelName() : null,
+            });
+            return;
+          }
+
           if (req.method !== 'POST' && req.method !== 'PATCH') {
             sendJson(res, 405, { error: 'Method not allowed' });
             return;
           }
 
           const body = await readJsonBody(req);
+
+          if (
+            req.url === '/__dev/api/ask-guide/chat' &&
+            req.method === 'POST'
+          ) {
+            try {
+              const result = await askGuideChat({
+                context: body?.context,
+                messages: body?.messages,
+              });
+              sendJson(res, 200, { ok: true, ...result });
+            } catch (error) {
+              const statusCode =
+                typeof error?.statusCode === 'number' ? error.statusCode : 500;
+              sendJson(res, statusCode, {
+                error:
+                  error instanceof Error ? error.message : 'Ask Guide failed',
+              });
+            }
+            return;
+          }
 
           if (
             req.url === '/__dev/api/client/update' &&
@@ -1149,6 +1209,18 @@ export function viteDevTourApiPlugin() {
               clientId: result.clientId,
               client: result.client,
             });
+            return;
+          }
+
+          if (req.url === '/__dev/api/client/delete') {
+            const payload = validateDeleteClientPayload(body);
+            const result = deleteClient({
+              root,
+              toursDir,
+              assetsRoot,
+              clientId: payload.clientId,
+            });
+            sendJson(res, 200, { ok: true, ...result });
             return;
           }
 
@@ -1349,6 +1421,7 @@ export function viteDevTourApiPlugin() {
               placeLead,
               previewVideoUrl,
               videoUrl,
+              visibility,
               setAsFirstScene,
             } = validateUpdateScenePayload(body);
             const result = updateScene({
@@ -1360,6 +1433,7 @@ export function viteDevTourApiPlugin() {
               placeLead,
               previewVideoUrl,
               videoUrl,
+              visibility,
               setAsFirstScene,
             });
             sendJson(res, 200, {
@@ -1424,6 +1498,7 @@ export function viteDevTourApiPlugin() {
               tourId,
               sceneId,
               hotspotId,
+              namingId,
               title,
               price,
               status,
@@ -1443,6 +1518,7 @@ export function viteDevTourApiPlugin() {
               tourId,
               sceneId,
               hotspotId,
+              namingId,
               title,
               price,
               status,
@@ -1573,12 +1649,11 @@ export function viteDevTourApiPlugin() {
             return;
           }
 
-          if (req.url === '/__dev/api/hotspot/naming') {
+          if (req.url === '/__dev/api/naming-opportunity') {
             const {
               tourId,
               sceneId,
               name,
-              position,
               price,
               status,
               body: copy,
@@ -1586,6 +1661,37 @@ export function viteDevTourApiPlugin() {
               image,
               donor,
               donorLogoFileBuffer,
+            } = validateCreateNamingOpportunityPayload(body);
+            const result = await createNamingOpportunity({
+              root,
+              assetsRoot,
+              toursDir,
+              tourId,
+              sceneId,
+              name,
+              price,
+              status,
+              body: copy,
+              videoUrl,
+              image,
+              donor,
+              donorLogoFileBuffer,
+            });
+            sendJson(res, 200, {
+              ok: true,
+              tourId,
+              record: result.record,
+              tourPath: result.tourPath,
+            });
+            return;
+          }
+
+          if (req.url === '/__dev/api/hotspot/naming') {
+            const {
+              tourId,
+              sceneId,
+              namingId,
+              position,
               targetView,
               previewFileBuffer,
             } = validateCreateNamingHotspotPayload(body);
@@ -1595,15 +1701,8 @@ export function viteDevTourApiPlugin() {
               toursDir,
               tourId,
               sceneId,
-              name,
+              namingId,
               position,
-              price,
-              status,
-              body: copy,
-              videoUrl,
-              image,
-              donor,
-              donorLogoFileBuffer,
               targetView,
               previewFileBuffer,
             });

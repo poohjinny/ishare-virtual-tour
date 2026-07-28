@@ -34,7 +34,6 @@ export function buildSharePath({
         : null,
       embed: null,
       dev: null,
-      chatTest: null,
       notFoundTest: null,
       loadErrorTest: null,
       panoramaErrorTest: null,
@@ -44,6 +43,10 @@ export function buildSharePath({
       splashHold: null,
       firstVisitHint: null,
       askGuide: null,
+      guideMock: null,
+      guideUiTest: null,
+      chatTest: null,
+      askGuideMock: null,
     },
   );
 }
@@ -68,7 +71,6 @@ export function buildEmbedPath({
       embed: '1',
       [NAMING_OPPORTUNITY_SEARCH_KEY]: null,
       dev: null,
-      chatTest: null,
       notFoundTest: null,
       loadErrorTest: null,
       panoramaErrorTest: null,
@@ -78,6 +80,10 @@ export function buildEmbedPath({
       splashHold: null,
       firstVisitHint: null,
       askGuide: null,
+      guideMock: null,
+      guideUiTest: null,
+      chatTest: null,
+      askGuideMock: null,
     },
   );
 }
