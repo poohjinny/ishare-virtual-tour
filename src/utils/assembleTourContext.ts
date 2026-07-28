@@ -1,6 +1,5 @@
 /**
  * Runtime AI context from canonical tour + catalog data (assemble-only).
- * Does not read *-knowledge.json.
  */
 
 import { findCatalogTour } from '../data/tourCatalog';
@@ -17,8 +16,10 @@ import {
 import { formatNamingPriceDisplay } from './namingPrice';
 import {
   resolveHotspotNamingOpportunity,
+  resolveHotspotNamingRecord,
   resolveNamingPopup,
 } from './namingSceneInherit';
+import { isNamingVisibleInExplore } from './namingVisibility';
 import { resolveScenePlaceLead } from './resolveScenePlaceLead';
 import { getTourWebsite, resolveTourClient } from './resolveTourClient';
 import { buildTourNamingDirectory } from './tourDirectory';
@@ -42,7 +43,7 @@ export interface AssembledTourContext {
   facilitySummary: string;
   sceneId: string;
   sceneTitle: string;
-  /** Visitor-facing place copy (description / placeLead / NO soft lead). */
+  /** Visitor-facing place copy (description or abbreviated first public NO body). */
   placeCopy: string;
   /** Raw scene.description when set (may be empty). */
   sceneDescription: string;
@@ -68,6 +69,9 @@ function listSceneNamings(tour: Tour, scene: Scene): AssembledNamingContext[] {
   const seen = new Set<string>();
 
   for (const hotspot of listSceneInfoHotspots(tour, scene)) {
+    if (!isNamingVisibleInExplore(resolveHotspotNamingRecord(tour, hotspot))) {
+      continue;
+    }
     const resolved = resolveHotspotNamingOpportunity(tour, hotspot, scene);
     if (!resolved) continue;
 

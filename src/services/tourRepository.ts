@@ -1,4 +1,4 @@
-import type { Tour, TourKnowledge } from '../types/tour';
+import type { Tour } from '../types/tour';
 import type { PublishedTourBundle } from '../types/publishedTour';
 import { ApiTourRepository } from './apiTourRepository';
 import { JsonTourRepository } from './jsonTourRepository';
@@ -43,15 +43,6 @@ export async function loadTourAsync(tourId: string): Promise<Tour> {
   return (await loadPublishedTourAsync(tourId)).tour;
 }
 
-export async function loadKnowledgeAsync(
-  tourId: string,
-): Promise<TourKnowledge> {
-  if (apiTourRepository) {
-    return apiTourRepository.loadKnowledge(tourId);
-  }
-  return jsonTourRepository.loadKnowledge(tourId);
-}
-
 /** Sync loader — JSON repository only (existing call sites). */
 export function loadTourSync(tourId: string): Tour {
   if (apiTourRepository) {
@@ -60,14 +51,4 @@ export function loadTourSync(tourId: string): Tour {
     );
   }
   return jsonTourRepository.loadTour(tourId);
-}
-
-/** Sync knowledge loader — JSON repository only. */
-export function loadKnowledgeSync(tourId: string): TourKnowledge {
-  if (apiTourRepository) {
-    throw new Error(
-      'Synchronous loadKnowledge() is unavailable when VITE_TOUR_API_URL is set. Use loadKnowledgeAsync() instead.',
-    );
-  }
-  return jsonTourRepository.loadKnowledge(tourId);
 }

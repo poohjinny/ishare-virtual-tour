@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { allocateOpaqueId, assertEntityId } from './opaqueId.mjs';
 import {
@@ -10,7 +10,6 @@ import {
   saveUploadedSceneThumbnailWebp,
   writeTourJson,
 } from './tourSceneDev.mjs';
-import { syncKnowledgeFromTour } from './devContentPlaceholders.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
 import {
   applyDefaultTransition,
@@ -18,7 +17,6 @@ import {
 } from './tourUpdateDev.mjs';
 import {
   readCatalogJson,
-  resolveClientWebsite,
   writeCatalogJson,
 } from './tourCatalogDev.mjs';
 
@@ -375,22 +373,9 @@ export async function createTour({
   }
 
   const tourPath = join(toursDir, `${tourId}.json`);
-  const knowledgePath = join(toursDir, `${tourId}-knowledge.json`);
 
   writeTourJson(tourPath, tour);
-  writeFileSync(
-    knowledgePath,
-    `${JSON.stringify(
-      syncKnowledgeFromTour(tour, null, {
-        clientWebsite: resolveClientWebsite(catalogClient),
-        clientName: catalogClient.name,
-      }),
-      null,
-      2,
-    )}\n`,
-    'utf8',
-  );
   writeCatalogJson(toursDir, catalog);
 
-  return { tourPath, knowledgePath, tour, firstSceneId: scene.id, clientId };
+  return { tourPath, tour, firstSceneId: scene.id, clientId };
 }

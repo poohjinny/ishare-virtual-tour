@@ -1,4 +1,4 @@
-import type { Tour, TourKnowledge } from '../types/tour';
+import type { Tour } from '../types/tour';
 import type { PublishedTourBundle } from '../types/publishedTour';
 import type { CatalogTourListItem } from '../data/tourCatalog';
 import { normalizeTourAssets } from './normalizeTourAssets';
@@ -26,18 +26,6 @@ export class ApiTourRepository {
 
   async loadTour(tourId: string): Promise<Tour> {
     return (await this.loadPublishedTour(tourId)).tour;
-  }
-
-  async loadKnowledge(tourId: string): Promise<TourKnowledge> {
-    const response = await fetch(
-      this.url(`/v1/tours/${encodeURIComponent(tourId)}/knowledge`),
-    );
-    if (!response.ok) {
-      throw new Error(
-        `Failed to load knowledge for "${tourId}" (${response.status} ${response.statusText})`,
-      );
-    }
-    return (await response.json()) as TourKnowledge;
   }
 
   async loadCatalog(): Promise<CatalogTourListItem[]> {

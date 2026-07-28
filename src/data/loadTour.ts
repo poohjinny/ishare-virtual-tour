@@ -1,4 +1,4 @@
-import type { Tour, TourKnowledge, ViewPosition } from '../types/tour';
+import type { Tour, ViewPosition } from '../types/tour';
 import type { TourCategory } from '../constants/tourCategories';
 import { getTourProductFullName } from '../utils/tourProductName';
 import { listRoutableCatalogTours } from './tourCatalog';
@@ -13,7 +13,7 @@ export {
 export { getTourClientId } from '../utils/tourClientId';
 export type { CatalogTourListItem } from './tourCatalog';
 
-import { loadKnowledgeSync, loadTourSync } from '../services/tourRepository';
+import { loadTourSync } from '../services/tourRepository';
 import { getDevTourCache } from '../services/devTourCache';
 import { getCatalogTourPreviewSourceFromTour } from '../services/jsonTourRepository';
 
@@ -64,18 +64,6 @@ export function tryLoadTour(tourId: string): Tour | null {
   }
 }
 
-export function loadKnowledge(tourId = DEFAULT_TOUR_ID): TourKnowledge {
-  return loadKnowledgeSync(tourId);
-}
-
-export function tryLoadKnowledge(tourId: string): TourKnowledge | null {
-  try {
-    return loadKnowledge(tourId);
-  } catch {
-    return null;
-  }
-}
-
 export function getSceneList(tour: Tour) {
   return Object.values(tour.scenes);
 }
@@ -104,7 +92,6 @@ export function getCatalogTourPreviewSource(
 
 export {
   loadTourAsync,
-  loadKnowledgeAsync,
   loadPublishedTourAsync,
   tourRepository,
   usesApiTourRepository,

@@ -954,7 +954,7 @@ export function DevClientPanel({
                                 {client.tourCount} tour
                                 {client.tourCount === 1 ? '' : 's'}
                               </strong>
-                              , tour JSON/knowledge, and{' '}
+                              , tour JSON, and{' '}
                             </>
                           : ' and '}
                           <code>assets/{client.id}/</code>. This cannot be

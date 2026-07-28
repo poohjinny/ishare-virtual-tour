@@ -1,5 +1,5 @@
 import type { ViewPosition } from '../types/tour';
-import type { Tour, TourKnowledge } from '../types/tour';
+import type { Tour } from '../types/tour';
 import type {
   PublishedTourBundle,
   PublishedTourCatalogMeta,
@@ -12,36 +12,20 @@ const tourJsonModules = import.meta.glob('../../tours/*.json', {
   import: 'default',
 }) as Record<string, Tour>;
 
-const knowledgeJsonModules = import.meta.glob('../../tours/*-knowledge.json', {
-  eager: true,
-  import: 'default',
-}) as Record<string, TourKnowledge>;
-
 function buildTourRegistry(): Record<string, Tour> {
   const tours: Record<string, Tour> = {};
 
   for (const [path, tour] of Object.entries(tourJsonModules)) {
     if (path.endsWith('catalog.json')) continue;
+    if (path.endsWith('-knowledge.json')) continue;
+    if (!tour?.id) continue;
     tours[tour.id] = tour;
   }
 
   return tours;
 }
 
-function buildKnowledgeRegistry(): Record<string, TourKnowledge> {
-  const knowledge: Record<string, TourKnowledge> = {};
-
-  for (const [path, record] of Object.entries(knowledgeJsonModules)) {
-    const match = path.match(/\/([^/]+)-knowledge\.json$/);
-    const tourId = match?.[1] ?? record.id;
-    knowledge[tourId] = record;
-  }
-
-  return knowledge;
-}
-
 const TOURS = buildTourRegistry();
-const KNOWLEDGE = buildKnowledgeRegistry();
 
 /** Static bundle revision — bump when shipped tour JSON changes materially. */
 const STATIC_PUBLISH_VERSION = 1;
@@ -84,30 +68,16 @@ export class JsonTourRepository {
       );
     }
 
-    const knowledge = KNOWLEDGE[tourId];
-    if (!knowledge) {
-      throw new Error(`Unknown tour knowledge: ${tourId}`);
-    }
-
     return {
       version: STATIC_PUBLISH_VERSION,
       publishedAt: 'static',
       tour: normalizeTourAssets(tour),
-      knowledge,
       catalog: resolveCatalogMeta(tourId),
     };
   }
 
   loadTour(tourId: string): Tour {
     return this.loadPublishedTour(tourId).tour;
-  }
-
-  loadKnowledge(tourId: string): TourKnowledge {
-    const knowledge = KNOWLEDGE[tourId];
-    if (!knowledge) {
-      throw new Error(`Unknown tour knowledge: ${tourId}`);
-    }
-    return knowledge;
   }
 }
 

@@ -1,5 +1,3 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import {
   readTourJson,
   resolveTourJsonPath,
@@ -9,7 +7,6 @@ import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
 import {
   findCatalogClientRecord,
   readCatalogJson,
-  resolveClientWebsite,
   tryReadCatalogJson,
   writeCatalogJson,
 } from './tourCatalogDev.mjs';
@@ -83,40 +80,6 @@ export function assertCatalogVisibility(value) {
     throw new Error('visibility must be public, unlisted, or internal');
   }
   return visibility;
-}
-
-function updateKnowledgeFile({
-  toursDir,
-  tourId,
-  tourTitle,
-  websiteUrl,
-  clientDisplayName,
-}) {
-  const knowledgePath = join(toursDir, `${tourId}-knowledge.json`);
-  if (!existsSync(knowledgePath)) return;
-
-  const knowledge = JSON.parse(readFileSync(knowledgePath, 'utf8'));
-  const nextWebsite = websiteUrl?.trim();
-  const nextTitle = tourTitle?.trim();
-  const nextClientName = clientDisplayName?.trim();
-
-  if (nextWebsite) {
-    knowledge.url = nextWebsite;
-  }
-  if (nextClientName || nextTitle) {
-    knowledge.global = knowledge.global ?? {};
-    if (nextClientName) {
-      knowledge.global.facilityName = nextClientName;
-    } else if (nextTitle) {
-      knowledge.global.facilityName = nextTitle;
-    }
-  }
-
-  writeFileSync(
-    knowledgePath,
-    `${JSON.stringify(knowledge, null, 2)}\n`,
-    'utf8',
-  );
 }
 
 function assertGoogleFontSourceUrl(url) {
@@ -453,14 +416,6 @@ export async function updateTour({
     featured: typeof featured === 'boolean' ? featured : undefined,
   });
   writeCatalogJsonOrThrow(toursDir, catalog);
-
-  updateKnowledgeFile({
-    toursDir,
-    tourId: tour.id,
-    tourTitle: nextTitle,
-    websiteUrl: resolveClientWebsite(catalogClient),
-    clientDisplayName: catalogClient.name,
-  });
 
   return { tourPath, tour };
 }
