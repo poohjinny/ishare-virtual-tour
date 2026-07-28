@@ -1,32 +1,16 @@
-import { GUIDE_PANEL_CURRENT_SCENE_LABEL } from '../../constants/branding';
 import {
   aiPanelLocationBadgeClassName,
-  aiPanelLocationBadgeLabelClassName,
-  aiPanelLocationBadgeSeparatorClassName,
   aiPanelLocationBadgeTitleClassName,
-  aiPanelLocationDotClassName,
 } from './aiAssistantVariants';
 
 interface LocationBadgeProps {
+  /** Facility / tour title — distinct from the breadcrumb scene path. */
   title: string;
 }
 
 export function LocationBadge({ title }: LocationBadgeProps) {
   return (
-    <p
-      className={aiPanelLocationBadgeClassName}
-      aria-label={`${GUIDE_PANEL_CURRENT_SCENE_LABEL}: ${title}`}
-    >
-      <span className={aiPanelLocationDotClassName} aria-hidden='true' />
-      <span className={aiPanelLocationBadgeLabelClassName}>
-        {GUIDE_PANEL_CURRENT_SCENE_LABEL}
-      </span>
-      <span
-        className={aiPanelLocationBadgeSeparatorClassName}
-        aria-hidden='true'
-      >
-        ·
-      </span>
+    <p className={aiPanelLocationBadgeClassName} aria-label={title}>
       <span className={aiPanelLocationBadgeTitleClassName}>{title}</span>
     </p>
   );

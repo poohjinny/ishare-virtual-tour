@@ -1,7 +1,7 @@
 import type { ChatMessage } from '../types/tour';
 import { VIRTUAL_TOUR_GUIDE_NAME } from '../constants/branding';
 
-/** TODO(test): remove when scroll UX is verified — enable with ?chatTest=1 */
+/** TODO(test): remove when scroll UX is verified — enable with ?guideUiTest=1 */
 export const CHAT_SCROLL_TEST_MESSAGES: ChatMessage[] = [
   {
     id: 'test-1',

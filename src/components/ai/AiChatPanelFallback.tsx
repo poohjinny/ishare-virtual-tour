@@ -6,7 +6,7 @@ export function AiChatPanelFallback() {
       className={aiPanelFallbackClassName}
       role='status'
       aria-live='polite'
-      aria-label='Loading Virtual Tour Guide'
+      aria-label='Loading Tour Guide'
     />
   );
 }

@@ -31,7 +31,7 @@ export const CLIENT_INTRO_HERO_VIDEO = withBaseUrl(
 );
 
 /** Unified AI assistant product name (shared across all client tours). */
-export const VIRTUAL_TOUR_GUIDE_NAME = 'Virtual Tour Guide';
+export const VIRTUAL_TOUR_GUIDE_NAME = 'Tour Guide';
 
 /** Short CTA label on nav preview and assistant FAB hover. */
 export const VIRTUAL_TOUR_GUIDE_CTA = 'Ask Guide';
@@ -48,9 +48,6 @@ export function isAskGuideEnabled(urlOverride = false): boolean {
   return SHOW_ASK_GUIDE || urlOverride;
 }
 
-/** Guide panel location badge — prefixes the active scene title. */
-export const GUIDE_PANEL_CURRENT_SCENE_LABEL = 'Current scene';
-
-/** Shown in chat until live AI is connected. */
+/** Shown in Ask Guide body lead when `?guideMock=1` (scripted replies). */
 export const VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE =
   'Demo preview — responses are scripted for now. Live AI assistance is coming in a future update.';
