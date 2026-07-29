@@ -1205,7 +1205,7 @@ export function DevViewPanel({
       .catch(() => {
         setCatalogClients([]);
       });
-  }, [panelTab, tour]);
+  }, [panelTab, tour, catalogTick]);
 
   useEffect(() => {
     if (!editingTourId) return;

@@ -167,6 +167,20 @@
         "primaryColor": "#d89c21",
         "favicon": "/assets/ishare-demos/favicon.ico"
       }
+    },
+    {
+      "id": "cihe",
+      "name": "Canadian Institute for Historical Education",
+      "tours": [],
+      "website": "https://cihe.ca/",
+      "email": "allanbwilliams@gmail.com",
+      "address": "82 Laird Drive, Suite 130, Toronto, ontario, M4G 3V1",
+      "branding": {
+        "logo": "/assets/cihe/brand/logo.png",
+        "logoAlt": "Canadian Institute for Historical Education",
+        "primaryColor": "#74112e",
+        "favicon": "/assets/cihe/favicon.ico"
+      }
     }
   ]
 }

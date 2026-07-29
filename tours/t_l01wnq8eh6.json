@@ -1900,17 +1900,17 @@
       "title": "Laundry Room",
       "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_pvcsd2t0w2.webp",
       "defaultView": {
-        "yaw": 27.3,
-        "pitch": -3.1,
-        "zoom": 29
+        "yaw": 73.4,
+        "pitch": -2.6,
+        "zoom": 44
       },
       "hotspots": [
         {
           "id": "info-laundry",
           "type": "info",
           "position": {
-            "yaw": 28.8,
-            "pitch": -3.4
+            "yaw": 78.4,
+            "pitch": -13.8
           },
           "popup": {
             "display": "anchored",
