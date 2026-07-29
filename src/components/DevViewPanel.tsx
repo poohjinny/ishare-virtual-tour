@@ -228,6 +228,7 @@ import {
   devViewPanelManageListItemLogoWrapClassName,
   devViewPanelManageListItemTitleClassName,
   devViewPanelManageListItemBulletClassName,
+  devViewPanelManageListItemIdClassName,
   devViewPanelManageListItemMetaClassName,
   devViewPanelManageListItemStackActionsClassName,
   devViewPanelManageListItemTextStackClassName,
@@ -552,7 +553,6 @@ export function DevViewPanel({
   const [deletingTourId, setDeletingTourId] = useState<string | null>(null);
   const [tourLinkCopyState, setTourLinkCopyState] = useState<{
     id: string;
-    kind: 'id' | 'link';
     status: 'copied' | 'failed';
   } | null>(null);
   const [manageClientId, setManageClientId] = useState('');
@@ -3040,26 +3040,16 @@ export function DevViewPanel({
     setEditTourError(null);
   }, []);
 
-  const copyTourIdOrLink = useCallback(
-    async (tourId: string, kind: 'id' | 'link') => {
-      const text = kind === 'link' ? `${TOUR_PUBLIC_ORIGIN}/${tourId}` : tourId;
-      const ok = await copyToClipboard(text);
-      setTourLinkCopyState({
-        id: tourId,
-        kind,
-        status: ok ? 'copied' : 'failed',
-      });
-      window.setTimeout(
-        () => {
-          setTourLinkCopyState((prev) =>
-            prev?.id === tourId && prev.kind === kind ? null : prev,
-          );
-        },
-        ok ? 1600 : 2000,
-      );
-    },
-    [],
-  );
+  const copyTourPublicLink = useCallback(async (tourId: string) => {
+    const ok = await copyToClipboard(`${TOUR_PUBLIC_ORIGIN}/${tourId}`);
+    setTourLinkCopyState({ id: tourId, status: ok ? 'copied' : 'failed' });
+    window.setTimeout(
+      () => {
+        setTourLinkCopyState((prev) => (prev?.id === tourId ? null : prev));
+      },
+      ok ? 1600 : 2000,
+    );
+  }, []);
 
   const openIntroGallery = useCallback(() => {
     navigate(`/${preservedSearchStringFrom(searchParams, { intro: '1' })}`, {
@@ -6443,13 +6433,34 @@ export function DevViewPanel({
                                           devViewPanelManageListItemCopyClassName
                                         }
                                       >
-                                        <span
+                                        <div
                                           className={
-                                            devViewPanelManageListItemTitleClassName
+                                            devViewPanelManageListItemHeadMainClassName
                                           }
                                         >
-                                          {entry.title}
-                                        </span>
+                                          <span
+                                            className={
+                                              devViewPanelManageListItemTitleClassName
+                                            }
+                                          >
+                                            {entry.title}
+                                          </span>
+                                          <span
+                                            className={
+                                              devViewPanelManageListItemBulletClassName
+                                            }
+                                            aria-hidden='true'
+                                          >
+                                            ·
+                                          </span>
+                                          <span
+                                            className={
+                                              devViewPanelManageListItemIdClassName
+                                            }
+                                          >
+                                            {entry.id}
+                                          </span>
+                                        </div>
                                         <p
                                           className={cn(
                                             devViewPanelManageListItemDescClassName,
@@ -6490,10 +6501,7 @@ export function DevViewPanel({
                                             tone: 'secondary',
                                           })}
                                           onClick={() =>
-                                            void copyTourIdOrLink(
-                                              entry.id,
-                                              'link',
-                                            )
+                                            void copyTourPublicLink(entry.id)
                                           }
                                           disabled={busy}
                                           title={`${TOUR_PUBLIC_ORIGIN}/${entry.id}`}
@@ -6501,7 +6509,6 @@ export function DevViewPanel({
                                           {(
                                             tourLinkCopyState?.id ===
                                               entry.id &&
-                                            tourLinkCopyState.kind === 'link' &&
                                             tourLinkCopyState.status ===
                                               'copied'
                                           ) ?
@@ -6509,7 +6516,6 @@ export function DevViewPanel({
                                           : (
                                             tourLinkCopyState?.id ===
                                               entry.id &&
-                                            tourLinkCopyState.kind === 'link' &&
                                             tourLinkCopyState.status ===
                                               'failed'
                                           ) ?
@@ -6688,91 +6694,6 @@ export function DevViewPanel({
                                   <>
                                     <DevPanelFormGroup inline manageEdit>
                                       <DevPanelFormSection title='Basics'>
-                                        <label
-                                          className={devViewPanelFieldClassName}
-                                        >
-                                          <span
-                                            className={
-                                              devViewPanelFieldLabelClassName
-                                            }
-                                          >
-                                            Tour id
-                                          </span>
-                                          <div
-                                            className={
-                                              devViewPanelActionsClassName
-                                            }
-                                          >
-                                            <input
-                                              className={
-                                                devViewPanelInputClassName
-                                              }
-                                              type='text'
-                                              value={entry.id}
-                                              readOnly
-                                              spellCheck={false}
-                                              autoComplete='off'
-                                            />
-                                            <button
-                                              type='button'
-                                              className={devViewPanelBtnVariants(
-                                                { tone: 'secondary' },
-                                              )}
-                                              onClick={() =>
-                                                void copyTourIdOrLink(
-                                                  entry.id,
-                                                  'id',
-                                                )
-                                              }
-                                            >
-                                              {(
-                                                tourLinkCopyState?.id ===
-                                                  entry.id &&
-                                                tourLinkCopyState.kind ===
-                                                  'id' &&
-                                                tourLinkCopyState.status ===
-                                                  'copied'
-                                              ) ?
-                                                'Copied!'
-                                              : 'Copy id'}
-                                            </button>
-                                            <button
-                                              type='button'
-                                              className={devViewPanelBtnVariants(
-                                                { tone: 'secondary' },
-                                              )}
-                                              onClick={() =>
-                                                void copyTourIdOrLink(
-                                                  entry.id,
-                                                  'link',
-                                                )
-                                              }
-                                              title={`${TOUR_PUBLIC_ORIGIN}/${entry.id}`}
-                                            >
-                                              {(
-                                                tourLinkCopyState?.id ===
-                                                  entry.id &&
-                                                tourLinkCopyState.kind ===
-                                                  'link' &&
-                                                tourLinkCopyState.status ===
-                                                  'copied'
-                                              ) ?
-                                                'Copied!'
-                                              : 'Copy link'}
-                                            </button>
-                                          </div>
-                                          <p
-                                            className={
-                                              devViewPanelSectionHintClassName
-                                            }
-                                          >
-                                            Stable public URL:{' '}
-                                            <code>
-                                              {TOUR_PUBLIC_ORIGIN}/{entry.id}
-                                            </code>
-                                          </p>
-                                        </label>
-
                                         <label
                                           className={devViewPanelFieldClassName}
                                         >

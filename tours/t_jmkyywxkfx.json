@@ -46,7 +46,8 @@
             "pitch": -20
           },
           "popup": {
-            "display": "anchored"
+            "display": "anchored",
+            "title": "Laboratory Overview"
           },
           "namingId": "no_0l6wdoos8c"
         },
@@ -66,7 +67,8 @@
           "placeOverviewManual": true
         }
       ],
-      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_tdzbrbsa2y.webp"
+      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_tdzbrbsa2y.webp",
+      "previewVideoUrl": "https://www.youtube.com/watch?v=NUxRY5ppXEc"
     },
     "s_pauuy0pinc": {
       "id": "s_pauuy0pinc",
@@ -113,7 +115,7 @@
         }
       ],
       "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_pauuy0pinc.webp",
-      "suppressPlaceOverview": true
+      "previewVideoUrl": "https://www.youtube.com/watch?v=NUxRY5ppXEc"
     },
     "s_1vwi9rq59h": {
       "id": "s_1vwi9rq59h",
@@ -160,7 +162,7 @@
         }
       ],
       "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_1vwi9rq59h.webp",
-      "suppressPlaceOverview": true
+      "previewVideoUrl": "https://www.youtube.com/watch?v=NUxRY5ppXEc"
     }
   },
   "namingOpportunities": {
@@ -173,14 +175,12 @@
     },
     "no_cwwagvae0t": {
       "id": "no_cwwagvae0t",
-      "name": "Frederick Banting Experimental Laboratory",
       "price": 150000,
       "status": "open",
       "body": "Temporary naming copy for the Frederick Banting Experimental Laboratory. Replace with final opportunity text."
     },
     "no_1f336mwy2x": {
       "id": "no_1f336mwy2x",
-      "name": "Charles Best Research Laboratory",
       "price": 150000,
       "status": "open",
       "body": "Temporary naming copy for the Charles Best Research Laboratory. Replace with final opportunity text."
