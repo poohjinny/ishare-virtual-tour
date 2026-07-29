@@ -1,0 +1,189 @@
+{
+  "id": "t_jmkyywxkfx",
+  "clientId": "cihe",
+  "category": "Education",
+  "title": "Banting and Best Laboratory",
+  "firstScene": "s_tdzbrbsa2y",
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  },
+  "scenes": {
+    "s_tdzbrbsa2y": {
+      "id": "s_tdzbrbsa2y",
+      "title": "Overview",
+      "description": "You are looking at an overview of the Banting and Best Laboratory — the University of Toronto workspace tied to the early insulin experiments of 1921. From here you can enter the Frederick Banting Experimental Laboratory or the Charles Best Research Laboratory.\n\n(Temporary copy — replace when final content is ready.)",
+      "panorama": "/assets/cihe/t_jmkyywxkfx/panoramas/s_tdzbrbsa2y.webp",
+      "defaultView": {
+        "yaw": 118.8,
+        "pitch": -30.5,
+        "zoom": 9
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-lab-1",
+          "type": "nav",
+          "position": {
+            "yaw": 87,
+            "pitch": -4
+          },
+          "targetScene": "s_pauuy0pinc"
+        },
+        {
+          "id": "nav-to-lab-2",
+          "type": "nav",
+          "position": {
+            "yaw": 183.7,
+            "pitch": -12.4
+          },
+          "targetScene": "s_1vwi9rq59h"
+        },
+        {
+          "id": "info-overview",
+          "type": "info",
+          "position": {
+            "yaw": 118.8,
+            "pitch": -20
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_0l6wdoos8c"
+        },
+        {
+          "id": "info-place",
+          "type": "info",
+          "role": "placeOverview",
+          "position": {
+            "yaw": 118.9356270984022,
+            "pitch": -30.44146453983191
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Overview",
+            "body": "You are looking at an overview of the Banting and Best Laboratory — the University of Toronto workspace tied to the early insulin experiments of 1921. From here you can enter the Frederick Banting Experimental Laboratory or the Charles Best Research Laboratory.\n\n(Temporary copy — replace when final content is ready.)"
+          },
+          "placeOverviewManual": true
+        }
+      ],
+      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_tdzbrbsa2y.webp"
+    },
+    "s_pauuy0pinc": {
+      "id": "s_pauuy0pinc",
+      "title": "Frederick Banting Experimental Laboratory",
+      "description": "Temporary: Frederick Banting experimental laboratory space — replace with final naming copy.",
+      "panorama": "/assets/cihe/t_jmkyywxkfx/panoramas/s_pauuy0pinc.webp",
+      "defaultView": {
+        "yaw": 107.5,
+        "pitch": -14.5,
+        "zoom": 14
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 280,
+            "pitch": -10
+          },
+          "targetScene": "s_tdzbrbsa2y",
+          "instant": true,
+          "navVariant": "hub"
+        },
+        {
+          "id": "nav-to-lab-2",
+          "type": "nav",
+          "position": {
+            "yaw": 200,
+            "pitch": -12
+          },
+          "targetScene": "s_1vwi9rq59h"
+        },
+        {
+          "id": "info-lab-1",
+          "type": "info",
+          "position": {
+            "yaw": 107.5,
+            "pitch": -8
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_cwwagvae0t"
+        }
+      ],
+      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_pauuy0pinc.webp",
+      "suppressPlaceOverview": true
+    },
+    "s_1vwi9rq59h": {
+      "id": "s_1vwi9rq59h",
+      "title": "Charles Best Research Laboratory",
+      "description": "Temporary: Charles Best research laboratory space — replace with final naming copy.",
+      "panorama": "/assets/cihe/t_jmkyywxkfx/panoramas/s_1vwi9rq59h.webp",
+      "defaultView": {
+        "yaw": 98.2,
+        "pitch": -21.4,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 280,
+            "pitch": -10
+          },
+          "targetScene": "s_tdzbrbsa2y",
+          "instant": true,
+          "navVariant": "hub"
+        },
+        {
+          "id": "nav-to-lab-1",
+          "type": "nav",
+          "position": {
+            "yaw": 160,
+            "pitch": -12
+          },
+          "targetScene": "s_pauuy0pinc"
+        },
+        {
+          "id": "info-lab-2",
+          "type": "info",
+          "position": {
+            "yaw": 98.2,
+            "pitch": -12
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_1f336mwy2x"
+        }
+      ],
+      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_1vwi9rq59h.webp",
+      "suppressPlaceOverview": true
+    }
+  },
+  "namingOpportunities": {
+    "no_0l6wdoos8c": {
+      "id": "no_0l6wdoos8c",
+      "name": "Laboratory Overview",
+      "price": 250000,
+      "status": "open",
+      "body": "Temporary naming copy for the Banting and Best Laboratory overview. Replace with final opportunity text."
+    },
+    "no_cwwagvae0t": {
+      "id": "no_cwwagvae0t",
+      "name": "Frederick Banting Experimental Laboratory",
+      "price": 150000,
+      "status": "open",
+      "body": "Temporary naming copy for the Frederick Banting Experimental Laboratory. Replace with final opportunity text."
+    },
+    "no_1f336mwy2x": {
+      "id": "no_1f336mwy2x",
+      "name": "Charles Best Research Laboratory",
+      "price": 150000,
+      "status": "open",
+      "body": "Temporary naming copy for the Charles Best Research Laboratory. Replace with final opportunity text."
+    }
+  }
+}

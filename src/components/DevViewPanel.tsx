@@ -38,6 +38,8 @@ import {
   preservedSearchStringFrom,
   resolveSceneId,
 } from '../utils/tourPaths';
+import { TOUR_PUBLIC_ORIGIN } from '../constants/tourOrigin';
+import { copyToClipboard } from '../utils/clipboard';
 import { getTourClientId } from '../utils/tourClientId';
 import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import {
@@ -548,6 +550,11 @@ export function DevViewPanel({
   const [tourCreateOpen, setTourCreateOpen] = useState(false);
   const [editingTourId, setEditingTourId] = useState<string | null>(null);
   const [deletingTourId, setDeletingTourId] = useState<string | null>(null);
+  const [tourLinkCopyState, setTourLinkCopyState] = useState<{
+    id: string;
+    kind: 'id' | 'link';
+    status: 'copied' | 'failed';
+  } | null>(null);
   const [manageClientId, setManageClientId] = useState('');
   const [catalogClients, setCatalogClients] = useState<DevCatalogClient[]>([]);
   const [newTourClientId, setNewTourClientId] = useState('');
@@ -3032,6 +3039,27 @@ export function DevViewPanel({
     setEditTourStatus('idle');
     setEditTourError(null);
   }, []);
+
+  const copyTourIdOrLink = useCallback(
+    async (tourId: string, kind: 'id' | 'link') => {
+      const text = kind === 'link' ? `${TOUR_PUBLIC_ORIGIN}/${tourId}` : tourId;
+      const ok = await copyToClipboard(text);
+      setTourLinkCopyState({
+        id: tourId,
+        kind,
+        status: ok ? 'copied' : 'failed',
+      });
+      window.setTimeout(
+        () => {
+          setTourLinkCopyState((prev) =>
+            prev?.id === tourId && prev.kind === kind ? null : prev,
+          );
+        },
+        ok ? 1600 : 2000,
+      );
+    },
+    [],
+  );
 
   const openIntroGallery = useCallback(() => {
     navigate(`/${preservedSearchStringFrom(searchParams, { intro: '1' })}`, {
@@ -6462,6 +6490,38 @@ export function DevViewPanel({
                                             tone: 'secondary',
                                           })}
                                           onClick={() =>
+                                            void copyTourIdOrLink(
+                                              entry.id,
+                                              'link',
+                                            )
+                                          }
+                                          disabled={busy}
+                                          title={`${TOUR_PUBLIC_ORIGIN}/${entry.id}`}
+                                        >
+                                          {(
+                                            tourLinkCopyState?.id ===
+                                              entry.id &&
+                                            tourLinkCopyState.kind === 'link' &&
+                                            tourLinkCopyState.status ===
+                                              'copied'
+                                          ) ?
+                                            'Copied!'
+                                          : (
+                                            tourLinkCopyState?.id ===
+                                              entry.id &&
+                                            tourLinkCopyState.kind === 'link' &&
+                                            tourLinkCopyState.status ===
+                                              'failed'
+                                          ) ?
+                                            'Copy failed'
+                                          : 'Copy link'}
+                                        </button>
+                                        <button
+                                          type='button'
+                                          className={devViewPanelBtnVariants({
+                                            tone: 'secondary',
+                                          })}
+                                          onClick={() =>
                                             startEditTour(entry.id)
                                           }
                                           disabled={busy || isEditing}
@@ -6628,6 +6688,91 @@ export function DevViewPanel({
                                   <>
                                     <DevPanelFormGroup inline manageEdit>
                                       <DevPanelFormSection title='Basics'>
+                                        <label
+                                          className={devViewPanelFieldClassName}
+                                        >
+                                          <span
+                                            className={
+                                              devViewPanelFieldLabelClassName
+                                            }
+                                          >
+                                            Tour id
+                                          </span>
+                                          <div
+                                            className={
+                                              devViewPanelActionsClassName
+                                            }
+                                          >
+                                            <input
+                                              className={
+                                                devViewPanelInputClassName
+                                              }
+                                              type='text'
+                                              value={entry.id}
+                                              readOnly
+                                              spellCheck={false}
+                                              autoComplete='off'
+                                            />
+                                            <button
+                                              type='button'
+                                              className={devViewPanelBtnVariants(
+                                                { tone: 'secondary' },
+                                              )}
+                                              onClick={() =>
+                                                void copyTourIdOrLink(
+                                                  entry.id,
+                                                  'id',
+                                                )
+                                              }
+                                            >
+                                              {(
+                                                tourLinkCopyState?.id ===
+                                                  entry.id &&
+                                                tourLinkCopyState.kind ===
+                                                  'id' &&
+                                                tourLinkCopyState.status ===
+                                                  'copied'
+                                              ) ?
+                                                'Copied!'
+                                              : 'Copy id'}
+                                            </button>
+                                            <button
+                                              type='button'
+                                              className={devViewPanelBtnVariants(
+                                                { tone: 'secondary' },
+                                              )}
+                                              onClick={() =>
+                                                void copyTourIdOrLink(
+                                                  entry.id,
+                                                  'link',
+                                                )
+                                              }
+                                              title={`${TOUR_PUBLIC_ORIGIN}/${entry.id}`}
+                                            >
+                                              {(
+                                                tourLinkCopyState?.id ===
+                                                  entry.id &&
+                                                tourLinkCopyState.kind ===
+                                                  'link' &&
+                                                tourLinkCopyState.status ===
+                                                  'copied'
+                                              ) ?
+                                                'Copied!'
+                                              : 'Copy link'}
+                                            </button>
+                                          </div>
+                                          <p
+                                            className={
+                                              devViewPanelSectionHintClassName
+                                            }
+                                          >
+                                            Stable public URL:{' '}
+                                            <code>
+                                              {TOUR_PUBLIC_ORIGIN}/{entry.id}
+                                            </code>
+                                          </p>
+                                        </label>
+
                                         <label
                                           className={devViewPanelFieldClassName}
                                         >
