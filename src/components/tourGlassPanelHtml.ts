@@ -257,6 +257,7 @@ export const GLASS_PANEL = {
   headerLeading: 'tour-glass-panel__header-leading',
   titleBlock: 'tour-glass-panel__title-block',
   titleLine: 'tour-glass-panel__title-line',
+  titleLineTrailing: 'tour-glass-panel__title-line-trailing',
   title: 'tour-glass-panel__title',
 
   close: 'tour-glass-panel__close',
@@ -686,10 +687,14 @@ export function buildAnchoredPopupHtml(
 
   const titleAfterHtml =
     naming ?
-      buildNamingPriceUnderTitleHtml(
-        naming.price,
-        namingOpportunityStatusConfig(naming.status).cssModifier === 'sold',
-      )
+      (() => {
+        const priceHtml = buildNamingPriceUnderTitleHtml(
+          naming.price,
+          namingOpportunityStatusConfig(naming.status).cssModifier === 'sold',
+        );
+        const namingBadgeHtml = buildPopupBadgeHtml(popup);
+        return `<div class="${GLASS_PANEL.titleLineTrailing}">${namingBadgeHtml}${priceHtml}</div>`;
+      })()
     : options?.shareAsLocation ? glassPanelYouAreHereBadgeHtml()
     : '';
   const donor = resolveNamingDonorPresentation(naming);
@@ -717,7 +722,6 @@ export function buildAnchoredPopupHtml(
     naming?.priceLabel ?
       `<p class="${GLASS_PANEL.priceLabel}">${escapeHtml(naming.priceLabel)}</p>`
     : '';
-  const badgeHtml = naming ? buildPopupBadgeHtml(popup) : '';
 
   const titleBlockHtml = `<div class="${GLASS_PANEL.titleBlock}">
       <div class="${GLASS_PANEL.titleLine}">
@@ -727,7 +731,6 @@ export function buildAnchoredPopupHtml(
         ${titleAfterHtml}
       </div>
       ${titleSubHtml}
-      ${badgeHtml}
     </div>`;
 
   const trimmedVideoUrl = popup.videoUrl?.trim();

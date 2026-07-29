@@ -303,7 +303,12 @@ export function InfoPopup({
                 {shown.title}
               </h2>
               {shown.namingOpportunity ?
-                <NamingOpportunityPrice opportunity={shown.namingOpportunity} />
+                <div className='tour-glass-panel__title-line-trailing'>
+                  <PopupHeaderMeta popup={shown} />
+                  <NamingOpportunityPrice
+                    opportunity={shown.namingOpportunity}
+                  />
+                </div>
               : null}
             </div>
             {shown.namingOpportunity?.priceLabel ?
@@ -311,7 +316,6 @@ export function InfoPopup({
                 {shown.namingOpportunity.priceLabel}
               </p>
             : null}
-            <PopupHeaderMeta popup={shown} />
           </div>
           {shown.namingOpportunity ?
             <NamingDonorCreditBlock opportunity={shown.namingOpportunity} />

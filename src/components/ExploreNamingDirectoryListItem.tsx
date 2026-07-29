@@ -7,6 +7,7 @@ import {
   EXPLORE_GALLERY_NAMING_VIEW_LABEL,
   EXPLORE_GALLERY_VISIT_LABEL,
   exploreNamingVisitPlaceAriaLabel,
+  tourDirectoryNamingInfoAriaLabel,
 } from '../constants/tourDirectory';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import type { Scene, TourViewerType } from '../types/tour';
@@ -18,7 +19,7 @@ import { NamingHeartIcon } from './icons/NamingHeartIcon';
 import type { NamingStatusModifier } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 import {
-  tourNavCurrentInlineLabelClassName,
+  tourNavCurrentListChipClassName,
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBadgeColumnClassName,
   tourNavDirectoryListItemBodyClassName,
@@ -34,9 +35,11 @@ import {
   tourNavItemNamingDescriptionClassName,
   tourNavItemNamingHeaderClassName,
   tourNavItemNamingLocationClassName,
+  tourNavItemNamingMetaStackClassName,
   tourNavItemNamingNameClassName,
   tourNavItemNamingPriceClassName,
   tourNavItemNamingTitleRowClassName,
+  tourNavItemNamingTopRowClassName,
   tourNavItemTextClassName,
   tourNavSceneInfoButtonClassName,
 } from './tourNavFloatVariants';
@@ -79,7 +82,7 @@ export function ExploreNamingDirectoryListItem({
   const donorCredit = item.donorCredit?.trim();
   const showActions = true;
   const visitPlaceLabel = exploreNamingVisitPlaceAriaLabel(item.sceneTitle);
-  const viewOpportunityLabel = `${EXPLORE_GALLERY_NAMING_VIEW_LABEL}: ${item.name}`;
+  const viewOpportunityLabel = tourDirectoryNamingInfoAriaLabel(item.name);
   const creditSuffix = donorCredit ? ` ${donorCredit}.` : '';
   const rowAriaLabel =
     active ?
@@ -170,49 +173,54 @@ export function ExploreNamingDirectoryListItem({
           className={cn(
             tourNavDirectoryListItemBodyMainClassName,
             tourNavDirectoryListItemNamingMainClassName,
+            tourNavItemTextClassName,
           )}
         >
-          <span className={tourNavItemTextClassName}>
-            {active ?
-              <ExploreCurrentHereLabel
-                className={tourNavCurrentInlineLabelClassName}
-              />
-            : null}
+          {active ?
+            <ExploreCurrentHereLabel
+              className={tourNavCurrentListChipClassName}
+            />
+          : null}
+          <span className={tourNavItemNamingTopRowClassName}>
             <span className={tourNavItemNamingHeaderClassName}>
               <span className={tourNavItemNamingTitleRowClassName}>
                 <span className={tourNavItemNamingNameClassName}>
                   {item.name}
                 </span>
               </span>
-              {showLocation ?
-                <span className={tourNavItemNamingLocationClassName}>
-                  {item.sceneTitle}
+              {showLocation || donorCredit ?
+                <span className={tourNavItemNamingMetaStackClassName}>
+                  {showLocation ?
+                    <span className={tourNavItemNamingLocationClassName}>
+                      {item.sceneTitle}
+                    </span>
+                  : null}
+                  {donorCredit ?
+                    <span className={tourNavItemNamingLocationClassName}>
+                      {donorCredit}
+                    </span>
+                  : null}
                 </span>
               : null}
-              {donorCredit ?
-                <span className={tourNavItemNamingLocationClassName}>
-                  {donorCredit}
-                </span>
-              : null}
-              {description ?
-                <span className={tourNavItemNamingDescriptionClassName}>
-                  {description}
+            </span>
+            <span className={tourNavDirectoryListItemBadgeColumnClassName}>
+              <NamingStatusBadge
+                statusModifier={item.statusModifier as NamingStatusModifier}
+                label={item.statusLabel}
+                className={cn(tourNavItemBadgeClassName, 'ml-0')}
+              />
+              {priceLabel ?
+                <span className={tourNavItemNamingPriceClassName}>
+                  {priceLabel}
                 </span>
               : null}
             </span>
           </span>
-          <span className={tourNavDirectoryListItemBadgeColumnClassName}>
-            {priceLabel ?
-              <span className={tourNavItemNamingPriceClassName}>
-                {priceLabel}
-              </span>
-            : null}
-            <NamingStatusBadge
-              statusModifier={item.statusModifier as NamingStatusModifier}
-              label={item.statusLabel}
-              className={cn(tourNavItemBadgeClassName, 'ml-0')}
-            />
-          </span>
+          {description ?
+            <span className={tourNavItemNamingDescriptionClassName}>
+              {description}
+            </span>
+          : null}
         </span>
         {showActions ?
           <ExploreDirectoryListItemActions>

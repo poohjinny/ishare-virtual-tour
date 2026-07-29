@@ -441,6 +441,24 @@
     white-space: nowrap;
   }
 
+  /* Badge left of price — both sit on the trailing (right) edge of the title row. */
+  .tour-glass-panel__title-line-trailing {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  .tour-glass-panel__title-line-trailing .tour-glass-panel__meta {
+    flex: 0 0 auto;
+  }
+
+  .tour-glass-panel__title-line-trailing .tour-glass-panel__price--under-title {
+    margin: 0;
+  }
+
   .tour-glass-panel__title-block .tour-glass-panel__title {
     flex: none;
     width: auto;
@@ -1513,13 +1531,72 @@
     min-height: 0;
   }
 
+  /* Explore place/naming detail — content-width Visit with in-flow arrow (not absolute postfix). */
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer {
+    padding: 18px 20px 20px;
+  }
+
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta-wrap {
+    align-items: center;
+  }
+
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta,
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon,
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta:has(> .tour-glass-panel__cta-icon) {
+    display: inline-flex;
+    width: auto;
+    max-width: 100%;
+    gap: var(--ishare-panel-cta-gap, 8px);
+    padding-block: 12px;
+    padding-inline: 40px 30px;
+    min-height: 0;
+    overflow: visible;
+    justify-content: center;
+  }
+
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta-text,
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-text,
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta:has(> .tour-glass-panel__cta-icon) .tour-glass-panel__cta-text {
+    flex: 0 0 auto;
+    max-width: none;
+    overflow: visible;
+    text-overflow: unset;
+    white-space: nowrap;
+  }
+
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta-icon,
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-icon,
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta:has(> .tour-glass-panel__cta-icon) .tour-glass-panel__cta-icon {
+    position: static;
+    top: auto;
+    right: auto;
+    transform: none;
+  }
+
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:hover .tour-glass-panel__cta-icon,
+  .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:focus-visible .tour-glass-panel__cta-icon {
+    transform: translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
+  }
+
+  /* Explore naming detail — donor rule spans content width (inside body padding). */
+  .tour-glass-panel--directory .tour-nav-scene-detail-main .tour-glass-panel__title-block {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .tour-glass-panel--directory .tour-nav-scene-detail-main .tour-glass-panel__donor {
+    align-self: stretch;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .tour-glass-panel__body--help {
     gap: 24px;
     padding: 20px;
   }
 
   .tour-glass-panel__body--help .ishare-accordion__trigger {
-    padding: 16px 14px;
+    padding: 14px 14px;
   }
 
   .tour-glass-panel__body--help .ishare-accordion__item {

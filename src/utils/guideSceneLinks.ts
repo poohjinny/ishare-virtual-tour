@@ -4,7 +4,10 @@ import {
   resolveNamingOpportunityStatus,
 } from '../data/namingOpportunityStatus';
 import type { ChatGuideLink, Hotspot, Scene, Tour } from '../types/tour';
-import { findNamingHotspotByNamingId, listSceneInfoHotspots } from './findTourHotspot';
+import {
+  findNamingHotspotByNamingId,
+  listSceneInfoHotspots,
+} from './findTourHotspot';
 import { formatNamingPriceDisplay } from './namingPrice';
 import {
   abbreviateNamingBodyLead,
@@ -305,14 +308,16 @@ export function inferGuideSceneLinksFromText(
   return out;
 }
 
-/** Merge model scene + naming links; fall back to text inference. */
+/** Merge model scene + naming links; optionally fall back to text inference. */
 export function resolveGuideLinks(
   tour: Tour,
   currentSceneId: string,
   reply: string,
   rawSceneLinks?: Array<{ sceneId?: string; label?: string }> | null,
   rawNamingLinks?: Array<{ namingId?: string; label?: string }> | null,
+  options?: { allowTextInference?: boolean },
 ): ChatGuideLink[] {
+  const allowTextInference = options?.allowTextInference !== false;
   const fromScenes = resolveGuideSceneLinks(
     tour,
     currentSceneId,
@@ -333,6 +338,7 @@ export function resolveGuideLinks(
   }
 
   if (merged.length > 0) {
+    if (!allowTextInference) return capGuideLinks(merged);
     // Model often lists naming names as sceneLinks — still attach naming cards
     // from reply text so interest answers are not place-only.
     const inferredNamings = inferGuideSceneLinksFromText(
@@ -342,6 +348,8 @@ export function resolveGuideLinks(
     ).filter((link) => link.kind === 'naming');
     return capGuideLinks([...merged, ...inferredNamings]);
   }
+
+  if (!allowTextInference) return [];
   return inferGuideSceneLinksFromText(tour, currentSceneId, reply);
 }
 

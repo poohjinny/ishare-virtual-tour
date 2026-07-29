@@ -31,6 +31,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_ASK_GUIDE_API_URL: ${{ secrets.VITE_ASK_GUIDE_API_URL }}
         run: npm run build
 
       - name: Upload artifact

@@ -10,7 +10,8 @@ import {
 import { segmentedTabPanelContentClassName } from './ui/segmentedTabsClasses';
 
 interface ExploreSceneDetailPanelProps {
-  sceneId: string;
+  /** Animation key — scene id or naming `sceneId:hotspotId`. */
+  detailKey: string;
   children: ReactNode;
   className?: string;
   exiting?: boolean;
@@ -24,9 +25,9 @@ function prefersReducedMotion(): boolean {
 
 const EXPLORE_SCENE_DETAIL_EXIT_MS = 220;
 
-/** Location detail drill-in — horizontal slide + fade on enter and back. */
+/** Explore directory detail drill-in — horizontal slide + fade on enter and back. */
 export function ExploreSceneDetailPanel({
-  sceneId,
+  detailKey,
   children,
   className = '',
   exiting = false,
@@ -59,7 +60,7 @@ export function ExploreSceneDetailPanel({
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [sceneId, exiting]);
+  }, [detailKey, exiting]);
 
   useEffect(() => {
     if (!exiting) return;

@@ -102,7 +102,8 @@ export function ExploreSceneInfoButton({
     <IconTooltip
       label={TOUR_DIRECTORY_SCENE_INFO_TOOLTIP}
       placement={
-        isBreadcrumb || isGalleryHeroChip || variant === 'gallery' ?
+        isBreadcrumb ? 'left'
+        : isGalleryHeroChip || variant === 'gallery' ?
           'bottom'
         : 'left'
       }

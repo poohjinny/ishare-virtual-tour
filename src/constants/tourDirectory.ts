@@ -74,7 +74,9 @@ export const EXPLORE_GALLERY_VISIT_LABEL = 'Visit';
 
 export const EXPLORE_GALLERY_LOCATION_DETAILS_LABEL = 'Details';
 
-export const EXPLORE_GALLERY_NAMING_VIEW_LABEL = 'View opportunity';
+/** Naming gallery/list secondary CTA — opens in-panel opportunity detail. */
+export const EXPLORE_GALLERY_NAMING_VIEW_LABEL =
+  EXPLORE_GALLERY_LOCATION_DETAILS_LABEL;
 
 /** Naming row secondary CTA — go to the place without opening the opportunity panel. */
 export function exploreNamingVisitPlaceAriaLabel(sceneTitle: string): string {
@@ -89,6 +91,8 @@ export function exploreLocationGroupCountLabel(count: number): string {
 }
 
 export const TOUR_DIRECTORY_SCENE_DETAIL_BACK = 'Back to places';
+
+export const TOUR_DIRECTORY_NAMING_DETAIL_BACK = 'Back to naming';
 
 /** Soft lead when a place has no scene description and no naming opportunities. */
 export const TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD =
@@ -108,4 +112,26 @@ export const TOUR_DIRECTORY_SCENE_INFO_TOOLTIP = 'Place details';
 
 export function tourDirectorySceneInfoAriaLabel(sceneTitle: string): string {
   return `Place details for ${sceneTitle}`;
+}
+
+export function tourDirectoryNamingInfoAriaLabel(
+  opportunityName: string,
+): string {
+  const name = opportunityName.trim();
+  return name ? `Details for ${name}` : 'Opportunity details';
+}
+
+/** Breadcrumb — current location crumb (no sibling menu). */
+export const TOUR_BREADCRUMB_CURRENT_TOOLTIP = TOUR_DIRECTORY_CURRENT_LOCATION_LABEL;
+
+/** Breadcrumb — ancestor crumb that navigates on click. */
+export function tourBreadcrumbGoToTooltip(placeTitle: string): string {
+  const name = placeTitle.trim();
+  return name ? `Go to ${name}` : 'Go to place';
+}
+
+/** Breadcrumb — crumb that opens the nearby-places menu. */
+export function tourBreadcrumbNearbyPlacesTooltip(placeTitle: string): string {
+  const name = placeTitle.trim();
+  return name ? `Places near ${name}` : 'Nearby places';
 }

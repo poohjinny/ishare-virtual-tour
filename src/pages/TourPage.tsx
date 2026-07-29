@@ -1173,6 +1173,8 @@ function TourExperience() {
           }
           activeNamingHotspotId={activeNamingHotspotId}
           embed={searchParams.embed}
+          showPlayTour={playTourEnabled}
+          showImmersiveAmbience={Boolean(bootstrapTour.immersiveBackground)}
           panelStack={panelStack}
           onDismissAnchoredPanels={() =>
             viewerRef.current?.closeAnchoredPanels()

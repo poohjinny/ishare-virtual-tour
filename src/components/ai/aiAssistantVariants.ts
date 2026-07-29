@@ -177,7 +177,7 @@ export const aiMessageVariants = cva('text-md leading-[1.75] shadow-none', {
 /** Single place/naming card width — CTA buttons align to this. */
 export const aiGuideCardWidthClassName = 'w-[17rem] max-w-full';
 
-export const aiSceneLinkListVariants = cva('mt-2 max-w-full self-start', {
+export const aiSceneLinkListVariants = cva('mt-0 max-w-full self-start', {
   variants: {
     layout: { single: 'flex', multi: 'grid w-full grid-cols-2 gap-2' },
   },
@@ -254,7 +254,7 @@ export const aiSceneLinkCardDescClassName = cn(
 );
 
 export const aiSceneLinkShowMoreClassName = cn(
-  'mt-0.5 cursor-pointer self-start rounded-md border-none bg-transparent px-0 py-1 font-body text-sm font-medium text-primary underline-offset-2 transition-[color,opacity] duration-150',
+  'mt-0.5 cursor-pointer self-center rounded-md border-none bg-transparent px-0 py-1 font-body text-sm font-medium text-primary underline-offset-2 transition-[color,opacity] duration-150',
   'hover:underline',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
   'disabled:cursor-default disabled:opacity-50 disabled:hover:no-underline',
@@ -288,7 +288,7 @@ export const aiGuideContactLinkClassName = cn(
 );
 
 export const aiGuideCtaClassName = cn(
-  'flex min-w-0 cursor-pointer items-center justify-center rounded-lg border border-[rgba(15,23,42,0.12)] bg-white/80 px-2.5 py-2.5 text-center font-body text-sm font-medium leading-snug text-muted no-underline transition-[background,color,border-color] duration-200',
+  'flex min-w-0 cursor-pointer items-center justify-center rounded-lg border border-[rgba(15,23,42,0.12)] bg-white/80 px-2 py-1.5 text-center font-body text-sm font-medium leading-snug text-muted no-underline transition-[background,color,border-color] duration-200',
   'hover:border-primary hover:bg-primary hover:text-white',
 );
 
@@ -297,8 +297,15 @@ export const aiGuideCtaPrimaryClassName = cn(
   'border-primary/35 bg-primary/10 text-primary hover:border-primary hover:bg-primary hover:text-white',
 );
 
-/** CTA button group under a reply — 1 col (card width) or equal 2–3 cols. */
-export function aiGuideCtaActionsColsClassName(count: number): string {
+/** CTA button group under a reply or naming card. */
+export function aiGuideCtaActionsColsClassName(
+  count: number,
+  align: 'card' | 'stretch' = 'card',
+  stack = false,
+): string {
+  if (stack || align === 'stretch') {
+    return 'grid-cols-1 w-full max-w-full self-stretch';
+  }
   if (count >= 3) return 'grid-cols-3 w-full max-w-full self-stretch';
   if (count === 2) return 'grid-cols-2 w-full max-w-full self-stretch';
   return cn('grid-cols-1', aiGuideCardWidthClassName);

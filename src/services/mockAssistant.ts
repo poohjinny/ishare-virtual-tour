@@ -91,6 +91,21 @@ export function askMockAssistant(
   }
   consider(ctx.sceneTitle, `${ctx.sceneTitle}. ${ctx.placeCopy}`.trim(), 0.5);
 
+  if (
+    /\b(hours?|schedule|timetable|visiting hours|operating hours)\b/.test(q) ||
+    /\bwhen\b.{0,40}\b(open|opened|close|closed)\b/.test(q) ||
+    /\b(open|opened|close|closed)\b.{0,24}\b(when|what time|hours?)\b/.test(
+      q,
+    ) ||
+    /\bwhat time\b/.test(q) ||
+    /\bwhen (is|are|will|was|were)\b.{0,64}\b(house|facility|building)\b/.test(
+      q,
+    ) ||
+    /몇\s*시|운영\s*시간|방문\s*시간|언제\s*(열어|열고|여|닫)/.test(question)
+  ) {
+    return 'I don’t have visiting hours or a schedule in this tour. For the latest details, please ask the foundation team at reception.';
+  }
+
   if (bestScore >= 0.35 && bestAnswer) return bestAnswer;
 
   if (q.includes('where am i') || q.includes('current location')) {

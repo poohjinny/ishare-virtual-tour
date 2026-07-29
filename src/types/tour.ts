@@ -379,6 +379,11 @@ export interface ChatGuideLink {
   priceLabel?: string;
   /** `naming` only — for status badge styling. */
   status?: NamingOpportunityStatus;
+  /**
+   * `naming` only — per-opportunity actions (Giftabulator gt / interest).
+   * Attached when hydrating Ask Guide replies.
+   */
+  ctas?: ChatGuideCta[];
 }
 
 /** External action under an Ask Guide reply (Website / Donate / Contact). */

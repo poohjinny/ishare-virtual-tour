@@ -2,11 +2,13 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": [
+      "/api/*",
       "/assets/*",
       "/*.{css,js,webp,svg,png,jpg,jpeg,ico,woff2,json,html,txt}"
     ]
   },
   "routes": [
+    { "route": "/api/*", "allowedRoles": ["anonymous"] },
     {
       "route": "/assets/*",
       "headers": { "Cache-Control": "public, max-age=31536000, immutable" }

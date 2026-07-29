@@ -100,7 +100,7 @@ const tourNavBreadcrumbMutedTextClassName =
   'text-[color:color-mix(in_srgb,var(--ishare-text-muted)_55%,var(--ishare-text-body))]';
 
 export const tourNavBreadcrumbSepClassName = cn(
-  'mx-2.5 shrink-0 font-normal max-[480px]:mx-2',
+  'mx-3.5 shrink-0 font-normal max-[480px]:mx-2.5',
   tourNavBreadcrumbMutedTextClassName,
 );
 
@@ -113,30 +113,33 @@ export const tourNavBreadcrumbLinkClassName = cn(
 );
 
 export const tourNavBreadcrumbCurrentClassName = cn(
-  'inline-flex min-w-0 max-w-full items-center gap-2.5 font-semibold text-foreground',
+  'inline-flex min-w-0 max-w-full items-center font-semibold text-foreground',
 );
 
 export const tourNavBreadcrumbCurrentLabelClassName = cn(
   'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap',
 );
 
-/** Info + title — tight pair; distance to the pulse comes from the parent gap. */
+/** Pulse + title — compact “you are here” lead. */
 export const tourNavBreadcrumbCurrentLeadClassName = cn(
-  'inline-flex min-w-0 items-center gap-0.5',
+  'inline-flex min-w-0 items-center gap-1.5',
 );
 
 export const tourNavBreadcrumbPulseDotClassName = cn(
-  'relative ml-0 size-2 shrink-0 rounded-full bg-primary',
-  'shadow-[0_0_0_0_rgba(var(--ishare-primary-rgb),0.55)]',
+  'relative size-2 shrink-0 rounded-full bg-primary',
+  'shadow-[0_0_0_0_rgba(var(--ishare-primary-rgb),0.45)]',
   'animate-tour-nav-dot-glow motion-reduce:animate-none',
   'max-[480px]:size-[7px]',
-  'before:pointer-events-none before:absolute before:-inset-0.5 before:z-0 before:origin-center',
-  'before:rounded-full before:border-2 before:border-[rgba(var(--ishare-primary-rgb),0.75)]',
-  'before:bg-[rgba(var(--ishare-primary-rgb),0.25)]',
-  'before:content-[""] before:animate-tour-nav-dot-pulse motion-reduce:before:animate-none',
-  'after:pointer-events-none after:absolute after:-inset-0.5 after:z-0 after:origin-center',
-  'after:rounded-full after:border-2 after:border-[rgba(var(--ishare-primary-rgb),0.5)]',
-  'after:content-[""] after:animate-tour-nav-dot-pulse after:[animation-delay:1.1s]',
+  // inset-0 keeps the ring geometrically centered while scale() expands.
+  'before:pointer-events-none before:absolute before:inset-0 before:z-0',
+  'before:rounded-full before:border before:border-[rgba(var(--ishare-primary-rgb),0.7)]',
+  'before:bg-[rgba(var(--ishare-primary-rgb),0.22)]',
+  'before:origin-center before:content-[""]',
+  'before:animate-tour-nav-dot-pulse motion-reduce:before:animate-none',
+  'after:pointer-events-none after:absolute after:inset-0 after:z-0',
+  'after:rounded-full after:border after:border-[rgba(var(--ishare-primary-rgb),0.45)]',
+  'after:origin-center after:content-[""]',
+  'after:animate-tour-nav-dot-pulse after:[animation-delay:1.1s]',
   'motion-reduce:after:animate-none',
 );
 
@@ -155,18 +158,18 @@ export const tourNavBreadcrumbChevronBtnClassName = cn(
   'max-[480px]:size-4',
 );
 
-export const tourNavBreadcrumbChevronIconClassName = cn(
-  materialSymbolCompactClassName,
-  'transition-transform duration-150',
-  'aria-expanded:rotate-180',
-);
-
 export const tourNavBreadcrumbCurrentMenuTriggerClassName = cn(
-  'inline-flex min-w-0 max-w-full cursor-pointer items-center gap-0.5 border-none bg-transparent p-0',
+  'inline-flex min-w-0 max-w-full cursor-pointer items-center gap-px border-none bg-transparent p-0',
   'font-[inherit] font-semibold text-foreground',
   'transition-colors duration-150 hover:enabled:text-primary',
   'aria-expanded:text-primary',
   'disabled:cursor-not-allowed disabled:opacity-50',
+);
+
+export const tourNavBreadcrumbChevronIconClassName = cn(
+  materialSymbolCompactClassName,
+  'transition-transform duration-150',
+  'aria-expanded:rotate-180',
 );
 
 /** Portaled sibling list under a breadcrumb crumb. */
@@ -175,10 +178,16 @@ export const TOUR_BREADCRUMB_SIBLING_MENU_ATTR =
 export const tourBreadcrumbSiblingMenuSelector = `[${TOUR_BREADCRUMB_SIBLING_MENU_ATTR}]`;
 
 export const tourNavBreadcrumbSiblingMenuClassName = cn(
-  'ishare-scrollbar fixed z-[var(--tour-chrome-menu-z-index)] m-0 max-h-[min(240px,40vh)] w-max min-w-[10rem]',
-  'max-w-[min(240px,calc(100vw-32px))] list-none overflow-y-auto overscroll-contain rounded-lg origin-top',
+  'ishare-scrollbar fixed z-[var(--tour-chrome-menu-z-index)] m-0 flex max-h-[min(240px,40vh)] w-max min-w-[10rem] flex-col gap-0',
+  'max-w-[min(240px,calc(100vw-32px))] list-none overflow-x-clip overflow-y-auto overscroll-contain rounded-lg origin-top',
   'border border-[color:var(--ishare-border)] bg-white/92 p-1 shadow-[var(--ishare-glass-dock-shadow)]',
 );
+
+/**
+ * Horizontal inset from menu left edge to option title text (`p-1` + `pl-2.5`).
+ * Used so the portal menu can line up with the crumb label.
+ */
+export const TOUR_BREADCRUMB_SIBLING_MENU_TEXT_INSET_PX = 4 + 10;
 
 export const tourNavBreadcrumbSiblingRowClassName = cn(
   'flex w-full items-center gap-0 rounded-md',
@@ -192,7 +201,7 @@ export const tourNavBreadcrumbSiblingRowCurrentClassName = cn(
 );
 
 export const tourNavBreadcrumbSiblingOptionClassName = cn(
-  'flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md border-none bg-transparent py-1.5 pr-2 pl-0.5 text-left',
+  'flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md border-none bg-transparent py-2.5 pr-2 pl-2.5 text-left',
   'font-display text-sm font-normal leading-[1.3] text-inherit',
   'transition-colors duration-100',
   'aria-current:font-semibold',
@@ -481,6 +490,14 @@ export const tourNavPanelScrollClassName = cn(
 
 export const tourNavPanelScrollInnerClassName = cn(
   'px-[var(--tour-directory-inline-padding,20px)] pb-5 max-[480px]:pb-[18px]',
+);
+
+/**
+ * Detail drill-in shell — column host (no own scroll). Main scrolls inside the
+ * view; Visit footer sits full-bleed below like a glass panel footer.
+ */
+export const tourNavSceneDetailShellClassName = cn(
+  'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
 );
 
 export const tourNavPanelLogoClassName = cn(
@@ -860,9 +877,9 @@ export const tourNavDirectoryListItemContentClassName = cn(
 
 export const tourNavDirectoryListItemBodyMainClassName = cn('min-w-0');
 
-/** Explore list row thumb — stretches with the content column height. */
+/** Explore list row thumb — wide preview; short idle height, stretches with content. */
 export const tourNavItemLeadingThumbClassName = cn(
-  'tour-nav-item-leading w-14 min-h-14 self-stretch overflow-hidden rounded-md',
+  'tour-nav-item-leading w-24 min-h-16 self-stretch overflow-hidden rounded-md',
   'bg-[rgba(15,23,42,0.06)]',
 );
 
@@ -893,12 +910,21 @@ export const tourNavItemNamingNameClassName = cn(
 );
 
 /**
- * NO list — name → location → description.
- * Badge lives in the trailing column, so this stack uses the full text width;
- * keep title→location tight and give description a slightly larger step.
+ * NO list — name → location / named-by (left of top row).
+ * Description sits below the top row at full content width.
  */
 export const tourNavItemNamingHeaderClassName = cn(
+  'flex min-w-0 flex-1 flex-col',
+);
+
+/** Location + donor credit — tight muted meta stack under the name. */
+export const tourNavItemNamingMetaStackClassName = cn(
   'flex min-w-0 flex-col gap-0.5',
+);
+
+/** Title/meta + trailing badge/price share one row. */
+export const tourNavItemNamingTopRowClassName = cn(
+  'flex min-w-0 items-start gap-3',
 );
 
 export const tourNavItemNamingTitleRowClassName = cn(
@@ -909,9 +935,9 @@ export const tourNavItemNamingLocationClassName = cn(
   'tour-nav-item-meta min-w-0 shrink cursor-text truncate text-xs leading-[1.3] text-muted',
 );
 
-/** Description under location — always visible; CTAs expand below on hover. */
+/** Description under the top row — full content width (not beside badge/price). */
 export const tourNavItemNamingDescriptionClassName = cn(
-  'tour-nav-item-description mt-0.5 cursor-text text-xs leading-[1.5] text-pretty break-words whitespace-normal text-muted',
+  'tour-nav-item-description cursor-text text-xs leading-[1.5] text-pretty break-words whitespace-normal text-muted',
   // Prefer max-height over line-clamp — WebKit line-clamp clips descenders on short copy.
   'max-h-[3.15em] overflow-hidden',
 );
@@ -976,7 +1002,7 @@ export const tourNavDirectoryListItemActionsInnerClassName =
 
 /** Room for the tighter list CTA shadow inside the overflow-hidden collapse. */
 export const tourNavDirectoryListItemActionsRowClassName = cn(
-  'flex min-w-0 items-center gap-2 px-0.5 pt-2 pb-2',
+  'flex min-w-0 items-center gap-2 px-0.5 pt-1.5 pb-1',
 );
 
 export const tourNavDirectoryListItemDetailCtaClassName = cn(
@@ -1032,11 +1058,27 @@ export const tourNavCurrentInlineLabelClassName = cn(
   'font-display text-2xs font-bold uppercase tracking-[0.04em] text-primary',
 );
 
-/** "You are here" chip over the active gallery card hero image. */
+/** "You are here" chip over gallery card heroes. */
 export const tourNavCurrentHeroChipClassName = cn(
-  'pointer-events-none absolute left-2 top-2 z-[2] inline-flex items-center gap-1',
-  'rounded-full bg-primary px-2 py-0.5 shadow-sm',
+  'pointer-events-none absolute left-2.5 top-2.5 z-[2] inline-flex items-center gap-1',
+  'rounded-full bg-primary px-2 py-0.75 pr-3 shadow-sm',
   'font-display text-2xs font-bold uppercase tracking-[0.03em] text-white',
+);
+
+/**
+ * Explore list — same gallery chip look, in-flow above the title
+ * (list thumbs are too small for an overlaid label).
+ */
+export const tourNavCurrentListChipClassName = cn(
+  'pointer-events-none inline-flex w-fit items-center gap-1',
+  'rounded-full bg-primary px-2 py-0.75 pr-3 shadow-sm',
+  'font-display text-2xs font-bold uppercase tracking-[0.03em] text-white',
+);
+
+/** Detail hero chip — inset farther to clear the active 4px border. */
+export const tourNavCurrentDetailHeroChipClassName = cn(
+  tourNavCurrentHeroChipClassName,
+  'left-3.5 top-3.5',
 );
 
 export const tourNavDirectoryLeadRootClassName = cn(
@@ -1130,7 +1172,7 @@ export const EXPLORE_SCENE_DETAIL_ENTER_X_PX = 16;
 export const EXPLORE_SCENE_DETAIL_EXIT_X_PX = 16;
 
 export const tourNavSceneDetailPanelClassName = cn(
-  'motion-reduce:animate-none',
+  'flex min-h-0 flex-1 flex-col motion-reduce:animate-none',
 );
 
 export const exploreDirectoryBackAnimateInClassName =
@@ -1144,7 +1186,17 @@ export const tourNavExploreDirectoryPanelClassName = cn(
 );
 
 export const tourNavSceneDetailLayoutClassName = cn(
-  'flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,16px)]',
+  'flex min-h-0 flex-1 flex-col',
+);
+
+/**
+ * Scrollable back + hero/copy. Horizontal + bottom padding live here so the
+ * Visit footer can stay full-bleed of the panel body.
+ */
+export const tourNavSceneDetailMainClassName = cn(
+  'tour-nav-scene-detail-main ishare-scrollbar flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,16px)]',
+  'overflow-x-clip overflow-y-scroll',
+  'px-[var(--tour-directory-inline-padding,20px)] pb-5 max-[480px]:pb-[18px]',
 );
 
 /** Hero image → title/description block. */
@@ -1162,11 +1214,20 @@ export const tourNavSceneDetailBackClassName = cn(
  * Hero shell aspect follows its content: a preview video embed is 16/9, so
  * match it to avoid the container background peeking below the player. Static
  * thumbnails use the taller 16/10 crop.
+ * Active uses the same primary inset border as gallery current cards.
  */
-export const tourNavSceneDetailHeroClassName = (hasVideo = false) =>
+export const tourNavSceneDetailHeroClassName = (
+  hasVideo = false,
+  active = false,
+) =>
   cn(
     'relative w-full overflow-hidden rounded-xl bg-[#e2e8f0]',
     hasVideo ? 'aspect-[16/9]' : 'aspect-[16/10]',
+    active &&
+      cn(
+        'after:pointer-events-none after:absolute after:inset-0 after:z-[5]',
+        'after:rounded-xl after:border-[4px] after:border-primary after:content-[""]',
+      ),
   );
 
 export const tourNavSceneDetailHeroImageClassName = cn(
@@ -1188,13 +1249,9 @@ export const tourNavSceneDetailBodyClassName = cn(
   'm-0 font-body text-md leading-[1.55] text-[var(--ishare-glass-body-text)] whitespace-pre-wrap',
 );
 
-export const tourNavSceneDetailFooterClassName = cn('flex justify-center pt-1');
-
-export const tourNavSceneDetailVisitClassName = cn(
-  'group/visit inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-full border-none bg-primary px-5 py-2 font-display text-sm font-semibold text-white',
-  'transition-[background,transform] duration-150 hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-  'hover:[&_.explore-cta-text-arrow]:translate-x-1.5 focus-visible:[&_.explore-cta-text-arrow]:translate-x-1.5',
-  'disabled:pointer-events-none disabled:opacity-45',
+/** Full-bleed glass footer; Visit CTA stays content-width (centered). */
+export const tourNavSceneDetailFooterClassName = cn(
+  'tour-glass-panel__footer tour-nav-scene-detail-footer w-full shrink-0',
 );
 
 /** info_i glyph inside gallery hero outlined chip. */
@@ -1317,16 +1374,15 @@ export const tourNavItemBadgeClassName = cn(
 );
 
 /**
- * NO list — text + trailing badge/price share the row beside the thumb.
- * Tighter than the thumb gap so title/desc keep more width.
+ * NO list — top row (title/meta | badge/price) + full-width description.
  */
 export const tourNavDirectoryListItemNamingMainClassName = cn(
-  'flex min-w-0 flex-1 items-start gap-6',
+  'flex min-w-0 flex-1 flex-col',
 );
 
-/** Directory list — trailing price + status stack (badge under amount). */
+/** Directory list — trailing status + price on the title row. */
 export const tourNavDirectoryListItemBadgeColumnClassName = cn(
-  'flex w-max shrink-0 flex-col items-end justify-start gap-1 self-start',
+  'flex w-max shrink-0 items-center justify-end gap-2.5 self-start',
 );
 
 export const tourNavItemIconNamingVariants = cva(

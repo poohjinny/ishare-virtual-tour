@@ -4,6 +4,9 @@ dist
 *.local
 .DS_Store
 
+# Azure Functions local secrets
+api/local.settings.json
+
 # Generated from assets/ via npm run sync-assets
 public/assets
 public/favicon.ico

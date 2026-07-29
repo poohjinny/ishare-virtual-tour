@@ -26,6 +26,12 @@ interface GuideCtaRowProps {
   clientLogo?: string;
   logoAlt?: string;
   className?: string;
+  /** `card` = match single-card width; `stretch` = fill parent (grid cell). */
+  align?: 'card' | 'stretch';
+  /** Catalog contact block — off when CTAs sit under a naming card. */
+  showContactInfo?: boolean;
+  /** Stack actions vertically (under naming cards). */
+  stack?: boolean;
 }
 
 function preferContactThenDonate(ctas: ChatGuideCta[]): ChatGuideCta[] {
@@ -92,9 +98,15 @@ export function GuideCtaRow({
   clientLogo,
   logoAlt,
   className,
+  align = 'card',
+  showContactInfo = true,
+  stack = false,
 }: GuideCtaRowProps) {
   const showInfo =
-    shouldShowContactInfo(ctas) && hasClientContact(client) && client;
+    showContactInfo &&
+    shouldShowContactInfo(ctas) &&
+    hasClientContact(client) &&
+    client;
   const visible = actionCtas(ctas, Boolean(showInfo), client);
   const phones = showInfo ? getClientPhones(client) : [];
   const logoSrc = clientLogo?.trim() || '';
@@ -105,7 +117,7 @@ export function GuideCtaRow({
     <div
       className={cn(
         aiGuideCtaRowClassName,
-        visible.length > 1 && 'w-full self-stretch',
+        (visible.length > 1 || align === 'stretch') && 'w-full self-stretch',
         className,
       )}
     >
@@ -184,7 +196,7 @@ export function GuideCtaRow({
         <div
           className={cn(
             'grid gap-2',
-            aiGuideCtaActionsColsClassName(visible.length),
+            aiGuideCtaActionsColsClassName(visible.length, align, stack),
           )}
         >
           {visible.map((cta) => {

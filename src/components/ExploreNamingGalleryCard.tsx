@@ -13,6 +13,7 @@ import {
   EXPLORE_GALLERY_NAMING_VIEW_LABEL,
   EXPLORE_GALLERY_VISIT_LABEL,
   exploreNamingVisitPlaceAriaLabel,
+  tourDirectoryNamingInfoAriaLabel,
 } from '../constants/tourDirectory';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
@@ -158,7 +159,7 @@ export function ExploreNamingGalleryCard({
   const priceLabel = formatNamingGalleryItemPrice(item);
   const showHoverBody = true;
   const visitPlaceLabel = exploreNamingVisitPlaceAriaLabel(item.sceneTitle);
-  const viewOpportunityLabel = `${EXPLORE_GALLERY_NAMING_VIEW_LABEL}: ${item.name}`;
+  const viewOpportunityLabel = tourDirectoryNamingInfoAriaLabel(item.name);
   const creditSuffix = donorCredit ? ` ${donorCredit}.` : '';
   const cardAriaLabel =
     active ?

@@ -315,6 +315,20 @@
     }
   }
 
+  /*
+   * Sibling menus scroll — keep the CSS tooltip box out of the scrollport until
+   * hover (always-on ::after still expands overflow even when opacity:0).
+   */
+  [data-tour-breadcrumb-sibling-menu] .ishare-tooltip-host::after {
+    display: none;
+  }
+
+  @media (hover: hover) {
+    [data-tour-breadcrumb-sibling-menu] .ishare-tooltip-host:hover::after {
+      display: block;
+    }
+  }
+
   /* ── Accordion (React + accordionChevronHtml) ── */
   .ishare-accordion {
     display: flex;

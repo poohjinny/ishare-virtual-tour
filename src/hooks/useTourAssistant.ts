@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { ChatMessage, Tour } from '../types/tour';
 import { askTourGuide, fetchAskGuideLiveStatus } from '../services/askGuide';
 import {
@@ -6,12 +12,23 @@ import {
   getNamingOpenNote,
   getSceneTitle,
 } from '../services/mockAssistant';
+import {
+  askGuideSessionKey,
+  clearAskGuideSession,
+  maxAskGuideMessageSeq,
+  readAskGuideSession,
+  writeAskGuideSession,
+} from '../utils/askGuideSession';
 import { buildNavContextFollowUps } from '../utils/guideMessageExtras';
 
 let messageId = 0;
 function nextId(): string {
   messageId += 1;
   return `msg-${messageId}`;
+}
+
+function bumpMessageIdCounter(messages: ChatMessage[]): void {
+  messageId = Math.max(messageId, maxAskGuideMessageSeq(messages));
 }
 
 export type GuideNavNoteKind = 'scene' | 'naming';
@@ -68,8 +85,16 @@ function upsertNavContextMessage(
 }
 
 export function useTourAssistant(tour: Tour, currentSceneId: string) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const storageKey = askGuideSessionKey(tour);
+  const storageKeyRef = useRef(storageKey);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const saved = readAskGuideSession(storageKey);
+    bumpMessageIdCounter(saved.messages);
+    return saved.messages;
+  });
+  const [isOpen, setIsOpen] = useState(
+    () => readAskGuideSession(storageKey).isOpen,
+  );
   const [isSending, setIsSending] = useState(false);
   const [liveMode, setLiveMode] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -84,9 +109,36 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
   messagesRef.current = messages;
   const isOpenRef = useRef(isOpen);
   isOpenRef.current = isOpen;
+  /** Skip the first persist after hydrate / tour switch (already on disk). */
+  const skipNextPersistRef = useRef(true);
 
   const locationTitle = getSceneTitle(tour, currentSceneId);
   const tourTitle = tour.title?.trim() || tour.id;
+
+  // Tour switch — load that tour’s tab session (same-tab refresh uses lazy init).
+  useLayoutEffect(() => {
+    if (storageKeyRef.current === storageKey) return;
+    storageKeyRef.current = storageKey;
+    const saved = readAskGuideSession(storageKey);
+    bumpMessageIdCounter(saved.messages);
+    skipNextPersistRef.current = true;
+    setMessages(saved.messages);
+    setIsOpen(saved.isOpen);
+    setIsSending(false);
+    setSendError(null);
+    pendingNavNoteRef.current = null;
+    suppressNextSceneNoteRef.current = false;
+    lastAutoNavNoteRef.current = null;
+    prevSceneRef.current = currentSceneId;
+  }, [storageKey, currentSceneId]);
+
+  useEffect(() => {
+    if (skipNextPersistRef.current) {
+      skipNextPersistRef.current = false;
+      return;
+    }
+    writeAskGuideSession(storageKey, { messages, isOpen });
+  }, [storageKey, messages, isOpen]);
 
   useEffect(() => {
     if (!import.meta.env.DEV || !isOpen) return;
@@ -218,6 +270,7 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
     pendingNavNoteRef.current = null;
     suppressNextSceneNoteRef.current = false;
     lastAutoNavNoteRef.current = null;
+    clearAskGuideSession(storageKeyRef.current);
   }, []);
 
   const openAndAskAboutScene = useCallback(

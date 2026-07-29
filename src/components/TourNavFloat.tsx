@@ -13,6 +13,7 @@ import { useFlipListReorder } from '../hooks/useFlipListReorder';
 import { isTypingTarget } from '../utils/isTypingTarget';
 import { withBaseUrl } from '../utils/assetUrl';
 import {
+  TOUR_BREADCRUMB_CURRENT_TOOLTIP,
   TOUR_DIRECTORY_PANEL_TITLE,
   TOUR_DIRECTORY_SECTION_LOCATIONS,
   TOUR_DIRECTORY_SECTION_NAMING,
@@ -24,6 +25,7 @@ import {
   TOUR_DIRECTORY_EMPTY_SEARCH,
   TOUR_DIRECTORY_GROUP_OTHER,
   exploreLocationGroupCountLabel,
+  tourBreadcrumbGoToTooltip,
   type TourDirectoryTab,
 } from '../constants/tourDirectory';
 import {
@@ -40,6 +42,7 @@ import {
 import { TourMarkerIcon } from './icons/TourMarkerIcon';
 import { ExploreDirectoryLead } from './ExploreDirectoryLead';
 import { ExploreDirectoryPanel } from './ExploreDirectoryPanel';
+import { ExploreNamingDescriptionView } from './ExploreNamingDescriptionView';
 import { ExploreNamingDirectoryListItem } from './ExploreNamingDirectoryListItem';
 import { ExploreNamingGalleryCard } from './ExploreNamingGalleryCard';
 import { ExplorePanelSearch } from './ExplorePanelSearch';
@@ -48,8 +51,8 @@ import { ExploreSceneDirectoryListItem } from './ExploreSceneDirectoryListItem';
 import { ExploreSceneDescriptionView } from './ExploreSceneDescriptionView';
 import { ExploreSceneDetailPanel } from './ExploreSceneDetailPanel';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
-import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { isPlaceOverviewHotspot } from '../utils/placeOverview';
+import { findNamingHotspotInTour } from '../utils/findTourHotspot';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
   TOUR_NAV_ACTION_SHARE,
@@ -88,6 +91,7 @@ import type {
   Hotspot,
   NamingOpportunityRecord,
   Scene,
+  Tour,
   TourClient,
   TourViewerType,
 } from '../types/tour';
@@ -166,6 +170,7 @@ import {
   tourNavNamingSceneSubheaderClassName,
   tourNavPanelScrollClassName,
   tourNavPanelScrollInnerClassName,
+  tourNavSceneDetailShellClassName,
   tourNavPanelSlotVariants,
   tourNavSectionTitleClassName,
   tourNavSectionTitleIconClassName,
@@ -212,6 +217,10 @@ interface TourNavFloatProps {
   activeNamingHotspotId?: string | null;
   /** `?embed=1` — hide Share/Help FAB; PSV control pill stays on. */
   embed?: boolean;
+  /** Show Play tour tips in Help when the tour has a valid play sequence. */
+  showPlayTour?: boolean;
+  /** Show immersive ambience tips in Help when the tour has a music bed. */
+  showImmersiveAmbience?: boolean;
   panelStack?: TourPanelStack;
   /** Close in-scene anchored nav/info panels (e.g. when opening explore chrome). */
   onDismissAnchoredPanels?: () => void;
@@ -236,6 +245,8 @@ interface BreadcrumbItem {
   title: string;
   isCurrent: boolean;
 }
+
+type ExploreNamingDetailTarget = { sceneId: string; hotspotId: string };
 
 function ExploreTourIcon() {
   return (
@@ -355,13 +366,15 @@ export function TourNavFloat({
   onHistoryBack,
   onHistoryForward,
   onSelectScene,
-  onSelectNamingOpportunity,
+  onSelectNamingOpportunity: _onSelectNamingOpportunity,
   onVisitNamingPlace,
   onBreadcrumbNavigate,
   onRecenterCurrentScene,
   onTogglePlaceOverview,
   activeNamingHotspotId = null,
   embed = false,
+  showPlayTour = true,
+  showImmersiveAmbience = true,
   panelStack,
   onDismissAnchoredPanels,
 }: TourNavFloatProps) {
@@ -374,7 +387,7 @@ export function TourNavFloat({
   const [panelPhase, setPanelPhase] = useState<PanelAnimPhase>('idle');
   const [exploreSearchOpen, setExploreSearchOpen] = useState(false);
   /**
-   * Explore "You are here" for a naming row — set by View (panel) or Visit place.
+   * Explore "You are here" for a naming row — set by Visit place (or detail Visit).
    * Survives panel close; cleared when leaving that NO's scene or visiting a place.
    * Pending holds a cross-scene Visit until `currentSceneId` catches up.
    */
@@ -397,6 +410,10 @@ export function TourNavFloat({
     string | null
   >(null);
   const [exploreSceneDetailExiting, setExploreSceneDetailExiting] =
+    useState(false);
+  const [exploreNamingDetail, setExploreNamingDetail] =
+    useState<ExploreNamingDetailTarget | null>(null);
+  const [exploreNamingDetailExiting, setExploreNamingDetailExiting] =
     useState(false);
   const [exploreDirectoryEnterToken, setExploreDirectoryEnterToken] =
     useState(0);
@@ -493,6 +510,27 @@ export function TourNavFloat({
     [namingOpportunities, scenes, tourHotspots, tourViewerType],
   );
 
+  const exploreTour = useMemo(
+    (): Tour => ({
+      id: tourId,
+      title: tourTitle ?? '',
+      firstScene: firstSceneId,
+      scenes: tourDirectoryContext.scenes,
+      hotspots: tourHotspots,
+      viewerType: tourViewerType,
+      namingOpportunities,
+    }),
+    [
+      firstSceneId,
+      namingOpportunities,
+      tourDirectoryContext.scenes,
+      tourHotspots,
+      tourId,
+      tourTitle,
+      tourViewerType,
+    ],
+  );
+
   const namingItems = useMemo(
     () => buildTourNamingDirectory(tourDirectoryContext),
     [tourDirectoryContext],
@@ -503,24 +541,63 @@ export function TourNavFloat({
     return scenes.find((scene) => scene.id === exploreSceneDetailId) ?? null;
   }, [exploreSceneDetailId, scenes]);
 
+  const exploreNamingDetailView = useMemo(() => {
+    if (!exploreNamingDetail) return null;
+    const found = findNamingHotspotInTour(
+      exploreTour,
+      exploreNamingDetail.hotspotId,
+    );
+    if (!found) return null;
+    const scene =
+      exploreTour.scenes[exploreNamingDetail.sceneId] ??
+      exploreTour.scenes[found.sceneId];
+    if (!scene) return null;
+    return {
+      sceneId: exploreNamingDetail.sceneId,
+      hotspotId: exploreNamingDetail.hotspotId,
+      scene,
+      hotspot: found.hotspot,
+      detailKey: `${exploreNamingDetail.sceneId}:${exploreNamingDetail.hotspotId}`,
+    };
+  }, [exploreNamingDetail, exploreTour]);
+
+  const exploreDetailOpen = Boolean(
+    exploreSceneDetail || exploreNamingDetailView,
+  );
+
   const captureExploreDirectoryScroll = useCallback(() => {
     // Detail / search use other scroll roots — keep the last directory offset.
-    if (exploreSceneDetailId != null) return;
+    if (exploreSceneDetailId != null || exploreNamingDetail != null) return;
     const scrollEl = exploreScrollRef.current;
     if (!scrollEl) return;
     exploreDirectoryScrollTopRef.current = scrollEl.scrollTop;
-  }, [exploreSceneDetailId]);
+  }, [exploreNamingDetail, exploreSceneDetailId]);
 
   const openExploreSceneDetail = useCallback(
     (sceneId: string) => {
       // Capture list scroll only when leaving the directory — not when swapping details.
-      if (exploreSceneDetailId == null) {
+      if (exploreSceneDetailId == null && exploreNamingDetail == null) {
         captureExploreDirectoryScroll();
       }
+      setExploreNamingDetail(null);
+      setExploreNamingDetailExiting(false);
       setExploreSceneDetailExiting(false);
       setExploreSceneDetailId(sceneId);
     },
-    [captureExploreDirectoryScroll, exploreSceneDetailId],
+    [captureExploreDirectoryScroll, exploreNamingDetail, exploreSceneDetailId],
+  );
+
+  const openExploreNamingDetail = useCallback(
+    (sceneId: string, hotspotId: string) => {
+      if (exploreSceneDetailId == null && exploreNamingDetail == null) {
+        captureExploreDirectoryScroll();
+      }
+      setExploreSceneDetailId(null);
+      setExploreSceneDetailExiting(false);
+      setExploreNamingDetailExiting(false);
+      setExploreNamingDetail({ sceneId, hotspotId });
+    },
+    [captureExploreDirectoryScroll, exploreNamingDetail, exploreSceneDetailId],
   );
 
   const requestCloseExploreSceneDetail = useCallback(() => {
@@ -534,10 +611,21 @@ export function TourNavFloat({
     setExploreDirectoryEnterToken((token) => token + 1);
   }, []);
 
+  const requestCloseExploreNamingDetail = useCallback(() => {
+    if (!exploreNamingDetail || exploreNamingDetailExiting) return;
+    setExploreNamingDetailExiting(true);
+  }, [exploreNamingDetail, exploreNamingDetailExiting]);
+
+  const finishCloseExploreNamingDetail = useCallback(() => {
+    setExploreNamingDetail(null);
+    setExploreNamingDetailExiting(false);
+    setExploreDirectoryEnterToken((token) => token + 1);
+  }, []);
+
   // Restore directory scroll after remount (detail back or Explore reopen).
   useLayoutEffect(() => {
     if (displayPanel !== 'explore') return;
-    if (exploreSceneDetailId != null) return;
+    if (exploreSceneDetailId != null || exploreNamingDetail != null) return;
     if (exploreSearch.trim().length > 0) return;
 
     const el = exploreScrollRef.current;
@@ -546,6 +634,7 @@ export function TourNavFloat({
   }, [
     displayPanel,
     exploreDirectoryEnterToken,
+    exploreNamingDetail,
     exploreSceneDetailId,
     exploreSearch,
   ]);
@@ -555,8 +644,6 @@ export function TourNavFloat({
   }, [currentSceneId, scenes]);
 
   const currentSceneTitle = currentScene?.title ?? currentSceneId;
-
-  const currentSceneHasDetails = Boolean(currentScene);
 
   const placeOverviewOpen = Boolean(
     activeNamingHotspotId &&
@@ -1219,6 +1306,8 @@ export function TourNavFloat({
     closeExploreSearch();
     setExploreSceneDetailExiting(false);
     setExploreSceneDetailId(null);
+    setExploreNamingDetailExiting(false);
+    setExploreNamingDetail(null);
   }, [closeExploreSearch, displayPanel]);
 
   useEffect(() => {
@@ -1226,6 +1315,8 @@ export function TourNavFloat({
 
     setExploreSceneDetailExiting(false);
     setExploreSceneDetailId(null);
+    setExploreNamingDetailExiting(false);
+    setExploreNamingDetail(null);
   }, [isExploreSearchActive]);
 
   const handleSelect = (sceneId: string) => {
@@ -1272,6 +1363,26 @@ export function TourNavFloat({
     exploreSceneDetailId,
     onRecenterCurrentScene,
     onSelectScene,
+  ]);
+
+  const handleExploreNamingDetailVisit = useCallback(() => {
+    if (!exploreNamingDetail) return;
+
+    const { sceneId, hotspotId } = exploreNamingDetail;
+    pendingNamingHereRef.current = { sceneId, hotspotId };
+    if (sceneId === currentSceneId) {
+      setNamingHereHotspotId(hotspotId);
+      pendingNamingHereRef.current = null;
+    }
+
+    closeExploreThen(() => {
+      onVisitNamingPlace(sceneId, hotspotId);
+    });
+  }, [
+    closeExploreThen,
+    currentSceneId,
+    exploreNamingDetail,
+    onVisitNamingPlace,
   ]);
 
   const handleExploreClick = useCallback(() => {
@@ -1339,10 +1450,7 @@ export function TourNavFloat({
 
   const handleSelectNaming = (sceneId: string, hotspotId: string) => {
     if (disabled || namingOpportunityBusy) return;
-    pendingNamingHereRef.current = { sceneId, hotspotId };
-    closeExploreThen(() => {
-      onSelectNamingOpportunity(sceneId, hotspotId);
-    });
+    openExploreNamingDetail(sceneId, hotspotId);
   };
 
   const handleVisitNamingPlace = (sceneId: string, hotspotId: string) => {
@@ -1901,7 +2009,7 @@ export function TourNavFloat({
         onClose={closePanel}
         headerActions={
           <div className={tourNavExploreHeaderActionsClassName}>
-            {!exploreSceneDetail ?
+            {!exploreDetailOpen ?
               <>
                 <ExplorePanelSearch
                   open={exploreSearchOpen}
@@ -1968,27 +2076,54 @@ export function TourNavFloat({
         bodyClassName='tour-glass-panel__body--directory'
       >
         {exploreSceneDetail ?
-          <div ref={exploreScrollRef} className={tourNavPanelScrollClassName}>
-            <div className={tourNavPanelScrollInnerClassName}>
-              <ExploreSceneDetailPanel
-                sceneId={exploreSceneDetail.id}
-                exiting={exploreSceneDetailExiting}
-                onExitComplete={finishCloseExploreSceneDetail}
-              >
-                <ExploreSceneDescriptionView
-                  tourId={tourId}
-                  scene={exploreSceneDetail}
-                  tourTitle={tourTitle}
-                  tourHotspots={tourHotspots}
-                  tourViewerType={tourViewerType}
-                  namingOpportunities={namingOpportunities}
-                  active={exploreSceneDetail.id === currentSceneId}
-                  disabled={locationNavDisabled}
-                  onBack={requestCloseExploreSceneDetail}
-                  onVisit={handleExploreSceneDetailVisit}
-                />
-              </ExploreSceneDetailPanel>
-            </div>
+          <div
+            ref={exploreScrollRef}
+            className={tourNavSceneDetailShellClassName}
+          >
+            <ExploreSceneDetailPanel
+              detailKey={exploreSceneDetail.id}
+              exiting={exploreSceneDetailExiting}
+              onExitComplete={finishCloseExploreSceneDetail}
+            >
+              <ExploreSceneDescriptionView
+                tourId={tourId}
+                scene={exploreSceneDetail}
+                tourTitle={tourTitle}
+                tourHotspots={tourHotspots}
+                tourViewerType={tourViewerType}
+                namingOpportunities={namingOpportunities}
+                active={exploreSceneDetail.id === currentSceneId}
+                disabled={locationNavDisabled}
+                onBack={requestCloseExploreSceneDetail}
+                onVisit={handleExploreSceneDetailVisit}
+              />
+            </ExploreSceneDetailPanel>
+          </div>
+        : exploreNamingDetailView ?
+          <div
+            ref={exploreScrollRef}
+            className={tourNavSceneDetailShellClassName}
+          >
+            <ExploreSceneDetailPanel
+              detailKey={exploreNamingDetailView.detailKey}
+              exiting={exploreNamingDetailExiting}
+              onExitComplete={finishCloseExploreNamingDetail}
+            >
+              <ExploreNamingDescriptionView
+                tour={exploreTour}
+                scene={exploreNamingDetailView.scene}
+                hotspot={exploreNamingDetailView.hotspot}
+                active={
+                  currentSceneId === exploreNamingDetailView.sceneId &&
+                  (activeNamingHotspotId ===
+                    exploreNamingDetailView.hotspotId ||
+                    namingHereHotspotId === exploreNamingDetailView.hotspotId)
+                }
+                disabled={disabled || namingOpportunityBusy}
+                onBack={requestCloseExploreNamingDetail}
+                onVisit={handleExploreNamingDetailVisit}
+              />
+            </ExploreSceneDetailPanel>
           </div>
         : isExploreSearchActive ?
           <div
@@ -2111,15 +2246,11 @@ export function TourNavFloat({
                         aria-current='location'
                       >
                         <span className={tourNavBreadcrumbCurrentLeadClassName}>
-                          {currentSceneHasDetails ?
-                            <ExploreSceneInfoButton
-                              sceneTitle={item.title}
-                              disabled={disabled}
-                              variant='breadcrumb'
-                              expanded={currentSceneDetailOpen}
-                              onShow={handleBreadcrumbSceneDetails}
-                            />
-                          : null}
+                          <span
+                            key={currentSceneId}
+                            className={tourNavBreadcrumbPulseDotClassName}
+                            aria-hidden='true'
+                          />
                           {showSiblingMenu ?
                             <TourBreadcrumbSiblingMenu
                               crumbId={item.id}
@@ -2135,18 +2266,20 @@ export function TourNavFloat({
                               onSelect={handleBreadcrumbNavigate}
                               onShowDetails={handleSiblingMenuShowDetails}
                             />
-                          : <span
-                              className={tourNavBreadcrumbCurrentLabelClassName}
+                          : <IconTooltip
+                              label={TOUR_BREADCRUMB_CURRENT_TOOLTIP}
+                              placement='bottom'
                             >
-                              {item.title}
-                            </span>
+                              <span
+                                className={
+                                  tourNavBreadcrumbCurrentLabelClassName
+                                }
+                              >
+                                {item.title}
+                              </span>
+                            </IconTooltip>
                           }
                         </span>
-                        <span
-                          key={currentSceneId}
-                          className={tourNavBreadcrumbPulseDotClassName}
-                          aria-hidden='true'
-                        />
                       </span>
                     : showSiblingMenu ?
                       <TourBreadcrumbSiblingMenu
@@ -2163,14 +2296,20 @@ export function TourNavFloat({
                         onSelect={handleBreadcrumbNavigate}
                         onShowDetails={handleSiblingMenuShowDetails}
                       />
-                    : <button
-                        type='button'
-                        className={tourNavBreadcrumbLinkClassName}
+                    : <IconTooltip
+                        label={tourBreadcrumbGoToTooltip(item.title)}
+                        placement='bottom'
                         disabled={disabled}
-                        onClick={() => handleBreadcrumbNavigate(item.id)}
                       >
-                        {item.title}
-                      </button>
+                        <button
+                          type='button'
+                          className={tourNavBreadcrumbLinkClassName}
+                          disabled={disabled}
+                          onClick={() => handleBreadcrumbNavigate(item.id)}
+                        >
+                          {item.title}
+                        </button>
+                      </IconTooltip>
                     }
                   </li>
                 );
@@ -2201,6 +2340,8 @@ export function TourNavFloat({
                 client={client}
                 logo={logoNode}
                 viewerType={tourViewerType}
+                showPlayTour={showPlayTour}
+                showImmersiveAmbience={showImmersiveAmbience}
               />
             </TourGlassPanel>
           </div>

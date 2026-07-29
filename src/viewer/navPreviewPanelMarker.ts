@@ -254,11 +254,9 @@ export function openAnchoredNavPreviewPanel(
       bindNavPreviewNamingAccordion(marker.domElement),
     );
 
-    // Serialize the expensive work: reveal the heavy hero (WebGL mini viewer /
-    // video) only once BOTH the entrance scale has finished AND the camera has
-    // settled (nudge done, or none). Running the hero mount alongside either
-    // animation caused the panel-open jank. Text content is already in the
-    // markup and shows immediately behind the skeleton.
+    // Panel chrome + text show immediately. Camera may nudge in parallel with
+    // the enter scale. Heavy hero (WebGL / video) waits until BOTH enter and
+    // camera have settled — mounting it mid-motion caused open jank.
     let cameraSettled = options?.skipCameraNudge ?? false;
     let enterDone = false;
     const revealHero = () => {

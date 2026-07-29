@@ -54,6 +54,12 @@ interface TourHelpPanelProps {
   logo?: ReactNode;
 
   viewerType?: TourViewerType;
+
+  /** When false, hide Play tour FAQ / using-this-tour tip. */
+  showPlayTour?: boolean;
+
+  /** When false, hide immersive ambience FAQ / using-this-tour tip. */
+  showImmersiveAmbience?: boolean;
 }
 
 export function TourHelpPanel({
@@ -64,6 +70,10 @@ export function TourHelpPanel({
   logo,
 
   viewerType,
+
+  showPlayTour = true,
+
+  showImmersiveAmbience = true,
 }: TourHelpPanelProps) {
   const { isCoarsePointer } = useTourChromeLayout();
   const { askGuide } = useAppSearchParams();
@@ -72,8 +82,15 @@ export function TourHelpPanel({
   const showTourSupport = hasClientContact(PLATFORM_TOUR_SUPPORT);
   const showContact = showClientContact || showTourSupport;
   const keyboardShortcuts = tourHelpKeyboardShortcuts(viewerType);
-  const viewerControls = tourHelpViewerControls(viewerType);
-  const faqItems = tourHelpFaq(viewerType, { showAskGuide });
+  const viewerControls = tourHelpViewerControls(viewerType, {
+    showPlayTour,
+    showImmersiveAmbience,
+  });
+  const faqItems = tourHelpFaq(viewerType, {
+    showAskGuide,
+    showPlayTour,
+    showImmersiveAmbience,
+  });
   const isModel3d = viewerType === 'model3d';
 
   const tourSupportLogo = (
@@ -101,9 +118,9 @@ export function TourHelpPanel({
         <AccordionItem title={TOUR_HELP_SECTION_USING} iconPosition='right'>
           <ul className={tourNavHelpListClassName}>
             <li>
-              The breadcrumb shows where you are in the tour — tap an earlier
-              stop to move up. Use the arrows beside it to retrace your recent
-              views (hidden on the overview).
+              The breadcrumb shows where you are in the tour — tap a stop with a
+              menu to pick that place or a sibling. Use the arrows beside it to
+              retrace your recent views (hidden on the overview).
             </li>
 
             <li>
@@ -115,6 +132,22 @@ export function TourHelpPanel({
               Tap hotspots {isModel3d ? 'on the model' : 'in the scene'} for
               info or to move to a new area.
             </li>
+
+            {showPlayTour ?
+              <li>
+                Use <strong>Play tour</strong> on the bottom control pill for a
+                guided walkthrough of key scenes. Tap pause or navigate yourself
+                to stop.
+              </li>
+            : null}
+
+            {showImmersiveAmbience ?
+              <li>
+                Use <strong>immersive ambience</strong> on the control pill (or
+                press M) for soft background music. Play tour starts it
+                automatically.
+              </li>
+            : null}
 
             {showAskGuide ?
               <li>

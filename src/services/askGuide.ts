@@ -9,14 +9,18 @@ import {
   buildGuideCtas,
   buildGuideFollowUps,
   shapeGuideLinksForQuestion,
+  shouldInferGuideLinksFromText,
+  shouldSuppressGuideLinks,
+  attachNamingGuideLinkCtas,
+  isExpressInterestIntent,
   withCurrentPlaceSummaryLink,
   withInterestNamingLink,
 } from '../utils/guideMessageExtras';
 import { resolveGuideLinks, capGuideLinks } from '../utils/guideSceneLinks';
 import { askMockAssistant } from './mockAssistant';
 
-const ASK_GUIDE_STATUS_URL = '/__dev/api/ask-guide/status';
-const ASK_GUIDE_CHAT_URL = '/__dev/api/ask-guide/chat';
+const ASK_GUIDE_DEV_STATUS_URL = '/__dev/api/ask-guide/status';
+const ASK_GUIDE_DEV_CHAT_URL = '/__dev/api/ask-guide/chat';
 
 /** `?guideMock=1` — brief think pause so scripted replies feel conversational. */
 const GUIDE_MOCK_THINK_MS_MIN = 650;
@@ -24,7 +28,7 @@ const GUIDE_MOCK_THINK_MS_MAX = 1400;
 
 export type AskGuideReply = {
   reply: string;
-  /** True when the reply came from the live OpenAI dev proxy. */
+  /** True when the reply came from the live OpenAI proxy (dev or production API). */
   live: boolean;
   /** Live proxy failure — show in UI as an error, not as a guide reply. */
   error?: string;
@@ -41,6 +45,32 @@ export function isAskGuideMockForced(): boolean {
   if (typeof window === 'undefined') return false;
   const params = new URLSearchParams(window.location.search);
   return params.get('guideMock') === '1' || params.get('askGuideMock') === '1';
+}
+
+/**
+ * Production / preview API base (`…/api`).
+ * DEV without this env keeps using Vite `/__dev/api/ask-guide/*`.
+ */
+export function resolveAskGuideApiBase(): string | null {
+  const configured = import.meta.env.VITE_ASK_GUIDE_API_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/$/, '');
+  }
+  if (import.meta.env.DEV) {
+    return null;
+  }
+  // Production build without env — same-origin SWA/Functions proxy.
+  return '/api';
+}
+
+function askGuideStatusUrl(apiBase: string | null): string {
+  if (apiBase === null) return ASK_GUIDE_DEV_STATUS_URL;
+  return `${apiBase}/tour/chat/status`;
+}
+
+function askGuideChatUrl(apiBase: string | null): string {
+  if (apiBase === null) return ASK_GUIDE_DEV_CHAT_URL;
+  return `${apiBase}/tour/chat`;
 }
 
 function guideMockThinkDelayMs(): number {
@@ -61,29 +91,49 @@ function hydrateGuideExtras(
   rawNamingLinks?: Array<{ namingId?: string; label?: string }> | null,
   modelFollowUps?: string[] | null,
 ): Pick<AskGuideReply, 'guideLinks' | 'guideCtas' | 'followUps'> {
-  const resolved = resolveGuideLinks(
-    tour,
-    sceneId,
+  const hasModelLinks =
+    (rawSceneLinks?.some((entry) => entry?.sceneId?.trim()) ?? false) ||
+    (rawNamingLinks?.some((entry) => entry?.namingId?.trim()) ?? false);
+  const allowTextInference = shouldInferGuideLinksFromText(
+    question,
     reply,
-    rawSceneLinks,
-    rawNamingLinks,
+    hasModelLinks,
   );
-  const withPlace = withCurrentPlaceSummaryLink(
-    tour,
-    sceneId,
-    question,
-    resolved,
-  );
-  const withInterest = withInterestNamingLink(
-    tour,
-    sceneId,
-    question,
-    withPlace,
-  );
-  const guideLinks = capGuideLinks(
-    shapeGuideLinksForQuestion(tour, question, withInterest),
-  );
-  const guideCtas = buildGuideCtas(tour, sceneId, guideLinks, question);
+  const suppressLinks = shouldSuppressGuideLinks(question, reply);
+
+  let guideLinks: ChatGuideLink[] = [];
+  if (!suppressLinks) {
+    guideLinks = resolveGuideLinks(
+      tour,
+      sceneId,
+      reply,
+      rawSceneLinks,
+      rawNamingLinks,
+      { allowTextInference },
+    );
+    guideLinks = withCurrentPlaceSummaryLink(
+      tour,
+      sceneId,
+      question,
+      guideLinks,
+    );
+    guideLinks = withInterestNamingLink(
+      tour,
+      sceneId,
+      question,
+      guideLinks,
+      reply,
+    );
+    guideLinks = attachNamingGuideLinkCtas(
+      tour,
+      capGuideLinks(shapeGuideLinksForQuestion(tour, question, guideLinks)),
+      { includeSupportCtas: isExpressInterestIntent(question, reply) },
+    );
+  }
+
+  // Naming support CTAs are on each card when includeSupportCtas was set.
+  // Place cards stay suppressed; contact referral CTAs still attach.
+  const guideCtas = buildGuideCtas(tour, sceneId, guideLinks, question, reply);
   const followUps = buildGuideFollowUps({
     question,
     reply,
@@ -118,9 +168,8 @@ async function mockGuideReply(
   };
 }
 
-/** Dev-only: whether Vite has OPENAI_API_KEY configured. */
+/** Whether live Ask Guide is configured (dev Vite proxy or production API). */
 export async function fetchAskGuideLiveStatus(force = false): Promise<boolean> {
-  if (!import.meta.env.DEV) return false;
   if (isAskGuideMockForced()) {
     cachedLiveStatus = false;
     return false;
@@ -128,10 +177,12 @@ export async function fetchAskGuideLiveStatus(force = false): Promise<boolean> {
   if (!force && cachedLiveStatus !== null) return cachedLiveStatus;
   if (!force && liveStatusInflight) return liveStatusInflight;
 
+  const apiBase = resolveAskGuideApiBase();
+
   let request!: Promise<boolean>;
   request = (async () => {
     try {
-      const response = await fetch(ASK_GUIDE_STATUS_URL);
+      const response = await fetch(askGuideStatusUrl(apiBase));
       if (!response.ok) {
         cachedLiveStatus = false;
         return false;
@@ -154,7 +205,7 @@ export async function fetchAskGuideLiveStatus(force = false): Promise<boolean> {
 }
 
 /**
- * Prefer live Ask Guide in Vite dev when configured; otherwise scripted mock.
+ * Prefer live Ask Guide when configured; otherwise scripted mock.
  * Does not silently swap to mock after a live attempt fails — that returns `error`.
  */
 export async function askTourGuide(
@@ -168,14 +219,12 @@ export async function askTourGuide(
     return mockGuideReply(tour, sceneId, question);
   }
 
-  if (!import.meta.env.DEV) {
-    return mockGuideReply(tour, sceneId, trimmed);
-  }
-
   if (isAskGuideMockForced()) {
     console.info('[ask-guide] mock forced (?guideMock=1)');
     return mockGuideReply(tour, sceneId, trimmed);
   }
+
+  const apiBase = resolveAskGuideApiBase();
 
   // Always re-check so a stale `cachedLiveStatus === false` cannot sticky-mock.
   const live = await fetchAskGuideLiveStatus(true);
@@ -186,10 +235,12 @@ export async function askTourGuide(
 
   const context = assembleTourContext(tour, sceneId);
   try {
-    const response = await fetch(ASK_GUIDE_CHAT_URL, {
+    const response = await fetch(askGuideChatUrl(apiBase), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        tourId: tour.id,
+        sceneId,
         context,
         messages: [
           ...priorMessages.map((message) => ({
@@ -208,7 +259,16 @@ export async function askTourGuide(
       } | null;
       throw new Error(
         data?.error ??
-          'Ask Guide live is not configured. Check OPENAI_API_KEY in .env.local and restart Vite.',
+          'Ask Guide live is not configured. Check OPENAI_API_KEY on the server.',
+      );
+    }
+
+    if (response.status === 429) {
+      const data = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      throw new Error(
+        data?.error ?? 'Too many Ask Guide requests. Try again shortly.',
       );
     }
 
@@ -254,10 +314,13 @@ function formatLiveFailureError(error: unknown): string {
     return 'OpenAI quota exceeded. Add billing or credits at platform.openai.com, then try again.';
   }
   if (/invalid.?api.?key|incorrect api key|401/i.test(detail)) {
-    return 'OpenAI authentication failed. Check OPENAI_API_KEY in .env.local and restart Vite.';
+    return 'OpenAI authentication failed. Check OPENAI_API_KEY on the Ask Guide server.';
   }
   if (/model|does not exist|404/i.test(detail)) {
-    return 'OpenAI model error. Set OPENAI_ASK_GUIDE_MODEL (for example gpt-4o-mini) in .env.local and restart Vite.';
+    return 'OpenAI model error. Set OPENAI_ASK_GUIDE_MODEL (for example gpt-4o-mini) on the Ask Guide server.';
+  }
+  if (/too many ask guide requests/i.test(detail)) {
+    return detail;
   }
   return 'Live Tour Guide could not answer just now. Check the browser console for details, then try again.';
 }

@@ -1,0 +1,13 @@
+{
+  "name": "ishare-virtual-tour-ask-guide-api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/functions/*.mjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.7.0"
+  }
+}

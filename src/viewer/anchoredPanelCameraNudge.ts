@@ -58,7 +58,10 @@ export interface PanelCameraNudgeSettled {
 }
 
 export interface SchedulePanelCameraNudgeOptions {
-  /** Runs after panel is ready; heavy embeds should load here. Deferred until nudge finishes when `nudged`. */
+  /**
+   * Runs when the camera has settled (nudge finished, or none needed).
+   * Mount heavy hero media here — not during enter + nudge.
+   */
   afterSettled?: (result: PanelCameraNudgeSettled) => void;
   /**
    * Fallback when the panel is off-view: PSV either keeps markers
@@ -148,10 +151,9 @@ async function animateCameraOrientation(
 
 /**
  * Resolves once the panel's entrance scale animation finishes — or immediately
- * under reduced-motion / when no entrance animation is present. Anchored panels
- * (nav preview + info) scale the article; dock panels scale the shell. Callers
- * gate heavy work (camera nudge, WebGL/video mount) on this so it never competes
- * with the entrance animation.
+ * under reduced-motion / when no entrance animation is present. Heavy embeds
+ * (WebGL / video hero) still wait on this so they don’t compete with the enter
+ * animation; camera clip-nudge may run in parallel with enter.
  */
 export function waitForAnchoredPanelEnter(panelEl: HTMLElement): Promise<void> {
   if (prefersReducedMotion()) return Promise.resolve();
@@ -673,9 +675,10 @@ export function scheduleNudgeCameraForClippedPanel(
       return;
     }
 
-    void waitForAnchoredPanelEnter(panelEl).then(async () => {
-      await nudgeCameraForClippedPanel(viewer, panelEl);
-      options?.afterSettled?.({ nudged: true });
+    // Panel enter (CSS) and camera nudge run together — feels like one reveal.
+    // Hero / WebGL still waits on afterSettled so it doesn’t fight either motion.
+    void nudgeCameraForClippedPanel(viewer, panelEl).then((nudged) => {
+      options?.afterSettled?.({ nudged });
     });
   };
 

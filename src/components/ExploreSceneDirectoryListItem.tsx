@@ -17,7 +17,7 @@ import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import {
-  tourNavCurrentInlineLabelClassName,
+  tourNavCurrentListChipClassName,
   tourNavDirectoryItemTitleRowClassName,
   tourNavDirectoryItemVariants,
   tourNavDirectoryListItemBodyClassName,
@@ -140,7 +140,7 @@ export function ExploreSceneDirectoryListItem({
         >
           {active ?
             <ExploreCurrentHereLabel
-              className={tourNavCurrentInlineLabelClassName}
+              className={tourNavCurrentListChipClassName}
             />
           : null}
           <span className={tourNavDirectoryItemTitleRowClassName}>

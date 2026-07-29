@@ -443,17 +443,36 @@ a production 3D tour is onboarded.
 
 ### Live AI assistant
 
-Replace `askMockAssistant()` in `src/services/mockAssistant.ts`:
+Ask Guide UI stays product-off (`SHOW_ASK_GUIDE = false`); QA with
+`?askGuide=1`.
+
+**In-repo path (early live):**
+
+- Shared core: [`api/shared/askGuideCore.mjs`](../api/shared/askGuideCore.mjs)
+- DEV proxy: Vite `/__dev/api/ask-guide/*`
+  ([`scripts/lib/askGuideDev.mjs`](../scripts/lib/askGuideDev.mjs))
+- **Production API (preferred):** Cloudflare Worker
+  [`workers/ask-guide/`](../workers/ask-guide/) — `GET /api/tour/chat/status`,
+  `POST /api/tour/chat`
+- Optional: Azure Functions [`api/`](../api/) (same routes)
+- Client: [`src/services/askGuide.ts`](../src/services/askGuide.ts) —
+  `VITE_ASK_GUIDE_API_URL` (Worker `…/api`); mock when live unavailable /
+  `?guideMock=1`
 
 ```typescript
-POST /v1/tour/chat
+POST /api/tour/chat
 {
-  tourId, sceneId, sceneTitle, messages[]
+  tourId, sceneId, context, messages[]
 }
 ```
 
-Server assembles tour context from published tour + catalog, builds system
-prompt, calls Azure OpenAI / OpenAI. API keys stay server-side.
+Phase 1 sends **client-assembled** `context` (no tour DB yet). Keys stay
+server-side (`OPENAI_API_KEY`). Later platform path may move to
+`POST /v1/tour/chat` with server-side context assembly — swap the client base
+URL only.
+
+See [DEPLOY.md — Ask Guide](./DEPLOY.md#ask-guide-live-ai-readiness) and
+[workers/ask-guide/README.md](../workers/ask-guide/README.md).
 
 ### Database & API (product)
 

@@ -48,6 +48,35 @@ export function isNamingInterestQuestion(question: string): boolean {
   );
 }
 
+/**
+ * “Express your interest” / how-to-support — not mere naming browse
+ * (“what naming opportunities are here?”).
+ */
+export function isExpressInterestIntent(question: string, reply = ''): boolean {
+  const q = question.toLowerCase().replace(/\s+/g, ' ').trim();
+  const r = reply.toLowerCase().replace(/\s+/g, ' ').trim();
+  if (
+    /\b(buy|purchase|purchasing|how (do|can) i (get|give|donate|support)|interested|interest|pledge|sponsor|claim)\b/.test(
+      q,
+    ) ||
+    /\bexpress(ing)? (my |your )?interest\b/.test(q) ||
+    /구매|사고\s*싶|관심\s*(있|표|등록)|후원\s*하|기부\s*하|어떻게\s*(사|구매|후원|기부)/.test(
+      question,
+    )
+  ) {
+    return true;
+  }
+  // Model invited them to express interest / contact the foundation about naming.
+  return (
+    /\bexpress(ing)? (your |my )?interest\b/.test(r) ||
+    /\b(use|tap|click|choose)\b.{0,48}\bexpress your interest\b/.test(r) ||
+    /\bcontact the foundation\b.{0,40}\b(naming|interest|support)\b/.test(r) ||
+    /\b(naming|opportunity)\b.{0,48}\b(express interest|get in touch|reach out)\b/.test(
+      r,
+    )
+  );
+}
+
 /** Where else / directions / nearby places. */
 export function isExplorePlacesQuestion(question: string): boolean {
   const q = question.toLowerCase();
@@ -56,6 +85,95 @@ export function isExplorePlacesQuestion(question: string): boolean {
       q,
     ) || /어디\s*(로|갈)|다른\s*(곳|장소|공간)|근처|길\s*찾/.test(question)
   );
+}
+
+/**
+ * Hours / schedule / visiting policy — facts this tour context usually lacks.
+ * Prefer a short refusal + empty place cards (don’t invent “typically open”).
+ */
+export function isFactualGapQuestion(question: string): boolean {
+  const q = question.toLowerCase().replace(/\s+/g, ' ').trim();
+  if (!q) return false;
+  return (
+    /\b(hours?|opening hours|visiting hours|operating hours|schedule|timetable)\b/.test(
+      q,
+    ) ||
+    /\bwhen (is|are|does|do|will|was|were)\b.{0,48}\b(open|opened|close|closed|closing)\b/.test(
+      q,
+    ) ||
+    /\b(open|opened|close|closed)\b.{0,32}\b(when|what time|hours?)\b/.test(
+      q,
+    ) ||
+    /\bwhat time\b/.test(q) ||
+    /\bis (it|the .{0,40}) open\b/.test(q) ||
+    // Incomplete “when will/is … house?” without open/hours still implies schedule.
+    /\bwhen (is|are|will|was|were)\b.{0,64}\b(house|facility|building)\b/.test(
+      q,
+    ) ||
+    /몇\s*시|운영\s*시간|방문\s*시간|언제\s*(열어|열고|여|닫)/.test(question)
+  );
+}
+
+/** Reply admits a missing fact / points to reception — don’t attach place cards. */
+export function isUncertainGuideReply(reply: string): boolean {
+  const t = reply.toLowerCase().replace(/\s+/g, ' ').trim();
+  if (!t) return false;
+  return (
+    /\bi don'?t have\b/.test(t) ||
+    /\bi do not have\b/.test(t) ||
+    /\bi'?m not (sure|certain)\b/.test(t) ||
+    /\bi am not (sure|certain)\b/.test(t) ||
+    /\bnot (sure|certain) (about|of|whether)\b/.test(t) ||
+    /\bdon'?t have (specific|that|this|exact|enough|the)\b/.test(t) ||
+    /\black (that |the |specific |enough )?information\b/.test(t) ||
+    /\bnot (listed|available) in (this|the) tour\b/.test(t) ||
+    /\bi (can'?t|cannot) (find|confirm|verify)\b/.test(t) ||
+    /\bask (at |the )?(reception|front desk|foundation team)\b/.test(t) ||
+    /\bfoundation team at (the )?reception\b/.test(t) ||
+    /\breception (desk|would|can|will) (be )?happy\b/.test(t) ||
+    /정보가\s*없|잘\s*모르|확실하(지|진)\s*않|리셉션|안내\s*데스크/.test(reply)
+  );
+}
+
+/**
+ * Whether client-side title matching may invent place/naming cards from prose.
+ * Prefer model link arrays; inference only for nav-ish questions.
+ */
+export function shouldInferGuideLinksFromText(
+  question: string,
+  reply: string,
+  hasModelLinks: boolean,
+): boolean {
+  if (isFactualGapQuestion(question) || isUncertainGuideReply(reply)) {
+    return false;
+  }
+  if (hasModelLinks) return true;
+  return (
+    isWhereAmIQuestion(question) ||
+    isExplorePlacesQuestion(question) ||
+    isNamingInterestQuestion(question)
+  );
+}
+
+/**
+ * Suppress place/naming cards for gap/uncertain answers (except where-am-i).
+ */
+export function shouldSuppressGuideLinks(
+  question: string,
+  reply: string,
+): boolean {
+  if (isWhereAmIQuestion(question)) return false;
+  return isFactualGapQuestion(question) || isUncertainGuideReply(reply);
+}
+
+/**
+ * Missing-fact / “ask reception” answers — show catalog contact, not place cards.
+ */
+export function shouldAttachContactReferralCtas(
+  question: string,
+  reply: string,
+): boolean {
+  return isFactualGapQuestion(question) || isUncertainGuideReply(reply);
 }
 
 function normalizeFollowUps(raw: unknown, exclude: Set<string>): string[] {
@@ -212,6 +330,23 @@ export function buildGuideFollowUps(options: {
     if (!isFollowUpGrounded(trimmed, allowedNames, foreignNames)) return;
     candidates.push(trimmed);
   };
+
+  // Missing-fact / ask-reception turns: pull back into the tour (contact card
+  // already covers reaching the foundation — chips should not re-ask hours).
+  if (shouldAttachContactReferralCtas(options.question, reply)) {
+    for (const entry of normalizeFollowUps(options.modelFollowUps, exclude)) {
+      if (isFactualGapQuestion(entry) || isContactInfoQuestion(entry)) continue;
+      push(entry);
+    }
+    if (sceneTitle && !questionKey.includes('tell me about this place')) {
+      push('Tell me about this place');
+    }
+    if (namings.length > 0) {
+      push('What naming opportunities are available in this place?');
+    }
+    push('Where else can I go?');
+    return normalizeFollowUps(candidates, exclude).slice(0, 3);
+  }
 
   // 1) Model suggestions — keep only grounded ones.
   for (const entry of normalizeFollowUps(options.modelFollowUps, exclude)) {
@@ -399,19 +534,69 @@ function namingCtasFromGuideLinks(
   return null;
 }
 
+function namingCtaBundleForLink(
+  tour: Tour,
+  link: ChatGuideLink,
+): NamingCtaBundle | null {
+  if (link.kind !== 'naming' || !link.hotspotId) return null;
+  const scene = tour.scenes[link.sceneId];
+  if (!scene) return null;
+  const hotspot =
+    scene.hotspots?.find((entry) => entry.id === link.hotspotId) ??
+    tour.hotspots?.find((entry) => entry.id === link.hotspotId);
+  if (!hotspot) return null;
+  const popup = resolveNamingPopup(tour, hotspot, scene);
+  if (!popup?.namingOpportunity) return null;
+  return namingCtasFromPopup(tour, link.hotspotId, popup);
+}
+
 /**
- * CTAs from tour data only — never invent URLs.
- * - Interest/purchase: Contact + Donate
- * - Website / contact-info intent: Website + catalog Email (+ Donate if present)
- * - Naming card in the reply: Donate for that opportunity
- * - Otherwise: no Giftabulator/donate on generic chat (e.g. "hi")
+ * Attach per-naming support CTAs (Giftabulator gt / express interest).
+ * Only when the turn is about supporting / interest — not on browse cards.
+ */
+export function attachNamingGuideLinkCtas(
+  tour: Tour,
+  links: ChatGuideLink[],
+  options?: { includeSupportCtas?: boolean },
+): ChatGuideLink[] {
+  if (options?.includeSupportCtas !== true) return links;
+
+  return links.map((link) => {
+    if (link.kind !== 'naming') return link;
+    const bundle = namingCtaBundleForLink(tour, link);
+    if (!bundle) return link;
+    const ctas: ChatGuideCta[] = [];
+    if (bundle.contact) ctas.push(bundle.contact);
+    if (bundle.donate) ctas.push(bundle.donate);
+    if (ctas.length === 0) return link;
+    return { ...link, ctas };
+  });
+}
+
+function catalogContactReferralCtas(
+  websiteCta: ChatGuideCta | null,
+  clientContact: ChatGuideCta | null,
+  namingContact: ChatGuideCta | null,
+): ChatGuideCta[] {
+  const out: ChatGuideCta[] = [];
+  if (websiteCta) out.push(websiteCta);
+  if (clientContact) out.push(clientContact);
+  else if (namingContact) out.push(namingContact);
+  return out.slice(0, MAX_GUIDE_CTAS);
+}
+
+/**
+ * Reply-level CTAs only (contact card / website). Naming Giftabulator / interest
+ * CTAs live on each naming card via {@link attachNamingGuideLinkCtas}.
  */
 export function buildGuideCtas(
   tour: Tour,
   sceneId: string,
   guideLinks: ChatGuideLink[] = [],
   question = '',
+  reply = '',
 ): ChatGuideCta[] {
+  const hasNamingCards = guideLinks.some((link) => link.kind === 'naming');
   const linkNamingBundle = namingCtasFromGuideLinks(tour, guideLinks);
   const namingBundle = linkNamingBundle || firstSceneNamingCtas(tour, sceneId);
 
@@ -422,8 +607,26 @@ export function buildGuideCtas(
     : null;
   const clientContact = clientEmailContactCta(tour);
 
+  if (
+    isContactInfoQuestion(question) ||
+    isWebsiteIntentQuestion(question) ||
+    shouldAttachContactReferralCtas(question, reply)
+  ) {
+    return catalogContactReferralCtas(
+      websiteCta,
+      clientContact,
+      namingBundle?.contact ?? null,
+    );
+  }
+
+  // Interest / purchase with naming cards — actions are on each card.
+  if (hasNamingCards) return [];
+
   if (isNamingInterestQuestion(question)) {
     const out: ChatGuideCta[] = [];
+    if (!isExpressInterestIntent(question, reply)) {
+      return websiteCta ? [websiteCta] : [];
+    }
     if (namingBundle?.contact) out.push(namingBundle.contact);
     else if (clientContact) out.push(clientContact);
     if (namingBundle?.donate) out.push(namingBundle.donate);
@@ -431,18 +634,7 @@ export function buildGuideCtas(
     return websiteCta ? [websiteCta] : [];
   }
 
-  if (isContactInfoQuestion(question) || isWebsiteIntentQuestion(question)) {
-    const out: ChatGuideCta[] = [];
-    if (websiteCta) out.push(websiteCta);
-    if (clientContact) out.push(clientContact);
-    else if (namingBundle?.contact) out.push(namingBundle.contact);
-    if (namingBundle?.donate && out.length < MAX_GUIDE_CTAS) {
-      out.push(namingBundle.donate);
-    }
-    return out.slice(0, MAX_GUIDE_CTAS);
-  }
-
-  return linkNamingBundle?.donate ? [linkNamingBundle.donate] : [];
+  return [];
 }
 
 /**
@@ -470,8 +662,10 @@ export function withInterestNamingLink(
   sceneId: string,
   question: string,
   links: ChatGuideLink[],
+  reply?: string,
 ): ChatGuideLink[] {
   if (!isNamingInterestQuestion(question)) return links;
+  if (reply && shouldSuppressGuideLinks(question, reply)) return links;
   if (links.some((link) => link.kind === 'naming')) return links;
 
   const scene = tour.scenes[sceneId];

@@ -275,10 +275,8 @@ export function openAnchoredInfoPanel(
 
   if (!(marker?.domElement instanceof HTMLElement)) return;
 
-  // Serialize the expensive work: wire the video preview only once BOTH the
-  // entrance scale has finished AND the camera has settled, so it never competes
-  // with those animations. A pre-framed (skipCameraNudge) open already moved the
-  // camera before open, so only the entrance gate remains.
+  // Heavy hero media waits until enter + camera have both settled. Camera nudge
+  // may already be running in parallel with the entrance scale.
   let cameraSettled = options?.skipCameraNudge ?? false;
   let enterDone = false;
   const revealMedia = () => {

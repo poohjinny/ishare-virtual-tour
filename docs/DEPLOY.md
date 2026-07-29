@@ -66,12 +66,27 @@ Do **not** use `build:ghpages` for `tour.ishare.ca` — production uses root
 
 ---
 
+## Ask Guide live API (Cloudflare Worker — preferred)
+
+GitHub Pages cannot run a server. Early live Ask Guide uses a **Cloudflare
+Worker** OpenAI proxy:
+
+- Code: [`workers/ask-guide/`](../workers/ask-guide/)
+- Routes: `GET/POST …/api/tour/chat/status` and `…/api/tour/chat`
+- Setup: [workers/ask-guide/README.md](../workers/ask-guide/README.md)
+
+Azure Functions in [`api/`](../api/) remain an optional alternative (same
+routes).
+
+---
+
 ## Azure Static Web Apps (alternative)
 
 `public/staticwebapp.config.json` ships with the build:
 
-- SPA `navigationFallback` → `index.html`
+- SPA `navigationFallback` → `index.html` (excludes `/api/*` and `/assets/*`)
 - Long-cache headers for `/assets/*`
+- `/api/*` left for linked Azure Functions (Ask Guide) if you use SWA + `api/`
 
 Point `tour.ishare.ca` CNAME to the SWA endpoint instead of GitHub Pages if your
 infra team prefers Azure. Build command stays `npm run build`; upload `dist/`.
@@ -80,12 +95,42 @@ infra team prefers Azure. Build command stays `npm run build`; upload `dist/`.
 
 ## Environment
 
-| Variable                  | When                                 | Purpose                                                       |
-| ------------------------- | ------------------------------------ | ------------------------------------------------------------- |
-| `VITE_TOUR_PUBLIC_ORIGIN` | Production build (`.env.production`) | Absolute share/embed URLs default to `https://tour.ishare.ca` |
-| `VITE_TOUR_API_URL`       | Phase 2 only                         | API-backed tours — unset for static JSON Phase 1              |
+| Variable                  | When                                 | Purpose                                                                                                                                                        |
+| ------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_TOUR_PUBLIC_ORIGIN` | Production build (`.env.production`) | Absolute share/embed URLs default to `https://tour.ishare.ca`                                                                                                  |
+| `VITE_TOUR_API_URL`       | Phase 2 only                         | API-backed tours — unset for static JSON Phase 1                                                                                                               |
+| `VITE_ASK_GUIDE_API_URL`  | Production / preview                 | Ask Guide API base ending in `/api` (Cloudflare Worker URL). Unset in DEV → Vite `/__dev/api/ask-guide/*`; unset in production → same-origin `/api` (SWA only) |
 
-Code: [`src/constants/tourOrigin.ts`](../src/constants/tourOrigin.ts)
+**Server-only** (never `VITE_*`): `OPENAI_API_KEY` on the Worker
+(`wrangler secret put`) or Azure Function App; Vite `.env.local` for DEV proxy.
+
+Code: [`src/constants/tourOrigin.ts`](../src/constants/tourOrigin.ts),
+[`src/services/askGuide.ts`](../src/services/askGuide.ts)
+
+---
+
+## Ask Guide (live AI) readiness
+
+Product FAB stays **off** by default (`SHOW_ASK_GUIDE = false`). QA with
+`?askGuide=1` (force mock with `?guideMock=1`).
+
+| Piece                                                                            | Status                      |
+| -------------------------------------------------------------------------------- | --------------------------- |
+| Chat UI + mock fallback                                                          | Ready                       |
+| DEV live via Vite `/__dev/api/ask-guide` + `OPENAI_API_KEY`                      | Ready                       |
+| Production API — Cloudflare Worker [`workers/ask-guide/`](../workers/ask-guide/) | Ready to deploy             |
+| Client prod wiring (`VITE_ASK_GUIDE_API_URL`)                                    | Ready                       |
+| Product default FAB on                                                           | Later — after API is stable |
+
+### Smoke (live on tour.ishare.ca)
+
+1. `cd workers/ask-guide && npm i && npx wrangler login && npx wrangler secret put OPENAI_API_KEY && npm run deploy`
+2. Copy the `*.workers.dev` URL; set GitHub Actions secret
+   `VITE_ASK_GUIDE_API_URL=https://ishare-ask-guide.<subdomain>.workers.dev/api`
+   (workflow already passes it into the production build when set).
+3. Push / re-run deploy.
+4. Open `https://tour.ishare.ca/{tourId}?askGuide=1` → live reply.
+5. Open `…?askGuide=1&guideMock=1` → scripted mock.
 
 ---
 

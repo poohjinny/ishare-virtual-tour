@@ -16,10 +16,12 @@ import {
 } from './ui/materialSymbolClasses';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
+import { IconTooltip } from './ui/IconTooltip';
+import { tourBreadcrumbNearbyPlacesTooltip } from '../constants/tourDirectory';
 import {
   TOUR_BREADCRUMB_BAR_ATTR,
   TOUR_BREADCRUMB_SIBLING_MENU_ATTR,
-  tourNavBreadcrumbChevronBtnClassName,
+  TOUR_BREADCRUMB_SIBLING_MENU_TEXT_INSET_PX,
   tourNavBreadcrumbChevronIconClassName,
   tourNavBreadcrumbCurrentMenuTriggerClassName,
   tourNavBreadcrumbLinkClassName,
@@ -43,7 +45,7 @@ interface TourBreadcrumbSiblingMenuProps {
   crumbId: string;
   label: string;
   siblings: BreadcrumbSiblingOption[];
-  /** Ancestor: title navigates, chevron opens. Current: whole label opens. */
+  /** Current location vs an earlier stop — same open interaction; select rules differ. */
   variant: 'ancestor' | 'current';
   open: boolean;
   disabled?: boolean;
@@ -92,6 +94,7 @@ function useDeferredSiblingMenuMount(open: boolean): boolean {
 function useMenuPosition(
   menuMounted: boolean,
   anchorRef: RefObject<HTMLElement | null>,
+  labelRef: RefObject<HTMLElement | null>,
 ): CSSProperties {
   const [style, setStyle] = useState<CSSProperties>({});
 
@@ -103,22 +106,24 @@ function useMenuPosition(
       if (!anchor) return;
 
       const bar = anchor.closest(`[${TOUR_BREADCRUMB_BAR_ATTR}]`);
-      const horizontalRect = anchor.getBoundingClientRect();
+      const anchorRect = anchor.getBoundingClientRect();
+      const labelRect = (labelRef.current ?? anchor).getBoundingClientRect();
       const verticalRect =
-        bar instanceof HTMLElement ?
-          bar.getBoundingClientRect()
-        : horizontalRect;
+        bar instanceof HTMLElement ? bar.getBoundingClientRect() : anchorRect;
 
       const pad = 8;
       const maxWidth = Math.min(240, window.innerWidth - pad * 2);
-      let left = horizontalRect.left;
+      // Align option titles with the crumb label (menu padding + option pl).
+      let left = labelRect.left - TOUR_BREADCRUMB_SIBLING_MENU_TEXT_INSET_PX;
       if (left + maxWidth > window.innerWidth - pad) {
         left = Math.max(pad, window.innerWidth - pad - maxWidth);
+      } else {
+        left = Math.max(pad, left);
       }
       setStyle({
         top: verticalRect.bottom + SIBLING_MENU_GAP_PX,
         left,
-        minWidth: Math.min(Math.max(horizontalRect.width, 160), maxWidth),
+        minWidth: Math.min(Math.max(anchorRect.width, 160), maxWidth),
       });
     };
 
@@ -129,7 +134,7 @@ function useMenuPosition(
       window.removeEventListener('resize', update);
       window.removeEventListener('scroll', update, true);
     };
-  }, [menuMounted, anchorRef]);
+  }, [menuMounted, anchorRef, labelRef]);
 
   return style;
 }
@@ -150,8 +155,27 @@ export function TourBreadcrumbSiblingMenu({
   const listId = useId();
   const rootRef = useRef<HTMLSpanElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const menuListRef = useRef<HTMLUListElement>(null);
+  const highlightedRowRef = useRef<HTMLLIElement | null>(null);
   const menuMounted = useDeferredSiblingMenuMount(open);
-  const menuStyle = useMenuPosition(menuMounted, rootRef);
+  const menuStyle = useMenuPosition(menuMounted, rootRef, labelRef);
+
+  // Keep tour order; if the highlighted row is clipped, bring it into view.
+  useLayoutEffect(() => {
+    if (!open) return;
+    const row = highlightedRowRef.current;
+    const list = menuListRef.current;
+    if (!row || !list) return;
+
+    const listRect = list.getBoundingClientRect();
+    const rowRect = row.getBoundingClientRect();
+    const fullyVisible =
+      rowRect.top >= listRect.top && rowRect.bottom <= listRect.bottom;
+    if (fullyVisible) return;
+
+    row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }, [open, crumbId, siblings]);
 
   useEffect(() => {
     if (!open) return;
@@ -185,7 +209,8 @@ export function TourBreadcrumbSiblingMenu({
     };
   }, [open, onOpenChange]);
 
-  const menuLabel = `Places near ${label}`;
+  const menuLabel = tourBreadcrumbNearbyPlacesTooltip(label);
+  const isCurrentCrumb = variant === 'current';
   const chevron = (
     <MaterialSymbol
       name='expand_more'
@@ -194,9 +219,7 @@ export function TourBreadcrumbSiblingMenu({
         open && 'rotate-180',
       )}
       sizePx={
-        variant === 'current' ?
-          MATERIAL_SYMBOL_SIZE_18
-        : MATERIAL_SYMBOL_SIZE_16
+        isCurrentCrumb ? MATERIAL_SYMBOL_SIZE_18 : MATERIAL_SYMBOL_SIZE_16
       }
     />
   );
@@ -206,6 +229,7 @@ export function TourBreadcrumbSiblingMenu({
       createPortal(
         <ul
           {...{ [TOUR_BREADCRUMB_SIBLING_MENU_ATTR]: '' }}
+          ref={menuListRef}
           id={listId}
           role='listbox'
           aria-label={menuLabel}
@@ -219,44 +243,38 @@ export function TourBreadcrumbSiblingMenu({
           style={menuStyle}
         >
           {siblings.map((sibling) => {
-            const selected = sibling.id === crumbId;
+            const highlighted = sibling.id === crumbId;
+            // Current crumb: already here — highlighted + check, row inert.
+            // Ancestor crumb: path stop highlighted (no check), still selectable.
+            const canSelect = !highlighted || !isCurrentCrumb;
             return (
               <li
                 key={sibling.id}
+                ref={highlighted ? highlightedRowRef : undefined}
                 role='presentation'
                 className={cn(
                   tourNavBreadcrumbSiblingRowClassName,
-                  selected && tourNavBreadcrumbSiblingRowCurrentClassName,
+                  highlighted && tourNavBreadcrumbSiblingRowCurrentClassName,
                 )}
               >
-                <ExploreSceneInfoButton
-                  sceneTitle={sibling.title}
-                  variant='breadcrumb'
-                  hideTooltip
-                  disabled={!open}
-                  expanded={detailSceneId === sibling.id}
-                  onShow={() => {
-                    onOpenChange(false);
-                    onShowDetails(sibling.id);
-                  }}
-                />
                 <button
                   type='button'
                   role='option'
-                  aria-selected={selected}
-                  aria-current={selected ? 'true' : undefined}
+                  aria-selected={highlighted}
+                  aria-current={highlighted ? 'true' : undefined}
                   className={tourNavBreadcrumbSiblingOptionClassName}
-                  disabled={!open || selected}
+                  disabled={!open || !canSelect}
                   tabIndex={open ? undefined : -1}
                   onClick={() => {
+                    if (!canSelect) return;
                     onOpenChange(false);
-                    if (!selected) onSelect(sibling.id);
+                    onSelect(sibling.id);
                   }}
                 >
                   <span className='min-w-0 flex-1 truncate'>
                     {sibling.title}
                   </span>
-                  {selected ?
+                  {highlighted && isCurrentCrumb ?
                     <MaterialSymbol
                       name='check'
                       className={tourNavBreadcrumbSiblingOptionCheckClassName}
@@ -264,6 +282,16 @@ export function TourBreadcrumbSiblingMenu({
                     />
                   : null}
                 </button>
+                <ExploreSceneInfoButton
+                  sceneTitle={sibling.title}
+                  variant='breadcrumb'
+                  disabled={!open}
+                  expanded={detailSceneId === sibling.id}
+                  onShow={() => {
+                    onOpenChange(false);
+                    onShowDetails(sibling.id);
+                  }}
+                />
               </li>
             );
           })}
@@ -272,13 +300,26 @@ export function TourBreadcrumbSiblingMenu({
       )
     : null;
 
-  if (variant === 'current') {
-    return (
-      <span ref={rootRef} className={tourNavBreadcrumbSplitClassName}>
+  // Title + chevron share one control — open the sibling menu (ancestors & current).
+  return (
+    <span ref={rootRef} className={tourNavBreadcrumbSplitClassName}>
+      <IconTooltip
+        label={menuLabel}
+        placement='bottom'
+        className='max-w-full'
+        disabled={disabled || open}
+      >
         <button
           ref={triggerRef}
           type='button'
-          className={tourNavBreadcrumbCurrentMenuTriggerClassName}
+          className={
+            isCurrentCrumb ?
+              tourNavBreadcrumbCurrentMenuTriggerClassName
+            : cn(
+                tourNavBreadcrumbLinkClassName,
+                'inline-flex max-w-full items-center gap-px',
+              )
+          }
           disabled={disabled}
           aria-haspopup='listbox'
           aria-expanded={open}
@@ -286,42 +327,15 @@ export function TourBreadcrumbSiblingMenu({
           aria-label={menuLabel}
           onClick={() => onOpenChange(!open)}
         >
-          <span className='min-w-0 overflow-hidden text-ellipsis whitespace-nowrap'>
+          <span
+            ref={labelRef}
+            className='min-w-0 overflow-hidden text-ellipsis whitespace-nowrap'
+          >
             {label}
           </span>
           {chevron}
         </button>
-        {menu}
-      </span>
-    );
-  }
-
-  return (
-    <span ref={rootRef} className={tourNavBreadcrumbSplitClassName}>
-      <button
-        type='button'
-        className={tourNavBreadcrumbLinkClassName}
-        disabled={disabled}
-        onClick={() => {
-          onOpenChange(false);
-          onSelect(crumbId);
-        }}
-      >
-        {label}
-      </button>
-      <button
-        ref={triggerRef}
-        type='button'
-        className={tourNavBreadcrumbChevronBtnClassName}
-        disabled={disabled}
-        aria-haspopup='listbox'
-        aria-expanded={open}
-        aria-controls={open ? listId : undefined}
-        aria-label={menuLabel}
-        onClick={() => onOpenChange(!open)}
-      >
-        {chevron}
-      </button>
+      </IconTooltip>
       {menu}
     </span>
   );

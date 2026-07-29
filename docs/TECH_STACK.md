@@ -58,17 +58,23 @@ Both viewer implementations conform to the shared `TourViewerHandle` interface
 (`src/viewer/viewerHandle.ts`), allowing `TourPage` to remain agnostic to the
 rendering engine.
 
-### Mock AI (not LLM in MVP)
+### Mock AI + live Ask Guide
 
 The scene-aware assistant assembles context from tour JSON + catalog
-(`assembleTourContext`) — scene copy, namings, and suggested chips. This allows:
+(`assembleTourContext`) — scene copy, namings, and suggested chips. Mock replies
+still power demos without keys.
 
-- Demo without API keys or backend
-- Controlled answers (important for care facility content)
-- UI/UX validation before LLM integration
+**Live path:**
 
-Production path: replace `src/services/mockAssistant.ts` with
-`POST /api/tour/chat` (Azure OpenAI / OpenAI via serverless or iShare API).
+- DEV: Vite `/__dev/api/ask-guide/*` + `OPENAI_API_KEY` in `.env.local`
+- Production (preferred): Cloudflare Worker
+  [`workers/ask-guide/`](../workers/ask-guide/) → `POST /api/tour/chat`. Client
+  `VITE_ASK_GUIDE_API_URL=https://….workers.dev/api`
+- Optional: Azure Functions in [`api/`](../api/) (same contract)
+- FAB stays off until product flip (`SHOW_ASK_GUIDE`); QA with `?askGuide=1`.
+
+Later: iShare platform `POST /v1/tour/chat` and/or Azure OpenAI with the same
+client contract.
 
 ---
 

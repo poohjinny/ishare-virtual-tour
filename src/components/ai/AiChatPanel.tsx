@@ -298,7 +298,9 @@ export function AiChatPanel({
   const threadSpacerRef = useRef<HTMLDivElement>(null);
   const composerFormRef = useRef<HTMLFormElement>(null);
   const composerInputRef = useRef<HTMLInputElement>(null);
-  const lastAnchoredUserIdRef = useRef<string | null>(null);
+  /** ChatGPT-style: follow new output while near the bottom; stop if user scrolls up. */
+  const stickToBottomRef = useRef(true);
+  const lastScrollOutputKeyRef = useRef<string>('');
   const hasInput = input.trim().length > 0;
   const canReset = !guideUiTest && messages.length > 0 && !isSending;
   const canCompose = !guideUiTest && !isSending;
@@ -337,62 +339,108 @@ export function AiChatPanel({
     return null;
   }, [displayMessages]);
 
+  const latestAssistantMessageId = useMemo(() => {
+    for (let i = displayMessages.length - 1; i >= 0; i -= 1) {
+      const msg = displayMessages[i];
+      if (msg?.role === 'assistant') return msg.id;
+    }
+    return null;
+  }, [displayMessages]);
+
+  const isNearBottom = (root: HTMLElement, thresholdPx = 96) => {
+    const remaining = root.scrollHeight - root.scrollTop - root.clientHeight;
+    return remaining <= thresholdPx;
+  };
+
+  const scrollThreadToBottom = (behavior: ScrollBehavior) => {
+    const root = messagesRef.current;
+    if (!root) return;
+    root.scrollTo({
+      top: Math.max(0, root.scrollHeight - root.clientHeight),
+      behavior,
+    });
+  };
+
+  useEffect(() => {
+    const root = messagesRef.current;
+    if (!root) return;
+
+    const onScroll = () => {
+      stickToBottomRef.current = isNearBottom(root);
+    };
+    root.addEventListener('scroll', onScroll, { passive: true });
+    return () => root.removeEventListener('scroll', onScroll);
+  }, []);
+
   useLayoutEffect(() => {
     const root = messagesRef.current;
     const spacer = threadSpacerRef.current;
-    if (!root || !spacer) return;
+    if (!root) return;
+    // Spacer was for pin-user-to-top; ChatGPT follows the bottom instead.
+    if (spacer) spacer.style.height = '0px';
 
-    // Content-sized panel: don't inflate the spacer or the panel grows forever.
-    // Only pin the latest user turn once the panel is height-capped and scrolling.
-    spacer.style.height = '0px';
-
-    if (!latestUserMessageId) {
-      lastAnchoredUserIdRef.current = null;
-      if (displayMessages.length === 0 && !isSending && !sendError) {
-        root.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+    if (displayMessages.length === 0 && !isSending && !sendError) {
+      stickToBottomRef.current = true;
+      lastScrollOutputKeyRef.current = '';
+      root.scrollTo({ top: 0, behavior: 'auto' });
       return;
     }
 
-    const panel = root.closest('.tour-glass-panel--ai');
-    const panelMaxH =
-      panel instanceof HTMLElement ?
-        parseFloat(window.getComputedStyle(panel).maxHeight)
-      : Number.NaN;
-    const panelH =
-      panel instanceof HTMLElement ? panel.getBoundingClientRect().height : 0;
-    const heightCapped =
-      Number.isFinite(panelMaxH) && panelMaxH > 0 && panelH >= panelMaxH - 2;
+    const outputKey = [
+      latestUserMessageId ?? '',
+      latestAssistantMessageId ?? '',
+      isSending ? 'sending' : 'idle',
+      sendError ? 'error' : '',
+    ].join('|');
 
-    if (!heightCapped) {
-      lastAnchoredUserIdRef.current = latestUserMessageId;
+    const isNewOutput = outputKey !== lastScrollOutputKeyRef.current;
+    if (!isNewOutput) return;
+
+    const previousKey = lastScrollOutputKeyRef.current;
+    lastScrollOutputKeyRef.current = outputKey;
+
+    // New user turn → always follow (like sending in ChatGPT).
+    const isNewUserTurn =
+      Boolean(latestUserMessageId) &&
+      !previousKey.startsWith(`${latestUserMessageId}|`);
+
+    if (isNewUserTurn) {
+      stickToBottomRef.current = true;
+      scrollThreadToBottom('smooth');
       return;
     }
 
-    const msgEl = root.querySelector(
-      `[data-msg-id="${CSS.escape(latestUserMessageId)}"]`,
-    );
-    if (!(msgEl instanceof HTMLElement)) return;
+    // Thinking / assistant reply / error — follow only if still stuck to bottom.
+    if (stickToBottomRef.current || isNearBottom(root)) {
+      stickToBottomRef.current = true;
+      scrollThreadToBottom('smooth');
+    }
+  }, [
+    displayMessages,
+    isSending,
+    sendError,
+    latestUserMessageId,
+    latestAssistantMessageId,
+  ]);
 
-    const shouldAnchor = latestUserMessageId !== lastAnchoredUserIdRef.current;
-
-    const prevSpacer = 0;
-    const rootRect = root.getBoundingClientRect();
-    const msgRect = msgEl.getBoundingClientRect();
-    const msgTop = root.scrollTop + (msgRect.top - rootRect.top);
-    const fromMsgToEnd = root.scrollHeight - prevSpacer - msgTop;
-    spacer.style.height = `${Math.max(0, root.clientHeight - fromMsgToEnd)}px`;
-
-    if (!shouldAnchor) return;
-    lastAnchoredUserIdRef.current = latestUserMessageId;
-
-    const delta =
-      msgEl.getBoundingClientRect().top - root.getBoundingClientRect().top;
-    root.scrollTo({
-      top: Math.max(0, root.scrollTop + delta - 4),
-      behavior: 'smooth',
+  // Composer / follow-up chrome can shrink the viewport — keep bottom if sticking.
+  useEffect(() => {
+    const root = messagesRef.current;
+    if (!root || typeof ResizeObserver === 'undefined') return;
+    let frame = 0;
+    const ro = new ResizeObserver(() => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        if (!stickToBottomRef.current) return;
+        scrollThreadToBottom('auto');
+      });
     });
-  }, [displayMessages, isSending, sendError, latestUserMessageId]);
+    ro.observe(root);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      ro.disconnect();
+    };
+  }, []);
 
   const panelClass = aiPanelVariants({ phase: panelPhase });
 
@@ -626,10 +674,13 @@ export function AiChatPanel({
                     currentSceneId={currentSceneId}
                     onSelectScene={onNavigateScene}
                     onSelectNaming={onSelectNaming}
-                    disabled={!canCompose}
                   />
                 : null}
-                {msg.role === 'assistant' && msg.guideCtas?.length ?
+                {(
+                  msg.role === 'assistant' &&
+                  msg.guideCtas?.length &&
+                  !(msg.guideLinks && msg.guideLinks.length > 0)
+                ) ?
                   <GuideCtaRow
                     ctas={msg.guideCtas}
                     client={client}

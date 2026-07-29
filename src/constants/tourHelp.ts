@@ -36,37 +36,32 @@ export const TOUR_HELP_KEYBOARD_SHORTCUTS_3D = [
   'W A S D — walk around the model',
 ] as const;
 
-export const TOUR_HELP_VIEWER_CONTROLS = [
-  'Drag to look around',
-  'Scroll or pinch to zoom',
-  'Use the control pill at the bottom for zoom, move, default view, and fullscreen',
-  'Collapse or expand the control pill (Show controls / Hide controls)',
-  'Arrow keys to rotate',
-  '+ / − to zoom in and out',
-] as const;
-
-export const TOUR_HELP_VIEWER_CONTROLS_3D = [
-  'Drag with left mouse to orbit — right mouse to pan',
-  'Scroll or pinch to zoom',
-  'Click the floor to move the camera toward that point',
-  'Use the control pill at the bottom for zoom, default view, immersive ambience, and fullscreen',
-  'Collapse or expand the control pill (Show controls / Hide controls)',
-  'Arrow keys to orbit',
-  'W A S D to walk around',
-] as const;
-
 export interface TourHelpFaqItem {
   id: string;
   question: string;
   answer: string;
 }
 
+const TOUR_HELP_FAQ_PLAY_TOUR: TourHelpFaqItem = {
+  id: 'play-tour',
+  question: 'What is Play tour?',
+  answer:
+    'Play tour is a guided slideshow on the control pill (play / pause). It moves through key scenes with a slow camera drift, then crossfades to the next stop. Tap play again to pause, or navigate yourself to stop the tour. Starting Play also starts immersive ambience when available.',
+};
+
+const TOUR_HELP_FAQ_IMMERSIVE: TourHelpFaqItem = {
+  id: 'immersive-ambience',
+  question: 'What is immersive ambience?',
+  answer:
+    'Immersive ambience is soft background music on the control pill (sound-wave icon). Tap it to play or pause, or press M on a keyboard. Play tour starts ambience automatically; pausing Play pauses the music too.',
+};
+
 export const TOUR_HELP_FAQ: TourHelpFaqItem[] = [
   {
     id: 'jump-location',
     question: 'How do I jump to a location?',
     answer:
-      'Open Explore tour to browse the full directory, use search to find a name, or tap the breadcrumb to move up to an earlier stop.',
+      'Open Explore tour to browse the full directory, use search to find a name, or use the breadcrumb menu to move to an earlier stop or a sibling place.',
   },
   {
     id: 'naming-opportunities',
@@ -79,11 +74,13 @@ export const TOUR_HELP_FAQ: TourHelpFaqItem[] = [
     question: 'How do I use Ask Guide?',
     answer: `Tap Ask Guide in the bottom-right corner to chat with ${VIRTUAL_TOUR_GUIDE_NAME} about this facility and your current location.`,
   },
+  TOUR_HELP_FAQ_PLAY_TOUR,
+  TOUR_HELP_FAQ_IMMERSIVE,
   {
     id: 'move-around',
     question: 'How do I look around in 360°?',
     answer:
-      'Drag to pan, scroll or pinch to zoom, and use the control pill at the bottom for zoom, move, and fullscreen.',
+      'Drag to pan, scroll or pinch to zoom, and use the control pill at the bottom for zoom, move, and other viewer actions.',
   },
   {
     id: 'share-tour',
@@ -98,7 +95,7 @@ export const TOUR_HELP_FAQ_3D: TourHelpFaqItem[] = [
     id: 'jump-location',
     question: 'How do I jump to a location?',
     answer:
-      'Open Explore tour to browse viewpoints, use search to find a name, or tap the breadcrumb to move up to an earlier stop. Hotspots in the model also move you to linked areas.',
+      'Open Explore tour to browse viewpoints, use search to find a name, or use the breadcrumb menu to move to an earlier stop or a sibling place. Hotspots in the model also move you to linked areas.',
   },
   {
     id: 'naming-opportunities',
@@ -111,11 +108,13 @@ export const TOUR_HELP_FAQ_3D: TourHelpFaqItem[] = [
     question: 'How do I use Ask Guide?',
     answer: `Tap Ask Guide in the bottom-right corner to chat with ${VIRTUAL_TOUR_GUIDE_NAME} about this facility and your current location.`,
   },
+  TOUR_HELP_FAQ_PLAY_TOUR,
+  TOUR_HELP_FAQ_IMMERSIVE,
   {
     id: 'move-around',
     question: 'How do I explore the 3D model?',
     answer:
-      'Drag to orbit, scroll to zoom, and click the floor to reposition the camera. Use arrow keys to orbit, W A S D to walk, and the control pill for zoom and default view.',
+      'Drag to orbit, scroll to zoom, and click the floor to reposition the camera. Use arrow keys to orbit, W A S D to walk, and the control pill for zoom and other viewer actions.',
   },
   {
     id: 'share-tour',
@@ -135,19 +134,59 @@ export function tourHelpKeyboardShortcuts(
 
 export function tourHelpViewerControls(
   viewerType?: TourViewerType,
+  options?: { showPlayTour?: boolean; showImmersiveAmbience?: boolean },
 ): readonly string[] {
-  return viewerType === 'model3d' ?
-      TOUR_HELP_VIEWER_CONTROLS_3D
-    : TOUR_HELP_VIEWER_CONTROLS;
+  const showPlayTour = options?.showPlayTour ?? true;
+  const showImmersiveAmbience = options?.showImmersiveAmbience ?? true;
+  const midControls = [
+    ...(viewerType === 'model3d' ? [] : ['move']),
+    'default view',
+    ...(showPlayTour ? ['Play tour'] : []),
+    ...(showImmersiveAmbience ? ['immersive ambience'] : []),
+    'fullscreen',
+  ];
+  const pill = `Use the control pill at the bottom for zoom, ${midControls.join(', ')}`;
+
+  if (viewerType === 'model3d') {
+    return [
+      'Drag with left mouse to orbit — right mouse to pan',
+      'Scroll or pinch to zoom',
+      'Click the floor to move the camera toward that point',
+      pill,
+      'Collapse or expand the control pill (Show controls / Hide controls)',
+      'Arrow keys to orbit',
+      'W A S D to walk around',
+    ];
+  }
+
+  return [
+    'Drag to look around',
+    'Scroll or pinch to zoom',
+    pill,
+    'Collapse or expand the control pill (Show controls / Hide controls)',
+    'Arrow keys to rotate',
+    '+ / − to zoom in and out',
+  ];
 }
 
 export function tourHelpFaq(
   viewerType?: TourViewerType,
-  options?: { showAskGuide?: boolean },
+  options?: {
+    showAskGuide?: boolean;
+    showPlayTour?: boolean;
+    showImmersiveAmbience?: boolean;
+  },
 ): TourHelpFaqItem[] {
   const items = viewerType === 'model3d' ? TOUR_HELP_FAQ_3D : TOUR_HELP_FAQ;
   const showAskGuide = options?.showAskGuide ?? SHOW_ASK_GUIDE;
-  return showAskGuide ? items : items.filter((item) => item.id !== 'ask-guide');
+  const showPlayTour = options?.showPlayTour ?? true;
+  const showImmersiveAmbience = options?.showImmersiveAmbience ?? true;
+  return items.filter((item) => {
+    if (item.id === 'ask-guide') return showAskGuide;
+    if (item.id === 'play-tour') return showPlayTour;
+    if (item.id === 'immersive-ambience') return showImmersiveAmbience;
+    return true;
+  });
 }
 
 export function tourHelpLeadText(

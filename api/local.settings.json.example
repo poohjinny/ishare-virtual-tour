@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "OPENAI_API_KEY": "",
+    "OPENAI_ASK_GUIDE_MODEL": "gpt-4o-mini",
+    "ASK_GUIDE_CORS_ORIGINS": "",
+    "ASK_GUIDE_RATE_LIMIT_PER_MIN": "30"
+  },
+  "Host": { "LocalHttpPort": 7071, "CORS": "*" }
+}

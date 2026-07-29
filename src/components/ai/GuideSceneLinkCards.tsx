@@ -10,7 +10,9 @@ import {
   tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryStatusBadgeVariants,
 } from '../tourNavFloatVariants';
+import { GuideCtaRow } from './GuideCtaRow';
 import {
+  aiGuideCardWidthClassName,
   aiSceneLinkCardBodyClassName,
   aiSceneLinkCardDescClassName,
   aiSceneLinkCardKindClassName,
@@ -80,6 +82,162 @@ function cardsLeadIn(links: ChatGuideLink[], currentSceneId?: string): string {
   return 'Based on what we just talked about, here are a few places you can visit:';
 }
 
+function GuideLinkCard({
+  link,
+  layout,
+  currentSceneId,
+  onSelectScene,
+  onSelectNaming,
+  disabled,
+}: {
+  link: ChatGuideLink;
+  layout: 'single' | 'multi';
+  currentSceneId?: string;
+  onSelectScene?: (sceneId: string) => void;
+  onSelectNaming?: (sceneId: string, hotspotId: string) => void;
+  disabled: boolean;
+}) {
+  const isNaming = link.kind === 'naming';
+  const isCurrent =
+    !isNaming && Boolean(currentSceneId) && link.sceneId === currentSceneId;
+  const canOpenNaming = isNaming && Boolean(link.hotspotId) && onSelectNaming;
+  const canOpenScene = Boolean(onSelectScene);
+  const canActivate = canOpenNaming || canOpenScene;
+  const showStatus =
+    isNaming && link.status && namingOpportunityStatusShowsBadge(link.status);
+  const price = isNaming ? link.priceLabel?.trim() : undefined;
+
+  return (
+    <div
+      className={cn(
+        'flex min-w-0 flex-col gap-1.5',
+        layout === 'single' && aiGuideCardWidthClassName,
+        layout === 'multi' && 'w-full',
+      )}
+    >
+      <button
+        type='button'
+        className={aiSceneLinkCardVariants({
+          // Column wrapper owns width — card fills it so CTAs match.
+          layout: 'multi',
+          kind: isNaming ? 'naming' : 'scene',
+          current: isCurrent,
+        })}
+        disabled={disabled || !canActivate}
+        aria-label={cardLabel(link, currentSceneId)}
+        onClick={() => {
+          if (canOpenNaming && link.hotspotId) {
+            onSelectNaming?.(link.sceneId, link.hotspotId);
+            return;
+          }
+          onSelectScene?.(link.sceneId);
+        }}
+      >
+        <span className={aiSceneLinkCardMediaWrapClassName}>
+          {link.thumbnail ?
+            <img
+              src={link.thumbnail}
+              alt=''
+              className={aiSceneLinkCardMediaClassName}
+              loading='lazy'
+              decoding='async'
+            />
+          : <span
+              className={aiSceneLinkCardMediaClassName}
+              aria-hidden='true'
+            />
+          }
+          {isCurrent ?
+            <ExploreCurrentHereLabel
+              className={tourNavCurrentHeroChipClassName}
+            />
+          : null}
+          {showStatus && link.status ?
+            <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
+              <NamingStatusBadge
+                status={link.status}
+                compact
+                ariaLabel={link.statusLabel}
+                className={tourNavLocationGalleryStatusBadgeVariants({
+                  status: link.status,
+                })}
+              />
+            </span>
+          : null}
+        </span>
+        <div className={aiSceneLinkCardBodyClassName}>
+          <span
+            className={
+              isNaming ?
+                aiSceneLinkCardKindNamingClassName
+              : aiSceneLinkCardKindClassName
+            }
+          >
+            {isNaming ? 'Naming opportunity' : 'Place'}
+          </span>
+          {isNaming ?
+            <div className={aiSceneLinkCardTitleRowClassName}>
+              <span className={aiSceneLinkCardTitleClassName}>
+                {link.title}
+              </span>
+              {price ?
+                <span className={aiSceneLinkCardPriceClassName}>{price}</span>
+              : null}
+            </div>
+          : <span className={aiSceneLinkCardTitleClassName}>{link.title}</span>}
+          {link.description ?
+            <p className={aiSceneLinkCardDescClassName}>{link.description}</p>
+          : null}
+        </div>
+      </button>
+      {isNaming && link.ctas && link.ctas.length > 0 ?
+        <GuideCtaRow
+          ctas={link.ctas}
+          align='stretch'
+          stack
+          showContactInfo={false}
+          className='mt-0 min-w-0 w-full'
+        />
+      : null}
+    </div>
+  );
+}
+
+function GuideLinkRow({
+  links,
+  compact,
+  currentSceneId,
+  onSelectScene,
+  onSelectNaming,
+  disabled,
+}: {
+  links: ChatGuideLink[];
+  /** Match half-column width even for a single card (mixed place/NO rows). */
+  compact: boolean;
+  currentSceneId?: string;
+  onSelectScene?: (sceneId: string) => void;
+  onSelectNaming?: (sceneId: string, hotspotId: string) => void;
+  disabled: boolean;
+}) {
+  if (links.length === 0) return null;
+  const layout = links.length > 1 || compact ? 'multi' : 'single';
+  return (
+    <div className={aiSceneLinkListVariants({ layout })}>
+      {links.map((link) => (
+        <GuideLinkCard
+          key={linkKey(link)}
+          link={link}
+          layout={layout}
+          currentSceneId={currentSceneId}
+          onSelectScene={onSelectScene}
+          onSelectNaming={onSelectNaming}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function GuideSceneLinkCards({
   links,
   currentSceneId,
@@ -92,127 +250,53 @@ export function GuideSceneLinkCards({
 
   if (links.length === 0) return null;
 
-  const needsCollapse = links.length > GUIDE_LINK_PREVIEW_COUNT;
-  const visible =
-    needsCollapse && !expanded ?
-      links.slice(0, GUIDE_LINK_PREVIEW_COUNT)
-    : links;
-  const hiddenCount = links.length - GUIDE_LINK_PREVIEW_COUNT;
-  const layout = links.length > 1 ? 'multi' : 'single';
+  const places = links.filter((link) => link.kind === 'scene');
+  const namings = links.filter((link) => link.kind === 'naming');
+  const total = places.length + namings.length;
+  const needsCollapse = total > GUIDE_LINK_PREVIEW_COUNT;
+  // 2 places + 1 NO → keep the lonely NO at grid-column width, not full single.
+  const compactRows = total > 1;
+
+  let visiblePlaces = places;
+  let visibleNamings = namings;
+  if (needsCollapse && !expanded) {
+    if (places.length >= GUIDE_LINK_PREVIEW_COUNT) {
+      visiblePlaces = places.slice(0, GUIDE_LINK_PREVIEW_COUNT);
+      visibleNamings = [];
+    } else {
+      visiblePlaces = places;
+      visibleNamings = namings.slice(
+        0,
+        GUIDE_LINK_PREVIEW_COUNT - places.length,
+      );
+    }
+  }
+
+  const hiddenCount = total - visiblePlaces.length - visibleNamings.length;
   const lead = cardsLeadIn(links, currentSceneId);
 
   return (
     <div
-      className={cn(
-        'flex max-w-full flex-col items-stretch gap-1.5',
-        className,
-      )}
+      className={cn('flex max-w-full flex-col items-stretch gap-2', className)}
     >
       <p className={aiSceneLinkLeadClassName}>{lead}</p>
-      <div className={aiSceneLinkListVariants({ layout })}>
-        {visible.map((link) => {
-          const isNaming = link.kind === 'naming';
-          const isCurrent =
-            !isNaming &&
-            Boolean(currentSceneId) &&
-            link.sceneId === currentSceneId;
-          const canOpenNaming =
-            isNaming && Boolean(link.hotspotId) && onSelectNaming;
-          const canOpenScene = Boolean(onSelectScene);
-          const canActivate = canOpenNaming || canOpenScene;
-          const showStatus =
-            isNaming &&
-            link.status &&
-            namingOpportunityStatusShowsBadge(link.status);
-          const price = isNaming ? link.priceLabel?.trim() : undefined;
-
-          return (
-            <button
-              key={linkKey(link)}
-              type='button'
-              className={aiSceneLinkCardVariants({
-                layout,
-                kind: isNaming ? 'naming' : 'scene',
-                current: isCurrent,
-              })}
-              disabled={disabled || !canActivate}
-              aria-label={cardLabel(link, currentSceneId)}
-              onClick={() => {
-                if (canOpenNaming && link.hotspotId) {
-                  onSelectNaming?.(link.sceneId, link.hotspotId);
-                  return;
-                }
-                onSelectScene?.(link.sceneId);
-              }}
-            >
-              <span className={aiSceneLinkCardMediaWrapClassName}>
-                {link.thumbnail ?
-                  <img
-                    src={link.thumbnail}
-                    alt=''
-                    className={aiSceneLinkCardMediaClassName}
-                    loading='lazy'
-                    decoding='async'
-                  />
-                : <span
-                    className={aiSceneLinkCardMediaClassName}
-                    aria-hidden='true'
-                  />
-                }
-                {isCurrent ?
-                  <ExploreCurrentHereLabel
-                    className={tourNavCurrentHeroChipClassName}
-                  />
-                : null}
-                {showStatus && link.status ?
-                  <span
-                    className={tourNavLocationGalleryHeroBadgeGroupClassName}
-                  >
-                    <NamingStatusBadge
-                      status={link.status}
-                      compact
-                      ariaLabel={link.statusLabel}
-                      className={tourNavLocationGalleryStatusBadgeVariants({
-                        status: link.status,
-                      })}
-                    />
-                  </span>
-                : null}
-              </span>
-              <div className={aiSceneLinkCardBodyClassName}>
-                <span
-                  className={
-                    isNaming ?
-                      aiSceneLinkCardKindNamingClassName
-                    : aiSceneLinkCardKindClassName
-                  }
-                >
-                  {isNaming ? 'Naming opportunity' : 'Place'}
-                </span>
-                {isNaming ?
-                  <div className={aiSceneLinkCardTitleRowClassName}>
-                    <span className={aiSceneLinkCardTitleClassName}>
-                      {link.title}
-                    </span>
-                    {price ?
-                      <span className={aiSceneLinkCardPriceClassName}>
-                        {price}
-                      </span>
-                    : null}
-                  </div>
-                : <span className={aiSceneLinkCardTitleClassName}>
-                    {link.title}
-                  </span>
-                }
-                {link.description ?
-                  <p className={aiSceneLinkCardDescClassName}>
-                    {link.description}
-                  </p>
-                : null}
-              </div>
-            </button>
-          );
-        })}
+      <div className='flex max-w-full flex-col items-stretch gap-2.5'>
+        <GuideLinkRow
+          links={visiblePlaces}
+          compact={compactRows}
+          currentSceneId={currentSceneId}
+          onSelectScene={onSelectScene}
+          onSelectNaming={onSelectNaming}
+          disabled={disabled}
+        />
+        <GuideLinkRow
+          links={visibleNamings}
+          compact={compactRows}
+          currentSceneId={currentSceneId}
+          onSelectScene={onSelectScene}
+          onSelectNaming={onSelectNaming}
+          disabled={disabled}
+        />
       </div>
       {needsCollapse ?
         <button
