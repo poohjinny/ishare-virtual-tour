@@ -798,9 +798,10 @@ export function buildAnchoredPopupHtml(
     );
 
   const copyHtml = buildGlassPanelParagraphsHtml(popup.body);
+  const locationBadgeHtml = naming ? '' : buildPopupBadgeHtml(popup);
   const introHtml = `<div class="info-panel__intro">
       ${titleBlockHtml}
-      ${naming ? '' : badgeHtml}
+      ${locationBadgeHtml}
       ${donorCreditHtml}
     </div>`;
 

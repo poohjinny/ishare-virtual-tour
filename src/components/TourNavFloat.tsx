@@ -653,12 +653,6 @@ export function TourNavFloat({
     ),
   );
 
-  const currentSceneDetailOpen =
-    placeOverviewOpen ||
-    ((panelMode === 'explore' || displayPanel === 'explore') &&
-      exploreSceneDetailId === currentSceneId &&
-      !exploreSceneDetailExiting);
-
   const activeNamingItem = useMemo(() => {
     if (!activeNamingHotspotId) return null;
 
