@@ -163,27 +163,8 @@ export function buildScenePath(
     return [firstSceneId];
   }
 
-  const parent = new Map<string, string>();
-  const queue = [firstSceneId];
-  const visited = new Set<string>([firstSceneId]);
-  const tour = { hotspots: tourHotspots, scenes };
-
-  while (queue.length > 0) {
-    const sceneId = queue.shift()!;
-    if (sceneId === targetSceneId) break;
-
-    const scene = scenes[sceneId];
-    if (!scene) continue;
-
-    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
-      if (visited.has(hotspot.targetScene!)) continue;
-      visited.add(hotspot.targetScene!);
-      parent.set(hotspot.targetScene!, sceneId);
-      queue.push(hotspot.targetScene!);
-    }
-  }
-
-  if (!visited.has(targetSceneId)) {
+  const parent = buildSceneParentMap(firstSceneId, scenes, tourHotspots);
+  if (!parent.has(targetSceneId)) {
     return [targetSceneId];
   }
 
@@ -194,6 +175,72 @@ export function buildScenePath(
     cursor = parent.get(cursor);
   }
   return path;
+}
+
+/**
+ * BFS parent map from {@link firstSceneId} along nav hotspots (first visit wins).
+ * The root is omitted from the map.
+ */
+export function buildSceneParentMap(
+  firstSceneId: string,
+  scenes: Record<string, Scene>,
+  tourHotspots?: Tour['hotspots'],
+): Map<string, string> {
+  const parent = new Map<string, string>();
+  const queue = [firstSceneId];
+  const visited = new Set<string>([firstSceneId]);
+  const tour = { hotspots: tourHotspots, scenes };
+
+  while (queue.length > 0) {
+    const sceneId = queue.shift()!;
+    const scene = scenes[sceneId];
+    if (!scene) continue;
+
+    for (const hotspot of resolveSceneNavHotspots(tour, scene)) {
+      const target = hotspot.targetScene!;
+      if (visited.has(target) || !scenes[target]) continue;
+      visited.add(target);
+      parent.set(target, sceneId);
+      queue.push(target);
+    }
+  }
+
+  return parent;
+}
+
+/**
+ * Sibling scene ids under the same BFS parent (includes `sceneId`, parent-nav
+ * order). Root / unreachable scenes return `[sceneId]` only — no dropdown.
+ */
+export function listSceneSiblings(
+  firstSceneId: string,
+  scenes: Record<string, Scene>,
+  sceneId: string,
+  tourHotspots?: Tour['hotspots'],
+): string[] {
+  if (!scenes[sceneId]) return [sceneId];
+
+  const parentMap = buildSceneParentMap(firstSceneId, scenes, tourHotspots);
+  const parentId = parentMap.get(sceneId);
+  if (parentId === undefined) return [sceneId];
+
+  const parentScene = scenes[parentId];
+  if (!parentScene) return [sceneId];
+
+  const siblings: string[] = [];
+  const seen = new Set<string>();
+  const tour = { hotspots: tourHotspots, scenes };
+
+  for (const hotspot of resolveSceneNavHotspots(tour, parentScene)) {
+    const target = hotspot.targetScene!;
+    if (!scenes[target] || parentMap.get(target) !== parentId) continue;
+    if (seen.has(target)) continue;
+    seen.add(target);
+    siblings.push(target);
+  }
+
+  if (!seen.has(sceneId)) siblings.push(sceneId);
+  return siblings;
 }
 
 /** Nav hotspot on target that links back toward the scene we came from. */

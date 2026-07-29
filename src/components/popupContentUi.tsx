@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import type { NamingOpportunity, PopupContent, PopupCta } from '../types/tour';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import { cn } from '../lib/cn';
-import { partitionPopupCtasForPlacement } from '../utils/popupCtaPlacement';
+import { partitionPopupCtasForPlacement, isMailtoCtaUrl, openCtaUrl } from '../utils/popupCtaPlacement';
 import {
   popupCtaRowClassName,
   popupCtaWrapClassName,
@@ -415,6 +415,7 @@ export function PopupCtaButton({ cta }: { cta: PopupCta }) {
   const resolved = resolvePopupCta(cta);
   const isSecondary = cta.variant === 'secondary';
   const showIcon = shouldShowPopupCtaIcon(cta, isSecondary);
+  const isMailto = isMailtoCtaUrl(resolved.url);
 
   return (
     <a
@@ -424,9 +425,15 @@ export function PopupCtaButton({ cta }: { cta: PopupCta }) {
         showIcon && 'tour-glass-panel__cta--has-trailing-icon',
       )}
       href={resolved.url}
-      target='_blank'
-      rel='noopener noreferrer'
+      {...(isMailto ?
+        {}
+      : { target: '_blank', rel: 'noopener noreferrer' })}
       aria-label={resolved.ariaLabel}
+      onClick={(event) => {
+        if (!isMailto) return;
+        event.preventDefault();
+        openCtaUrl(resolved.url);
+      }}
     >
       <GlassPanelCtaText label={resolved.label}>
         <PopupCtaLabel cta={cta} />

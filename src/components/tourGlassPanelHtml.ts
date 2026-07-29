@@ -49,6 +49,7 @@ import {
   popupCtaWrapClassName,
   resolvePopupFooterLayout,
 } from '../utils/popupCtaLayout';
+import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import {
   isNamingStatusIconModifier,
   namingStatusBadgeIconHtml,
@@ -515,12 +516,13 @@ export function buildPopupCtaButtonHtml(cta: PopupCta): string {
       glassPanelCtaIconHtml(resolvePopupCtaIconKind(cta), GLASS_PANEL.ctaIcon)
     : '';
   const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}${iconHtml ? ' tour-glass-panel__cta--has-trailing-icon' : ''}`;
+  const isMailto = isMailtoCtaUrl(resolved.url);
+  const targetAttrs =
+    isMailto ? '' : ' target="_blank" rel="noopener noreferrer"';
 
   return `<a
         class="${className}"
-        href="${escapeHtml(resolved.url)}"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="${escapeHtml(resolved.url)}"${targetAttrs}
         aria-label="${escapeHtml(resolved.ariaLabel)}"
       >${labelHtml}${iconHtml}</a>`;
 }

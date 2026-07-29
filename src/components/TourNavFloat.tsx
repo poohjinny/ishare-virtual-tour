@@ -73,9 +73,14 @@ import {
 import { ShareTourPanel } from './ShareTourPanel';
 import { ExploreLocationGroup } from './ExploreLocationGroup';
 import {
+  resolveBreadcrumbSiblingOptions,
+  TourBreadcrumbSiblingMenu,
+} from './TourBreadcrumbSiblingMenu';
+import {
   buildScenePath,
   buildSceneGroups,
   buildSceneGroupSecondaryById,
+  listSceneSiblings,
   sceneIdsWithTitleCollisions,
   SCENE_GROUP_OTHER_ID,
 } from '../viewer/sceneDepth';
@@ -108,10 +113,7 @@ import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
 import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import {
-  MATERIAL_SYMBOL_SIZE_20,
-  MATERIAL_SYMBOL_SIZE_22,
-} from './ui/materialSymbolClasses';
+import { MATERIAL_SYMBOL_SIZE_20 } from './ui/materialSymbolClasses';
 import { TourHelpPanel } from './TourHelpPanel';
 import { TourHelpFooter } from './TourHelpFooter';
 import { TourGlassPanel, type TourGlassPanelAnimation } from './TourGlassPanel';
@@ -126,7 +128,9 @@ import {
   tourNavActionsRootClassName,
   tourNavDockOverflowWrapClassName,
   TOUR_BREADCRUMB_ATTR,
+  TOUR_BREADCRUMB_BAR_ATTR,
   tourBreadcrumbSelector,
+  tourBreadcrumbSiblingMenuSelector,
   tourExploreRefineMenuSelector,
   tourNavBreadcrumbAlignVariants,
   tourNavBreadcrumbBarClassName,
@@ -238,7 +242,7 @@ function ExploreTourIcon() {
     <MaterialSymbol
       name='map_search'
       className={tourNavCircleIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
 }
@@ -248,7 +252,7 @@ function HelpIcon() {
     <MaterialSymbol
       name='help'
       className={tourNavCircleIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
 }
@@ -258,7 +262,7 @@ function MoreIcon() {
     <MaterialSymbol
       name='more_horiz'
       className={tourNavCircleIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
 }
@@ -267,7 +271,7 @@ function ShareIconButton() {
   return (
     <ShareIcon
       className={tourNavCircleIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
 }
@@ -277,7 +281,7 @@ function HistoryBackIcon() {
     <MaterialSymbol
       name='chevron_left'
       className={tourNavHistoryBtnIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
 }
@@ -287,7 +291,7 @@ function HistoryForwardIcon() {
     <MaterialSymbol
       name='chevron_right'
       className={tourNavHistoryBtnIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={MATERIAL_SYMBOL_SIZE_20}
     />
   );
 }
@@ -419,6 +423,36 @@ export function TourNavFloat({
     }
     return items;
   }, [isMobile, currentSceneId, firstSceneId, scenes, tourHotspots]);
+
+  const breadcrumbScenesById = useMemo(
+    () => Object.fromEntries(scenes.map((scene) => [scene.id, scene])),
+    [scenes],
+  );
+
+  const breadcrumbSiblingsById = useMemo(() => {
+    const map: Record<
+      string,
+      ReturnType<typeof resolveBreadcrumbSiblingOptions>
+    > = {};
+    for (const item of breadcrumbItems) {
+      const ids = listSceneSiblings(
+        firstSceneId,
+        breadcrumbScenesById,
+        item.id,
+        tourHotspots,
+      );
+      map[item.id] = resolveBreadcrumbSiblingOptions(ids, breadcrumbScenesById);
+    }
+    return map;
+  }, [breadcrumbItems, breadcrumbScenesById, firstSceneId, tourHotspots]);
+
+  const [siblingMenuCrumbId, setSiblingMenuCrumbId] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    setSiblingMenuCrumbId(null);
+  }, [currentSceneId, isMobile, disabled]);
 
   useEffect(() => {
     setDockOverflowOpen(false);
@@ -1018,6 +1052,28 @@ export function TourNavFloat({
     panelMode,
   ]);
 
+  /** Sibling-menu info — current scene prefers place-overview; others open Explore detail. */
+  const handleSiblingMenuShowDetails = useCallback(
+    (sceneId: string) => {
+      if (sceneId === currentSceneId) {
+        handleBreadcrumbSceneDetails();
+        return;
+      }
+      openExploreWithSceneDetail(sceneId);
+    },
+    [currentSceneId, handleBreadcrumbSceneDetails, openExploreWithSceneDetail],
+  );
+
+  const siblingMenuDetailSceneId =
+    (
+      (panelMode === 'explore' || displayPanel === 'explore') &&
+      exploreSceneDetailId &&
+      !exploreSceneDetailExiting
+    ) ?
+      exploreSceneDetailId
+    : placeOverviewOpen ? currentSceneId
+    : null;
+
   useEffect(() => {
     if (targetPanel === displayPanel) {
       return;
@@ -1123,7 +1179,8 @@ export function TourNavFloat({
       if (
         target instanceof Element &&
         (target.closest(tourExploreRefineMenuSelector) ||
-          target.closest(tourBreadcrumbSelector))
+          target.closest(tourBreadcrumbSelector) ||
+          target.closest(tourBreadcrumbSiblingMenuSelector))
       ) {
         return;
       }
@@ -1892,12 +1949,12 @@ export function TourNavFloat({
                         <MaterialSymbol
                           name='view_list'
                           className={tourGlassPanelCloseIconClassName}
-                          sizePx={MATERIAL_SYMBOL_SIZE_22}
+                          sizePx={MATERIAL_SYMBOL_SIZE_20}
                         />
                       : <MaterialSymbol
                           name='grid_view'
                           className={tourGlassPanelCloseIconClassName}
-                          sizePx={MATERIAL_SYMBOL_SIZE_22}
+                          sizePx={MATERIAL_SYMBOL_SIZE_20}
                         />
                       }
                     </button>
@@ -2028,56 +2085,96 @@ export function TourNavFloat({
             </div>
           )}
 
-          <div className={tourNavBreadcrumbBarClassName}>
+          <div
+            {...{ [TOUR_BREADCRUMB_BAR_ATTR]: '' }}
+            className={tourNavBreadcrumbBarClassName}
+          >
             <ol className={tourNavBreadcrumbListClassName}>
-              {breadcrumbItems.map((item, index) => (
-                <li key={item.id} className={tourNavBreadcrumbItemClassName}>
-                  {index > 0 && (
-                    <span
-                      className={tourNavBreadcrumbSepClassName}
-                      aria-hidden='true'
-                    >
-                      ›
-                    </span>
-                  )}
-                  {item.isCurrent ?
-                    <span
-                      className={tourNavBreadcrumbCurrentClassName}
-                      aria-current='location'
-                    >
-                      <span className={tourNavBreadcrumbCurrentLeadClassName}>
-                        {currentSceneHasDetails ?
-                          <ExploreSceneInfoButton
-                            sceneTitle={item.title}
-                            disabled={disabled}
-                            variant='breadcrumb'
-                            expanded={currentSceneDetailOpen}
-                            onShow={handleBreadcrumbSceneDetails}
-                          />
-                        : null}
-                        <span
-                          className={tourNavBreadcrumbCurrentLabelClassName}
-                        >
-                          {item.title}
-                        </span>
-                      </span>
+              {breadcrumbItems.map((item, index) => {
+                const siblings = breadcrumbSiblingsById[item.id] ?? [];
+                const showSiblingMenu = siblings.length > 1;
+                const siblingMenuOpen = siblingMenuCrumbId === item.id;
+
+                return (
+                  <li key={item.id} className={tourNavBreadcrumbItemClassName}>
+                    {index > 0 && (
                       <span
-                        key={currentSceneId}
-                        className={tourNavBreadcrumbPulseDotClassName}
+                        className={tourNavBreadcrumbSepClassName}
                         aria-hidden='true'
+                      >
+                        ›
+                      </span>
+                    )}
+                    {item.isCurrent ?
+                      <span
+                        className={tourNavBreadcrumbCurrentClassName}
+                        aria-current='location'
+                      >
+                        <span className={tourNavBreadcrumbCurrentLeadClassName}>
+                          {currentSceneHasDetails ?
+                            <ExploreSceneInfoButton
+                              sceneTitle={item.title}
+                              disabled={disabled}
+                              variant='breadcrumb'
+                              expanded={currentSceneDetailOpen}
+                              onShow={handleBreadcrumbSceneDetails}
+                            />
+                          : null}
+                          {showSiblingMenu ?
+                            <TourBreadcrumbSiblingMenu
+                              crumbId={item.id}
+                              label={item.title}
+                              siblings={siblings}
+                              variant='current'
+                              open={siblingMenuOpen}
+                              disabled={disabled}
+                              detailSceneId={siblingMenuDetailSceneId}
+                              onOpenChange={(open) =>
+                                setSiblingMenuCrumbId(open ? item.id : null)
+                              }
+                              onSelect={handleBreadcrumbNavigate}
+                              onShowDetails={handleSiblingMenuShowDetails}
+                            />
+                          : <span
+                              className={tourNavBreadcrumbCurrentLabelClassName}
+                            >
+                              {item.title}
+                            </span>
+                          }
+                        </span>
+                        <span
+                          key={currentSceneId}
+                          className={tourNavBreadcrumbPulseDotClassName}
+                          aria-hidden='true'
+                        />
+                      </span>
+                    : showSiblingMenu ?
+                      <TourBreadcrumbSiblingMenu
+                        crumbId={item.id}
+                        label={item.title}
+                        siblings={siblings}
+                        variant='ancestor'
+                        open={siblingMenuOpen}
+                        disabled={disabled}
+                        detailSceneId={siblingMenuDetailSceneId}
+                        onOpenChange={(open) =>
+                          setSiblingMenuCrumbId(open ? item.id : null)
+                        }
+                        onSelect={handleBreadcrumbNavigate}
+                        onShowDetails={handleSiblingMenuShowDetails}
                       />
-                    </span>
-                  : <button
-                      type='button'
-                      className={tourNavBreadcrumbLinkClassName}
-                      disabled={disabled}
-                      onClick={() => handleBreadcrumbNavigate(item.id)}
-                    >
-                      {item.title}
-                    </button>
-                  }
-                </li>
-              ))}
+                    : <button
+                        type='button'
+                        className={tourNavBreadcrumbLinkClassName}
+                        disabled={disabled}
+                        onClick={() => handleBreadcrumbNavigate(item.id)}
+                      >
+                        {item.title}
+                      </button>
+                    }
+                  </li>
+                );
+              })}
             </ol>
           </div>
         </div>

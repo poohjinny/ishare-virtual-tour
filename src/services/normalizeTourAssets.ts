@@ -8,6 +8,7 @@ import type {
 import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import { GLOBAL_IMMERSIVE_BACKGROUND } from '../constants/immersiveBackground';
 import { parseNamingPriceInput } from '../utils/namingPrice';
+import { normalizePlayTour } from '../utils/playTour';
 
 function normalizePopupContent(popup: PopupContent): PopupContent {
   let next = popup;
@@ -121,7 +122,7 @@ export function normalizeTourAssets(tour: Tour): Tour {
       )
     : undefined;
 
-  return {
+  return withNormalizedPlayTour({
     ...tour,
     ...(tour.hotspots ? { hotspots: tour.hotspots.map(normalizeHotspot) } : {}),
     ...(namingOpportunities ? { namingOpportunities } : {}),
@@ -153,7 +154,18 @@ export function normalizeTourAssets(tour: Tour): Tour {
         },
       ]),
     ),
-  };
+  });
+}
+
+function withNormalizedPlayTour(tour: Tour): Tour {
+  const playTour = normalizePlayTour(tour, tour.playTour);
+  if (!playTour) {
+    if (!tour.playTour) return tour;
+    const { playTour: _removed, ...rest } = tour;
+    return rest;
+  }
+  if (playTour === tour.playTour) return tour;
+  return { ...tour, playTour };
 }
 
 /** Bust scene media URLs after dev rebake/replace (same path, new file bytes). */

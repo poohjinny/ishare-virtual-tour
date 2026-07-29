@@ -92,6 +92,7 @@ export function isNamingHotspotInViewport(
 export async function animateViewerToView(
   viewer: Viewer,
   view: ViewPosition,
+  options?: { durationMs?: number; continueMotion?: boolean },
 ): Promise<void> {
   const reduceMotion =
     typeof window !== 'undefined' &&
@@ -103,10 +104,12 @@ export async function animateViewerToView(
     zoom: toPsvZoom(view.zoom),
   };
 
-  try {
-    await viewer.stopAnimation();
-  } catch {
-    /* viewer may not be animating */
+  if (!options?.continueMotion) {
+    try {
+      await viewer.stopAnimation();
+    } catch {
+      /* viewer may not be animating */
+    }
   }
 
   if (reduceMotion) {
@@ -115,13 +118,15 @@ export async function animateViewerToView(
     return;
   }
 
+  const durationMs = options?.durationMs ?? NAMING_VIEW_ANIMATION_MS;
+
   try {
     const animation = viewer.animate({
       yaw: target.yaw,
       pitch: target.pitch,
       zoom: target.zoom,
-      speed: NAMING_VIEW_ANIMATION_MS,
-      easing: 'outCubic',
+      speed: durationMs,
+      easing: options?.durationMs ? 'linear' : 'outCubic',
     });
     if (animation) await animation;
     else {
@@ -129,8 +134,8 @@ export async function animateViewerToView(
       viewer.zoom(target.zoom);
     }
   } catch {
-    viewer.rotate({ yaw: target.yaw, pitch: target.pitch });
-    viewer.zoom(target.zoom);
+    // Interrupted (stopAnimation) or failed — leave the camera where it stopped.
+    // Snapping to the target made Play Tour pause jump to the end of the dwell drift.
   }
 }
 

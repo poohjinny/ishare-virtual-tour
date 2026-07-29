@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from 'react';
-import type { ChatGuideLink } from '../../types/tour';
+import type { TourClient } from '../../types/tour';
 import type { useTourAssistant } from '../../hooks/useTourAssistant';
 import { AiAssistantFab } from './AiAssistantFab';
 import { AiChatPanelFallback } from './AiChatPanelFallback';
@@ -18,10 +18,11 @@ interface AiAssistantProps {
   guideUiTest?: boolean;
   guideMock?: boolean;
   currentSceneId?: string;
+  client?: TourClient;
+  clientLogo?: string;
+  logoAlt?: string;
   onNavigateScene?: (sceneId: string) => void;
   onSelectNaming?: (sceneId: string, hotspotId: string) => void;
-  onVisitNaming?: (sceneId: string, hotspotId: string) => void;
-  onCopyGuideLink?: (link: ChatGuideLink) => Promise<boolean> | boolean;
 }
 
 type AnimPhase = 'idle' | 'enter' | 'exit';
@@ -31,10 +32,11 @@ export function AiAssistant({
   guideUiTest = false,
   guideMock = false,
   currentSceneId,
+  client,
+  clientLogo,
+  logoAlt,
   onNavigateScene,
   onSelectNaming,
-  onVisitNaming,
-  onCopyGuideLink,
 }: AiAssistantProps) {
   const {
     isOpen,
@@ -45,7 +47,6 @@ export function AiAssistant({
     messages,
     locationTitle,
     tourTitle,
-    suggestedQuestions,
     sendMessage,
     isSending,
     liveMode,
@@ -145,7 +146,6 @@ export function AiAssistant({
             messages={messages}
             locationTitle={locationTitle}
             tourTitle={tourTitle}
-            suggestedQuestions={suggestedQuestions}
             currentSceneId={currentSceneId}
             isSending={isSending}
             liveMode={liveMode}
@@ -156,8 +156,9 @@ export function AiAssistant({
             onSend={sendMessage}
             onNavigateScene={onNavigateScene}
             onSelectNaming={onSelectNaming}
-            onVisitNaming={onVisitNaming}
-            onCopyGuideLink={onCopyGuideLink}
+            client={client}
+            clientLogo={clientLogo}
+            logoAlt={logoAlt}
           />
         </Suspense>
       )}

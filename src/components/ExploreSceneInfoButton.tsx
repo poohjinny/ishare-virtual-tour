@@ -32,6 +32,11 @@ interface ExploreSceneInfoButtonProps {
     | 'breadcrumb';
   /** When set (breadcrumb), reflects whether place details are already open. */
   expanded?: boolean;
+  /**
+   * Skip CSS hover tooltip. Use inside overflow menus — absolute tooltip
+   * `::after` can inflate the scrollport and look like an empty trailing row.
+   */
+  hideTooltip?: boolean;
 }
 
 export function ExploreSceneInfoButton({
@@ -40,6 +45,7 @@ export function ExploreSceneInfoButton({
   onShow,
   variant = 'gallery',
   expanded = false,
+  hideTooltip = false,
 }: ExploreSceneInfoButtonProps) {
   const label = tourDirectorySceneInfoAriaLabel(sceneTitle);
   const isGalleryHeroChip = variant === 'galleryHero';
@@ -88,7 +94,7 @@ export function ExploreSceneInfoButton({
     </button>
   );
 
-  if (isTextButton) {
+  if (isTextButton || hideTooltip) {
     return button;
   }
 

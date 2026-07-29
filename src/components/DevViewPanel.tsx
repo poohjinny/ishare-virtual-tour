@@ -2924,16 +2924,6 @@ export function DevViewPanel({
     sceneStatus,
   ]);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'l' || e.key === 'L') {
-        void applyDefaultView();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [applyDefaultView]);
-
   const markerCoords = clickCoords ? formatCoords(clickCoords) : '—';
 
   const stickyTourBranding = useMemo(
@@ -6191,7 +6181,7 @@ export function DevViewPanel({
                         'Saving…'
                       : landingStatus === 'done' ?
                         'Saved!'
-                      : 'Apply defaultView (L)'}
+                      : 'Apply defaultView'}
                     </button>
                   </div>
                 </DevPanelFormGroup>

@@ -1,7 +1,10 @@
 import { TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD } from '../constants/tourDirectory';
-import { namingOpportunityStatusConfig } from '../data/namingOpportunityStatus';
+import {
+  namingOpportunityStatusConfig,
+  resolveNamingOpportunityStatus,
+} from '../data/namingOpportunityStatus';
 import type { ChatGuideLink, Hotspot, Scene, Tour } from '../types/tour';
-import { findNamingHotspotByNamingId } from './findTourHotspot';
+import { findNamingHotspotByNamingId, listSceneInfoHotspots } from './findTourHotspot';
 import { formatNamingPriceDisplay } from './namingPrice';
 import {
   abbreviateNamingBodyLead,
@@ -18,8 +21,61 @@ import { isSceneVisibleInExplore } from './sceneVisibility';
 /** Place / naming card under an Ask Guide reply. */
 export type GuideSceneLink = ChatGuideLink;
 
-const MAX_GUIDE_LINKS = 4;
-const GUIDE_CARD_DESC_MAX_CHARS = 96;
+/** UI collapses the list after this many cards (Show more / Show less). */
+export const GUIDE_LINK_PREVIEW_COUNT = 4;
+
+const GUIDE_CARD_DESC_MAX_CHARS = 140;
+
+function guideLinkKey(link: ChatGuideLink): string {
+  return link.kind === 'naming' ?
+      `naming:${link.namingId ?? link.hotspotId ?? ''}`
+    : `scene:${link.sceneId}`;
+}
+
+function normalizeGuideLinkTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Dedupe guide cards by id, then by display title.
+ * Same title for a place + its inherited naming (e.g. both "Covered Porch")
+ * collapses to one card — prefer the scene/place card for navigation.
+ */
+export function capGuideLinks(links: ChatGuideLink[]): ChatGuideLink[] {
+  const byId: ChatGuideLink[] = [];
+  const seenId = new Set<string>();
+  for (const link of links) {
+    const key = guideLinkKey(link);
+    if (seenId.has(key)) continue;
+    seenId.add(key);
+    byId.push(link);
+  }
+
+  const out: ChatGuideLink[] = [];
+  const indexByTitle = new Map<string, number>();
+  for (const link of byId) {
+    const titleKey = normalizeGuideLinkTitle(link.title);
+    if (!titleKey) {
+      out.push(link);
+      continue;
+    }
+    const existingIndex = indexByTitle.get(titleKey);
+    if (existingIndex === undefined) {
+      indexByTitle.set(titleKey, out.length);
+      out.push(link);
+      continue;
+    }
+    const existing = out[existingIndex];
+    if (existing && existing.kind === 'naming' && link.kind === 'scene') {
+      out[existingIndex] = link;
+    }
+  }
+  return out;
+}
 
 /** Short one-line blurb for guide cards — skips empty-place filler. */
 export function guideCardDescription(
@@ -83,22 +139,22 @@ function buildNamingLinkFromHotspot(
     naming.priceLabel?.trim() || formatNamingPriceDisplay(naming.price);
   const statusLabel = namingOpportunityStatusConfig(naming.status).label;
   const bodyDesc = guideCardDescription(popup?.body);
-  const fallbackDesc =
-    [priceLabel, statusLabel, scene.title?.trim()]
-      .filter(Boolean)
-      .join(' · ') || undefined;
+  const title =
+    label?.trim() || naming.name?.trim() || hotspot.label?.trim() || hotspot.id;
+  const placeHint = scene.title?.trim();
+  const description =
+    bodyDesc ||
+    (placeHint && placeHint.toLowerCase() !== title.toLowerCase() ?
+      `In ${placeHint}`
+    : undefined);
 
   return {
     kind: 'naming',
     sceneId,
     namingId: hotspot.namingId?.trim() || hotspot.id,
     hotspotId: hotspot.id,
-    title:
-      label?.trim() ||
-      naming.name?.trim() ||
-      hotspot.label?.trim() ||
-      hotspot.id,
-    description: bodyDesc || fallbackDesc,
+    title,
+    description,
     thumbnail:
       hotspot.preview?.image?.trim() ||
       popup?.image?.trim() ||
@@ -106,6 +162,7 @@ function buildNamingLinkFromHotspot(
       undefined,
     statusLabel,
     priceLabel: priceLabel || undefined,
+    status: resolveNamingOpportunityStatus(naming.status),
   };
 }
 
@@ -152,7 +209,6 @@ export function resolveGuideSceneLinks(
     if (!link) continue;
     seen.add(`scene:${sceneId}`);
     out.push(link);
-    if (out.length >= MAX_GUIDE_LINKS) break;
   }
 
   return out;
@@ -175,7 +231,6 @@ export function resolveGuideNamingLinks(
     if (!link) continue;
     seen.add(`naming:${namingId}`);
     out.push(link);
-    if (out.length >= MAX_GUIDE_LINKS) break;
   }
 
   return out;
@@ -245,7 +300,6 @@ export function inferGuideSceneLinksFromText(
     if (!link) continue;
     seen.add(candidate.key);
     out.push(link);
-    if (out.length >= MAX_GUIDE_LINKS) break;
   }
 
   return out;
@@ -268,7 +322,7 @@ export function resolveGuideLinks(
   const merged: ChatGuideLink[] = [];
   const seen = new Set<string>();
 
-  for (const link of [...fromScenes, ...fromNamings]) {
+  for (const link of [...fromNamings, ...fromScenes]) {
     const key =
       link.kind === 'naming' ?
         `naming:${link.namingId}`
@@ -276,9 +330,57 @@ export function resolveGuideLinks(
     if (seen.has(key)) continue;
     seen.add(key);
     merged.push(link);
-    if (merged.length >= MAX_GUIDE_LINKS) return merged;
   }
 
-  if (merged.length > 0) return merged;
+  if (merged.length > 0) {
+    // Model often lists naming names as sceneLinks — still attach naming cards
+    // from reply text so interest answers are not place-only.
+    const inferredNamings = inferGuideSceneLinksFromText(
+      tour,
+      currentSceneId,
+      reply,
+    ).filter((link) => link.kind === 'naming');
+    return capGuideLinks([...merged, ...inferredNamings]);
+  }
   return inferGuideSceneLinksFromText(tour, currentSceneId, reply);
+}
+
+/**
+ * When a Place card is really a naming opportunity (same title / scene pin),
+ * return the naming card instead.
+ */
+export function promoteGuideSceneLinkToNaming(
+  tour: Tour,
+  link: ChatGuideLink,
+): ChatGuideLink | null {
+  if (link.kind !== 'scene') return null;
+
+  const titleKey = normalizeGuideLinkTitle(link.title);
+  if (titleKey) {
+    for (const item of buildTourNamingDirectory(tour)) {
+      if (normalizeGuideLinkTitle(item.name) !== titleKey) continue;
+      const scene = tour.scenes[item.sceneId];
+      if (!scene) continue;
+      const hotspot = findHotspotOnScene(tour, scene, item.hotspotId);
+      if (!hotspot) continue;
+      return buildNamingLinkFromHotspot(tour, item.sceneId, hotspot, item.name);
+    }
+  }
+
+  const scene = tour.scenes[link.sceneId];
+  if (!scene || !isSceneVisibleInExplore(scene)) return null;
+
+  for (const hotspot of listSceneInfoHotspots(tour, scene)) {
+    const popup = resolveNamingPopup(tour, hotspot, scene);
+    const naming = popup?.namingOpportunity;
+    if (!naming) continue;
+    if (!isNamingVisibleInExplore(resolveHotspotNamingRecord(tour, hotspot))) {
+      continue;
+    }
+    const status = resolveNamingOpportunityStatus(naming.status);
+    if (status === 'sold') continue;
+    return buildNamingLinkFromHotspot(tour, link.sceneId, hotspot);
+  }
+
+  return null;
 }

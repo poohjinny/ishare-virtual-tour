@@ -28,6 +28,7 @@ import {
 } from '../components/TourLoadSplash';
 import { TourNavFloat } from '../components/TourNavFloat';
 import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
+import { usePlayTour } from '../hooks/usePlayTour';
 import {
   loadTour,
   listPublicTourIds,
@@ -39,7 +40,6 @@ import { getTourWebsite, resolveTourClient } from '../utils/resolveTourClient';
 import { resolveExploreDirectoryLead } from '../utils/resolveExploreDirectoryLead';
 import { resolveTourBranding } from '../utils/resolveTourBranding';
 import { getTourProductFullName } from '../utils/tourProductName';
-import { buildAbsoluteShareUrl } from '../utils/buildShareUrl';
 import {
   listExploreScenes,
   resolveRoutableSceneId,
@@ -59,16 +59,15 @@ import { useClientFavicon } from '../hooks/useClientFavicon';
 import { useClientFont } from '../hooks/useClientFont';
 import { useImmersiveBackground } from '../hooks/useImmersiveBackground';
 import { useTourOpenGraph } from '../hooks/useTourOpenGraph';
-import { toggleImmersiveBackgroundPlayback } from '../viewer/immersiveBackgroundNavbarButton';
+import {
+  ensureImmersiveBackgroundPlaying,
+  ensureImmersiveBackgroundPaused,
+  toggleImmersiveBackgroundPlayback,
+} from '../viewer/immersiveBackgroundNavbarButton';
 import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
 import { useTourEmbedMessaging } from '../hooks/useTourEmbedMessaging';
 import { useTourFullscreen } from '../hooks/useTourFullscreen';
-import type {
-  ChatGuideLink,
-  PopupContent,
-  Tour,
-  ViewPosition,
-} from '../types/tour';
+import type { PopupContent, Tour, ViewPosition } from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import { devFetchTour, type DevTourMutateOptions } from '../utils/devTourApi';
 import { setDevTourCache } from '../services/devTourCache';
@@ -542,6 +541,7 @@ function TourExperience() {
   } = useTourState(initialScene);
 
   const transitioningRef = useRef(false);
+  const playTourSuppressRouteNavRef = useRef(false);
 
   const { showBack, showForward, goBack, goForward } = useHistoryNavControls();
 
@@ -550,6 +550,7 @@ function TourExperience() {
     currentSceneId,
     isTransitioning,
     transitioningRef,
+    suppressViewerNavRef: playTourSuppressRouteNavRef,
     viewerRef,
     syncSceneFromRoute,
     pendingNamingSelectionRef,
@@ -568,6 +569,41 @@ function TourExperience() {
     viewerRef,
     pendingNamingSelectionRef,
     setActiveNamingHotspotId,
+  });
+
+  const prepareForPlayNav = useCallback(() => {
+    pendingNamingSelectionRef.current = null;
+    setActiveNamingHotspotId(null);
+    clearNamingOpportunityFromUrl();
+    viewerRef.current?.clearActiveInfoHotspot();
+    viewerRef.current?.closeAnchoredPanels();
+  }, [clearNamingOpportunityFromUrl]);
+
+  const handlePlayTourStart = useCallback(() => {
+    if (!immersiveBackgroundController) return;
+    ensureImmersiveBackgroundPlaying(immersiveBackgroundController);
+  }, [immersiveBackgroundController]);
+
+  const handlePlayTourPause = useCallback(() => {
+    if (!immersiveBackgroundController) return;
+    ensureImmersiveBackgroundPaused(immersiveBackgroundController);
+  }, [immersiveBackgroundController]);
+
+  const {
+    enabled: playTourEnabled,
+    phase: playTourPhase,
+    toggle: togglePlayTour,
+    pauseForManualNav,
+  } = usePlayTour({
+    tour:
+      bootstrapTour.id === BOOTSTRAP_TOUR_PLACEHOLDER.id ? null : bootstrapTour,
+    currentSceneId,
+    viewerRef,
+    suppressRouteViewerNavRef: playTourSuppressRouteNavRef,
+    onPlayStart: handlePlayTourStart,
+    onPlayPause: handlePlayTourPause,
+    prepareForPlayNav,
+    syncSceneToUrl,
   });
 
   const openGraphMeta = useMemo(() => {
@@ -692,11 +728,16 @@ function TourExperience() {
   // "Visit" on the current place — clear any open NO and reset to the bare
   // scene default (unlike the recenter shortcut, which keeps an active NO).
   const handleVisitCurrentScene = useCallback(() => {
+    pauseForManualNav();
     pendingNamingSelectionRef.current = null;
     setActiveNamingHotspotId(null);
     clearNamingOpportunityFromUrl();
     viewerRef.current?.recenterToDefaultView({ forceDefault: true });
-  }, [clearNamingOpportunityFromUrl, pendingNamingSelectionRef]);
+  }, [
+    clearNamingOpportunityFromUrl,
+    pauseForManualNav,
+    pendingNamingSelectionRef,
+  ]);
 
   const handleToggleBackgroundMusic = useCallback(() => {
     if (!immersiveBackgroundController) return;
@@ -747,6 +788,7 @@ function TourExperience() {
 
   const handleSelectNamingOpportunity = useCallback(
     (sceneId: string, hotspotId: string) => {
+      pauseForManualNav();
       const found = findNamingHotspotInTour(bootstrapTour, hotspotId);
       if (!found) return;
 
@@ -761,12 +803,14 @@ function TourExperience() {
       bootstrapTour,
       currentSceneId,
       openNamingOpportunity,
+      pauseForManualNav,
     ],
   );
 
   /** Explore naming Visit — aim at the hotspot without opening the panel. */
   const handleVisitNamingPlace = useCallback(
     async (sceneId: string, hotspotId: string) => {
+      pauseForManualNav();
       const found = findNamingHotspotInTour(bootstrapTour, hotspotId);
       const targetSceneId = found?.sceneId ?? sceneId;
       const scene = bootstrapTour.scenes[targetSceneId];
@@ -787,7 +831,7 @@ function TourExperience() {
         scene.defaultView;
 
       if (targetSceneId === currentSceneId) {
-        viewerRef.current?.animateToView(view);
+        void viewerRef.current?.animateToView(view);
         return;
       }
 
@@ -800,12 +844,14 @@ function TourExperience() {
       bootstrapTour,
       clearNamingOpportunityFromUrl,
       currentSceneId,
+      pauseForManualNav,
       syncSceneToUrl,
     ],
   );
 
   const handleNavigate = useCallback(
     async (sceneId: string, targetView?: ViewPosition) => {
+      pauseForManualNav();
       const pendingNaming = pendingNamingSelectionRef.current;
       const navigatingToPendingNaming =
         pendingNaming !== null && pendingNaming.sceneId === sceneId;
@@ -829,7 +875,13 @@ function TourExperience() {
         targetView ?? scene.defaultView,
       );
     },
-    [bootstrapTour.scenes, currentSceneId, sceneAudience, syncSceneToUrl],
+    [
+      bootstrapTour.scenes,
+      currentSceneId,
+      pauseForManualNav,
+      sceneAudience,
+      syncSceneToUrl,
+    ],
   );
 
   const handleDismissModalPopups = useCallback(() => {
@@ -885,6 +937,7 @@ function TourExperience() {
     async (sceneId: string) => {
       if (sceneId === currentSceneId) return;
 
+      pauseForManualNav();
       pendingNamingSelectionRef.current = null;
       setActiveNamingHotspotId(null);
       viewerRef.current?.clearActiveInfoHotspot();
@@ -896,8 +949,18 @@ function TourExperience() {
 
       await viewerRef.current?.navigateToScene(sceneId, scene.defaultView);
     },
-    [bootstrapTour.scenes, currentSceneId, syncSceneToUrl],
+    [bootstrapTour.scenes, currentSceneId, pauseForManualNav, syncSceneToUrl],
   );
+
+  const handleHistoryBack = useCallback(() => {
+    pauseForManualNav();
+    goBack();
+  }, [goBack, pauseForManualNav]);
+
+  const handleHistoryForward = useCallback(() => {
+    pauseForManualNav();
+    goForward();
+  }, [goForward, pauseForManualNav]);
 
   const handleTransitionStart = useCallback(() => {
     transitioningRef.current = true;
@@ -937,13 +1000,19 @@ function TourExperience() {
   const handleLoadErrorGoHome = useCallback(async () => {
     const scene = bootstrapTour.scenes[bootstrapTour.firstScene];
     if (!scene) return;
+    pauseForManualNav();
     setViewerLoadError(null);
     syncSceneToUrl(bootstrapTour.firstScene, { clearNamingOpportunity: true });
     await viewerRef.current?.navigateToScene(
       bootstrapTour.firstScene,
       scene.defaultView,
     );
-  }, [bootstrapTour.firstScene, bootstrapTour.scenes, syncSceneToUrl]);
+  }, [
+    bootstrapTour.firstScene,
+    bootstrapTour.scenes,
+    pauseForManualNav,
+    syncSceneToUrl,
+  ]);
 
   if (!tour || bootstrapTour.id === BOOTSTRAP_TOUR_PLACEHOLDER.id) {
     if (searchParams.dev && devTourBootstrapStatus === 'loading') {
@@ -988,6 +1057,9 @@ function TourExperience() {
               immersiveNavbarAvailable={Boolean(
                 bootstrapTour.immersiveBackground,
               )}
+              playTourEnabled={playTourEnabled}
+              playTourPhase={playTourPhase}
+              onPlayTourToggle={togglePlayTour}
               skipLanding={searchParams.skipLanding}
               splashDone={splashRevealReady}
               immersiveBackgroundController={immersiveBackgroundController}
@@ -1031,6 +1103,9 @@ function TourExperience() {
                 bootstrapTour.immersiveBackground,
               )}
               toolbarToggleAvailable={isDesktop}
+              playTourEnabled={playTourEnabled}
+              playTourPhase={playTourPhase}
+              onPlayTourToggle={togglePlayTour}
               activeNamingHotspotId={activeNamingHotspotId}
               embed={searchParams.embed}
               disabled={isTransitioning}
@@ -1086,8 +1161,8 @@ function TourExperience() {
           namingOpportunityBusy={namingOpportunityBusy}
           showHistoryBack={showBack && currentSceneId !== tour.firstScene}
           showHistoryForward={showForward}
-          onHistoryBack={goBack}
-          onHistoryForward={goForward}
+          onHistoryBack={handleHistoryBack}
+          onHistoryForward={handleHistoryForward}
           onSelectScene={handleNavigate}
           onSelectNamingOpportunity={handleSelectNamingOpportunity}
           onVisitNamingPlace={handleVisitNamingPlace}
@@ -1126,6 +1201,9 @@ function TourExperience() {
             guideUiTest={searchParams.guideUiTest}
             guideMock={searchParams.guideMock}
             currentSceneId={currentSceneId}
+            client={resolveTourClient(tour)}
+            clientLogo={tourBranding?.logo}
+            logoAlt={tourBranding?.logoAlt}
             onNavigateScene={(sceneId) => {
               if (sceneId === currentSceneId) {
                 handleVisitCurrentScene();
@@ -1137,25 +1215,6 @@ function TourExperience() {
               void handleNavigate(sceneId);
             }}
             onSelectNaming={handleSelectNamingOpportunity}
-            onVisitNaming={(sceneId, hotspotId) => {
-              void handleVisitNamingPlace(sceneId, hotspotId);
-            }}
-            onCopyGuideLink={async (link: ChatGuideLink) => {
-              try {
-                const url = buildAbsoluteShareUrl({
-                  tourId: bootstrapTour.id,
-                  sceneId: link.sceneId,
-                  firstSceneId: bootstrapTour.firstScene,
-                  namingHotspotId:
-                    link.kind === 'naming' ? link.hotspotId : null,
-                });
-                await navigator.clipboard.writeText(url);
-                return true;
-              } catch (error) {
-                console.warn('[ask-guide] copy link failed', error);
-                return false;
-              }
-            }}
           />
         : null}
 

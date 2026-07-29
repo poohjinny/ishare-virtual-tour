@@ -51,16 +51,20 @@ export const tourNavBreadcrumbAlignVariants = cva('', {
 });
 
 export const tourNavBreadcrumbRowClassName = cn(
-  'flex w-fit max-w-full items-center justify-center gap-2.5',
-  'max-[1023px]:justify-start max-[480px]:gap-2',
+  'flex w-fit max-w-full items-center justify-center gap-2',
+  'max-[1023px]:justify-start max-[480px]:gap-1.5',
 );
 
 export const tourNavBreadcrumbBarClassName = cn(
-  'flex h-11 w-fit max-w-full min-w-0 flex-[0_1_auto] items-center',
-  'rounded-full bg-white/[0.75] px-7 transition-[background] duration-150 hover:bg-white/[0.90]',
+  'flex h-10 w-fit max-w-full min-w-0 flex-[0_1_auto] items-center',
+  'rounded-full bg-white/[0.75] px-5 transition-[background] duration-150 hover:bg-white/[0.90]',
   tourNavGlassShadow,
-  'max-[480px]:h-10 max-[480px]:px-[22px]',
+  'max-[480px]:h-9 max-[480px]:px-4',
 );
+
+/** Marks the glass pill so sibling menus can anchor below its bottom edge. */
+export const TOUR_BREADCRUMB_BAR_ATTR = 'data-tour-breadcrumb-bar';
+export const tourBreadcrumbBarSelector = `[${TOUR_BREADCRUMB_BAR_ATTR}]`;
 
 /** ← → grouped on the breadcrumb row (right of location pill). */
 export const tourNavHistoryGroupClassName = cn(
@@ -71,20 +75,20 @@ export const tourNavHistoryGroupClassName = cn(
 );
 
 export const tourNavHistoryGroupBtnClassName = cn(
-  'inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
+  'inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
   'bg-transparent p-0 text-muted',
   'transition-[background,color,transform] duration-150',
   'hover:enabled:bg-white/[0.90] hover:enabled:text-primary',
   'disabled:cursor-not-allowed disabled:opacity-35',
-  'max-[480px]:size-9',
+  'max-[480px]:size-8',
 );
 
 export const tourNavHistoryBtnIconClassName = materialSymbolCompactClassName;
 
 export const tourNavBreadcrumbListClassName = cn(
   'm-0 flex min-w-0 list-none flex-nowrap items-center gap-0 p-0',
-  'font-display text-lg font-normal leading-[1.25] tracking-[-0.01em]',
-  'max-[480px]:text-md',
+  'font-display text-md font-normal leading-[1.25] tracking-[-0.01em]',
+  'max-[480px]:text-sm',
 );
 
 export const tourNavBreadcrumbItemClassName = cn(
@@ -96,7 +100,7 @@ const tourNavBreadcrumbMutedTextClassName =
   'text-[color:color-mix(in_srgb,var(--ishare-text-muted)_55%,var(--ishare-text-body))]';
 
 export const tourNavBreadcrumbSepClassName = cn(
-  'mx-3.5 shrink-0 font-normal max-[480px]:mx-[11px]',
+  'mx-2.5 shrink-0 font-normal max-[480px]:mx-2',
   tourNavBreadcrumbMutedTextClassName,
 );
 
@@ -109,7 +113,7 @@ export const tourNavBreadcrumbLinkClassName = cn(
 );
 
 export const tourNavBreadcrumbCurrentClassName = cn(
-  'inline-flex min-w-0 max-w-full items-center gap-[15px] font-semibold text-foreground',
+  'inline-flex min-w-0 max-w-full items-center gap-2.5 font-semibold text-foreground',
 );
 
 export const tourNavBreadcrumbCurrentLabelClassName = cn(
@@ -122,10 +126,10 @@ export const tourNavBreadcrumbCurrentLeadClassName = cn(
 );
 
 export const tourNavBreadcrumbPulseDotClassName = cn(
-  'relative ml-0 size-2.5 shrink-0 rounded-full bg-primary',
+  'relative ml-0 size-2 shrink-0 rounded-full bg-primary',
   'shadow-[0_0_0_0_rgba(var(--ishare-primary-rgb),0.55)]',
   'animate-tour-nav-dot-glow motion-reduce:animate-none',
-  'max-[480px]:size-[9px]',
+  'max-[480px]:size-[7px]',
   'before:pointer-events-none before:absolute before:-inset-0.5 before:z-0 before:origin-center',
   'before:rounded-full before:border-2 before:border-[rgba(var(--ishare-primary-rgb),0.75)]',
   'before:bg-[rgba(var(--ishare-primary-rgb),0.25)]',
@@ -134,6 +138,70 @@ export const tourNavBreadcrumbPulseDotClassName = cn(
   'after:rounded-full after:border-2 after:border-[rgba(var(--ishare-primary-rgb),0.5)]',
   'after:content-[""] after:animate-tour-nav-dot-pulse after:[animation-delay:1.1s]',
   'motion-reduce:after:animate-none',
+);
+
+/** Sibling picker — split control (ancestor title + chevron). */
+export const tourNavBreadcrumbSplitClassName = cn(
+  'inline-flex min-w-0 max-w-full items-center',
+);
+
+export const tourNavBreadcrumbChevronBtnClassName = cn(
+  'inline-flex size-5 shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0',
+  'transition-[background,color,transform] duration-150',
+  tourNavBreadcrumbMutedTextClassName,
+  'hover:enabled:bg-[rgba(15,23,42,0.06)] hover:enabled:text-primary',
+  'aria-expanded:bg-[rgba(var(--ishare-primary-rgb),0.1)] aria-expanded:text-primary',
+  'disabled:cursor-not-allowed disabled:opacity-50',
+  'max-[480px]:size-4',
+);
+
+export const tourNavBreadcrumbChevronIconClassName = cn(
+  materialSymbolCompactClassName,
+  'transition-transform duration-150',
+  'aria-expanded:rotate-180',
+);
+
+export const tourNavBreadcrumbCurrentMenuTriggerClassName = cn(
+  'inline-flex min-w-0 max-w-full cursor-pointer items-center gap-0.5 border-none bg-transparent p-0',
+  'font-[inherit] font-semibold text-foreground',
+  'transition-colors duration-150 hover:enabled:text-primary',
+  'aria-expanded:text-primary',
+  'disabled:cursor-not-allowed disabled:opacity-50',
+);
+
+/** Portaled sibling list under a breadcrumb crumb. */
+export const TOUR_BREADCRUMB_SIBLING_MENU_ATTR =
+  'data-tour-breadcrumb-sibling-menu';
+export const tourBreadcrumbSiblingMenuSelector = `[${TOUR_BREADCRUMB_SIBLING_MENU_ATTR}]`;
+
+export const tourNavBreadcrumbSiblingMenuClassName = cn(
+  'ishare-scrollbar fixed z-[var(--tour-chrome-menu-z-index)] m-0 max-h-[min(240px,40vh)] w-max min-w-[10rem]',
+  'max-w-[min(240px,calc(100vw-32px))] list-none overflow-y-auto overscroll-contain rounded-lg origin-top',
+  'border border-[color:var(--ishare-border)] bg-white/92 p-1 shadow-[var(--ishare-glass-dock-shadow)]',
+);
+
+export const tourNavBreadcrumbSiblingRowClassName = cn(
+  'flex w-full items-center gap-0 rounded-md',
+  'transition-[background,color] duration-100',
+  'hover:bg-[rgba(15,23,42,0.06)]',
+);
+
+export const tourNavBreadcrumbSiblingRowCurrentClassName = cn(
+  'bg-[rgba(var(--ishare-primary-rgb),0.1)] text-primary',
+  'hover:bg-[rgba(var(--ishare-primary-rgb),0.1)]',
+);
+
+export const tourNavBreadcrumbSiblingOptionClassName = cn(
+  'flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md border-none bg-transparent py-1.5 pr-2 pl-0.5 text-left',
+  'font-display text-sm font-normal leading-[1.3] text-inherit',
+  'transition-colors duration-100',
+  'aria-current:font-semibold',
+  'disabled:cursor-default disabled:opacity-100',
+);
+
+export const tourNavBreadcrumbSiblingOptionCheckClassName = cn(
+  materialSymbolCheckClassName,
+  'ml-auto shrink-0 text-primary',
 );
 
 /** Breadcrumb current-pill Details control — compact glass chip beside the title. */
@@ -153,7 +221,7 @@ export const tourNavActionsRootClassName = cn(
 );
 
 export const tourNavActionsDockClassName = cn(
-  'relative flex items-center gap-2 overflow-visible',
+  'relative flex items-center gap-1.5 overflow-visible',
 );
 
 /** ⋯ overflow menu anchor (mobile + compact). */
@@ -171,8 +239,7 @@ export const tourNavDockOverflowItemClassName = cn(
 
 export const tourNavCircleBtnVariants = cva(
   cn(
-    'tour-nav-dock-btn flex size-[46px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
-    'max-[480px]:size-11',
+    'tour-nav-dock-btn flex size-[var(--tour-chrome-fab-size)] shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
   ),
   {
     variants: {

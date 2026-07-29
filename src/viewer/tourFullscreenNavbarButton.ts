@@ -9,20 +9,28 @@ interface NavbarButtonWithContainer {
   container: HTMLElement;
 }
 
-/** True when `target` is the active tour fullscreen element. */
+type DocumentWithVendorFullscreen = Document & {
+  webkitFullscreenElement?: Element | null;
+  mozFullScreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+  mozCancelFullScreen?: () => Promise<void> | void;
+};
+
+function getDocumentFullscreenElement(): Element | null {
+  const doc = document as DocumentWithVendorFullscreen;
+  return (
+    document.fullscreenElement ??
+    doc.webkitFullscreenElement ??
+    doc.mozFullScreenElement ??
+    null
+  );
+}
+
+/** True when `target` is the active Fullscreen API element. */
 export function isTourElementFullscreen(target: HTMLElement | null): boolean {
   if (!target) return false;
 
-  const doc = document as Document & {
-    webkitFullscreenElement?: Element | null;
-    mozFullScreenElement?: Element | null;
-  };
-
-  const fs =
-    document.fullscreenElement ??
-    doc.webkitFullscreenElement ??
-    doc.mozFullScreenElement;
-
+  const fs = getDocumentFullscreenElement();
   if (fs === target) return true;
 
   if (typeof target.matches !== 'function') return false;
@@ -38,6 +46,42 @@ export function isTourElementFullscreen(target: HTMLElement | null): boolean {
   }
 }
 
+/**
+ * F11 / browser-chrome fullscreen is not the Fullscreen API
+ * (`document.fullscreenElement` stays null). Approximate via viewport fill
+ * and `display-mode: fullscreen` when present.
+ */
+export function isBrowserChromeFullscreen(): boolean {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return false;
+  }
+  if (getDocumentFullscreenElement()) return false;
+
+  try {
+    if (window.matchMedia('(display-mode: fullscreen)').matches) return true;
+  } catch {
+    /* ignore */
+  }
+
+  const slack = 2;
+  return (
+    window.innerWidth >= screen.width - slack &&
+    window.innerHeight >= screen.height - slack
+  );
+}
+
+/** UI active — Fullscreen API and/or native F11-style browser fullscreen. */
+export function isTourPresentationFullscreen(
+  target: HTMLElement | null,
+): boolean {
+  if (isTourElementFullscreen(target)) return true;
+
+  const fs = getDocumentFullscreenElement();
+  if (fs === document.documentElement || fs === document.body) return true;
+
+  return isBrowserChromeFullscreen();
+}
+
 function resolveFullscreenButtonEl(container: HTMLElement): HTMLElement {
   if (container.classList.contains('psv-fullscreen-button')) {
     return container;
@@ -49,10 +93,15 @@ function resolveFullscreenButtonEl(container: HTMLElement): HTMLElement {
 function applyFullscreenButtonState(
   container: HTMLElement,
   active: boolean,
+  chromeOnly = false,
 ): void {
   const button = resolveFullscreenButtonEl(container);
   button.classList.toggle('psv-fullscreen-button--active', active);
-  const label = active ? 'Exit fullscreen' : 'Fullscreen';
+  const label =
+    active ?
+      chromeOnly ? 'Exit fullscreen (press F11)'
+      : 'Exit fullscreen'
+    : 'Fullscreen';
   button.setAttribute('aria-label', label);
   button.setAttribute('title', label);
 }
@@ -82,25 +131,107 @@ function requestElementFullscreen(target: HTMLElement): void {
 }
 
 function exitElementFullscreen(): void {
+  const doc = document as DocumentWithVendorFullscreen;
   if (document.exitFullscreen) {
-    void document.exitFullscreen();
+    void document.exitFullscreen().catch((error: unknown) => {
+      console.warn('[tour fullscreen] exitFullscreen failed', error);
+    });
     return;
   }
 
-  const webkitDocument = document as Document & {
-    webkitExitFullscreen?: () => Promise<void> | void;
-  };
-  webkitDocument.webkitExitFullscreen?.();
+  try {
+    doc.webkitExitFullscreen?.();
+  } catch (error: unknown) {
+    console.warn('[tour fullscreen] webkitExitFullscreen failed', error);
+  }
+
+  try {
+    doc.mozCancelFullScreen?.();
+  } catch {
+    /* ignore */
+  }
 }
 
 export function toggleTourFullscreen(target: HTMLElement | null): void {
   if (!target) return;
 
-  if (isTourElementFullscreen(target)) {
+  // Fullscreen API session — always exit via API.
+  if (getDocumentFullscreenElement()) {
     exitElementFullscreen();
-  } else {
-    requestElementFullscreen(target);
+    return;
   }
+
+  // Native F11 only — JS cannot exit; F11 key handler lets the browser leave.
+  if (isBrowserChromeFullscreen()) {
+    return;
+  }
+
+  requestElementFullscreen(target);
+}
+
+/**
+ * Prefer our Fullscreen API over native F11 so the control button can enter
+ * and exit. When already in native F11, do not preventDefault — the browser
+ * must handle leaving.
+ */
+export function handleTourFullscreenHotkey(
+  event: KeyboardEvent,
+  target: HTMLElement | null,
+): void {
+  if (event.key !== 'F11' && event.key.toLowerCase() !== 'f') return;
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+  const isF11 = event.key === 'F11';
+  const apiFs = Boolean(getDocumentFullscreenElement());
+  const chromeFs = isBrowserChromeFullscreen();
+
+  if (isF11 && chromeFs && !apiFs) {
+    // Leaving native F11 — must not preventDefault or the user gets stuck.
+    return;
+  }
+
+  event.preventDefault();
+  toggleTourFullscreen(target);
+}
+
+function schedulePresentationSync(sync: () => void): void {
+  sync();
+  window.setTimeout(sync, 50);
+  window.setTimeout(sync, 200);
+  window.setTimeout(sync, 500);
+}
+
+function bindFullscreenApiSync(sync: () => void): () => void {
+  document.addEventListener('fullscreenchange', sync);
+  document.addEventListener('webkitfullscreenchange', sync);
+  document.addEventListener('mozfullscreenchange', sync);
+  window.addEventListener('resize', sync);
+
+  let displayModeMql: MediaQueryList | null = null;
+  const onDisplayModeChange = () => sync();
+  try {
+    displayModeMql = window.matchMedia('(display-mode: fullscreen)');
+    displayModeMql.addEventListener('change', onDisplayModeChange);
+  } catch {
+    displayModeMql = null;
+  }
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== 'F11') return;
+    schedulePresentationSync(sync);
+  };
+  window.addEventListener('keydown', onKeyDown);
+
+  sync();
+
+  return () => {
+    document.removeEventListener('fullscreenchange', sync);
+    document.removeEventListener('webkitfullscreenchange', sync);
+    document.removeEventListener('mozfullscreenchange', sync);
+    window.removeEventListener('resize', sync);
+    window.removeEventListener('keydown', onKeyDown);
+    displayModeMql?.removeEventListener('change', onDisplayModeChange);
+  };
 }
 
 export function createTourFullscreenNavbarButton(
@@ -129,22 +260,20 @@ export function bindTourFullscreenNavbarButton(
       false,
     ) as NavbarButtonWithContainer | undefined;
 
-    if (!target) return;
+    if (!target || !button) return;
 
-    const active = isTourElementFullscreen(target);
-    if (!button) return;
-
-    applyFullscreenButtonState(button.container, active);
+    const apiFs = Boolean(getDocumentFullscreenElement());
+    const chromeOnly = !apiFs && isBrowserChromeFullscreen();
+    applyFullscreenButtonState(
+      button.container,
+      isTourPresentationFullscreen(target),
+      chromeOnly,
+    );
   };
 
-  document.addEventListener('fullscreenchange', sync);
-  document.addEventListener('webkitfullscreenchange', sync);
-  document.addEventListener('mozfullscreenchange', sync);
-  sync();
+  return bindFullscreenApiSync(sync);
+}
 
-  return () => {
-    document.removeEventListener('fullscreenchange', sync);
-    document.removeEventListener('webkitfullscreenchange', sync);
-    document.removeEventListener('mozfullscreenchange', sync);
-  };
+export function bindPresentationFullscreenSync(sync: () => void): () => void {
+  return bindFullscreenApiSync(sync);
 }

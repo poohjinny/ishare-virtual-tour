@@ -1,10 +1,17 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Ref,
+} from 'react';
 import { CHAT_SCROLL_TEST_MESSAGES } from '../../data/chatScrollTestMessages';
 import {
   VIRTUAL_TOUR_GUIDE_NAME,
   VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE,
 } from '../../constants/branding';
-import type { ChatGuideLink, ChatMessage } from '../../types/tour';
+import type { ChatMessage, TourClient } from '../../types/tour';
 import { cn } from '../../lib/cn';
 import { useSpeechToText } from '../../hooks/useSpeechToText';
 import { GlassPanelCloseIcon, TourGlassPanel } from '../TourGlassPanel';
@@ -12,32 +19,37 @@ import { IconTooltip } from '../ui/IconTooltip';
 import { MaterialSymbol } from '../ui/MaterialSymbol';
 import { MATERIAL_SYMBOL_SIZE_22 } from '../ui/materialSymbolClasses';
 import { PlatformBrandLink } from '../PlatformBrandLink';
-import { LocationBadge } from './LocationBadge';
 import { GuideAvatar } from './GuideAvatar';
 import { GuideCtaRow } from './GuideCtaRow';
 import { GuideSceneLinkCards } from './GuideSceneLinkCards';
-import { SuggestedQuestions } from './SuggestedQuestions';
+import { FollowUpQuestions } from './FollowUpQuestions';
 import { AiThinkingIndicator } from './AiThinkingIndicator';
 import {
   aiComposerActionsClassName,
   aiComposerClassName,
+  aiComposerFollowUpsRevealClassName,
+  aiComposerFollowUpsRevealClosedClassName,
+  aiComposerFollowUpsRevealInnerClassName,
+  aiComposerFollowUpsRevealOpenClassName,
   aiComposerIconClassName,
   aiComposerInputClassName,
-  aiComposerPillClassName,
-  aiComposerPillExpandedClassName,
   aiComposerSendClassName,
   aiComposerSendIconClassName,
+  aiComposerShellClassName,
+  aiComposerShellCollapsedClassName,
+  aiComposerShellDividerClassName,
+  aiComposerShellExpandedClassName,
+  aiComposerShellFieldClassName,
+  aiComposerShellFollowUpsClassName,
   aiComposerVoiceClassName,
   aiComposerVoiceListeningClassName,
   aiComposerVoiceRingClassName,
-  aiMessageFollowUpsClassName,
   aiMessageGapSameClassName,
   aiMessageGapTurnClassName,
   aiMessageVariants,
   aiPanelErrorClassName,
   aiPanelErrorDismissClassName,
   aiPanelErrorRowClassName,
-  aiPanelFooterClassName,
   aiPanelHeaderActionsClassName,
   aiPanelHeaderBtnClassName,
   aiPanelHeaderIconClassName,
@@ -47,7 +59,6 @@ import {
   aiPanelMessagesClassName,
   aiPanelNoticeClassName,
   aiPanelPoweredByClassName,
-  aiPanelSuggestionsSlotClassName,
   aiPanelSymbolClassName,
   aiPanelThreadClassName,
   aiPanelTitleClassName,
@@ -62,7 +73,6 @@ interface AiChatPanelProps {
   messages: ChatMessage[];
   locationTitle: string;
   tourTitle: string;
-  suggestedQuestions: string[];
   currentSceneId?: string;
   isSending?: boolean;
   liveMode?: boolean;
@@ -73,8 +83,10 @@ interface AiChatPanelProps {
   onSend: (text: string) => void;
   onNavigateScene?: (sceneId: string) => void;
   onSelectNaming?: (sceneId: string, hotspotId: string) => void;
-  onVisitNaming?: (sceneId: string, hotspotId: string) => void;
-  onCopyGuideLink?: (link: ChatGuideLink) => Promise<boolean> | boolean;
+  /** Catalog client — shown when a reply includes contact / website CTAs. */
+  client?: TourClient;
+  clientLogo?: string;
+  logoAlt?: string;
 }
 
 function ResetIcon() {
@@ -126,7 +138,7 @@ function ArrowUpIcon() {
   );
 }
 
-/** Same-role stays tight; user↔assistant turns open up. */
+/** Same-role opens a bit; user↔assistant turns open more. */
 function threadItemSpacingClass(
   previousRole: ChatMessage['role'] | null,
   role: ChatMessage['role'] | 'assistant',
@@ -137,6 +149,128 @@ function threadItemSpacingClass(
     : aiMessageGapTurnClassName;
 }
 
+interface ComposerFieldProps {
+  value: string;
+  canCompose: boolean;
+  hasInput: boolean;
+  listening: boolean;
+  speechSupported: boolean;
+  speechError: string | null;
+  speechLevel: number;
+  voiceLabel: string;
+  onChange: (value: string) => void;
+  onToggleSpeech: () => void;
+  /** Keep caret in the field on Enter — avoid focusing the submit control. */
+  onSubmitRequest?: () => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
+  className?: string;
+  autoFocus?: boolean;
+  inputRef?: Ref<HTMLInputElement>;
+}
+
+function ComposerField({
+  value,
+  canCompose,
+  hasInput,
+  listening,
+  speechSupported,
+  speechError,
+  speechLevel,
+  voiceLabel,
+  onChange,
+  onToggleSpeech,
+  onSubmitRequest,
+  onFocus,
+  onBlur,
+  className,
+  autoFocus = false,
+  inputRef,
+}: ComposerFieldProps) {
+  const canSend = hasInput && canCompose && !listening;
+
+  return (
+    <div className={className}>
+      <input
+        ref={inputRef}
+        className={aiComposerInputClassName}
+        type='text'
+        placeholder={
+          listening ? 'Listening…' : `Ask ${VIRTUAL_TOUR_GUIDE_NAME}...`
+        }
+        value={value}
+        autoFocus={autoFocus}
+        onChange={(e) => {
+          if (listening || !canCompose) return;
+          onChange(e.target.value);
+        }}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
+          // Prevent the browser from moving focus to the submit control (then
+          // disabling/hiding it dumps focus out of the composer).
+          event.preventDefault();
+          if (!canSend) return;
+          onSubmitRequest?.();
+        }}
+        aria-label='Your question'
+        // readOnly (not disabled) while sending — disabled inputs drop focus on Enter.
+        readOnly={listening || !canCompose}
+      />
+      <div className={aiComposerActionsClassName}>
+        {speechSupported ?
+          <IconTooltip label={voiceLabel} placement='top'>
+            <button
+              type='button'
+              className={
+                listening ?
+                  aiComposerVoiceListeningClassName
+                : aiComposerVoiceClassName
+              }
+              aria-label={voiceLabel}
+              aria-pressed={listening}
+              disabled={!canCompose}
+              onPointerDown={(event) => {
+                // Avoid focusing the mic (pill expand) and losing the click to layout shift.
+                event.preventDefault();
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onToggleSpeech();
+              }}
+            >
+              {listening ?
+                <MicVolumePulse level={speechLevel} />
+              : null}
+              <MicIcon />
+            </button>
+          </IconTooltip>
+        : null}
+        {speechError ?
+          <span className='sr-only' role='status'>
+            {speechError}
+          </span>
+        : null}
+        {/* Keep mounted; collapse from layout when idle so the mic sits on the trailing edge.
+            Enter is handled on the input, so hiding the control no longer dumps focus. */}
+        <button
+          type='submit'
+          className={aiComposerSendClassName}
+          aria-label='Send message'
+          tabIndex={-1}
+          aria-hidden={!canSend}
+          disabled={!canSend}
+          hidden={!canSend}
+        >
+          <ArrowUpIcon />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function AiChatPanel({
   panelPhase,
   guideUiTest = false,
@@ -144,7 +278,6 @@ export function AiChatPanel({
   messages,
   locationTitle,
   tourTitle,
-  suggestedQuestions,
   currentSceneId,
   isSending = false,
   liveMode = false,
@@ -155,12 +288,16 @@ export function AiChatPanel({
   onSend,
   onNavigateScene,
   onSelectNaming,
-  onVisitNaming,
-  onCopyGuideLink,
+  client,
+  clientLogo,
+  logoAlt,
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
+  const [composerFocused, setComposerFocused] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
   const threadSpacerRef = useRef<HTMLDivElement>(null);
+  const composerFormRef = useRef<HTMLFormElement>(null);
+  const composerInputRef = useRef<HTMLInputElement>(null);
   const lastAnchoredUserIdRef = useRef<string | null>(null);
   const hasInput = input.trim().length > 0;
   const canReset = !guideUiTest && messages.length > 0 && !isSending;
@@ -170,7 +307,8 @@ export function AiChatPanel({
     [guideUiTest, messages],
   );
   const showMockNotice = guideMock && !liveMode;
-  const latestAssistantFollowUps = useMemo(() => {
+  const latestFollowUps = useMemo(() => {
+    if (guideUiTest) return null;
     for (let i = displayMessages.length - 1; i >= 0; i -= 1) {
       const msg = displayMessages[i];
       if (msg?.role === 'assistant' && msg.followUps?.length) {
@@ -178,19 +316,17 @@ export function AiChatPanel({
       }
     }
     return null;
-  }, [displayMessages]);
-  const showBottomSuggestions =
-    !guideUiTest && !isSending && !latestAssistantFollowUps;
+  }, [displayMessages, guideUiTest]);
   const greeting = useMemo(() => {
     const place = locationTitle.trim();
     const tour = tourTitle.trim();
     if (tour && place && tour !== place) {
-      return `Welcome to ${tour} — so glad you're here. I'm your ${VIRTUAL_TOUR_GUIDE_NAME}, and I'd love to help you explore. You're in ${place} right now; ask me about this place, naming opportunities, or where to go next.`;
+      return `Welcome to ${tour} — so glad you're here. I'm your ${VIRTUAL_TOUR_GUIDE_NAME}, and I'd love to help you explore. You're in ${place} right now — what would you like to know about this place, naming opportunities, or where to go next?`;
     }
     if (place) {
-      return `Welcome — so glad you're here. I'm your ${VIRTUAL_TOUR_GUIDE_NAME}, and I'd love to help you explore ${place}. Ask me about this place, naming opportunities, or where to go next.`;
+      return `Welcome — so glad you're here. I'm your ${VIRTUAL_TOUR_GUIDE_NAME}, and I'd love to help you explore ${place}. What would you like to know about this place, naming opportunities, or where to go next?`;
     }
-    return `Welcome — so glad you're here. I'm your ${VIRTUAL_TOUR_GUIDE_NAME}, and I'd love to help you explore. Ask me about this place, naming opportunities, or where to go next.`;
+    return `Welcome — so glad you're here. I'm your ${VIRTUAL_TOUR_GUIDE_NAME}, and I'd love to help you explore. What would you like to know about this place, naming opportunities, or where to go next?`;
   }, [locationTitle, tourTitle]);
 
   const latestUserMessageId = useMemo(() => {
@@ -206,12 +342,30 @@ export function AiChatPanel({
     const spacer = threadSpacerRef.current;
     if (!root || !spacer) return;
 
+    // Content-sized panel: don't inflate the spacer or the panel grows forever.
+    // Only pin the latest user turn once the panel is height-capped and scrolling.
+    spacer.style.height = '0px';
+
     if (!latestUserMessageId) {
       lastAnchoredUserIdRef.current = null;
-      spacer.style.height = '0px';
       if (displayMessages.length === 0 && !isSending && !sendError) {
         root.scrollTo({ top: 0, behavior: 'smooth' });
       }
+      return;
+    }
+
+    const panel = root.closest('.tour-glass-panel--ai');
+    const panelMaxH =
+      panel instanceof HTMLElement ?
+        parseFloat(window.getComputedStyle(panel).maxHeight)
+      : Number.NaN;
+    const panelH =
+      panel instanceof HTMLElement ? panel.getBoundingClientRect().height : 0;
+    const heightCapped =
+      Number.isFinite(panelMaxH) && panelMaxH > 0 && panelH >= panelMaxH - 2;
+
+    if (!heightCapped) {
+      lastAnchoredUserIdRef.current = latestUserMessageId;
       return;
     }
 
@@ -222,7 +376,7 @@ export function AiChatPanel({
 
     const shouldAnchor = latestUserMessageId !== lastAnchoredUserIdRef.current;
 
-    const prevSpacer = spacer.offsetHeight;
+    const prevSpacer = 0;
     const rootRect = root.getBoundingClientRect();
     const msgRect = msgEl.getBoundingClientRect();
     const msgTop = root.scrollTop + (msgRect.top - rootRect.top);
@@ -245,6 +399,12 @@ export function AiChatPanel({
   const canComposeRef = useRef(canCompose);
   canComposeRef.current = canCompose;
 
+  const focusComposerInput = () => {
+    const input = composerInputRef.current;
+    if (!input) return;
+    input.focus({ preventScroll: true });
+  };
+
   const handleSend = (text: string) => {
     onSend(text);
   };
@@ -255,14 +415,25 @@ export function AiChatPanel({
       if (!text || !canComposeRef.current) return;
       setInput('');
       handleSend(text);
+      setComposerFocused(true);
+      queueMicrotask(focusComposerInput);
     },
   });
 
+  const commitComposerText = () => {
+    const text = input.trim();
+    if (!canCompose || !text) return;
+    handleSend(text);
+    setInput('');
+    setComposerFocused(true);
+    // Restore after React applies readOnly / clears value (Enter used to focus submit).
+    queueMicrotask(focusComposerInput);
+    requestAnimationFrame(focusComposerInput);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canCompose || !input.trim()) return;
-    handleSend(input);
-    setInput('');
+    commitComposerText();
   };
 
   const composerValue =
@@ -271,15 +442,42 @@ export function AiChatPanel({
     !speech.supported ? 'Voice input unavailable in this browser'
     : speech.listening ? 'Stop listening'
     : 'Voice input';
+  const showFollowUps =
+    Boolean(latestFollowUps) && (composerFocused || speech.listening);
+  // Keep one composer mount path — switching pill ↔ shell remounted the input and dropped focus.
+  const shellExpanded =
+    showFollowUps || composerFocused || speech.listening || hasInput;
 
   useEffect(() => {
     if (!canCompose && speech.listening) speech.stop();
   }, [canCompose, speech.listening, speech.stop]);
 
+  // After send starts / reply brings follow-ups, keep caret if the user was composing.
+  useLayoutEffect(() => {
+    if (!composerFocused) return;
+    focusComposerInput();
+  }, [canCompose, latestFollowUps, composerFocused]);
+
+  const handleComposerFocus = () => {
+    setComposerFocused(true);
+  };
+
+  const handleComposerBlur = () => {
+    // Defer so follow-up / mic clicks inside the form still count as "in composer".
+    window.setTimeout(() => {
+      const active = document.activeElement;
+      if (active && composerFormRef.current?.contains(active)) {
+        return;
+      }
+      setComposerFocused(false);
+    }, 0);
+  };
+
   const handleReset = () => {
     if (!canReset) return;
     onReset();
     setInput('');
+    setComposerFocused(false);
   };
 
   return (
@@ -297,7 +495,9 @@ export function AiChatPanel({
               <p id='ai-guide-panel-title' className={aiPanelTitleClassName}>
                 Tour Guide
               </p>
-              <LocationBadge title={tourTitle} />
+              <p className={aiPanelPoweredByClassName}>
+                Powered by <PlatformBrandLink brandId='fundingMattersAiSuite' />
+              </p>
             </div>
           </div>
           <div className={aiPanelHeaderActionsClassName}>
@@ -325,13 +525,67 @@ export function AiChatPanel({
         </>
       }
       footer={
-        <footer
-          className={`tour-glass-panel__footer ${aiPanelFooterClassName}`}
+        <form
+          ref={composerFormRef}
+          className={aiComposerClassName}
+          onSubmit={handleSubmit}
+          onFocus={handleComposerFocus}
+          onBlur={handleComposerBlur}
         >
-          <p className={aiPanelPoweredByClassName}>
-            Powered by <PlatformBrandLink brandId='fundingMattersAiSuite' />
-          </p>
-        </footer>
+          <div
+            className={cn(
+              aiComposerShellClassName,
+              shellExpanded ?
+                aiComposerShellExpandedClassName
+              : aiComposerShellCollapsedClassName,
+            )}
+          >
+            <div
+              className={cn(
+                aiComposerFollowUpsRevealClassName,
+                showFollowUps ?
+                  aiComposerFollowUpsRevealOpenClassName
+                : aiComposerFollowUpsRevealClosedClassName,
+              )}
+              aria-hidden={!showFollowUps}
+            >
+              <div className={aiComposerFollowUpsRevealInnerClassName}>
+                {latestFollowUps ?
+                  <FollowUpQuestions
+                    className={aiComposerShellFollowUpsClassName}
+                    questions={latestFollowUps}
+                    onSelect={(question) => {
+                      setComposerFocused(true);
+                      handleSend(question);
+                      queueMicrotask(focusComposerInput);
+                      requestAnimationFrame(focusComposerInput);
+                    }}
+                    disabled={!canCompose || !showFollowUps}
+                  />
+                : null}
+                <div
+                  className={aiComposerShellDividerClassName}
+                  aria-hidden='true'
+                />
+              </div>
+            </div>
+            <ComposerField
+              className={aiComposerShellFieldClassName}
+              value={composerValue}
+              canCompose={canCompose}
+              hasInput={hasInput}
+              listening={speech.listening}
+              speechSupported={speech.supported}
+              speechError={speech.error}
+              speechLevel={speech.level}
+              voiceLabel={voiceLabel}
+              onChange={setInput}
+              onToggleSpeech={speech.toggle}
+              onSubmitRequest={commitComposerText}
+              inputRef={composerInputRef}
+            />
+          </div>
+        </form>
       }
     >
       <div className={aiPanelMessagesClassName} ref={messagesRef}>
@@ -365,36 +619,22 @@ export function AiChatPanel({
                   msg.role === 'assistant' &&
                   msg.guideLinks &&
                   msg.guideLinks.length > 0 &&
-                  (onNavigateScene ||
-                    onSelectNaming ||
-                    onVisitNaming ||
-                    onCopyGuideLink)
+                  (onNavigateScene || onSelectNaming)
                 ) ?
                   <GuideSceneLinkCards
                     links={msg.guideLinks}
                     currentSceneId={currentSceneId}
                     onSelectScene={onNavigateScene}
                     onSelectNaming={onSelectNaming}
-                    onVisitNaming={onVisitNaming}
-                    onCopyLink={onCopyGuideLink}
                     disabled={!canCompose}
                   />
                 : null}
                 {msg.role === 'assistant' && msg.guideCtas?.length ?
-                  <GuideCtaRow ctas={msg.guideCtas} />
-                : null}
-                {(
-                  msg.role === 'assistant' &&
-                  msg.followUps &&
-                  msg.followUps.length > 0 &&
-                  !guideUiTest &&
-                  !isSending
-                ) ?
-                  <SuggestedQuestions
-                    className={aiMessageFollowUpsClassName}
-                    questions={msg.followUps}
-                    onSelect={handleSend}
-                    disabled={!canCompose}
+                  <GuideCtaRow
+                    ctas={msg.guideCtas}
+                    client={client}
+                    clientLogo={clientLogo}
+                    logoAlt={logoAlt}
                   />
                 : null}
               </div>
@@ -408,24 +648,6 @@ export function AiChatPanel({
               )}
             >
               <AiThinkingIndicator />
-            </div>
-          : null}
-          {showBottomSuggestions ?
-            <div
-              key={suggestedQuestions.join('|')}
-              className={cn(
-                aiPanelSuggestionsSlotClassName,
-                threadItemSpacingClass(
-                  displayMessages.at(-1)?.role ?? null,
-                  'assistant',
-                ),
-              )}
-            >
-              <SuggestedQuestions
-                questions={suggestedQuestions}
-                onSelect={handleSend}
-                disabled={!canCompose}
-              />
             </div>
           : null}
           {/* Lets the latest user question sit near the top while the reply grows below. */}
@@ -457,78 +679,6 @@ export function AiChatPanel({
           </div>
         : null}
       </div>
-
-      <form className={aiComposerClassName} onSubmit={handleSubmit}>
-        <div
-          className={cn(
-            aiComposerPillClassName,
-            speech.listening && aiComposerPillExpandedClassName,
-          )}
-        >
-          <input
-            className={aiComposerInputClassName}
-            type='text'
-            placeholder={
-              speech.listening ? 'Listening…' : (
-                `Ask ${VIRTUAL_TOUR_GUIDE_NAME}...`
-              )
-            }
-            value={composerValue}
-            onChange={(e) => {
-              if (speech.listening) return;
-              setInput(e.target.value);
-            }}
-            aria-label='Your question'
-            disabled={!canCompose}
-            readOnly={speech.listening}
-          />
-          <div className={aiComposerActionsClassName}>
-            {speech.supported ?
-              <IconTooltip label={voiceLabel} placement='top'>
-                <button
-                  type='button'
-                  className={
-                    speech.listening ?
-                      aiComposerVoiceListeningClassName
-                    : aiComposerVoiceClassName
-                  }
-                  aria-label={voiceLabel}
-                  aria-pressed={speech.listening}
-                  disabled={!canCompose}
-                  onPointerDown={(event) => {
-                    // Avoid focusing the mic (pill expand) and losing the click to layout shift.
-                    event.preventDefault();
-                  }}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    speech.toggle();
-                  }}
-                >
-                  {speech.listening ?
-                    <MicVolumePulse level={speech.level} />
-                  : null}
-                  <MicIcon />
-                </button>
-              </IconTooltip>
-            : null}
-            {speech.error ?
-              <span className='sr-only' role='status'>
-                {speech.error}
-              </span>
-            : null}
-            {hasInput && canCompose && !speech.listening ?
-              <button
-                type='submit'
-                className={aiComposerSendClassName}
-                aria-label='Send message'
-              >
-                <ArrowUpIcon />
-              </button>
-            : null}
-          </div>
-        </div>
-      </form>
     </TourGlassPanel>
   );
 }

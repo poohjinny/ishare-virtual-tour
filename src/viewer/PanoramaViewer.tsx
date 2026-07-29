@@ -88,7 +88,7 @@ import {
 } from './infoHotspotActive';
 import { setDevFocusedHotspot } from './devHotspotFocus';
 import { setAnchoredPanelVisibilityListener } from './anchoredPanelVisibility';
-import { navigateToScene } from './transition';
+import { navigateToScene, ensureScenePreloaded } from './transition';
 import { bindVirtualTourLifecycleGuard } from './virtualTourLifecycle';
 import { createRecenterViewNavbarButton } from './recenterViewNavbarButton';
 import {
@@ -105,8 +105,14 @@ import {
   createImmersiveBackgroundNavbarButton,
   syncImmersiveBackgroundNavbarButtonVisibility,
 } from './immersiveBackgroundNavbarButton';
+import {
+  createPlayTourNavbarButton,
+  syncPlayTourNavbarButton,
+} from './playTourNavbarButton';
+import type { PlayTourPhase } from '../hooks/usePlayTour';
 import type { ImmersiveBackgroundController } from './immersiveBackgroundController';
 import { patchZoomSliderSmoothZoom } from './patchZoomSlider';
+import { patchPsvZoomButtonIcons } from './patchPsvZoomButtonIcons';
 import {
   bindPsvNavbarChromeControls,
   primePsvDesktopTouchSupport,
@@ -168,6 +174,10 @@ interface PanoramaViewerProps {
   immersiveNavbarAvailable?: boolean;
   /** Desktop toolbar collapse control — hidden in embed mode. */
   toolbarToggleAvailable?: boolean;
+  /** Guided Play Tour control — hidden when tour has no valid `playTour`. */
+  playTourEnabled?: boolean;
+  playTourPhase?: PlayTourPhase;
+  onPlayTourToggle?: () => void;
   /** Open naming-opportunity panel on the current scene (for default-view recenter). */
   activeNamingHotspotId?: string | null;
   /** `?embed=1` — hide glass-panel share controls (FAB Share is already hidden). */
@@ -236,6 +246,9 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       immersiveBackgroundController = null,
       immersiveNavbarAvailable = false,
       toolbarToggleAvailable = false,
+      playTourEnabled = false,
+      playTourPhase = 'idle',
+      onPlayTourToggle,
       activeNamingHotspotId = null,
       embed = false,
       // Authoring chrome; also unlocks unlisted/internal naming markers.
@@ -282,6 +295,8 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     const transitioningRef = useRef(false);
     /** Scene nav called onLoadStart — skip duplicate panorama-load start; balance on fail. */
     const navLoadProgressArmedRef = useRef(false);
+    /** Play Tour quiet hop — skip load-bar start/complete pairing. */
+    const quietNavRef = useRef(false);
     const disabledRef = useRef(disabled);
     const suppressKeyboardRef = useLatestRef(suppressKeyboard);
     const tourRef = useLatestRef(tour);
@@ -339,6 +354,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     const immersiveControllerRef = useLatestRef(immersiveBackgroundController);
     const immersiveNavbarAvailableRef = useLatestRef(immersiveNavbarAvailable);
     const toolbarToggleAvailableRef = useLatestRef(toolbarToggleAvailable);
+    const onPlayTourToggleRef = useLatestRef(onPlayTourToggle);
     const activeNamingHotspotIdRef = useLatestRef(activeNamingHotspotId);
     const controlsVisibleRef = useRef(controlsVisible);
     controlsVisibleRef.current = controlsVisible;
@@ -487,6 +503,17 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       const viewer = viewerRef.current;
       if (!viewerReady || !viewer) return;
 
+      syncPlayTourNavbarButton(viewer, {
+        enabled: playTourEnabled,
+        phase: playTourPhase,
+      });
+      syncPsvNavbarChromeControls(viewer);
+    }, [playTourEnabled, playTourPhase, viewerReady]);
+
+    useEffect(() => {
+      const viewer = viewerRef.current;
+      if (!viewerReady || !viewer) return;
+
       const showToolbarToggle = Boolean(onControlsToggle);
       syncTourToolbarToggleNavbarButtonVisibility(viewer, showToolbarToggle);
       if (!showToolbarToggle) {
@@ -499,36 +526,52 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     }, [controlsVisible, onControlsToggle, viewerReady]);
 
     useImperativeHandle(ref, () => ({
-      navigateToScene: async (sceneId, targetView) => {
+      navigateToScene: async (sceneId, targetView, options) => {
         const viewer = viewerRef.current;
         const virtualTour = virtualTourRef.current;
+        if (!viewerActiveRef.current || !viewer || !virtualTour) {
+          return false;
+        }
+
+        // Play Tour (and rapid manual hops) can call navigate while a prior
+        // transition/dwell stop is still clearing — wait briefly instead of
+        // hard-failing the hop.
+        for (let i = 0; i < 12 && transitioningRef.current; i += 1) {
+          await new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+          });
+        }
         if (
           !viewerActiveRef.current ||
-          !viewer ||
-          !virtualTour ||
-          transitioningRef.current ||
-          (disabledRef.current && !pendingNamingInfoHotspotRef.current)
+          !viewerRef.current ||
+          !virtualTourRef.current ||
+          transitioningRef.current
         ) {
           return false;
         }
 
+        const quiet = options?.quiet === true;
+        quietNavRef.current = quiet;
         pendingSceneIdRef.current = sceneId;
         deferredErrorRef.current = null;
         transitioningRef.current = true;
         hotspotEnterRef.current?.hold();
-        navLoadProgressArmedRef.current = true;
-        onLoadStartRef.current?.();
+        if (!quiet) {
+          navLoadProgressArmedRef.current = true;
+          onLoadStartRef.current?.();
+        }
         onTransitionStartRef.current();
 
         let navOk = false;
         try {
           navOk = await navigateToScene(
-            viewer,
-            virtualTour,
+            viewerRef.current,
+            virtualTourRef.current,
             tourRef.current,
             sceneId,
             targetView,
             () => viewerActiveRef.current,
+            { seamless: options?.seamless === true },
           );
           if (navOk) {
             onViewerLoadRecoveredRef.current?.();
@@ -537,7 +580,39 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           }
           return navOk;
         } finally {
+          if (!navOk || !quiet) {
+            quietNavRef.current = false;
+          } else {
+            // panorama-loaded clears quiet; fallback if the event is skipped
+            // for an already-cached texture.
+            window.setTimeout(() => {
+              quietNavRef.current = false;
+            }, 500);
+          }
           endNavigation(navOk);
+        }
+      },
+      preloadScene: async (sceneId) => {
+        const viewer = viewerRef.current;
+        const virtualTour = virtualTourRef.current;
+        const scene = tourRef.current.scenes[sceneId];
+        if (
+          !viewerActiveRef.current ||
+          !viewer ||
+          !virtualTour ||
+          !scene?.panorama
+        ) {
+          return;
+        }
+        try {
+          await ensureScenePreloaded(
+            viewer,
+            virtualTour,
+            sceneId,
+            scene.panorama,
+          );
+        } catch {
+          /* best-effort warm; navigate will retry */
         }
       },
       retryScene: async (sceneId) => {
@@ -682,9 +757,20 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
         void animateViewerToView(viewer, view);
       },
-      animateToView: (view) => {
+      animateToView: async (view, options) => {
         const viewer = viewerRef.current;
-        if (!viewer || disabledRef.current || transitioningRef.current) {
+        // Only block on live transitions — `disabled` lags one React render behind
+        // `transitioningRef` (TourPage `isTransitioning`), which made Play Tour
+        // skip dwell drift and race the next hop.
+        if (!viewer) {
+          return;
+        }
+        for (let i = 0; i < 12 && transitioningRef.current; i += 1) {
+          await new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+          });
+        }
+        if (!viewerRef.current || transitioningRef.current) {
           return;
         }
 
@@ -697,7 +783,16 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           onAnchoredPanelVisibilityChangeRef.current?.(false);
         }
 
-        void animateViewerToView(viewer, view);
+        await animateViewerToView(viewerRef.current, view, options);
+      },
+      stopViewAnimation: async () => {
+        const viewer = viewerRef.current;
+        if (!viewer) return;
+        try {
+          await viewer.stopAnimation();
+        } catch {
+          /* idle */
+        }
       },
       applyTourUpdate: async (nextTour) => {
         const virtualTour = virtualTourRef.current;
@@ -1030,10 +1125,15 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         () => immersiveControllerRef.current,
       );
 
+      const playTourButton = createPlayTourNavbarButton(() =>
+        onPlayTourToggleRef.current?.(),
+      );
+
       const navbarButtons: Array<string | NavbarCustomButton> = [
         'zoom',
         'move',
         recenterViewButton,
+        playTourButton,
       ];
       if (immersiveNavbarAvailableRef.current) {
         navbarButtons.push(immersiveBgButton);
@@ -1099,6 +1199,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         () => fullscreenRootRefLatest.current?.current ?? null,
       );
       patchZoomSliderSmoothZoom(viewer);
+      patchPsvZoomButtonIcons(viewer);
       const unbindDesktopNavbarControls = bindPsvNavbarChromeControls(viewer);
       const virtualTour =
         viewer.getPlugin<VirtualTourPlugin>(VirtualTourPlugin);
@@ -1201,6 +1302,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
       viewer.addEventListener('load-progress', (e) => {
         if (landingSuppressLoadProgress) return;
+        if (quietNavRef.current) return;
         onLoadProgressRef.current?.(e.progress);
       });
 
@@ -1234,6 +1336,12 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
             hotspotEnter.schedule();
             tryNotifyInitialTourReveal();
           }
+          return;
+        }
+
+        if (quietNavRef.current) {
+          quietNavRef.current = false;
+          navLoadProgressArmedRef.current = false;
           return;
         }
 

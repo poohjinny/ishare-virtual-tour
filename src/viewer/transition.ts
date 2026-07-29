@@ -2,6 +2,10 @@
  * Scene navigation — load the target panorama, then Virtual Tour setCurrentNode.
  * No background prefetch of neighbors or other scenes; only the destination
  * is loaded (keeps the current scene visible until the cached texture is ready).
+ *
+ * Play Tour may warm the *next* stop via `preloadPanorama`, but only after the
+ * current hop finishes: `Viewer.setPanorama` calls `textureLoader.abortLoading()`
+ * and cancels any in-flight ImageLoader request (DevTools: cancelled .webp).
  */
 import type { Viewer } from '@photo-sphere-viewer/core';
 import type { VirtualTourPlugin } from '@photo-sphere-viewer/virtual-tour-plugin';
@@ -85,6 +89,7 @@ export async function navigateToScene(
   targetSceneId: string,
   targetView?: ViewPosition,
   isActive?: () => boolean,
+  options?: { seamless?: boolean },
 ): Promise<boolean> {
   if (isActive && !isActive()) {
     return false;
@@ -94,6 +99,7 @@ export async function navigateToScene(
   if (!scene) return false;
 
   const view = targetView ?? scene.defaultView;
+  const seamless = options?.seamless === true;
 
   try {
     await ensureScenePreloaded(
@@ -107,13 +113,20 @@ export async function navigateToScene(
       return false;
     }
 
+    // Passing position/zoom makes PSV `stopAll()` before the fade — that is the
+    // "camera freezes, then transition" beat. Seamless hops keep the live pose.
     return (
-      (await virtualTour.setCurrentNode(targetSceneId, {
-        showLoader: false,
-        rotation: false,
-        rotateTo: toPsvPosition(view),
-        zoomTo: toPsvZoom(view.zoom),
-      })) !== false
+      (await virtualTour.setCurrentNode(
+        targetSceneId,
+        seamless ?
+          { showLoader: false, rotation: false }
+        : {
+            showLoader: false,
+            rotation: false,
+            rotateTo: toPsvPosition(view),
+            zoomTo: toPsvZoom(view.zoom),
+          },
+      )) !== false
     );
   } catch (err) {
     if (isActive && !isActive()) {

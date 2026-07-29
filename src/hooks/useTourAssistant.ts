@@ -5,8 +5,8 @@ import {
   getLocationChangeNote,
   getNamingOpenNote,
   getSceneTitle,
-  getSuggestedQuestions,
 } from '../services/mockAssistant';
+import { buildNavContextFollowUps } from '../utils/guideMessageExtras';
 
 let messageId = 0;
 function nextId(): string {
@@ -22,17 +22,6 @@ type LastAutoNavNote =
   | { kind: 'scene'; sceneId: string }
   | { kind: 'naming'; hotspotId: string };
 
-function noteContent(
-  tour: Tour,
-  sceneId: string,
-  note: GuideNavNote | null | undefined,
-): string {
-  if (note?.kind === 'naming') {
-    return getNamingOpenNote(tour, sceneId, note.namingName);
-  }
-  return getLocationChangeNote(tour, sceneId);
-}
-
 function isSameAutoNavNote(
   last: LastAutoNavNote | null,
   next: LastAutoNavNote,
@@ -42,6 +31,40 @@ function isSameAutoNavNote(
     return last.kind === 'scene' && last.sceneId === next.sceneId;
   }
   return last.kind === 'naming' && last.hotspotId === next.hotspotId;
+}
+
+/** Place/NO context bubble — replaces the previous note of the same kind only. */
+function navContextMessage(
+  tour: Tour,
+  sceneId: string,
+  note: GuideNavNote | null | undefined,
+): ChatMessage {
+  const kind = note?.kind === 'naming' ? 'naming' : 'scene';
+  const followUps = buildNavContextFollowUps({
+    tour,
+    sceneId,
+    kind,
+    namingName: note?.namingName,
+  });
+  const content =
+    kind === 'naming' ?
+      getNamingOpenNote(tour, sceneId, note?.namingName)
+    : getLocationChangeNote(tour, sceneId);
+  return {
+    id: nextId(),
+    role: 'assistant',
+    source: kind === 'naming' ? 'nav-naming' : 'nav-scene',
+    content,
+    ...(followUps.length ? { followUps } : {}),
+  };
+}
+
+function upsertNavContextMessage(
+  prev: ChatMessage[],
+  next: ChatMessage,
+): ChatMessage[] {
+  const withoutOld = prev.filter((msg) => msg.source !== next.source);
+  return [...withoutOld, next];
 }
 
 export function useTourAssistant(tour: Tour, currentSceneId: string) {
@@ -62,7 +85,6 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
   const isOpenRef = useRef(isOpen);
   isOpenRef.current = isOpen;
 
-  const suggestedQuestions = getSuggestedQuestions(tour, currentSceneId);
   const locationTitle = getSceneTitle(tour, currentSceneId);
   const tourTitle = tour.title?.trim() || tour.id;
 
@@ -92,14 +114,12 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
     if (isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
 
     lastAutoNavNoteRef.current = key;
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: nextId(),
-        role: 'assistant',
-        content: noteContent(tour, currentSceneId, pending),
-      },
-    ]);
+    setMessages((prev) =>
+      upsertNavContextMessage(
+        prev,
+        navContextMessage(tour, currentSceneId, pending),
+      ),
+    );
   }, [currentSceneId, isOpen, tour]);
 
   /** Next scene change uses this note kind (default: place visit). */
@@ -108,7 +128,7 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
   }, []);
 
   /**
-   * Naming opportunity opened while Ask Guide is open — post the NO note.
+   * Naming opportunity opened while Ask Guide is open — replace context message.
    * Skips when the same hotspot was the last auto note (chat / panorama / Explore).
    */
   const noteNamingOpened = useCallback(
@@ -122,14 +142,12 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
         lastAutoNavNoteRef.current = key;
       }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: nextId(),
-          role: 'assistant',
-          content: getNamingOpenNote(tour, sceneId, namingName),
-        },
-      ]);
+      setMessages((prev) =>
+        upsertNavContextMessage(
+          prev,
+          navContextMessage(tour, sceneId, { kind: 'naming', namingName }),
+        ),
+      );
     },
     [tour],
   );
@@ -243,7 +261,6 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
     prepareNavNote,
     noteNamingOpened,
     suppressNextLocationNote,
-    suggestedQuestions,
     locationTitle,
     tourTitle,
   };

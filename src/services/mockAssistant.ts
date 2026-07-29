@@ -94,7 +94,7 @@ export function askMockAssistant(
   if (bestScore >= 0.35 && bestAnswer) return bestAnswer;
 
   if (q.includes('where am i') || q.includes('current location')) {
-    return `You are currently at ${ctx.sceneTitle}. ${ctx.placeCopy}`.trim();
+    return `You are currently at ${ctx.sceneTitle}.`;
   }
 
   if (
@@ -150,7 +150,12 @@ export function askMockAssistant(
 
 export function getLocationChangeNote(tour: Tour, sceneId: string): string {
   const title = getSceneTitle(tour, sceneId);
-  return `You're now on ${title}. Feel free to ask questions about this area.`;
+  return `Here we are at ${title} — I'd love to tell you more about this space, or help you explore what's nearby.`;
+}
+
+/** Compact sticky notice after a place move (Ask Guide panel). */
+export function getSceneContextNotice(tour: Tour, sceneId: string): string {
+  return `Now in ${getSceneTitle(tour, sceneId)}`;
 }
 
 /** Chat note when a naming opportunity is opened (same or new scene). */
@@ -162,7 +167,27 @@ export function getNamingOpenNote(
   const place = getSceneTitle(tour, sceneId);
   const name = namingName?.trim();
   if (name) {
-    return `You're looking at ${name} in ${place}. Ask me about this naming opportunity or the area around it.`;
+    if (name.toLowerCase() === place.toLowerCase()) {
+      return `Here's the ${name} naming opportunity — happy to share what it supports, or how you can get involved.`;
+    }
+    return `Here's the ${name} naming opportunity in ${place} — I can walk you through what it means, or how to show your support.`;
   }
-  return `You're looking at a naming opportunity in ${place}. Ask me about it or this area.`;
+  return `Here's a naming opportunity in ${place} — happy to share what it supports, or how you can get involved.`;
+}
+
+/** Compact sticky notice after a naming opportunity is opened. */
+export function getNamingContextNotice(
+  tour: Tour,
+  sceneId: string,
+  namingName?: string,
+): string {
+  const place = getSceneTitle(tour, sceneId);
+  const name = namingName?.trim();
+  if (name) {
+    if (name.toLowerCase() === place.toLowerCase()) {
+      return `Viewing ${name} naming opportunity`;
+    }
+    return `Viewing ${name} · ${place}`;
+  }
+  return `Viewing a naming opportunity · ${place}`;
 }

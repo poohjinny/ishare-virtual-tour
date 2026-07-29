@@ -8,10 +8,11 @@ import { assembleTourContext } from '../utils/assembleTourContext';
 import {
   buildGuideCtas,
   buildGuideFollowUps,
+  shapeGuideLinksForQuestion,
   withCurrentPlaceSummaryLink,
   withInterestNamingLink,
 } from '../utils/guideMessageExtras';
-import { resolveGuideLinks } from '../utils/guideSceneLinks';
+import { resolveGuideLinks, capGuideLinks } from '../utils/guideSceneLinks';
 import { askMockAssistant } from './mockAssistant';
 
 const ASK_GUIDE_STATUS_URL = '/__dev/api/ask-guide/status';
@@ -73,7 +74,15 @@ function hydrateGuideExtras(
     question,
     resolved,
   );
-  const guideLinks = withInterestNamingLink(tour, sceneId, question, withPlace);
+  const withInterest = withInterestNamingLink(
+    tour,
+    sceneId,
+    question,
+    withPlace,
+  );
+  const guideLinks = capGuideLinks(
+    shapeGuideLinksForQuestion(tour, question, withInterest),
+  );
   const guideCtas = buildGuideCtas(tour, sceneId, guideLinks, question);
   const followUps = buildGuideFollowUps({
     question,
@@ -81,6 +90,7 @@ function hydrateGuideExtras(
     tour,
     sceneId,
     modelFollowUps,
+    guideLinks,
   });
 
   return {

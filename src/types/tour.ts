@@ -300,6 +300,24 @@ export interface TourImmersiveBackground {
   volume?: number;
 }
 
+/** One stop in a guided Play Tour slideshow. */
+export interface PlayTourStop {
+  sceneId: string;
+  /** Optional camera; falls back to the scene `defaultView` at play time. */
+  view?: ViewPosition;
+  /** Per-stop dwell after the camera settles (ms). */
+  dwellMs?: number;
+}
+
+/** Author-defined autoplay sequence — Matterport-style Play (slideshow hops). */
+export interface PlayTour {
+  /** Default dwell at each stop after camera settles (ms). */
+  dwellMs?: number;
+  /** When true, restart from the first stop after the last (default false). */
+  loop?: boolean;
+  stops: PlayTourStop[];
+}
+
 export interface Tour {
   /** Tour id — unique per experience; used in URL paths and `loadTour()`. */
   id: string;
@@ -333,6 +351,11 @@ export interface Tour {
   immersiveBackground?: TourImmersiveBackground;
   firstScene: string;
   defaultTransition?: { speed?: string; effect?: 'fade' | 'black' };
+  /**
+   * Optional guided Play Tour (slideshow). When omitted / invalid, load time
+   * fills Explore-visible scenes in nav BFS order (needs ≥2 scenes for Play).
+   */
+  playTour?: PlayTour;
   scenes: Record<string, Scene>;
 }
 
@@ -354,6 +377,8 @@ export interface ChatGuideLink {
   hotspotId?: string;
   statusLabel?: string;
   priceLabel?: string;
+  /** `naming` only — for status badge styling. */
+  status?: NamingOpportunityStatus;
 }
 
 /** External action under an Ask Guide reply (Website / Donate / Contact). */
@@ -371,10 +396,12 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  /** Auto place/NO context — one of each; replaced on the next Visit / open of that kind. */
+  source?: 'nav-scene' | 'nav-naming';
   /** Optional place / naming cards under an assistant reply. */
   guideLinks?: ChatGuideLink[];
   /** Optional Website / Donate actions under the reply. */
   guideCtas?: ChatGuideCta[];
-  /** Contextual follow-up questions (max 3). */
+  /** Contextual follow-up questions (max 4). */
   followUps?: string[];
 }

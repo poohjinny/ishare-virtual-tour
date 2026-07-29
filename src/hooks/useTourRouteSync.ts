@@ -38,6 +38,10 @@ interface UseTourRouteSyncOptions {
   isTransitioning: boolean;
   /** Synchronous ref — immune to React batching delays unlike `isTransitioning` state. */
   transitioningRef?: MutableRefObject<boolean>;
+  /**
+   * When true, skip route→viewer `navigateToScene` (Play Tour owns scene hops).
+   */
+  suppressViewerNavRef?: MutableRefObject<boolean>;
   viewerRef: RefObject<TourViewerHandle | null>;
   syncSceneFromRoute: (sceneId: string) => void;
   pendingNamingSelectionRef?: RefObject<{
@@ -51,6 +55,7 @@ export function useTourRouteSync({
   currentSceneId,
   isTransitioning,
   transitioningRef,
+  suppressViewerNavRef,
   viewerRef,
   syncSceneFromRoute,
   pendingNamingSelectionRef,
@@ -126,20 +131,23 @@ export function useTourRouteSync({
       return;
     }
 
-    // Outbound URL sync in flight — wait until route matches before snapping viewer.
+    // Outbound URL sync in flight — wait until route matches, then stop.
+    // Do NOT fall through into inbound viewer navigate: the caller already drove
+    // the viewer (Explore / Play Tour). Falling through while `currentSceneId`
+    // lags caused a second navigateToScene that aborted Play Tour mid-run.
     if (pendingToUrlSceneIdRef.current !== null) {
       if (routeSceneId === pendingToUrlSceneIdRef.current) {
         pendingToUrlSceneIdRef.current = null;
         syncingToUrlRef.current = false;
-      } else {
-        return;
       }
+      return;
     }
 
     if (
       routeSceneId === currentSceneId ||
       isTransitioning ||
       transitioningRef?.current ||
+      suppressViewerNavRef?.current ||
       syncingToUrlRef.current ||
       syncingFromUrlRef.current
     ) {
@@ -180,6 +188,7 @@ export function useTourRouteSync({
     pendingNamingSelectionRef,
     searchParams,
     transitioningRef,
+    suppressViewerNavRef,
   ]);
 
   useEffect(() => {

@@ -250,15 +250,18 @@ export function namingOpportunityCtaEnabled(
   );
 }
 
+function encodeMailtoQueryValue(value: string): string {
+  // RFC 6068 — %20 for spaces (URLSearchParams would emit "+", which many clients break).
+  return encodeURIComponent(value);
+}
+
 function buildContactMailto(email: string, naming: NamingOpportunity): string {
   const name = naming.name.trim();
-  const params = new URLSearchParams();
-  params.set('subject', `Naming opportunity inquiry: ${name}`);
-  params.set(
-    'body',
+  const subject = encodeMailtoQueryValue(`Naming opportunity inquiry: ${name}`);
+  const body = encodeMailtoQueryValue(
     `Hello,\n\nI am interested in learning more about the ${name}.\n\n`,
   );
-  return `mailto:${email}?${params.toString()}`;
+  return `mailto:${email}?subject=${subject}&body=${body}`;
 }
 
 function withStatusCtaIcon(

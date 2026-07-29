@@ -24,6 +24,7 @@ import {
 
 import type { Tour, ViewPosition, PopupContent, Hotspot } from '../types/tour';
 import { isWorldPosition } from '../types/tour';
+import type { PlayTourPhase } from '../hooks/usePlayTour';
 import { namingOpportunityStatusConfig } from '../data/namingOpportunityStatus';
 import {
   buildNamingHotspotAriaLabel,
@@ -126,6 +127,10 @@ export interface ThreeDViewerProps {
   toolbarToggleAvailable?: boolean;
   /** Tour JSON has immersive bed — show ambience control. */
   immersiveNavbarAvailable?: boolean;
+  /** Guided Play Tour control — hidden when tour has no valid `playTour`. */
+  playTourEnabled?: boolean;
+  playTourPhase?: PlayTourPhase;
+  onPlayTourToggle?: () => void;
   /** `?dev=1` — allow nav hotspots to internal scenes. */
   devMode?: boolean;
   onSceneChange: (sceneId: string) => void;
@@ -380,6 +385,9 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
       onControlsToggle,
       toolbarToggleAvailable = false,
       immersiveNavbarAvailable = false,
+      playTourEnabled = false,
+      playTourPhase = 'idle',
+      onPlayTourToggle,
       // Reserved for authoring chrome; marker visibility uses visitor rules.
       devMode: _devMode = false,
     },
@@ -1153,7 +1161,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
     );
 
     useImperativeHandle(ref, () => ({
-      navigateToScene: async (sceneId, targetView) => {
+      navigateToScene: async (sceneId, targetView, _options) => {
         if (transitioningRef.current || !sceneRef.current) return false;
         if (sceneId === currentSceneIdRef.current && !targetView) return false;
 
@@ -1169,6 +1177,9 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
           transitioningRef.current = false;
           onTransitionEnd();
         }
+      },
+      preloadScene: async (_sceneId) => {
+        /* 3D model prefetch not wired yet — Play Tour still hops via loadScene. */
       },
       retryScene: async (sceneId) => {
         const target = sceneId ?? currentSceneIdRef.current;
@@ -1232,17 +1243,27 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
       recenterToDefaultView: (_options?: { forceDefault?: boolean }) => {
         handleRecenter();
       },
-      animateToView: (view) => {
+      animateToView: async (view, options) => {
         const camera = cameraRef.current;
         const controls = controlsRef.current;
         if (!camera || !controls || transitioningRef.current) return;
-        void waitForSceneTransition(
+        const timing =
+          options?.durationMs !== undefined ?
+            options.durationMs
+          : HOTSPOT_CAMERA_TRANSITION_TIMING;
+        await waitForSceneTransition(
           camera,
           controls,
           view,
           modelRootRef.current,
-          HOTSPOT_CAMERA_TRANSITION_TIMING,
+          timing,
         );
+      },
+      stopViewAnimation: () => {
+        const previous = sceneTransitionAnimRef.current;
+        if (!previous) return;
+        sceneTransitionAnimRef.current = null;
+        previous.resolve();
       },
       focusHotspot: (hotspotId, options) => {
         if (!hotspotId) {
@@ -2008,6 +2029,9 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
             toolbarToggleAvailable={toolbarToggleAvailable}
             immersiveAvailable={immersiveNavbarAvailable}
             immersiveController={immersiveBackgroundController}
+            playTourEnabled={playTourEnabled}
+            playTourPhase={playTourPhase}
+            onPlayTourToggle={onPlayTourToggle}
             onRecenter={handleRecenter}
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}

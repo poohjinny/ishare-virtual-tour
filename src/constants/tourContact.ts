@@ -5,12 +5,15 @@ export const TOUR_CONTACT_US_EMAIL = 'wpetruck@fundingmatters.com';
 
 export const TOUR_CONTACT_US_MAILTO = `mailto:${TOUR_CONTACT_US_EMAIL}`;
 
+function encodeMailtoQueryValue(value: string): string {
+  // RFC 6068 — %20 for spaces (URLSearchParams would emit "+").
+  return encodeURIComponent(value);
+}
+
 export function buildTourNotifyMeMailto(naming: NamingOpportunity): string {
   const name = naming.name.trim();
-  const params = new URLSearchParams();
-  params.set('subject', `Notify me: ${name}`);
-  params.set(
-    'body',
+  const subject = encodeMailtoQueryValue(`Notify me: ${name}`);
+  const body = encodeMailtoQueryValue(
     [
       'Hello,',
       '',
@@ -22,5 +25,5 @@ export function buildTourNotifyMeMailto(naming: NamingOpportunity): string {
       '',
     ].join('\n'),
   );
-  return `mailto:${TOUR_CONTACT_US_EMAIL}?${params.toString()}`;
+  return `mailto:${TOUR_CONTACT_US_EMAIL}?subject=${subject}&body=${body}`;
 }

@@ -19,7 +19,7 @@ const TOUR_HELP_KEYBOARD_SHORTCUTS_COMMON = [
   'C — collapse or expand the viewer controls pill (desktop)',
   'H — open or close Help',
   'R — reset to default view',
-  'F — toggle fullscreen',
+  'F / F11 — toggle fullscreen',
   'M — play or pause background music',
   'Esc — close the most recently opened panel (search, tour panels, zoom/move controls, hotspot panels, and more)',
 ] as const;

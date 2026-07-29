@@ -283,11 +283,11 @@
   height: var(--psv-nav-icon-size);
 }
 
-.viewer-3d-container .psv-navbar .psv-zoom-in-button+.psv-zoom-out-button {
-  margin-left: 4px;
+.viewer-3d-container .psv-navbar .psv-zoom-out-button+.psv-recenter-button {
+  margin-left: 24px;
 }
 
-.viewer-3d-container .psv-navbar .psv-zoom-out-button+.psv-recenter-button {
+.viewer-3d-container .psv-navbar .psv-recenter-button+.psv-play-tour-button {
   margin-left: 24px;
 }
 
@@ -297,14 +297,6 @@
 
 .viewer-3d-container .psv-navbar .psv-recenter-button+.psv-fullscreen-button {
   margin-left: 24px;
-}
-
-.viewer-3d-container .psv-navbar .psv-immersive-bg-button+.psv-fullscreen-button {
-  margin-left: 4px;
-}
-
-.viewer-3d-container .psv-navbar .psv-fullscreen-button+.psv-tour-toolbar-toggle {
-  margin-left: 4px;
 }
 
 .viewer-3d-container .psv-toolbar-toggle-icon-stack {
@@ -351,10 +343,10 @@
 
 @media (min-width: 1024px) {
   .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar {
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
-    max-width: 46px;
+    width: var(--tour-chrome-fab-size);
+    height: var(--tour-chrome-fab-size);
+    min-width: var(--tour-chrome-fab-size);
+    max-width: var(--tour-chrome-fab-size);
     padding: 0;
     border-radius: 50%;
     align-items: center;
@@ -376,10 +368,10 @@
   }
 
   .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle {
-    flex: 0 0 46px;
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
+    flex: 0 0 var(--tour-chrome-fab-size);
+    width: var(--tour-chrome-fab-size);
+    height: var(--tour-chrome-fab-size);
+    min-width: var(--tour-chrome-fab-size);
     margin: 0 !important;
     padding: 0;
     border-radius: 50%;
@@ -390,19 +382,19 @@
 
   .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol {
     display: block;
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
-    font-size: 22px;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    font-size: 20px;
   }
 
   .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
   }
 }
 

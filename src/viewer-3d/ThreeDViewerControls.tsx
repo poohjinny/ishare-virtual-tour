@@ -6,6 +6,7 @@ import {
   TOUR_TOOLBAR_TOGGLE_EXPAND_LABEL,
 } from '../constants/tourToolbar';
 import { cn } from '../lib/cn';
+import type { PlayTourPhase } from '../hooks/usePlayTour';
 import type { ImmersiveBackgroundController } from '../viewer/immersiveBackgroundController';
 import type { ImmersiveBgButtonState } from '../viewer/immersiveBackgroundController';
 import { toggleImmersiveBackgroundPlayback } from '../viewer/immersiveBackgroundNavbarButton';
@@ -115,6 +116,9 @@ export interface ThreeDViewerControlsProps {
   toolbarToggleAvailable?: boolean;
   immersiveAvailable?: boolean;
   immersiveController?: ImmersiveBackgroundController | null;
+  playTourEnabled?: boolean;
+  playTourPhase?: PlayTourPhase;
+  onPlayTourToggle?: () => void;
   onRecenter: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
@@ -129,6 +133,9 @@ export function ThreeDViewerControls({
   toolbarToggleAvailable = false,
   immersiveAvailable = false,
   immersiveController,
+  playTourEnabled = false,
+  playTourPhase = 'idle',
+  onPlayTourToggle,
   onRecenter,
   onZoomIn,
   onZoomOut,
@@ -138,6 +145,8 @@ export function ThreeDViewerControls({
 }: ThreeDViewerControlsProps) {
   const fullscreen = fullscreenActive;
   const toggleFullscreen = onFullscreenToggle ?? (() => {});
+  const playTourPlaying = playTourPhase === 'playing';
+  const playTourLabel = playTourPlaying ? 'Pause tour' : 'Play tour';
 
   const toolbarLabel =
     collapsed ?
@@ -187,6 +196,28 @@ export function ThreeDViewerControls({
           <MaterialSymbol name='gps_fixed' {...NAVBAR_SYMBOL_PROPS} />
         </button>
       </IconTooltip>
+
+      {playTourEnabled ?
+        <IconTooltip label={playTourLabel} placement='top'>
+          <button
+            type='button'
+            className={cn(
+              'psv-button psv-play-tour-button',
+              playTourPlaying && 'psv-button--active',
+            )}
+            disabled={disabled && !playTourPlaying}
+            aria-label={playTourLabel}
+            aria-pressed={playTourPlaying}
+            onClick={onPlayTourToggle}
+          >
+            <MaterialSymbol
+              name={playTourPlaying ? 'pause' : 'play_arrow'}
+              filled
+              {...NAVBAR_SYMBOL_PROPS}
+            />
+          </button>
+        </IconTooltip>
+      : null}
 
       {immersiveAvailable && immersiveController ?
         <ImmersiveBackgroundButton

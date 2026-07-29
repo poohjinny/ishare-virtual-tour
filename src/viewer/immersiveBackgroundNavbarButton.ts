@@ -121,6 +121,22 @@ export function toggleImmersiveBackgroundPlayback(
   void controller.toggle();
 }
 
+/** Start ambience if it isn’t already on (Play Tour companion). */
+export function ensureImmersiveBackgroundPlaying(
+  controller: ImmersiveBackgroundController,
+): void {
+  if (controller.isEnabled()) return;
+  void controller.toggle();
+}
+
+/** Pause ambience when Play Tour pauses (no-op if already off). */
+export function ensureImmersiveBackgroundPaused(
+  controller: ImmersiveBackgroundController,
+): void {
+  if (!controller.isEnabled()) return;
+  controller.pause();
+}
+
 function applyImmersiveBackgroundNavbarButtonOff(viewer: Viewer): void {
   const button = viewer.navbar.getButton(
     IMMERSIVE_BG_NAVBAR_BUTTON_ID,

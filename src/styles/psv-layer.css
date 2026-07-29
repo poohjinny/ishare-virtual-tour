@@ -46,14 +46,14 @@
   --ishare-display-font: var(--client-font, var(--ishare-font-display));
   /* Tour chrome gutter — nav FAB dock, breadcrumb, dev tools, Ask Guide */
   --tour-chrome-inset: 1rem;
-  --tour-chrome-fab-size: 2.875rem;
-  --tour-chrome-breadcrumb-row-height: 2.75rem;
-  --tour-chrome-top-dock-width: calc(4 * var(--tour-chrome-fab-size) + 3 * 0.5rem);
+  --tour-chrome-fab-size: 2.5rem;
+  --tour-chrome-breadcrumb-row-height: 2.375rem;
+  --tour-chrome-top-dock-width: calc(4 * var(--tour-chrome-fab-size) + 3 * 0.375rem);
   --tour-chrome-inset-top: max(var(--tour-chrome-inset), env(safe-area-inset-top, 0px));
   --tour-chrome-inset-right: max(var(--tour-chrome-inset), env(safe-area-inset-right, 0px));
   --tour-chrome-inset-bottom: max(var(--tour-chrome-inset), env(safe-area-inset-bottom, 0px));
   --tour-chrome-inset-left: max(var(--tour-chrome-inset), env(safe-area-inset-left, 0px));
-  --tour-chrome-ai-fab-size: 4.75rem;
+  --tour-chrome-ai-fab-size: 4rem;
   /* Top-right dock/directory panels share this cap so they grow as tall as the
      viewport allows while clearing the bottom-right Ask Guide avatar. */
   --tour-chrome-top-panel-max-height: calc(100vh - var(--tour-chrome-inset-top) - var(--tour-chrome-inset-bottom) - var(--tour-chrome-ai-fab-size) - var(--tour-chrome-inset));
@@ -68,16 +68,16 @@
 
 @media (max-width: 1023px) {
   .tour-page {
-    --tour-chrome-top-dock-width: calc(2 * var(--tour-chrome-fab-size) + 0.5rem);
+    --tour-chrome-top-dock-width: calc(2 * var(--tour-chrome-fab-size) + 0.375rem);
   }
 }
 
 @media (max-width: 480px) {
   .tour-page {
     --tour-chrome-inset: 0.5rem;
-    --tour-chrome-fab-size: 2.75rem;
-    --tour-chrome-ai-fab-size: 4rem;
-    --tour-chrome-breadcrumb-row-height: 2.5rem;
+    --tour-chrome-fab-size: 2.375rem;
+    --tour-chrome-ai-fab-size: 3.5rem;
+    --tour-chrome-breadcrumb-row-height: 2.125rem;
   }
 }
 
@@ -379,7 +379,7 @@ input::placeholder {
   display: flex;
   transform: translateX(-50%) translateY(0);
   flex-direction: row;
-  padding: 8px 20px;
+  padding: 6px 16px;
   border-radius: 999px;
   background: var(--ishare-float-glass-bg);
   border: none;
@@ -438,10 +438,10 @@ input::placeholder {
     visibility: visible;
     pointer-events: auto;
     transform: translateX(-50%) translateY(0);
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
-    max-width: 46px;
+    width: var(--tour-chrome-fab-size);
+    height: var(--tour-chrome-fab-size);
+    min-width: var(--tour-chrome-fab-size);
+    max-width: var(--tour-chrome-fab-size);
     padding: 0;
     border-radius: 50%;
     align-items: center;
@@ -477,10 +477,10 @@ input::placeholder {
   }
 
   .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle {
-    flex: 0 0 46px;
-    width: 46px;
-    height: 46px;
-    min-width: 46px;
+    flex: 0 0 var(--tour-chrome-fab-size);
+    width: var(--tour-chrome-fab-size);
+    height: var(--tour-chrome-fab-size);
+    min-width: var(--tour-chrome-fab-size);
     margin: 0 !important;
     padding: 0;
     border-radius: 50%;
@@ -492,19 +492,19 @@ input::placeholder {
   .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg,
   .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol {
     display: block;
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
-    font-size: 22px;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    font-size: 20px;
   }
 
   .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
   }
 
   /* Collapsed FAB hover — drop the toolbar's dark button tint (pill bg handles it) */
@@ -518,7 +518,7 @@ input::placeholder {
     height: auto;
     min-width: 0;
     max-width: min(520px, calc(100vw - 48px));
-    padding: 8px 20px;
+    padding: 6px 16px;
     border-radius: 999px;
   }
 }
@@ -649,8 +649,13 @@ input::placeholder {
   margin-left: 24px;
 }
 
-.viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
+/* Thin chevrons read tighter than filled icons at 0 gap — keep a hairline between arrows only. */
+.viewer-container .psv-move-button+.psv-move-button {
   margin-left: 4px;
+}
+
+.viewer-container .psv-recenter-button+.psv-play-tour-button {
+  margin-left: 24px;
 }
 
 .viewer-container .psv-recenter-button+.psv-immersive-bg-button {
@@ -659,14 +664,6 @@ input::placeholder {
 
 .viewer-container .psv-recenter-button+.psv-fullscreen-button {
   margin-left: 24px;
-}
-
-.viewer-container .psv-immersive-bg-button+.psv-fullscreen-button {
-  margin-left: 4px;
-}
-
-.viewer-container .psv-fullscreen-button+.psv-tour-toolbar-toggle {
-  margin-left: 4px;
 }
 
 .viewer-container .psv-toolbar-toggle-icon-stack {
@@ -820,10 +817,6 @@ input::placeholder {
   .viewer-container .psv-immersive-bg-button--loading .psv-immersive-bg-bar {
     opacity: 0.72;
   }
-}
-
-.viewer-container .psv-move-button+.psv-move-button {
-  margin-left: 4px;
 }
 
 .viewer-container .psv-button:not(.psv-zoom-range):not(.psv-button--disabled):hover,
@@ -985,8 +978,12 @@ input::placeholder {
     margin-left: 18px;
   }
 
-  .viewer-container .psv-navbar .psv-move-button+.psv-recenter-button {
+  .viewer-container .psv-move-button+.psv-move-button {
     margin-left: 4px;
+  }
+
+  .viewer-container .psv-recenter-button+.psv-play-tour-button {
+    margin-left: 18px;
   }
 
   .viewer-container .psv-recenter-button+.psv-immersive-bg-button {
@@ -995,14 +992,6 @@ input::placeholder {
 
   .viewer-container .psv-recenter-button+.psv-fullscreen-button {
     margin-left: 18px;
-  }
-
-  .viewer-container .psv-immersive-bg-button+.psv-fullscreen-button {
-    margin-left: 4px;
-  }
-
-  .viewer-container .psv-move-button+.psv-move-button {
-    margin-left: 4px;
   }
 }
 

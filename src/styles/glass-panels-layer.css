@@ -1630,14 +1630,41 @@
     gap: 12px;
   }
 
+  .tour-glass-panel--ai {
+    height: auto;
+    /* Radius lives on the shell (below). Root stays visible so stacked chrome
+       outside this panel is unaffected; shell clips the rounded glass. */
+    overflow: visible;
+  }
+
+  .tour-glass-panel--ai .tour-glass-panel__shell {
+    height: auto;
+    max-height: 100%;
+    min-height: 0;
+    /* Dock shells normally rely on the root’s overflow:hidden + radius; AI keeps
+       root overflow visible, so the shell must own both radius and clip. */
+    border-radius: var(--ishare-panel-radius);
+    overflow: hidden;
+  }
+
   .tour-glass-panel--ai .tour-glass-panel__header {
     padding-left: var(--ai-panel-inline-padding);
     padding-right: var(--ai-panel-inline-padding);
   }
 
+  .tour-glass-panel--ai .tour-glass-panel__footer {
+    /* Mic tooltip paints above the control inside the shell — don’t clip it in
+       the footer itself; shell overflow:hidden still keeps outer corners round. */
+    overflow: visible;
+  }
+
   .tour-glass-panel__body--ai {
     position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
     gap: 0;
+    min-height: 0;
     padding: 0;
     overflow: hidden;
     overflow-x: clip;
@@ -1670,6 +1697,10 @@
     }
 
     .tour-glass-panel__body--ai {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      min-height: 0;
       padding: 0;
       overflow: hidden;
       overflow-x: clip;
@@ -2084,8 +2115,9 @@
     display: flex;
     justify-content: flex-end;
     margin: 0;
-    padding: 8px 8px 4px;
+    padding: 12px 8px;
     background: var(--ishare-glass-body-bg);
+    border-bottom: var(--ishare-glass-divider);
     z-index: 12;
   }
 
@@ -2100,15 +2132,16 @@
   }
 
   /*
-   * No-media chrome lives above the scroll body. Keep a clear gap under the
-   * pinned share/close row so title/meta don't crowd the buttons.
+   * No-media chrome lives above the scroll body. Keep top padding near the
+   * with-hero body rhythm so title/meta aren’t cramped under the toolbar.
    */
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
   .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.info-popup__body {
-    padding-top: 16px;
+    --anchored-body-pad-top: 28px;
+    padding-top: var(--anchored-body-pad-top, 28px);
   }
 
   /* Body chrome (no media): same hit area as hero, ghost fill instead of glass disc. */
