@@ -294,9 +294,25 @@ export async function askGuideChatCore({
 
   if (!response.ok) {
     const detail = await response.text();
-    const error = new Error(
-      `OpenAI ${response.status}: ${detail.slice(0, 400)}`,
-    );
+    let summary = detail.slice(0, 400).trim();
+    if (summary) {
+      try {
+        const parsed = JSON.parse(summary);
+        const message =
+          parsed?.error?.message ||
+          parsed?.error?.code ||
+          parsed?.message ||
+          null;
+        if (typeof message === 'string' && message.trim()) {
+          summary = message.trim();
+        }
+      } catch {
+        /* keep raw text */
+      }
+    } else {
+      summary = '(empty error body)';
+    }
+    const error = new Error(`OpenAI ${response.status}: ${summary}`);
     error.statusCode = 502;
     throw error;
   }

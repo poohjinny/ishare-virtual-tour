@@ -18,7 +18,10 @@ import { useSpeechToText } from '../../hooks/useSpeechToText';
 import { GlassPanelCloseIcon, TourGlassPanel } from '../TourGlassPanel';
 import { IconTooltip } from '../ui/IconTooltip';
 import { MaterialSymbol } from '../ui/MaterialSymbol';
-import { MATERIAL_SYMBOL_SIZE_22 } from '../ui/materialSymbolClasses';
+import {
+  MATERIAL_SYMBOL_SIZE_14,
+  MATERIAL_SYMBOL_SIZE_22,
+} from '../ui/materialSymbolClasses';
 import { PlatformBrandLink } from '../PlatformBrandLink';
 import { GuideAvatar } from './GuideAvatar';
 import { GuideCtaRow } from './GuideCtaRow';
@@ -31,7 +34,13 @@ import {
   aiComposerIconClassName,
   aiComposerInputClassName,
   aiComposerSendClassName,
+  aiComposerSendHiddenClassName,
   aiComposerSendIconClassName,
+  aiComposerSendSlotClassName,
+  aiComposerSendSlotClosedClassName,
+  aiComposerSendSlotInnerClassName,
+  aiComposerSendSlotOpenClassName,
+  aiComposerSendVisibleClassName,
   aiComposerShellClassName,
   aiComposerShellCollapsedClassName,
   aiComposerShellExpandedClassName,
@@ -43,9 +52,9 @@ import {
   aiMessageGapSameClassName,
   aiMessageGapTurnClassName,
   aiMessageVariants,
+  aiPanelBannerBodyClassName,
+  aiPanelBannerDismissClassName,
   aiPanelErrorClassName,
-  aiPanelErrorDismissClassName,
-  aiPanelErrorRowClassName,
   aiPanelHeaderActionsClassName,
   aiPanelHeaderBtnClassName,
   aiPanelHeaderIconClassName,
@@ -60,6 +69,41 @@ import {
   aiPanelTitleClassName,
   aiPanelVariants,
 } from './aiAssistantVariants';
+
+function AiPanelBanner({
+  variant,
+  children,
+  onDismiss,
+}: {
+  variant: 'notice' | 'error';
+  children: string;
+  onDismiss?: () => void;
+}) {
+  return (
+    <div
+      className={
+        variant === 'notice' ? aiPanelNoticeClassName : aiPanelErrorClassName
+      }
+      role={variant === 'error' ? 'alert' : 'note'}
+    >
+      <p className={aiPanelBannerBodyClassName}>{children}</p>
+      {onDismiss ?
+        <button
+          type='button'
+          className={aiPanelBannerDismissClassName}
+          onClick={onDismiss}
+          aria-label={variant === 'error' ? 'Dismiss error' : 'Dismiss notice'}
+        >
+          <MaterialSymbol
+            name='close'
+            sizePx={MATERIAL_SYMBOL_SIZE_14}
+            aria-hidden
+          />
+        </button>
+      : null}
+    </div>
+  );
+}
 
 interface AiChatPanelProps {
   panelPhase: 'idle' | 'enter' | 'exit';
@@ -266,20 +310,41 @@ function ComposerField({
             {speechError}
           </span>
         : null}
-        <IconTooltip label='Send message' placement='top' disabled={!canSend}>
-          <button
-            type='submit'
-            className={aiComposerSendClassName}
-            aria-label='Send message'
-            disabled={!canSend}
-            tabIndex={-1}
-            onPointerDown={(event) => {
-              event.preventDefault();
-            }}
-          >
-            <ArrowUpIcon />
-          </button>
-        </IconTooltip>
+        <div
+          className={cn(
+            aiComposerSendSlotClassName,
+            hasInput ?
+              aiComposerSendSlotOpenClassName
+            : aiComposerSendSlotClosedClassName,
+          )}
+          aria-hidden={!hasInput}
+        >
+          <div className={aiComposerSendSlotInnerClassName}>
+            <IconTooltip
+              label='Send message'
+              placement='top'
+              disabled={!canSend}
+            >
+              <button
+                type='submit'
+                className={cn(
+                  aiComposerSendClassName,
+                  hasInput ?
+                    aiComposerSendVisibleClassName
+                  : aiComposerSendHiddenClassName,
+                )}
+                aria-label='Send message'
+                disabled={!canSend}
+                tabIndex={-1}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                }}
+              >
+                <ArrowUpIcon />
+              </button>
+            </IconTooltip>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -308,6 +373,8 @@ export function AiChatPanel({
 }: AiChatPanelProps) {
   const [input, setInput] = useState('');
   const [composerFocused, setComposerFocused] = useState(false);
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
+  const [errorDismissed, setErrorDismissed] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
   const threadSpacerRef = useRef<HTMLDivElement>(null);
   const composerFormRef = useRef<HTMLFormElement>(null);
@@ -323,6 +390,20 @@ export function AiChatPanel({
     [guideUiTest, messages],
   );
   const showMockNotice = guideMock && !liveMode;
+  const showUiTestNotice = guideUiTest && !noticeDismissed;
+  const showUiTestError = guideUiTest && !errorDismissed;
+  const showSendError = Boolean(sendError) && !guideUiTest && !errorDismissed;
+
+  useEffect(() => {
+    setErrorDismissed(false);
+  }, [sendError]);
+
+  useEffect(() => {
+    if (guideUiTest) {
+      setNoticeDismissed(false);
+      setErrorDismissed(false);
+    }
+  }, [guideUiTest]);
   /**
    * Follow-ups only while that assistant turn is still the thread tip.
    * Once the user sends (incl. tapping a suggestion), hide so the pick
@@ -597,10 +678,13 @@ export function AiChatPanel({
       <div className={aiPanelMessagesClassName} ref={messagesRef}>
         {!guideUiTest && (
           <div className={aiPanelIntroClassName}>
-            {showMockNotice ?
-              <p className={aiPanelNoticeClassName} role='note'>
+            {showMockNotice && !noticeDismissed ?
+              <AiPanelBanner
+                variant='notice'
+                onDismiss={() => setNoticeDismissed(true)}
+              >
                 {VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE}
-              </p>
+              </AiPanelBanner>
             : null}
             <p className={aiMessageVariants({ role: 'assistant' })}>
               {greeting}
@@ -683,26 +767,32 @@ export function AiChatPanel({
             className='pointer-events-none shrink-0'
           />
         </div>
-        {sendError && !guideUiTest ?
-          <div className={aiPanelErrorRowClassName} role='alert'>
-            <p className={cn(aiPanelErrorClassName, 'min-w-0 flex-1')}>
-              {sendError}
-            </p>
-            {onDismissError ?
-              <button
-                type='button'
-                className={aiPanelErrorDismissClassName}
-                onClick={onDismissError}
-                aria-label='Dismiss error'
-              >
-                <MaterialSymbol
-                  name='close'
-                  className={aiPanelHeaderIconClassName}
-                  sizePx={MATERIAL_SYMBOL_SIZE_22}
-                />
-              </button>
-            : null}
-          </div>
+        {showUiTestNotice ?
+          <AiPanelBanner
+            variant='notice'
+            onDismiss={() => setNoticeDismissed(true)}
+          >
+            Preview notice — scripted replies only (guideUiTest).
+          </AiPanelBanner>
+        : null}
+        {showSendError ?
+          <AiPanelBanner
+            variant='error'
+            onDismiss={() => {
+              setErrorDismissed(true);
+              onDismissError?.();
+            }}
+          >
+            {sendError!}
+          </AiPanelBanner>
+        : null}
+        {showUiTestError ?
+          <AiPanelBanner
+            variant='error'
+            onDismiss={() => setErrorDismissed(true)}
+          >
+            Sample error — Ask Guide live unavailable (guideUiTest).
+          </AiPanelBanner>
         : null}
       </div>
       <form

@@ -134,20 +134,20 @@ export const aiMessageGapTurnClassName = 'mt-7';
 export const aiPanelIntroClassName = cn('flex flex-col gap-3 self-stretch');
 
 export const aiPanelNoticeClassName = cn(
-  'max-w-full self-stretch rounded-lg border border-[#e8c878] bg-[#fdf4e3] px-3.5 py-2.5 text-sm leading-normal text-muted',
+  'flex max-w-full items-start gap-1.5 self-stretch rounded-lg border border-[#e8c878] bg-[#fdf4e3] px-3 py-2 text-sm leading-normal text-muted',
 );
 
 export const aiPanelErrorClassName = cn(
-  'max-w-full self-stretch rounded-lg border border-[rgba(239,68,68,0.35)] bg-[rgba(239,68,68,0.08)] px-3.5 py-2.5 text-sm leading-normal text-danger',
+  'flex max-w-full items-start gap-1.5 self-stretch rounded-lg border border-[rgba(239,68,68,0.35)] bg-[rgba(239,68,68,0.08)] px-3 py-2 text-sm leading-normal text-danger',
 );
 
-export const aiPanelErrorRowClassName = cn(
-  'flex max-w-full items-start gap-2 self-stretch',
+/** Close control inside notice / error banners. */
+export const aiPanelBannerDismissClassName = cn(
+  'mt-px flex size-4 shrink-0 cursor-pointer items-center justify-center rounded border-none bg-transparent p-0 transition-[background,color] duration-150',
+  'text-current/70 hover:bg-black/5 hover:text-current',
 );
 
-export const aiPanelErrorDismissClassName = cn(
-  'mt-0.5 flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-md border-none bg-transparent p-0 text-danger/80 transition-[background,color] duration-150 hover:bg-[rgba(239,68,68,0.12)] hover:text-danger',
-);
+export const aiPanelBannerBodyClassName = cn('m-0 min-w-0 flex-1');
 
 export const aiThinkingRowClassName = cn(
   'flex max-w-full items-center gap-2.5 self-start text-muted',
@@ -394,11 +394,31 @@ export const aiComposerVoiceRingClassName = cn(
   'pointer-events-none absolute inset-0 rounded-full bg-primary will-change-transform motion-reduce:hidden',
 );
 
+/** Collapses send width so mic spacing eases in/out with the control. */
+export const aiComposerSendSlotClassName = cn(
+  'grid transition-[grid-template-columns,margin] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+);
+
+export const aiComposerSendSlotOpenClassName = cn(
+  'ml-0 grid-cols-[minmax(0,max-content)]',
+);
+
+export const aiComposerSendSlotClosedClassName = cn(
+  'pointer-events-none -ml-1 grid-cols-[0fr]',
+);
+
+export const aiComposerSendSlotInnerClassName = cn('min-w-0 overflow-hidden');
+
 export const aiComposerSendClassName = cn(
-  'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform,opacity] duration-200',
+  'flex size-[30px] shrink-0 origin-center cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]',
   'hover:bg-primary-dark active:scale-95',
   'disabled:cursor-default disabled:bg-primary/35 disabled:text-white/80 disabled:hover:bg-primary/35 disabled:active:scale-100',
+  'motion-reduce:transition-none',
 );
+
+export const aiComposerSendVisibleClassName = cn('scale-100 opacity-100');
+
+export const aiComposerSendHiddenClassName = cn('scale-75 opacity-0');
 
 export const aiComposerIconClassName = materialSymbolCompactClassName;
 
