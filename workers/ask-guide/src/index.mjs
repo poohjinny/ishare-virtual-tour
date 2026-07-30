@@ -15,9 +15,9 @@
 import {
   ASK_GUIDE_DEFAULT_MODEL,
   askGuideChatCore,
-} from '../../api/shared/askGuideCore.mjs';
-import { corsHeaders, resolveCorsOrigin } from '../../api/shared/cors.mjs';
-import { consumeAskGuideRateLimit } from '../../api/shared/rateLimit.mjs';
+} from '../../../api/shared/askGuideCore.mjs';
+import { corsHeaders, resolveCorsOrigin } from '../../../api/shared/cors.mjs';
+import { consumeAskGuideRateLimit } from '../../../api/shared/rateLimit.mjs';
 
 function requestOrigin(request) {
   return request.headers.get('origin') || '';

@@ -1,10 +1,8 @@
-{
-  "name": "ishare-ask-guide",
-  "main": "src/index.mjs",
-  "compatibility_date": "2024-11-01",
-  "workers_dev": true,
-  "vars": {
-    "OPENAI_ASK_GUIDE_MODEL": "gpt-4o-mini",
-    "ASK_GUIDE_RATE_LIMIT_PER_MIN": "30"
-  }
-}
+name = "ishare-ask-guide"
+main = "src/index.mjs"
+compatibility_date = "2024-11-01"
+workers_dev = true
+
+[vars]
+OPENAI_ASK_GUIDE_MODEL = "gpt-4o-mini"
+ASK_GUIDE_RATE_LIMIT_PER_MIN = "30"
