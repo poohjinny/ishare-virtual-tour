@@ -9,6 +9,65 @@ export const aiAssistantStackClassName = cn(
   '[&>*]:pointer-events-auto',
 );
 
+/** Speech bubble above the Ask Guide FAB (panel closed). */
+export const aiFabBubbleClassName = cn(
+  'relative mb-1 max-w-[min(17.5rem,calc(100vw-5.5rem))] rounded-2xl border-none',
+  'group/fab-bubble bg-[var(--ishare-float-glass-bg)] text-left shadow-[var(--ishare-float-glass-shadow)]',
+  '[--fab-bubble-fill:var(--ishare-float-glass-bg)]',
+  '[--fab-bubble-tail-right:calc(var(--tour-chrome-ai-fab-size)/2-0.5rem)]',
+  'motion-reduce:animate-none',
+  'transition-[background,box-shadow] duration-150',
+  'hover:bg-[var(--ishare-float-glass-bg-hover)] hover:shadow-[0_10px_26px_rgba(15,23,42,0.14)]',
+  'hover:[--fab-bubble-fill:var(--ishare-float-glass-bg-hover)]',
+  'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary',
+  'max-[480px]:max-w-none max-[480px]:self-end',
+);
+
+export const aiFabBubbleEnterClassName = cn('animate-ai-fab-bubble-in');
+
+export const aiFabBubbleExitClassName = cn('animate-ai-fab-bubble-out');
+
+/** Main hit target — opens Ask Guide. */
+export const aiFabBubbleOpenClassName = cn(
+  'm-0 w-full cursor-pointer rounded-2xl border-none bg-transparent px-3.5 py-2.5 pe-8 text-left',
+  'focus-visible:outline-none',
+);
+
+export const aiFabBubbleTextClassName = cn(
+  // Design scale `text-sm` (0.75rem) — readable speech; chrome captions often use 2xs/xs.
+  'm-0 font-body text-sm leading-relaxed text-foreground',
+);
+
+/** Corner dismiss — hybrid with auto-hide. */
+export const aiFabBubbleDismissClassName = cn(
+  'absolute top-1 right-1 inline-flex size-6 shrink-0 cursor-pointer items-center justify-center',
+  'rounded-full border-none bg-transparent p-0 text-muted',
+  'transition-[background,color] duration-150',
+  'hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground',
+  'focus-visible:outline-none',
+);
+
+/** Place / naming name inside the FAB proximity line (icon/dot + name as one unit). */
+export const aiFabBubbleEmphasisClassName = cn(
+  'ms-1.5 inline-flex items-center gap-1 align-middle font-semibold leading-none text-foreground',
+);
+
+/** Theme place marker before a location name in the FAB bubble. */
+export const aiFabBubblePlaceDotClassName = cn(
+  'size-1.5 shrink-0 rounded-full bg-primary',
+);
+
+/** Theme naming heart before an NO name in the FAB bubble. */
+export const aiFabBubbleNamingHeartClassName = cn(
+  'shrink-0 leading-none text-primary',
+);
+
+/** Tip centered on the FAB; slight tuck so fill meets the bubble edge. */
+export const aiFabBubbleTailClassName = cn(
+  'pointer-events-none absolute top-full h-2 w-4',
+  'right-[var(--fab-bubble-tail-right)]',
+);
+
 const aiFabHoverClassName = cn(
   'hover:max-w-[160px] hover:bg-[var(--ishare-float-glass-bg-hover)] hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
   'focus-visible:max-w-[160px] focus-visible:bg-[var(--ishare-float-glass-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
@@ -41,8 +100,13 @@ export const aiFabAvatarClassName = cn(
 /** FAB orb — inset within the pill so outer shadow is not clipped by `overflow-hidden`. */
 export const aiFabGuideMarkClassName = cn(
   'size-[calc(var(--tour-chrome-ai-fab-size)-1.25rem)]',
-  'origin-center animate-guide-avatar-orb motion-reduce:animate-none',
+  'origin-center',
   'shadow-[inset_0_-2px_8px_rgba(var(--ishare-primary-rgb),0.2),0_0_0_1px_rgba(var(--ishare-primary-rgb),0.22),0_2px_6px_rgba(var(--ishare-primary-rgb),0.28)]',
+);
+
+/** Faster breathe — only while the proximity bubble is visible. */
+export const aiFabGuideMarkPulseClassName = cn(
+  'animate-guide-avatar-orb-pulse motion-reduce:animate-none',
 );
 
 /** Default Ask Guide avatar — primary-tinted orb when no per-tour image override. */
@@ -147,7 +211,25 @@ export const aiPanelBannerDismissClassName = cn(
   'text-current/70 hover:bg-black/5 hover:text-current',
 );
 
+export const aiPanelBannerRetryClassName = cn(
+  'mt-px shrink-0 cursor-pointer rounded-md border-none bg-transparent px-1.5 py-0.5 font-display text-xs font-semibold text-current underline-offset-2 transition-[background,opacity] duration-150',
+  'hover:bg-black/5 hover:underline',
+);
+
 export const aiPanelBannerBodyClassName = cn('m-0 min-w-0 flex-1');
+
+export const aiMessageSpeakClassName = cn(
+  'inline-flex size-8 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-muted transition-[background,color] duration-150',
+  'hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground',
+  'aria-pressed:bg-primary/12 aria-pressed:text-primary',
+);
+
+export const aiMessageActionsClassName = cn('mt-1 flex items-center gap-0');
+
+export const aiComposerStopClassName = cn(
+  'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-[rgba(15,23,42,0.08)] text-foreground transition-[background,transform] duration-150',
+  'hover:bg-[rgba(15,23,42,0.14)] active:scale-95',
+);
 
 export const aiThinkingRowClassName = cn(
   'flex max-w-full items-center gap-2.5 self-start text-muted',
@@ -173,6 +255,27 @@ export const aiMessageVariants = cva('text-md leading-[1.75] shadow-none', {
     },
   },
 });
+
+/** Light markdown inside assistant replies (bold, lists, links, quotes). */
+export const aiMessageProseClassName = cn(
+  'min-w-0',
+  '[&_p]:m-0 [&_p+p]:mt-2.5',
+  '[&_ul]:my-2.5 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5',
+  '[&_ol]:my-2.5 [&_ol]:list-decimal [&_ol]:space-y-1.5 [&_ol]:pl-5',
+  // Nested bullets / numbers so levels read as distinct.
+  '[&_ul_ul]:my-1.5 [&_ul_ul]:list-[circle]',
+  '[&_ul_ul_ul]:list-[square]',
+  '[&_ol_ol]:my-1.5 [&_ol_ol]:list-[lower-alpha]',
+  '[&_ol_ol_ol]:list-[lower-roman]',
+  '[&_ul_ol]:my-1.5 [&_ol_ul]:my-1.5',
+  '[&_li]:leading-[1.65]',
+  '[&_blockquote]:my-2.5 [&_blockquote]:border-l-2 [&_blockquote]:border-primary/35 [&_blockquote]:pl-3 [&_blockquote]:text-muted',
+  '[&_strong]:font-semibold [&_strong]:text-foreground',
+  '[&_em]:italic',
+  '[&_del]:text-muted [&_del]:line-through',
+  '[&_code]:rounded-sm [&_code]:bg-[rgba(15,23,42,0.06)] [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.92em]',
+  '[&_a]:font-semibold [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 [&_a]:transition-colors hover:[&_a]:text-primary-dark',
+);
 
 /** Single place/naming card width — CTA buttons align to this. */
 export const aiGuideCardWidthClassName = 'w-[17rem] max-w-full';
@@ -231,12 +334,9 @@ export const aiSceneLinkCardBodyClassName = cn(
   'flex min-w-0 flex-col gap-1 px-2.5 pt-2 pb-3',
 );
 
+/** Shared place / naming eyebrow above the card title. */
 export const aiSceneLinkCardKindClassName = cn(
   'font-body text-2xs font-medium uppercase tracking-wide text-muted',
-);
-
-export const aiSceneLinkCardKindNamingClassName = cn(
-  'font-body text-2xs font-medium tracking-wide text-primary',
 );
 
 export const aiSceneLinkCardTitleRowClassName = cn(
@@ -302,6 +402,17 @@ export const aiGuideCtaClassName = cn(
 export const aiGuideCtaPrimaryClassName = cn(
   aiGuideCtaClassName,
   'border-primary/35 bg-primary/10 text-primary hover:border-primary hover:bg-primary hover:text-white',
+);
+
+/** Compact CTAs under naming cards — quieter than reply-level actions. */
+export const aiGuideCtaCompactClassName = cn(
+  'flex min-w-0 cursor-pointer items-center justify-center rounded-md border border-[rgba(15,23,42,0.12)] bg-white/80 px-2 py-1.5 text-center font-body text-2xs font-medium leading-snug text-muted no-underline transition-[background,color,border-color] duration-200',
+  'hover:border-[rgba(15,23,42,0.22)] hover:bg-white hover:text-foreground',
+);
+
+export const aiGuideCtaCompactPrimaryClassName = cn(
+  aiGuideCtaCompactClassName,
+  'border-primary/30 bg-primary/8 text-primary hover:border-primary/45 hover:bg-primary/12 hover:text-primary',
 );
 
 /** CTA button group under a reply or naming card. */

@@ -15,10 +15,7 @@ import {
   applyDefaultTransition,
   applyImmersiveBackground,
 } from './tourUpdateDev.mjs';
-import {
-  readCatalogJson,
-  writeCatalogJson,
-} from './tourCatalogDev.mjs';
+import { readCatalogJson, writeCatalogJson } from './tourCatalogDev.mjs';
 
 const DEFAULT_TRANSITION = { speed: '500ms', effect: 'fade' };
 const DEFAULT_VIEW = { yaw: 0, pitch: 0, zoom: 17 };
@@ -46,6 +43,7 @@ function buildTourRecord({
     category,
     title: tourTitle,
     firstScene: scene.id,
+    sceneOrder: [scene.id],
     defaultTransition: DEFAULT_TRANSITION,
     scenes: { [scene.id]: scene },
   };

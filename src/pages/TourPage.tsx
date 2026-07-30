@@ -272,10 +272,12 @@ function TourExperience() {
   const [devTourBootstrapStatus, setDevTourBootstrapStatus] = useState<
     'idle' | 'loading' | 'error'
   >('idle');
+  /** Keeps DevTools mounted across ?dev=1 tour switches while the next tour loads. */
+  const heldDevTourRef = useRef<Tour | null>(null);
 
   useEffect(() => {
-    setDevTourSnapshot(null);
-    setDevTourBootstrapStatus('idle');
+    // Keep the previous snapshot until the matching tour arrives so the shell
+    // can hold UI. Resolution below ignores mismatched snapshot ids.
     setDevThumbnailVersion(0);
   }, [route.tourId]);
 
@@ -302,21 +304,37 @@ function TourExperience() {
     };
   }, [route.tourId, searchParams.dev]);
 
-  const tour = useMemo(() => {
-    let base: Tour | null;
-    if (searchParams.dev) {
-      if (devTourSnapshot) base = devTourSnapshot;
-      else base = staticTour;
-    } else {
-      base = devTourSnapshot ?? staticTour;
-    }
-
+  const resolvedTour = useMemo(() => {
+    const matchedSnapshot =
+      devTourSnapshot && devTourSnapshot.id === route.tourId ?
+        devTourSnapshot
+      : null;
+    const base = matchedSnapshot ?? staticTour;
     if (!base) return null;
     if (searchParams.dev && devThumbnailVersion > 0) {
       return bustSceneThumbnailUrls(base, devThumbnailVersion);
     }
     return base;
-  }, [devThumbnailVersion, devTourSnapshot, searchParams.dev, staticTour]);
+  }, [
+    devThumbnailVersion,
+    devTourSnapshot,
+    route.tourId,
+    searchParams.dev,
+    staticTour,
+  ]);
+
+  if (resolvedTour) {
+    heldDevTourRef.current = resolvedTour;
+  }
+
+  const awaitingDevTour =
+    searchParams.dev &&
+    devTourBootstrapStatus === 'loading' &&
+    (!resolvedTour || resolvedTour.id !== route.tourId);
+
+  /** Prefer the route tour; while switching under ?dev=1, keep the last one. */
+  const tour =
+    resolvedTour ?? (awaitingDevTour ? heldDevTourRef.current : null);
   const bootstrapTour = useMemo(
     (): Tour =>
       tour ??
@@ -407,6 +425,7 @@ function TourExperience() {
     string | null
   >(null);
   const [namingOpportunityBusy, setNamingOpportunityBusy] = useState(false);
+  const [chromeDockOpen, setChromeDockOpen] = useState(false);
   const [devClickCoords, setDevClickCoords] = useState<ClickCoords | null>(
     null,
   );
@@ -1173,6 +1192,7 @@ function TourExperience() {
           namingOpportunities={tour.namingOpportunities}
           currentSceneId={currentSceneId}
           firstSceneId={tour.firstScene}
+          sceneOrder={tour.sceneOrder}
           tourTitle={productFullName}
           exploreLead={exploreLead}
           client={resolveTourClient(tour)}
@@ -1190,6 +1210,12 @@ function TourExperience() {
           onVisitNamingPlace={handleVisitNamingPlace}
           onBreadcrumbNavigate={handleBreadcrumbNavigate}
           onRecenterCurrentScene={handleVisitCurrentScene}
+          onAskAboutScene={
+            showAskGuide ? assistant.openAndAskAboutScene : undefined
+          }
+          onAskAboutNaming={
+            showAskGuide ? assistant.openAndAskAboutNaming : undefined
+          }
           onTogglePlaceOverview={() =>
             viewerRef.current?.togglePlaceOverview() ?? false
           }
@@ -1201,6 +1227,7 @@ function TourExperience() {
           onDismissAnchoredPanels={() =>
             viewerRef.current?.closeAnchoredPanels()
           }
+          onChromeDockOpenChange={setChromeDockOpen}
         />
 
         {splashPhase !== 'done' && (
@@ -1225,6 +1252,9 @@ function TourExperience() {
             guideUiTest={searchParams.guideUiTest}
             guideMock={searchParams.guideMock}
             currentSceneId={currentSceneId}
+            namingHotspotId={activeNamingHotspotId}
+            namingName={assistantLiveContext?.namingName}
+            chromeDockOpen={chromeDockOpen}
             client={resolveTourClient(tour)}
             clientLogo={tourBranding?.logo}
             logoAlt={tourBranding?.logoAlt}

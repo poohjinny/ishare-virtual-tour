@@ -107,6 +107,7 @@ import {
   type NamingSceneSubgroup,
   type TourDirectoryNamingItem,
 } from '../utils/tourDirectory';
+import { sortSceneGroupsByTourOrder, sortSceneIdsByTourOrder } from '../utils/sceneOrder';
 import {
   computeNamingPriceBounds,
   filterTourNamingByPriceRange,
@@ -195,6 +196,8 @@ interface TourNavFloatProps {
   namingOpportunities?: Record<string, NamingOpportunityRecord>;
   currentSceneId: string;
   firstSceneId: string;
+  /** Author Explore / Play order — when omitted, runtime fills via nav BFS. */
+  sceneOrder?: string[];
   tourTitle?: string;
   client?: TourClient;
   clientLogo?: string;
@@ -216,6 +219,10 @@ interface TourNavFloatProps {
   onBreadcrumbNavigate: (sceneId: string) => void;
   /** Recenter the live scene to its default view — used when "Visiting" the current place. */
   onRecenterCurrentScene?: () => void;
+  /** Open Ask Guide and ask about the Explore place detail. */
+  onAskAboutScene?: (sceneId: string) => void;
+  /** Open Ask Guide and ask about the Explore naming detail. */
+  onAskAboutNaming?: (sceneId: string, namingName?: string) => void;
   /**
    * Toggle in-scene place-overview panel. Returns false when no pin exists
    * (breadcrumb falls back to Explore detail).
@@ -232,6 +239,8 @@ interface TourNavFloatProps {
   panelStack?: TourPanelStack;
   /** Close in-scene anchored nav/info panels (e.g. when opening explore chrome). */
   onDismissAnchoredPanels?: () => void;
+  /** True while a top-right dock panel is open or exiting (Explore / Help / Share). */
+  onChromeDockOpenChange?: (open: boolean) => void;
 }
 
 type PanelMode = 'explore' | 'help' | 'share' | null;
@@ -361,6 +370,7 @@ export function TourNavFloat({
   namingOpportunities,
   currentSceneId,
   firstSceneId,
+  sceneOrder,
   tourTitle = 'Virtual Tour',
   client,
   clientLogo,
@@ -378,6 +388,8 @@ export function TourNavFloat({
   onVisitNamingPlace,
   onBreadcrumbNavigate,
   onRecenterCurrentScene,
+  onAskAboutScene,
+  onAskAboutNaming,
   onTogglePlaceOverview,
   activeNamingHotspotId = null,
   embed = false,
@@ -385,6 +397,7 @@ export function TourNavFloat({
   showImmersiveAmbience = true,
   panelStack,
   onDismissAnchoredPanels,
+  onChromeDockOpenChange,
 }: TourNavFloatProps) {
   const { isMobile, isDesktop } = useTourChromeLayout();
   /** Location picks stay clickable during scene transitions (disabled only blocks chrome). */
@@ -459,17 +472,32 @@ export function TourNavFloat({
       string,
       ReturnType<typeof resolveBreadcrumbSiblingOptions>
     > = {};
+    const orderTour = {
+      scenes: breadcrumbScenesById,
+      hotspots: tourHotspots,
+      firstScene: firstSceneId,
+      ...(sceneOrder ? { sceneOrder } : {}),
+    };
     for (const item of breadcrumbItems) {
-      const ids = listSceneSiblings(
-        firstSceneId,
-        breadcrumbScenesById,
-        item.id,
-        tourHotspots,
+      const ids = sortSceneIdsByTourOrder(
+        orderTour,
+        listSceneSiblings(
+          firstSceneId,
+          breadcrumbScenesById,
+          item.id,
+          tourHotspots,
+        ),
       );
       map[item.id] = resolveBreadcrumbSiblingOptions(ids, breadcrumbScenesById);
     }
     return map;
-  }, [breadcrumbItems, breadcrumbScenesById, firstSceneId, tourHotspots]);
+  }, [
+    breadcrumbItems,
+    breadcrumbScenesById,
+    firstSceneId,
+    sceneOrder,
+    tourHotspots,
+  ]);
 
   const [siblingMenuCrumbId, setSiblingMenuCrumbId] = useState<string | null>(
     null,
@@ -514,8 +542,17 @@ export function TourNavFloat({
       hotspots: tourHotspots,
       viewerType: tourViewerType,
       namingOpportunities,
+      firstScene: firstSceneId,
+      sceneOrder,
     }),
-    [namingOpportunities, scenes, tourHotspots, tourViewerType],
+    [
+      firstSceneId,
+      namingOpportunities,
+      sceneOrder,
+      scenes,
+      tourHotspots,
+      tourViewerType,
+    ],
   );
 
   const exploreTour = useMemo(
@@ -527,10 +564,12 @@ export function TourNavFloat({
       hotspots: tourHotspots,
       viewerType: tourViewerType,
       namingOpportunities,
+      ...(sceneOrder ? { sceneOrder } : {}),
     }),
     [
       firstSceneId,
       namingOpportunities,
+      sceneOrder,
       tourDirectoryContext.scenes,
       tourHotspots,
       tourId,
@@ -901,13 +940,17 @@ export function TourNavFloat({
   const firstScene = scenesById[firstSceneId];
 
   // Department groups from the nav graph — only when sorted by tour order.
+  // Membership stays nav-based; member + group order follows authored sceneOrder.
   const locationGroups = useMemo(() => {
     if (exploreLocationsSort !== 'tour-order') return null;
-    return buildSceneGroups(
-      tourDirectoryContext,
-      scenesById,
-      firstSceneId,
-      TOUR_DIRECTORY_GROUP_OTHER,
+    return sortSceneGroupsByTourOrder(
+      { ...tourDirectoryContext, firstScene: firstSceneId },
+      buildSceneGroups(
+        tourDirectoryContext,
+        scenesById,
+        firstSceneId,
+        TOUR_DIRECTORY_GROUP_OTHER,
+      ),
     );
   }, [exploreLocationsSort, firstSceneId, scenesById, tourDirectoryContext]);
 
@@ -1258,6 +1301,11 @@ export function TourNavFloat({
     };
   }, [closeExploreSearch, embed, panelStack]);
 
+  // Ask Guide FAB bubble shares the right rail — hide it while dock chrome is up.
+  useEffect(() => {
+    onChromeDockOpenChange?.(panelMode !== null || displayPanel !== null);
+  }, [displayPanel, onChromeDockOpenChange, panelMode]);
+
   useEffect(() => {
     if (panelMode === null) return;
 
@@ -1396,6 +1444,30 @@ export function TourNavFloat({
     currentSceneId,
     exploreNamingDetail,
     onVisitNamingPlace,
+  ]);
+
+  const handleExploreSceneDetailAsk = useCallback(() => {
+    if (!exploreSceneDetailId || !onAskAboutScene) return;
+    const sceneId = exploreSceneDetailId;
+    closeExploreThen(() => {
+      onAskAboutScene(sceneId);
+    });
+  }, [closeExploreThen, exploreSceneDetailId, onAskAboutScene]);
+
+  const handleExploreNamingDetailAsk = useCallback(() => {
+    if (!exploreNamingDetail || !onAskAboutNaming) return;
+    const { sceneId } = exploreNamingDetail;
+    const namingName =
+      exploreNamingDetailView?.hotspot.popup?.title?.trim() ||
+      exploreNamingDetailView?.hotspot.label?.trim();
+    closeExploreThen(() => {
+      onAskAboutNaming(sceneId, namingName);
+    });
+  }, [
+    closeExploreThen,
+    exploreNamingDetail,
+    exploreNamingDetailView,
+    onAskAboutNaming,
   ]);
 
   const handleExploreClick = useCallback(() => {
@@ -2116,6 +2188,9 @@ export function TourNavFloat({
                 disabled={locationNavDisabled}
                 onBack={requestCloseExploreSceneDetail}
                 onVisit={handleExploreSceneDetailVisit}
+                onAskGuide={
+                  onAskAboutScene ? handleExploreSceneDetailAsk : undefined
+                }
               />
             </ExploreSceneDetailPanel>
           </div>
@@ -2142,6 +2217,9 @@ export function TourNavFloat({
                 disabled={disabled || namingOpportunityBusy}
                 onBack={requestCloseExploreNamingDetail}
                 onVisit={handleExploreNamingDetailVisit}
+                onAskGuide={
+                  onAskAboutNaming ? handleExploreNamingDetailAsk : undefined
+                }
               />
             </ExploreSceneDetailPanel>
           </div>

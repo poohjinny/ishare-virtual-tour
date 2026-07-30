@@ -14,6 +14,8 @@ import {
   aiGuideContactValueClassName,
   aiGuideCtaActionsColsClassName,
   aiGuideCtaClassName,
+  aiGuideCtaCompactClassName,
+  aiGuideCtaCompactPrimaryClassName,
   aiGuideCtaPrimaryClassName,
   aiGuideCtaRowClassName,
 } from './aiAssistantVariants';
@@ -195,20 +197,29 @@ export function GuideCtaRow({
       {visible.length > 0 ?
         <div
           className={cn(
-            'grid gap-2',
+            'grid',
+            stack ? 'gap-1.5' : 'gap-2',
             aiGuideCtaActionsColsClassName(visible.length, align, stack),
           )}
         >
-          {visible.map((cta) => {
+          {visible.map((cta, index) => {
             const isMailto = isMailtoCtaUrl(cta.url);
-            const isPrimary = cta.kind === 'donate' || cta.kind === 'contact';
+            // Naming stack: one quiet primary + secondary peers (avoid all-theme clash).
+            const isPrimary =
+              stack ?
+                index === 0
+              : cta.kind === 'donate' || cta.kind === 'contact';
+            const className =
+              stack ?
+                isPrimary ? aiGuideCtaCompactPrimaryClassName
+                : aiGuideCtaCompactClassName
+              : isPrimary ? aiGuideCtaPrimaryClassName
+              : aiGuideCtaClassName;
             return (
               <a
                 key={cta.id}
                 href={cta.url}
-                className={
-                  isPrimary ? aiGuideCtaPrimaryClassName : aiGuideCtaClassName
-                }
+                className={className}
                 {...(isMailto ?
                   {}
                 : { target: '_blank', rel: 'noopener noreferrer' })}

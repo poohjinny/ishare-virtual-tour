@@ -2198,8 +2198,8 @@
           "id": "info-suite-b",
           "type": "info",
           "position": {
-            "yaw": 50.6,
-            "pitch": -20.9
+            "yaw": 59.4,
+            "pitch": -26.2
           },
           "popup": {
             "display": "anchored",
@@ -3366,5 +3366,49 @@
       "status": "sold",
       "body": "Within the basement of the Ken Sargent House is one of the most important and hard-working spaces in the entire home, the Operations Centre. At more than 700 square feet, this room houses the essential systems that bring comfort, safety, and connection to every family who stays with us.\n\nFrom heating, mechanical controls, and building infrastructure to the technology that powers our internet, Wi-Fi, television, and communications, this space ensures that the house runs seamlessly, quietly supporting families through every moment of their stay. When families unwind after a long day at the hospital with a favourite show or when they connect with loved ones back home through video calls, or when staff rely on stable systems to coordinate care, it is the Operations Centre that makes these moments possible."
     }
-  }
+  },
+  "sceneOrder": [
+    "s_dtv27wfrbi",
+    "s_h310pim38b",
+    "s_ca8beuikkq",
+    "s_tcr44j461u",
+    "s_c77nixtvmw",
+    "s_leoc61fw42",
+    "s_q5obngkupu",
+    "s_0g101b6iul",
+    "s_hxsjmv1tio",
+    "s_9kkz24dle7",
+    "s_t3it0l8bsk",
+    "s_pvcsd2t0w2",
+    "s_y9dmsf7zmk",
+    "s_fb3dsuusxy",
+    "s_eb2hcp3nla",
+    "s_6e38qm2jc1",
+    "s_osxxeptx4f",
+    "s_0j9sgtokj2",
+    "s_be8euh4oit",
+    "s_zlz39v1fjz",
+    "s_x6w0tq0sa5",
+    "s_e5k3wjy72q",
+    "s_3fh5x3humm",
+    "s_vddzraqi1q",
+    "s_0vzggtgj1g",
+    "s_sb851xh639",
+    "s_dehwdo8kx1",
+    "s_c13b4lgg8f",
+    "s_ps029p4kzn",
+    "s_91jpwd8ota",
+    "s_rmf30ndp5j",
+    "s_yz800wucno",
+    "s_dm33cannkj",
+    "s_sw7dxt8z3g",
+    "s_f24tksel8t",
+    "s_4epcuat8yv",
+    "s_lc9a2b99af",
+    "s_px8i95h8ei",
+    "s_hfiucp83au",
+    "s_xl88jb8utx",
+    "s_jfn7k06rhj",
+    "s_6bewbri9s0"
+  ]
 }

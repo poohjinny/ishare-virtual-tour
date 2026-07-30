@@ -719,6 +719,16 @@ export function devUpdateScene(payload: DevUpdateScenePayload) {
   }>('/scene/update', payload);
 }
 
+export function devUpdateSceneOrder(payload: {
+  tourId: string;
+  sceneOrder: string[];
+}) {
+  return postDevTourJson<{ ok: true; sceneOrder: string[] }>(
+    '/scene/order',
+    payload,
+  );
+}
+
 export interface DevUpdateNavHotspotPayload extends DevHotspotIdPayload {
   label?: string;
   targetSceneId?: string;

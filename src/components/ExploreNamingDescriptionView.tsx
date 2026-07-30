@@ -40,6 +40,7 @@ interface ExploreNamingDescriptionViewProps {
   disabled?: boolean;
   onBack: () => void;
   onVisit: () => void;
+  onAskGuide?: () => void;
 }
 
 export function ExploreNamingDescriptionView({
@@ -50,6 +51,7 @@ export function ExploreNamingDescriptionView({
   disabled = false,
   onBack,
   onVisit,
+  onAskGuide,
 }: ExploreNamingDescriptionViewProps) {
   const popup = useMemo(
     () => resolveNamingPopup(tour, hotspot, scene),
@@ -176,6 +178,7 @@ export function ExploreNamingDescriptionView({
         label={visitLabel}
         disabled={disabled}
         onVisit={onVisit}
+        onAsk={onAskGuide}
       />
     </div>
   );

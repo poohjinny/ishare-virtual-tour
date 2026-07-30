@@ -89,6 +89,14 @@ export function AnchoredPanelShell({
           {footer}
         </div>
       </div>
+      <svg
+        className={ANCHORED_PANEL.anchorArrow}
+        viewBox='0 0 16 8'
+        aria-hidden='true'
+        focusable='false'
+      >
+        <path d='M0 0 L8 8 L16 0 Z' />
+      </svg>
     </article>
   );
 }

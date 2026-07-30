@@ -2,6 +2,7 @@ import {
   Children,
   Fragment,
   isValidElement,
+  type DragEventHandler,
   type KeyboardEvent,
   type ReactElement,
   type ReactNode,
@@ -23,11 +24,18 @@ import {
 export type DevPanelSectionProps = {
   title: string;
   description?: ReactNode;
+  /** Leading control in the header (e.g. drag grip). Clicks should stopPropagation. */
+  headerLeading?: ReactNode;
+  /** Trailing controls in the header (e.g. actions). Clicks should stopPropagation. */
+  headerActions?: ReactNode;
   children: ReactNode;
   className?: string;
   collapsible?: boolean;
   open?: boolean;
   onToggle?: () => void;
+  onDragOver?: DragEventHandler<HTMLElement>;
+  onDragLeave?: DragEventHandler<HTMLElement>;
+  onDrop?: DragEventHandler<HTMLElement>;
 };
 
 function hasBlockDescriptionParagraphs(node: ReactNode): boolean {
@@ -52,17 +60,23 @@ function renderSectionDescription(description: ReactNode): ReactNode {
     return description;
   }
 
-  return <p className={devViewPanelSectionLeadClassName}>{description}</p>;
+  // Interactive / composite descriptions (e.g. group Up/Down) — avoid <p> wrapper.
+  return <div className={devViewPanelSectionLeadClassName}>{description}</div>;
 }
 
 export function DevPanelSection({
   title,
   description,
+  headerLeading,
+  headerActions,
   children,
   className,
   collapsible = false,
   open = true,
   onToggle,
+  onDragOver,
+  onDragLeave,
+  onDrop,
 }: DevPanelSectionProps) {
   const descriptionBlock =
     description != null && description !== '' ?
@@ -80,11 +94,25 @@ export function DevPanelSection({
   };
 
   return (
-    <section className={cn(devViewPanelSectionClassName, className)}>
+    <section
+      className={cn(devViewPanelSectionClassName, className)}
+      data-open={
+        collapsible ?
+          open ?
+            'true'
+          : 'false'
+        : 'true'
+      }
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
       <header
         className={cn(
           devViewPanelSectionHeaderClassName,
           collapsible && devViewPanelSectionHeaderCollapsibleClassName,
+          /* Multi-line lead: pin grip/chevron to the title row, not the block mid. */
+          collapsible && descriptionBlock && 'items-start',
           collapsible && 'cursor-pointer select-none',
         )}
         role={collapsible ? 'button' : undefined}
@@ -100,10 +128,31 @@ export function DevPanelSection({
         onClick={collapsible ? onToggle : undefined}
         onKeyDown={handleHeaderKeyDown}
       >
+        {headerLeading ?
+          <div
+            className={cn(
+              'flex shrink-0 items-center leading-none',
+              descriptionBlock && 'mt-0.5',
+            )}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            {headerLeading}
+          </div>
+        : null}
         <div className='flex min-w-0 flex-1 flex-col gap-1.5'>
           <h3 className={devViewPanelSectionTitleClassName}>{title}</h3>
           {descriptionBlock}
         </div>
+        {headerActions ?
+          <div
+            className='flex shrink-0 items-center gap-1'
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            {headerActions}
+          </div>
+        : null}
         {collapsible ?
           <AccordionChevron
             className={cn(
@@ -114,7 +163,12 @@ export function DevPanelSection({
         : null}
       </header>
       {!collapsible || open ?
-        <div className={devViewPanelSectionContentClassName}>{children}</div>
+        <div
+          data-section-content=''
+          className={devViewPanelSectionContentClassName}
+        >
+          {children}
+        </div>
       : null}
     </section>
   );

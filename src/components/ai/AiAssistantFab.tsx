@@ -1,8 +1,10 @@
 import { VIRTUAL_TOUR_GUIDE_NAME } from '../../constants/branding';
+import { cn } from '../../lib/cn';
 import { GuideAvatar } from './GuideAvatar';
 import {
   aiFabAvatarClassName,
   aiFabGuideMarkClassName,
+  aiFabGuideMarkPulseClassName,
   aiFabLabelAccentClassName,
   aiFabLabelClassName,
   aiFabVariants,
@@ -10,12 +12,15 @@ import {
 
 interface AiAssistantFabProps {
   phase: 'idle' | 'enter' | 'exit';
+  /** Faster orb pulse while a proximity bubble is up. */
+  pulse?: boolean;
   onClick: () => void;
   onWarmup?: () => void;
 }
 
 export function AiAssistantFab({
   phase,
+  pulse = false,
   onClick,
   onWarmup,
 }: AiAssistantFabProps) {
@@ -30,7 +35,12 @@ export function AiAssistantFab({
       aria-expanded={false}
     >
       <span className={aiFabAvatarClassName}>
-        <GuideAvatar className={aiFabGuideMarkClassName} />
+        <GuideAvatar
+          className={cn(
+            aiFabGuideMarkClassName,
+            pulse && aiFabGuideMarkPulseClassName,
+          )}
+        />
       </span>
       <span className={aiFabLabelClassName}>
         Ask <span className={aiFabLabelAccentClassName}>Guide</span>

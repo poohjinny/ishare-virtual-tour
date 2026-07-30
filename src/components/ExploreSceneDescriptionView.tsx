@@ -42,6 +42,7 @@ interface ExploreSceneDescriptionViewProps {
   disabled?: boolean;
   onBack: () => void;
   onVisit: () => void;
+  onAskGuide?: () => void;
 }
 
 export function ExploreSceneDescriptionView({
@@ -55,6 +56,7 @@ export function ExploreSceneDescriptionView({
   disabled = false,
   onBack,
   onVisit,
+  onAskGuide,
 }: ExploreSceneDescriptionViewProps) {
   const description = resolveScenePlaceLead(
     {
@@ -156,6 +158,7 @@ export function ExploreSceneDescriptionView({
         label={tourDirectorySceneDetailVisitLabel(scene.title)}
         disabled={disabled}
         onVisit={onVisit}
+        onAsk={onAskGuide}
       />
     </div>
   );

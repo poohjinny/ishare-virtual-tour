@@ -121,7 +121,7 @@
   flex-direction: column;
 }
 
-/* Info panel root — dock-style glass (matches PSV .psv-marker info panel) */
+/* Info panel root — shell holds glass; article stays overflow-visible for tip */
 .hotspot-3d-anchored-panel .tour-glass-panel--anchored[data-info-panel='true'] {
   --ishare-panel-radius: 18px;
   --ishare-panel-header-btn-size: 38px;
@@ -129,22 +129,25 @@
   --ishare-panel-inline-padding: 28px;
   --ishare-panel-header-padding-y: 18px;
   --ishare-panel-footer-padding-y: 22px;
-  border-radius: var(--ishare-panel-radius);
-  box-shadow: var(--ishare-glass-dock-shadow);
-  overflow: hidden;
-  backdrop-filter: var(--ishare-glass-blur);
-  -webkit-backdrop-filter: var(--ishare-glass-blur);
+  position: relative;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   height: auto;
   max-height: 100%;
 }
 
-/* Shell — border/shadow handled by the outer panel, not the shell */
+/* Shell — dock glass + clip content */
 .hotspot-3d-anchored-panel .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__shell {
   border: none;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-radius: 0;
+  box-shadow: var(--ishare-glass-dock-shadow);
+  backdrop-filter: var(--ishare-glass-blur);
+  -webkit-backdrop-filter: var(--ishare-glass-blur);
+  border-radius: var(--ishare-panel-radius);
+  background: var(--ishare-glass-shell-bg);
   flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
@@ -155,6 +158,28 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored .anchored-panel__anchor-arrow {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  z-index: 2;
+  display: block;
+  width: 1rem;
+  height: 0.5rem;
+  margin: 0;
+  transform: translateX(-50%);
+  pointer-events: none;
+  overflow: visible;
+}
+
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored .anchored-panel__anchor-arrow path {
+  fill: var(--ishare-glass-body-bg);
+}
+
+.hotspot-3d-anchored-panel .tour-glass-panel--anchored:has(.tour-glass-panel__footer) .anchored-panel__anchor-arrow path {
+  fill: var(--ishare-glass-footer-bg);
 }
 
 /* Header */

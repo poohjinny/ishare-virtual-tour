@@ -248,7 +248,7 @@ export function exploreSortDirectionLabel(
 ): string {
   switch (field.id) {
     case 'tour-order':
-      return 'Default order';
+      return 'Author order';
     case 'name':
       return direction === 'asc' ? 'A–Z' : 'Z–A';
     case 'naming-count':

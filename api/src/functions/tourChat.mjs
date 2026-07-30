@@ -16,6 +16,8 @@ import { app } from '@azure/functions';
 import {
   ASK_GUIDE_DEFAULT_MODEL,
   askGuideChatCore,
+  askGuideChatCoreStream,
+  askGuideSseResponseStream,
 } from '../../shared/askGuideCore.mjs';
 import { corsHeaders, resolveCorsOrigin } from '../../shared/cors.mjs';
 import { consumeAskGuideRateLimit } from '../../shared/rateLimit.mjs';
@@ -138,6 +140,82 @@ app.http('tourChat', {
         model,
       });
       return jsonResponse(200, { ok: true, ...result }, origin);
+    } catch (error) {
+      const statusCode =
+        typeof error?.statusCode === 'number' ? error.statusCode : 500;
+      return jsonResponse(
+        statusCode,
+        { error: error instanceof Error ? error.message : 'Ask Guide failed' },
+        origin,
+      );
+    }
+  },
+});
+
+app.http('tourChatStream', {
+  methods: ['POST', 'OPTIONS'],
+  authLevel: 'anonymous',
+  route: 'tour/chat/stream',
+  handler: async (request) => {
+    const origin = requestOrigin(request);
+    if (request.method === 'OPTIONS') {
+      return optionsResponse(origin);
+    }
+
+    if (origin && !resolveCorsOrigin(origin)) {
+      return jsonResponse(403, { error: 'Origin not allowed' }, origin);
+    }
+
+    const rate = consumeAskGuideRateLimit(clientIp(request));
+    if (!rate.ok) {
+      return {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Retry-After': String(rate.retryAfterSec),
+          ...corsHeaders(origin),
+        },
+        jsonBody: { error: 'Too many Ask Guide requests. Try again shortly.' },
+      };
+    }
+
+    const { apiKey, model } = resolveAskGuideEnv();
+    if (!apiKey) {
+      return jsonResponse(
+        503,
+        {
+          error:
+            'Ask Guide live is not configured. Set OPENAI_API_KEY on the Function App.',
+        },
+        origin,
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return jsonResponse(400, { error: 'Invalid JSON body' }, origin);
+    }
+
+    try {
+      const stream = askGuideSseResponseStream(
+        askGuideChatCoreStream({
+          context: body?.context,
+          messages: body?.messages,
+          apiKey,
+          model,
+        }),
+      );
+      return {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache',
+          ...corsHeaders(origin),
+        },
+        body: stream,
+      };
     } catch (error) {
       const statusCode =
         typeof error?.statusCode === 'number' ? error.statusCode : 500;

@@ -42,6 +42,7 @@
 
   /* PSV HTML marker: fixed size on .psv-marker � panel fills box and body scrolls */
   .viewer-container .psv-marker .tour-glass-panel--anchored {
+    position: relative;
     width: 100%;
     height: 100%;
     max-height: none;
@@ -65,20 +66,23 @@
     transform-origin: bottom center;
   }
 
-  /* Info anchored panels � same dock glass shell as AI / Help */
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] {
-    border-radius: var(--ishare-panel-radius);
-    box-shadow: var(--ishare-glass-dock-shadow);
-    overflow: hidden;
-    background: var(--ishare-glass-shell-bg);
+  /* Info + nav anchored panels — shell holds glass; article stays overflow-visible for tip. */
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'],
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview {
     height: auto;
     max-height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+    background: transparent;
   }
 
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__shell {
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .tour-glass-panel__shell,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .tour-glass-panel__shell {
     border: none;
-    box-shadow: none;
-    border-radius: 0;
+    box-shadow: var(--ishare-glass-dock-shadow);
+    border-radius: var(--ishare-panel-radius);
+    background: var(--ishare-glass-shell-bg);
     flex: 1 1 auto;
     min-height: 0;
     min-width: 0;
@@ -89,6 +93,29 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  /* Bottom tip toward the host hotspot — continuous with the bottom chrome. */
+  .tour-glass-panel--anchored .anchored-panel__anchor-arrow {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    z-index: 2;
+    display: block;
+    width: 1rem;
+    height: 0.5rem;
+    margin: 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .tour-glass-panel--anchored .anchored-panel__anchor-arrow path {
+    fill: var(--ishare-glass-body-bg);
+  }
+
+  .tour-glass-panel--anchored:has(.tour-glass-panel__footer) .anchored-panel__anchor-arrow path {
+    fill: var(--ishare-glass-footer-bg);
   }
 
   .tour-glass-panel--anchored .tour-glass-panel__body {
@@ -235,13 +262,7 @@
   }
 
   /* Anchored panels: avoid display:none flicker when PSV toggles visibility */
-  .viewer-container .psv-marker:has([data-nav-panel='true']) {
-    display: block !important;
-    overflow: visible;
-    visibility: hidden;
-    pointer-events: none;
-  }
-
+  .viewer-container .psv-marker:has([data-nav-panel='true']),
   .viewer-container .psv-marker:has([data-info-panel='true']) {
     display: flex !important;
     flex-direction: column;
@@ -1852,32 +1873,36 @@
     max-width: none;
   }
 
+  /* Nav preview: keep article overflow-visible for bottom tip (same as info).
+     Do NOT put overflow:hidden / glass on the article — that clips the arrow. */
   .viewer-container .psv-marker .tour-glass-panel--nav-preview {
     width: 100%;
-    height: 100%;
-    max-height: none;
+    height: auto;
+    max-height: 100%;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
     flex-direction: column;
-    border-radius: var(--ishare-panel-radius);
-    box-shadow: var(--ishare-glass-dock-shadow);
-    background: var(--ishare-glass-shell-bg);
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
   }
 
   .viewer-container .psv-marker .tour-glass-panel--nav-preview .tour-glass-panel__shell {
     flex: 1 1 auto;
     min-height: 0;
     min-width: 0;
-    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
     max-height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-radius: 0;
-    background: transparent;
+    border-radius: var(--ishare-panel-radius);
+    background: var(--ishare-glass-shell-bg);
     border: none;
-    box-shadow: none;
+    box-shadow: var(--ishare-glass-dock-shadow);
     transform-origin: bottom center;
   }
 

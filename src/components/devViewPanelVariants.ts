@@ -41,7 +41,7 @@ export const devViewPanelStickyHeaderClassName = cn(
 );
 
 export const devViewPanelBodyClassName = cn(
-  'flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-3.5 pb-3.5 pt-2.5',
+  'flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-3.5 pb-0 pt-2.5',
   '[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
 );
 
@@ -70,11 +70,11 @@ export const devViewPanelStickyTourLogoClassName = cn(
 );
 
 export const devViewPanelTourSwitchAnchorClassName = cn(
-  'relative min-w-0 flex-1',
+  'relative min-w-0 max-w-full',
 );
 
 export const devViewPanelTourSwitchTriggerClassName = cn(
-  'flex w-full min-w-0 items-center gap-2 border border-transparent px-0 py-0.5 text-left',
+  'inline-flex max-w-full min-w-0 items-center gap-1.5 border border-transparent px-2 py-0.5 text-left',
   devViewPanelControlRadiusClassName,
   'text-xs font-semibold leading-snug text-[#f0fdf4]',
   'hover:border-[rgba(100,116,139,0.35)] hover:bg-[rgba(15,23,42,0.45)]',
@@ -82,22 +82,22 @@ export const devViewPanelTourSwitchTriggerClassName = cn(
 );
 
 export const devViewPanelTourSwitchChevronClassName = cn(
-  'ml-auto h-5 w-5 shrink-0 text-[#64748b]',
+  'h-5 w-5 shrink-0 text-[#64748b]',
 );
 
 export const devViewPanelTourSwitchMenuClassName = cn(
-  'fixed z-[var(--tour-chrome-menu-z-index)] max-h-[min(60vh,420px)] overflow-y-auto border border-[rgba(100,116,139,0.45)] bg-[rgba(15,23,42,0.98)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.55)]',
+  'fixed z-[var(--tour-chrome-menu-z-index)] w-max max-w-[min(100vw-1rem,22rem)] max-h-[min(60vh,420px)] overflow-y-auto border border-[rgba(100,116,139,0.45)] bg-[rgba(15,23,42,0.98)] py-1 shadow-[0_10px_24px_rgba(15,23,42,0.55)]',
   devViewPanelControlRadiusClassName,
   '[scrollbar-width:thin] [scrollbar-color:rgba(100,116,139,0.55)_transparent]',
 );
 
 /** Client name row — non-interactive group label above its tours. */
 export const devViewPanelTourSwitchGroupHeadingClassName = cn(
-  'block truncate px-2.5 pb-1 pt-2.5 text-[0.5625rem] font-bold uppercase tracking-[0.06em] text-[#94a3b8]',
+  'block px-2.5 pb-1 pt-2.5 text-[0.5625rem] font-bold uppercase tracking-[0.06em] text-[#94a3b8]',
 );
 
 export const devViewPanelTourSwitchMenuItemClassName = cn(
-  'block w-full truncate py-1.5 pl-5 pr-2.5 text-left text-2xs text-[#e2e8f0]',
+  'block w-full whitespace-normal py-1.5 pl-5 pr-2.5 text-left text-2xs text-[#e2e8f0]',
   'hover:bg-[rgba(56,189,248,0.12)] hover:text-[#f0fdf4]',
   'focus-visible:bg-[rgba(56,189,248,0.12)] focus-visible:outline-none',
 );
@@ -112,10 +112,30 @@ export const devViewPanelSceneIdClassName = cn(
 
 export const devViewPanelSectionClassName = cn('flex flex-col');
 
-export const devViewPanelTabPanelClassName = cn(
+/**
+ * Stacked accordion root — children are `section`s that carry their own pad
+ * via {@link devViewPanelSectionStackItemClassName} (applied by the accordion).
+ */
+export const devViewPanelSectionStackClassName = cn('flex flex-col');
+
+/** Nested manage-group accordion root. */
+export const devViewPanelNestedSectionStackClassName = cn(
   'flex flex-col',
-  '[&>section:not(:first-child)]:mt-7 [&>section:not(:first-child)]:border-t [&>section:not(:first-child)]:border-[rgba(100,116,139,0.28)] [&>section:not(:first-child)]:pt-7',
+  '[&_h3]:normal-case [&_h3]:tracking-normal',
 );
+
+/**
+ * Same `py` on every section — divider sits between equal top/bottom pads
+ * (no first/last `pt-0`/`pb-0` special cases).
+ */
+export const devViewPanelSectionStackItemClassName = cn('py-5');
+export const devViewPanelSectionStackItemNestedClassName = cn('py-2.5');
+export const devViewPanelSectionStackItemRuleClassName = cn(
+  'border-t border-[rgba(100,116,139,0.28)]',
+);
+
+/** Tab panels host the accordion; stack padding is on each section item. */
+export const devViewPanelTabPanelClassName = cn('flex flex-col');
 
 export const devViewPanelSubsectionClassName = cn(
   'mt-5 border-t border-[rgba(100,116,139,0.22)] pt-5',
@@ -125,20 +145,33 @@ export const devViewPanelFormSectionClassName = cn('flex flex-col gap-3');
 
 export const devViewPanelFormSectionBodyClassName = cn('flex flex-col gap-3');
 
-/** Save / error block below stacked form subsections. */
+/** Save / error block below stacked form subsections (owns the submit divider). */
 export const devViewPanelStackedFormFooterClassName = cn(
-  'mt-5 flex flex-col gap-3',
+  'mt-5 flex flex-col gap-3 border-t border-[rgba(100,116,139,0.22)] pt-4',
+);
+
+/**
+ * Manage-tab inline edit — flows inside active list row (no nested card).
+ * Top rule separates preview from fields; submit rows use
+ * {@link devViewPanelActionsClassName} (divider above Cancel/Save).
+ */
+export const devViewPanelManageEditFormClassName = cn(
+  'mt-3 flex flex-col gap-3 border-t border-[rgba(100,116,139,0.22)] pt-4',
 );
 
 export const devViewPanelSectionHeaderClassName = cn('flex flex-col gap-1.5');
 
 export const devViewPanelSectionHeaderCollapsibleClassName = cn(
-  'flex flex-row items-start justify-between gap-2',
+  'group flex flex-row items-center justify-between gap-2.5',
+  /* Chevron color already signals focus — a browser outline hugs the header and
+   * makes the gap above the next divider look smaller than the matching pt below. */
+  'outline-none focus-visible:outline-none',
 );
 
 /** Collapsible section header — whole row toggles expand/collapse. */
 export const devViewPanelSectionChevronClassName = cn(
-  'mt-px shrink-0 text-[#64748b] transition-[transform,color] duration-200',
+  'shrink-0 text-[#64748b] transition-[transform,color] duration-200',
+  'group-hover:text-[#86efac] group-focus-visible:text-[#86efac]',
 );
 
 export const devViewPanelSectionChevronOpenClassName = cn(
@@ -167,15 +200,6 @@ export const devViewPanelInlineFormGroupClassName = cn(
   devViewPanelControlRadiusClassName,
 );
 
-/**
- * Manage-tab inline edit — flows inside active list row (no nested card).
- * List items use `gap-1`; `mt-3` + that gap equals `pt-4` so the divider
- * sits evenly under the Edit / Move / Delete row.
- */
-export const devViewPanelManageEditFormClassName = cn(
-  'mt-3 flex flex-col gap-3 border-t border-[rgba(100,116,139,0.22)] pt-4',
-);
-
 export const devViewPanelFormRowClassName = cn(
   'grid grid-cols-2 gap-x-3 gap-y-3',
 );
@@ -202,6 +226,11 @@ export const devViewPanelSubsectionTitleClassName = cn(
 
 export const devViewPanelSectionLeadClassName = cn(
   'm-0 text-2xs leading-[1.35] text-[#64748b] [&_code]:text-[#86efac]',
+);
+
+/** Tab-panel intro under the primary tab strip. */
+export const devViewPanelTabLeadClassName = cn(
+  devViewPanelSectionLeadClassName,
 );
 
 export const devViewPanelCoordsClassName = cn(
@@ -304,7 +333,18 @@ export const devViewPanelSlugPreviewClassName = cn(
   'm-0 text-2xs leading-[1.4] text-[#94a3b8] [&_code]:text-[#86efac]',
 );
 
-export const devViewPanelActionsClassName = cn('flex flex-wrap gap-2');
+/** Plain button row — Suggest, list CTAs, nested inside a stacked footer. */
+export const devViewPanelInlineActionsClassName = cn('flex flex-wrap gap-2');
+
+/**
+ * Form action row (all forms) — top divider above Cancel/Save · Create · Apply.
+ * Use {@link devViewPanelInlineActionsClassName} when a divider would be wrong
+ * (Suggest, Open/Edit list rows, or buttons already inside
+ * {@link devViewPanelStackedFormFooterClassName}).
+ */
+export const devViewPanelActionsClassName = cn(
+  'flex flex-wrap gap-2 border-t border-[rgba(100,116,139,0.22)] pt-4',
+);
 
 export const devViewPanelColorFieldClassName = cn(
   'flex items-center gap-1.5 py-1.5 pl-1.5 pr-2 overflow-hidden border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)]',
@@ -624,10 +664,8 @@ export const devViewPanelManageListClassName = cn(
 );
 
 /** Add action row below a manage list or empty state. */
-export const devViewPanelManageListFooterClassName = cn(
-  devViewPanelActionsClassName,
-  'border-t border-[rgba(100,116,139,0.22)] pt-4',
-);
+export const devViewPanelManageListFooterClassName =
+  devViewPanelActionsClassName;
 
 export const devViewPanelManageListItemClassName = cn(
   'flex flex-col gap-1',
@@ -635,8 +673,85 @@ export const devViewPanelManageListItemClassName = cn(
   '[&>div.flex-wrap]:mt-1.5',
 );
 
+/** Scene manage row with a leading drag grip. */
+export const devViewPanelManageListItemReorderRowClassName = cn(
+  'flex items-start gap-2.5',
+);
+
+/** Main column beside a leading reorder grip. */
+export const devViewPanelManageListItemBodyClassName = cn(
+  'flex min-w-0 flex-1 flex-col gap-3',
+);
+
+/** Title/badges column + trailing icon CTAs. */
+export const devViewPanelManageListItemMainRowClassName = cn(
+  'flex min-w-0 w-full items-start gap-2',
+);
+
+/** Tours / Clients — a bit more air between logo and copy; vertically centered. */
+export const devViewPanelManageListItemMainRowWithLogoClassName = cn(
+  'flex min-w-0 w-full items-center gap-3',
+);
+
+export const devViewPanelManageListItemContentClassName = cn(
+  'flex min-w-0 flex-1 flex-col gap-1.5',
+);
+
+/** Icon CTAs pinned to the right of a manage row. */
+export const devViewPanelManageListItemIconActionsClassName = cn(
+  'flex shrink-0 items-center gap-2.5',
+);
+
+/** Compact icon-only manage action. */
+export const devViewPanelIconBtnVariants = cva(
+  cn(
+    'inline-flex shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 leading-none',
+    'disabled:cursor-not-allowed disabled:opacity-40',
+  ),
+  {
+    variants: {
+      tone: {
+        secondary: cn(
+          'text-[#64748b] hover:text-[#e2e8f0]',
+          'disabled:hover:text-[#64748b]',
+          'hover:[&_.material-symbols-rounded]:text-[#e2e8f0]',
+          'disabled:hover:[&_.material-symbols-rounded]:text-[#64748b]',
+        ),
+        danger: cn(
+          'text-[#64748b] hover:text-danger',
+          'disabled:hover:text-[#64748b]',
+          'hover:[&_.material-symbols-rounded]:text-danger',
+          'disabled:hover:[&_.material-symbols-rounded]:text-[#64748b]',
+        ),
+      },
+    },
+    defaultVariants: { tone: 'secondary' },
+  },
+);
+
+/** Ghost grip — no chrome; icon bbox is the hit target. */
+export const devViewPanelReorderHandleClassName = cn(
+  'm-0 inline-flex shrink-0 cursor-grab appearance-none items-center justify-center',
+  'border-0 bg-transparent p-0 leading-none text-[#64748b]',
+  'hover:text-[#cbd5e1] active:cursor-grabbing',
+  'disabled:cursor-not-allowed disabled:opacity-40',
+);
+
+/** Drop target highlight while dragging a manage row/group. */
+export const devViewPanelReorderDropTargetClassName = cn(
+  'rounded-md shadow-[inset_0_0_0_1px_rgba(56,189,248,0.7)]',
+  'bg-[rgba(56,189,248,0.1)]',
+);
+
+/**
+ * Active/current manage row highlight.
+ * Inset shadow (not `border`) keeps list `border-t` dividers visible.
+ * `!py-2.5` beats the list’s `pt-4` so the tint doesn’t fill the gap above
+ * the rule and merge with the previous row.
+ */
 export const devViewPanelManageListItemActiveClassName = cn(
-  'rounded-md border border-[rgba(56,189,248,0.55)] bg-[rgba(56,189,248,0.08)] px-2.5 py-2.5',
+  'rounded-md bg-[rgba(56,189,248,0.08)] px-2.5 !py-2.5',
+  'shadow-[inset_0_0_0_1px_rgba(56,189,248,0.55)]',
   devViewPanelControlRadiusClassName,
 );
 
@@ -664,7 +779,7 @@ export const devViewPanelManageListItemCopyClassName = cn(
  * Matches manage-list rows: item `gap-1` + action `mt-1.5` (Scenes pattern).
  */
 export const devViewPanelManageListItemStackActionsClassName = cn(
-  devViewPanelActionsClassName,
+  devViewPanelInlineActionsClassName,
   'mt-2.5',
 );
 
@@ -709,6 +824,38 @@ export const devViewPanelManageListItemIdClassName = cn(
   'font-normal text-[#94a3b8]',
 );
 
+export type DevManageListItemIdCategory =
+  | 'scene'
+  | 'naming'
+  | 'hotspot'
+  | 'tour'
+  | 'client';
+
+const DEV_MANAGE_LIST_ITEM_ID_LABEL: Record<
+  DevManageListItemIdCategory,
+  string
+> = {
+  scene: 'Scene id',
+  naming: 'Naming id',
+  hotspot: 'Hotspot id',
+  tour: 'Tour id',
+  client: 'Client id',
+};
+
+/** Manage-list id line — `Scene id: kitchen`, `Tour id: ken-sargent-house`, … */
+export function formatManageListItemId(
+  category: DevManageListItemIdCategory,
+  id: string,
+): string {
+  return `${DEV_MANAGE_LIST_ITEM_ID_LABEL[category]}: ${id}`;
+}
+
+/** Desc block under manage rows — id line + copy/contact stacked. */
+export const devViewPanelManageListItemDescStackClassName = cn(
+  devViewPanelSectionHintClassName,
+  'flex flex-col gap-0.5',
+);
+
 /** Floor / department secondary — still a human label, not a technical id. */
 export const devViewPanelManageListItemMetaClassName = cn(
   'font-normal text-[#94a3b8]',
@@ -751,11 +898,10 @@ export const devViewPanelManageListItemBadgesClassName = cn(
 );
 
 /**
- * Scenes manage row — horizontal equal-width chips (column width = longest label).
+ * Manage badges under the title (Scenes / Namings / Hotspots / Tours / Clients).
  */
 export const devViewPanelManageListItemSceneBadgesClassName = cn(
-  'grid w-max shrink-0 grid-flow-col gap-1 [grid-auto-columns:1fr]',
-  '[&>*]:w-full [&>*]:justify-center',
+  'flex flex-wrap items-center gap-1',
 );
 
 /**

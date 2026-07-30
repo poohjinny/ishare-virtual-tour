@@ -350,10 +350,16 @@ export interface Tour {
   /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
   immersiveBackground?: TourImmersiveBackground;
   firstScene: string;
+  /**
+   * Author Explore / Play order — scene ids as listed in DEV Manage.
+   * When omitted or incomplete, runtime fills gaps via nav BFS.
+   */
+  sceneOrder?: string[];
   defaultTransition?: { speed?: string; effect?: 'fade' | 'black' };
   /**
    * Optional guided Play Tour (slideshow). When omitted / invalid, load time
-   * fills Explore-visible scenes in nav BFS order (needs ≥2 scenes for Play).
+   * fills Explore-visible scenes in authored {@link sceneOrder} (needs ≥2
+   * scenes for Play).
    */
   playTour?: PlayTour;
   scenes: Record<string, Scene>;

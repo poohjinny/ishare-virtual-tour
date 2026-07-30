@@ -124,7 +124,15 @@ Missing facts (critical — do not invent):
 Do not invent prices, statuses, medical advice, policies, or hours.
 Keep answers short (2–4 sentences), still warm. Match the visitor’s language (reply in Korean if they wrote in Korean).
 
-Respond with ONLY valid JSON (no markdown fences):
+Reply text formatting (light markdown — the chat UI renders it):
+- Use **bold** or __bold__ for key place or naming names when it helps scanning
+- Use *italic* / _italic_ sparingly; ~~strikethrough~~ only when contrasting a retired label
+- Use short bullet lists (- item) or numbered lists (1. item); nest with 2-space indent when needed
+- Use > blockquote for a short aside or tip
+- Use [label](https://...) only for real http(s) URLs from context — never invent links
+- Do not use headings (#), images, tables, code fences, or raw HTML inside reply
+
+Respond with ONLY valid JSON (no markdown fences around the JSON):
 {"reply":"string","sceneLinks":[{"sceneId":"id-from-other-areas","label":"optional title"}],"namingLinks":[{"namingId":"id-from-tour-namings","label":"optional name"}],"followUps":["short follow-up question"]}
 Rules for links (opt-in — only when this turn needs cards):
 - Default to [] for both sceneLinks and namingLinks
@@ -333,4 +341,221 @@ export async function askGuideChatCore({
     followUps: parsed.followUps,
     model: resolvedModel,
   };
+}
+
+/**
+ * Extract a growing JSON string value for `"reply"` from incomplete model output.
+ * @param {string} accumulated
+ * @returns {string | null}
+ */
+export function extractPartialAskGuideReply(accumulated) {
+  const match = accumulated.match(/"reply"\s*:\s*"/);
+  if (!match || match.index == null) return null;
+  let i = match.index + match[0].length;
+  let out = '';
+  while (i < accumulated.length) {
+    const ch = accumulated[i];
+    if (ch === '\\') {
+      const next = accumulated[i + 1];
+      if (next == null) break;
+      if (next === 'n') out += '\n';
+      else if (next === 'r') out += '\r';
+      else if (next === 't') out += '\t';
+      else if (next === '"' || next === '\\' || next === '/') out += next;
+      else if (next === 'u' && i + 5 < accumulated.length) {
+        const hex = accumulated.slice(i + 2, i + 6);
+        if (/^[0-9a-fA-F]{4}$/.test(hex)) {
+          out += String.fromCharCode(parseInt(hex, 16));
+          i += 6;
+          continue;
+        }
+        out += next;
+      } else {
+        out += next;
+      }
+      i += 2;
+      continue;
+    }
+    if (ch === '"') break;
+    out += ch;
+    i += 1;
+  }
+  return out;
+}
+
+/**
+ * Stream OpenAI json_object completions for Ask Guide.
+ * Yields `{ type: 'delta', text }` (full reply so far) then `{ type: 'done', ...result }`.
+ * @param {{ context: unknown, messages: unknown, apiKey: string, model?: string, temperature?: number, signal?: AbortSignal }} input
+ */
+export async function* askGuideChatCoreStream({
+  context,
+  messages,
+  apiKey,
+  model = ASK_GUIDE_DEFAULT_MODEL,
+  temperature = ASK_GUIDE_DEFAULT_TEMPERATURE,
+  signal,
+}) {
+  const key = typeof apiKey === 'string' ? apiKey.trim() : '';
+  if (!key) {
+    const error = new Error(
+      'OPENAI_API_KEY is not set. Configure the server secret and retry.',
+    );
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const resolvedModel =
+    (typeof model === 'string' && model.trim()) || ASK_GUIDE_DEFAULT_MODEL;
+  const history = normalizeAskGuideMessages(messages);
+  if (history.length === 0) {
+    const error = new Error('messages must include at least one user turn');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: resolvedModel,
+      temperature,
+      stream: true,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: buildAskGuideSystemPrompt(context) },
+        ...history,
+      ],
+    }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    let summary = detail.slice(0, 400).trim();
+    if (summary) {
+      try {
+        const parsed = JSON.parse(summary);
+        const message =
+          parsed?.error?.message ||
+          parsed?.error?.code ||
+          parsed?.message ||
+          null;
+        if (typeof message === 'string' && message.trim()) {
+          summary = message.trim();
+        }
+      } catch {
+        /* keep raw text */
+      }
+    } else {
+      summary = '(empty error body)';
+    }
+    const error = new Error(`OpenAI ${response.status}: ${summary}`);
+    error.statusCode = 502;
+    throw error;
+  }
+
+  if (!response.body) {
+    const error = new Error('OpenAI returned an empty stream');
+    error.statusCode = 502;
+    throw error;
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let content = '';
+  let lastReply = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data:')) continue;
+      const payload = trimmed.slice(5).trim();
+      if (!payload || payload === '[DONE]') continue;
+      let parsed;
+      try {
+        parsed = JSON.parse(payload);
+      } catch {
+        continue;
+      }
+      const piece = parsed?.choices?.[0]?.delta?.content;
+      if (typeof piece !== 'string' || !piece) continue;
+      content += piece;
+      const replySoFar = extractPartialAskGuideReply(content);
+      if (replySoFar != null && replySoFar !== lastReply) {
+        lastReply = replySoFar;
+        yield { type: 'delta', text: replySoFar };
+      }
+    }
+  }
+
+  const parsed = parseAskGuideModelContent(content);
+  if (!parsed.reply) {
+    const error = new Error('OpenAI returned an empty reply');
+    error.statusCode = 502;
+    throw error;
+  }
+
+  yield {
+    type: 'done',
+    reply: parsed.reply,
+    sceneLinks: parsed.sceneLinks,
+    namingLinks: parsed.namingLinks,
+    followUps: parsed.followUps,
+    model: resolvedModel,
+  };
+}
+
+/**
+ * Encode Ask Guide stream events as SSE bytes.
+ * @param {AsyncIterable<{ type: string } & Record<string, unknown>>} events
+ * @param {AbortSignal} [signal]
+ */
+export function askGuideSseResponseStream(events, signal) {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    async start(controller) {
+      const send = (event, data) => {
+        controller.enqueue(
+          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`),
+        );
+      };
+      try {
+        for await (const chunk of events) {
+          if (signal?.aborted) break;
+          if (chunk.type === 'delta') {
+            send('delta', { text: chunk.text });
+          } else if (chunk.type === 'done') {
+            const { type: _type, ...rest } = chunk;
+            send('done', { ok: true, ...rest });
+          } else if (chunk.type === 'error') {
+            send('error', { error: chunk.error });
+          }
+        }
+      } catch (error) {
+        if (signal?.aborted) {
+          /* client cancelled */
+        } else {
+          send('error', {
+            error:
+              error instanceof Error ?
+                error.message
+              : 'Ask Guide stream failed',
+          });
+        }
+      } finally {
+        controller.close();
+      }
+    },
+  });
 }

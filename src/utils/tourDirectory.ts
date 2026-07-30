@@ -10,12 +10,12 @@ import {
   resolveModel3dNamingTargetView,
 } from './findTourHotspot';
 import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
-import {
-  buildSceneGroups,
-  buildSceneVisitOrder,
-  SCENE_GROUP_OTHER_ID,
-} from '../viewer/sceneDepth';
+import { buildSceneGroups, SCENE_GROUP_OTHER_ID } from '../viewer/sceneDepth';
 import { isSceneVisibleInExplore } from './sceneVisibility';
+import {
+  resolveTourSceneOrder,
+  sortSceneGroupsByTourOrder,
+} from './sceneOrder';
 
 export interface TourDirectoryNamingItem {
   sceneId: string;
@@ -86,18 +86,18 @@ export function buildTourNamingDirectory(
 
 /** Group sorted naming items by nav-graph sector and sum visible prices. */
 export function buildNamingSectorGroups(
-  tour: Pick<Tour, 'hotspots' | 'viewerType'> & {
+  tour: Pick<Tour, 'hotspots' | 'viewerType' | 'sceneOrder'> & {
     scenes: Record<string, Scene>;
     firstScene: string;
   },
   sortedItems: TourDirectoryNamingItem[],
   otherGroupTitle: string = TOUR_DIRECTORY_GROUP_OTHER,
 ): NamingSectorGroup[] {
-  const sceneGroups = buildSceneGroups(
+  // Department header order follows authored sceneOrder (same as Locations
+  // tour-order). Item / scene-subgroup order stays the active naming sort.
+  const sceneGroups = sortSceneGroupsByTourOrder(
     tour,
-    tour.scenes,
-    tour.firstScene,
-    otherGroupTitle,
+    buildSceneGroups(tour, tour.scenes, tour.firstScene, otherGroupTitle),
   );
 
   const sceneToGroupId = new Map<string, string>();
@@ -300,7 +300,10 @@ function compareScenesByNamingCount(
 }
 
 export function sortTourScenes(
-  tour: Pick<Tour, 'hotspots' | 'viewerType'>,
+  tour: Pick<
+    Tour,
+    'hotspots' | 'viewerType' | 'scenes' | 'firstScene' | 'sceneOrder'
+  >,
   scenes: Scene[],
   sort: ExploreDirectorySort,
   firstSceneId?: string,
@@ -309,15 +312,18 @@ export function sortTourScenes(
 
   switch (sort) {
     case 'tour-order': {
-      if (firstSceneId) {
-        const sceneMap = Object.fromEntries(
-          sorted.map((scene) => [scene.id, scene]),
-        );
-        const order = buildSceneVisitOrder(tour, sceneMap, firstSceneId);
-        const rank = new Map(order.map((id, index) => [id, index]));
-        sorted.sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
-      }
-      break;
+      const rank = new Map(
+        resolveTourSceneOrder({
+          ...tour,
+          firstScene: firstSceneId ?? tour.firstScene,
+        }).map((id, index) => [id, index]),
+      );
+      sorted.sort(
+        (a, b) =>
+          (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+          (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+      );
+      return sorted;
     }
     case 'name-asc':
       sorted.sort((a, b) => compareLocaleStrings(a.title, b.title, 1));

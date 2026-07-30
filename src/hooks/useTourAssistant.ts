@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -30,6 +31,13 @@ function nextId(): string {
 
 function bumpMessageIdCounter(messages: ChatMessage[]): void {
   messageId = Math.max(messageId, maxAskGuideMessageSeq(messages));
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof DOMException && error.name === 'AbortError') ||
+    (error instanceof Error && error.name === 'AbortError')
+  );
 }
 
 export type GuideNavNoteKind = 'scene' | 'naming';
@@ -109,6 +117,7 @@ export function useTourAssistant(
   const [isSending, setIsSending] = useState(false);
   const [liveMode, setLiveMode] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [canRetry, setCanRetry] = useState(false);
   const prevSceneRef = useRef(currentSceneId);
   /**
    * Chat was closed (or stayed closed) while the visitor moved — next time it
@@ -127,6 +136,8 @@ export function useTourAssistant(
   isOpenRef.current = isOpen;
   /** Skip the first persist after hydrate / tour switch (already on disk). */
   const skipNextPersistRef = useRef(true);
+  const abortRef = useRef<AbortController | null>(null);
+  const lastFailedUserTextRef = useRef<string | null>(null);
 
   const locationTitle = getSceneTitle(tour, currentSceneId);
   const tourTitle = tour.title?.trim() || tour.id;
@@ -144,6 +155,8 @@ export function useTourAssistant(
     setIsOpen(saved.isOpen);
     setIsSending(false);
     setSendError(null);
+    setCanRetry(false);
+    lastFailedUserTextRef.current = null;
     pendingNavNoteRef.current = null;
     suppressNextSceneNoteRef.current = false;
     lastAutoNavNoteRef.current = null;
@@ -263,98 +276,204 @@ export function useTourAssistant(
     pendingNavNoteRef.current = null;
   }, []);
 
-  const applyGuideResult = useCallback(
-    (result: Awaited<ReturnType<typeof askTourGuide>>) => {
-      if (result.error) {
-        setSendError(result.error);
-        return;
-      }
+  const stopGenerating = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setIsSending(false);
+  }, []);
+
+  const runSend = useCallback(
+    async (
+      text: string,
+      prior: ChatMessage[],
+      sceneId: string,
+      options?: { appendUser?: boolean },
+    ) => {
+      const trimmed = text.trim();
+      if (!trimmed || isSending) return;
+
+      const appendUser = options?.appendUser !== false;
+      const controller = new AbortController();
+      abortRef.current?.abort();
+      abortRef.current = controller;
+      const assistantId = nextId();
+      lastFailedUserTextRef.current = null;
+      setCanRetry(false);
       setSendError(null);
-      setLiveMode(result.live);
-      if (!result.reply) return;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: nextId(),
-          role: 'assistant',
-          content: result.reply,
-          ...(result.guideLinks?.length ?
-            { guideLinks: result.guideLinks }
-          : {}),
-          ...(result.guideCtas?.length ? { guideCtas: result.guideCtas } : {}),
-          ...(result.followUps?.length ? { followUps: result.followUps } : {}),
-        },
-      ]);
+
+      flushSync(() => {
+        if (appendUser) {
+          setMessages((prev) => [
+            ...prev,
+            { id: nextId(), role: 'user', content: trimmed },
+          ]);
+        }
+        setIsSending(true);
+      });
+
+      let sawDelta = false;
+
+      try {
+        const result = await askTourGuide(tour, sceneId, trimmed, prior, {
+          signal: controller.signal,
+          onDelta: (deltaText) => {
+            sawDelta = true;
+            setMessages((prev) => {
+              const exists = prev.some((msg) => msg.id === assistantId);
+              if (!exists) {
+                return [
+                  ...prev,
+                  { id: assistantId, role: 'assistant', content: deltaText },
+                ];
+              }
+              return prev.map((msg) =>
+                msg.id === assistantId ? { ...msg, content: deltaText } : msg,
+              );
+            });
+          },
+        });
+
+        if (controller.signal.aborted) return;
+
+        if (result.error) {
+          lastFailedUserTextRef.current = trimmed;
+          setCanRetry(true);
+          setSendError(result.error);
+          if (sawDelta) {
+            setMessages((prev) => prev.filter((msg) => msg.id !== assistantId));
+          }
+          return;
+        }
+
+        setSendError(null);
+        setLiveMode(result.live);
+        if (!result.reply) return;
+
+        setMessages((prev) => {
+          const nextMsg: ChatMessage = {
+            id: assistantId,
+            role: 'assistant',
+            content: result.reply,
+            ...(result.guideLinks?.length ?
+              { guideLinks: result.guideLinks }
+            : {}),
+            ...(result.guideCtas?.length ?
+              { guideCtas: result.guideCtas }
+            : {}),
+            ...(result.followUps?.length ?
+              { followUps: result.followUps }
+            : {}),
+          };
+          const exists = prev.some((msg) => msg.id === assistantId);
+          if (!exists) return [...prev, nextMsg];
+          return prev.map((msg) => (msg.id === assistantId ? nextMsg : msg));
+        });
+      } catch (error) {
+        if (isAbortError(error) || controller.signal.aborted) {
+          if (!sawDelta) {
+            setMessages((prev) => prev.filter((msg) => msg.id !== assistantId));
+          }
+          return;
+        }
+        lastFailedUserTextRef.current = trimmed;
+        setCanRetry(true);
+        setSendError(
+          error instanceof Error ? error.message : 'Ask Guide failed',
+        );
+        if (sawDelta) {
+          setMessages((prev) => prev.filter((msg) => msg.id !== assistantId));
+        }
+      } finally {
+        if (abortRef.current === controller) {
+          abortRef.current = null;
+        }
+        setIsSending(false);
+      }
     },
-    [],
+    [isSending, tour],
   );
 
   const sendMessage = useCallback(
     (text: string) => {
       const trimmed = text.trim();
       if (!trimmed || isSending) return;
-
-      const userMsg: ChatMessage = {
-        id: nextId(),
-        role: 'user',
-        content: trimmed,
-      };
-      const prior = messagesRef.current;
-      setSendError(null);
-      // Paint the user turn (and hide tip suggestions) before the request starts.
-      flushSync(() => {
-        setMessages((prev) => [...prev, userMsg]);
-        setIsSending(true);
+      void runSend(trimmed, messagesRef.current, currentSceneId, {
+        appendUser: true,
       });
-
-      void askTourGuide(tour, currentSceneId, trimmed, prior)
-        .then(applyGuideResult)
-        .finally(() => {
-          setIsSending(false);
-        });
     },
-    [applyGuideResult, currentSceneId, isSending, tour],
+    [currentSceneId, isSending, runSend],
   );
 
+  const retryLastSend = useCallback(() => {
+    const text = lastFailedUserTextRef.current?.trim();
+    if (!text || isSending) return;
+    const msgs = messagesRef.current;
+    const last = msgs.at(-1);
+    const prior =
+      last?.role === 'user' && last.content === text ? msgs.slice(0, -1) : msgs;
+    void runSend(text, prior, currentSceneId, { appendUser: false });
+  }, [currentSceneId, isSending, runSend]);
+
   const toggle = useCallback(() => setIsOpen((v) => !v), []);
-  const close = useCallback(() => setIsOpen(false), []);
-  const clearSendError = useCallback(() => setSendError(null), []);
+  const close = useCallback(() => {
+    stopGenerating();
+    setIsOpen(false);
+  }, [stopGenerating]);
+  const clearSendError = useCallback(() => {
+    setSendError(null);
+    setCanRetry(false);
+    lastFailedUserTextRef.current = null;
+  }, []);
   const resetChat = useCallback(() => {
+    stopGenerating();
     setMessages([]);
     setIsSending(false);
     setSendError(null);
+    setCanRetry(false);
+    lastFailedUserTextRef.current = null;
     pendingNavNoteRef.current = null;
     suppressNextSceneNoteRef.current = false;
     lastAutoNavNoteRef.current = null;
     clearAskGuideSession(storageKeyRef.current);
-  }, []);
+  }, [stopGenerating]);
 
   const openAndAskAboutScene = useCallback(
     (sceneId: string) => {
       const question = 'Tell me about this place';
-
       setIsOpen(true);
       if (isSending) return;
-
-      const userMsg: ChatMessage = {
-        id: nextId(),
-        role: 'user',
-        content: question,
-      };
-      const prior = messagesRef.current;
-      setSendError(null);
-      flushSync(() => {
-        setMessages((prev) => [...prev, userMsg]);
-        setIsSending(true);
+      void runSend(question, messagesRef.current, sceneId, {
+        appendUser: true,
       });
-
-      void askTourGuide(tour, sceneId, question, prior)
-        .then(applyGuideResult)
-        .finally(() => {
-          setIsSending(false);
-        });
     },
-    [applyGuideResult, isSending, tour],
+    [isSending, runSend],
+  );
+
+  const openAndAskAboutNaming = useCallback(
+    (sceneId: string, namingName?: string) => {
+      const name = namingName?.trim();
+      const question =
+        name ?
+          `Tell me about ${name}`
+        : 'Tell me about this naming opportunity';
+      setIsOpen(true);
+      if (isSending) return;
+      void runSend(question, messagesRef.current, sceneId, {
+        appendUser: true,
+      });
+    },
+    [isSending, runSend],
+  );
+
+  const starterQuestions = useMemo(
+    () =>
+      buildNavContextFollowUps({
+        tour,
+        sceneId: currentSceneId,
+        kind: liveNamingHotspotId ? 'naming' : 'scene',
+        namingName: liveNamingName,
+      }),
+    [currentSceneId, liveNamingHotspotId, liveNamingName, tour],
   );
 
   return {
@@ -363,12 +482,17 @@ export function useTourAssistant(
     isSending,
     liveMode,
     sendError,
+    canRetry,
+    starterQuestions,
     toggle,
     close,
     resetChat,
     clearSendError,
     sendMessage,
+    retryLastSend,
+    stopGenerating,
     openAndAskAboutScene,
+    openAndAskAboutNaming,
     prepareNavNote,
     noteNamingOpened,
     suppressNextLocationNote,

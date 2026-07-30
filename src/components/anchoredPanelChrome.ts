@@ -9,6 +9,7 @@ const ROOT_ANCHORED =
   'tour-glass-panel tour-glass-panel--anchored psv--capture-event';
 const SHELL = 'tour-glass-panel__shell';
 const ANCHORED_ENTER = 'tour-glass-panel--anchored-enter';
+const ANCHOR_ARROW = 'anchored-panel__anchor-arrow';
 
 function escapeHtml(text: string): string {
   return text
@@ -42,7 +43,19 @@ export const ANCHORED_PANEL = {
   headerBtn: 'anchored-panel__header-btn',
   headerBtnInline: 'anchored-panel__header-btn--inline',
   headerBtnIcon: 'anchored-panel__header-btn-icon',
+  /** Bottom tip pointing at the host hotspot (info + nav preview). */
+  anchorArrow: ANCHOR_ARROW,
 } as const;
+
+/**
+ * Glass tip under anchored panels.
+ * Fill is CSS-driven: footer wash when a footer exists, else body wash.
+ */
+export function anchoredPanelAnchorArrowHtml(): string {
+  return `<svg class="${ANCHOR_ARROW}" viewBox="0 0 16 8" aria-hidden="true" focusable="false">
+      <path d="M0 0 L8 8 L16 0 Z"/>
+    </svg>`;
+}
 
 export function anchoredPanelCloseIconHtml(): string {
   return materialSymbolHtml('close', {
@@ -183,6 +196,7 @@ export function buildAnchoredMediaPanelHtml(
           ${footerHtml}
         </div>
       </div>
+      ${anchoredPanelAnchorArrowHtml()}
     </article>
   `;
 }

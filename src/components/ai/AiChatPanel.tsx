@@ -15,11 +15,16 @@ import {
 import type { ChatMessage, TourClient } from '../../types/tour';
 import { cn } from '../../lib/cn';
 import { useSpeechToText } from '../../hooks/useSpeechToText';
+import {
+  stripMarkdownForSpeech,
+  useSpeechSynthesis,
+} from '../../hooks/useSpeechSynthesis';
 import { GlassPanelCloseIcon, TourGlassPanel } from '../TourGlassPanel';
 import { IconTooltip } from '../ui/IconTooltip';
 import { MaterialSymbol } from '../ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_14,
+  MATERIAL_SYMBOL_SIZE_18,
   MATERIAL_SYMBOL_SIZE_22,
 } from '../ui/materialSymbolClasses';
 import { PlatformBrandLink } from '../PlatformBrandLink';
@@ -27,6 +32,7 @@ import { GuideAvatar } from './GuideAvatar';
 import { GuideCtaRow } from './GuideCtaRow';
 import { GuideSceneLinkCards } from './GuideSceneLinkCards';
 import { FollowUpQuestions } from './FollowUpQuestions';
+import { GuideChatMarkdown } from '../../utils/guideChatMarkdown';
 import { AiThinkingIndicator } from './AiThinkingIndicator';
 import {
   aiComposerActionsClassName,
@@ -44,6 +50,7 @@ import {
   aiComposerShellClassName,
   aiComposerShellCollapsedClassName,
   aiComposerShellExpandedClassName,
+  aiComposerStopClassName,
   aiComposerVoiceClassName,
   aiComposerVoiceListeningClassName,
   aiComposerVoiceRingClassName,
@@ -51,9 +58,13 @@ import {
   aiFollowUpUserBubbleClassName,
   aiMessageGapSameClassName,
   aiMessageGapTurnClassName,
+  aiMessageProseClassName,
+  aiMessageActionsClassName,
+  aiMessageSpeakClassName,
   aiMessageVariants,
   aiPanelBannerBodyClassName,
   aiPanelBannerDismissClassName,
+  aiPanelBannerRetryClassName,
   aiPanelErrorClassName,
   aiPanelHeaderActionsClassName,
   aiPanelHeaderBtnClassName,
@@ -74,10 +85,12 @@ function AiPanelBanner({
   variant,
   children,
   onDismiss,
+  onRetry,
 }: {
   variant: 'notice' | 'error';
   children: string;
   onDismiss?: () => void;
+  onRetry?: () => void;
 }) {
   return (
     <div
@@ -87,6 +100,15 @@ function AiPanelBanner({
       role={variant === 'error' ? 'alert' : 'note'}
     >
       <p className={aiPanelBannerBodyClassName}>{children}</p>
+      {onRetry ?
+        <button
+          type='button'
+          className={aiPanelBannerRetryClassName}
+          onClick={onRetry}
+        >
+          Retry
+        </button>
+      : null}
       {onDismiss ?
         <button
           type='button'
@@ -117,9 +139,14 @@ interface AiChatPanelProps {
   isSending?: boolean;
   liveMode?: boolean;
   sendError?: string | null;
+  canRetry?: boolean;
+  /** First-turn starters when the visitor has not sent a user message yet. */
+  starterQuestions?: string[];
   onClose: () => void;
   onReset: () => void;
   onDismissError?: () => void;
+  onRetryError?: () => void;
+  onStop?: () => void;
   onSend: (text: string) => void;
   onNavigateScene?: (sceneId: string) => void;
   onSelectNaming?: (sceneId: string, hotspotId: string) => void;
@@ -212,6 +239,7 @@ interface ComposerFieldProps {
   value: string;
   canCompose: boolean;
   hasInput: boolean;
+  isSending?: boolean;
   listening: boolean;
   speechSupported: boolean;
   speechError: string | null;
@@ -219,6 +247,7 @@ interface ComposerFieldProps {
   voiceLabel: string;
   onChange: (value: string) => void;
   onToggleSpeech: () => void;
+  onStop?: () => void;
   /** Keep caret in the field on Enter — avoid focusing the submit control. */
   onSubmitRequest?: () => void;
   onFocus?: () => void;
@@ -232,6 +261,7 @@ function ComposerField({
   value,
   canCompose,
   hasInput,
+  isSending = false,
   listening,
   speechSupported,
   speechError,
@@ -239,6 +269,7 @@ function ComposerField({
   voiceLabel,
   onChange,
   onToggleSpeech,
+  onStop,
   onSubmitRequest,
   onFocus,
   onBlur,
@@ -310,41 +341,59 @@ function ComposerField({
             {speechError}
           </span>
         : null}
-        <div
-          className={cn(
-            aiComposerSendSlotClassName,
-            hasInput ?
-              aiComposerSendSlotOpenClassName
-            : aiComposerSendSlotClosedClassName,
-          )}
-          aria-hidden={!hasInput}
-        >
-          <div className={aiComposerSendSlotInnerClassName}>
-            <IconTooltip
-              label='Send message'
-              placement='top'
-              disabled={!canSend}
+        {isSending && onStop ?
+          <IconTooltip label='Stop generating' placement='top'>
+            <button
+              type='button'
+              className={aiComposerStopClassName}
+              aria-label='Stop generating'
+              onPointerDown={(event) => {
+                event.preventDefault();
+              }}
+              onClick={(event) => {
+                event.preventDefault();
+                onStop();
+              }}
             >
-              <button
-                type='submit'
-                className={cn(
-                  aiComposerSendClassName,
-                  hasInput ?
-                    aiComposerSendVisibleClassName
-                  : aiComposerSendHiddenClassName,
-                )}
-                aria-label='Send message'
+              <StopIcon />
+            </button>
+          </IconTooltip>
+        : <div
+            className={cn(
+              aiComposerSendSlotClassName,
+              hasInput ?
+                aiComposerSendSlotOpenClassName
+              : aiComposerSendSlotClosedClassName,
+            )}
+            aria-hidden={!hasInput}
+          >
+            <div className={aiComposerSendSlotInnerClassName}>
+              <IconTooltip
+                label='Send message'
+                placement='top'
                 disabled={!canSend}
-                tabIndex={-1}
-                onPointerDown={(event) => {
-                  event.preventDefault();
-                }}
               >
-                <ArrowUpIcon />
-              </button>
-            </IconTooltip>
+                <button
+                  type='submit'
+                  className={cn(
+                    aiComposerSendClassName,
+                    hasInput ?
+                      aiComposerSendVisibleClassName
+                    : aiComposerSendHiddenClassName,
+                  )}
+                  aria-label='Send message'
+                  disabled={!canSend}
+                  tabIndex={-1}
+                  onPointerDown={(event) => {
+                    event.preventDefault();
+                  }}
+                >
+                  <ArrowUpIcon />
+                </button>
+              </IconTooltip>
+            </div>
           </div>
-        </div>
+        }
       </div>
     </div>
   );
@@ -361,9 +410,13 @@ export function AiChatPanel({
   isSending = false,
   liveMode = false,
   sendError = null,
+  canRetry = false,
+  starterQuestions = [],
   onClose,
   onReset,
   onDismissError,
+  onRetryError,
+  onStop,
   onSend,
   onNavigateScene,
   onSelectNaming,
@@ -375,6 +428,7 @@ export function AiChatPanel({
   const [composerFocused, setComposerFocused] = useState(false);
   const [noticeDismissed, setNoticeDismissed] = useState(false);
   const [errorDismissed, setErrorDismissed] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const threadSpacerRef = useRef<HTMLDivElement>(null);
   const composerFormRef = useRef<HTMLFormElement>(null);
@@ -383,6 +437,7 @@ export function AiChatPanel({
   const stickToBottomRef = useRef(true);
   const lastScrollOutputKeyRef = useRef<string>('');
   const hasInput = input.trim().length > 0;
+  const readAloud = useSpeechSynthesis();
   const canReset = !guideUiTest && messages.length > 0 && !isSending;
   const canCompose = !guideUiTest && !isSending;
   const displayMessages = useMemo(
@@ -417,6 +472,24 @@ export function AiChatPanel({
     }
     return { messageId: last.id, questions: last.followUps };
   }, [displayMessages, guideUiTest]);
+  const hasUserTurn = useMemo(
+    () => displayMessages.some((msg) => msg.role === 'user'),
+    [displayMessages],
+  );
+  const showStarters =
+    !guideUiTest &&
+    !hasUserTurn &&
+    !isSending &&
+    starterQuestions.length > 0 &&
+    !tipFollowUps;
+  const showThinking =
+    guideUiTest || (isSending && displayMessages.at(-1)?.role !== 'assistant');
+
+  useEffect(() => {
+    if (!isSending) return;
+    readAloud.stop();
+  }, [isSending, readAloud]);
+
   const greeting = useMemo(() => {
     const place = locationTitle.trim();
     const tour = tourTitle.trim();
@@ -623,6 +696,21 @@ export function AiChatPanel({
     requestAnimationFrame(focusComposerInput);
   };
 
+  const handleCopyMessage = (messageId: string, content: string) => {
+    const plain = stripMarkdownForSpeech(content);
+    if (!plain || typeof navigator === 'undefined' || !navigator.clipboard) {
+      return;
+    }
+    void navigator.clipboard.writeText(plain).then(() => {
+      setCopiedMessageId(messageId);
+      window.setTimeout(() => {
+        setCopiedMessageId((current) =>
+          current === messageId ? null : current,
+        );
+      }, 1600);
+    });
+  };
+
   const handleReset = () => {
     if (!canReset) return;
     onReset();
@@ -686,9 +774,26 @@ export function AiChatPanel({
                 {VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE}
               </AiPanelBanner>
             : null}
-            <p className={aiMessageVariants({ role: 'assistant' })}>
-              {greeting}
-            </p>
+            <div className={aiMessageVariants({ role: 'assistant' })}>
+              <GuideChatMarkdown
+                text={greeting}
+                className={aiMessageProseClassName}
+              />
+            </div>
+            {showStarters ?
+              <div
+                className={cn(
+                  aiMessageVariants({ role: 'user' }),
+                  aiFollowUpUserBubbleClassName,
+                )}
+              >
+                <FollowUpQuestions
+                  questions={starterQuestions}
+                  onSelect={handleFollowUpSelect}
+                  disabled={!canCompose}
+                />
+              </div>
+            : null}
           </div>
         )}
         <div className={aiPanelThreadClassName}>
@@ -696,6 +801,7 @@ export function AiChatPanel({
             const previousRole =
               index > 0 ? (displayMessages[index - 1]?.role ?? null) : null;
             const showTipFollowUps = tipFollowUps?.messageId === msg.id;
+            const speaking = readAloud.speakingId === msg.id;
             return (
               <Fragment key={msg.id}>
                 <div
@@ -705,7 +811,74 @@ export function AiChatPanel({
                     threadItemSpacingClass(previousRole, msg.role),
                   )}
                 >
-                  {msg.content}
+                  {msg.role === 'assistant' ?
+                    <>
+                      <GuideChatMarkdown
+                        text={msg.content}
+                        className={aiMessageProseClassName}
+                      />
+                      {msg.content.trim() ?
+                        <div className={aiMessageActionsClassName}>
+                          <IconTooltip
+                            label={
+                              copiedMessageId === msg.id ? 'Copied' : 'Copy'
+                            }
+                            placement='top'
+                          >
+                            <button
+                              type='button'
+                              className={aiMessageSpeakClassName}
+                              aria-label={
+                                copiedMessageId === msg.id ?
+                                  'Copied'
+                                : 'Copy reply'
+                              }
+                              onClick={() =>
+                                handleCopyMessage(msg.id, msg.content)
+                              }
+                            >
+                              <MaterialSymbol
+                                name={
+                                  copiedMessageId === msg.id ?
+                                    'check'
+                                  : 'content_copy'
+                                }
+                                sizePx={MATERIAL_SYMBOL_SIZE_18}
+                                aria-hidden
+                              />
+                            </button>
+                          </IconTooltip>
+                          {readAloud.supported ?
+                            <IconTooltip
+                              label={
+                                speaking ? 'Stop reading aloud' : 'Read aloud'
+                              }
+                              placement='top'
+                            >
+                              <button
+                                type='button'
+                                className={aiMessageSpeakClassName}
+                                aria-label={
+                                  speaking ? 'Stop reading aloud' : 'Read aloud'
+                                }
+                                aria-pressed={speaking}
+                                onClick={() =>
+                                  readAloud.toggle(msg.id, msg.content)
+                                }
+                              >
+                                <MaterialSymbol
+                                  name={speaking ? 'stop' : 'graphic_eq'}
+                                  sizePx={MATERIAL_SYMBOL_SIZE_18}
+                                  filled={speaking}
+                                  aria-hidden
+                                />
+                              </button>
+                            </IconTooltip>
+                          : null}
+                        </div>
+                      : null}
+                    </>
+                  : msg.content}
                   {(
                     msg.role === 'assistant' &&
                     msg.guideLinks &&
@@ -750,7 +923,7 @@ export function AiChatPanel({
               </Fragment>
             );
           })}
-          {isSending || guideUiTest ?
+          {showThinking ?
             <div
               className={threadItemSpacingClass(
                 displayMessages.at(-1)?.role ?? null,
@@ -778,6 +951,7 @@ export function AiChatPanel({
         {showSendError ?
           <AiPanelBanner
             variant='error'
+            onRetry={canRetry && onRetryError ? onRetryError : undefined}
             onDismiss={() => {
               setErrorDismissed(true);
               onDismissError?.();
@@ -812,6 +986,7 @@ export function AiChatPanel({
           value={composerValue}
           canCompose={canCompose}
           hasInput={hasInput}
+          isSending={isSending}
           listening={speech.listening}
           speechSupported={speech.supported}
           speechError={speech.error}
@@ -819,6 +994,7 @@ export function AiChatPanel({
           voiceLabel={voiceLabel}
           onChange={setInput}
           onToggleSpeech={speech.toggle}
+          onStop={onStop}
           onSubmitRequest={commitComposerText}
           inputRef={composerInputRef}
         />

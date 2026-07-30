@@ -22,11 +22,14 @@ import {
   updateNavHotspot,
   updateNamingHotspot,
   updateScene,
+  updateSceneOrder,
 } from '../lib/tourSceneDev.mjs';
 import { normalizeNamingPriceStorage } from '../lib/namingPrice.mjs';
 import {
   askGuideChat,
+  askGuideChatStream,
   askGuideModelName,
+  askGuideSseResponseStream,
   isAskGuideLiveConfigured,
 } from '../lib/askGuideDev.mjs';
 import {
@@ -307,6 +310,17 @@ function validateSceneIdPayload(body) {
     throw new Error('tourId and sceneId are required');
   }
   return { tourId, sceneId: sceneId.trim() };
+}
+
+function validateUpdateSceneOrderPayload(body) {
+  const { tourId, sceneOrder } = body ?? {};
+  if (!tourId?.trim()) {
+    throw new Error('tourId is required');
+  }
+  if (!Array.isArray(sceneOrder)) {
+    throw new Error('sceneOrder must be an array of scene ids');
+  }
+  return { tourId: tourId.trim(), sceneOrder };
 }
 
 function validateUpdateScenePayload(body) {
@@ -1162,6 +1176,49 @@ export function viteDevTourApiPlugin() {
           }
 
           if (
+            req.url === '/__dev/api/ask-guide/chat/stream' &&
+            req.method === 'POST'
+          ) {
+            try {
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+              res.setHeader('Cache-Control', 'no-cache');
+              res.setHeader('Connection', 'keep-alive');
+              const abort = new AbortController();
+              req.on('close', () => abort.abort());
+              const stream = askGuideSseResponseStream(
+                askGuideChatStream({
+                  context: body?.context,
+                  messages: body?.messages,
+                  signal: abort.signal,
+                }),
+                abort.signal,
+              );
+              const reader = stream.getReader();
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                res.write(Buffer.from(value));
+              }
+              res.end();
+            } catch (error) {
+              if (!res.headersSent) {
+                const statusCode =
+                  typeof error?.statusCode === 'number' ?
+                    error.statusCode
+                  : 500;
+                sendJson(res, statusCode, {
+                  error:
+                    error instanceof Error ? error.message : 'Ask Guide failed',
+                });
+              } else {
+                res.end();
+              }
+            }
+            return;
+          }
+
+          if (
             req.url === '/__dev/api/client/update' &&
             req.method === 'PATCH'
           ) {
@@ -1430,6 +1487,19 @@ export function viteDevTourApiPlugin() {
               tourId,
               sceneId: result.sceneId,
               firstScene: result.firstScene,
+              tourPath: result.tourPath,
+            });
+            return;
+          }
+
+          if (req.url === '/__dev/api/scene/order') {
+            const { tourId, sceneOrder } =
+              validateUpdateSceneOrderPayload(body);
+            const result = updateSceneOrder({ toursDir, tourId, sceneOrder });
+            sendJson(res, 200, {
+              ok: true,
+              tourId,
+              sceneOrder: result.sceneOrder,
               tourPath: result.tourPath,
             });
             return;

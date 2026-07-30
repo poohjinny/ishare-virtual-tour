@@ -1,5 +1,5 @@
 import type { PlayTour, PlayTourStop, Tour, ViewPosition } from '../types/tour';
-import { buildSceneVisitOrder } from '../viewer/sceneDepth';
+import { resolveTourSceneOrder } from './sceneOrder';
 import { isSceneVisibleInExplore } from './sceneVisibility';
 
 /** Default dwell for the full arrive → defaultView → exit ken-burns. */
@@ -27,11 +27,11 @@ function normalizeView(raw: unknown): ViewPosition | undefined {
 }
 
 /**
- * Default Play sequence — Explore-visible scenes in nav-graph BFS order
- * (overview → level-1 floors → nested places).
+ * Default Play sequence — Explore-visible scenes in authored tour order
+ * (`sceneOrder`, with nav-BFS fill for gaps).
  */
 export function buildDefaultPlayTourStops(tour: Tour): PlayTourStop[] {
-  return buildSceneVisitOrder(tour, tour.scenes, tour.firstScene)
+  return resolveTourSceneOrder(tour)
     .filter((sceneId) => {
       const scene = tour.scenes[sceneId];
       return scene ? isSceneVisibleInExplore(scene) : false;
@@ -46,10 +46,7 @@ export function buildDefaultPlayTour(tour: Tour): PlayTour | undefined {
   return { dwellMs: PLAY_TOUR_DEFAULT_DWELL_MS, loop: true, stops };
 }
 
-/**
- * Prefer authored stops when ≥2 resolve; otherwise fall back to Explore BFS.
- * Tours with fewer than 2 Explore scenes get no Play control.
- */
+/** Prefer authored stops when ≥2 resolve; otherwise fall back to authored tour order. */
 export function normalizePlayTour(
   tour: Tour,
   playTour: PlayTour | null | undefined,

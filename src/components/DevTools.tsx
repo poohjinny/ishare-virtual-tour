@@ -6,6 +6,11 @@ import type { DevTourMutateOptions } from '../utils/devTourApi';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
 import { prefersMobileTourChrome } from '../hooks/useTourChromeLayout';
 import { isTypingTarget } from '../utils/isTypingTarget';
+import {
+  readRememberedDevPanelOpen,
+  writeRememberedDevPanelOpen,
+} from '../utils/devPanelUiState';
+import { cn } from '../lib/cn';
 import { devFabVariants, devToolsStackClassName } from './devViewPanelVariants';
 
 interface DevToolsProps {
@@ -40,7 +45,13 @@ export function DevTools({
   openNamingOpportunity,
   panelStack,
 }: DevToolsProps) {
-  const [panelOpen, setPanelOpen] = useState(() => !prefersMobileTourChrome());
+  const [panelOpen, setPanelOpen] = useState(() =>
+    readRememberedDevPanelOpen(!prefersMobileTourChrome()),
+  );
+
+  useEffect(() => {
+    writeRememberedDevPanelOpen(panelOpen);
+  }, [panelOpen]);
 
   useEffect(() => {
     return panelStack?.registerPanel('dev-panel', () => {
@@ -67,9 +78,11 @@ export function DevTools({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
+
   return (
     <div className={devToolsStackClassName}>
-      {panelOpen ?
+      {/* Keep mounted so tab / accordion / draft state survives close and scene nav. */}
+      <div className={cn(!panelOpen && 'hidden')} aria-hidden={!panelOpen}>
         <DevViewPanel
           id='dev-view-panel'
           tour={tour}
@@ -85,7 +98,9 @@ export function DevTools({
           openNamingOpportunity={openNamingOpportunity}
           onClose={() => setPanelOpen(false)}
         />
-      : <button
+      </div>
+      {!panelOpen ?
+        <button
           type='button'
           className={devFabVariants({ open: panelOpen })}
           aria-expanded={panelOpen}
@@ -95,7 +110,7 @@ export function DevTools({
         >
           Dev
         </button>
-      }
+      : null}
     </div>
   );
 }

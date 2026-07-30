@@ -75,7 +75,7 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
  *
  * - `askGuide` — show the FAB/panel
  * - `guideMock` — chat works with scripted replies (no OpenAI)
- * - `guideUiTest` — frozen UI fixtures only (scroll + thinking); no composing
+ * - `guideUiTest` — frozen UI fixtures only (scroll + thinking + markdown); no composing
  */
 export const DEV_ASK_GUIDE_FLAG_TOGGLES: DevUrlFlagToggle[] = [
   {
@@ -98,11 +98,13 @@ export const DEV_ASK_GUIDE_FLAG_TOGGLES: DevUrlFlagToggle[] = [
   {
     key: 'guideUiTest',
     label: 'guideUiTest',
-    hint: 'Frozen UI preview — scroll fixtures, thinking, notice + error banners (no chat / no API)',
+    hint: 'Frozen UI preview — markdown sample, scroll fixtures, thinking, FAB bubble, notice + error (no chat / no API)',
     isOn: (params) => params.guideUiTest,
     urlPatch: (enabled) => ({
       guideUiTest: enabled ? '1' : null,
       chatTest: null,
+      // Open the guide surface so the fixture panel is visible immediately.
+      ...(enabled ? { askGuide: '1' } : {}),
     }),
   },
 ];

@@ -16,7 +16,6 @@ import {
   aiSceneLinkCardBodyClassName,
   aiSceneLinkCardDescClassName,
   aiSceneLinkCardKindClassName,
-  aiSceneLinkCardKindNamingClassName,
   aiSceneLinkCardMediaClassName,
   aiSceneLinkCardMediaWrapClassName,
   aiSceneLinkCardPriceClassName,
@@ -140,13 +139,7 @@ function GuideLinkCard({
           : null}
         </span>
         <div className={aiSceneLinkCardBodyClassName}>
-          <span
-            className={
-              isNaming ?
-                aiSceneLinkCardKindNamingClassName
-              : aiSceneLinkCardKindClassName
-            }
-          >
+          <span className={aiSceneLinkCardKindClassName}>
             {isNaming ? 'Naming opportunity' : 'Place'}
           </span>
           {isNaming ?

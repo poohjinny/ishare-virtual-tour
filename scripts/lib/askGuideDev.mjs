@@ -15,6 +15,8 @@ import { fileURLToPath } from 'node:url';
 import {
   ASK_GUIDE_DEFAULT_MODEL,
   askGuideChatCore,
+  askGuideChatCoreStream,
+  askGuideSseResponseStream,
 } from '../../api/shared/askGuideCore.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -88,3 +90,25 @@ export async function askGuideChat({ context, messages }) {
     throw error;
   }
 }
+
+/** Async iterable of Ask Guide stream events for the Vite SSE proxy. */
+export async function* askGuideChatStream({ context, messages, signal }) {
+  const { apiKey, model } = resolveAskGuideEnv();
+  try {
+    yield* askGuideChatCoreStream({ context, messages, apiKey, model, signal });
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes('OPENAI_API_KEY is not set')
+    ) {
+      const localError = new Error(
+        'OPENAI_API_KEY is not set. Add it to .env.local (not .env.local.example) and restart Vite.',
+      );
+      localError.statusCode = 503;
+      throw localError;
+    }
+    throw error;
+  }
+}
+
+export { askGuideSseResponseStream };

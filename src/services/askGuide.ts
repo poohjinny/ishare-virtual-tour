@@ -28,10 +28,13 @@ import { askMockAssistant } from './mockAssistant';
 
 const ASK_GUIDE_DEV_STATUS_URL = '/__dev/api/ask-guide/status';
 const ASK_GUIDE_DEV_CHAT_URL = '/__dev/api/ask-guide/chat';
+const ASK_GUIDE_DEV_CHAT_STREAM_URL = '/__dev/api/ask-guide/chat/stream';
 
 /** `?guideMock=1` — brief think pause so scripted replies feel conversational. */
 const GUIDE_MOCK_THINK_MS_MIN = 650;
 const GUIDE_MOCK_THINK_MS_MAX = 1400;
+const GUIDE_MOCK_STREAM_CHUNK_CHARS = 24;
+const GUIDE_MOCK_STREAM_CHUNK_MS = 28;
 
 export type AskGuideReply = {
   reply: string;
@@ -89,6 +92,11 @@ function askGuideStatusUrl(apiBase: string | null): string {
 function askGuideChatUrl(apiBase: string | null): string {
   if (apiBase === null) return ASK_GUIDE_DEV_CHAT_URL;
   return `${apiBase}/tour/chat`;
+}
+
+function askGuideChatStreamUrl(apiBase: string | null): string {
+  if (apiBase === null) return ASK_GUIDE_DEV_CHAT_STREAM_URL;
+  return `${apiBase}/tour/chat/stream`;
 }
 
 function guideMockThinkDelayMs(): number {
@@ -218,6 +226,46 @@ async function mockGuideReply(
   };
 }
 
+export type AskGuideStreamHandlers = {
+  signal?: AbortSignal;
+  onDelta?: (text: string) => void;
+};
+
+async function mockGuideStream(
+  tour: Tour,
+  sceneId: string,
+  question: string,
+  handlers: AskGuideStreamHandlers = {},
+): Promise<AskGuideReply> {
+  const reply = askMockAssistant(tour, sceneId, question);
+  const extras = hydrateGuideExtras(tour, sceneId, question, reply);
+  if (handlers.signal?.aborted) {
+    const error = new Error('Aborted');
+    error.name = 'AbortError';
+    throw error;
+  }
+  for (let i = 0; i < reply.length; i += GUIDE_MOCK_STREAM_CHUNK_CHARS) {
+    if (handlers.signal?.aborted) {
+      const error = new Error('Aborted');
+      error.name = 'AbortError';
+      throw error;
+    }
+    handlers.onDelta?.(reply.slice(0, i + GUIDE_MOCK_STREAM_CHUNK_CHARS));
+    await new Promise<void>((resolve) => {
+      window.setTimeout(resolve, GUIDE_MOCK_STREAM_CHUNK_MS);
+    });
+  }
+  handlers.onDelta?.(reply);
+  return { reply, live: false, ...extras };
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof DOMException && error.name === 'AbortError') ||
+    (error instanceof Error && error.name === 'AbortError')
+  );
+}
+
 /** Whether live Ask Guide is configured (dev Vite proxy or production API). */
 export async function fetchAskGuideLiveStatus(force = false): Promise<boolean> {
   if (isAskGuideMockForced()) {
@@ -263,6 +311,7 @@ export async function askTourGuide(
   sceneId: string,
   question: string,
   priorMessages: ChatMessage[] = [],
+  handlers: AskGuideStreamHandlers = {},
 ): Promise<AskGuideReply> {
   const trimmed = question.trim();
   if (!trimmed) {
@@ -271,7 +320,7 @@ export async function askTourGuide(
 
   if (isAskGuideMockForced()) {
     console.info('[ask-guide] mock forced (?guideMock=1)');
-    return mockGuideReply(tour, sceneId, trimmed);
+    return mockGuideStream(tour, sceneId, trimmed, handlers);
   }
 
   const apiBase = resolveAskGuideApiBase();
@@ -280,14 +329,17 @@ export async function askTourGuide(
   const live = await fetchAskGuideLiveStatus(true);
   if (!live) {
     console.info('[ask-guide] live unavailable — using mock');
-    return mockGuideReply(tour, sceneId, trimmed);
+    return mockGuideStream(tour, sceneId, trimmed, handlers);
   }
 
   const context = assembleTourContext(tour, sceneId);
   try {
-    const response = await fetch(askGuideChatUrl(apiBase), {
+    const response = await fetch(askGuideChatStreamUrl(apiBase), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+      },
       body: JSON.stringify({
         tourId: tour.id,
         sceneId,
@@ -300,6 +352,7 @@ export async function askTourGuide(
           { role: 'user', content: trimmed },
         ],
       }),
+      signal: handlers.signal,
     });
 
     if (response.status === 503) {
@@ -329,33 +382,158 @@ export async function askTourGuide(
       throw new Error(data?.error ?? `Ask Guide failed (${response.status})`);
     }
 
-    const data = (await response.json()) as {
-      reply?: string;
-      sceneLinks?: Array<{ sceneId?: string; label?: string }>;
-      namingLinks?: Array<{ namingId?: string; label?: string }>;
-      followUps?: string[];
-    };
-    const reply = data.reply?.trim();
-    if (!reply) {
-      throw new Error('Ask Guide returned an empty reply');
+    if (!response.body) {
+      throw new Error('Ask Guide returned an empty stream');
     }
-    return {
-      reply,
-      live: true,
-      ...hydrateGuideExtras(
-        tour,
-        sceneId,
-        trimmed,
-        reply,
-        data.sceneLinks,
-        data.namingLinks,
-        data.followUps,
-      ),
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let finalReply: AskGuideReply | null = null;
+    let streamError: string | null = null;
+
+    const handleEvent = (eventName: string, dataRaw: string) => {
+      let data: Record<string, unknown>;
+      try {
+        data = JSON.parse(dataRaw) as Record<string, unknown>;
+      } catch {
+        return;
+      }
+      if (eventName === 'delta' && typeof data.text === 'string') {
+        handlers.onDelta?.(data.text);
+        return;
+      }
+      if (eventName === 'error') {
+        streamError =
+          typeof data.error === 'string' ?
+            data.error
+          : 'Ask Guide stream failed';
+        return;
+      }
+      if (eventName === 'done') {
+        const reply = typeof data.reply === 'string' ? data.reply.trim() : '';
+        if (!reply) {
+          streamError = 'Ask Guide returned an empty reply';
+          return;
+        }
+        finalReply = {
+          reply,
+          live: true,
+          ...hydrateGuideExtras(
+            tour,
+            sceneId,
+            trimmed,
+            reply,
+            data.sceneLinks as
+              | Array<{ sceneId?: string; label?: string }>
+              | null
+              | undefined,
+            data.namingLinks as
+              | Array<{ namingId?: string; label?: string }>
+              | null
+              | undefined,
+            data.followUps as string[] | null | undefined,
+          ),
+        };
+      }
     };
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const chunks = buffer.split('\n\n');
+      buffer = chunks.pop() ?? '';
+      for (const chunk of chunks) {
+        const lines = chunk.split('\n');
+        let eventName = 'message';
+        const dataLines: string[] = [];
+        for (const line of lines) {
+          if (line.startsWith('event:')) {
+            eventName = line.slice(6).trim();
+          } else if (line.startsWith('data:')) {
+            dataLines.push(line.slice(5).trim());
+          }
+        }
+        if (dataLines.length) {
+          handleEvent(eventName, dataLines.join('\n'));
+        }
+      }
+    }
+
+    if (streamError) {
+      throw new Error(streamError);
+    }
+    if (!finalReply) {
+      // Fallback: non-stream endpoint if the Worker is older.
+      return askTourGuideOnce(tour, sceneId, trimmed, priorMessages);
+    }
+    return finalReply;
   } catch (error) {
+    if (isAbortError(error) || handlers.signal?.aborted) {
+      const abortError = new Error('Aborted');
+      abortError.name = 'AbortError';
+      throw abortError;
+    }
     console.warn('[ask-guide] live chat failed', error);
     return { reply: '', live: false, error: formatLiveFailureError(error) };
   }
+}
+
+/** One-shot JSON chat — fallback when stream endpoint is unavailable. */
+async function askTourGuideOnce(
+  tour: Tour,
+  sceneId: string,
+  trimmed: string,
+  priorMessages: ChatMessage[],
+): Promise<AskGuideReply> {
+  const apiBase = resolveAskGuideApiBase();
+  const context = assembleTourContext(tour, sceneId);
+  const response = await fetch(askGuideChatUrl(apiBase), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tourId: tour.id,
+      sceneId,
+      context,
+      messages: [
+        ...priorMessages.map((message) => ({
+          role: message.role,
+          content: message.content,
+        })),
+        { role: 'user', content: trimmed },
+      ],
+    }),
+  });
+  if (!response.ok) {
+    const data = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
+    throw new Error(data?.error ?? `Ask Guide failed (${response.status})`);
+  }
+  const data = (await response.json()) as {
+    reply?: string;
+    sceneLinks?: Array<{ sceneId?: string; label?: string }>;
+    namingLinks?: Array<{ namingId?: string; label?: string }>;
+    followUps?: string[];
+  };
+  const reply = data.reply?.trim();
+  if (!reply) {
+    throw new Error('Ask Guide returned an empty reply');
+  }
+  return {
+    reply,
+    live: true,
+    ...hydrateGuideExtras(
+      tour,
+      sceneId,
+      trimmed,
+      reply,
+      data.sceneLinks,
+      data.namingLinks,
+      data.followUps,
+    ),
+  };
 }
 
 function formatLiveFailureError(error: unknown): string {

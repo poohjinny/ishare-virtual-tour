@@ -4,6 +4,7 @@
  * Routes:
  *   GET  /api/tour/chat/status
  *   POST /api/tour/chat
+ *   POST /api/tour/chat/stream
  *
  * Secrets / vars (wrangler, never VITE_*):
  *   OPENAI_API_KEY (secret)
@@ -15,6 +16,8 @@
 import {
   ASK_GUIDE_DEFAULT_MODEL,
   askGuideChatCore,
+  askGuideChatCoreStream,
+  askGuideSseResponseStream,
 } from '../../../api/shared/askGuideCore.mjs';
 import { corsHeaders, resolveCorsOrigin } from '../../../api/shared/cors.mjs';
 import { consumeAskGuideRateLimit } from '../../../api/shared/rateLimit.mjs';
@@ -56,6 +59,91 @@ function normalizePath(pathname) {
   return pathname;
 }
 
+async function handleChatPost(request, env, { stream }) {
+  const origin = requestOrigin(request);
+  if (origin && !resolveCorsOrigin(origin, env)) {
+    return jsonResponse(403, { error: 'Origin not allowed' }, origin, env);
+  }
+
+  const rate = consumeAskGuideRateLimit(clientIp(request), env);
+  if (!rate.ok) {
+    return new Response(
+      JSON.stringify({
+        error: 'Too many Ask Guide requests. Try again shortly.',
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Retry-After': String(rate.retryAfterSec),
+          ...corsHeaders(origin, env),
+        },
+      },
+    );
+  }
+
+  const apiKey = (env.OPENAI_API_KEY || '').trim();
+  if (!apiKey) {
+    return jsonResponse(
+      503,
+      {
+        error:
+          'Ask Guide live is not configured. Set OPENAI_API_KEY on the Worker.',
+      },
+      origin,
+      env,
+    );
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse(400, { error: 'Invalid JSON body' }, origin, env);
+  }
+
+  const model = (env.OPENAI_ASK_GUIDE_MODEL || ASK_GUIDE_DEFAULT_MODEL).trim();
+
+  if (!stream) {
+    try {
+      const result = await askGuideChatCore({
+        context: body?.context,
+        messages: body?.messages,
+        apiKey,
+        model,
+      });
+      return jsonResponse(200, { ok: true, ...result }, origin, env);
+    } catch (error) {
+      const statusCode =
+        typeof error?.statusCode === 'number' ? error.statusCode : 500;
+      return jsonResponse(
+        statusCode,
+        { error: error instanceof Error ? error.message : 'Ask Guide failed' },
+        origin,
+        env,
+      );
+    }
+  }
+
+  const events = askGuideChatCoreStream({
+    context: body?.context,
+    messages: body?.messages,
+    apiKey,
+    model,
+    signal: request.signal,
+  });
+
+  return new Response(askGuideSseResponseStream(events, request.signal), {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      ...corsHeaders(origin, env),
+    },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -81,67 +169,11 @@ export default {
     }
 
     if (path === '/api/tour/chat' && request.method === 'POST') {
-      if (origin && !resolveCorsOrigin(origin, env)) {
-        return jsonResponse(403, { error: 'Origin not allowed' }, origin, env);
-      }
+      return handleChatPost(request, env, { stream: false });
+    }
 
-      const rate = consumeAskGuideRateLimit(clientIp(request), env);
-      if (!rate.ok) {
-        return new Response(
-          JSON.stringify({
-            error: 'Too many Ask Guide requests. Try again shortly.',
-          }),
-          {
-            status: 429,
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8',
-              'Retry-After': String(rate.retryAfterSec),
-              ...corsHeaders(origin, env),
-            },
-          },
-        );
-      }
-
-      const apiKey = (env.OPENAI_API_KEY || '').trim();
-      if (!apiKey) {
-        return jsonResponse(
-          503,
-          {
-            error:
-              'Ask Guide live is not configured. Set OPENAI_API_KEY on the Worker.',
-          },
-          origin,
-          env,
-        );
-      }
-
-      let body;
-      try {
-        body = await request.json();
-      } catch {
-        return jsonResponse(400, { error: 'Invalid JSON body' }, origin, env);
-      }
-
-      try {
-        const result = await askGuideChatCore({
-          context: body?.context,
-          messages: body?.messages,
-          apiKey,
-          model: (env.OPENAI_ASK_GUIDE_MODEL || ASK_GUIDE_DEFAULT_MODEL).trim(),
-        });
-        return jsonResponse(200, { ok: true, ...result }, origin, env);
-      } catch (error) {
-        const statusCode =
-          typeof error?.statusCode === 'number' ? error.statusCode : 500;
-        return jsonResponse(
-          statusCode,
-          {
-            error: error instanceof Error ? error.message : 'Ask Guide failed',
-          },
-          origin,
-          env,
-        );
-      }
+    if (path === '/api/tour/chat/stream' && request.method === 'POST') {
+      return handleChatPost(request, env, { stream: true });
     }
 
     return jsonResponse(404, { error: 'Not found' }, origin, env);

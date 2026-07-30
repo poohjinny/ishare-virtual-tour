@@ -1,3 +1,4 @@
+import { VIRTUAL_TOUR_GUIDE_CTA } from '../constants/branding';
 import { PopupCtaArrowIcon } from './popupContentUi';
 import { tourNavSceneDetailFooterClassName } from './tourNavFloatVariants';
 
@@ -5,17 +6,46 @@ interface ExploreDetailVisitFooterProps {
   label: string;
   disabled?: boolean;
   onVisit: () => void;
+  /** Secondary Ask Guide CTA — only when Ask Guide is enabled. */
+  askLabel?: string;
+  onAsk?: () => void;
 }
 
-/** Glass panel footer shell; Visit CTA is content-width. */
+/** Glass panel footer shell; Visit CTA is content-width; optional Ask Guide. */
 export function ExploreDetailVisitFooter({
   label,
   disabled = false,
   onVisit,
+  askLabel = VIRTUAL_TOUR_GUIDE_CTA,
+  onAsk,
 }: ExploreDetailVisitFooterProps) {
+  const showAsk = typeof onAsk === 'function';
+
   return (
     <footer className={tourNavSceneDetailFooterClassName}>
-      <div className='tour-glass-panel__cta-wrap'>
+      <div
+        className={
+          showAsk ?
+            'tour-glass-panel__cta-wrap tour-glass-panel__cta-row'
+          : 'tour-glass-panel__cta-wrap'
+        }
+      >
+        {showAsk ?
+          <button
+            type='button'
+            className='tour-glass-panel__cta tour-glass-panel__cta--secondary border border-[rgba(15,23,42,0.14)] bg-white/80 text-foreground'
+            disabled={disabled}
+            aria-label={askLabel}
+            onClick={onAsk}
+          >
+            <span
+              className='tour-glass-panel__cta-text'
+              data-cta-label={askLabel}
+            >
+              {askLabel}
+            </span>
+          </button>
+        : null}
         <button
           type='button'
           className='tour-glass-panel__cta'
