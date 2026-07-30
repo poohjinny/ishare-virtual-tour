@@ -120,7 +120,6 @@ import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
-  MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_18,
   MATERIAL_SYMBOL_SIZE_20,
 } from './ui/materialSymbolClasses';
