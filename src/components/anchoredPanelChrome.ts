@@ -31,6 +31,8 @@ export const ANCHORED_PANEL = {
   heroFallback: 'anchored-panel__hero-fallback',
   heroFallbackLoaded: 'anchored-panel__hero-fallback--loaded',
   main: 'anchored-panel__main',
+  /** Pinned title/intro above the scroll body. */
+  header: 'anchored-panel__header',
   body: 'anchored-panel__body',
   bodyToolbar: 'anchored-panel__body-toolbar',
   toolbarActions: 'anchored-panel__toolbar-actions',
@@ -131,13 +133,18 @@ export interface AnchoredMediaPanelShellOptions {
    * Rendered above the scroll body so it stays pinned.
    */
   toolbarHtml?: string;
+  /**
+   * Optional title/intro block pinned above the scroll body
+   * (identity stays visible while copy scrolls).
+   */
+  headerHtml?: string;
   /** Full body element HTML (scrollable copy). */
   bodyHtml: string;
   footerHtml?: string;
 }
 
 /**
- * Shared article shell: hero (optional) + main(toolbar? + body + footer).
+ * Shared article shell: hero (optional) + main(toolbar? + header? + body + footer).
  */
 export function buildAnchoredMediaPanelHtml(
   options: AnchoredMediaPanelShellOptions,
@@ -149,6 +156,7 @@ export function buildAnchoredMediaPanelHtml(
     rootDataAttrs = {},
     heroHtml,
     toolbarHtml = '',
+    headerHtml = '',
     bodyHtml,
     footerHtml = '',
   } = options;
@@ -170,6 +178,7 @@ export function buildAnchoredMediaPanelHtml(
         ${heroHtml}
         <div class="${ANCHORED_PANEL.main}">
           ${toolbarHtml}
+          ${headerHtml}
           ${bodyHtml}
           ${footerHtml}
         </div>

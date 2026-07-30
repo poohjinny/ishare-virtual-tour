@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import { cn } from '../lib/cn';
+import { useExploreDirectoryMediaLoad } from '../hooks/useExploreDirectoryMediaLoad';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
@@ -69,18 +71,25 @@ export function ExploreSceneGalleryCard({
   const { isCoarsePointer } = useTourChromeLayout();
   const groupMediaReady = useExploreGroupMediaReady();
   const { ref, inView } = useLazyInView<HTMLLIElement>();
-  const {
-    src: previewSrc,
-    failed: previewFailed,
-    loading: previewLoading,
-  } = useScenePreview(tourId, scene, inView && groupMediaReady);
+  const wantsLoad = inView && groupMediaReady;
+  const { allowed: mediaAllowed, onSettled: onMediaSettled } =
+    useExploreDirectoryMediaLoad(wantsLoad);
+  const { src: previewSrc, failed: previewFailed } = useScenePreview(
+    tourId,
+    scene,
+    mediaAllowed,
+  );
   const {
     imgRef,
     revealed: previewLoaded,
     onLoad: onPreviewLoad,
   } = usePreviewHeroReveal(previewSrc);
-  const heroLoading =
-    previewLoading || Boolean(previewSrc && !previewLoaded && !previewFailed);
+  // Skeleton as soon as the card is in view; load/decode waits for scroll idle + slot.
+  const heroLoading = wantsLoad && !previewFailed && !previewLoaded;
+
+  useEffect(() => {
+    if (previewFailed || previewLoaded) onMediaSettled();
+  }, [onMediaSettled, previewFailed, previewLoaded]);
   const description = resolveScenePlaceLead(
     {
       id: tourId,
@@ -172,6 +181,7 @@ export function ExploreSceneGalleryCard({
               loading='lazy'
               decoding='async'
               onLoad={onPreviewLoad}
+              onError={onMediaSettled}
             />
           : null}
           {previewFailed ?

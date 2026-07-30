@@ -160,6 +160,11 @@ input[type='text'] {
     box-shadow 0.2s ease;
 }
 
+/* Ask Guide composer — shell is already a pill; input radius clips caret/selection. */
+input[type='text'].ai-composer-input {
+  border-radius: 0;
+}
+
 input::placeholder {
   font-family: var(--ishare-display-font);
   color: var(--ishare-text-muted);
@@ -170,6 +175,9 @@ input::placeholder {
   width: 100%;
   height: 100%;
   background: #000;
+  --tour-viewer-controls-exit: 4.75rem;
+  --tour-viewer-controls-duration: 0.36s;
+  --tour-viewer-controls-ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .viewer-area:fullscreen,
@@ -207,8 +215,6 @@ input::placeholder {
   width: 100%;
   height: 100%;
   background: #000;
-  --psv-toolbar-collapse-duration: 0.45s;
-  --psv-toolbar-collapse-ease: cubic-bezier(0.22, 1, 0.36, 1);
   /*
    * Hotspot labels are screen-space overlays (not UI chrome). Keep them on a
    * dedicated token so panel rem scale and panorama chips can diverge.
@@ -379,7 +385,7 @@ input::placeholder {
   display: flex;
   transform: translateX(-50%) translateY(0);
   flex-direction: row;
-  padding: 6px 16px;
+  padding: 6px 8px;
   border-radius: 999px;
   background: var(--ishare-float-glass-bg);
   border: none;
@@ -392,17 +398,11 @@ input::placeholder {
   overflow: visible;
   max-width: min(520px, calc(100vw - 48px));
   transition:
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.2s,
-    box-shadow 0.2s,
-    opacity 0.22s ease,
+    transform var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+    opacity var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
     visibility 0s linear 0s,
-    padding var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-    border-radius var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-    width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-    height var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-    min-width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-    max-width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease);
+    background 0.2s,
+    box-shadow 0.2s;
 }
 
 .viewer-container .psv-navbar .ishare-tooltip-host::after {
@@ -413,124 +413,28 @@ input::placeholder {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
 }
 
-/* Collapsed — desktop expand circle */
+/* Hide: pill slides off-screen with the hide FAB (same exit distance/timing). */
 @media (min-width: 1024px) {
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle {
-    transition:
-      width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-      height var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-      border-radius var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease);
-  }
-
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg,
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol,
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
-    transition:
-      width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-      height var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease);
-  }
-
   .viewer-container.viewer-container--controls-collapsed .psv-navbar {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
-    width: var(--tour-chrome-fab-size);
-    height: var(--tour-chrome-fab-size);
-    min-width: var(--tour-chrome-fab-size);
-    max-width: var(--tour-chrome-fab-size);
-    padding: 0;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-button:not(.psv-tour-toolbar-toggle) {
-    position: absolute;
     opacity: 0;
     visibility: hidden;
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden;
     pointer-events: none;
+    transform: translateX(-50%) translateY(var(--tour-viewer-controls-exit));
     transition:
-      opacity 0.3s ease,
-      visibility 0s linear 0.3s,
-      max-width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-      width var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease),
-      margin var(--psv-toolbar-collapse-duration) var(--psv-toolbar-collapse-ease);
-  }
-
-  .viewer-container:not(.viewer-container--controls-collapsed) .psv-navbar .psv-button:not(.psv-tour-toolbar-toggle) {
-    opacity: 1;
-    visibility: visible;
-    transition:
-      opacity 0.34s ease 0.16s,
-      visibility 0s linear 0.16s;
-  }
-
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle {
-    flex: 0 0 var(--tour-chrome-fab-size);
-    width: var(--tour-chrome-fab-size);
-    height: var(--tour-chrome-fab-size);
-    min-width: var(--tour-chrome-fab-size);
-    margin: 0 !important;
-    padding: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg,
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol {
-    display: block;
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
-    font-size: 20px;
-  }
-
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
-  }
-
-  /* Collapsed FAB hover — drop the toolbar's dark button tint (pill bg handles it) */
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-button.psv-tour-toolbar-toggle:hover,
-  .viewer-container.viewer-container--controls-collapsed .psv-navbar .psv-button.psv-tour-toolbar-toggle:focus-visible {
-    background: transparent;
-  }
-
-  .viewer-container:not(.viewer-container--controls-collapsed) .psv-navbar {
-    width: auto;
-    height: auto;
-    min-width: 0;
-    max-width: min(520px, calc(100vw - 48px));
-    padding: 6px 16px;
-    border-radius: 999px;
+      transform var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+      opacity var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+      visibility 0s linear var(--tour-viewer-controls-duration),
+      background 0.2s,
+      box-shadow 0.2s;
   }
 }
 
 @media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
 
   .viewer-container .psv-navbar,
-  .viewer-container .psv-navbar .psv-button:not(.psv-tour-toolbar-toggle),
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle,
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-button-svg,
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol,
-  .viewer-container .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
+  .viewer-container.viewer-container--controls-collapsed .psv-navbar {
     transition: none !important;
   }
 }
@@ -540,13 +444,11 @@ input::placeholder {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateX(-50%) translateY(calc(100% + 28px));
+  transform: translateX(-50%) translateY(var(--tour-viewer-controls-exit));
   transition:
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    background 0.2s,
-    box-shadow 0.2s,
-    opacity 0.22s ease,
-    visibility 0s linear 0.28s;
+    transform var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+    opacity var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+    visibility 0s linear var(--tour-viewer-controls-duration);
 }
 
 /* Mobile + compact chrome — hide PSV pill (touch pan/zoom; desktop ≥1024 keeps pill) */
@@ -576,6 +478,119 @@ input::placeholder {
     0 5px 14px rgba(15, 23, 42, 0.09);
 }
 
+/*
+ * Show/hide controls FABs — sibling layer inside `.viewer-area`.
+ * Hide FAB docks to the pill’s right edge; show FAB is centered.
+ * Both use the same off-screen slide as the toolbar pill.
+ */
+.tour-viewer-controls-toggle-layer {
+  position: absolute;
+  inset: 0;
+  z-index: var(--tour-chrome-z-index);
+  pointer-events: none;
+}
+
+.viewer-area .tour-viewer-controls-toggle-fab {
+  position: absolute;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tour-chrome-fab-size);
+  height: var(--tour-chrome-fab-size);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+    opacity var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+    visibility 0s linear var(--tour-viewer-controls-duration);
+}
+
+.viewer-area .tour-viewer-controls-toggle-fab.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    transform var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+    opacity var(--tour-viewer-controls-duration) var(--tour-viewer-controls-ease),
+    visibility 0s linear 0s;
+}
+
+/* Hide FAB — rests beside the pill; exits downward with the pill. */
+.viewer-area .tour-viewer-controls-toggle-fab--hide {
+  left: 50%;
+  transform: translateY(var(--tour-viewer-controls-exit));
+}
+
+.viewer-area .tour-viewer-controls-toggle-fab--hide.is-active {
+  transform: translateY(0);
+}
+
+/* Show FAB — centered; enters from below when the pill is hidden. */
+.viewer-area .tour-viewer-controls-toggle-fab--show {
+  left: 50%;
+  transform: translateX(-50%) translateY(var(--tour-viewer-controls-exit));
+}
+
+.viewer-area .tour-viewer-controls-toggle-fab--show.is-active {
+  transform: translateX(-50%) translateY(0);
+}
+
+.viewer-area:not(.tour-viewer-controls--motion-ready) .psv-navbar,
+.viewer-area:not(.tour-viewer-controls--motion-ready) .tour-viewer-controls-toggle-fab {
+  transition: none !important;
+}
+
+.tour-viewer-controls-toggle-fab__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tour-chrome-fab-size);
+  height: var(--tour-chrome-fab-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  color: var(--ishare-text-muted);
+  background: var(--ishare-float-glass-bg);
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.08);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.tour-viewer-controls-toggle-fab__button:hover,
+.tour-viewer-controls-toggle-fab__button:focus-visible {
+  color: var(--ishare-text);
+  background: var(--ishare-float-glass-bg-hover);
+  box-shadow:
+    0 12px 32px rgba(15, 23, 42, 0.16),
+    0 5px 14px rgba(15, 23, 42, 0.09);
+}
+
+.tour-viewer-controls-toggle-fab__button:focus-visible {
+  outline: 2px solid var(--ishare-primary-light, var(--ishare-primary));
+  outline-offset: 2px;
+}
+
+.tour-viewer-controls-toggle-fab__button:disabled {
+  cursor: default;
+}
+
+@media (max-width: 1023px) {
+  .tour-viewer-controls-toggle-layer {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewer-area .tour-viewer-controls-toggle-fab {
+    transition: none !important;
+  }
+}
+
 /* Icon buttons ? keep zoom slider separate */
 .viewer-container {
   --psv-nav-icon-size: 16px;
@@ -603,10 +618,10 @@ input::placeholder {
 
 .viewer-container .psv-zoom-range.psv-button {
   flex: 0 0 auto;
-  width: 56px;
+  width: 40px;
   height: 28px;
   margin: 0 2px;
-  padding: 0 4px;
+  padding: 0 2px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -614,7 +629,7 @@ input::placeholder {
 
 .viewer-container .psv-zoom-range-line {
   position: relative;
-  width: 56px;
+  width: 40px;
   height: 2px;
   margin: 0 auto;
   background: rgba(100, 116, 139, 0.35);
@@ -626,8 +641,8 @@ input::placeholder {
 .viewer-container .psv-zoom-range-handle {
   position: absolute;
   top: 50%;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   margin: 0;
   border-radius: 50%;
   background: var(--ishare-text-muted);
@@ -640,47 +655,48 @@ input::placeholder {
   background: var(--ishare-text);
 }
 
-/* Control groups: zoom | move + default view | immersive + fullscreen */
+/* Control groups: move + zoom + default view | play + immersive + fullscreen */
 .viewer-container .psv-navbar .psv-menu-button {
   display: none !important;
 }
 
-.viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
-  margin-left: 24px;
-}
-
-/* Thin chevrons read tighter than filled icons at 0 gap — keep a hairline between arrows only. */
 .viewer-container .psv-move-button+.psv-move-button {
   margin-left: 4px;
 }
 
-.viewer-container .psv-recenter-button+.psv-play-tour-button {
-  margin-left: 24px;
-}
-
-.viewer-container .psv-recenter-button+.psv-immersive-bg-button {
-  margin-left: 24px;
-}
-
-.viewer-container .psv-recenter-button+.psv-fullscreen-button {
-  margin-left: 24px;
-}
-
-.viewer-container .psv-toolbar-toggle-icon-stack {
+/* Decorative gutters between navbar groups (PSV + 3D). */
+.psv-navbar .psv-nav-group-divider {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--psv-nav-icon-size);
-  height: var(--psv-nav-icon-size);
+  width: auto;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  padding: 0 10px;
+  pointer-events: none;
+  cursor: default;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: 1;
 }
 
-.viewer-container .psv-toolbar-toggle-material-symbol {
+.psv-navbar .psv-nav-group-divider:hover,
+.psv-navbar .psv-nav-group-divider:focus-visible {
+  background: transparent !important;
+}
+
+.psv-navbar .psv-nav-group-divider.psv-button--disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+.psv-navbar .psv-nav-group-divider__line {
   display: block;
-  width: var(--psv-nav-icon-size);
-  height: var(--psv-nav-icon-size);
-  font-size: var(--psv-nav-icon-size);
-  line-height: 1;
-  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
+  width: 1px;
+  height: 14px;
+  border-radius: 1px;
+  background: rgba(15, 23, 42, 0.14);
 }
 
 .viewer-container .psv-navbar-material-symbol {
@@ -971,27 +987,15 @@ input::placeholder {
   .viewer-container .psv-navbar,
   .viewer-container .psv-navbar--open {
     bottom: 14px;
-    padding: 7px 14px;
-  }
-
-  .viewer-container .psv-navbar .psv-zoom-button+.psv-move-button {
-    margin-left: 18px;
+    padding: 5px 8px;
   }
 
   .viewer-container .psv-move-button+.psv-move-button {
     margin-left: 4px;
   }
 
-  .viewer-container .psv-recenter-button+.psv-play-tour-button {
-    margin-left: 18px;
-  }
-
-  .viewer-container .psv-recenter-button+.psv-immersive-bg-button {
-    margin-left: 18px;
-  }
-
-  .viewer-container .psv-recenter-button+.psv-fullscreen-button {
-    margin-left: 18px;
+  .viewer-container .psv-navbar .psv-nav-group-divider {
+    padding: 0 8px;
   }
 }
 

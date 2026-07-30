@@ -7,12 +7,12 @@ import { ExploreCurrentHereLabel } from '../ExploreCurrentHereLabel';
 import { NamingStatusBadge } from '../ui/NamingStatusBadge';
 import {
   tourNavCurrentHeroChipClassName,
-  tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryStatusBadgeVariants,
 } from '../tourNavFloatVariants';
 import { GuideCtaRow } from './GuideCtaRow';
 import {
   aiGuideCardWidthClassName,
+  aiSceneLinkCardBadgeGroupClassName,
   aiSceneLinkCardBodyClassName,
   aiSceneLinkCardDescClassName,
   aiSceneLinkCardKindClassName,
@@ -20,10 +20,10 @@ import {
   aiSceneLinkCardMediaClassName,
   aiSceneLinkCardMediaWrapClassName,
   aiSceneLinkCardPriceClassName,
+  aiSceneLinkCardStatusBadgeClassName,
   aiSceneLinkCardTitleClassName,
   aiSceneLinkCardTitleRowClassName,
   aiSceneLinkCardVariants,
-  aiSceneLinkLeadClassName,
   aiSceneLinkListVariants,
   aiSceneLinkShowMoreClassName,
 } from './aiAssistantVariants';
@@ -51,35 +51,6 @@ function cardLabel(link: ChatGuideLink, currentSceneId?: string): string {
     return `Recenter on ${link.title}`;
   }
   return `Go to ${link.title}`;
-}
-
-/** Friendly lead-in above cards — why these are shown. */
-function cardsLeadIn(links: ChatGuideLink[], currentSceneId?: string): string {
-  const places = links.filter((link) => link.kind === 'scene');
-  const namings = links.filter((link) => link.kind === 'naming');
-  const placeCount = places.length;
-  const namingCount = namings.length;
-  const onlyCurrentPlace =
-    placeCount === 1 &&
-    namingCount === 0 &&
-    Boolean(currentSceneId) &&
-    places[0]?.sceneId === currentSceneId;
-
-  if (placeCount > 0 && namingCount > 0) {
-    return 'Based on what we just talked about, here are a few related places and naming opportunities you can open:';
-  }
-  if (namingCount > 0 && placeCount === 0) {
-    return namingCount === 1 ?
-        "Based on your question, here's a naming opportunity you can open:"
-      : 'Based on your question, here are naming opportunities you can open:';
-  }
-  if (onlyCurrentPlace) {
-    return "Here's where you are right now — you can open the card to look around again:";
-  }
-  if (placeCount === 1) {
-    return "Here's a place you can open to continue exploring:";
-  }
-  return 'Based on what we just talked about, here are a few places you can visit:';
 }
 
 function GuideLinkCard({
@@ -110,7 +81,7 @@ function GuideLinkCard({
   return (
     <div
       className={cn(
-        'flex min-w-0 flex-col gap-1.5',
+        'flex min-w-0 flex-col gap-3',
         layout === 'single' && aiGuideCardWidthClassName,
         layout === 'multi' && 'w-full',
       )}
@@ -153,14 +124,17 @@ function GuideLinkCard({
             />
           : null}
           {showStatus && link.status ?
-            <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
+            <span className={aiSceneLinkCardBadgeGroupClassName}>
               <NamingStatusBadge
                 status={link.status}
                 compact
                 ariaLabel={link.statusLabel}
-                className={tourNavLocationGalleryStatusBadgeVariants({
-                  status: link.status,
-                })}
+                className={cn(
+                  tourNavLocationGalleryStatusBadgeVariants({
+                    status: link.status,
+                  }),
+                  aiSceneLinkCardStatusBadgeClassName,
+                )}
               />
             </span>
           : null}
@@ -273,13 +247,14 @@ export function GuideSceneLinkCards({
   }
 
   const hiddenCount = total - visiblePlaces.length - visibleNamings.length;
-  const lead = cardsLeadIn(links, currentSceneId);
 
   return (
     <div
-      className={cn('flex max-w-full flex-col items-stretch gap-2', className)}
+      className={cn(
+        'mt-3 flex max-w-full flex-col items-stretch gap-2',
+        className,
+      )}
     >
-      <p className={aiSceneLinkLeadClassName}>{lead}</p>
       <div className='flex max-w-full flex-col items-stretch gap-2.5'>
         <GuideLinkRow
           links={visiblePlaces}

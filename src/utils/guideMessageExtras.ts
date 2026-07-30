@@ -16,11 +16,11 @@ import {
 import { resolveNamingPopup } from './namingSceneInherit';
 import { getTourWebsite, resolveTourClient } from './resolveTourClient';
 
-const MAX_FOLLOW_UPS = 4;
+const MAX_FOLLOW_UPS = 6;
 const MAX_GUIDE_CTAS = 3;
 
-/** Visible follow-up chips before “Show more”. */
-export const FOLLOW_UP_PREVIEW_COUNT = 2;
+/** Visible follow-up questions before “Show more”. */
+export const FOLLOW_UP_PREVIEW_COUNT = 3;
 
 export function isWhereAmIQuestion(question: string): boolean {
   const q = question.toLowerCase();
@@ -77,13 +77,21 @@ export function isExpressInterestIntent(question: string, reply = ''): boolean {
   );
 }
 
-/** Where else / directions / nearby places. */
+/** Where else / directions / nearby / what to explore — show place cards. */
 export function isExplorePlacesQuestion(question: string): boolean {
-  const q = question.toLowerCase();
+  const q = question.toLowerCase().replace(/\s+/g, ' ').trim();
   return (
-    /\b(where else|how (do|can) i (get|go|reach)|directions?|nearby|other (areas?|places?|rooms?)|take me to|show me (around|other))\b/.test(
+    /\b(where else|how (do|can) i (get|go|reach)|directions?|nearby|other (areas?|places?|rooms?)|take me to|get me to|show me (around|other)|what (can|should) i (explore|see|visit|enjoy)|what (to|can i) (explore|see|visit|enjoy)|places? (to|i can) (explore|visit|see|enjoy)|recommend .{0,24}(place|area|room|spot)|where (can|should) i (go|explore|visit))\b/.test(
       q,
-    ) || /어디\s*(로|갈)|다른\s*(곳|장소|공간)|근처|길\s*찾/.test(question)
+    ) ||
+    /\b((any|some) more\b|do you have more|have more|anything else|what else|other options?|more (places|areas|rooms|options|spots))\b/.test(
+      q,
+    ) ||
+    /\bi want to (see|visit|go|explore)\b/.test(q) ||
+    /\b(show|take) me (around|there|to)\b/.test(q) ||
+    /어디\s*(로|갈)|다른\s*(곳|장소|공간)|근처|길\s*찾|둘러\s*볼|가\s*볼\s*만|추천|더\s*있|또\s*있/.test(
+      question,
+    )
   );
 }
 
@@ -135,35 +143,140 @@ export function isUncertainGuideReply(reply: string): boolean {
   );
 }
 
+function normalizePlaceMatchText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /**
- * Whether client-side title matching may invent place/naming cards from prose.
- * Prefer model link arrays; inference only for nav-ish questions.
+ * Visitor named a tour place as the message (e.g. “communal space”, “the gazebo”).
+ * Used so a destination choice still gets a tappable go-card.
  */
-export function shouldInferGuideLinksFromText(
+export function matchTourPlaceSceneIdsFromQuestion(
+  tour: Tour,
   question: string,
-  reply: string,
-  hasModelLinks: boolean,
-): boolean {
-  if (isFactualGapQuestion(question) || isUncertainGuideReply(reply)) {
-    return false;
+): string[] {
+  const q = normalizePlaceMatchText(question);
+  if (q.length < 3) return [];
+
+  const candidates: Array<{ sceneId: string; titleNorm: string; len: number }> =
+    [];
+  for (const [sceneId, scene] of Object.entries(tour.scenes)) {
+    const title = scene.title?.trim();
+    if (!title || title.length < 3) continue;
+    const titleNorm = normalizePlaceMatchText(title);
+    if (titleNorm.length < 3) continue;
+    candidates.push({ sceneId, titleNorm, len: titleNorm.length });
   }
-  if (hasModelLinks) return true;
+  candidates.sort((a, b) => b.len - a.len);
+
+  const matched: string[] = [];
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (seen.has(candidate.sceneId)) continue;
+    const { titleNorm, len } = candidate;
+    const compactChoice =
+      q === titleNorm ||
+      q === `the ${titleNorm}` ||
+      q === `go ${titleNorm}` ||
+      q === `go to ${titleNorm}` ||
+      q === `visit ${titleNorm}` ||
+      q === `see ${titleNorm}`;
+    const namedInShort =
+      q.length <= len + 16 && (q.includes(titleNorm) || titleNorm.includes(q));
+    const namedInSentence = len >= 5 && q.includes(titleNorm);
+    if (!compactChoice && !namedInShort && !namedInSentence) continue;
+    // Avoid tiny title substrings in long free chat.
+    if (!compactChoice && len < 5 && q.length > len + 4) continue;
+    seen.add(candidate.sceneId);
+    matched.push(candidate.sceneId);
+  }
+  return matched;
+}
+
+/** Short place-name messages — prefer that place’s card only. */
+export function isPrimarilyPlaceChoiceQuestion(
+  question: string,
+  matchedSceneIds: string[],
+): boolean {
+  if (matchedSceneIds.length === 0) return false;
+  const q = normalizePlaceMatchText(question);
+  return q.length > 0 && q.length <= 48 && matchedSceneIds.length <= 2;
+}
+
+/**
+ * Detail / go-to questions about a place or naming — cards help open that entity.
+ * Keep narrow so chitchat (“hahaha”, “thanks”) never becomes a card turn.
+ */
+export function isGuideEntityQuestion(question: string): boolean {
+  const q = question.toLowerCase().replace(/\s+/g, ' ').trim();
+  if (!q) return false;
   return (
-    isWhereAmIQuestion(question) ||
-    isExplorePlacesQuestion(question) ||
-    isNamingInterestQuestion(question)
+    /\btell me about\b/.test(q) ||
+    /\b(how (do|can) i get to|take me to|go to|visit)\b/.test(q) ||
+    /\bi want to (see|visit|go|explore)\b/.test(q) ||
+    /\bwhat (is|are|does|do)\b.{0,48}\b(room|space|area|suite|naming|opportunit|price|cost)\b/.test(
+      q,
+    ) ||
+    /\b(price|cost|status) of\b/.test(q) ||
+    /\bis .{0,40}\b(available|open|sold|reserved)\b/.test(q) ||
+    /알려\s*줘|설명해|어때요?|가\s*고\s*싶|가격|비용/.test(question)
   );
 }
 
 /**
- * Suppress place/naming cards for gap/uncertain answers (except where-am-i).
+ * Opt-in: attach place/naming cards only when the visitor's question needs them.
+ * Model sceneLinks alone are not enough (avoids leftover links on chitchat turns).
+ */
+export function shouldAttachGuideLinks(
+  question: string,
+  reply: string,
+  options?: { tour?: Tour },
+): boolean {
+  if (isWhereAmIQuestion(question)) return true;
+  if (isFactualGapQuestion(question) || isUncertainGuideReply(reply)) {
+    return false;
+  }
+  if (
+    isExplorePlacesQuestion(question) ||
+    isNamingInterestQuestion(question) ||
+    isGuideEntityQuestion(question)
+  ) {
+    return true;
+  }
+  if (options?.tour) {
+    return (
+      matchTourPlaceSceneIdsFromQuestion(options.tour, question).length > 0
+    );
+  }
+  return false;
+}
+
+/**
+ * Whether client-side title matching may invent place/naming cards from prose.
+ * Same opt-in as cards — never scrape names on low-intent turns.
+ */
+export function shouldInferGuideLinksFromText(
+  question: string,
+  reply: string,
+  _hasModelLinks = false,
+  options?: { tour?: Tour },
+): boolean {
+  return shouldAttachGuideLinks(question, reply, options);
+}
+
+/**
+ * Inverse of {@link shouldAttachGuideLinks} — kept for existing call sites.
  */
 export function shouldSuppressGuideLinks(
   question: string,
   reply: string,
+  options?: { tour?: Tour },
 ): boolean {
-  if (isWhereAmIQuestion(question)) return false;
-  return isFactualGapQuestion(question) || isUncertainGuideReply(reply);
+  return !shouldAttachGuideLinks(question, reply, options);
 }
 
 /**
@@ -176,6 +289,33 @@ export function shouldAttachContactReferralCtas(
   return isFactualGapQuestion(question) || isUncertainGuideReply(reply);
 }
 
+/**
+ * Follow-ups become the visitor’s next chat message — keep visitor voice
+ * (“I would like…”, “I’m interested…”, “Shall I…”, “관심있어요”),
+ * drop only guide→visitor offers (“Would you like…?”, “관심 있으세요?”).
+ */
+export function isVisitorVoiceFollowUp(text: string): boolean {
+  const t = text.trim();
+  if (!t) return false;
+  const lower = t.toLowerCase();
+  // Guide asking the visitor — not the visitor speaking.
+  if (
+    /^(would you|do you (want|need)|are you (interested|curious|looking)|shall we|can i help you|let me know|if you('d| would) like)\b/.test(
+      lower,
+    ) ||
+    /\b(would you like|would you care|are you interested|shall we|can i help you|let me know if|feel free to ask)\b/.test(
+      lower,
+    ) ||
+    /^(원하시나요|관심\s*있으(신가요|세요)|어떠세요|도와드릴까요|알려\s*드릴까요)/.test(
+      t,
+    ) ||
+    /(으실래요|실래요|하실래요|드릴까요|관심\s*있으세요)\s*\??\s*$/.test(t)
+  ) {
+    return false;
+  }
+  return true;
+}
+
 function normalizeFollowUps(raw: unknown, exclude: Set<string>): string[] {
   if (!Array.isArray(raw)) return [];
   const out: string[] = [];
@@ -184,6 +324,7 @@ function normalizeFollowUps(raw: unknown, exclude: Set<string>): string[] {
   for (const entry of raw) {
     const text = typeof entry === 'string' ? entry.trim() : '';
     if (!text || text.length > 80) continue;
+    if (!isVisitorVoiceFollowUp(text)) continue;
     // Action-y website prompts belong as CTAs, not chat chips.
     if (
       /\b(website|web site|homepage|official site)\b/i.test(text) ||
@@ -272,8 +413,25 @@ function isFollowUpGrounded(
 }
 
 /**
+ * Opt-in: follow-ups only when this turn is about the tour (cards, entity talk,
+ * or a missing-fact pull-back) — not on chitchat / thanks / laughter.
+ */
+export function shouldAttachGuideFollowUps(options: {
+  question: string;
+  reply: string;
+  guideLinks?: ChatGuideLink[] | null;
+}): boolean {
+  if (shouldAttachContactReferralCtas(options.question, options.reply)) {
+    return true;
+  }
+  if (shouldAttachGuideLinks(options.question, options.reply)) return true;
+  return (options.guideLinks?.length ?? 0) > 0;
+}
+
+/**
  * Build follow-ups grounded in the assistant reply + current place.
  * Prefer model followUps (filtered), then fill from reply-mentioned / current-place entities only.
+ * Never pad empty turns with generic tour chips.
  */
 export function buildGuideFollowUps(options: {
   question: string;
@@ -284,6 +442,8 @@ export function buildGuideFollowUps(options: {
   /** Card titles from this turn — also count as grounded. */
   guideLinks?: ChatGuideLink[] | null;
 }): string[] {
+  if (!shouldAttachGuideFollowUps(options)) return [];
+
   const questionKey = options.question.trim().toLowerCase();
   const exclude = new Set<string>(questionKey ? [questionKey] : []);
   const reply = options.reply.trim();
@@ -379,21 +539,24 @@ export function buildGuideFollowUps(options: {
     }
   }
 
-  // 3) Other places only when the reply actually named them.
-  for (const area of mentionedPlaces.slice(0, 2)) {
-    push(`Tell me about ${area.title}`);
-    push(`How do I get to ${area.title}?`);
+  // 3) Other places only when the reply actually named them — or when this
+  // turn already shows place cards (explore / where-else answers).
+  const placeSeed =
+    mentionedPlaces.length > 0 ? mentionedPlaces.map((area) => area.title)
+    : isExplorePlacesQuestion(options.question) ?
+      (options.guideLinks ?? [])
+        .filter((link) => link.kind === 'scene')
+        .map((link) => link.title?.trim() ?? '')
+        .filter(Boolean)
+    : [];
+
+  for (const title of placeSeed.slice(0, 2)) {
+    push(`Tell me about ${title}`);
+    push(`How do I get to ${title}?`);
   }
 
-  // 4) Light current-place fallbacks — avoid stuffing unrelated rooms.
-  const wantsLocalExplore =
-    isWhereAmIQuestion(options.question) ||
-    /\byou('re| are) (now )?(in|at|on)\b/i.test(reply) ||
-    /\b(explore|nearby|other (areas|places)|down the (hall|corridor)|next door)\b/i.test(
-      reply,
-    );
-
-  if (wantsLocalExplore) {
+  // 4) Where-am-i / naming interest — natural next questions only (no prose sniff).
+  if (isWhereAmIQuestion(options.question)) {
     if (namings.length > 0) {
       push('What naming opportunities are available in this place?');
     }
@@ -402,15 +565,6 @@ export function buildGuideFollowUps(options: {
 
   if (isNamingInterestQuestion(options.question) && namingPool[0]) {
     push(`Is ${namingPool[0].name} still available?`);
-  }
-
-  if (candidates.length < 2 && sceneTitle) {
-    if (!questionKey.includes('tell me about this place')) {
-      push('Tell me about this place');
-    }
-    if (namings.length > 0) {
-      push('What naming opportunities are available in this place?');
-    }
   }
 
   return normalizeFollowUps(candidates, exclude);
@@ -434,6 +588,8 @@ export function buildNavContextFollowUps(options: {
     candidates.push(trimmed);
   };
 
+  const sceneTitle = ctx?.sceneTitle?.trim();
+
   if (options.kind === 'naming') {
     if (namingName) {
       push(`How can I support ${namingName}?`);
@@ -442,11 +598,19 @@ export function buildNavContextFollowUps(options: {
     } else {
       push('How do I express interest?');
     }
-    push('Tell me about this place');
+    push(
+      sceneTitle ? `Tell me about ${sceneTitle}` : 'Tell me about this place',
+    );
   } else {
-    push('Tell me about this place');
+    push(
+      sceneTitle ? `Tell me about ${sceneTitle}` : 'Tell me about this place',
+    );
     if (namings.length > 0) {
-      push('What naming opportunities are available in this place?');
+      push(
+        sceneTitle ?
+          `What naming opportunities are available in ${sceneTitle}?`
+        : 'What naming opportunities are available in this place?',
+      );
     }
     push('Where else can I go?');
   }

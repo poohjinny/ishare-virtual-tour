@@ -1,5 +1,6 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
+import { useExploreDirectoryMediaLoad } from '../hooks/useExploreDirectoryMediaLoad';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { useScenePreview } from '../hooks/useScenePreview';
 import type {
@@ -30,6 +31,7 @@ import {
   tourNavItemLeadingThumbClassName,
   tourNavItemLeadingThumbFallbackClassName,
   tourNavItemLeadingThumbImageClassName,
+  tourNavItemLeadingThumbSkeletonClassName,
   tourNavItemMetaClassName,
   tourNavItemTextClassName,
 } from './tourNavFloatVariants';
@@ -72,12 +74,22 @@ export function ExploreSceneDirectoryListItem({
   const { isCoarsePointer } = useTourChromeLayout();
   const groupMediaReady = useExploreGroupMediaReady();
   const { ref: thumbRef, inView } = useLazyInView<HTMLSpanElement>();
+  const wantsLoad = inView && groupMediaReady;
+  const { allowed: mediaAllowed, onSettled: onMediaSettled } =
+    useExploreDirectoryMediaLoad(wantsLoad);
   const { src: previewSrc, failed: previewFailed } = useScenePreview(
     tourId,
     scene,
-    inView && groupMediaReady,
+    mediaAllowed,
   );
   const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
+  // Icon only after failure / missing asset — never as a loading placeholder.
+  const hasPreviewSource = Boolean(scene.thumbnail || scene.panorama);
+  const showThumbSkeleton = hasPreviewSource && !thumbSrc && !previewFailed;
+
+  useEffect(() => {
+    if (mediaAllowed && previewFailed) onMediaSettled();
+  }, [mediaAllowed, onMediaSettled, previewFailed]);
   const description = resolveScenePlaceLead(
     {
       id: tourId,
@@ -122,8 +134,20 @@ export function ExploreSceneDirectoryListItem({
           draggable={false}
           loading='lazy'
           decoding='async'
+          ref={(node) => {
+            if (node?.complete && node.naturalWidth > 0) onMediaSettled();
+          }}
+          onLoad={onMediaSettled}
+          onError={onMediaSettled}
         />
       </span>
+    : showThumbSkeleton ?
+      <span
+        ref={thumbRef}
+        className={tourNavItemLeadingThumbSkeletonClassName}
+        aria-hidden='true'
+        aria-busy='true'
+      />
     : <span ref={thumbRef} className={tourNavItemLeadingThumbFallbackClassName}>
         {locationIcon}
       </span>;

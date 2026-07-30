@@ -294,34 +294,35 @@ export function InfoPopup({
             <AnchoredPanelBodyToolbar>{chromeActions}</AnchoredPanelBodyToolbar>
           : undefined
         }
-        footer={footer}
-      >
-        <div className='info-panel__intro'>
-          <div className={infoPopupTitleBlockClassName}>
-            <div className={infoPopupTitleLineClassName}>
-              <h2 id='info-popup-title' className={infoPopupTitleClassName}>
-                {shown.title}
-              </h2>
-              {shown.namingOpportunity ?
-                <div className='tour-glass-panel__title-line-trailing'>
-                  <PopupHeaderMeta popup={shown} />
-                  <NamingOpportunityPrice
-                    opportunity={shown.namingOpportunity}
-                  />
-                </div>
+        header={
+          <div className='info-panel__intro'>
+            <div className={infoPopupTitleBlockClassName}>
+              <div className={infoPopupTitleLineClassName}>
+                <h2 id='info-popup-title' className={infoPopupTitleClassName}>
+                  {shown.title}
+                </h2>
+                {shown.namingOpportunity ?
+                  <div className='tour-glass-panel__title-line-trailing'>
+                    <PopupHeaderMeta popup={shown} />
+                    <NamingOpportunityPrice
+                      opportunity={shown.namingOpportunity}
+                    />
+                  </div>
+                : null}
+              </div>
+              {shown.namingOpportunity?.priceLabel ?
+                <p className={infoPopupPriceLabelClassName}>
+                  {shown.namingOpportunity.priceLabel}
+                </p>
               : null}
             </div>
-            {shown.namingOpportunity?.priceLabel ?
-              <p className={infoPopupPriceLabelClassName}>
-                {shown.namingOpportunity.priceLabel}
-              </p>
+            {shown.namingOpportunity ?
+              <NamingDonorCreditBlock opportunity={shown.namingOpportunity} />
             : null}
           </div>
-          {shown.namingOpportunity ?
-            <NamingDonorCreditBlock opportunity={shown.namingOpportunity} />
-          : null}
-        </div>
-
+        }
+        footer={footer}
+      >
         <PopupBodyCopy body={shown.body} />
       </AnchoredPanelShell>
     </div>

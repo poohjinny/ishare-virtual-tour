@@ -49,7 +49,10 @@
             "display": "anchored",
             "title": "Laboratory Overview"
           },
-          "namingId": "no_0l6wdoos8c"
+          "namingId": "no_0l6wdoos8c",
+          "preview": {
+            "image": "/assets/cihe/t_jmkyywxkfx/previews/info-overview.webp"
+          }
         },
         {
           "id": "info-place",
@@ -111,7 +114,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_cwwagvae0t"
+          "namingId": "no_cwwagvae0t",
+          "preview": {
+            "image": "/assets/cihe/t_jmkyywxkfx/previews/info-lab-1.webp"
+          }
         }
       ],
       "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_pauuy0pinc.webp",
@@ -158,7 +164,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_1f336mwy2x"
+          "namingId": "no_1f336mwy2x",
+          "preview": {
+            "image": "/assets/cihe/t_jmkyywxkfx/previews/info-lab-2.webp"
+          }
         }
       ],
       "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_1vwi9rq59h.webp",

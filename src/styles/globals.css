@@ -91,6 +91,7 @@
   --animate-ai-panel-out: ai-panel-out 0.14s ease-in forwards;
   --animate-ai-thinking-dot: ai-thinking-dot 1.05s ease-in-out infinite;
   --animate-ai-thinking-label: ai-thinking-label 0.35s ease-out both;
+  --animate-ai-voice-listen: ai-voice-listen 1.6s ease-in-out infinite;
   --animate-hotspot-nav-dot-glow: hotspot-nav-dot-glow 2.8s ease-out infinite;
   --animate-tour-nav-dot-glow: tour-nav-dot-glow 4.3s ease-out infinite;
   --animate-tour-nav-dot-pulse: tour-nav-dot-pulse 4.3s ease-out infinite backwards;
@@ -283,6 +284,20 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes ai-voice-listen {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+
+  50% {
+    transform: scale(1.18);
+    opacity: 0.7;
   }
 }
 
@@ -637,6 +652,8 @@
     position: absolute;
     inset: -1px;
     z-index: 0;
+    /* Match Explore list thumb skeleton (muted slate, not solid #e2e8f0). */
+    background: rgba(15, 23, 42, 0.06);
   }
 
   .tour-nav-gallery-card-hero-media {
@@ -737,7 +754,7 @@
   }
 
   .tour-nav-location-group--expanded .tour-nav-location-group__panel-inner {
-    padding-top: var(--tour-directory-space, 16px);
+    padding-top: var(--tour-directory-group-content-lead, 8px);
   }
 
   .tour-nav-location-group__content {

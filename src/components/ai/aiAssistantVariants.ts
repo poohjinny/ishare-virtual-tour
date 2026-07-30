@@ -184,10 +184,6 @@ export const aiSceneLinkListVariants = cva('mt-0 max-w-full self-start', {
   defaultVariants: { layout: 'single' },
 });
 
-export const aiSceneLinkLeadClassName = cn(
-  'mt-3 max-w-full self-stretch font-body text-sm leading-snug text-muted',
-);
-
 export const aiSceneLinkCardVariants = cva(
   cn(
     'flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-white/85 p-0 text-left shadow-none transition-[border-color,background,box-shadow] duration-200',
@@ -221,6 +217,16 @@ export const aiSceneLinkCardMediaClassName = cn(
   'pointer-events-none block aspect-[2/1] w-full bg-[rgba(15,23,42,0.06)] object-cover object-center',
 );
 
+/** Compact status chip — Explore gallery badge is oversized on 17rem AI cards. */
+export const aiSceneLinkCardBadgeGroupClassName = cn(
+  'pointer-events-none absolute top-1.5 right-1.5 z-[2] max-w-[calc(100%-12px)]',
+  'flex flex-row flex-wrap items-center justify-end gap-1',
+);
+
+export const aiSceneLinkCardStatusBadgeClassName = cn(
+  'px-1.5 py-1 text-[0.5625rem] font-medium leading-none tracking-[0.03em]',
+);
+
 export const aiSceneLinkCardBodyClassName = cn(
   'flex min-w-0 flex-col gap-1 px-2.5 pt-2 pb-3',
 );
@@ -250,7 +256,8 @@ export const aiSceneLinkCardMetaClassName = cn(
 );
 
 export const aiSceneLinkCardDescClassName = cn(
-  'line-clamp-3 font-body text-2xs leading-snug text-muted',
+  // Reserve full clamp height so short copy matches ellipsed rows in a grid.
+  'line-clamp-3 min-h-[3lh] font-body text-2xs leading-snug text-muted',
 );
 
 export const aiSceneLinkShowMoreClassName = cn(
@@ -312,93 +319,59 @@ export function aiGuideCtaActionsColsClassName(
 }
 
 export const aiFollowUpListClassName = cn(
-  'flex max-w-full flex-wrap items-center gap-1.5 self-stretch',
+  'flex w-full max-w-full flex-col items-start gap-1.5',
 );
 
 export const aiFollowUpButtonClassName = cn(
-  'max-w-full cursor-pointer rounded-lg border border-[rgba(15,23,42,0.12)] bg-white/80 px-2.5 py-1.5 text-left font-body text-sm leading-snug text-foreground transition-[background,border-color,color] duration-150',
-  'hover:border-primary/40 hover:bg-primary/5 hover:text-primary',
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-  'disabled:cursor-default disabled:opacity-50 disabled:hover:border-[rgba(15,23,42,0.12)] disabled:hover:bg-white/80 disabled:hover:text-foreground',
+  'relative max-w-full cursor-pointer border-none bg-transparent py-0 pr-0 pl-3 text-left font-body text-md leading-[1.75] text-body transition-[color] duration-150',
+  "before:absolute before:top-[0.55em] before:left-0 before:size-1 before:rounded-full before:bg-muted/40 before:content-['']",
+  'hover:text-primary hover:underline hover:before:bg-primary/50',
+  'focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+  'disabled:cursor-default disabled:opacity-50 disabled:hover:text-body disabled:hover:no-underline disabled:hover:before:bg-muted/40',
 );
 
 export const aiFollowUpShowMoreClassName = cn(
-  'cursor-pointer rounded-lg border-none bg-transparent px-1.5 py-1.5 font-body text-sm font-medium text-primary underline-offset-2 transition-[opacity,color] duration-150',
+  'mt-1 cursor-pointer border-none bg-transparent py-0 pr-0 pl-3 font-body text-sm font-medium leading-[1.75] text-primary underline-offset-2 transition-[opacity,color] duration-150',
   'hover:underline',
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+  'focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
   'disabled:cursor-default disabled:opacity-50 disabled:hover:no-underline',
 );
 
-/** Input zone in panel footer — separate from the scrolling chat body. */
+/** Suggested questions as one user-aligned bubble (tap sends as a user turn). */
+export const aiFollowUpUserBubbleClassName = cn('flex flex-col gap-2');
+
+/** Pinned under the scroll thread — outer inset only; shell owns the surface. */
 export const aiComposerClassName = cn(
-  'tour-glass-panel__footer flex w-full flex-col items-stretch gap-0 overflow-visible px-[var(--ai-panel-inline-padding)] py-3',
+  'flex w-full shrink-0 flex-col items-stretch overflow-visible p-[calc(var(--ai-panel-inline-padding)/1.25)]',
 );
 
-/** Composer surface — width + radius + follow-ups height animate together.
- *  Nearby px radii (not rounded-full) so border-radius interpolates cleanly. */
+/**
+ * Composer surface (input + actions). Capsule ends stay round; width grows when
+ * active; primary border only while focused (`focus-within`).
+ * `overflow-visible` keeps the mic listening ring from clipping.
+ */
 export const aiComposerShellClassName = cn(
-  // overflow-visible so mic/send tooltips aren’t clipped at idle (follow-ups clip themselves).
-  'flex w-full max-w-full flex-col overflow-visible border border-[rgba(15,23,42,0.12)] bg-white/90',
-  'transition-[width,border-radius,border-color,background-color] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+  'relative z-[1] mx-auto flex min-h-[44px] max-w-full items-center gap-0.5 overflow-visible rounded-full border border-[rgba(15,23,42,0.12)] bg-white/90 py-1.5 pl-4 pr-1.5',
+  'transition-[width,border-color] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+  'focus-within:border-primary',
   'motion-reduce:transition-none',
 );
 
-/** ~half of field height → capsule ends; interpolates to expanded 16px. */
-export const aiComposerShellCollapsedClassName = cn(
-  'w-[60%] self-center rounded-[22px]',
-);
+export const aiComposerShellCollapsedClassName = cn('w-[60%]');
 
-export const aiComposerShellExpandedClassName = cn(
-  'w-full self-stretch rounded-[16px] border-primary/35',
-);
+export const aiComposerShellExpandedClassName = cn('w-full');
 
-/** Height/opacity reveal for follow-up questions above the field. */
-export const aiComposerFollowUpsRevealClassName = cn(
-  'grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
-  'motion-reduce:transition-none',
-);
-
-export const aiComposerFollowUpsRevealOpenClassName = cn(
-  'grid-rows-[1fr] opacity-100',
-);
-
-export const aiComposerFollowUpsRevealClosedClassName = cn(
-  'pointer-events-none grid-rows-[0fr] opacity-0',
-);
-
-export const aiComposerFollowUpsRevealInnerClassName = cn(
-  'min-h-0 overflow-hidden',
-);
-
-export const aiComposerShellFollowUpsClassName = cn('px-3.5 pt-2.5 pb-1.5');
-
-export const aiComposerShellDividerClassName = cn(
-  'mx-3.5 border-0 border-t border-[rgba(15,23,42,0.08)]',
-);
-
-export const aiComposerShellFieldClassName = cn(
-  'relative z-[1] flex min-h-[44px] w-full items-center gap-0.5 overflow-visible px-2 py-1.5 pl-4',
-);
-
-/** Standalone pill when there are no follow-ups at all. */
-export const aiComposerPillClassName = cn(
-  'group/composer flex w-[60%] max-w-full min-h-[44px] items-center gap-0.5 self-center rounded-full border-[1.5px] border-[rgba(15,23,42,0.12)] bg-white/90 px-2 py-1.5 pl-4 transition-[width,border-color,background,box-shadow] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
-  'hover:bg-white focus-within:w-full focus-within:border-primary focus-within:bg-white',
-  'motion-reduce:transition-none',
-);
-
-export const aiComposerPillExpandedClassName = cn('w-full border-primary');
-
+/**
+ * Class `ai-composer-input` → `border-radius: 0` in psv-layer.css (overrides the
+ * global pill input radius that clipped caret/selection). Height matches mic/send.
+ */
 export const aiComposerInputClassName = cn(
-  // Stretch to the field/pill height so the caret isn’t a tiny beam in empty focus.
-  // Explicit rem line-height gives the caret a stable strut (Chromium uses font metrics;
-  // a short content box inside a tall flex row makes it look undersized).
-  'min-h-[1.25rem] min-w-0 flex-1 self-stretch border-none bg-transparent py-0 font-display text-md leading-[1.25rem] text-body caret-foreground outline-none',
-  'placeholder:font-display placeholder:text-muted',
+  'ai-composer-input h-[30px] min-w-0 flex-1 border-none bg-transparent py-0 font-display text-md leading-[30px] text-body caret-foreground outline-none',
+  'placeholder:text-muted',
 );
 
 export const aiComposerActionsClassName = cn(
-  'flex shrink-0 items-center gap-1 pr-0.5',
+  'flex shrink-0 items-center gap-1',
 );
 
 export const aiComposerVoiceClassName = cn(
@@ -410,15 +383,26 @@ export const aiComposerVoiceListeningClassName = cn(
   'bg-primary/15 text-primary hover:bg-primary/20 hover:text-primary',
 );
 
-/** Soft volume halo behind the mic — shown only when speech energy is present. */
+/** Idle listening halo — soft breathe so the control reads as “live”. */
+export const aiComposerVoiceRingIdleClassName = cn(
+  'pointer-events-none absolute inset-[-3px] rounded-full border-2 border-primary/45 motion-reduce:hidden',
+  'animate-ai-voice-listen',
+);
+
+/** Level-reactive fill behind the stop control while speech energy is present. */
 export const aiComposerVoiceRingClassName = cn(
   'pointer-events-none absolute inset-0 rounded-full bg-primary will-change-transform motion-reduce:hidden',
 );
 
 export const aiComposerSendClassName = cn(
-  'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform] duration-200 hover:bg-primary-dark active:scale-95',
+  'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform,opacity] duration-200',
+  'hover:bg-primary-dark active:scale-95',
+  'disabled:cursor-default disabled:bg-primary/35 disabled:text-white/80 disabled:hover:bg-primary/35 disabled:active:scale-100',
 );
 
 export const aiComposerIconClassName = materialSymbolCompactClassName;
 
-export const aiComposerSendIconClassName = materialSymbolCompactClassName;
+export const aiComposerSendIconClassName = cn(
+  materialSymbolCompactClassName,
+  'text-current',
+);

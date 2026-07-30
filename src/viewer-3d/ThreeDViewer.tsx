@@ -121,10 +121,8 @@ export interface ThreeDViewerProps {
   /** Browser fullscreen active — icon + label state from TourPage. */
   fullscreenActive?: boolean;
   onFullscreenToggle?: () => void;
-  /** Desktop toolbar collapse — pill expanded when true. */
+  /** Desktop — when false, hide the bottom control pill (FAB lives on TourPage). */
   controlsVisible?: boolean;
-  onControlsToggle?: () => void;
-  toolbarToggleAvailable?: boolean;
   /** Tour JSON has immersive bed — show ambience control. */
   immersiveNavbarAvailable?: boolean;
   /** Guided Play Tour control — hidden when tour has no valid `playTour`. */
@@ -382,8 +380,6 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
       fullscreenActive,
       onFullscreenToggle,
       controlsVisible = VIEWER_CONTROLS_VISIBLE_DEFAULT,
-      onControlsToggle,
-      toolbarToggleAvailable = false,
       immersiveNavbarAvailable = false,
       playTourEnabled = false,
       playTourPhase = 'idle',
@@ -2008,9 +2004,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
         ref={containerRef}
         className={cn(
           'viewer-3d-container',
-          toolbarToggleAvailable &&
-            !controlsVisible &&
-            'viewer-3d-container--controls-collapsed',
+          !controlsVisible && 'viewer-3d-container--controls-collapsed',
         )}
         style={{
           width: '100%',
@@ -2024,9 +2018,6 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
       >
         {ready ?
           <ThreeDViewerControls
-            collapsed={!controlsVisible}
-            onToggleCollapsed={onControlsToggle}
-            toolbarToggleAvailable={toolbarToggleAvailable}
             immersiveAvailable={immersiveNavbarAvailable}
             immersiveController={immersiveBackgroundController}
             playTourEnabled={playTourEnabled}

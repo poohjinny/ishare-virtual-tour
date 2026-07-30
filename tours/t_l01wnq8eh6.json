@@ -178,7 +178,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cc45c26c-fda8-45f7-a6ae-96d7a7c8bc10"
           },
-          "namingId": "no_vdqq3f4hfw"
+          "namingId": "no_vdqq3f4hfw",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-kitchen.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -332,7 +335,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/510e41aa-d14b-4bc7-8b13-54c8517fac66"
           },
-          "namingId": "no_4q7bxizw9o"
+          "namingId": "no_4q7bxizw9o",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-comfort-corner.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -447,7 +453,10 @@
             },
             "title": "Reception Area"
           },
-          "namingId": "no_iv5uzns09e"
+          "namingId": "no_iv5uzns09e",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-reception.webp"
+          }
         },
         {
           "id": "nav-to-kitchen",
@@ -1284,7 +1293,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_yohppm1k3q"
+          "namingId": "no_yohppm1k3q",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-covered-porch.webp"
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_e5k3wjy72q.webp",
@@ -1312,7 +1324,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/0f9ccf86-f6fb-4739-8c03-6e0aa8abff08"
           },
-          "namingId": "no_2roymsyadr"
+          "namingId": "no_2roymsyadr",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-dining-area.webp"
+          }
         },
         {
           "id": "nav-to-kitchen",
@@ -1430,7 +1445,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/9227b641-562a-49f2-b1cf-19eac55ec6d6"
           },
-          "namingId": "no_6k2x96yalr"
+          "namingId": "no_6k2x96yalr",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-family-patient-communal-space.webp"
+          }
         },
         {
           "id": "nav-to-dining-area",
@@ -1540,7 +1558,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8431074c-e271-4083-be66-189dd064148f"
           },
-          "namingId": "no_4lng3uiyfs"
+          "namingId": "no_4lng3uiyfs",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-main-floor-stairwell.webp"
+          }
         },
         {
           "id": "nav-to-second-floor",
@@ -1596,7 +1617,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788"
           },
-          "namingId": "no_qslvzqne8a"
+          "namingId": "no_qslvzqne8a",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-accessible-larger-suites.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -1645,7 +1669,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/28feffbb-caed-43f8-bfa1-ac8addf0c1c3"
           },
-          "namingId": "no_geeclddv9n"
+          "namingId": "no_geeclddv9n",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-suite-a.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -1684,7 +1711,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/b650328c-722e-4a11-93b0-69110088a77a"
           },
-          "namingId": "no_4uzx2f0hs7"
+          "namingId": "no_4uzx2f0hs7",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-gazebo.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -1723,7 +1753,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8c273fc2-9b00-4c9a-9869-02e4c60c9a82"
           },
-          "namingId": "no_7m5xquxs2v"
+          "namingId": "no_7m5xquxs2v",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-pantry.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -1762,7 +1795,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/6219e1bf-98ed-45c4-837e-d0e1ced62cbe"
           },
-          "namingId": "no_0eace8xncd"
+          "namingId": "no_0eace8xncd",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-playroom.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -1856,7 +1892,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_0s9nr1ie12"
+          "namingId": "no_0s9nr1ie12",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-corridor.webp"
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_rmf30ndp5j.webp",
@@ -1916,7 +1955,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8841a848-6936-469d-8992-8d0447f2d42d"
           },
-          "namingId": "no_2e79wndqcc"
+          "namingId": "no_2e79wndqcc",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-laundry.webp"
+          }
         },
         {
           "id": "nav-to-basement",
@@ -2043,7 +2085,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/29ab5a30-8c4b-46a7-8e45-6ea7773f5e0f"
           },
-          "namingId": "no_42bkm6h2zd"
+          "namingId": "no_42bkm6h2zd",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-social-space.webp"
+          }
         },
         {
           "id": "nav-to-quite-space",
@@ -2109,7 +2154,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/4665eae4-a333-4968-b7a8-16a8fdd3318d"
           },
-          "namingId": "no_0ldb9bludk"
+          "namingId": "no_0ldb9bludk",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-quite-space.webp"
+          }
         },
         {
           "id": "nav-to-social-space",
@@ -2157,7 +2205,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/9775faff-a2ce-4620-9e5a-8cbe822b1efe"
           },
-          "namingId": "no_f95cxxxi4c"
+          "namingId": "no_f95cxxxi4c",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-suite-b.webp"
+          }
         },
         {
           "id": "nav-to-second-floor",
@@ -2196,7 +2247,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/f1fc94b3-9b5c-4c8c-843f-173c1459bd1e"
           },
-          "namingId": "no_tfkzkw1ex1"
+          "namingId": "no_tfkzkw1ex1",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-second-floor-comfort-corner.webp"
+          }
         },
         {
           "id": "nav-to-second-floor",
@@ -2253,7 +2307,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/be369002-6a25-4ef4-bf60-310e11612a99"
           },
-          "namingId": "no_29qjjy8422"
+          "namingId": "no_29qjjy8422",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-fitness-room.webp"
+          }
         },
         {
           "id": "nav-to-comfort-corner",
@@ -2356,7 +2413,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_iv4wwz1tpn"
+          "namingId": "no_iv4wwz1tpn",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-family-corridor.webp"
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_9kkz24dle7.webp",
@@ -2406,7 +2466,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788"
           },
-          "namingId": "no_u2odcp0f8q"
+          "namingId": "no_u2odcp0f8q",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-suite-a3.webp"
+          }
         },
         {
           "id": "nav-to-second-floor",
@@ -2444,7 +2507,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_8st1iyzvpi"
+          "namingId": "no_8st1iyzvpi",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-parking-space.webp"
+          }
         },
         {
           "id": "nav-to-main-entrance",
@@ -2490,7 +2556,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_201r3riftw"
+          "namingId": "no_201r3riftw",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-housekeeping-centre.webp"
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_6bewbri9s0.webp",
@@ -2517,7 +2586,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/4f5dedec-1fb9-459f-a732-88fe81d79587"
           },
-          "namingId": "no_ulg3poh16m"
+          "namingId": "no_ulg3poh16m",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-house-administration-hub.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -2552,7 +2624,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_cxz5nh0a4w"
+          "namingId": "no_cxz5nh0a4w",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-welcome-walk.webp"
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_dm33cannkj.webp",
@@ -2579,7 +2654,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/65b119dd-4256-4646-b077-f40ee3301ce4"
           },
-          "namingId": "no_enqqoiso2d"
+          "namingId": "no_enqqoiso2d",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-elevator-door-panel.webp"
+          }
         },
         {
           "id": "nav-to-stairwell",
@@ -2678,7 +2756,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/77123de7-e58b-4233-b466-6f5280dac24d"
           },
-          "namingId": "no_lwq3eoqpv4"
+          "namingId": "no_lwq3eoqpv4",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-donor-wall.webp"
+          }
         },
         {
           "id": "nav-to-corridor",
@@ -2795,7 +2876,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8da31eb6-9664-41d0-9b42-cc1b131e4aaa"
           },
-          "namingId": "no_x5f8d2vk43"
+          "namingId": "no_x5f8d2vk43",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-crawl-space.webp"
+          }
         },
         {
           "id": "nav-to-corridor",
@@ -2842,7 +2926,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/bf5c4261-4ff4-4bfc-9e2c-d68071c6fd9d"
           },
-          "namingId": "no_edshzrdub5"
+          "namingId": "no_edshzrdub5",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-linen-room.webp"
+          }
         },
         {
           "id": "nav-to-basement",
@@ -2879,7 +2966,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_b4sebwu5uv"
+          "namingId": "no_b4sebwu5uv",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-custodian-room.webp"
+          }
         },
         {
           "id": "nav-to-basement",
@@ -2916,7 +3006,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_x3eqslki43"
+          "namingId": "no_x3eqslki43",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-main-level-storage-room.webp"
+          }
         },
         {
           "id": "nav-to-main-floor",
@@ -2952,7 +3045,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e638cb9a-e8a3-4c4b-98b8-4253b535a639"
           },
-          "namingId": "no_z7nyd4zmse"
+          "namingId": "no_z7nyd4zmse",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-home-essentials-room.webp"
+          }
         },
         {
           "id": "nav-to-corridor",
@@ -2989,7 +3085,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_lqpoee5q46"
+          "namingId": "no_lqpoee5q46",
+          "preview": {
+            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-operation-hub.webp"
+          }
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_be8euh4oit.webp",

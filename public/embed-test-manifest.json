@@ -21,6 +21,26 @@
       ]
     },
     {
+      "id": "t_jmkyywxkfx",
+      "name": "Banting and Best Laboratory",
+      "clientName": "Canadian Institute for Historical Education",
+      "firstScene": "s_tdzbrbsa2y",
+      "scenes": [
+        {
+          "id": "s_1vwi9rq59h",
+          "title": "Charles Best Research Laboratory"
+        },
+        {
+          "id": "s_pauuy0pinc",
+          "title": "Frederick Banting Experimental Laboratory"
+        },
+        {
+          "id": "s_tdzbrbsa2y",
+          "title": "Overview"
+        }
+      ]
+    },
+    {
       "id": "t_8kx3m2p9qa",
       "name": "Cancer Research",
       "clientName": "Cancer Research Society",

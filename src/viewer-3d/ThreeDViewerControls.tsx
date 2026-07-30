@@ -1,19 +1,22 @@
 import { useEffect, useState } from 'react';
 import { IconTooltip } from '../components/ui/IconTooltip';
 import { MaterialSymbol } from '../components/ui/MaterialSymbol';
-import {
-  TOUR_TOOLBAR_TOGGLE_COLLAPSE_LABEL,
-  TOUR_TOOLBAR_TOGGLE_EXPAND_LABEL,
-} from '../constants/tourToolbar';
 import { cn } from '../lib/cn';
 import type { PlayTourPhase } from '../hooks/usePlayTour';
 import type { ImmersiveBackgroundController } from '../viewer/immersiveBackgroundController';
 import type { ImmersiveBgButtonState } from '../viewer/immersiveBackgroundController';
 import { toggleImmersiveBackgroundPlayback } from '../viewer/immersiveBackgroundNavbarButton';
 import { tourNavbarMaterialSymbolProps } from '../viewer/tourNavbarMaterialSymbol';
-import { MATERIAL_SYMBOL_SIZE_16 } from '../components/ui/materialSymbolClasses';
 
 const NAVBAR_SYMBOL_PROPS = tourNavbarMaterialSymbolProps;
+
+function NavbarGroupDivider() {
+  return (
+    <span className='psv-nav-group-divider' aria-hidden='true'>
+      <span className='psv-nav-group-divider__line' />
+    </span>
+  );
+}
 
 function immersiveTitle(state: ImmersiveBgButtonState): string {
   switch (state) {
@@ -111,9 +114,6 @@ function ImmersiveBackgroundButton({
 }
 
 export interface ThreeDViewerControlsProps {
-  collapsed: boolean;
-  onToggleCollapsed?: () => void;
-  toolbarToggleAvailable?: boolean;
   immersiveAvailable?: boolean;
   immersiveController?: ImmersiveBackgroundController | null;
   playTourEnabled?: boolean;
@@ -128,9 +128,6 @@ export interface ThreeDViewerControlsProps {
 }
 
 export function ThreeDViewerControls({
-  collapsed,
-  onToggleCollapsed,
-  toolbarToggleAvailable = false,
   immersiveAvailable = false,
   immersiveController,
   playTourEnabled = false,
@@ -147,11 +144,6 @@ export function ThreeDViewerControls({
   const toggleFullscreen = onFullscreenToggle ?? (() => {});
   const playTourPlaying = playTourPhase === 'playing';
   const playTourLabel = playTourPlaying ? 'Pause tour' : 'Play tour';
-
-  const toolbarLabel =
-    collapsed ?
-      TOUR_TOOLBAR_TOGGLE_EXPAND_LABEL
-    : TOUR_TOOLBAR_TOGGLE_COLLAPSE_LABEL;
 
   return (
     <nav
@@ -196,6 +188,8 @@ export function ThreeDViewerControls({
           <MaterialSymbol name='gps_fixed' {...NAVBAR_SYMBOL_PROPS} />
         </button>
       </IconTooltip>
+
+      <NavbarGroupDivider />
 
       {playTourEnabled ?
         <IconTooltip label={playTourLabel} placement='top'>
@@ -247,26 +241,6 @@ export function ThreeDViewerControls({
           />
         </button>
       </IconTooltip>
-
-      {toolbarToggleAvailable && onToggleCollapsed ?
-        <IconTooltip label={toolbarLabel} placement='top'>
-          <button
-            type='button'
-            className='psv-button psv-tour-toolbar-toggle psv-button--hover-scale'
-            disabled={disabled}
-            aria-label={toolbarLabel}
-            onClick={onToggleCollapsed}
-          >
-            <span className='psv-toolbar-toggle-icon-stack' aria-hidden>
-              <MaterialSymbol
-                name={collapsed ? 'unfold_more' : 'unfold_less'}
-                className='psv-toolbar-toggle-material-symbol'
-                sizePx={MATERIAL_SYMBOL_SIZE_16}
-              />
-            </span>
-          </button>
-        </IconTooltip>
-      : null}
     </nav>
   );
 }

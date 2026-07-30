@@ -37,6 +37,8 @@ interface ExploreSceneInfoButtonProps {
    * `::after` can inflate the scrollport and look like an empty trailing row.
    */
   hideTooltip?: boolean;
+  /** Override tooltip side (breadcrumb dropdown uses left; inline crumb uses bottom). */
+  tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right';
 }
 
 export function ExploreSceneInfoButton({
@@ -46,6 +48,7 @@ export function ExploreSceneInfoButton({
   variant = 'gallery',
   expanded = false,
   hideTooltip = false,
+  tooltipPlacement,
 }: ExploreSceneInfoButtonProps) {
   const label = tourDirectorySceneInfoAriaLabel(sceneTitle);
   const isGalleryHeroChip = variant === 'galleryHero';
@@ -102,10 +105,10 @@ export function ExploreSceneInfoButton({
     <IconTooltip
       label={TOUR_DIRECTORY_SCENE_INFO_TOOLTIP}
       placement={
-        isBreadcrumb ? 'left'
-        : isGalleryHeroChip || variant === 'gallery' ?
-          'bottom'
-        : 'left'
+        tooltipPlacement ??
+        (isBreadcrumb ? 'left'
+        : isGalleryHeroChip || variant === 'gallery' ? 'bottom'
+        : 'left')
       }
       disabled={disabled}
     >

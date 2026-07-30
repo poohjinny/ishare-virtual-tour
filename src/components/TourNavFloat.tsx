@@ -53,6 +53,7 @@ import { ExploreSceneDetailPanel } from './ExploreSceneDetailPanel';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
 import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import { findNamingHotspotInTour } from '../utils/findTourHotspot';
+import { notifyExploreDirectoryScroll } from '../utils/exploreDirectoryScrollIdle';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
   TOUR_NAV_ACTION_SHARE,
@@ -75,6 +76,7 @@ import {
 } from '../utils/buildShareUrl';
 import { ShareTourPanel } from './ShareTourPanel';
 import { ExploreLocationGroup } from './ExploreLocationGroup';
+import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
 import {
   resolveBreadcrumbSiblingOptions,
   TourBreadcrumbSiblingMenu,
@@ -117,7 +119,11 @@ import { SegmentedTabPanel } from './ui/SegmentedTabPanel';
 import { ExploreLayoutPanel } from './ui/ExploreLayoutPanel';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import { MATERIAL_SYMBOL_SIZE_20 } from './ui/materialSymbolClasses';
+import {
+  MATERIAL_SYMBOL_SIZE_16,
+  MATERIAL_SYMBOL_SIZE_18,
+  MATERIAL_SYMBOL_SIZE_20,
+} from './ui/materialSymbolClasses';
 import { TourHelpPanel } from './TourHelpPanel';
 import { TourHelpFooter } from './TourHelpFooter';
 import { TourGlassPanel, type TourGlassPanelAnimation } from './TourGlassPanel';
@@ -148,6 +154,7 @@ import {
   tourNavBreadcrumbPulseDotClassName,
   tourNavBreadcrumbRowClassName,
   tourNavBreadcrumbSepClassName,
+  tourNavBreadcrumbSplitClassName,
   tourNavCircleBtnVariants,
   tourNavCircleIconClassName,
   tourNavDockOverflowItemClassName,
@@ -173,8 +180,10 @@ import {
   tourNavSceneDetailShellClassName,
   tourNavPanelSlotVariants,
   tourNavSectionTitleClassName,
+  tourNavSectionTitleDividerLineClassName,
   tourNavSectionTitleIconClassName,
   tourNavSectionTitleLabelClassName,
+  tourNavSectionTitleRowClassName,
 } from './tourNavFloatVariants';
 
 interface TourNavFloatProps {
@@ -1327,14 +1336,25 @@ export function TourNavFloat({
     });
   };
 
-  /** Breadcrumb jump — leave Explore so the panel doesn't outlive the move. */
+  /** Breadcrumb jump — leave Explore so the panel doesn't outlive the move.
+   *  Same scene re-snaps the camera to the place default view. */
   const handleBreadcrumbNavigate = useCallback(
     (sceneId: string) => {
+      const shouldRecenter = sceneId === currentSceneId;
       closeExploreThen(() => {
-        onBreadcrumbNavigate(sceneId);
+        if (shouldRecenter) {
+          onRecenterCurrentScene?.();
+        } else {
+          onBreadcrumbNavigate(sceneId);
+        }
       });
     },
-    [closeExploreThen, onBreadcrumbNavigate],
+    [
+      closeExploreThen,
+      currentSceneId,
+      onBreadcrumbNavigate,
+      onRecenterCurrentScene,
+    ],
   );
 
   const handleExploreSceneDetailVisit = useCallback(() => {
@@ -1499,12 +1519,22 @@ export function TourNavFloat({
     tab: 'locations' | 'naming',
     label: string,
   ) => (
-    <h3 id={headingId} className={tourNavSectionTitleClassName}>
-      <span className={tourNavSectionTitleIconClassName} aria-hidden='true'>
-        <ExploreDirectoryTabIcon tab={tab} sizePx={20} />
-      </span>
-      <span className={tourNavSectionTitleLabelClassName}>{label}</span>
-    </h3>
+    <div className={tourNavSectionTitleRowClassName}>
+      <span
+        className={tourNavSectionTitleDividerLineClassName}
+        aria-hidden='true'
+      />
+      <h3 id={headingId} className={tourNavSectionTitleClassName}>
+        <span className={tourNavSectionTitleIconClassName} aria-hidden='true'>
+          <ExploreDirectoryTabIcon tab={tab} sizePx={MATERIAL_SYMBOL_SIZE_18} />
+        </span>
+        <span className={tourNavSectionTitleLabelClassName}>{label}</span>
+      </h3>
+      <span
+        className={tourNavSectionTitleDividerLineClassName}
+        aria-hidden='true'
+      />
+    </div>
   );
 
   const renderLocationsList = (
@@ -1775,10 +1805,7 @@ export function TourNavFloat({
   const renderGroupedLocations = (options?: { sectionGroupLead?: boolean }) => (
     <>
       {firstScene ?
-        <ExploreLayoutPanel
-          layout={exploreLayout}
-          className='mb-[var(--tour-directory-space,16px)]'
-        >
+        <ExploreLayoutPanel layout={exploreLayout} className='mb-6'>
           {renderLocationsList([firstScene], {
             listBodyOnly: true,
             suppressReorderRef: true,
@@ -2126,6 +2153,9 @@ export function TourNavFloat({
             className={tourNavPanelScrollClassName}
             role='region'
             aria-label='Search results'
+            onScroll={() => {
+              notifyExploreDirectoryScroll();
+            }}
           >
             <div className={tourNavPanelScrollInnerClassName}>
               {renderDirectorySearchResults(
@@ -2146,6 +2176,7 @@ export function TourNavFloat({
               onScroll={(event) => {
                 exploreDirectoryScrollTopRef.current =
                   event.currentTarget.scrollTop;
+                notifyExploreDirectoryScroll();
               }}
             >
               <div className={tourNavPanelScrollInnerClassName}>
@@ -2260,18 +2291,35 @@ export function TourNavFloat({
                               onSelect={handleBreadcrumbNavigate}
                               onShowDetails={handleSiblingMenuShowDetails}
                             />
-                          : <IconTooltip
-                              label={TOUR_BREADCRUMB_CURRENT_TOOLTIP}
-                              placement='bottom'
+                          : <span
+                              className={cn(
+                                tourNavBreadcrumbSplitClassName,
+                                'gap-0.5',
+                              )}
                             >
-                              <span
-                                className={
-                                  tourNavBreadcrumbCurrentLabelClassName
-                                }
+                              <IconTooltip
+                                label={TOUR_BREADCRUMB_CURRENT_TOOLTIP}
+                                placement='bottom'
                               >
-                                {item.title}
-                              </span>
-                            </IconTooltip>
+                                <span
+                                  className={
+                                    tourNavBreadcrumbCurrentLabelClassName
+                                  }
+                                >
+                                  {item.title}
+                                </span>
+                              </IconTooltip>
+                              <ExploreSceneInfoButton
+                                sceneTitle={item.title}
+                                variant='breadcrumb'
+                                disabled={disabled}
+                                expanded={siblingMenuDetailSceneId === item.id}
+                                tooltipPlacement='bottom'
+                                onShow={() =>
+                                  handleSiblingMenuShowDetails(item.id)
+                                }
+                              />
+                            </span>
                           }
                         </span>
                       </span>
@@ -2290,20 +2338,35 @@ export function TourNavFloat({
                         onSelect={handleBreadcrumbNavigate}
                         onShowDetails={handleSiblingMenuShowDetails}
                       />
-                    : <IconTooltip
-                        label={tourBreadcrumbGoToTooltip(item.title)}
-                        placement='bottom'
-                        disabled={disabled}
+                    : <span
+                        className={cn(
+                          tourNavBreadcrumbSplitClassName,
+                          'gap-0.5',
+                        )}
                       >
-                        <button
-                          type='button'
-                          className={tourNavBreadcrumbLinkClassName}
+                        <IconTooltip
+                          label={tourBreadcrumbGoToTooltip(item.title)}
+                          placement='bottom'
                           disabled={disabled}
-                          onClick={() => handleBreadcrumbNavigate(item.id)}
                         >
-                          {item.title}
-                        </button>
-                      </IconTooltip>
+                          <button
+                            type='button'
+                            className={tourNavBreadcrumbLinkClassName}
+                            disabled={disabled}
+                            onClick={() => handleBreadcrumbNavigate(item.id)}
+                          >
+                            {item.title}
+                          </button>
+                        </IconTooltip>
+                        <ExploreSceneInfoButton
+                          sceneTitle={item.title}
+                          variant='breadcrumb'
+                          disabled={disabled}
+                          expanded={siblingMenuDetailSceneId === item.id}
+                          tooltipPlacement='bottom'
+                          onShow={() => handleSiblingMenuShowDetails(item.id)}
+                        />
+                      </span>
                     }
                   </li>
                 );

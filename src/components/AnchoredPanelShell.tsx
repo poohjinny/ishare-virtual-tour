@@ -17,6 +17,11 @@ interface AnchoredPanelShellProps {
   hero?: ReactNode;
   /** Share/close chrome for no-hero panels — pinned above the scroll body. */
   toolbar?: ReactNode;
+  /**
+   * Title / identity block pinned above the scroll body so copy can scroll
+   * underneath without losing place context.
+   */
+  header?: ReactNode;
   footer?: ReactNode;
   bodyClassName?: string;
   children: ReactNode;
@@ -24,7 +29,7 @@ interface AnchoredPanelShellProps {
 }
 
 /**
- * Shared React shell for media panels: optional hero + main(toolbar? + body + footer).
+ * Shared React shell for media panels: optional hero + main(toolbar? + header? + body + footer).
  * Matches {@link buildAnchoredMediaPanelHtml}.
  */
 export function AnchoredPanelShell({
@@ -37,6 +42,7 @@ export function AnchoredPanelShell({
   dataAttrs,
   hero,
   toolbar,
+  header,
   footer,
   bodyClassName,
   children,
@@ -68,6 +74,9 @@ export function AnchoredPanelShell({
         {hero}
         <div className={ANCHORED_PANEL.main}>
           {toolbar}
+          {header ?
+            <div className={ANCHORED_PANEL.header}>{header}</div>
+          : null}
           <div
             className={cn(
               tourGlassPanelBodyClassName,

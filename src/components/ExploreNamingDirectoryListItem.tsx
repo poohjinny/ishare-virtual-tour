@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
+import { useExploreDirectoryMediaLoad } from '../hooks/useExploreDirectoryMediaLoad';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { useScenePreview } from '../hooks/useScenePreview';
 import { cn } from '../lib/cn';
@@ -10,7 +11,7 @@ import {
   tourDirectoryNamingInfoAriaLabel,
 } from '../constants/tourDirectory';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
-import type { Scene, TourViewerType } from '../types/tour';
+import type { Scene, TourViewerType, ViewPosition } from '../types/tour';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
 import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
@@ -32,6 +33,7 @@ import {
   tourNavItemLeadingThumbClassName,
   tourNavItemLeadingThumbFallbackClassName,
   tourNavItemLeadingThumbImageClassName,
+  tourNavItemLeadingThumbSkeletonClassName,
   tourNavItemNamingDescriptionClassName,
   tourNavItemNamingHeaderClassName,
   tourNavItemNamingLocationClassName,
@@ -45,6 +47,23 @@ import {
 } from './tourNavFloatVariants';
 import type { TourDirectoryNamingItem } from '../utils/tourDirectory';
 import { MATERIAL_SYMBOL_SIZE_14 } from './ui/materialSymbolClasses';
+
+function resolveListNamingPreviewView(
+  scene: Scene | undefined,
+  hotspotId: string,
+): ViewPosition | undefined {
+  if (!scene) return undefined;
+  const hotspot = scene.hotspots.find((entry) => entry.id === hotspotId);
+  const pos = hotspot?.position as ViewPosition | undefined;
+  if (typeof pos?.yaw === 'number' && typeof pos?.pitch === 'number') {
+    return {
+      yaw: pos.yaw,
+      pitch: pos.pitch,
+      zoom: pos.zoom ?? scene.defaultView?.zoom,
+    };
+  }
+  return scene.defaultView;
+}
 
 interface ExploreNamingDirectoryListItemProps {
   tourId: string;
@@ -102,25 +121,52 @@ export function ExploreNamingDirectoryListItem({
       hotspots: [],
     };
 
-    if (tourViewerType === 'model3d' && item.previewImage) {
+    if (item.previewImage) {
       return {
         ...base,
         thumbnail: item.previewImage,
-        panorama: item.previewImage,
+        ...(tourViewerType === 'model3d' ?
+          { panorama: item.previewImage }
+        : {}),
       };
     }
 
     return base;
   }, [item.previewImage, item.sceneId, item.sceneTitle, scene, tourViewerType]);
 
+  const previewView = useMemo(
+    () => resolveListNamingPreviewView(scene, item.hotspotId),
+    [item.hotspotId, scene],
+  );
+
+  const previewOptions = useMemo(() => {
+    if (item.previewImage) return undefined;
+    if (tourViewerType === 'model3d') return undefined;
+    return { view: previewView, cacheKeySuffix: `no:${item.hotspotId}` };
+  }, [item.hotspotId, item.previewImage, previewView, tourViewerType]);
+
+  const wantsLoad =
+    inView &&
+    groupMediaReady &&
+    Boolean(previewScene.panorama || previewScene.thumbnail);
+  const { allowed: mediaAllowed, onSettled: onMediaSettled } =
+    useExploreDirectoryMediaLoad(wantsLoad);
   const { src: previewSrc, failed: previewFailed } = useScenePreview(
     tourId,
     previewScene,
-    inView &&
-      groupMediaReady &&
-      Boolean(previewScene.panorama || previewScene.thumbnail),
+    mediaAllowed,
+    previewOptions,
   );
   const thumbSrc = previewSrc && !previewFailed ? previewSrc : null;
+  // Icon only after failure / missing asset — never as a loading placeholder.
+  const hasPreviewSource = Boolean(
+    previewScene.panorama || previewScene.thumbnail,
+  );
+  const showThumbSkeleton = hasPreviewSource && !thumbSrc && !previewFailed;
+
+  useEffect(() => {
+    if (mediaAllowed && previewFailed) onMediaSettled();
+  }, [mediaAllowed, onMediaSettled, previewFailed]);
 
   const visitCta = (
     <>
@@ -159,8 +205,20 @@ export function ExploreNamingDirectoryListItem({
           draggable={false}
           loading='lazy'
           decoding='async'
+          ref={(node) => {
+            if (node?.complete && node.naturalWidth > 0) onMediaSettled();
+          }}
+          onLoad={onMediaSettled}
+          onError={onMediaSettled}
         />
       </span>
+    : showThumbSkeleton ?
+      <span
+        ref={thumbRef}
+        className={tourNavItemLeadingThumbSkeletonClassName}
+        aria-hidden='true'
+        aria-busy='true'
+      />
     : <span ref={thumbRef} className={tourNavItemLeadingThumbFallbackClassName}>
         <NamingHeartIcon active={active} sold={isSold} />
       </span>;

@@ -64,14 +64,12 @@ export function ClientIntroGalleryCard({
           )}
           aria-busy={previewLoading || undefined}
         >
-          {isCoarsePointer ?
-            <button
-              type='button'
-              className='absolute inset-0 z-[2] block h-full w-full cursor-pointer rounded-none border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light'
-              onClick={onSelect}
-              aria-label={ariaLabel}
-            />
-          : null}
+          <button
+            type='button'
+            className='absolute inset-0 z-[3] block h-full w-full cursor-pointer rounded-none border-none bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light'
+            onClick={onSelect}
+            aria-label={ariaLabel}
+          />
           {previewLoading ?
             <span
               className={tourNavLocationGalleryCardHeroSkeletonClassName}
@@ -103,15 +101,19 @@ export function ClientIntroGalleryCard({
             aria-hidden='true'
           />
           {!isCoarsePointer ?
-            <span className={tourNavLocationGalleryHeroCtaOverlayClassName}>
-              <button
-                type='button'
-                className={tourNavLocationGalleryCenterCtaClassName}
-                onClick={onSelect}
-                aria-label={ariaLabel}
+            <span
+              className={tourNavLocationGalleryHeroCtaOverlayClassName}
+              aria-hidden='true'
+            >
+              <span
+                className={cn(
+                  tourNavLocationGalleryCenterCtaClassName,
+                  // Decorative only — hero hit-target owns the click.
+                  '!pointer-events-none',
+                )}
               >
                 <ExploreGalleryCtaArrowIcon />
-              </button>
+              </span>
             </span>
           : null}
           <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>

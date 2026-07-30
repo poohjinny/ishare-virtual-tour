@@ -92,14 +92,13 @@ import { navigateToScene, ensureScenePreloaded } from './transition';
 import { bindVirtualTourLifecycleGuard } from './virtualTourLifecycle';
 import { createRecenterViewNavbarButton } from './recenterViewNavbarButton';
 import {
+  createNavbarGroupDivider,
+  polishNavbarGroupDividers,
+} from './navbarGroupDivider';
+import {
   bindTourFullscreenNavbarButton,
   createTourFullscreenNavbarButton,
 } from './tourFullscreenNavbarButton';
-import {
-  createTourToolbarToggleNavbarButton,
-  syncTourToolbarToggleNavbarButton,
-  syncTourToolbarToggleNavbarButtonVisibility,
-} from './tourToolbarToggleNavbarButton';
 import {
   bindImmersiveBackgroundNavbarButton,
   createImmersiveBackgroundNavbarButton,
@@ -158,8 +157,6 @@ interface PanoramaViewerProps {
   /** Root element for browser fullscreen — keeps tour overlays visible. */
   fullscreenRootRef?: RefObject<HTMLElement | null>;
   controlsVisible?: boolean;
-  /** Desktop — collapse/expand PSV toolbar from the bottom pill toggle. */
-  onControlsToggle?: () => void;
   /** Skip landing zoom — start at scene `defaultView` (`?skipLanding=1`). */
   skipLanding?: boolean;
   /** Override landing end pose (e.g. `?no=` on the initial scene). */
@@ -172,8 +169,6 @@ interface PanoramaViewerProps {
   immersiveBackgroundController?: ImmersiveBackgroundController | null;
   /** Tour JSON has immersive bed — navbar slot stays mounted for embed dev toggles. */
   immersiveNavbarAvailable?: boolean;
-  /** Desktop toolbar collapse control — hidden in embed mode. */
-  toolbarToggleAvailable?: boolean;
   /** Guided Play Tour control — hidden when tour has no valid `playTour`. */
   playTourEnabled?: boolean;
   playTourPhase?: PlayTourPhase;
@@ -238,14 +233,12 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       initialSceneId,
       fullscreenRootRef,
       controlsVisible = VIEWER_CONTROLS_VISIBLE_DEFAULT,
-      onControlsToggle,
       skipLanding = false,
       landingTargetView,
       landingNamingHotspotId = null,
       splashDone = false,
       immersiveBackgroundController = null,
       immersiveNavbarAvailable = false,
-      toolbarToggleAvailable = false,
       playTourEnabled = false,
       playTourPhase = 'idle',
       onPlayTourToggle,
@@ -353,12 +346,8 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     const splashDoneRef = useLatestRef(splashDone);
     const immersiveControllerRef = useLatestRef(immersiveBackgroundController);
     const immersiveNavbarAvailableRef = useLatestRef(immersiveNavbarAvailable);
-    const toolbarToggleAvailableRef = useLatestRef(toolbarToggleAvailable);
     const onPlayTourToggleRef = useLatestRef(onPlayTourToggle);
     const activeNamingHotspotIdRef = useLatestRef(activeNamingHotspotId);
-    const controlsVisibleRef = useRef(controlsVisible);
-    controlsVisibleRef.current = controlsVisible;
-    const onControlsToggleRef = useLatestRef(onControlsToggle);
     const initialLoadNotifiedRef = useRef(false);
     const tryStartLandingRef = useRef<(() => void) | null>(null);
     const hotspotEnterRef = useRef<ReturnType<
@@ -509,21 +498,6 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       });
       syncPsvNavbarChromeControls(viewer);
     }, [playTourEnabled, playTourPhase, viewerReady]);
-
-    useEffect(() => {
-      const viewer = viewerRef.current;
-      if (!viewerReady || !viewer) return;
-
-      const showToolbarToggle = Boolean(onControlsToggle);
-      syncTourToolbarToggleNavbarButtonVisibility(viewer, showToolbarToggle);
-      if (!showToolbarToggle) {
-        syncPsvNavbarChromeControls(viewer);
-        return;
-      }
-
-      syncTourToolbarToggleNavbarButton(viewer, !controlsVisible);
-      syncPsvNavbarChromeControls(viewer);
-    }, [controlsVisible, onControlsToggle, viewerReady]);
 
     useImperativeHandle(ref, () => ({
       navigateToScene: async (sceneId, targetView, options) => {
@@ -1130,23 +1104,16 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       );
 
       const navbarButtons: Array<string | NavbarCustomButton> = [
-        'zoom',
         'move',
+        'zoom',
         recenterViewButton,
+        createNavbarGroupDivider('psv-nav-divider-experience'),
         playTourButton,
       ];
       if (immersiveNavbarAvailableRef.current) {
         navbarButtons.push(immersiveBgButton);
       }
       navbarButtons.push(fullscreenButton);
-      if (toolbarToggleAvailableRef.current) {
-        navbarButtons.push(
-          createTourToolbarToggleNavbarButton(
-            () => !controlsVisibleRef.current,
-            () => onControlsToggleRef.current?.(),
-          ),
-        );
-      }
 
       primePsvDesktopTouchSupport();
 
@@ -1200,6 +1167,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       );
       patchZoomSliderSmoothZoom(viewer);
       patchPsvZoomButtonIcons(viewer);
+      polishNavbarGroupDividers(viewer);
       const unbindDesktopNavbarControls = bindPsvNavbarChromeControls(viewer);
       const virtualTour =
         viewer.getPlugin<VirtualTourPlugin>(VirtualTourPlugin);

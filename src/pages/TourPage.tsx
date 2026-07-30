@@ -27,6 +27,7 @@ import {
   getTourLoadSplashFadeMs,
 } from '../components/TourLoadSplash';
 import { TourNavFloat } from '../components/TourNavFloat';
+import { TourViewerControlsToggleFab } from '../components/TourViewerControlsToggleFab';
 import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
 import { usePlayTour } from '../hooks/usePlayTour';
 import {
@@ -664,7 +665,29 @@ function TourExperience() {
     [onSceneChange],
   );
 
-  const assistant = useTourAssistant(bootstrapTour, currentSceneId);
+  const assistantLiveContext = useMemo(() => {
+    if (!activeNamingHotspotId) return undefined;
+    const found = findHotspotInTour(bootstrapTour, activeNamingHotspotId);
+    if (!found?.hotspot || !isNamingHotspot(found.hotspot)) return undefined;
+
+    const sceneId = found.sceneId ?? currentSceneId;
+    const scene = bootstrapTour.scenes[sceneId];
+    const namingName =
+      scene ?
+        stripNamingOpportunitySuffix(
+          resolveNamingPopup(bootstrapTour, found.hotspot, scene)
+            ?.namingOpportunity?.name ?? '',
+        ) || undefined
+      : undefined;
+
+    return { namingHotspotId: activeNamingHotspotId, namingName };
+  }, [activeNamingHotspotId, bootstrapTour, currentSceneId]);
+
+  const assistant = useTourAssistant(
+    bootstrapTour,
+    currentSceneId,
+    assistantLiveContext,
+  );
   const showAskGuide = isAskGuideEnabled(searchParams.askGuide);
   const panelStack = useTourPanelStack();
 
@@ -1050,10 +1073,6 @@ function TourExperience() {
               fullscreenActive={viewerFullscreen}
               onFullscreenToggle={toggleViewerFullscreen}
               controlsVisible={viewerControlsVisible}
-              onControlsToggle={
-                searchParams.embed ? undefined : toggleControlsVisible
-              }
-              toolbarToggleAvailable={isDesktop}
               immersiveNavbarAvailable={Boolean(
                 bootstrapTour.immersiveBackground,
               )}
@@ -1091,9 +1110,6 @@ function TourExperience() {
               fullscreenRootRef={viewerAreaRef}
               controlsVisible={viewerControlsVisible}
               devMode={searchParams.dev}
-              onControlsToggle={
-                searchParams.embed ? undefined : toggleControlsVisible
-              }
               skipLanding={searchParams.skipLanding}
               landingTargetView={landingTargetView}
               landingNamingHotspotId={landingNamingHotspotId}
@@ -1102,7 +1118,6 @@ function TourExperience() {
               immersiveNavbarAvailable={Boolean(
                 bootstrapTour.immersiveBackground,
               )}
-              toolbarToggleAvailable={isDesktop}
               playTourEnabled={playTourEnabled}
               playTourPhase={playTourPhase}
               onPlayTourToggle={togglePlayTour}
@@ -1133,6 +1148,13 @@ function TourExperience() {
             />
           }
         </Suspense>
+
+        {isDesktop && !searchParams.embed ?
+          <TourViewerControlsToggleFab
+            collapsed={!viewerControlsVisible}
+            onToggle={toggleControlsVisible}
+          />
+        : null}
 
         {showLoadError && (
           <ViewerLoadError

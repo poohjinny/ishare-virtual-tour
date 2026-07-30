@@ -98,7 +98,9 @@
   }
 
   .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body,
-  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body * {
+  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body *,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .anchored-panel__header,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .anchored-panel__header * {
     user-select: text !important;
     -webkit-user-select: text !important;
   }
@@ -110,8 +112,9 @@
   .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .tour-glass-panel__copy,
   .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .tour-glass-panel__paragraph,
   .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .tour-glass-panel__title,
-  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .info-panel__intro,
-  .viewer-container .psv-marker .tour-glass-panel--anchored .tour-glass-panel__body .nav-preview-panel__intro {
+  .viewer-container .psv-marker .tour-glass-panel--anchored .anchored-panel__header .tour-glass-panel__title,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .anchored-panel__header .info-panel__intro,
+  .viewer-container .psv-marker .tour-glass-panel--anchored .anchored-panel__header .nav-preview-panel__intro {
     cursor: text;
   }
 
@@ -124,6 +127,23 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+  }
+
+  /* Title / identity pinned above the scrollport.
+   * Keep the title→copy gap on the header (padding-bottom) so it stays visible
+   * while body content scrolls underneath. */
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__header,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__header,
+  .tour-glass-panel--nav-preview .anchored-panel__header,
+  .info-popup .anchored-panel__header {
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: 100%;
+    padding:
+      var(--anchored-body-pad-top, 32px) var(--ishare-panel-inline-padding, 28px) var(--anchored-header-pad-bottom, 14px);
+    background: var(--ishare-glass-body-bg);
+    user-select: text !important;
+    -webkit-user-select: text !important;
   }
 
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body,
@@ -149,18 +169,28 @@
     cursor: default;
   }
 
+  /* Header owns the gap — body starts flush under it. */
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main:has(> .anchored-panel__header)>.anchored-panel__body,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__header)>.anchored-panel__body,
+  .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__header)>.anchored-panel__body,
+  .info-popup .anchored-panel__main:has(> .anchored-panel__header)>.anchored-panel__body,
+  .info-popup .anchored-panel__main:has(> .anchored-panel__header)>.info-popup__body {
+    --anchored-body-pad-top: 0px;
+    padding-top: 0;
+  }
+
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .tour-glass-panel__copy,
   .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .tour-glass-panel__paragraph,
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .tour-glass-panel__title,
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__body .info-panel__intro,
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__header .tour-glass-panel__title,
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__header .info-panel__intro,
   .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__copy,
   .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__paragraph,
-  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__intro,
-  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__title,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__header .nav-preview-panel__intro,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__header .nav-preview-panel__title,
   .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__copy,
   .tour-glass-panel--nav-preview .anchored-panel__body .tour-glass-panel__paragraph,
-  .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__intro,
-  .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__title {
+  .tour-glass-panel--nav-preview .anchored-panel__header .nav-preview-panel__intro,
+  .tour-glass-panel--nav-preview .anchored-panel__header .nav-preview-panel__title {
     cursor: text;
   }
 
@@ -1729,12 +1759,6 @@
     padding-right: var(--ai-panel-inline-padding);
   }
 
-  .tour-glass-panel--ai .tour-glass-panel__footer {
-    /* Mic tooltip paints above the control inside the shell — don’t clip it in
-       the footer itself; shell overflow:hidden still keeps outer corners round. */
-    overflow: visible;
-  }
-
   .tour-glass-panel__body--ai {
     position: relative;
     display: flex;
@@ -2028,7 +2052,7 @@
     }
   }
 
-  /* Title lives in the body now — keep overlay styles out of the hero. */
+  /* Title lives in the pinned header — keep overlay styles out of the hero. */
 
   .nav-preview-panel__intro {
     display: flow-root;
@@ -2209,14 +2233,23 @@
   }
 
   /*
-   * No-media chrome lives above the scroll body. Keep top padding near the
-   * with-hero body rhythm so title/meta aren’t cramped under the toolbar.
+   * No-media chrome lives above the pinned header / scroll body.
+   * Keep top padding near the with-hero rhythm so title/meta aren’t cramped.
    */
-  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
-  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
-  .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
-  .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__body,
-  .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.info-popup__body {
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__header,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__header,
+  .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__header,
+  .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar)>.anchored-panel__header {
+    --anchored-body-pad-top: 28px;
+    padding-top: var(--anchored-body-pad-top, 28px);
+  }
+
+  /* Fallback when a panel has toolbar but no header (rare). */
+  .viewer-container .psv-marker .tour-glass-panel--anchored[data-info-panel='true'] .anchored-panel__main:has(> .anchored-panel__body-toolbar):not(:has(> .anchored-panel__header))>.anchored-panel__body,
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar):not(:has(> .anchored-panel__header))>.anchored-panel__body,
+  .tour-glass-panel--nav-preview .anchored-panel__main:has(> .anchored-panel__body-toolbar):not(:has(> .anchored-panel__header))>.anchored-panel__body,
+  .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar):not(:has(> .anchored-panel__header))>.anchored-panel__body,
+  .info-popup .anchored-panel__main:has(> .anchored-panel__body-toolbar):not(:has(> .anchored-panel__header))>.info-popup__body {
     --anchored-body-pad-top: 28px;
     padding-top: var(--anchored-body-pad-top, 28px);
   }
@@ -2287,6 +2320,7 @@
     cursor: auto;
   }
 
+  .tour-glass-panel--nav-preview .anchored-panel__header .nav-preview-panel__title,
   .tour-glass-panel--nav-preview .anchored-panel__body .nav-preview-panel__title {
     margin: 0;
     font-size: var(--ishare-font-size-2xl);
@@ -2307,22 +2341,29 @@
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    margin-top: 14px;
+    margin-top: 0;
     padding-top: 0;
+  }
+
+  .viewer-container .psv-marker .tour-glass-panel--nav-preview .anchored-panel__body>.nav-preview-panel__naming:not(:first-child),
+  .tour-glass-panel--nav-preview .anchored-panel__body>.nav-preview-panel__naming:not(:first-child) {
+    /* Body already has gap; this adds a bit more when copy/media precedes. */
+    margin-top: 10px;
   }
 
   .nav-preview-panel__naming-divider {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin: 12px 0 2px;
+    gap: 20px;
+    margin: 0;
+    padding: 6px 0;
   }
 
   .nav-preview-panel__naming-divider-line {
     flex: 1 1 0;
     min-width: 12px;
     height: 1px;
-    background: rgba(15, 23, 42, 0.08);
+    background: rgba(15, 23, 42, 0.14);
   }
 
   .nav-preview-panel__naming-heading {
@@ -2341,7 +2382,7 @@
     font-family: var(--ishare-display-font);
     font-size: var(--ishare-font-size-sm);
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--ishare-text-muted);
@@ -2800,6 +2841,10 @@
     gap: 14px;
     --anchored-body-pad-top: 28px;
     padding: var(--anchored-body-pad-top, 28px) var(--ishare-panel-inline-padding, 28px) 24px;
+  }
+
+  .info-popup .anchored-panel__header {
+    --anchored-body-pad-top: 28px;
   }
 
   .info-popup .info-panel__intro .info-popup__title {

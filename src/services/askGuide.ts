@@ -9,14 +9,21 @@ import {
   buildGuideCtas,
   buildGuideFollowUps,
   shapeGuideLinksForQuestion,
+  shouldAttachGuideLinks,
   shouldInferGuideLinksFromText,
-  shouldSuppressGuideLinks,
   attachNamingGuideLinkCtas,
   isExpressInterestIntent,
+  isPrimarilyPlaceChoiceQuestion,
+  matchTourPlaceSceneIdsFromQuestion,
   withCurrentPlaceSummaryLink,
   withInterestNamingLink,
 } from '../utils/guideMessageExtras';
-import { resolveGuideLinks, capGuideLinks } from '../utils/guideSceneLinks';
+import {
+  resolveGuideLinks,
+  resolveGuideSceneLinks,
+  buildCurrentPlaceGuideLink,
+  capGuideLinks,
+} from '../utils/guideSceneLinks';
 import { askMockAssistant } from './mockAssistant';
 
 const ASK_GUIDE_DEV_STATUS_URL = '/__dev/api/ask-guide/status';
@@ -94,23 +101,55 @@ function hydrateGuideExtras(
   const hasModelLinks =
     (rawSceneLinks?.some((entry) => entry?.sceneId?.trim()) ?? false) ||
     (rawNamingLinks?.some((entry) => entry?.namingId?.trim()) ?? false);
+  const placeChoiceIds = matchTourPlaceSceneIdsFromQuestion(tour, question);
+  const attachLinks = shouldAttachGuideLinks(question, reply, { tour });
   const allowTextInference = shouldInferGuideLinksFromText(
     question,
     reply,
     hasModelLinks,
+    { tour },
   );
-  const suppressLinks = shouldSuppressGuideLinks(question, reply);
+
+  const sceneLinkInputs = [
+    ...(rawSceneLinks ?? []),
+    ...placeChoiceIds.map((id) => ({ sceneId: id })),
+  ];
 
   let guideLinks: ChatGuideLink[] = [];
-  if (!suppressLinks) {
+  // Opt-in: only resolve cards when the question warrants them (ignore leftover model links).
+  if (attachLinks) {
     guideLinks = resolveGuideLinks(
       tour,
       sceneId,
       reply,
-      rawSceneLinks,
+      sceneLinkInputs,
       rawNamingLinks,
       { allowTextInference },
     );
+    // Question-only scrape when the visitor typed a place name (reply may not repeat it).
+    if (placeChoiceIds.length > 0) {
+      const choiceLinks = resolveGuideSceneLinks(
+        tour,
+        sceneId,
+        placeChoiceIds.map((id) => ({ sceneId: id })),
+      );
+      const currentChoice =
+        placeChoiceIds.includes(sceneId) ?
+          buildCurrentPlaceGuideLink(tour, sceneId)
+        : null;
+      guideLinks = capGuideLinks([
+        ...guideLinks,
+        ...choiceLinks,
+        ...(currentChoice ? [currentChoice] : []),
+      ]);
+    }
+    if (isPrimarilyPlaceChoiceQuestion(question, placeChoiceIds)) {
+      const choiceOnly = guideLinks.filter(
+        (link) =>
+          link.kind === 'scene' && placeChoiceIds.includes(link.sceneId),
+      );
+      if (choiceOnly.length > 0) guideLinks = choiceOnly;
+    }
     guideLinks = withCurrentPlaceSummaryLink(
       tour,
       sceneId,

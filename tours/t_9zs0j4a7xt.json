@@ -64,7 +64,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_kew3djcwfv"
+          "namingId": "no_kew3djcwfv",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-emergency-department.webp"
+          }
         },
         {
           "id": "nav-to-mh-3",
@@ -225,7 +228,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
           },
-          "namingId": "no_k1s4kwbwrc"
+          "namingId": "no_k1s4kwbwrc",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-emergency-department-waiting-area.webp"
+          }
         },
         {
           "id": "nav-to-walk-in-entrance",
@@ -273,7 +279,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7"
           },
-          "namingId": "no_5lk0uyjstz"
+          "namingId": "no_5lk0uyjstz",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-ambulance-offload.webp"
+          }
         },
         {
           "id": "nav-to-waiting-area",
@@ -297,7 +306,7 @@
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_kl3j76w8q9.webp",
-      "placeLead": "For patients arriving by ambulance, the first moments inside the Emergency Department are critical. Queensway Carleton Hospital’s new Ambulance Offload Area is designed to help paramedics and hospital teams transfer patients safely, quickly, and with dignity. This area will support a smoother handoff from ambulance crews to emergency staff, helping reduce delays and allowing paramedics to return to the community sooner. With better space, clearer organization, and improved…"
+      "visibility": "unlisted"
     },
     "s_d2s5ai83yt": {
       "id": "s_d2s5ai83yt",
@@ -460,7 +469,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_086npbauv3"
+          "namingId": "no_086npbauv3",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-james-beach-health-care-centre.webp"
+          }
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_d2s5ai83yt.webp",
@@ -487,7 +499,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
           },
-          "namingId": "no_ekdp6j8za4"
+          "namingId": "no_ekdp6j8za4",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-inpatient-bed-rooms.webp"
+          }
         },
         {
           "id": "nav-to-emergency-department",
@@ -525,7 +540,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
           },
-          "namingId": "no_3g368pxzvv"
+          "namingId": "no_3g368pxzvv",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-nursing-station.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -563,7 +581,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
           },
-          "namingId": "no_2eza407wl7"
+          "namingId": "no_2eza407wl7",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-multi-use-lounge-activity-room.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -601,7 +622,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
           },
-          "namingId": "no_y1bjxeed34"
+          "namingId": "no_y1bjxeed34",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-reception-centre.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -639,7 +663,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
           },
-          "namingId": "no_db8e1xnyxt"
+          "namingId": "no_db8e1xnyxt",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-quiet-consultant.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -677,7 +704,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
           },
-          "namingId": "no_ay45meg3s4"
+          "namingId": "no_ay45meg3s4",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-allied-health-team-room.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -714,7 +744,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_zqz4tno6t3"
+          "namingId": "no_zqz4tno6t3",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -776,7 +809,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
           },
-          "namingId": "no_eiys6da6e3"
+          "namingId": "no_eiys6da6e3",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-dining-activity-room.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -813,7 +849,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_02ft2ioebi"
+          "namingId": "no_02ft2ioebi",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge.webp"
+          }
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
@@ -851,7 +890,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900"
           },
-          "namingId": "no_nbu3uzywmj"
+          "namingId": "no_nbu3uzywmj",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-mental-health-emergency-services-unit.webp"
+          }
         },
         {
           "id": "nav-to-mental-health-emergency-services-unit-2",
@@ -902,7 +944,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/f8601c47-6a3d-425d-8d85-ec765796909d"
           },
-          "namingId": "no_x0vspsmm8b"
+          "namingId": "no_x0vspsmm8b",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-acute-care-pod-a.webp"
+          }
         },
         {
           "id": "nav-to-emergency-department",
@@ -943,7 +988,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/24ad8146-f72d-4428-9a75-a0801853e2d2"
           },
-          "namingId": "no_nwo2zfd5vp"
+          "namingId": "no_nwo2zfd5vp",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-acute-care-pod-b.webp"
+          }
         },
         {
           "id": "nav-to-emergency-department",
@@ -984,7 +1032,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/2013054c-1a9d-428c-b08f-6a670507081b"
           },
-          "namingId": "no_kcg3mykn5l"
+          "namingId": "no_kcg3mykn5l",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-acute-care-pod-c.webp"
+          }
         },
         {
           "id": "nav-to-emergency-department",
@@ -1084,7 +1135,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e"
           },
-          "namingId": "no_7wv90skdw0"
+          "namingId": "no_7wv90skdw0",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-acute-care-pod-d.webp"
+          }
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_smiksp7yqr.webp",
@@ -1151,7 +1205,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/0e031edd-6b8c-4b5c-a1b6-327172894834"
           },
-          "namingId": "no_uutrjfm27j"
+          "namingId": "no_uutrjfm27j",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-satellite-imaging-unit.webp"
+          }
         },
         {
           "id": "nav-to-emergency-department",
@@ -1190,7 +1247,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8fadc41c-48c0-4b33-ab99-df27551cf3ba"
           },
-          "namingId": "no_isl00d89od"
+          "namingId": "no_isl00d89od",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-rapid-assessment-centre.webp"
+          }
         }
       ],
       "previewVideoUrl": "https://www.youtube.com/watch?v=hSoW1C5VyRY&t=1s",
@@ -1217,7 +1277,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_5f0c3r63zp"
+          "namingId": "no_5f0c3r63zp",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-trauma-resuscitation.webp"
+          }
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_5dwnzwkhwz.webp",

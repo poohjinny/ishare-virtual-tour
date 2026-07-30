@@ -30,6 +30,7 @@ import {
   tourNavBreadcrumbSiblingOptionClassName,
   tourNavBreadcrumbSiblingRowClassName,
   tourNavBreadcrumbSiblingRowCurrentClassName,
+  tourNavBreadcrumbSiblingRowPathClassName,
   tourNavBreadcrumbSplitClassName,
   tourNavExploreSortMenuInClassName,
   tourNavExploreSortMenuOutClassName,
@@ -244,9 +245,8 @@ export function TourBreadcrumbSiblingMenu({
         >
           {siblings.map((sibling) => {
             const highlighted = sibling.id === crumbId;
-            // Current crumb: already here — highlighted + check, row inert.
-            // Ancestor crumb: path stop highlighted (no check), still selectable.
-            const canSelect = !highlighted || !isCurrentCrumb;
+            // Current crumb: primary fill + check (you are here).
+            // Ancestor crumb: bold black for the path stop only — no fill.
             return (
               <li
                 key={sibling.id}
@@ -254,7 +254,10 @@ export function TourBreadcrumbSiblingMenu({
                 role='presentation'
                 className={cn(
                   tourNavBreadcrumbSiblingRowClassName,
-                  highlighted && tourNavBreadcrumbSiblingRowCurrentClassName,
+                  highlighted &&
+                    (isCurrentCrumb ?
+                      tourNavBreadcrumbSiblingRowCurrentClassName
+                    : tourNavBreadcrumbSiblingRowPathClassName),
                 )}
               >
                 <button
@@ -263,10 +266,9 @@ export function TourBreadcrumbSiblingMenu({
                   aria-selected={highlighted}
                   aria-current={highlighted ? 'true' : undefined}
                   className={tourNavBreadcrumbSiblingOptionClassName}
-                  disabled={!open || !canSelect}
+                  disabled={!open}
                   tabIndex={open ? undefined : -1}
                   onClick={() => {
-                    if (!canSelect) return;
                     onOpenChange(false);
                     onSelect(sibling.id);
                   }}

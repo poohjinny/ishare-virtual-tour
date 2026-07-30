@@ -22,6 +22,13 @@ type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 
 type VoiceMeter = { stream: MediaStream; context: AudioContext; raf: number };
 
+/**
+ * Pause after the last heard speech before auto-stop + send.
+ * Non-continuous Web Speech ends much sooner (~0.5–1s); continuous + this
+ * debounce feels closer to ChatGPT (~2s).
+ */
+export const SPEECH_SILENCE_COMMIT_MS = 2000;
+
 function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
   if (typeof window === 'undefined') return null;
   const w = window as Window & {
@@ -51,6 +58,15 @@ function computeRms(samples: Uint8Array): number {
   return Math.sqrt(sum / Math.max(samples.length, 1));
 }
 
+function joinTranscript(...parts: string[]): string {
+  return parts
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /**
  * Browser Web Speech API — Chrome/Edge best; unsupported browsers report
  * `supported: false` so callers can hide the mic.
@@ -59,9 +75,12 @@ function computeRms(samples: Uint8Array): number {
 export function useSpeechToText(options?: {
   lang?: string;
   onFinal?: (transcript: string) => void;
+  /** Silence before auto-commit; default {@link SPEECH_SILENCE_COMMIT_MS}. */
+  silenceCommitMs?: number;
 }) {
   const onFinalRef = useRef(options?.onFinal);
   onFinalRef.current = options?.onFinal;
+  const silenceCommitMs = options?.silenceCommitMs ?? SPEECH_SILENCE_COMMIT_MS;
   const lang = options?.lang ?? resolveSpeechLang();
 
   const [supported] = useState(() => isSpeechToTextSupported());
@@ -74,6 +93,18 @@ export function useSpeechToText(options?: {
   const meterRef = useRef<VoiceMeter | null>(null);
   const levelSmoothRef = useRef(0);
   const lastLevelPublishRef = useRef(0);
+  const finalizedRef = useRef('');
+  const interimRef = useRef('');
+  const silenceTimerRef = useRef<number | null>(null);
+  /** User/browser ended the session — commit transcript on `onend`. */
+  const shouldCommitRef = useRef(false);
+  const bumpSilenceTimerRef = useRef<(() => void) | null>(null);
+
+  const clearSilenceTimer = useCallback(() => {
+    if (silenceTimerRef.current == null) return;
+    window.clearTimeout(silenceTimerRef.current);
+    silenceTimerRef.current = null;
+  }, []);
 
   const stopMeter = useCallback(() => {
     const meter = meterRef.current;
@@ -133,6 +164,11 @@ export function useSpeechToText(options?: {
         // Map quiet speech into a visible range; clamp peaks.
         const boosted = Math.min(1, Math.pow(rms * 3.2, 0.85));
         levelSmoothRef.current = levelSmoothRef.current * 0.55 + boosted * 0.45;
+        // Hearing energy also resets the silence timer — keeps a long phrase
+        // alive when interim results arrive slowly.
+        if (levelSmoothRef.current >= 0.12) {
+          bumpSilenceTimerRef.current?.();
+        }
         if (now - lastLevelPublishRef.current >= 40) {
           lastLevelPublishRef.current = now;
           setLevel(levelSmoothRef.current);
@@ -146,6 +182,8 @@ export function useSpeechToText(options?: {
   }, [stopMeter]);
 
   const stop = useCallback(() => {
+    clearSilenceTimer();
+    shouldCommitRef.current = true;
     const recognition = recognitionRef.current;
     if (!recognition) {
       setListening(false);
@@ -157,7 +195,7 @@ export function useSpeechToText(options?: {
     } catch {
       /* already stopped */
     }
-  }, [stopMeter]);
+  }, [clearSilenceTimer, stopMeter]);
 
   const start = useCallback(() => {
     const Ctor = getSpeechRecognitionCtor();
@@ -168,6 +206,10 @@ export function useSpeechToText(options?: {
 
     setError(null);
     setInterim('');
+    finalizedRef.current = '';
+    interimRef.current = '';
+    shouldCommitRef.current = false;
+    clearSilenceTimer();
 
     try {
       recognitionRef.current?.abort();
@@ -177,32 +219,48 @@ export function useSpeechToText(options?: {
 
     const recognition = new Ctor();
     recognition.lang = lang;
-    recognition.continuous = false;
+    // Keep the session open across short pauses; we auto-stop after silence.
+    recognition.continuous = true;
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
 
+    const scheduleSilenceCommit = () => {
+      clearSilenceTimer();
+      silenceTimerRef.current = window.setTimeout(() => {
+        silenceTimerRef.current = null;
+        shouldCommitRef.current = true;
+        try {
+          recognition.stop();
+        } catch {
+          /* already stopped */
+        }
+      }, silenceCommitMs);
+    };
+    bumpSilenceTimerRef.current = scheduleSilenceCommit;
+
     recognition.onresult = (event) => {
-      let interimText = '';
-      let finalText = '';
+      let nextInterim = '';
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
         const result = event.results[i];
         if (!result) continue;
         const piece = result[0]?.transcript?.trim() ?? '';
         if (!piece) continue;
-        if (result.isFinal) finalText += `${piece} `;
-        else interimText += `${piece} `;
+        if (result.isFinal) {
+          finalizedRef.current = joinTranscript(finalizedRef.current, piece);
+        } else {
+          nextInterim = joinTranscript(nextInterim, piece);
+        }
       }
-      if (interimText) setInterim(interimText.trim());
-      const trimmedFinal = finalText.trim();
-      if (trimmedFinal) {
-        setInterim('');
-        onFinalRef.current?.(trimmedFinal);
-      }
+      interimRef.current = nextInterim;
+      setInterim(joinTranscript(finalizedRef.current, nextInterim));
+      scheduleSilenceCommit();
     };
 
     recognition.onerror = (event) => {
       const code = event.error ?? 'error';
       if (code === 'aborted' || code === 'no-speech') {
+        // no-speech: nothing said before browser timeout — don't treat as hard error.
+        shouldCommitRef.current = code !== 'aborted';
         setListening(false);
         return;
       }
@@ -211,12 +269,27 @@ export function useSpeechToText(options?: {
       } else {
         setError('Voice input failed. Try again or type your question.');
       }
+      shouldCommitRef.current = false;
       setListening(false);
     };
 
     recognition.onend = () => {
-      setListening(false);
+      clearSilenceTimer();
+      bumpSilenceTimerRef.current = null;
+      const transcript = joinTranscript(
+        finalizedRef.current,
+        interimRef.current,
+      );
+      const shouldCommit = shouldCommitRef.current;
+      finalizedRef.current = '';
+      interimRef.current = '';
+      shouldCommitRef.current = false;
       recognitionRef.current = null;
+      setInterim('');
+      setListening(false);
+      if (shouldCommit && transcript) {
+        onFinalRef.current?.(transcript);
+      }
     };
 
     recognitionRef.current = recognition;
@@ -228,7 +301,7 @@ export function useSpeechToText(options?: {
       setListening(false);
       recognitionRef.current = null;
     }
-  }, [lang]);
+  }, [clearSilenceTimer, lang, silenceCommitMs]);
 
   const toggle = useCallback(() => {
     if (listening) stop();
@@ -248,6 +321,7 @@ export function useSpeechToText(options?: {
 
   useEffect(() => {
     return () => {
+      clearSilenceTimer();
       try {
         recognitionRef.current?.abort();
       } catch {
@@ -256,7 +330,7 @@ export function useSpeechToText(options?: {
       recognitionRef.current = null;
       stopMeter();
     };
-  }, [stopMeter]);
+  }, [clearSilenceTimer, stopMeter]);
 
   return {
     supported,

@@ -16,8 +16,6 @@
   --ishare-hotspot-glass-bg: rgba(255, 255, 255, 0.72);
   --ishare-hotspot-glass-bg-hover: rgba(255, 255, 255, 0.86);
   --ishare-hotspot-glass-blur: blur(8px) saturate(120%);
-  --psv-toolbar-collapse-duration: 0.45s;
-  --psv-toolbar-collapse-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --psv-nav-icon-size: 16px;
   /* Sketchfab-style navigation cursors on the canvas */
   cursor: grab;
@@ -244,11 +242,9 @@
   display: flex;
   transform: translateX(-50%) translateY(0);
   flex-direction: row;
-  padding: 8px 20px;
+  padding: 6px 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.52);
-  backdrop-filter: blur(6px) saturate(120%);
-  -webkit-backdrop-filter: blur(6px) saturate(120%);
+  background: var(--ishare-float-glass-bg);
   border: none;
   box-shadow:
     0 10px 28px rgba(15, 23, 42, 0.14),
@@ -259,6 +255,10 @@
   overflow: visible;
   max-width: min(520px, calc(100vw - 48px));
   pointer-events: auto;
+  transition:
+    transform var(--tour-viewer-controls-duration, 0.36s) var(--tour-viewer-controls-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    opacity var(--tour-viewer-controls-duration, 0.36s) var(--tour-viewer-controls-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+    visibility 0s linear 0s;
 }
 
 .viewer-3d-container .psv-button:not(.psv-zoom-range) {
@@ -281,39 +281,6 @@
 .viewer-3d-container .psv-button:not(.psv-zoom-range) .psv-button-svg {
   width: var(--psv-nav-icon-size);
   height: var(--psv-nav-icon-size);
-}
-
-.viewer-3d-container .psv-navbar .psv-zoom-out-button+.psv-recenter-button {
-  margin-left: 24px;
-}
-
-.viewer-3d-container .psv-navbar .psv-recenter-button+.psv-play-tour-button {
-  margin-left: 24px;
-}
-
-.viewer-3d-container .psv-navbar .psv-recenter-button+.psv-immersive-bg-button {
-  margin-left: 24px;
-}
-
-.viewer-3d-container .psv-navbar .psv-recenter-button+.psv-fullscreen-button {
-  margin-left: 24px;
-}
-
-.viewer-3d-container .psv-toolbar-toggle-icon-stack {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--psv-nav-icon-size);
-  height: var(--psv-nav-icon-size);
-}
-
-.viewer-3d-container .psv-toolbar-toggle-material-symbol {
-  display: block;
-  width: var(--psv-nav-icon-size);
-  height: var(--psv-nav-icon-size);
-  font-size: var(--psv-nav-icon-size);
-  line-height: 1;
-  font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 }
 
 .viewer-3d-container .psv-navbar-material-symbol {
@@ -341,60 +308,31 @@
   color: var(--ishare-primary);
 }
 
+/* Hide: pill slides off-screen with the hide FAB (same exit distance/timing). */
 @media (min-width: 1024px) {
   .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar {
-    width: var(--tour-chrome-fab-size);
-    height: var(--tour-chrome-fab-size);
-    min-width: var(--tour-chrome-fab-size);
-    max-width: var(--tour-chrome-fab-size);
-    padding: 0;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-button:not(.psv-tour-toolbar-toggle) {
-    position: absolute;
     opacity: 0;
     visibility: hidden;
-    width: 0 !important;
-    min-width: 0 !important;
-    max-width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden;
     pointer-events: none;
+    transform: translateX(-50%) translateY(var(--tour-viewer-controls-exit, 4.75rem));
+    transition:
+      transform var(--tour-viewer-controls-duration, 0.36s) var(--tour-viewer-controls-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+      opacity var(--tour-viewer-controls-duration, 0.36s) var(--tour-viewer-controls-ease, cubic-bezier(0.32, 0.72, 0, 1)),
+      visibility 0s linear var(--tour-viewer-controls-duration, 0.36s);
   }
+}
 
-  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle {
-    flex: 0 0 var(--tour-chrome-fab-size);
-    width: var(--tour-chrome-fab-size);
-    height: var(--tour-chrome-fab-size);
-    min-width: var(--tour-chrome-fab-size);
-    margin: 0 !important;
-    padding: 0;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+
+  .viewer-3d-container .psv-navbar,
+  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar {
+    transition: none !important;
   }
+}
 
-  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-material-symbol {
-    display: block;
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
-    font-size: 20px;
-  }
-
-  .viewer-3d-container.viewer-3d-container--controls-collapsed .psv-navbar .psv-tour-toolbar-toggle .psv-toolbar-toggle-icon-stack {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    flex: 0 0 20px;
+@media (max-width: 1023px) {
+  .tour-page .viewer-3d-container .psv-navbar {
+    display: none !important;
   }
 }
 

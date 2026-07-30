@@ -805,8 +805,11 @@ export function buildAnchoredPopupHtml(
       ${donorCreditHtml}
     </div>`;
 
-  const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
+  const headerHtml = `<div class="${ANCHORED_PANEL.header}">
     ${introHtml}
+  </div>`;
+
+  const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
     ${copyHtml ? `<div class="${GLASS_PANEL.copy}">${copyHtml}</div>` : ''}
   </div>`;
 
@@ -842,6 +845,7 @@ export function buildAnchoredPopupHtml(
     animate: options?.animate ?? true,
     heroHtml,
     toolbarHtml,
+    headerHtml,
     bodyHtml,
     footerHtml: ctaFooterHtml + visitFooterHtml,
     rootDataAttrs: {
@@ -1030,6 +1034,7 @@ export function buildNavPreviewNamingListHtml(
 
   return `<section class="nav-preview-panel__naming">
     <div class="nav-preview-panel__naming-divider">
+      <span class="nav-preview-panel__naming-divider-line" aria-hidden="true"></span>
       <h4 class="nav-preview-panel__naming-heading">
         <span class="nav-preview-panel__naming-heading-label">
           ${navPreviewNamingHeadingIconHtml()}
@@ -1199,20 +1204,22 @@ export function buildAnchoredNavPreviewHtml(
   </footer>`
     : '';
 
-  const introInnerHtml = `${namingTotalHtml}${titleHtml}${
+  const introInnerHtml = `${namingTotalHtml}${titleHtml}`;
+  const headerHtml =
+    introInnerHtml.trim() ?
+      `<div class="${ANCHORED_PANEL.header}">
+      <div class="nav-preview-panel__intro">${introInnerHtml}</div>
+    </div>`
+    : '';
+
+  const scrollInnerHtml = `${
     descriptionHtml ?
       `<div class="${GLASS_PANEL.copy}">${descriptionHtml}</div>`
     : ''
-  }`;
-  const introHtml =
-    introInnerHtml.trim() ?
-      `<div class="nav-preview-panel__intro">${introInnerHtml}</div>`
-    : '';
+  }${bodyVideoHtml}${namingHtml}`;
 
   const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
-    ${introHtml}
-    ${bodyVideoHtml}
-    ${namingHtml}
+    ${scrollInnerHtml}
   </div>`;
 
   return buildAnchoredMediaPanelHtml({
@@ -1221,6 +1228,7 @@ export function buildAnchoredNavPreviewHtml(
     animate: options?.animate ?? true,
     heroHtml,
     toolbarHtml,
+    headerHtml,
     bodyHtml,
     footerHtml,
     rootDataAttrs: {

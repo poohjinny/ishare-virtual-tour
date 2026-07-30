@@ -4229,6 +4229,14 @@ export function DevViewPanel({
                               <span className={devViewPanelFieldLabelClassName}>
                                 Hotspot position
                               </span>
+                              {isNamingInfoHotspot(hotspot) && !isModel3dTour ?
+                                <p className={devViewPanelSectionHintClassName}>
+                                  Click a new spot — Apply updates{' '}
+                                  <code>position</code> and rebakes Explore{' '}
+                                  <code>preview.image</code> (like Apply
+                                  defaultView → scene <code>thumbnail</code>).
+                                </p>
+                              : null}
                               <input
                                 className={devViewPanelInputClassName}
                                 type='text'
@@ -4449,7 +4457,14 @@ export function DevViewPanel({
                               <p className={devViewPanelSectionHintClassName}>
                                 Like nav target scene — this hotspot points at a
                                 catalog NO. Edit name / price / status / media
-                                in Naming catalog. Use Move to reposition.
+                                in Naming catalog. Use Move to reposition
+                                {!isModel3dTour ?
+                                  <>
+                                    {' '}
+                                    (rebakes Explore <code>preview.image</code>)
+                                  </>
+                                : null}
+                                .
                               </p>
                               {isModel3dTour ?
                                 <label className={devViewPanelFieldClassName}>
@@ -4461,9 +4476,10 @@ export function DevViewPanel({
                                   <p
                                     className={devViewPanelSectionHintClassName}
                                   >
-                                    Orbit to frame the opening shot — saved on
-                                    Save with Explore <code>preview.image</code>
-                                    . Scene landing unchanged.
+                                    Orbit to frame the opening shot — Save
+                                    writes <code>targetView</code> and bakes
+                                    Explore <code>preview.image</code> from the
+                                    current 3D view. Scene landing unchanged.
                                   </p>
                                   <input
                                     className={devViewPanelInputClassName}
@@ -5022,7 +5038,12 @@ export function DevViewPanel({
                             </code>{' '}
                             + Explore <code>preview.image</code>.
                           </>
-                        : null}
+                        : <>
+                            {' '}
+                            Saves <code>position</code> and bakes Explore{' '}
+                            <code>preview.image</code> (card thumbnail).
+                          </>
+                        }
                       </p>
                       <input
                         className={devViewPanelInputClassName}

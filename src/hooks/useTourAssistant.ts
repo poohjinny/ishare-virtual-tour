@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { flushSync } from 'react-dom';
 import type { ChatMessage, Tour } from '../types/tour';
 import { askTourGuide, fetchAskGuideLiveStatus } from '../services/askGuide';
 import {
@@ -84,7 +85,17 @@ function upsertNavContextMessage(
   return [...withoutOld, next];
 }
 
-export function useTourAssistant(tour: Tour, currentSceneId: string) {
+export type TourAssistantLiveContext = {
+  /** Open naming pin, if any — used to sync Ask Guide when the panel reopens. */
+  namingHotspotId?: string | null;
+  namingName?: string | null;
+};
+
+export function useTourAssistant(
+  tour: Tour,
+  currentSceneId: string,
+  liveContext?: TourAssistantLiveContext,
+) {
   const storageKey = askGuideSessionKey(tour);
   const storageKeyRef = useRef(storageKey);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -99,11 +110,16 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
   const [liveMode, setLiveMode] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const prevSceneRef = useRef(currentSceneId);
-  /** Next scene-change effect should use this note (scene Visit). */
+  /**
+   * Chat was closed (or stayed closed) while the visitor moved — next time it
+   * opens, force-refresh place/NO context even if the last note key matches.
+   */
+  const pendingOpenSyncRef = useRef(true);
+  /** Next scene sync should use this note (scene Visit). */
   const pendingNavNoteRef = useRef<GuideNavNote | null>(null);
   /** Naming open already posted / will post a note — skip the automatic place note. */
   const suppressNextSceneNoteRef = useRef(false);
-  /** Last auto place/NO note — skip consecutive duplicates. */
+  /** Last auto place/NO note — skip consecutive duplicates while the panel stays open. */
   const lastAutoNavNoteRef = useRef<LastAutoNavNote | null>(null);
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
@@ -114,6 +130,8 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
 
   const locationTitle = getSceneTitle(tour, currentSceneId);
   const tourTitle = tour.title?.trim() || tour.id;
+  const liveNamingHotspotId = liveContext?.namingHotspotId?.trim() || '';
+  const liveNamingName = liveContext?.namingName?.trim() || undefined;
 
   // Tour switch — load that tour’s tab session (same-tab refresh uses lazy init).
   useLayoutEffect(() => {
@@ -130,6 +148,7 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
     suppressNextSceneNoteRef.current = false;
     lastAutoNavNoteRef.current = null;
     prevSceneRef.current = currentSceneId;
+    pendingOpenSyncRef.current = true;
   }, [storageKey, currentSceneId]);
 
   useEffect(() => {
@@ -145,34 +164,68 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
     void fetchAskGuideLiveStatus(true).then(setLiveMode);
   }, [isOpen]);
 
-  useEffect(() => {
-    if (prevSceneRef.current === currentSceneId) return;
-    prevSceneRef.current = currentSceneId;
+  /**
+   * Keep Ask Guide place/NO context aligned with the live tour while the panel
+   * is open. After a closed stretch, always rewrite context on the next open so
+   * guidance + follow-ups match where the visitor is now (layout so the panel
+   * does not flash the stale note).
+   */
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      pendingOpenSyncRef.current = true;
+      pendingNavNoteRef.current = null;
+      return;
+    }
 
-    if (suppressNextSceneNoteRef.current) {
+    const force = pendingOpenSyncRef.current;
+    if (force) {
+      pendingOpenSyncRef.current = false;
+      suppressNextSceneNoteRef.current = false;
+      lastAutoNavNoteRef.current = null;
+    }
+
+    if (liveNamingHotspotId) {
+      const key: LastAutoNavNote = {
+        kind: 'naming',
+        hotspotId: liveNamingHotspotId,
+      };
+      if (!force && isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
+      lastAutoNavNoteRef.current = key;
+      prevSceneRef.current = currentSceneId;
+      setMessages((prev) =>
+        upsertNavContextMessage(
+          prev,
+          navContextMessage(tour, currentSceneId, {
+            kind: 'naming',
+            namingName: liveNamingName,
+          }),
+        ),
+      );
+      return;
+    }
+
+    if (!force && suppressNextSceneNoteRef.current) {
       suppressNextSceneNoteRef.current = false;
       pendingNavNoteRef.current = null;
+      prevSceneRef.current = currentSceneId;
       return;
     }
 
-    if (!isOpen) {
-      pendingNavNoteRef.current = null;
-      return;
-    }
+    const key: LastAutoNavNote = { kind: 'scene', sceneId: currentSceneId };
+    if (!force && isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
 
     const pending = pendingNavNoteRef.current;
     pendingNavNoteRef.current = null;
-    const key: LastAutoNavNote = { kind: 'scene', sceneId: currentSceneId };
-    if (isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
-
     lastAutoNavNoteRef.current = key;
-    setMessages((prev) =>
-      upsertNavContextMessage(
-        prev,
-        navContextMessage(tour, currentSceneId, pending),
-      ),
-    );
-  }, [currentSceneId, isOpen, tour]);
+    prevSceneRef.current = currentSceneId;
+    setMessages((prev) => {
+      const withoutNaming = prev.filter((msg) => msg.source !== 'nav-naming');
+      return upsertNavContextMessage(
+        withoutNaming,
+        navContextMessage(tour, currentSceneId, pending ?? { kind: 'scene' }),
+      );
+    });
+  }, [currentSceneId, isOpen, liveNamingHotspotId, liveNamingName, tour]);
 
   /** Next scene change uses this note kind (default: place visit). */
   const prepareNavNote = useCallback((note: GuideNavNote) => {
@@ -248,8 +301,11 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
       };
       const prior = messagesRef.current;
       setSendError(null);
-      setMessages((prev) => [...prev, userMsg]);
-      setIsSending(true);
+      // Paint the user turn (and hide tip suggestions) before the request starts.
+      flushSync(() => {
+        setMessages((prev) => [...prev, userMsg]);
+        setIsSending(true);
+      });
 
       void askTourGuide(tour, currentSceneId, trimmed, prior)
         .then(applyGuideResult)
@@ -287,8 +343,10 @@ export function useTourAssistant(tour: Tour, currentSceneId: string) {
       };
       const prior = messagesRef.current;
       setSendError(null);
-      setMessages((prev) => [...prev, userMsg]);
-      setIsSending(true);
+      flushSync(() => {
+        setMessages((prev) => [...prev, userMsg]);
+        setIsSending(true);
+      });
 
       void askTourGuide(tour, sceneId, question, prior)
         .then(applyGuideResult)

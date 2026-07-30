@@ -113,9 +113,36 @@ THUMBNAIL_WIDTH=640 THUMBNAIL_QUALITY=85 npm run generate-thumbnails
 
 Writes `assets/{clientId}/{tourId}/thumbnails/{sceneId}.webp` and updates
 `tours/{tourId}.json` with `scene.thumbnail` paths. Re-run after changing
-`defaultView` or swapping a panorama. Naming-opportunity gallery cards fall back
-to a small runtime rectilinear crop at the hotspot view when no dedicated NO
-thumbnail exists.
+`defaultView` or swapping a panorama.
+
+## Naming opportunity previews (hotspot view)
+
+Explore naming gallery/list cards use baked `hotspot.preview.image` when set
+(same field model3d Dev captures write). Generate from each naming pin’s
+`position` (yaw/pitch/zoom):
+
+```bash
+npm run generate-naming-thumbnails
+```
+
+Or bake scenes + naming together:
+
+```bash
+npm run generate-thumbnails
+```
+
+Options:
+
+```bash
+node scripts/generate-naming-thumbnails.mjs --tour ken-sargent-house
+node scripts/generate-naming-thumbnails.mjs --dry-run
+THUMBNAIL_WIDTH=640 THUMBNAIL_QUALITY=85 npm run generate-naming-thumbnails
+```
+
+Writes `assets/{clientId}/{tourId}/previews/{hotspotId}.webp` and sets
+`hotspot.preview.image`. Panorama Dev create/move of a naming pin rebakes
+automatically. model3d tours still use canvas capture uploads (script skips
+them). Without a baked preview, Explore falls back to a small runtime crop.
 
 ## Adding a new tour
 

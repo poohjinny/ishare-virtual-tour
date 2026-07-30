@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FLIP_LIST_KEY_ATTR } from '../hooks/useFlipListReorder';
 import { cn } from '../lib/cn';
+import { useExploreDirectoryMediaLoad } from '../hooks/useExploreDirectoryMediaLoad';
 import { useLazyInView } from '../hooks/useLazyInView';
 import { usePreviewHeroReveal } from '../hooks/usePreviewHeroReveal';
 import { useScenePreview } from '../hooks/useScenePreview';
@@ -94,11 +95,13 @@ export function ExploreNamingGalleryCard({
       hotspots: [],
     };
 
-    if (tourViewerType === 'model3d' && item.previewImage) {
+    if (item.previewImage) {
       return {
         ...base,
         thumbnail: item.previewImage,
-        panorama: item.previewImage,
+        ...(tourViewerType === 'model3d' ?
+          { panorama: item.previewImage }
+        : {}),
       };
     }
 
@@ -128,23 +131,24 @@ export function ExploreNamingGalleryCard({
   );
 
   const previewOptions = useMemo(() => {
-    if (tourViewerType === 'model3d') {
-      return undefined;
-    }
+    // Baked hotspot.preview.image — skip runtime crop (panorama + model3d).
+    if (item.previewImage) return undefined;
+    if (tourViewerType === 'model3d') return undefined;
 
     return { view: previewView, cacheKeySuffix: `no:${item.hotspotId}` };
-  }, [item.hotspotId, previewView, tourViewerType]);
+  }, [item.hotspotId, item.previewImage, previewView, tourViewerType]);
 
-  const {
-    src: previewSrc,
-    failed: previewFailed,
-    loading: previewLoading,
-  } = useScenePreview(
+  const wantsLoad =
+    inView &&
+    groupMediaReady &&
+    Boolean(previewScene.panorama || previewScene.thumbnail);
+  const { allowed: mediaAllowed, onSettled: onMediaSettled } =
+    useExploreDirectoryMediaLoad(wantsLoad);
+
+  const { src: previewSrc, failed: previewFailed } = useScenePreview(
     tourId,
     previewScene,
-    inView &&
-      groupMediaReady &&
-      Boolean(previewScene.panorama || previewScene.thumbnail),
+    mediaAllowed,
     previewOptions,
   );
 
@@ -153,6 +157,13 @@ export function ExploreNamingGalleryCard({
     revealed: previewLoaded,
     onLoad: onPreviewLoad,
   } = usePreviewHeroReveal(previewSrc);
+
+  useEffect(() => {
+    if (previewFailed || previewLoaded) onMediaSettled();
+  }, [onMediaSettled, previewFailed, previewLoaded]);
+
+  // Skeleton as soon as the card is in view; load/decode waits for scroll idle + slot.
+  const heroLoading = wantsLoad && !previewFailed && !previewLoaded;
 
   const description = item.description?.trim();
   const donorCredit = item.donorCredit?.trim();
@@ -218,7 +229,7 @@ export function ExploreNamingGalleryCard({
             tourNavLocationGalleryCardHeroClassName,
             previewFailed && 'bg-[#e2e8f0]',
           )}
-          aria-busy={previewLoading || undefined}
+          aria-busy={heroLoading || undefined}
         >
           {isCoarsePointer ?
             <button
@@ -233,7 +244,7 @@ export function ExploreNamingGalleryCard({
             />
           : null}
 
-          {previewLoading ?
+          {heroLoading ?
             <span
               className={cn(
                 tourNavLocationGalleryCardHeroSkeletonClassName,
@@ -257,6 +268,7 @@ export function ExploreNamingGalleryCard({
               loading='lazy'
               decoding='async'
               onLoad={onPreviewLoad}
+              onError={onMediaSettled}
             />
           : null}
 

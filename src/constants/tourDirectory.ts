@@ -25,6 +25,12 @@ export const TOUR_DIRECTORY_GROUP_OTHER = 'More places';
  */
 export const TOUR_DIRECTORY_GROUP_EXPAND_MS = 350;
 
+/** Pause new Explore thumb loads until the directory/search list stops scrolling. */
+export const EXPLORE_DIRECTORY_MEDIA_SCROLL_IDLE_MS = 120;
+
+/** Cap concurrent Explore thumb network/decode work while idle. */
+export const EXPLORE_DIRECTORY_MEDIA_MAX_CONCURRENT = 1;
+
 export type TourDirectoryTab = 'all' | 'locations' | 'naming';
 
 export const TOUR_DIRECTORY_TABS: {
@@ -122,7 +128,8 @@ export function tourDirectoryNamingInfoAriaLabel(
 }
 
 /** Breadcrumb — current location crumb (no sibling menu). */
-export const TOUR_BREADCRUMB_CURRENT_TOOLTIP = TOUR_DIRECTORY_CURRENT_LOCATION_LABEL;
+export const TOUR_BREADCRUMB_CURRENT_TOOLTIP =
+  TOUR_DIRECTORY_CURRENT_LOCATION_LABEL;
 
 /** Breadcrumb — ancestor crumb that navigates on click. */
 export function tourBreadcrumbGoToTooltip(placeTitle: string): string {

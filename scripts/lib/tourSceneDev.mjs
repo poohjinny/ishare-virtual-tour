@@ -525,7 +525,9 @@ export function deleteHotspot({ toursDir, tourId, sceneId, hotspotId }) {
   return { tourPath, hotspot };
 }
 
-export function updateHotspotPosition({
+export async function updateHotspotPosition({
+  root,
+  assetsRoot,
   toursDir,
   tourId,
   sceneId,
@@ -548,6 +550,22 @@ export function updateHotspotPosition({
   const { hotspot } = findSceneHotspot(tour, sceneId, resolvedHotspotId);
   hotspot.position = normalizeHotspotPosition(position);
   markPlaceOverviewManual(hotspot);
+
+  if (
+    root &&
+    assetsRoot &&
+    tour.viewerType !== 'model3d' &&
+    isNamingHotspotRecord(hotspot)
+  ) {
+    await bakeNamingHotspotPreview({
+      root,
+      assetsRoot,
+      tour,
+      sceneId,
+      hotspotId: resolvedHotspotId,
+    });
+  }
+
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot };
 }
@@ -1222,6 +1240,17 @@ export async function createNamingHotspot({
   if (hostScene) {
     syncPlaceOverviewFromScene(tour, hostScene);
   }
+
+  if (tour.viewerType !== 'model3d' && root && assetsRoot) {
+    await bakeNamingHotspotPreview({
+      root,
+      assetsRoot,
+      tour,
+      sceneId,
+      hotspotId: hotspot.id,
+    });
+  }
+
   writeTourJson(tourPath, tour);
   return { tourPath, hotspot, record };
 }
@@ -2046,6 +2075,84 @@ export async function bakeSceneThumbnail({
   syncThumbnailToPublic(root, thumbnailFilePath, thumbnailWebPath);
 
   return { thumbnail: thumbnailWebPath, defaultView: renderView };
+}
+
+/**
+ * Panorama naming pin → baked Explore card preview at hotspot.position
+ * (same pose as resolveNamingDirectoryPreviewView). model3d uses capture upload.
+ */
+export function resolveNamingHotspotBakeView(tour, scene, hotspot) {
+  if (tour?.viewerType === 'model3d') return null;
+  const pos = hotspot?.position;
+  if (typeof pos?.yaw !== 'number' || typeof pos?.pitch !== 'number') {
+    return null;
+  }
+  return {
+    yaw: pos.yaw,
+    pitch: pos.pitch,
+    zoom: pos.zoom ?? scene?.defaultView?.zoom ?? 50,
+  };
+}
+
+export async function bakeNamingHotspotPreview({
+  root,
+  assetsRoot,
+  tour,
+  sceneId,
+  hotspotId,
+}) {
+  if (tour.viewerType === 'model3d') {
+    return null;
+  }
+
+  const resolvedSceneId = sceneId?.trim();
+  const resolvedHotspotId = hotspotId?.trim();
+  if (!resolvedSceneId || !resolvedHotspotId) {
+    throw new Error('sceneId and hotspotId are required');
+  }
+
+  const scene = tour.scenes?.[resolvedSceneId];
+  if (!scene?.panorama) {
+    throw new Error(`Scene "${resolvedSceneId}" is missing panorama`);
+  }
+
+  const { hotspot } = findSceneHotspot(
+    tour,
+    resolvedSceneId,
+    resolvedHotspotId,
+  );
+  if (!isNamingHotspotRecord(hotspot)) {
+    throw new Error(
+      `Hotspot is not a naming opportunity: ${resolvedHotspotId}`,
+    );
+  }
+
+  const renderView = resolveNamingHotspotBakeView(tour, scene, hotspot);
+  if (!renderView) {
+    throw new Error(
+      `Naming hotspot "${resolvedHotspotId}" needs {yaw, pitch} position to bake`,
+    );
+  }
+
+  const previewWebPath = buildDefaultHotspotPreviewWebPath(
+    tour,
+    resolvedHotspotId,
+  );
+  const previewFilePath = resolveThumbnailFilePath(assetsRoot, previewWebPath);
+  const panoramaFilePath = resolvePanoramaFilePath(assetsRoot, scene.panorama);
+
+  mkdirSync(dirname(previewFilePath), { recursive: true });
+  await renderEquirectPreviewToFile(
+    panoramaFilePath,
+    renderView,
+    previewFilePath,
+    { width: THUMBNAIL_WIDTH, quality: THUMBNAIL_QUALITY },
+  );
+
+  hotspot.preview = { image: previewWebPath };
+  syncThumbnailToPublic(root, previewFilePath, previewWebPath);
+
+  return { previewImage: previewWebPath, view: renderView };
 }
 
 export async function applySceneDefaultView({

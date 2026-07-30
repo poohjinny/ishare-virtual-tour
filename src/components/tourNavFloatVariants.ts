@@ -200,6 +200,9 @@ export const tourNavBreadcrumbSiblingRowCurrentClassName = cn(
   'hover:bg-[rgba(var(--ishare-primary-rgb),0.1)]',
 );
 
+/** Ancestor path stop — bold black type only, no fill. */
+export const tourNavBreadcrumbSiblingRowPathClassName = cn('text-foreground');
+
 export const tourNavBreadcrumbSiblingOptionClassName = cn(
   'flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md border-none bg-transparent py-2.5 pr-2 pl-2.5 text-left',
   'font-display text-sm font-normal leading-[1.3] text-inherit',
@@ -226,7 +229,7 @@ export const tourNavBreadcrumbSceneInfoButtonClassName = cn(
 
 export const tourNavActionsRootClassName = cn(
   'absolute top-[var(--tour-chrome-inset-top)] right-[var(--tour-chrome-inset-right)] z-[var(--tour-chrome-z-index)] flex flex-col-reverse items-end',
-  '[--tour-directory-space:16px] [--tour-directory-divider-space:24px] [--tour-directory-section-group-lead-extra:8px] [--tour-directory-group-gap:20px]',
+  '[--tour-directory-space:16px] [--tour-directory-divider-space:32px] [--tour-directory-section-group-lead-extra:8px] [--tour-directory-group-gap:20px] [--tour-directory-group-content-lead:8px]',
 );
 
 export const tourNavActionsDockClassName = cn(
@@ -769,8 +772,8 @@ export const tourNavLocationGalleryCenterCtaClassName = cn(
 /** Intro hero — full darken on hover so the center CTA reads clearly. */
 export const clientIntroGalleryHeroScrimClassName = cn(
   'pointer-events-none absolute inset-0 z-[2]',
-  'bg-[rgba(15,23,42,0)] transition-colors duration-[var(--tour-gallery-hover-duration)] ease-[var(--tour-gallery-hover-ease)]',
-  'group-hover/card:bg-[rgba(15,23,42,0.52)] group-focus-within/card:bg-[rgba(15,23,42,0.52)]',
+  'bg-[rgba(0,0,0,0)] transition-colors duration-[var(--tour-gallery-hover-duration)] ease-[var(--tour-gallery-hover-ease)]',
+  'group-hover/card:bg-[rgba(0,0,0,0.7)] group-focus-within/card:bg-[rgba(0,0,0,0.7)]',
   'motion-reduce:transition-none',
 );
 
@@ -890,6 +893,15 @@ export const tourNavItemLeadingThumbImageClassName = cn(
 export const tourNavItemLeadingThumbFallbackClassName = cn(
   tourNavItemLeadingThumbClassName,
   'flex items-center justify-center',
+);
+
+/** List thumb placeholder while waiting for scroll-idle load / decode. */
+export const tourNavItemLeadingThumbSkeletonClassName = cn(
+  tourNavItemLeadingThumbClassName,
+  'relative block',
+  PREVIEW_HERO_SKELETON_CLASS,
+  // Win over `.preview-hero-skeleton { background: #e2e8f0 }` — keep list muted tone.
+  '!bg-[rgba(15,23,42,0.06)]',
 );
 
 export const tourNavItemLocationIconClassName = cn(
@@ -1025,16 +1037,26 @@ export const tourNavEmptyClassName = cn(
   'm-0 px-1 py-2 text-center text-md leading-[1.55] text-muted',
 );
 
+/** Section chrome (Locations / Naming) — label centered between hairlines. */
+export const tourNavSectionTitleRowClassName = cn(
+  'mb-[var(--tour-directory-space)] flex items-center gap-5 py-1.5',
+);
+
 export const tourNavSectionTitleClassName = cn(
-  'm-0 mb-[var(--tour-directory-space)] flex items-center gap-1.5',
-  'font-display text-lg-plus font-semibold leading-none tracking-tight text-foreground',
+  'm-0 flex min-w-0 shrink-0 items-center gap-1',
+  'font-display text-sm font-semibold uppercase leading-none tracking-[0.04em] text-muted',
 );
 
 export const tourNavSectionTitleIconClassName = cn(
-  'inline-flex size-5 shrink-0 translate-y-px items-center justify-center text-muted',
+  'inline-flex size-[1.125rem] shrink-0 items-center justify-center text-muted',
 );
 
 export const tourNavSectionTitleLabelClassName = cn('min-w-0 leading-none');
+
+/** Hairline flanking the section label — same role as nav-preview naming divider. */
+export const tourNavSectionTitleDividerLineClassName = cn(
+  'h-px min-w-3 flex-1 bg-[rgba(15,23,42,0.14)]',
+);
 
 /** Pinned "current location" block above the grouped directory lists. */
 export const tourNavCurrentPinnedClassName = cn(
@@ -1287,7 +1309,7 @@ export const tourNavDirectoryTabsClassName = cn(
 export const tourNavDirectoryPanelClassName = cn('flex flex-col gap-0');
 
 export const tourNavDirectorySectionClassName = cn(
-  '[&+&]:mt-[var(--tour-directory-divider-space)] [&+&]:border-t [&+&]:border-[rgba(15,23,42,0.08)] [&+&]:pt-[var(--tour-directory-divider-space)]',
+  '[&+&]:mt-[var(--tour-directory-divider-space)]',
 );
 
 /** Wrapper for collapsible sector/department groups under a section. */
@@ -1322,7 +1344,7 @@ export const tourNavLocationGroupPanelContentClassName =
 export const tourNavLocationGroupHeaderClassName = cn(
   // Flush left with the list-item card; pr keeps trailing meta lined up with
   // item content (px-3 + 1px border).
-  'flex w-full items-center gap-1.5 border-none bg-transparent p-0 pr-[calc(0.75rem+1px)] text-left',
+  'flex w-full items-center gap-1 border-none bg-transparent p-0 pr-[calc(0.75rem+1px)] text-left',
   'cursor-pointer',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
   'disabled:cursor-not-allowed disabled:opacity-50',
@@ -1350,9 +1372,10 @@ export const tourNavLocationGroupMetaClassName = cn(
 export const tourNavNamingSceneSubgroupsClassName = cn('flex flex-col gap-3');
 
 /** Scene (place) subheader above its naming items — smaller than the sector title.
- *  Flush with the item card left (same column as sector headers / list rows). */
+ *  Align with the list-item thumbnail column (naming row px-3.5 + 1px border). */
 export const tourNavNamingSceneSubheaderClassName = cn(
-  'mb-1 min-w-0 truncate pr-1 font-display text-xs font-semibold text-foreground/75',
+  'mb-1.5 min-w-0 truncate pl-[calc(0.875rem+1px)] pr-1',
+  'font-display text-xs font-semibold text-foreground/75',
 );
 
 /** @deprecated Use {@link tourNavLocationGroupMetaClassName}. */

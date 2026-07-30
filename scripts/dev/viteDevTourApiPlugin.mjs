@@ -1576,6 +1576,8 @@ export function viteDevTourApiPlugin() {
             const { tourId, sceneId, hotspotId, position } =
               validateHotspotPositionPayload(body);
             const result = await updateHotspotPosition({
+              root,
+              assetsRoot,
               toursDir,
               tourId,
               sceneId,
