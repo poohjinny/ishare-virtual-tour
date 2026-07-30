@@ -61,7 +61,18 @@ export function isAskGuideMockForced(): boolean {
 export function resolveAskGuideApiBase(): string | null {
   const configured = import.meta.env.VITE_ASK_GUIDE_API_URL?.trim();
   if (configured) {
-    return configured.replace(/\/$/, '');
+    // Recover PowerShell path-mangling of https://…
+    // e.g. `D:\repo\https:\host\api` → `https://host/api`
+    const mangled = configured.match(/https?:[/\\]+(.+)$/i);
+    const candidate =
+      mangled ? `https://${mangled[1].replace(/\\/g, '/')}` : configured;
+    if (/^https?:\/\//i.test(candidate)) {
+      return candidate.replace(/\/$/, '');
+    }
+    console.warn(
+      '[ask-guide] VITE_ASK_GUIDE_API_URL must be an absolute http(s) URL; got:',
+      configured,
+    );
   }
   if (import.meta.env.DEV) {
     return null;
