@@ -888,7 +888,6 @@ export function DevViewPanel({
   const [namingCatalogError, setNamingCatalogError] = useState<string | null>(
     null,
   );
-  const [namingCatalogCreateOpen, setNamingCatalogCreateOpen] = useState(false);
   const [namingAddEnsureKey, setNamingAddEnsureKey] = useState(0);
   const [namingAddCloseKey, setNamingAddCloseKey] = useState(0);
   const [infoName, setInfoName] = useState('');
@@ -905,7 +904,6 @@ export function DevViewPanel({
     readRememberedDevPanelTab('scene'),
   );
   const [hotspotCreateOpen, setHotspotCreateOpen] = useState(false);
-  const [sceneCreateOpen, setSceneCreateOpen] = useState(false);
   const [sceneAddCloseKey, setSceneAddCloseKey] = useState(0);
   const [pendingSceneId, setPendingSceneId] = useState(() =>
     createOpaqueId(OPAQUE_SCENE_ID_PREFIX),
@@ -1243,7 +1241,6 @@ export function DevViewPanel({
     setEditingHotspotId(null);
     setMovingHotspotId(null);
     setCatalogEditNamingId(null);
-    setNamingCatalogCreateOpen(true);
     setNamingCatalogError(null);
     setNamingCatalogStatus('idle');
     setPanelTab('naming');
@@ -1690,7 +1687,6 @@ export function DevViewPanel({
       setNoBody('');
       setNoVideoUrl('');
       setNoImage('');
-      setNamingCatalogCreateOpen(false);
     } catch (error) {
       setNamingCatalogStatus('error');
       setNamingCatalogError(
@@ -1929,7 +1925,6 @@ export function DevViewPanel({
       setScenePanoramaFile(null);
       mintCreateSceneId();
       setSceneStatus('done');
-      setSceneCreateOpen(false);
       await onTourMutated?.({ navigateToScene: result.scene.id });
       setPanelTab('scene');
     } catch (error) {
@@ -2559,7 +2554,6 @@ export function DevViewPanel({
       setCatalogEditNamingId(namingId);
       setEditingHotspotId(null);
       setMovingHotspotId(null);
-      setNamingCatalogCreateOpen(false);
       setCatalogEditName(record.name?.trim() ?? '');
       setCatalogEditPrice(formatNamingPriceInput(record.price));
       setCatalogEditStatus(record.status ?? '');
@@ -3596,7 +3590,6 @@ export function DevViewPanel({
                   setNoDonorLogoFile(null);
                   setNamingCatalogError(null);
                   setNamingCatalogStatus('idle');
-                  setNamingCatalogCreateOpen(false);
                   setNamingAddCloseKey((key) => key + 1);
                 }}
                 disabled={namingCatalogStatus === 'working'}
@@ -6287,7 +6280,6 @@ export function DevViewPanel({
                 setSceneError(null);
                 setSceneStatus('idle');
                 mintCreateSceneId();
-                setSceneCreateOpen(false);
                 setSceneAddCloseKey((key) => key + 1);
               }}
               disabled={sceneStatus === 'working'}
