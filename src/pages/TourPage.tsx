@@ -1252,6 +1252,8 @@ function TourExperience() {
             guideUiTest={searchParams.guideUiTest}
             guideMock={searchParams.guideMock}
             currentSceneId={currentSceneId}
+            firstSceneId={tour.firstScene}
+            splashDone={splashPhase === 'done'}
             namingHotspotId={activeNamingHotspotId}
             namingName={assistantLiveContext?.namingName}
             chromeDockOpen={chromeDockOpen}

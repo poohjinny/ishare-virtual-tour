@@ -213,6 +213,22 @@ export function getNamingContextNotice(
  * `{place}` / `{name}` are filled at pick time.
  */
 
+const GUIDE_FAB_OVERVIEW_BUBBLES = [
+  "Welcome — I'm here if you'd like a hand exploring.",
+  'Hi! Pick a place to dive in, or ask me anything.',
+  'This is the overview — tap somewhere to look around, or chat with me.',
+  'Ready when you are — where should we start?',
+  "I'll tag along. Explore from here, or ask me a question.",
+] as const;
+
+const GUIDE_FAB_OVERVIEW_BUBBLES_WITH_TOUR = [
+  'Welcome to **{tour}** — where should we start?',
+  "Hi! You're at the **{tour}** overview. Pick a place, or ask me anything.",
+  'This is **{tour}**. Tap an area to explore, or chat with me.',
+  "Ready to look around **{tour}**? I'm here if you need a guide.",
+  'Welcome — explore **{tour}** from here, or ask me a question.',
+] as const;
+
 const GUIDE_FAB_SCENE_BUBBLES = [
   "Hey — we're in **{place}** — want to look around together?",
   'Just stepped into **{place}**. Anything you want to know?',
@@ -281,17 +297,38 @@ function createGuideFabBagPicker() {
   };
 }
 
+const pickOverviewBubbleIndex = createGuideFabBagPicker();
+const pickOverviewTourBubbleIndex = createGuideFabBagPicker();
 const pickSceneBubbleIndex = createGuideFabBagPicker();
 const pickNamingBubbleIndex = createGuideFabBagPicker();
 const pickNamingGenericBubbleIndex = createGuideFabBagPicker();
 
 function fillGuideFabTemplate(
   template: string,
-  vars: { place?: string; name?: string },
+  vars: { place?: string; name?: string; tour?: string },
 ): string {
   return template
     .replaceAll('{place}', vars.place ?? '')
-    .replaceAll('{name}', vars.name ?? '');
+    .replaceAll('{name}', vars.name ?? '')
+    .replaceAll('{tour}', vars.tour ?? '');
+}
+
+/**
+ * FAB speech bubble on the tour overview / first scene (panel closed).
+ * Welcome tone — invite to explore, not a place-arrival line.
+ */
+export function getGuideFabOverviewBubble(tourTitle?: string): string {
+  const tour = tourTitle?.trim();
+  if (tour) {
+    const index = pickOverviewTourBubbleIndex(
+      GUIDE_FAB_OVERVIEW_BUBBLES_WITH_TOUR.length,
+    );
+    return fillGuideFabTemplate(GUIDE_FAB_OVERVIEW_BUBBLES_WITH_TOUR[index]!, {
+      tour,
+    });
+  }
+  const index = pickOverviewBubbleIndex(GUIDE_FAB_OVERVIEW_BUBBLES.length);
+  return GUIDE_FAB_OVERVIEW_BUBBLES[index]!;
 }
 
 /**
