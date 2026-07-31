@@ -30,14 +30,13 @@
           "targetScene": "s_7ezzd8nh4z"
         },
         {
-          "id": "nav-to-med-surg-inpatient",
+          "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "label": "James Beach Health Care Centre",
           "position": {
-            "yaw": 80.3,
-            "pitch": 0.1
+            "yaw": 79.9,
+            "pitch": -1.6
           },
-          "targetScene": "s_d2s5ai83yt"
+          "targetScene": "s_qu7z1pbgsb"
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_sxeq0eovm7.webp",
@@ -202,10 +201,25 @@
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
+        },
+        {
+          "id": "info-place",
+          "type": "info",
+          "role": "placeOverview",
+          "position": {
+            "yaw": 57,
+            "pitch": -5.2
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Walk-in Entrance",
+            "body": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end."
+          }
         }
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_t0y42xbmsv.webp",
-      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
+      "previewVideoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144",
+      "visibility": "unlisted"
     },
     "s_8s40pp3yyo": {
       "id": "s_8s40pp3yyo",
@@ -310,7 +324,7 @@
     },
     "s_d2s5ai83yt": {
       "id": "s_d2s5ai83yt",
-      "title": "James Beach Health Care Centre",
+      "title": "Floor 4",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_d2s5ai83yt.webp",
       "defaultView": {
         "yaw": 108.7,
@@ -361,7 +375,6 @@
         {
           "id": "nav-to-quiet-consultant",
           "type": "nav",
-          "label": "Quiet / Consultant",
           "position": {
             "yaw": 134.5,
             "pitch": -22.3
@@ -455,9 +468,9 @@
             "yaw": 148.8,
             "pitch": -15.9
           },
-          "targetScene": "s_sxeq0eovm7",
+          "targetScene": "s_qu7z1pbgsb",
           "instant": true,
-          "navVariant": "hub"
+          "navVariant": "back"
         },
         {
           "id": "info-james-beach-health-care-centre",
@@ -467,7 +480,8 @@
             "pitch": -28.1
           },
           "popup": {
-            "display": "anchored"
+            "display": "anchored",
+            "title": "James Beach Health Care Centre - Floor"
           },
           "namingId": "no_086npbauv3",
           "preview": {
@@ -475,8 +489,7 @@
           }
         }
       ],
-      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_d2s5ai83yt.webp",
-      "suppressPlaceOverview": true
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_d2s5ai83yt.webp"
     },
     "s_zyrfvgi4sg": {
       "id": "s_zyrfvgi4sg",
@@ -644,7 +657,7 @@
     },
     "s_w0voges2yz": {
       "id": "s_w0voges2yz",
-      "title": "Quiet / Consultant",
+      "title": "Quiet / Consult Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_w0voges2yz.webp",
       "defaultView": {
         "yaw": 231.7,
@@ -680,8 +693,7 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_w0voges2yz.webp",
-      "placeLead": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_w0voges2yz.webp"
     },
     "s_oh2aardnvw": {
       "id": "s_oh2aardnvw",
@@ -1285,6 +1297,1514 @@
       ],
       "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_5dwnzwkhwz.webp",
       "placeLead": "When a seriously injured patient arrives at the hospital, every minute matters. The trauma resuscitation centre is the part of the emergency department dedicated to those moments. It is where a trained trauma team comes together to rapidly assess, stabilize, and treat patients with life‑threatening injuries. In this space, specialists work in parallel—airway, breathing, circulation, imaging, and surgery planning happen at the same time, not in sequence. That coordinated…"
+    },
+    "s_qu7z1pbgsb": {
+      "id": "s_qu7z1pbgsb",
+      "title": "James Beach Health Care Centre",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_qu7z1pbgsb.webp",
+      "defaultView": {
+        "yaw": 83,
+        "pitch": -19,
+        "zoom": 0
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-emergency-department",
+          "type": "nav",
+          "position": {
+            "yaw": 203.6,
+            "pitch": -25.7
+          },
+          "targetScene": "s_7ezzd8nh4z"
+        },
+        {
+          "id": "nav-to-overview",
+          "type": "nav",
+          "position": {
+            "yaw": 238.4,
+            "pitch": -20.4
+          },
+          "targetScene": "s_sxeq0eovm7"
+        },
+        {
+          "id": "nav-to-floors-4",
+          "type": "nav",
+          "position": {
+            "yaw": 79.6,
+            "pitch": -20.7
+          },
+          "targetScene": "s_d2s5ai83yt"
+        },
+        {
+          "id": "nav-to-floors-4-2",
+          "type": "nav",
+          "position": {
+            "yaw": 79.7,
+            "pitch": -15.8
+          },
+          "targetScene": "s_mmj82ryz6p"
+        },
+        {
+          "id": "nav-to-floors-4-2-2",
+          "type": "nav",
+          "position": {
+            "yaw": 79.8,
+            "pitch": -11.4
+          },
+          "targetScene": "s_fa241wial8"
+        }
+      ],
+      "description": "**Adding 3 Floors and 90 New Inpatient Beds to the James Beach Health Care Centre to Care for Our Loved Ones**\n\nThe volume and complexity of care needs in the West End of Ottawa continues to place significant strain across the hospital, and **there are rarely days when occupancy falls below 110 percent**. The consequences are visible and deeply felt. Patients are too often cared for in unconventional spaces — hallways, treatment areas, and within the Emergency Department itself — dedicated staff work tirelessly under relentless pressure.\n\nThe addition of 90 new inpatient beds reflects thoughtful, forward-looking planning grounded in real community need. When the original James Beach Health Care Centre was built in 2012, it was intentionally designed to support the future addition of these 3 new inpatient floors — **a proactive approach that will allow construction to move more efficiently and the new space to open sooner in response to growing demand.**\n\nThe new floors of private inpatient rooms will expand access to essential services, help relieve the growing strain of overcrowding across the hospital, improve patient flow and provide greater privacy, comfort, and timely access to care.\nEvery element has been shaped around the patient journey. From care zones to circulation paths, from arrival to treatment and recovery, the design reflects how care is delivered today — and how it will need to evolve tomorrow — with the patient experience at its center.\nThis expansion is not simply about adding space. It is a response to an urgent reality and strengthening the hospital’s ability to serve the community more effectively now and into the future.",
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_qu7z1pbgsb.webp",
+      "suppressPlaceOverview": true
+    },
+    "s_mmj82ryz6p": {
+      "id": "s_mmj82ryz6p",
+      "title": "Floor 5",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_mmj82ryz6p.webp",
+      "defaultView": {
+        "yaw": 108.7,
+        "pitch": -63.5,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-inpatient-suites-overview-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 337.3,
+            "pitch": -62.9
+          },
+          "targetScene": "s_c42kwvk6i6"
+        },
+        {
+          "id": "nav-to-reception-centre-2",
+          "type": "nav",
+          "label": "Reception Centre",
+          "position": {
+            "yaw": 140.7,
+            "pitch": -34.7
+          },
+          "targetScene": "s_z7n2u3rr0e"
+        },
+        {
+          "id": "nav-to-nursing-station-2",
+          "type": "nav",
+          "label": "Nursing Station",
+          "position": {
+            "yaw": 33.1,
+            "pitch": -60.9
+          },
+          "targetScene": "s_6u5agl2var"
+        },
+        {
+          "id": "nav-to-multi-use-lounge-activity-room-2",
+          "type": "nav",
+          "label": "Multi Use Lounge / Activity Room",
+          "position": {
+            "yaw": 157.7,
+            "pitch": -30.1
+          },
+          "targetScene": "s_3nv9rl56r7"
+        },
+        {
+          "id": "nav-to-quiet-consultant-2",
+          "type": "nav",
+          "label": "Quiet / Consultant",
+          "position": {
+            "yaw": 134.5,
+            "pitch": -22.3
+          },
+          "targetScene": "s_vf8l9043xl"
+        },
+        {
+          "id": "nav-to-dining-activity-room-2",
+          "type": "nav",
+          "label": "Dining / Activity Room",
+          "position": {
+            "yaw": 126.9,
+            "pitch": -21.7
+          },
+          "targetScene": "s_7df4dxgbgk"
+        },
+        {
+          "id": "nav-to-allied-health-team-room-2",
+          "type": "nav",
+          "label": "Allied Health Team Room",
+          "position": {
+            "yaw": 122.9,
+            "pitch": -25.6
+          },
+          "targetScene": "s_jv5lhy0fzb"
+        },
+        {
+          "id": "nav-to-galley-servery-2",
+          "type": "nav",
+          "label": "Galley / Servery",
+          "position": {
+            "yaw": 120.9,
+            "pitch": -19.7
+          },
+          "targetScene": "s_53f222bswk"
+        },
+        {
+          "id": "nav-to-report-meeting-room-2",
+          "type": "nav",
+          "label": "Report Meeting Room",
+          "position": {
+            "yaw": 112.1,
+            "pitch": -28.5
+          },
+          "targetScene": "s_tkfah1p184"
+        },
+        {
+          "id": "nav-to-staff-facility-lounge-2",
+          "type": "nav",
+          "label": "Staff Facility / Lounge",
+          "position": {
+            "yaw": 114.9,
+            "pitch": -18.4
+          },
+          "targetScene": "s_r8ctcgzbei"
+        },
+        {
+          "id": "nav-to-inpatient-suites-4",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 50,
+            "pitch": -45.3
+          },
+          "targetScene": "s_c42kwvk6i6"
+        },
+        {
+          "id": "nav-to-inpatient-suites-2-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 63.5,
+            "pitch": -47.9
+          },
+          "targetScene": "s_c42kwvk6i6"
+        },
+        {
+          "id": "nav-to-inpatient-suites-3-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -47.6
+          },
+          "targetScene": "s_c42kwvk6i6"
+        },
+        {
+          "id": "nav-to-overview-2",
+          "type": "nav",
+          "position": {
+            "yaw": 148.8,
+            "pitch": -15.9
+          },
+          "targetScene": "s_qu7z1pbgsb",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "info-james-beach-health-care-centre-2",
+          "type": "info",
+          "position": {
+            "yaw": 77.2,
+            "pitch": -28.1
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "James Beach Health Care Centre - Floor"
+          },
+          "namingId": "no_i223vnd2db",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-james-beach-health-care-centre-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_mmj82ryz6p.webp"
+    },
+    "s_c42kwvk6i6": {
+      "id": "s_c42kwvk6i6",
+      "title": "Inpatient Suites",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_c42kwvk6i6.webp",
+      "defaultView": {
+        "yaw": 111,
+        "pitch": 0.2,
+        "zoom": 15
+      },
+      "hotspots": [
+        {
+          "id": "info-inpatient-bed-rooms-3",
+          "type": "info",
+          "position": {
+            "yaw": 101.1,
+            "pitch": -15.8
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+          },
+          "namingId": "no_v214g0oww7",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-inpatient-bed-rooms-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-emergency-department-2",
+          "type": "nav",
+          "position": {
+            "yaw": 293,
+            "pitch": -2.6
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_c42kwvk6i6.webp",
+      "suppressPlaceOverview": true
+    },
+    "s_z7n2u3rr0e": {
+      "id": "s_z7n2u3rr0e",
+      "title": "Reception Centre",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_z7n2u3rr0e.webp",
+      "defaultView": {
+        "yaw": 101.6,
+        "pitch": -2.8,
+        "zoom": 55
+      },
+      "hotspots": [
+        {
+          "id": "info-reception-centre-3",
+          "type": "info",
+          "position": {
+            "yaw": 84.9,
+            "pitch": -9.1
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
+          },
+          "namingId": "no_lykbpg4xy8",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-reception-centre-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-2",
+          "type": "nav",
+          "position": {
+            "yaw": 128.1,
+            "pitch": -6.7
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_z7n2u3rr0e.webp",
+      "placeLead": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+    },
+    "s_6u5agl2var": {
+      "id": "s_6u5agl2var",
+      "title": "Nursing Station",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_6u5agl2var.webp",
+      "defaultView": {
+        "yaw": 84.5,
+        "pitch": -17.2,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "info-nursing-station-3",
+          "type": "info",
+          "position": {
+            "yaw": 78.3,
+            "pitch": -20.8
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
+          },
+          "namingId": "no_tixxag95au",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-nursing-station-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-3",
+          "type": "nav",
+          "position": {
+            "yaw": 124.7,
+            "pitch": -14
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_6u5agl2var.webp",
+      "placeLead": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
+    },
+    "s_3nv9rl56r7": {
+      "id": "s_3nv9rl56r7",
+      "title": "Multi Use Lounge / Activity Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_3nv9rl56r7.webp",
+      "defaultView": {
+        "yaw": 183.1,
+        "pitch": -8.5,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "info-multi-use-lounge-activity-room-3",
+          "type": "info",
+          "position": {
+            "yaw": 186.7,
+            "pitch": -40.4
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
+          },
+          "namingId": "no_t6e9gsrsbh",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-multi-use-lounge-activity-room-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-4",
+          "type": "nav",
+          "position": {
+            "yaw": 182.5,
+            "pitch": -5
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_3nv9rl56r7.webp",
+      "placeLead": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
+    },
+    "s_vf8l9043xl": {
+      "id": "s_vf8l9043xl",
+      "title": "Quiet / Consultant",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_vf8l9043xl.webp",
+      "defaultView": {
+        "yaw": 231.7,
+        "pitch": -29.9,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "info-quiet-consultant-3",
+          "type": "info",
+          "position": {
+            "yaw": 237,
+            "pitch": -32
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
+          },
+          "namingId": "no_810qrsybup",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-quiet-consultant-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-5",
+          "type": "nav",
+          "position": {
+            "yaw": 53.9,
+            "pitch": -8.3
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_vf8l9043xl.webp",
+      "placeLead": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+    },
+    "s_7df4dxgbgk": {
+      "id": "s_7df4dxgbgk",
+      "title": "Dining / Activity Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_7df4dxgbgk.webp",
+      "defaultView": {
+        "yaw": 73.6,
+        "pitch": -29.2,
+        "zoom": 14
+      },
+      "hotspots": [
+        {
+          "id": "info-dining-activity-room-3",
+          "type": "info",
+          "position": {
+            "yaw": 70.4,
+            "pitch": -20
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
+          },
+          "namingId": "no_vii7b6q7b7",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-dining-activity-room-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-6",
+          "type": "nav",
+          "position": {
+            "yaw": 169.5,
+            "pitch": -12.7
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_7df4dxgbgk.webp",
+      "placeLead": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+    },
+    "s_jv5lhy0fzb": {
+      "id": "s_jv5lhy0fzb",
+      "title": "Allied Health Team Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_jv5lhy0fzb.webp",
+      "defaultView": {
+        "yaw": 81,
+        "pitch": -41.3,
+        "zoom": 14
+      },
+      "hotspots": [
+        {
+          "id": "info-allied-health-team-room-3",
+          "type": "info",
+          "position": {
+            "yaw": 82.3,
+            "pitch": -43.4
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
+          },
+          "namingId": "no_ptbmlcz8u0",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-allied-health-team-room-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-7",
+          "type": "nav",
+          "position": {
+            "yaw": 111.3,
+            "pitch": -5.6
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_jv5lhy0fzb.webp",
+      "placeLead": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care. Where care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place…"
+    },
+    "s_53f222bswk": {
+      "id": "s_53f222bswk",
+      "title": "Galley / Servery",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_53f222bswk.webp",
+      "defaultView": {
+        "yaw": 293.6,
+        "pitch": -13.6,
+        "zoom": 4
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-james-beach-health-care-centre-8",
+          "type": "nav",
+          "position": {
+            "yaw": 75.2,
+            "pitch": -4.3
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "info-place",
+          "type": "info",
+          "role": "placeOverview",
+          "position": {
+            "yaw": 293.6,
+            "pitch": -13.6
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Galley / Servery",
+            "body": "The Galley/Servery is the busy heart behind every meal served on the floor. It’s where nutritious, comforting food is prepared and carefully organized to support patients’ healing and well-being.\n\nThis essential area keeps the care experience nourished—from special dietary needs to timely delivery—so patients can focus on recovery.\n\nBe a part of fueling the care journey by helping bring nourishment and comfort to every meal"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_53f222bswk.webp",
+      "description": "The Galley/Servery is the busy heart behind every meal served on the floor. It’s where nutritious, comforting food is prepared and carefully organized to support patients’ healing and well-being.\n\nThis essential area keeps the care experience nourished—from special dietary needs to timely delivery—so patients can focus on recovery.\n\nBe a part of fueling the care journey by helping bring nourishment and comfort to every meal"
+    },
+    "s_tkfah1p184": {
+      "id": "s_tkfah1p184",
+      "title": "Report Meeting Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_tkfah1p184.webp",
+      "defaultView": {
+        "yaw": 91.4,
+        "pitch": -19.3,
+        "zoom": 32
+      },
+      "hotspots": [
+        {
+          "id": "info-report-meeting-room-3",
+          "type": "info",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -16.9
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_ulu3wcv6bh",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-9",
+          "type": "nav",
+          "position": {
+            "yaw": 6.9,
+            "pitch": -8.2
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_tkfah1p184.webp",
+      "placeLead": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+    },
+    "s_r8ctcgzbei": {
+      "id": "s_r8ctcgzbei",
+      "title": "Staff Facility / Lounge",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_r8ctcgzbei.webp",
+      "defaultView": {
+        "yaw": 329.3,
+        "pitch": -22.6,
+        "zoom": 19
+      },
+      "hotspots": [
+        {
+          "id": "info-staff-facility-lounge-3",
+          "type": "info",
+          "position": {
+            "yaw": 330.7,
+            "pitch": -27.4
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_dd2495tzjk",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge-3.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-10",
+          "type": "nav",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -7.4
+          },
+          "targetScene": "s_mmj82ryz6p",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_r8ctcgzbei.webp",
+      "placeLead": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
+    },
+    "s_fa241wial8": {
+      "id": "s_fa241wial8",
+      "title": "Floor 6",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_fa241wial8.webp",
+      "defaultView": {
+        "yaw": 108.7,
+        "pitch": -63.5,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-inpatient-suites-overview-2-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 337.3,
+            "pitch": -62.9
+          },
+          "targetScene": "s_k5znwwhgm4"
+        },
+        {
+          "id": "nav-to-reception-centre-2-2",
+          "type": "nav",
+          "label": "Reception Centre",
+          "position": {
+            "yaw": 140.7,
+            "pitch": -34.7
+          },
+          "targetScene": "s_sdjz2mhlw6"
+        },
+        {
+          "id": "nav-to-nursing-station-2-2",
+          "type": "nav",
+          "label": "Nursing Station",
+          "position": {
+            "yaw": 33.1,
+            "pitch": -60.9
+          },
+          "targetScene": "s_2hbvd10ndp"
+        },
+        {
+          "id": "nav-to-multi-use-lounge-activity-room-2-2",
+          "type": "nav",
+          "label": "Multi Use Lounge / Activity Room",
+          "position": {
+            "yaw": 157.7,
+            "pitch": -30.1
+          },
+          "targetScene": "s_aglvzytsd0"
+        },
+        {
+          "id": "nav-to-quiet-consultant-2-2",
+          "type": "nav",
+          "label": "Quiet / Consultant",
+          "position": {
+            "yaw": 134.5,
+            "pitch": -22.3
+          },
+          "targetScene": "s_b0p4zlphcm"
+        },
+        {
+          "id": "nav-to-dining-activity-room-2-2",
+          "type": "nav",
+          "label": "Dining / Activity Room",
+          "position": {
+            "yaw": 126.9,
+            "pitch": -21.7
+          },
+          "targetScene": "s_c422jvoq5t"
+        },
+        {
+          "id": "nav-to-allied-health-team-room-2-2",
+          "type": "nav",
+          "label": "Allied Health Team Room",
+          "position": {
+            "yaw": 122.9,
+            "pitch": -25.6
+          },
+          "targetScene": "s_ms3jd5bxdx"
+        },
+        {
+          "id": "nav-to-galley-servery-2-2",
+          "type": "nav",
+          "label": "Galley / Servery",
+          "position": {
+            "yaw": 120.9,
+            "pitch": -19.7
+          },
+          "targetScene": "s_thjs1ppqso"
+        },
+        {
+          "id": "nav-to-report-meeting-room-2-2",
+          "type": "nav",
+          "label": "Report Meeting Room",
+          "position": {
+            "yaw": 112.1,
+            "pitch": -28.5
+          },
+          "targetScene": "s_h8ukfkaxr9"
+        },
+        {
+          "id": "nav-to-staff-facility-lounge-2-2",
+          "type": "nav",
+          "label": "Staff Facility / Lounge",
+          "position": {
+            "yaw": 114.9,
+            "pitch": -18.4
+          },
+          "targetScene": "s_x48fg4wlvd"
+        },
+        {
+          "id": "nav-to-inpatient-suites-4-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 50,
+            "pitch": -45.3
+          },
+          "targetScene": "s_k5znwwhgm4"
+        },
+        {
+          "id": "nav-to-inpatient-suites-2-2-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 63.5,
+            "pitch": -47.9
+          },
+          "targetScene": "s_k5znwwhgm4"
+        },
+        {
+          "id": "nav-to-inpatient-suites-3-2-2",
+          "type": "nav",
+          "label": "Inpatient Suites",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -47.6
+          },
+          "targetScene": "s_k5znwwhgm4"
+        },
+        {
+          "id": "nav-to-overview-2-2",
+          "type": "nav",
+          "position": {
+            "yaw": 148.8,
+            "pitch": -15.9
+          },
+          "targetScene": "s_qu7z1pbgsb",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "info-james-beach-health-care-centre-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 77.2,
+            "pitch": -28.1
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "James Beach Health Care Centre - Floor"
+          },
+          "namingId": "no_t65h6fpr3k",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-james-beach-health-care-centre-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_fa241wial8.webp"
+    },
+    "s_k5znwwhgm4": {
+      "id": "s_k5znwwhgm4",
+      "title": "Inpatient Suites",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_k5znwwhgm4.webp",
+      "defaultView": {
+        "yaw": 111,
+        "pitch": 0.2,
+        "zoom": 15
+      },
+      "hotspots": [
+        {
+          "id": "info-inpatient-bed-rooms-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 101.1,
+            "pitch": -15.8
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+          },
+          "namingId": "no_wyngqmlmpj",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-inpatient-bed-rooms-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-emergency-department-2-2",
+          "type": "nav",
+          "position": {
+            "yaw": 293,
+            "pitch": -2.6
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_k5znwwhgm4.webp",
+      "suppressPlaceOverview": true
+    },
+    "s_sdjz2mhlw6": {
+      "id": "s_sdjz2mhlw6",
+      "title": "Reception Centre",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_sdjz2mhlw6.webp",
+      "defaultView": {
+        "yaw": 101.6,
+        "pitch": -2.8,
+        "zoom": 55
+      },
+      "hotspots": [
+        {
+          "id": "info-reception-centre-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 84.9,
+            "pitch": -9.1
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
+          },
+          "namingId": "no_8qiqmdxgxh",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-reception-centre-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-2-2",
+          "type": "nav",
+          "position": {
+            "yaw": 128.1,
+            "pitch": -6.7
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_sdjz2mhlw6.webp",
+      "placeLead": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+    },
+    "s_2hbvd10ndp": {
+      "id": "s_2hbvd10ndp",
+      "title": "Nursing Station",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_2hbvd10ndp.webp",
+      "defaultView": {
+        "yaw": 84.5,
+        "pitch": -17.2,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "info-nursing-station-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 78.3,
+            "pitch": -20.8
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
+          },
+          "namingId": "no_6pxvptbryr",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-nursing-station-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-3-2",
+          "type": "nav",
+          "position": {
+            "yaw": 124.7,
+            "pitch": -14
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_2hbvd10ndp.webp",
+      "placeLead": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
+    },
+    "s_aglvzytsd0": {
+      "id": "s_aglvzytsd0",
+      "title": "Multi Use Lounge / Activity Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_aglvzytsd0.webp",
+      "defaultView": {
+        "yaw": 183.1,
+        "pitch": -8.5,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "info-multi-use-lounge-activity-room-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 186.7,
+            "pitch": -40.4
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
+          },
+          "namingId": "no_5zk36dz2rv",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-multi-use-lounge-activity-room-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-4-2",
+          "type": "nav",
+          "position": {
+            "yaw": 182.5,
+            "pitch": -5
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_aglvzytsd0.webp",
+      "placeLead": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
+    },
+    "s_b0p4zlphcm": {
+      "id": "s_b0p4zlphcm",
+      "title": "Quiet / Consultant",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_b0p4zlphcm.webp",
+      "defaultView": {
+        "yaw": 231.7,
+        "pitch": -29.9,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "info-quiet-consultant-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 237,
+            "pitch": -32
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
+          },
+          "namingId": "no_69pt8e6cp7",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-quiet-consultant-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-5-2",
+          "type": "nav",
+          "position": {
+            "yaw": 53.9,
+            "pitch": -8.3
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_b0p4zlphcm.webp",
+      "placeLead": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+    },
+    "s_c422jvoq5t": {
+      "id": "s_c422jvoq5t",
+      "title": "Dining / Activity Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_c422jvoq5t.webp",
+      "defaultView": {
+        "yaw": 73.6,
+        "pitch": -29.2,
+        "zoom": 14
+      },
+      "hotspots": [
+        {
+          "id": "info-dining-activity-room-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 70.4,
+            "pitch": -20
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
+          },
+          "namingId": "no_jmkkq6iq5e",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-dining-activity-room-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-6-2",
+          "type": "nav",
+          "position": {
+            "yaw": 169.5,
+            "pitch": -12.7
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_c422jvoq5t.webp",
+      "placeLead": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+    },
+    "s_ms3jd5bxdx": {
+      "id": "s_ms3jd5bxdx",
+      "title": "Allied Health Team Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_ms3jd5bxdx.webp",
+      "defaultView": {
+        "yaw": 81,
+        "pitch": -41.3,
+        "zoom": 14
+      },
+      "hotspots": [
+        {
+          "id": "info-allied-health-team-room-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 82.3,
+            "pitch": -43.4
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
+          },
+          "namingId": "no_6vv6bg02hx",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-allied-health-team-room-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-7-2",
+          "type": "nav",
+          "position": {
+            "yaw": 111.3,
+            "pitch": -5.6
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_ms3jd5bxdx.webp",
+      "placeLead": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care. Where care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place…"
+    },
+    "s_thjs1ppqso": {
+      "id": "s_thjs1ppqso",
+      "title": "Galley / Servery",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_thjs1ppqso.webp",
+      "defaultView": {
+        "yaw": 293.6,
+        "pitch": -13.6,
+        "zoom": 4
+      },
+      "hotspots": [
+        {
+          "id": "nav-to-james-beach-health-care-centre-8-2",
+          "type": "nav",
+          "position": {
+            "yaw": 75.2,
+            "pitch": -4.3
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        },
+        {
+          "id": "info-place",
+          "type": "info",
+          "role": "placeOverview",
+          "position": {
+            "yaw": 293.6,
+            "pitch": -13.6
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Galley / Servery",
+            "body": "The Galley/Servery is the busy heart behind every meal served on the floor. It’s where nutritious, comforting food is prepared and carefully organized to support patients’ healing and well-being.\n\nThis essential area keeps the care experience nourished—from special dietary needs to timely delivery—so patients can focus on recovery.\n\nBe a part of fueling the care journey by helping bring nourishment and comfort to every meal"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_thjs1ppqso.webp",
+      "description": "The Galley/Servery is the busy heart behind every meal served on the floor. It’s where nutritious, comforting food is prepared and carefully organized to support patients’ healing and well-being.\n\nThis essential area keeps the care experience nourished—from special dietary needs to timely delivery—so patients can focus on recovery.\n\nBe a part of fueling the care journey by helping bring nourishment and comfort to every meal"
+    },
+    "s_h8ukfkaxr9": {
+      "id": "s_h8ukfkaxr9",
+      "title": "Report Meeting Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_h8ukfkaxr9.webp",
+      "defaultView": {
+        "yaw": 91.4,
+        "pitch": -19.3,
+        "zoom": 32
+      },
+      "hotspots": [
+        {
+          "id": "info-report-meeting-room-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -16.9
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_z32j81duw6",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-9-2",
+          "type": "nav",
+          "position": {
+            "yaw": 6.9,
+            "pitch": -8.2
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_h8ukfkaxr9.webp",
+      "placeLead": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+    },
+    "s_x48fg4wlvd": {
+      "id": "s_x48fg4wlvd",
+      "title": "Staff Facility / Lounge",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_x48fg4wlvd.webp",
+      "defaultView": {
+        "yaw": 329.3,
+        "pitch": -22.6,
+        "zoom": 19
+      },
+      "hotspots": [
+        {
+          "id": "info-staff-facility-lounge-3-2",
+          "type": "info",
+          "position": {
+            "yaw": 330.7,
+            "pitch": -27.4
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_75whawiy0s",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge-3-2.webp"
+          }
+        },
+        {
+          "id": "nav-to-james-beach-health-care-centre-10-2",
+          "type": "nav",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -7.4
+          },
+          "targetScene": "s_fa241wial8",
+          "instant": true,
+          "navVariant": "back"
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_x48fg4wlvd.webp",
+      "placeLead": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
+    },
+    "s_6uyqibvsr5": {
+      "id": "s_6uyqibvsr5",
+      "title": "Inpatient Suites",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_6uyqibvsr5.webp",
+      "defaultView": {
+        "yaw": 111,
+        "pitch": 0.2,
+        "zoom": 15
+      },
+      "hotspots": [
+        {
+          "id": "info-inpatient-bed-rooms-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 101.1,
+            "pitch": -15.8
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+          },
+          "namingId": "no_su4we23ytq",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-inpatient-bed-rooms-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_6uyqibvsr5.webp",
+      "suppressPlaceOverview": true
+    },
+    "s_e4d31i0et7": {
+      "id": "s_e4d31i0et7",
+      "title": "Reception Centre",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_e4d31i0et7.webp",
+      "defaultView": {
+        "yaw": 101.6,
+        "pitch": -2.8,
+        "zoom": 55
+      },
+      "hotspots": [
+        {
+          "id": "info-reception-centre-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 84.9,
+            "pitch": -9.1
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
+          },
+          "namingId": "no_ibmnbs4wrw",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-reception-centre-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_e4d31i0et7.webp",
+      "placeLead": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+    },
+    "s_m6i932yb3i": {
+      "id": "s_m6i932yb3i",
+      "title": "Nursing Station",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_m6i932yb3i.webp",
+      "defaultView": {
+        "yaw": 84.5,
+        "pitch": -17.2,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "info-nursing-station-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 78.3,
+            "pitch": -20.8
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
+          },
+          "namingId": "no_2nt96k6scx",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-nursing-station-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_m6i932yb3i.webp",
+      "placeLead": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
+    },
+    "s_ei1i2wrm71": {
+      "id": "s_ei1i2wrm71",
+      "title": "Multi Use Lounge / Activity Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_ei1i2wrm71.webp",
+      "defaultView": {
+        "yaw": 183.1,
+        "pitch": -8.5,
+        "zoom": 1
+      },
+      "hotspots": [
+        {
+          "id": "info-multi-use-lounge-activity-room-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 186.7,
+            "pitch": -40.4
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
+          },
+          "namingId": "no_vrhkymu51b",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-multi-use-lounge-activity-room-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_ei1i2wrm71.webp",
+      "placeLead": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
+    },
+    "s_lo3hschobb": {
+      "id": "s_lo3hschobb",
+      "title": "Quiet / Consultant",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_lo3hschobb.webp",
+      "defaultView": {
+        "yaw": 231.7,
+        "pitch": -29.9,
+        "zoom": 10
+      },
+      "hotspots": [
+        {
+          "id": "info-quiet-consultant-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 237,
+            "pitch": -32
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
+          },
+          "namingId": "no_6zaycio8kb",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-quiet-consultant-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_lo3hschobb.webp",
+      "placeLead": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+    },
+    "s_yy6nfi18rd": {
+      "id": "s_yy6nfi18rd",
+      "title": "Dining / Activity Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_yy6nfi18rd.webp",
+      "defaultView": {
+        "yaw": 73.6,
+        "pitch": -29.2,
+        "zoom": 14
+      },
+      "hotspots": [
+        {
+          "id": "info-dining-activity-room-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 70.4,
+            "pitch": -20
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
+          },
+          "namingId": "no_1zfmgq6c39",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-dining-activity-room-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_yy6nfi18rd.webp",
+      "placeLead": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+    },
+    "s_y8izxirnap": {
+      "id": "s_y8izxirnap",
+      "title": "Allied Health Team Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_y8izxirnap.webp",
+      "defaultView": {
+        "yaw": 81,
+        "pitch": -41.3,
+        "zoom": 14
+      },
+      "hotspots": [
+        {
+          "id": "info-allied-health-team-room-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 82.3,
+            "pitch": -43.4
+          },
+          "popup": {
+            "display": "anchored",
+            "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
+          },
+          "namingId": "no_jt5f2q3roq",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-allied-health-team-room-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_y8izxirnap.webp",
+      "placeLead": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care. Where care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place…"
+    },
+    "s_9axb7djr5z": {
+      "id": "s_9axb7djr5z",
+      "title": "Galley / Servery",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_9axb7djr5z.webp",
+      "defaultView": {
+        "yaw": 293.6,
+        "pitch": -13.6,
+        "zoom": 4
+      },
+      "hotspots": [
+        {
+          "id": "info-place-2",
+          "type": "info",
+          "role": "placeOverview",
+          "position": {
+            "yaw": 293.6,
+            "pitch": -13.6
+          },
+          "popup": {
+            "display": "anchored",
+            "title": "Galley / Servery",
+            "body": "The Galley/Servery is the busy heart behind every meal served on the floor. It’s where nutritious, comforting food is prepared and carefully organized to support patients’ healing and well-being.\n\nThis essential area keeps the care experience nourished—from special dietary needs to timely delivery—so patients can focus on recovery.\n\nBe a part of fueling the care journey by helping bring nourishment and comfort to every meal"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_9axb7djr5z.webp",
+      "description": "The Galley/Servery is the busy heart behind every meal served on the floor. It’s where nutritious, comforting food is prepared and carefully organized to support patients’ healing and well-being.\n\nThis essential area keeps the care experience nourished—from special dietary needs to timely delivery—so patients can focus on recovery.\n\nBe a part of fueling the care journey by helping bring nourishment and comfort to every meal"
+    },
+    "s_r9cso9ov3y": {
+      "id": "s_r9cso9ov3y",
+      "title": "Report Meeting Room",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_r9cso9ov3y.webp",
+      "defaultView": {
+        "yaw": 91.4,
+        "pitch": -19.3,
+        "zoom": 32
+      },
+      "hotspots": [
+        {
+          "id": "info-report-meeting-room-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 79.5,
+            "pitch": -16.9
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_2droar7isn",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_r9cso9ov3y.webp",
+      "placeLead": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+    },
+    "s_31fdtwxt9c": {
+      "id": "s_31fdtwxt9c",
+      "title": "Staff Facility / Lounge",
+      "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_31fdtwxt9c.webp",
+      "defaultView": {
+        "yaw": 329.3,
+        "pitch": -22.6,
+        "zoom": 19
+      },
+      "hotspots": [
+        {
+          "id": "info-staff-facility-lounge-3-2-2",
+          "type": "info",
+          "position": {
+            "yaw": 330.7,
+            "pitch": -27.4
+          },
+          "popup": {
+            "display": "anchored"
+          },
+          "namingId": "no_xbx7bn2rlf",
+          "preview": {
+            "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge-3-2-2.webp"
+          }
+        }
+      ],
+      "thumbnail": "/assets/qchfoundation/t_9zs0j4a7xt/thumbnails/s_31fdtwxt9c.webp",
+      "placeLead": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
     }
   },
   "namingOpportunities": {
@@ -1310,8 +2830,10 @@
     },
     "no_086npbauv3": {
       "id": "no_086npbauv3",
-      "price": 1000000,
-      "status": "open"
+      "price": 5000000,
+      "status": "open",
+      "body": "**30 new inpatient beds to the James Beach Health Care Centre to Care for Our Loved Ones.**\n\nThe volume and complexity of care needs in the West End of Ottawa continues to place significant strain across the hospital, and **there are rarely days when occupancy falls below 110 percent**. The consequences are visible and deeply felt. Patients are too often cared for in unconventional spaces — hallways, treatment areas, and within the Emergency Department itself — while dedicated staff work tirelessly under relentless pressure.\n\nThis floor is one of three new inpatient floors adding **90 new beds** in total to the James Beach Health Care Centre. When the original centre was built in 2012, it was intentionally designed to support this expansion — **a proactive approach that will allow construction to move more efficiently and the new space to open sooner in response to growing demand.**\n\nThese private inpatient rooms will expand access to essential services, help relieve overcrowding across the hospital, improve patient flow, and provide greater privacy, comfort, and timely access to care. Every element is shaped around the patient journey — from care zones to circulation paths, from arrival to treatment and recovery — with the patient experience at its centre.\n\nThis floor is not simply about adding space. It is part of an urgent response that strengthens the hospital’s ability to serve the community more effectively now and into the future.",
+      "name": "James Beach Health Care Centre - Floor"
     },
     "no_ekdp6j8za4": {
       "id": "no_ekdp6j8za4",
@@ -1344,7 +2866,6 @@
     "no_db8e1xnyxt": {
       "id": "no_db8e1xnyxt",
       "price": 100000,
-      "name": "Quiet / Consultant",
       "status": "open",
       "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
     },
@@ -1428,6 +2949,354 @@
       "price": 1000000,
       "status": "open",
       "body": "When a seriously injured patient arrives at the hospital, every minute\nmatters. The trauma resuscitation centre is the part of the emergency\ndepartment dedicated to those moments. It is where a trained trauma\nteam comes together to rapidly assess, stabilize, and treat patients\nwith life‑threatening injuries.\n\nIn this space, specialists work in parallel—airway, breathing,\ncirculation, imaging, and surgery planning happen at the same time,\nnot in sequence. That coordinated response shortens the time to\ncritical diagnostics like CT scans and speeds decisions about surgery\nor intensive care, which has been shown to reduce emergency department\nlength of stay and improve key indicators of trauma care quality.\n\nFor patients and families, the trauma resuscitation centre is where\nfear begins to turn into a sense of safety. Studies show that clear\nleadership, organized teamwork, and compassionate communication during\nresuscitation help patients feel they are in capable hands, even in\nthe most vulnerable moments.\n\nInvesting in the trauma resuscitation centre means investing in the\nsystems, equipment, and training that give people their best chance of\nsurvival and recovery when the unexpected happens."
+    },
+    "no_7itmkm9ry9": {
+      "id": "no_7itmkm9ry9",
+      "price": 5000000,
+      "status": "open",
+      "body": "**30 new inpatient beds to the James Beach Health Care Centre to Care for Our Loved Ones.**\n\nThe volume and complexity of care needs in the West End of Ottawa continues to place significant strain across the hospital, and **there are rarely days when occupancy falls below 110 percent**. The consequences are visible and deeply felt. Patients are too often cared for in unconventional spaces — hallways, treatment areas, and within the Emergency Department itself — while dedicated staff work tirelessly under relentless pressure.\n\nThis floor is one of three new inpatient floors adding **90 new beds** in total to the James Beach Health Care Centre. When the original centre was built in 2012, it was intentionally designed to support this expansion — **a proactive approach that will allow construction to move more efficiently and the new space to open sooner in response to growing demand.**\n\nThese private inpatient rooms will expand access to essential services, help relieve overcrowding across the hospital, improve patient flow, and provide greater privacy, comfort, and timely access to care. Every element is shaped around the patient journey — from care zones to circulation paths, from arrival to treatment and recovery — with the patient experience at its centre.\n\nThis floor is not simply about adding space. It is part of an urgent response that strengthens the hospital’s ability to serve the community more effectively now and into the future.",
+      "name": "James Beach Health Care Centre - Floor"
+    },
+    "no_htjr45td27": {
+      "id": "no_htjr45td27",
+      "price": 5000000,
+      "status": "open",
+      "body": "**30 new inpatient beds to the James Beach Health Care Centre to Care for Our Loved Ones.**\n\nThe volume and complexity of care needs in the West End of Ottawa continues to place significant strain across the hospital, and **there are rarely days when occupancy falls below 110 percent**. The consequences are visible and deeply felt. Patients are too often cared for in unconventional spaces — hallways, treatment areas, and within the Emergency Department itself — while dedicated staff work tirelessly under relentless pressure.\n\nThis floor is one of three new inpatient floors adding **90 new beds** in total to the James Beach Health Care Centre. When the original centre was built in 2012, it was intentionally designed to support this expansion — **a proactive approach that will allow construction to move more efficiently and the new space to open sooner in response to growing demand.**\n\nThese private inpatient rooms will expand access to essential services, help relieve overcrowding across the hospital, improve patient flow, and provide greater privacy, comfort, and timely access to care. Every element is shaped around the patient journey — from care zones to circulation paths, from arrival to treatment and recovery — with the patient experience at its centre.\n\nThis floor is not simply about adding space. It is part of an urgent response that strengthens the hospital’s ability to serve the community more effectively now and into the future.",
+      "name": "James Beach Health Care Centre - Floor"
+    },
+    "no_800ybwzzo0": {
+      "id": "no_800ybwzzo0",
+      "price": 50000,
+      "name": "Inpatient Bed Rooms",
+      "status": "open",
+      "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together."
+    },
+    "no_dzmb7lypru": {
+      "id": "no_dzmb7lypru",
+      "price": 500000,
+      "name": "Reception Centre",
+      "status": "open",
+      "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+    },
+    "no_xq3ij7yuy4": {
+      "id": "no_xq3ij7yuy4",
+      "price": 250000,
+      "name": "Nursing Station",
+      "status": "open",
+      "body": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
+    },
+    "no_iialpmr9w6": {
+      "id": "no_iialpmr9w6",
+      "price": 250000,
+      "name": "Multi Use Lounge / Activity Room",
+      "status": "open",
+      "body": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
+    },
+    "no_h2n5md9ckf": {
+      "id": "no_h2n5md9ckf",
+      "price": 100000,
+      "name": "Quiet / Consultant",
+      "status": "open",
+      "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+    },
+    "no_st1mpn6pu3": {
+      "id": "no_st1mpn6pu3",
+      "price": 250000,
+      "name": "Dining / Activity Room",
+      "status": "open",
+      "body": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+    },
+    "no_x6pyvfzrpa": {
+      "id": "no_x6pyvfzrpa",
+      "price": 100000,
+      "name": "Allied Health Team Room",
+      "status": "open",
+      "body": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape."
+    },
+    "no_qebkmn2z4p": {
+      "id": "no_qebkmn2z4p",
+      "price": 100000,
+      "name": "Report Meeting Room",
+      "status": "open",
+      "body": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+    },
+    "no_lft69fqeql": {
+      "id": "no_lft69fqeql",
+      "price": 100000,
+      "name": "Staff Facility / Lounge",
+      "status": "open",
+      "body": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
+    },
+    "no_i223vnd2db": {
+      "id": "no_i223vnd2db",
+      "price": 5000000,
+      "status": "open",
+      "body": "**30 new inpatient beds to the James Beach Health Care Centre to Care for Our Loved Ones.**\n\nThe volume and complexity of care needs in the West End of Ottawa continues to place significant strain across the hospital, and **there are rarely days when occupancy falls below 110 percent**. The consequences are visible and deeply felt. Patients are too often cared for in unconventional spaces — hallways, treatment areas, and within the Emergency Department itself — while dedicated staff work tirelessly under relentless pressure.\n\nThis floor is one of three new inpatient floors adding **90 new beds** in total to the James Beach Health Care Centre. When the original centre was built in 2012, it was intentionally designed to support this expansion — **a proactive approach that will allow construction to move more efficiently and the new space to open sooner in response to growing demand.**\n\nThese private inpatient rooms will expand access to essential services, help relieve overcrowding across the hospital, improve patient flow, and provide greater privacy, comfort, and timely access to care. Every element is shaped around the patient journey — from care zones to circulation paths, from arrival to treatment and recovery — with the patient experience at its centre.\n\nThis floor is not simply about adding space. It is part of an urgent response that strengthens the hospital’s ability to serve the community more effectively now and into the future.",
+      "name": "James Beach Health Care Centre - Floor"
+    },
+    "no_v214g0oww7": {
+      "id": "no_v214g0oww7",
+      "price": 50000,
+      "name": "Inpatient Bed Rooms",
+      "status": "open",
+      "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together."
+    },
+    "no_lykbpg4xy8": {
+      "id": "no_lykbpg4xy8",
+      "price": 500000,
+      "name": "Reception Centre",
+      "status": "open",
+      "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+    },
+    "no_tixxag95au": {
+      "id": "no_tixxag95au",
+      "price": 250000,
+      "name": "Nursing Station",
+      "status": "open",
+      "body": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
+    },
+    "no_t6e9gsrsbh": {
+      "id": "no_t6e9gsrsbh",
+      "price": 250000,
+      "name": "Multi Use Lounge / Activity Room",
+      "status": "open",
+      "body": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
+    },
+    "no_810qrsybup": {
+      "id": "no_810qrsybup",
+      "price": 100000,
+      "name": "Quiet / Consultant",
+      "status": "open",
+      "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+    },
+    "no_vii7b6q7b7": {
+      "id": "no_vii7b6q7b7",
+      "price": 250000,
+      "name": "Dining / Activity Room",
+      "status": "open",
+      "body": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+    },
+    "no_ptbmlcz8u0": {
+      "id": "no_ptbmlcz8u0",
+      "price": 100000,
+      "name": "Allied Health Team Room",
+      "status": "open",
+      "body": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape."
+    },
+    "no_ulu3wcv6bh": {
+      "id": "no_ulu3wcv6bh",
+      "price": 100000,
+      "name": "Report Meeting Room",
+      "status": "open",
+      "body": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+    },
+    "no_dd2495tzjk": {
+      "id": "no_dd2495tzjk",
+      "price": 100000,
+      "name": "Staff Facility / Lounge",
+      "status": "open",
+      "body": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
+    },
+    "no_t65h6fpr3k": {
+      "id": "no_t65h6fpr3k",
+      "price": 5000000,
+      "status": "open",
+      "body": "**30 new inpatient beds to the James Beach Health Care Centre to Care for Our Loved Ones.**\n\nThe volume and complexity of care needs in the West End of Ottawa continues to place significant strain across the hospital, and **there are rarely days when occupancy falls below 110 percent**. The consequences are visible and deeply felt. Patients are too often cared for in unconventional spaces — hallways, treatment areas, and within the Emergency Department itself — while dedicated staff work tirelessly under relentless pressure.\n\nThis floor is one of three new inpatient floors adding **90 new beds** in total to the James Beach Health Care Centre. When the original centre was built in 2012, it was intentionally designed to support this expansion — **a proactive approach that will allow construction to move more efficiently and the new space to open sooner in response to growing demand.**\n\nThese private inpatient rooms will expand access to essential services, help relieve overcrowding across the hospital, improve patient flow, and provide greater privacy, comfort, and timely access to care. Every element is shaped around the patient journey — from care zones to circulation paths, from arrival to treatment and recovery — with the patient experience at its centre.\n\nThis floor is not simply about adding space. It is part of an urgent response that strengthens the hospital’s ability to serve the community more effectively now and into the future.",
+      "name": "James Beach Health Care Centre - Floor"
+    },
+    "no_wyngqmlmpj": {
+      "id": "no_wyngqmlmpj",
+      "price": 50000,
+      "name": "Inpatient Bed Rooms",
+      "status": "open",
+      "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together."
+    },
+    "no_8qiqmdxgxh": {
+      "id": "no_8qiqmdxgxh",
+      "price": 500000,
+      "name": "Reception Centre",
+      "status": "open",
+      "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+    },
+    "no_6pxvptbryr": {
+      "id": "no_6pxvptbryr",
+      "price": 250000,
+      "name": "Nursing Station",
+      "status": "open",
+      "body": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
+    },
+    "no_5zk36dz2rv": {
+      "id": "no_5zk36dz2rv",
+      "price": 250000,
+      "name": "Multi Use Lounge / Activity Room",
+      "status": "open",
+      "body": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
+    },
+    "no_69pt8e6cp7": {
+      "id": "no_69pt8e6cp7",
+      "price": 100000,
+      "name": "Quiet / Consultant",
+      "status": "open",
+      "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+    },
+    "no_jmkkq6iq5e": {
+      "id": "no_jmkkq6iq5e",
+      "price": 250000,
+      "name": "Dining / Activity Room",
+      "status": "open",
+      "body": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+    },
+    "no_6vv6bg02hx": {
+      "id": "no_6vv6bg02hx",
+      "price": 100000,
+      "name": "Allied Health Team Room",
+      "status": "open",
+      "body": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape."
+    },
+    "no_z32j81duw6": {
+      "id": "no_z32j81duw6",
+      "price": 100000,
+      "name": "Report Meeting Room",
+      "status": "open",
+      "body": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+    },
+    "no_75whawiy0s": {
+      "id": "no_75whawiy0s",
+      "price": 100000,
+      "name": "Staff Facility / Lounge",
+      "status": "open",
+      "body": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
+    },
+    "no_kjs2sx9u45": {
+      "id": "no_kjs2sx9u45",
+      "price": 5000000,
+      "status": "open",
+      "body": "**30 new inpatient beds to the James Beach Health Care Centre to Care for Our Loved Ones.**\n\nThe volume and complexity of care needs in the West End of Ottawa continues to place significant strain across the hospital, and **there are rarely days when occupancy falls below 110 percent**. The consequences are visible and deeply felt. Patients are too often cared for in unconventional spaces — hallways, treatment areas, and within the Emergency Department itself — while dedicated staff work tirelessly under relentless pressure.\n\nThis floor is one of three new inpatient floors adding **90 new beds** in total to the James Beach Health Care Centre. When the original centre was built in 2012, it was intentionally designed to support this expansion — **a proactive approach that will allow construction to move more efficiently and the new space to open sooner in response to growing demand.**\n\nThese private inpatient rooms will expand access to essential services, help relieve overcrowding across the hospital, improve patient flow, and provide greater privacy, comfort, and timely access to care. Every element is shaped around the patient journey — from care zones to circulation paths, from arrival to treatment and recovery — with the patient experience at its centre.\n\nThis floor is not simply about adding space. It is part of an urgent response that strengthens the hospital’s ability to serve the community more effectively now and into the future.",
+      "name": "James Beach Health Care Centre - Floor"
+    },
+    "no_su4we23ytq": {
+      "id": "no_su4we23ytq",
+      "price": 50000,
+      "name": "Inpatient Bed Rooms",
+      "status": "open",
+      "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments. \n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together."
+    },
+    "no_ibmnbs4wrw": {
+      "id": "no_ibmnbs4wrw",
+      "price": 500000,
+      "name": "Reception Centre",
+      "status": "open",
+      "body": "At the heart of every inpatient floor, the Reception Centre welcomes patients, families, and visitors with support, clear direction, and a friendly smile. Whether you’re arriving for a visit or seeking information, the QCH team is here to guide you—answering questions and connecting you with the care team. Be a part of a welcoming and supportive space that patients rely on throughout their care journey."
+    },
+    "no_2nt96k6scx": {
+      "id": "no_2nt96k6scx",
+      "price": 250000,
+      "name": "Nursing Station",
+      "status": "open",
+      "body": "Nursing Stations are located in every corner and at the heart of each floor, Nursing Stations are where vital work happens. Nurses coordinate care plans, share critical updates, respond to urgent needs, manage admissions and discharges, and collaborate with the care team. Be part of the space where the care team makes a real difference every day."
+    },
+    "no_vrhkymu51b": {
+      "id": "no_vrhkymu51b",
+      "price": 250000,
+      "name": "Multi Use Lounge / Activity Room",
+      "status": "open",
+      "body": "This bright, welcoming space is designed for connection, comfort, and creativity. Whether it’s a quiet moment to relax, a group activity, or time to socialize, the Multi Use Lounge adapts to the needs of patients and their families. A flexible, inviting environment that supports well-being in all its forms. Be a part of the moments that matter—where comfort and community come together"
+    },
+    "no_6zaycio8kb": {
+      "id": "no_6zaycio8kb",
+      "price": 100000,
+      "name": "Quiet / Consultant",
+      "status": "open",
+      "body": "This calm, inviting room is designed to provide patients and their loved ones with privacy, comfort, and a welcoming atmosphere. It’s where QCH care teams meet to share important information, offer support, and provide education during some of the most meaningful moments in a patient’s care journey. Be a part of those meaningful moments that build trust, understanding, and connection throughout a patients care journey."
+    },
+    "no_1zfmgq6c39": {
+      "id": "no_1zfmgq6c39",
+      "price": 250000,
+      "name": "Dining / Activity Room",
+      "status": "open",
+      "body": "The Dining / Activity Room is a large, welcoming space where patients and loved ones gather to share meals, spend time together, and enjoy meaningful moments. Healing happens here—through comfort, conversation, and community. Be a part of the patient journey by supporting a space where comfort, connection, and compassion come together."
+    },
+    "no_jt5f2q3roq": {
+      "id": "no_jt5f2q3roq",
+      "price": 100000,
+      "name": "Allied Health Team Room",
+      "status": "open",
+      "body": "The Allied Health Team Room is where professionals from many disciplines—like physiotherapy, occupational therapy, social work, and more—come together to collaborate, share insights, and plan patient-centered care.\n\nWhere care plans are discussed, progress is reviewed, and next steps are thoughtfully mapped out to support every patient’s journey. This space sparks innovation and strengthens teamwork—fueling the expert care your community counts on. Be a part of the place where teamwork happens and better care takes shape."
+    },
+    "no_2droar7isn": {
+      "id": "no_2droar7isn",
+      "price": 100000,
+      "name": "Report Meeting Room",
+      "status": "open",
+      "body": "The Report Meeting Room is where vital conversations happen—where the care team comes together to share updates, discuss patient progress, and plan next steps. Designed to foster clear communication and focused collaboration, the room helps ensure everyone is aligned and empowered to provide high-quality, compassionate, and coordinated care. Be a part of the space that strengthens teamwork and supports exceptional care every day."
+    },
+    "no_xbx7bn2rlf": {
+      "id": "no_xbx7bn2rlf",
+      "price": 100000,
+      "name": "Staff Facility / Lounge",
+      "status": "open",
+      "body": "The Staff Facility/Lounge is a dedicated space where the QCH care team can recharge, connect, and find support during their demanding shifts. This space fosters camaraderie and well-being, helping our team stay refreshed and ready to provide high-quality, compassionate, and coordinated care every day. Be a part of the everyday moments that support those who care for our community."
     }
-  }
+  },
+  "sceneOrder": [
+    "s_sxeq0eovm7",
+    "s_7ezzd8nh4z",
+    "s_t0y42xbmsv",
+    "s_8s40pp3yyo",
+    "s_kl3j76w8q9",
+    "s_qu7z1pbgsb",
+    "s_d2s5ai83yt",
+    "s_mmj82ryz6p",
+    "s_fa241wial8",
+    "s_6uyqibvsr5",
+    "s_e4d31i0et7",
+    "s_m6i932yb3i",
+    "s_ei1i2wrm71",
+    "s_lo3hschobb",
+    "s_yy6nfi18rd",
+    "s_y8izxirnap",
+    "s_9axb7djr5z",
+    "s_r9cso9ov3y",
+    "s_31fdtwxt9c",
+    "s_k5znwwhgm4",
+    "s_sdjz2mhlw6",
+    "s_2hbvd10ndp",
+    "s_aglvzytsd0",
+    "s_b0p4zlphcm",
+    "s_c422jvoq5t",
+    "s_ms3jd5bxdx",
+    "s_thjs1ppqso",
+    "s_h8ukfkaxr9",
+    "s_x48fg4wlvd",
+    "s_c42kwvk6i6",
+    "s_z7n2u3rr0e",
+    "s_6u5agl2var",
+    "s_3nv9rl56r7",
+    "s_vf8l9043xl",
+    "s_7df4dxgbgk",
+    "s_jv5lhy0fzb",
+    "s_53f222bswk",
+    "s_tkfah1p184",
+    "s_r8ctcgzbei",
+    "s_zyrfvgi4sg",
+    "s_h8xx646a23",
+    "s_vosd6uzi2u",
+    "s_1tdql8sfba",
+    "s_w0voges2yz",
+    "s_oh2aardnvw",
+    "s_j2qwfv4t1m",
+    "s_x0w3usny9z",
+    "s_0gnezew7qt",
+    "s_ud8lmbrt5c",
+    "s_epo1xsg3qz",
+    "s_rieg7s3uck",
+    "s_9lpv5ehvnw",
+    "s_g04g0ejaut",
+    "s_smiksp7yqr",
+    "s_5qt1e2v1kl",
+    "s_uk608rqf4q",
+    "s_tzlpanycba",
+    "s_5dwnzwkhwz",
+    "s_k7h3wlz10z"
+  ]
 }
