@@ -38,7 +38,10 @@ import {
 
 export interface BreadcrumbSiblingOption {
   id: string;
+  /** Full scene title (tooltips, aria, details). */
   title: string;
+  /** Visible trail / menu label (same as title; kept for call-site clarity). */
+  displayTitle: string;
 }
 
 interface TourBreadcrumbSiblingMenuProps {
@@ -274,7 +277,7 @@ export function TourBreadcrumbSiblingMenu({
                   }}
                 >
                   <span className='min-w-0 flex-1 truncate'>
-                    {sibling.title}
+                    {sibling.displayTitle}
                   </span>
                   {highlighted && isCurrentCrumb ?
                     <MaterialSymbol
@@ -347,5 +350,8 @@ export function resolveBreadcrumbSiblingOptions(
   siblingIds: string[],
   scenesById: Record<string, Scene>,
 ): BreadcrumbSiblingOption[] {
-  return siblingIds.map((id) => ({ id, title: scenesById[id]?.title ?? id }));
+  return siblingIds.map((id) => {
+    const title = scenesById[id]?.title ?? id;
+    return { id, title, displayTitle: title };
+  });
 }

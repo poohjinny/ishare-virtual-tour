@@ -3,7 +3,11 @@ import { flushSync } from 'react-dom';
 import type { NamingOpportunity, PopupContent, PopupCta } from '../types/tour';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import { cn } from '../lib/cn';
-import { partitionPopupCtasForPlacement, isMailtoCtaUrl, openCtaUrl } from '../utils/popupCtaPlacement';
+import {
+  partitionPopupCtasForPlacement,
+  isMailtoCtaUrl,
+  openCtaUrl,
+} from '../utils/popupCtaPlacement';
 import {
   popupCtaRowClassName,
   popupCtaWrapClassName,
@@ -47,12 +51,13 @@ import {
   MATERIAL_SYMBOL_SIZE_18,
   materialSymbolBadgeClassName,
 } from './ui/materialSymbolClasses';
+import {
+  renderInlineMarkdown,
+  splitMarkdownParagraphs,
+} from '../utils/inlineMarkdown';
 
 export function splitPopupBody(body: string): string[] {
-  return body
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  return splitMarkdownParagraphs(body);
 }
 
 function StatusBadgeIcon({ modifier }: { modifier: string }) {
@@ -195,7 +200,7 @@ export function PopupBodyCopy({ body }: { body: string }) {
     <div className='tour-glass-panel__copy'>
       {paragraphs.map((paragraph, index) => (
         <p key={index} className='tour-glass-panel__paragraph'>
-          {paragraph}
+          {renderInlineMarkdown(paragraph, `body-${index}`)}
         </p>
       ))}
     </div>
@@ -425,9 +430,7 @@ export function PopupCtaButton({ cta }: { cta: PopupCta }) {
         showIcon && 'tour-glass-panel__cta--has-trailing-icon',
       )}
       href={resolved.url}
-      {...(isMailto ?
-        {}
-      : { target: '_blank', rel: 'noopener noreferrer' })}
+      {...(isMailto ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
       aria-label={resolved.ariaLabel}
       onClick={(event) => {
         if (!isMailto) return;

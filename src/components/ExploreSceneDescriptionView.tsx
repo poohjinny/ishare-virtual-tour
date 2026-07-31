@@ -11,6 +11,7 @@ import {
   tourDirectorySceneDetailVisitLabel,
 } from '../constants/tourDirectory';
 import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
+import { InlineMarkdownParagraphs } from '../utils/inlineMarkdown';
 import { cn } from '../lib/cn';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDetailVisitFooter } from './ExploreDetailVisitFooter';
@@ -145,7 +146,13 @@ export function ExploreSceneDescriptionView({
           <div className={tourNavSceneDetailCopyClassName}>
             <h3 className={tourNavSceneDetailTitleClassName}>{scene.title}</h3>
 
-            <p className={tourNavSceneDetailBodyClassName}>{description}</p>
+            {description ?
+              <InlineMarkdownParagraphs
+                text={description}
+                className='flex flex-col gap-3'
+                paragraphClassName={tourNavSceneDetailBodyClassName}
+              />
+            : null}
 
             {bodyVideoUrl ?
               <PopupVideoEmbed videoUrl={bodyVideoUrl} title={scene.title} />

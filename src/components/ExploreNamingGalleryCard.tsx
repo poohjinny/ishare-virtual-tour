@@ -16,6 +16,10 @@ import {
   exploreNamingVisitPlaceAriaLabel,
   tourDirectoryNamingInfoAriaLabel,
 } from '../constants/tourDirectory';
+import {
+  renderInlineMarkdown,
+  stripInlineMarkdown,
+} from '../utils/inlineMarkdown';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { useExploreGroupMediaReady } from './ExploreGroupMediaReady';
 import {
@@ -166,6 +170,7 @@ export function ExploreNamingGalleryCard({
   const heroLoading = wantsLoad && !previewFailed && !previewLoaded;
 
   const description = item.description?.trim();
+  const descriptionPlain = description ? stripInlineMarkdown(description) : '';
   const donorCredit = item.donorCredit?.trim();
   const priceLabel = formatNamingGalleryItemPrice(item);
   const showHoverBody = true;
@@ -174,11 +179,11 @@ export function ExploreNamingGalleryCard({
   const creditSuffix = donorCredit ? ` ${donorCredit}.` : '';
   const cardAriaLabel =
     active ?
-      description ?
-        `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+      descriptionPlain ?
+        `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${descriptionPlain}`
       : `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`
-    : description ?
-      `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+    : descriptionPlain ?
+      `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${descriptionPlain}`
     : `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`;
 
   const visitCta = (
@@ -359,7 +364,7 @@ export function ExploreNamingGalleryCard({
                           tourNavLocationGalleryHeroDescriptionClassName
                         }
                       >
-                        {description}
+                        {renderInlineMarkdown(description, item.hotspotId)}
                       </span>
                     : null}
 

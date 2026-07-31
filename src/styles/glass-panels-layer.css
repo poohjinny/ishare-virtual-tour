@@ -976,28 +976,63 @@
   }
 
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta {
-    white-space: nowrap;
-    overflow: hidden;
     max-width: 100%;
   }
 
-  /* Footer primary CTA hover � nav preview + info/NO panels */
+  /*
+   * Full-width Visit / postfix CTAs — long labels (e.g. Floors 4, 5 and 6) wrap
+   * with balanced lines; arrow stays in-flow so multi-line height stays tidy.
+   */
+  .tour-glass-panel--anchored .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon,
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon,
+  .tour-glass-panel--modal .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon,
+  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] {
+    display: flex;
+    align-items: center;
+    gap: var(--ishare-panel-cta-gap, 8px);
+    white-space: normal;
+    overflow: hidden;
+    max-width: 100%;
+    border-radius: 16px;
+    padding-inline: 16px 14px;
+  }
+
+  .tour-glass-panel--anchored .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-text,
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-text,
+  .tour-glass-panel--modal .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-text,
+  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] .tour-glass-panel__cta-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: center;
+    white-space: normal;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+    line-height: 1.3;
+  }
+
+  .tour-glass-panel--anchored .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-icon,
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-icon,
+  .tour-glass-panel--modal .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-icon,
+  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] .tour-glass-panel__cta-icon {
+    position: static;
+    top: auto;
+    right: auto;
+    flex: none;
+    align-self: center;
+    transform: none;
+    margin: 0;
+  }
+
+  /* Footer primary CTA hover — nav preview + info/NO panels */
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon) .tour-glass-panel__cta-icon {
     transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-trailing-icon:not(.tour-glass-panel__cta--secondary):hover .tour-glass-panel__cta-icon,
-  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-trailing-icon:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon,
+  .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon:not(.tour-glass-panel__cta--secondary):focus-visible .tour-glass-panel__cta-icon,
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):hover .tour-glass-panel__cta-icon,
   .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):focus-visible .tour-glass-panel__cta-icon {
-    transform: translateY(-50%) translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
-  }
-
-  /* Visit-scene CTA — same hover as nav-preview CTA */
-  .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] {
-    white-space: nowrap;
-    overflow: hidden;
-    max-width: 100%;
+    transform: translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
   }
 
   .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] .tour-glass-panel__cta-icon {
@@ -1008,7 +1043,7 @@
 
   .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:hover .tour-glass-panel__cta-icon,
   .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:focus-visible .tour-glass-panel__cta-icon {
-    transform: translateY(-50%) translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
+    transform: translateX(var(--ishare-panel-cta-icon-hover-shift, 6px));
   }
 
   /* NO panel primary CTA icon — Material Symbols fill on hover */
@@ -1045,6 +1080,19 @@
     font-size: var(--ishare-font-size-lg);
     line-height: 1.72;
     color: inherit;
+  }
+
+  .tour-glass-panel__paragraph strong,
+  .tour-glass-panel__copy strong,
+  .nav-preview-panel__naming-desc strong {
+    font-weight: 500;
+    color: #0f172a;
+  }
+
+  .tour-glass-panel__paragraph em,
+  .tour-glass-panel__copy em,
+  .nav-preview-panel__naming-desc em {
+    font-style: italic;
   }
 
   .tour-glass-panel__video {
@@ -1582,37 +1630,50 @@
     min-height: 0;
   }
 
-  /* Explore place/naming detail — content-width Visit with in-flow arrow (not absolute postfix). */
+  /* Explore place/naming detail — Visit CTA wraps long labels (full width). */
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer {
     padding: 18px 20px 20px;
   }
 
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta-wrap {
-    align-items: center;
+    align-items: stretch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta,
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon,
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta:has(> .tour-glass-panel__cta-icon) {
-    display: inline-flex;
-    width: auto;
+    display: flex;
+    align-items: center;
+    width: 100%;
     max-width: 100%;
+    min-width: 0;
     gap: var(--ishare-panel-cta-gap, 8px);
     padding-block: 12px;
-    padding-inline: 40px 30px;
+    padding-inline: 16px 14px;
     min-height: 0;
-    overflow: visible;
+    overflow: hidden;
     justify-content: center;
+    border-radius: 16px;
+    white-space: normal;
+    box-sizing: border-box;
   }
 
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta-text,
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta--has-postfix-icon .tour-glass-panel__cta-text,
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta:has(> .tour-glass-panel__cta-icon) .tour-glass-panel__cta-text {
-    flex: 0 0 auto;
-    max-width: none;
-    overflow: visible;
-    text-overflow: unset;
-    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+    text-align: center;
+    line-height: 1.3;
   }
 
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta-icon,
@@ -1621,7 +1682,10 @@
     position: static;
     top: auto;
     right: auto;
+    flex: none;
+    align-self: center;
     transform: none;
+    margin: 0;
   }
 
   .tour-glass-panel--directory .tour-nav-scene-detail-footer.tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:hover .tour-glass-panel__cta-icon,
@@ -2796,7 +2860,7 @@
 
     .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):hover .tour-glass-panel__cta-icon,
     .tour-glass-panel--nav-preview .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary):has(> .tour-glass-panel__cta-icon):focus-visible .tour-glass-panel__cta-icon {
-      transform: translateY(-50%);
+      transform: none;
     }
 
     .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene] .tour-glass-panel__cta-icon {
@@ -2805,7 +2869,7 @@
 
     .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:hover .tour-glass-panel__cta-icon,
     .tour-glass-panel__footer .tour-glass-panel__cta[data-visit-scene]:focus-visible .tour-glass-panel__cta-icon {
-      transform: translateY(-50%);
+      transform: none;
     }
 
     .tour-glass-panel--anchored[data-info-panel-naming='true'] .tour-glass-panel__footer .tour-glass-panel__cta:not(.tour-glass-panel__cta--secondary) .tour-glass-panel__cta-icon,

@@ -1085,14 +1085,10 @@ input::placeholder {
   letter-spacing: -0.01em;
   color: var(--ishare-text);
   white-space: nowrap;
-  max-width: 10rem;
+  /* Soft viewport cap only — avoid idle ellipsis on normal-length titles. */
+  max-width: min(22rem, 75vw);
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: max-width 0.22s ease;
-}
-
-.hotspot-nav:is(:hover, :focus-visible, .hotspot-nav--active) .hotspot-nav__label {
-  max-width: min(22rem, 75vw);
 }
 
 /*
@@ -1375,11 +1371,11 @@ input::placeholder {
   letter-spacing: -0.01em;
   color: #fff;
   white-space: nowrap;
-  max-width: 16rem;
+  /* Soft viewport cap only — avoid idle ellipsis on normal-length titles. */
+  max-width: min(22rem, 75vw);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: max-width 0.22s ease;
 }
 
 .hotspot-info__name {
@@ -1387,10 +1383,6 @@ input::placeholder {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.hotspot-info:is(:hover, :focus-visible, .hotspot-info--active) .hotspot-info__label {
-  max-width: min(22rem, 75vw);
 }
 
 .hotspot-info__label-sep,
@@ -1496,22 +1488,7 @@ input::placeholder {
   animation: none;
 }
 
-@media (pointer: coarse) {
-  .hotspot-nav__label {
-    max-width: 14rem;
-  }
-
-  .hotspot-info__label {
-    max-width: 18rem;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-
-  .hotspot-nav__label,
-  .hotspot-info__label {
-    transition: none;
-  }
 
   .hotspot-nav--active .hotspot-nav__dot {
     box-shadow: var(--ishare-active-icon-dot-ring);

@@ -13,6 +13,7 @@ import {
 } from './namingSceneInherit';
 import { isDefaultNamingDescription } from './namingDescriptionPlaceholder';
 import { isNamingUsableForPlaceLead } from './namingVisibility';
+import { repairTruncatedInlineMarkdown } from './inlineMarkdown';
 import { isDefaultSceneDescription } from './sceneDescriptionPlaceholder';
 
 interface SceneNamingLeadItem {
@@ -105,12 +106,16 @@ export function abbreviateNamingBodyLead(
   const withinBudget = text.slice(0, maxChars);
   const lastSentenceEnd = lastCompleteSentenceEnd(withinBudget);
   if (lastSentenceEnd > Math.floor(maxChars * 0.4)) {
-    return withinBudget.slice(0, lastSentenceEnd).trimEnd();
+    return repairTruncatedInlineMarkdown(
+      withinBudget.slice(0, lastSentenceEnd).trimEnd(),
+    );
   }
 
   const firstSentenceEnd = lastCompleteSentenceEnd(text);
   if (firstSentenceEnd > 0) {
-    return text.slice(0, firstSentenceEnd).trimEnd();
+    return repairTruncatedInlineMarkdown(
+      text.slice(0, firstSentenceEnd).trimEnd(),
+    );
   }
 
   const lastSpace = withinBudget.lastIndexOf(' ');
@@ -118,7 +123,9 @@ export function abbreviateNamingBodyLead(
     lastSpace > Math.floor(maxChars * 0.6) ?
       withinBudget.slice(0, lastSpace)
     : withinBudget;
-  return clipped.replace(/[,;:–—-]+$/u, '').trimEnd();
+  return repairTruncatedInlineMarkdown(
+    clipped.replace(/[,;:–—-]+$/u, '').trimEnd(),
+  );
 }
 
 function lastCompleteSentenceEnd(text: string): number {

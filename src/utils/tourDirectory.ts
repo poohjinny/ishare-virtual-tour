@@ -12,6 +12,7 @@ import {
 import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
 import { buildSceneGroups, SCENE_GROUP_OTHER_ID } from '../viewer/sceneDepth';
 import { isSceneVisibleInExplore } from './sceneVisibility';
+import { stripInlineMarkdown } from './inlineMarkdown';
 import {
   resolveTourSceneOrder,
   sortSceneGroupsByTourOrder,
@@ -204,7 +205,9 @@ export function filterTourScenes(scenes: Scene[], query: string): Scene[] {
   return scenes.filter(
     (scene) =>
       scene.title.toLowerCase().includes(q) ||
-      scene.description?.toLowerCase().includes(q),
+      stripInlineMarkdown(scene.description ?? '')
+        .toLowerCase()
+        .includes(q),
   );
 }
 
@@ -219,7 +222,9 @@ export function filterTourNamingDirectory(
     (item) =>
       item.name.toLowerCase().includes(q) ||
       item.sceneTitle.toLowerCase().includes(q) ||
-      item.description?.toLowerCase().includes(q) ||
+      stripInlineMarkdown(item.description ?? '')
+        .toLowerCase()
+        .includes(q) ||
       item.donorCredit?.toLowerCase().includes(q),
   );
 }

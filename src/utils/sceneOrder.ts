@@ -93,9 +93,9 @@ export function sortSceneGroupsByTourOrder(
   const rank = sceneOrderRankMap(tour);
   const sceneRank = (id: string) => rank.get(id) ?? Number.MAX_SAFE_INTEGER;
   const groupRank = (group: SceneGroup) => {
-    if (group.id !== otherGroupId) return sceneRank(group.id);
-    if (group.scenes.length === 0) return Number.MAX_SAFE_INTEGER;
-    return Math.min(...group.scenes.map((scene) => sceneRank(scene.id)));
+    // Orphans stay last — "More places" is a catch-all, not a department.
+    if (group.id === otherGroupId) return Number.MAX_SAFE_INTEGER;
+    return sceneRank(group.id);
   };
 
   return [...groups]

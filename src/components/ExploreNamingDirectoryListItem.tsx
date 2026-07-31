@@ -11,6 +11,10 @@ import {
   tourDirectoryNamingInfoAriaLabel,
 } from '../constants/tourDirectory';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
+import {
+  renderInlineMarkdown,
+  stripInlineMarkdown,
+} from '../utils/inlineMarkdown';
 import type { Scene, TourViewerType, ViewPosition } from '../types/tour';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
 import { ExploreDirectoryListItemActions } from './ExploreDirectoryListItemActions';
@@ -98,6 +102,7 @@ export function ExploreNamingDirectoryListItem({
   const { ref: thumbRef, inView } = useLazyInView<HTMLSpanElement>();
   const isSold = item.statusModifier === 'sold';
   const description = item.description?.trim();
+  const descriptionPlain = description ? stripInlineMarkdown(description) : '';
   const donorCredit = item.donorCredit?.trim();
   const showActions = true;
   const visitPlaceLabel = exploreNamingVisitPlaceAriaLabel(item.sceneTitle);
@@ -105,11 +110,11 @@ export function ExploreNamingDirectoryListItem({
   const creditSuffix = donorCredit ? ` ${donorCredit}.` : '';
   const rowAriaLabel =
     active ?
-      description ?
-        `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+      descriptionPlain ?
+        `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${descriptionPlain}`
       : `${item.name}, current naming opportunity, ${item.sceneTitle}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`
-    : description ?
-      `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${description}`
+    : descriptionPlain ?
+      `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}. ${descriptionPlain}`
     : `${visitPlaceLabel}. ${item.name}.${creditSuffix} ${item.statusLabel}. ${priceLabel}.`;
 
   const previewScene = useMemo((): Scene => {
@@ -276,7 +281,7 @@ export function ExploreNamingDirectoryListItem({
           </span>
           {description ?
             <span className={tourNavItemNamingDescriptionClassName}>
-              {description}
+              {renderInlineMarkdown(description, item.hotspotId)}
             </span>
           : null}
         </span>

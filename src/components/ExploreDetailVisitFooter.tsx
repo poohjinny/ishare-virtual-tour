@@ -11,7 +11,7 @@ interface ExploreDetailVisitFooterProps {
   onAsk?: () => void;
 }
 
-/** Glass panel footer shell; Visit CTA is content-width; optional Ask Guide. */
+/** Glass panel footer shell; Visit CTA fills width and wraps long labels. */
 export function ExploreDetailVisitFooter({
   label,
   disabled = false,
@@ -27,7 +27,7 @@ export function ExploreDetailVisitFooter({
         className={
           showAsk ?
             'tour-glass-panel__cta-wrap tour-glass-panel__cta-row'
-          : 'tour-glass-panel__cta-wrap'
+          : 'tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'
         }
       >
         {showAsk ?
@@ -48,7 +48,7 @@ export function ExploreDetailVisitFooter({
         : null}
         <button
           type='button'
-          className='tour-glass-panel__cta'
+          className='tour-glass-panel__cta tour-glass-panel__cta--has-postfix-icon'
           data-visit-scene=''
           disabled={disabled}
           aria-label={label}

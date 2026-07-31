@@ -10,6 +10,10 @@ import type {
   TourViewerType,
 } from '../types/tour';
 import { EXPLORE_GALLERY_VISIT_LABEL } from '../constants/tourDirectory';
+import {
+  renderInlineMarkdown,
+  stripInlineMarkdown,
+} from '../utils/inlineMarkdown';
 import { resolveScenePlaceLead } from '../utils/resolveScenePlaceLead';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { ExploreCurrentHereLabel } from './ExploreCurrentHereLabel';
@@ -100,17 +104,18 @@ export function ExploreSceneDirectoryListItem({
     },
     scene,
   ).trim();
+  const descriptionPlain = description ? stripInlineMarkdown(description) : '';
   const showInfo = Boolean(onShowDescription);
   const showActions = true;
   const tourStartPrefix = isTourStart ? 'Tour start location. ' : '';
   const contextSuffix = contextLabel ? `, ${contextLabel}` : '';
   const ariaLabel =
     active ?
-      description ?
-        `${tourStartPrefix}${scene.title}${contextSuffix}, current location. ${description}`
+      descriptionPlain ?
+        `${tourStartPrefix}${scene.title}${contextSuffix}, current location. ${descriptionPlain}`
       : `${tourStartPrefix}${scene.title}${contextSuffix}, current location`
-    : description ?
-      `${tourStartPrefix}Go to ${scene.title}${contextSuffix}. ${description}`
+    : descriptionPlain ?
+      `${tourStartPrefix}Go to ${scene.title}${contextSuffix}. ${descriptionPlain}`
     : `${tourStartPrefix}Go to ${scene.title}${contextSuffix}`;
 
   const visitCta = (
@@ -175,7 +180,7 @@ export function ExploreSceneDirectoryListItem({
           </span>
           {description ?
             <span className={tourNavItemDescriptionClassName}>
-              {description}
+              {renderInlineMarkdown(description, scene.id)}
             </span>
           : null}
         </span>

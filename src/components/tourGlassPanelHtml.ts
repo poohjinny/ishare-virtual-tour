@@ -17,6 +17,10 @@ import {
   navPreviewCtaLabel,
   navPreviewVisitAriaLabel,
 } from '../utils/navPreview';
+import {
+  buildInlineMarkdownParagraphsHtml,
+  formatInlineMarkdownHtml,
+} from '../utils/inlineMarkdown';
 import { formatCountValue } from '../viewer/navPreviewTotalCount';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import {
@@ -437,12 +441,7 @@ export function mountAnchoredPopupVideo(root: ParentNode): void {
 }
 
 export function buildGlassPanelParagraphsHtml(body: string): string {
-  return body
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((p) => `<p class="${GLASS_PANEL.paragraph}">${escapeHtml(p)}</p>`)
-    .join('');
+  return buildInlineMarkdownParagraphsHtml(body, GLASS_PANEL.paragraph);
 }
 
 export function buildNamingPriceUnderTitleHtml(
@@ -981,7 +980,7 @@ export function buildNavPreviewNamingListHtml(
 
       const descriptionHtml =
         item.description ?
-          `<p class="nav-preview-panel__naming-desc">${escapeHtml(item.description)}</p>`
+          `<p class="nav-preview-panel__naming-desc">${formatInlineMarkdownHtml(item.description)}</p>`
         : '';
 
       const badgeHtml = buildNavPreviewNamingBadgeHtml(item);

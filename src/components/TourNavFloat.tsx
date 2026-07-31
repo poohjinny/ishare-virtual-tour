@@ -262,7 +262,10 @@ function panelAnimation(phase: PanelAnimPhase): TourGlassPanelAnimation {
 
 interface BreadcrumbItem {
   id: string;
+  /** Full scene title (tooltips, aria, details). */
   title: string;
+  /** Visible trail label — may drop a repeated parent prefix. */
+  displayTitle: string;
   isCurrent: boolean;
 }
 
@@ -357,9 +360,11 @@ function buildBreadcrumbItems(
 
   return pathIds.map((sceneId, index) => {
     const scene = sceneMap.get(sceneId);
+    const title = scene?.title ?? sceneId;
     return {
       id: sceneId,
-      title: scene?.title ?? sceneId,
+      title,
+      displayTitle: title,
       isCurrent: index === pathIds.length - 1,
     };
   });
@@ -481,7 +486,8 @@ export function TourNavFloat({
       firstScene: firstSceneId,
       ...(sceneOrder ? { sceneOrder } : {}),
     };
-    for (const item of breadcrumbItems) {
+    for (let index = 0; index < breadcrumbItems.length; index++) {
+      const item = breadcrumbItems[index];
       const ids = sortSceneIdsByTourOrder(
         orderTour,
         listSceneSiblings(
@@ -2375,7 +2381,7 @@ export function TourNavFloat({
                           {showSiblingMenu ?
                             <TourBreadcrumbSiblingMenu
                               crumbId={item.id}
-                              label={item.title}
+                              label={item.displayTitle}
                               siblings={siblings}
                               variant='current'
                               open={siblingMenuOpen}
@@ -2394,7 +2400,11 @@ export function TourNavFloat({
                               )}
                             >
                               <IconTooltip
-                                label={TOUR_BREADCRUMB_CURRENT_TOOLTIP}
+                                label={
+                                  item.displayTitle !== item.title ?
+                                    item.title
+                                  : TOUR_BREADCRUMB_CURRENT_TOOLTIP
+                                }
                                 placement='bottom'
                               >
                                 <span
@@ -2402,7 +2412,7 @@ export function TourNavFloat({
                                     tourNavBreadcrumbCurrentLabelClassName
                                   }
                                 >
-                                  {item.title}
+                                  {item.displayTitle}
                                 </span>
                               </IconTooltip>
                               <ExploreSceneInfoButton
@@ -2422,7 +2432,7 @@ export function TourNavFloat({
                     : showSiblingMenu ?
                       <TourBreadcrumbSiblingMenu
                         crumbId={item.id}
-                        label={item.title}
+                        label={item.displayTitle}
                         siblings={siblings}
                         variant='ancestor'
                         open={siblingMenuOpen}
@@ -2451,7 +2461,7 @@ export function TourNavFloat({
                             disabled={disabled}
                             onClick={() => handleBreadcrumbNavigate(item.id)}
                           >
-                            {item.title}
+                            {item.displayTitle}
                           </button>
                         </IconTooltip>
                         <ExploreSceneInfoButton

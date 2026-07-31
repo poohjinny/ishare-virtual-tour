@@ -37,7 +37,8 @@ export const tourExploreRefineMenuSelector = `[${TOUR_EXPLORE_REFINE_MENU_ATTR}]
 
 export const tourNavBreadcrumbClassName = cn(
   'absolute top-[var(--tour-chrome-inset-top)] z-[var(--tour-chrome-z-index)]',
-  'max-w-[min(680px,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)-var(--tour-chrome-top-dock-width)))]',
+  // Wider than legacy 680px so long trails use the empty centered band before ellipsis.
+  'max-w-[min(56rem,calc(100vw-var(--tour-chrome-inset-left)-var(--tour-chrome-inset-right)-var(--tour-chrome-top-dock-width)))]',
 );
 
 export const tourNavBreadcrumbAlignVariants = cva('', {
@@ -86,13 +87,17 @@ export const tourNavHistoryGroupBtnClassName = cn(
 export const tourNavHistoryBtnIconClassName = materialSymbolCompactClassName;
 
 export const tourNavBreadcrumbListClassName = cn(
-  'm-0 flex min-w-0 list-none flex-nowrap items-center gap-0 p-0',
+  'm-0 flex min-w-0 max-w-full list-none flex-nowrap items-center gap-0 overflow-hidden p-0',
   'font-display text-md font-normal leading-[1.25] tracking-[-0.01em]',
   'max-[480px]:text-sm',
 );
 
+/** Full labels when they fit; truncate only if the pill hits viewport width. */
 export const tourNavBreadcrumbItemClassName = cn(
-  'flex min-w-0 shrink-0 items-center last:min-w-0 last:shrink',
+  'flex min-w-0 items-center',
+  // Ancestors give way first; current stays readable longer.
+  'shrink-[2]',
+  'last:shrink',
 );
 
 /** Ancestor links, separators, and info — muted, a touch darker than global muted. */
@@ -105,8 +110,8 @@ export const tourNavBreadcrumbSepClassName = cn(
 );
 
 export const tourNavBreadcrumbLinkClassName = cn(
-  'inline-flex cursor-pointer items-center border-none bg-transparent p-0',
-  'font-[inherit] whitespace-nowrap transition-colors duration-150',
+  'inline-flex min-w-0 max-w-full cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap border-none bg-transparent p-0',
+  'font-[inherit] transition-colors duration-150',
   tourNavBreadcrumbMutedTextClassName,
   'hover:enabled:text-primary',
   'disabled:cursor-not-allowed disabled:opacity-50',
@@ -117,7 +122,7 @@ export const tourNavBreadcrumbCurrentClassName = cn(
 );
 
 export const tourNavBreadcrumbCurrentLabelClassName = cn(
-  'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap',
+  'min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap',
 );
 
 /** Pulse + title — compact “you are here” lead. */
@@ -652,6 +657,7 @@ export const tourNavLocationGalleryHeroContextClassName = cn(
 
 export const tourNavLocationGalleryHeroDescriptionClassName = cn(
   'tour-nav-gallery-card-hero-desc pointer-events-auto min-w-0 cursor-text text-xs leading-[1.4] text-white/85 line-clamp-3',
+  '[&_strong]:font-medium [&_strong]:text-white [&_em]:italic',
 );
 
 /** Shared arrow motion tokens — nudge is applied only on text CTAs via explore-cta-text-arrow. */
@@ -952,6 +958,7 @@ export const tourNavItemNamingDescriptionClassName = cn(
   'tour-nav-item-description cursor-text text-xs leading-[1.5] text-pretty break-words whitespace-normal text-muted',
   // Prefer max-height over line-clamp — WebKit line-clamp clips descenders on short copy.
   'max-h-[3.15em] overflow-hidden',
+  '[&_strong]:font-medium [&_strong]:text-[#0f172a] [&_em]:italic',
 );
 
 /** Price mirrors the title type scale in a muted tone. */
@@ -977,6 +984,7 @@ export const tourNavItemDescriptionClassName = cn(
   // Avoid line-clamp — it clips descenders (p/g/y) on short single-line copy.
   'tour-nav-item-description cursor-text text-xs leading-[1.5] text-muted',
   'max-h-[3.15em] overflow-hidden',
+  '[&_strong]:font-medium [&_strong]:text-[#0f172a] [&_em]:italic',
 );
 
 export const tourNavItemBadgePlacementClassName = cn('shrink-0 self-center');
@@ -1269,9 +1277,10 @@ export const tourNavSceneDetailTitleClassName = cn(
 
 export const tourNavSceneDetailBodyClassName = cn(
   'm-0 font-body text-md leading-[1.55] text-[var(--ishare-glass-body-text)] whitespace-pre-wrap',
+  '[&_strong]:font-medium [&_strong]:text-[#0f172a] [&_em]:italic',
 );
 
-/** Full-bleed glass footer; Visit CTA stays content-width (centered). */
+/** Full-bleed glass footer; Visit CTA wraps long labels at full width. */
 export const tourNavSceneDetailFooterClassName = cn(
   'tour-glass-panel__footer tour-nav-scene-detail-footer w-full shrink-0',
 );
