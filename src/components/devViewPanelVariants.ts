@@ -31,23 +31,117 @@ export const devFabVariants = cva(
   },
 );
 
-export const devViewPanelRootClassName = cn(
-  'flex max-h-[min(calc(100vh-72px),900px)] min-h-0 flex-col overflow-hidden rounded-lg border border-[rgba(0,255,128,0.35)] bg-[rgba(0,0,0,0.85)] font-mono text-xs text-[#e2e8f0]',
-  'max-[1023px]:max-h-[min(calc(100vh-var(--tour-chrome-inset-bottom)-var(--tour-chrome-inset-top)-4.5rem),900px)]',
+/** Primary tab theme — panel chrome + header/tab-track borders. */
+export type DevViewPanelChromeTab =
+  | 'scene'
+  | 'scenes'
+  | 'naming'
+  | 'tour'
+  | 'client'
+  | 'debug';
+
+const DEV_PANEL_CHROME_BORDER = {
+  scene: 'border-[rgba(74,222,128,0.4)]',
+  scenes: 'border-[rgba(45,212,191,0.4)]',
+  naming: 'border-[rgba(244,114,182,0.4)]',
+  tour: 'border-[rgba(167,139,250,0.4)]',
+  client: 'border-[rgba(56,189,248,0.4)]',
+  debug: 'border-[rgba(250,204,21,0.4)]',
+} as const satisfies Record<DevViewPanelChromeTab, string>;
+
+const DEV_PANEL_CHROME_BORDER_MUTED = {
+  scene: 'border-[rgba(74,222,128,0.22)]',
+  scenes: 'border-[rgba(45,212,191,0.22)]',
+  naming: 'border-[rgba(244,114,182,0.22)]',
+  tour: 'border-[rgba(167,139,250,0.22)]',
+  client: 'border-[rgba(56,189,248,0.22)]',
+  debug: 'border-[rgba(250,204,21,0.22)]',
+} as const satisfies Record<DevViewPanelChromeTab, string>;
+
+/** Border + CSS vars for tab-panel primary accents (buttons, focus, checkboxes). */
+const DEV_PANEL_ROOT_THEME = {
+  scene: cn(
+    DEV_PANEL_CHROME_BORDER.scene,
+    '[--dev-panel-primary:#4ade80] [--dev-panel-primary-rgb:74,222,128] [--dev-panel-primary-deep:#166534] [--dev-panel-primary-deep-hover:#15803d]',
+  ),
+  scenes: cn(
+    DEV_PANEL_CHROME_BORDER.scenes,
+    '[--dev-panel-primary:#2dd4bf] [--dev-panel-primary-rgb:45,212,191] [--dev-panel-primary-deep:#0f766e] [--dev-panel-primary-deep-hover:#0d9488]',
+  ),
+  naming: cn(
+    DEV_PANEL_CHROME_BORDER.naming,
+    '[--dev-panel-primary:#f472b6] [--dev-panel-primary-rgb:244,114,182] [--dev-panel-primary-deep:#9d174d] [--dev-panel-primary-deep-hover:#be185d]',
+  ),
+  tour: cn(
+    DEV_PANEL_CHROME_BORDER.tour,
+    '[--dev-panel-primary:#a78bfa] [--dev-panel-primary-rgb:167,139,250] [--dev-panel-primary-deep:#5b21b6] [--dev-panel-primary-deep-hover:#6d28d9]',
+  ),
+  client: cn(
+    DEV_PANEL_CHROME_BORDER.client,
+    '[--dev-panel-primary:#38bdf8] [--dev-panel-primary-rgb:56,189,248] [--dev-panel-primary-deep:#0369a1] [--dev-panel-primary-deep-hover:#0284c7]',
+  ),
+  debug: cn(
+    DEV_PANEL_CHROME_BORDER.debug,
+    '[--dev-panel-primary:#facc15] [--dev-panel-primary-rgb:250,204,21] [--dev-panel-primary-deep:#a16207] [--dev-panel-primary-deep-hover:#ca8a04]',
+  ),
+} as const satisfies Record<DevViewPanelChromeTab, string>;
+
+export const devViewPanelRootVariants = cva(
+  cn(
+    'flex max-h-[min(calc(100vh-72px),900px)] min-h-0 flex-col overflow-hidden rounded-lg border bg-[rgba(0,0,0,0.85)] font-mono text-xs text-[#e2e8f0]',
+    'transition-[border-color] duration-150',
+    'max-[1023px]:max-h-[min(calc(100vh-var(--tour-chrome-inset-bottom)-var(--tour-chrome-inset-top)-4.5rem),900px)]',
+  ),
+  {
+    variants: { tab: DEV_PANEL_ROOT_THEME },
+    defaultVariants: { tab: 'scene' },
+  },
 );
 
-export const devViewPanelStickyHeaderClassName = cn(
-  'sticky top-0 z-[2] shrink-0 flex flex-col gap-2.5 border-b border-[rgba(0,255,128,0.2)] px-3.5 pb-2.5 pt-3.5',
+/** @deprecated Prefer {@link devViewPanelRootVariants}. */
+export const devViewPanelRootClassName = devViewPanelRootVariants({
+  tab: 'scene',
+});
+
+export const devViewPanelStickyHeaderVariants = cva(
+  'sticky top-0 z-[2] shrink-0 flex flex-col gap-2.5 border-b px-3.5 pb-2.5 pt-3.5 transition-[border-color] duration-150',
+  {
+    variants: { tab: DEV_PANEL_CHROME_BORDER_MUTED },
+    defaultVariants: { tab: 'scene' },
+  },
 );
+
+/** @deprecated Prefer {@link devViewPanelStickyHeaderVariants}. */
+export const devViewPanelStickyHeaderClassName =
+  devViewPanelStickyHeaderVariants({ tab: 'scene' });
 
 export const devViewPanelBodyClassName = cn(
   'flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-3.5 pb-0 pt-2.5',
   '[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
 );
 
-export const devViewPanelTitleClassName = cn(
-  'm-0 font-bold uppercase tracking-[0.05em] text-[#4ade80]',
+export const DEV_PANEL_TITLE_TEXT = {
+  scene: 'text-[#4ade80]',
+  scenes: 'text-[#2dd4bf]',
+  naming: 'text-[#f472b6]',
+  tour: 'text-[#a78bfa]',
+  client: 'text-[#38bdf8]',
+  debug: 'text-[#facc15]',
+} as const satisfies Record<DevViewPanelChromeTab, string>;
+
+export const devViewPanelTitleVariants = cva(
+  'm-0 font-bold uppercase tracking-[0.05em]',
+  {
+    variants: { tab: DEV_PANEL_TITLE_TEXT },
+    defaultVariants: { tab: 'scene' },
+  },
 );
+
+/** @deprecated Prefer {@link devViewPanelTitleVariants}. */
+export const devViewPanelTitleClassName = devViewPanelTitleVariants({
+  tab: 'scene',
+});
+
 
 export const devViewPanelStickyTourTitleClassName = cn(
   'm-0 text-xs font-semibold leading-snug text-[#f0fdf4]',
@@ -78,7 +172,7 @@ export const devViewPanelTourSwitchTriggerClassName = cn(
   devViewPanelControlRadiusClassName,
   'text-xs font-semibold leading-snug text-[#f0fdf4]',
   'hover:border-[rgba(100,116,139,0.35)] hover:bg-[rgba(15,23,42,0.45)]',
-  'focus-visible:border-[#38bdf8] focus-visible:outline-none',
+  'focus-visible:border-[color:var(--dev-panel-primary,#38bdf8)] focus-visible:outline-none',
 );
 
 export const devViewPanelTourSwitchChevronClassName = cn(
@@ -243,14 +337,14 @@ export const devViewPanelFieldClassName = cn('flex flex-col gap-1.5');
 export const devViewPanelFieldLabelClassName = cn('text-2xs text-[#94a3b8]');
 
 export const devViewPanelInputClassName = cn(
-  'box-border w-full border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)] px-2.5 py-1.5 font-[inherit] text-2xs text-[#f0fdf4] placeholder:text-[#64748b] focus:border-[#38bdf8] focus:outline-none',
+  'box-border w-full border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)] px-2.5 py-1.5 font-[inherit] text-2xs text-[#f0fdf4] placeholder:text-[#64748b] focus:border-[color:var(--dev-panel-primary,#38bdf8)] focus:outline-none',
   devViewPanelControlRadiusClassName,
 );
 
 export const devViewPanelFileFieldClassName = cn(
   'flex flex-col overflow-hidden border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)]',
   devViewPanelControlRadiusClassName,
-  'focus-within:border-[#38bdf8]',
+  'focus-within:border-[color:var(--dev-panel-primary,#38bdf8)]',
 );
 
 export const devViewPanelFileFieldPreviewClassName = cn(
@@ -349,7 +443,7 @@ export const devViewPanelActionsClassName = cn(
 export const devViewPanelColorFieldClassName = cn(
   'flex items-center gap-1.5 py-1.5 pl-1.5 pr-2 overflow-hidden border border-[rgba(100,116,139,0.55)] bg-[rgba(15,23,42,0.75)]',
   devViewPanelControlRadiusClassName,
-  'focus-within:border-[#38bdf8]',
+  'focus-within:border-[color:var(--dev-panel-primary,#38bdf8)]',
 );
 
 export const devViewPanelColorInputInnerClassName = cn(
@@ -384,7 +478,7 @@ export const devViewPanelBtnVariants = cva(
     variants: {
       tone: {
         primary:
-          'border-[#4ade80] bg-[#166534] text-[#f0fdf4] hover:enabled:bg-[#15803d]',
+          'border-[color:var(--dev-panel-primary,#4ade80)] bg-[color:var(--dev-panel-primary-deep,#166534)] text-[#f0fdf4] hover:enabled:bg-[color:var(--dev-panel-primary-deep-hover,#15803d)]',
         secondary:
           'border-[#64748b] bg-[#1e293b] text-[#f0fdf4] hover:enabled:bg-[#334155]',
         danger:
@@ -422,10 +516,21 @@ export const devViewPanelTabHintClassName = cn(
 
 export const devViewPanelHotspotSectionClassName = cn('flex flex-col gap-1.5');
 
-export const devViewPanelPrimaryTabsClassName = cn(
-  'flex gap-1 border border-[rgba(0,255,128,0.35)] bg-[rgba(0,0,0,0.45)] p-1',
-  devViewPanelControlRadiusClassName,
+export const devViewPanelPrimaryTabsVariants = cva(
+  cn(
+    'flex gap-1 border bg-[rgba(0,0,0,0.45)] p-1 transition-[border-color] duration-150',
+    devViewPanelControlRadiusClassName,
+  ),
+  {
+    variants: { tab: DEV_PANEL_CHROME_BORDER },
+    defaultVariants: { tab: 'scene' },
+  },
 );
+
+/** @deprecated Prefer {@link devViewPanelPrimaryTabsVariants}. */
+export const devViewPanelPrimaryTabsClassName = devViewPanelPrimaryTabsVariants({
+  tab: 'scene',
+});
 
 /** Section mode tabs — Manage / Create, Existing / New client. */
 export const devViewPanelSecondaryTabsClassName = cn(
@@ -486,7 +591,7 @@ export const devViewPanelTabVariants = cva(
     variants: {
       depth: {
         primary: cn(
-          'flex-1 px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-[0.04em]',
+          'flex-1 border px-2.5 py-1.5 text-2xs font-semibold uppercase tracking-[0.04em]',
           devViewPanelControlRadiusClassName,
         ),
         secondary: cn(
@@ -516,7 +621,8 @@ export const devViewPanelTabVariants = cva(
       {
         depth: 'primary',
         active: false,
-        class: 'bg-transparent text-[#94a3b8] hover:text-[#e2e8f0]',
+        class:
+          'border-transparent bg-transparent text-[#94a3b8] hover:text-[#e2e8f0]',
       },
       {
         depth: 'secondary',
@@ -533,37 +639,43 @@ export const devViewPanelTabVariants = cva(
         depth: 'primary',
         kind: 'client',
         active: true,
-        class: 'bg-[rgba(56,189,248,0.22)] text-[#7dd3fc]',
+        class:
+          'border-[rgba(56,189,248,0.55)] bg-[rgba(56,189,248,0.22)] text-[#7dd3fc]',
       },
       {
         depth: 'primary',
         kind: 'tour',
         active: true,
-        class: 'bg-[rgba(167,139,250,0.22)] text-[#c4b5fd]',
+        class:
+          'border-[rgba(167,139,250,0.55)] bg-[rgba(167,139,250,0.22)] text-[#c4b5fd]',
       },
       {
         depth: 'primary',
         kind: 'scenes',
         active: true,
-        class: 'bg-[rgba(45,212,191,0.22)] text-[#5eead4]',
+        class:
+          'border-[rgba(45,212,191,0.55)] bg-[rgba(45,212,191,0.22)] text-[#5eead4]',
       },
       {
         depth: 'primary',
         kind: 'naming',
         active: true,
-        class: 'bg-[rgba(244,114,182,0.22)] text-[#f9a8d4]',
+        class:
+          'border-[rgba(244,114,182,0.55)] bg-[rgba(244,114,182,0.22)] text-[#f9a8d4]',
       },
       {
         depth: 'primary',
         kind: 'scene',
         active: true,
-        class: 'bg-[rgba(74,222,128,0.22)] text-[#86efac]',
+        class:
+          'border-[rgba(74,222,128,0.55)] bg-[rgba(74,222,128,0.22)] text-[#86efac]',
       },
       {
         depth: 'primary',
         kind: 'debug',
         active: true,
-        class: 'bg-[rgba(250,204,21,0.22)] text-[#fde047]',
+        class:
+          'border-[rgba(250,204,21,0.55)] bg-[rgba(250,204,21,0.22)] text-[#fde047]',
       },
       {
         depth: 'secondary',
@@ -634,7 +746,7 @@ export const devViewPanelToggleLabelMultilineClassName = cn(
 );
 
 export const devViewPanelToggleInputClassName = cn(
-  'size-3 shrink-0 cursor-pointer accent-[#4ade80]',
+  'size-3 shrink-0 cursor-pointer accent-[color:var(--dev-panel-primary,#4ade80)]',
 );
 
 /** Checkbox row inside form grids — same layout as devViewPanelToggleLabelClassName. */

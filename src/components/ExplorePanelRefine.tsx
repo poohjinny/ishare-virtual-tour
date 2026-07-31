@@ -337,7 +337,7 @@ export function ExplorePanelRefine({
       className={tourNavExploreSortRootClassName}
       data-explore-refine-root
     >
-      <IconTooltip label={tooltipLabel} placement='bottom'>
+      <IconTooltip label={tooltipLabel} placement='left'>
         <button
           ref={triggerRef}
           type='button'

@@ -41,6 +41,8 @@ interface AiAssistantProps {
   namingName?: string | null;
   /** Top-right Explore/Help/Share dock — suppress FAB bubble while open. */
   chromeDockOpen?: boolean;
+  /** Play Tour slideshow — close proximity bubbles; parent closes the panel. */
+  playTourActive?: boolean;
   client?: TourClient;
   clientLogo?: string;
   logoAlt?: string;
@@ -66,6 +68,7 @@ export function AiAssistant({
   namingHotspotId = null,
   namingName = null,
   chromeDockOpen = false,
+  playTourActive = false,
   client,
   clientLogo,
   logoAlt,
@@ -197,11 +200,18 @@ export function AiAssistant({
     setFabBubble(null);
   }, [chromeDockOpen]);
 
+  // Play Tour owns attention — drop proximity bubbles for the slideshow.
+  useEffect(() => {
+    if (!playTourActive) return;
+    setFabBubble(null);
+  }, [playTourActive]);
+
   // Place move / overview welcome — soft hello from the guide (FAB only).
   useEffect(() => {
     if (guideUiTest) return;
     if (!currentSceneId) return;
     if (!splashDone) return;
+    if (playTourActive) return;
     if (!fabShown || isOpen || chromeDockOpen) return;
     // Naming panel owns the nudge while open — schedule place after it closes.
     if (namingHotspotId?.trim()) return;
@@ -243,6 +253,7 @@ export function AiAssistant({
     isOpen,
     locationTitle,
     namingHotspotId,
+    playTourActive,
     splashDone,
     tourTitle,
   ]);
@@ -259,6 +270,7 @@ export function AiAssistant({
       skipInitialNamingRef.current = false;
       return;
     }
+    if (playTourActive) return;
     if (!fabShown || isOpen || chromeDockOpen) return;
 
     const key = `naming:${hotspotId}`;
@@ -283,6 +295,7 @@ export function AiAssistant({
     isOpen,
     namingHotspotId,
     namingName,
+    playTourActive,
   ]);
 
   // guideUiTest — sticky fixture bubbles on the FAB (scene ↔ naming samples).

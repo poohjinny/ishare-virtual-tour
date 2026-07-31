@@ -8,7 +8,10 @@ import {
 import { cn } from '../lib/cn';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import { MATERIAL_SYMBOL_SIZE_18, MATERIAL_SYMBOL_SIZE_22 } from './ui/materialSymbolClasses';
+import {
+  MATERIAL_SYMBOL_SIZE_18,
+  MATERIAL_SYMBOL_SIZE_22,
+} from './ui/materialSymbolClasses';
 import {
   tourNavExploreSearchCloseClassName,
   tourNavExploreSearchIconClassName,
@@ -58,7 +61,7 @@ export function ExplorePanelSearch({
       data-explore-search-pill=''
       data-open={open ? 'true' : 'false'}
     >
-      <IconTooltip label={TOUR_NAV_ACTION_SEARCH_OPEN} placement='bottom'>
+      <IconTooltip label={TOUR_NAV_ACTION_SEARCH_OPEN} placement='left'>
         <button
           type='button'
           className={cn(tourNavExploreSearchTriggerClassName, open && 'hidden')}
@@ -110,7 +113,7 @@ export function ExplorePanelSearch({
             aria-controls='tour-nav-explore-search-results'
           />
         </div>
-        <IconTooltip label={TOUR_NAV_ACTION_SEARCH_CLOSE} placement='bottom'>
+        <IconTooltip label={TOUR_NAV_ACTION_SEARCH_CLOSE} placement='left'>
           <button
             type='button'
             className={tourNavExploreSearchCloseClassName}

@@ -1,5 +1,6 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 import { resolveTourChromeModeFromMatchMedia } from '../constants/tourChrome';
+import { reapplyPlayTourNavbarInteractionGuard } from './playTourNavbarButton';
 
 const PSV_TOUCH_SUPPORT_KEY = 'photoSphereViewer_touchSupport';
 const PSV_MENU_BUTTON_ID = 'menu';
@@ -79,6 +80,7 @@ export function syncPsvNavbarDesktopControls(viewer: Viewer): void {
   showPsvZoomMoveButtons(viewer);
   (viewer.navbar as unknown as NavbarWithCollapsed).autoSize();
   finalizePsvNavbarInlineLayout(viewer);
+  reapplyPlayTourNavbarInteractionGuard(viewer);
 }
 
 /** @deprecated Menu overflow removed — same as `syncPsvNavbarDesktopControls`. */

@@ -107,7 +107,10 @@ import {
   type NamingSceneSubgroup,
   type TourDirectoryNamingItem,
 } from '../utils/tourDirectory';
-import { sortSceneGroupsByTourOrder, sortSceneIdsByTourOrder } from '../utils/sceneOrder';
+import {
+  sortSceneGroupsByTourOrder,
+  sortSceneIdsByTourOrder,
+} from '../utils/sceneOrder';
 import {
   computeNamingPriceBounds,
   filterTourNamingByPriceRange,
@@ -1034,9 +1037,16 @@ export function TourNavFloat({
   const locationsListRef = useRef<HTMLUListElement>(null);
   const namingGalleryListRef = useRef<HTMLUListElement>(null);
   const namingListRef = useRef<HTMLUListElement>(null);
+  /** Sector-grouped naming — FLIP across nested lists (shared flat refs are suppressed). */
+  const namingGroupedRootRef = useRef<HTMLDivElement>(null);
 
   const locationsOrderKey = exploreLocationsSort;
   const namingOrderKey = `${exploreNamingSort}:${namingPriceMin ?? ''}:${namingPriceMax ?? ''}`;
+  const namingGroupedFlipEnabled =
+    !isExploreSearchActive &&
+    exploreSceneDetailId == null &&
+    exploreNamingDetail == null &&
+    (directoryTab === 'all' || directoryTab === 'naming');
 
   useFlipListReorder(
     locationsGalleryListRef,
@@ -1051,10 +1061,18 @@ export function TourNavFloat({
   useFlipListReorder(
     namingGalleryListRef,
     namingOrderKey,
-    exploreLayout === 'gallery',
+    exploreLayout === 'gallery' && !namingGroupedFlipEnabled,
   );
-  useFlipListReorder(namingListRef, namingOrderKey, exploreLayout === 'list');
-
+  useFlipListReorder(
+    namingListRef,
+    namingOrderKey,
+    exploreLayout === 'list' && !namingGroupedFlipEnabled,
+  );
+  useFlipListReorder(
+    namingGroupedRootRef,
+    namingOrderKey,
+    namingGroupedFlipEnabled,
+  );
   const targetPanel = panelMode;
 
   targetPanelRef.current = targetPanel;
@@ -1925,6 +1943,7 @@ export function TourNavFloat({
     return (
       <>
         <div
+          ref={namingGroupedRootRef}
           className={tourNavDirectoryGroupedListClassName({
             sectionLead: options?.sectionGroupLead,
           })}
@@ -2134,7 +2153,7 @@ export function TourNavFloat({
                 {!isExploreSearchActive ?
                   <IconTooltip
                     label={tourNavExploreLayoutActionLabel(exploreLayout)}
-                    placement='bottom'
+                    placement='left'
                   >
                     <button
                       type='button'

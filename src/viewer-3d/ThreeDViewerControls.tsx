@@ -144,6 +144,8 @@ export function ThreeDViewerControls({
   const toggleFullscreen = onFullscreenToggle ?? (() => {});
   const playTourPlaying = playTourPhase === 'playing';
   const playTourLabel = playTourPlaying ? 'Pause tour' : 'Play tour';
+  // Move / zoom / recenter fight Play Tour — keep Play, ambience, fullscreen.
+  const navigationLocked = disabled || playTourPlaying;
 
   return (
     <nav
@@ -157,7 +159,7 @@ export function ThreeDViewerControls({
         <button
           type='button'
           className='psv-button psv-zoom-in-button'
-          disabled={disabled}
+          disabled={navigationLocked}
           aria-label='Zoom in'
           onClick={onZoomIn}
         >
@@ -169,7 +171,7 @@ export function ThreeDViewerControls({
         <button
           type='button'
           className='psv-button psv-zoom-out-button'
-          disabled={disabled}
+          disabled={navigationLocked}
           aria-label='Zoom out'
           onClick={onZoomOut}
         >
@@ -181,7 +183,7 @@ export function ThreeDViewerControls({
         <button
           type='button'
           className='psv-button psv-recenter-button'
-          disabled={disabled}
+          disabled={navigationLocked}
           aria-label='Default view'
           onClick={onRecenter}
         >

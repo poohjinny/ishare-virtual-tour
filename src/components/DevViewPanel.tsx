@@ -208,17 +208,17 @@ import {
   devViewPanelBrandFaviconClassName,
   devViewPanelBrandLogoClassName,
   devViewPanelInputClassName,
-  devViewPanelRootClassName,
+  devViewPanelRootVariants,
   devViewPanelSectionHintClassName,
   devViewPanelTabLeadClassName,
   devViewPanelSelectClassName,
   devViewPanelSlugPreviewClassName,
-  devViewPanelStickyHeaderClassName,
+  devViewPanelStickyHeaderVariants,
   devViewPanelStickyTourLogoClassName,
   devViewPanelStickyTourLogoWrapClassName,
   devViewPanelStickyTourTitleClassName,
   devViewPanelFormGroupTitleClassName,
-  devViewPanelPrimaryTabsClassName,
+  devViewPanelPrimaryTabsVariants,
   devViewPanelTabPanelBodyClassName,
   devViewPanelTabPanelClassName,
   devViewPanelTabVariants,
@@ -3686,25 +3686,6 @@ export function DevViewPanel({
                               >
                                 {row.displayName}
                               </span>
-                              {row.record.price ?
-                                <>
-                                  <span
-                                    className={
-                                      devViewPanelManageListItemBulletClassName
-                                    }
-                                    aria-hidden='true'
-                                  >
-                                    ·
-                                  </span>
-                                  <span
-                                    className={
-                                      devViewPanelManageListItemMetaClassName
-                                    }
-                                  >
-                                    {formatNamingPriceInput(row.record.price)}
-                                  </span>
-                                </>
-                              : null}
                             </div>
                             <div
                               className={
@@ -3816,6 +3797,16 @@ export function DevViewPanel({
                             devViewPanelManageListItemDescStackClassName
                           }
                         >
+                          {row.record.price ?
+                            <p
+                              className={cn(
+                                'm-0',
+                                devViewPanelManageListItemMetaClassName,
+                              )}
+                            >
+                              {`Price: ${formatNamingPriceInput(row.record.price)}`}
+                            </p>
+                          : null}
                           <p className='m-0' title={row.record.id}>
                             {formatManageListItemId('naming', row.record.id)}
                           </p>
@@ -6429,8 +6420,8 @@ export function DevViewPanel({
   );
 
   return (
-    <div id={id} className={devViewPanelRootClassName}>
-      <div className={devViewPanelStickyHeaderClassName}>
+    <div id={id} className={devViewPanelRootVariants({ tab: panelTab })}>
+      <div className={devViewPanelStickyHeaderVariants({ tab: panelTab })}>
         <div className={devViewPanelTourSwitcherClassName}>
           {stickyTourIcon ?
             <div className={devViewPanelStickyTourLogoWrapClassName}>
@@ -6555,7 +6546,7 @@ export function DevViewPanel({
         </div>
 
         <div
-          className={devViewPanelPrimaryTabsClassName}
+          className={devViewPanelPrimaryTabsVariants({ tab: panelTab })}
           role='tablist'
           aria-label='Dev panel section'
         >

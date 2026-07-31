@@ -15,6 +15,7 @@ import {
 import type { ChatMessage, TourClient } from '../../types/tour';
 import { cn } from '../../lib/cn';
 import { useSpeechToText } from '../../hooks/useSpeechToText';
+import { useTourChromeLayout } from '../../hooks/useTourChromeLayout';
 import {
   stripMarkdownForSpeech,
   useSpeechSynthesis,
@@ -424,6 +425,7 @@ export function AiChatPanel({
   clientLogo,
   logoAlt,
 }: AiChatPanelProps) {
+  const { isCoarsePointer } = useTourChromeLayout();
   const [input, setInput] = useState('');
   const [composerFocused, setComposerFocused] = useState(false);
   const [noticeDismissed, setNoticeDismissed] = useState(false);
@@ -523,12 +525,26 @@ export function AiChatPanel({
     return remaining <= thresholdPx;
   };
 
-  const scrollThreadToBottom = (behavior: ScrollBehavior) => {
+  const scrollThreadToBottom = (behavior: ScrollBehavior = 'auto') => {
     const root = messagesRef.current;
     if (!root) return;
-    root.scrollTo({
-      top: Math.max(0, root.scrollHeight - root.clientHeight),
-      behavior,
+    const top = Math.max(0, root.scrollHeight - root.clientHeight);
+    // `scrollTop` is more reliable than smooth `scrollTo` when layout is still
+    // settling (composer expand, panel enter).
+    if (behavior === 'auto') {
+      root.scrollTop = top;
+      return;
+    }
+    root.scrollTo({ top, behavior });
+  };
+
+  /** Re-pin after layout catches up (composer focus grow, panel anim, etc.). */
+  const settleThreadToBottom = () => {
+    if (!stickToBottomRef.current) return;
+    scrollThreadToBottom('auto');
+    requestAnimationFrame(() => {
+      if (!stickToBottomRef.current) return;
+      scrollThreadToBottom('auto');
     });
   };
 
@@ -550,11 +566,19 @@ export function AiChatPanel({
     // Spacer was for pin-user-to-top; ChatGPT follows the bottom instead.
     if (spacer) spacer.style.height = '0px';
 
+    let settleTimer = 0;
+    const followWithSettle = () => {
+      stickToBottomRef.current = true;
+      scrollThreadToBottom('smooth');
+      settleTimer = window.setTimeout(() => settleThreadToBottom(), 320);
+    };
+
     if (displayMessages.length === 0 && !isSending && !sendError) {
       stickToBottomRef.current = true;
       lastScrollOutputKeyRef.current = '';
-      root.scrollTo({ top: 0, behavior: 'auto' });
-      return;
+      // Bottom so greeting/starters aren’t clipped under a growing composer.
+      scrollThreadToBottom('auto');
+      return () => window.clearTimeout(settleTimer);
     }
 
     const outputKey = [
@@ -565,7 +589,7 @@ export function AiChatPanel({
     ].join('|');
 
     const isNewOutput = outputKey !== lastScrollOutputKeyRef.current;
-    if (!isNewOutput) return;
+    if (!isNewOutput) return () => window.clearTimeout(settleTimer);
 
     const previousKey = lastScrollOutputKeyRef.current;
     lastScrollOutputKeyRef.current = outputKey;
@@ -576,16 +600,15 @@ export function AiChatPanel({
       !previousKey.startsWith(`${latestUserMessageId}|`);
 
     if (isNewUserTurn) {
-      stickToBottomRef.current = true;
-      scrollThreadToBottom('smooth');
-      return;
+      followWithSettle();
+      return () => window.clearTimeout(settleTimer);
     }
 
     // Thinking / assistant reply / error — follow only if still stuck to bottom.
     if (stickToBottomRef.current || isNearBottom(root)) {
-      stickToBottomRef.current = true;
-      scrollThreadToBottom('smooth');
+      followWithSettle();
     }
+    return () => window.clearTimeout(settleTimer);
   }, [
     displayMessages,
     isSending,
@@ -594,19 +617,20 @@ export function AiChatPanel({
     latestAssistantMessageId,
   ]);
 
-  // Composer / follow-up chrome can shrink the viewport — keep bottom if sticking.
+  // Composer / panel chrome can shrink the thread — keep true bottom if sticking.
   useEffect(() => {
     const root = messagesRef.current;
+    const form = composerFormRef.current;
     if (!root || typeof ResizeObserver === 'undefined') return;
     let frame = 0;
     const ro = new ResizeObserver(() => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        if (!stickToBottomRef.current) return;
-        scrollThreadToBottom('auto');
+        settleThreadToBottom();
       });
     });
     ro.observe(root);
+    if (form) ro.observe(form);
     return () => {
       window.cancelAnimationFrame(frame);
       ro.disconnect();
@@ -619,10 +643,33 @@ export function AiChatPanel({
   canComposeRef.current = canCompose;
 
   const focusComposerInput = () => {
-    const input = composerInputRef.current;
-    if (!input) return;
-    input.focus({ preventScroll: true });
+    const inputEl = composerInputRef.current;
+    if (!inputEl) return;
+    inputEl.focus({ preventScroll: true });
   };
+
+  // Desktop / fine pointer — ready to type on open. Skip coarse (phone keyboard).
+  useEffect(() => {
+    if (panelPhase !== 'enter') return;
+    if (!canCompose || isCoarsePointer) return;
+    setComposerFocused(true);
+    queueMicrotask(focusComposerInput);
+    requestAnimationFrame(() => {
+      focusComposerInput();
+      // Focus expands the composer and shortens the thread — re-pin after that.
+      stickToBottomRef.current = true;
+      settleThreadToBottom();
+    });
+  }, [canCompose, isCoarsePointer, panelPhase]);
+
+  // Panel enter (incl. touch) — settle once the glass panel finishes growing.
+  useEffect(() => {
+    if (panelPhase !== 'enter') return;
+    stickToBottomRef.current = true;
+    settleThreadToBottom();
+    const timer = window.setTimeout(() => settleThreadToBottom(), 200);
+    return () => window.clearTimeout(timer);
+  }, [panelPhase]);
 
   const handleSend = (text: string) => {
     onSend(text);

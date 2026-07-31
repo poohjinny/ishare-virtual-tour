@@ -229,7 +229,7 @@ export const tourNavBreadcrumbSceneInfoButtonClassName = cn(
 
 export const tourNavActionsRootClassName = cn(
   'absolute top-[var(--tour-chrome-inset-top)] right-[var(--tour-chrome-inset-right)] z-[var(--tour-chrome-z-index)] flex flex-col-reverse items-end',
-  '[--tour-directory-space:16px] [--tour-directory-divider-space:32px] [--tour-directory-section-group-lead-extra:8px] [--tour-directory-group-gap:20px] [--tour-directory-group-content-lead:8px]',
+  '[--tour-directory-space:16px] [--tour-directory-divider-space:32px] [--tour-directory-section-group-lead-extra:8px] [--tour-directory-group-gap:28px] [--tour-directory-group-content-lead:8px]',
 );
 
 export const tourNavActionsDockClassName = cn(
@@ -1326,7 +1326,7 @@ export const tourNavDirectoryGroupedListClassName = cva('flex flex-col', {
 
 /** Collapsible department group in the grouped locations list. */
 export const tourNavLocationGroupClassName = cn(
-  'tour-nav-location-group flex flex-col [&+&]:mt-[var(--tour-directory-group-gap,20px)]',
+  'tour-nav-location-group flex flex-col [&+&]:mt-[var(--tour-directory-group-gap,28px)]',
 );
 
 export const tourNavLocationGroupExpandedClassName =

@@ -738,6 +738,13 @@ function TourExperience() {
     else panelStack.closePanel('ai-chat');
   }, [assistant.isOpen, panelStack, showAskGuide]);
 
+  // Play Tour owns the scene — close Ask Guide so it doesn’t cover the slideshow.
+  useEffect(() => {
+    if (!showAskGuide) return;
+    if (playTourPhase !== 'playing') return;
+    assistant.close();
+  }, [assistant.close, playTourPhase, showAskGuide]);
+
   useTourEmbedMessaging({
     embed: searchParams.embed,
     tourId: tour?.id ?? route.tourId,
@@ -1257,6 +1264,7 @@ function TourExperience() {
             namingHotspotId={activeNamingHotspotId}
             namingName={assistantLiveContext?.namingName}
             chromeDockOpen={chromeDockOpen}
+            playTourActive={playTourPhase === 'playing'}
             client={resolveTourClient(tour)}
             clientLogo={tourBranding?.logo}
             logoAlt={tourBranding?.logoAlt}

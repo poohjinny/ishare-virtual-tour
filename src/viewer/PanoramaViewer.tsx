@@ -291,6 +291,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     /** Play Tour quiet hop — skip load-bar start/complete pairing. */
     const quietNavRef = useRef(false);
     const disabledRef = useRef(disabled);
+    const playTourPlayingRef = useRef(playTourPhase === 'playing');
     const suppressKeyboardRef = useLatestRef(suppressKeyboard);
     const tourRef = useLatestRef(tour);
     const markerAudienceRef = useLatestRef(
@@ -316,6 +317,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     };
 
     disabledRef.current = disabled;
+    playTourPlayingRef.current = playTourPhase === 'playing';
 
     const onSceneChangeRef = useLatestRef(onSceneChange);
     const onInfoHotspotRef = useLatestRef(onInfoHotspot);
@@ -1088,7 +1090,10 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
             activeNamingHotspotIdRef.current,
           );
         },
-        () => disabledRef.current || transitioningRef.current,
+        () =>
+          disabledRef.current ||
+          transitioningRef.current ||
+          playTourPlayingRef.current,
       );
 
       const fullscreenButton = createTourFullscreenNavbarButton(
