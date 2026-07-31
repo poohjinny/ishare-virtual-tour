@@ -1,6 +1,5 @@
 import { resolveNamingOpportunityPopupCtas } from '../data/namingOpportunityStatus';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
-import { VIRTUAL_TOUR_GUIDE_FAB_LABEL } from '../constants/branding';
 import type { ChatGuideCta, ChatGuideLink, Tour } from '../types/tour';
 import { assembleTourContext } from './assembleTourContext';
 import { listSceneInfoHotspots } from './findTourHotspot';
@@ -381,17 +380,10 @@ function openExploreCta(): ChatGuideCta {
   return { id: 'open-explore', label: 'Explore tour', kind: 'open-explore' };
 }
 
-function openAskGuideCta(): ChatGuideCta {
-  return {
-    id: 'open-ask-guide',
-    label: VIRTUAL_TOUR_GUIDE_FAB_LABEL,
-    kind: 'open-ask-guide',
-  };
-}
-
 /** How-to replies — short chrome shortcuts instead of a product manual. */
 function appHowToChromeCtas(): ChatGuideCta[] {
-  return [openHelpCta(), openExploreCta(), openAskGuideCta()];
+  // Skip Ask Tour Guide here — the visitor is already in the Guide panel.
+  return [openHelpCta(), openExploreCta()];
 }
 
 function replyPointsToHelp(reply: string): boolean {
