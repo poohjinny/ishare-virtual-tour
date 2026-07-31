@@ -870,7 +870,7 @@ export const devViewPanelManageListItemActiveClassName = cn(
 
 /** Compact circular client/tour logo in manage-list row heads. */
 export const devViewPanelManageListItemLogoWrapClassName = cn(
-  'flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1',
+  'flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white p-1',
 );
 
 export const devViewPanelManageListItemLogoClassName = cn(
