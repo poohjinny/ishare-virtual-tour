@@ -8,7 +8,7 @@ import {
   findNamingHotspotByNamingId,
   listSceneInfoHotspots,
 } from './findTourHotspot';
-import { formatNamingPriceDisplay } from './namingPrice';
+import { formatNamingGalleryItemPrice } from './namingPrice';
 import {
   abbreviateNamingBodyLead,
   resolveScenePlaceLead,
@@ -138,8 +138,10 @@ function buildNamingLinkFromHotspot(
     return null;
   }
 
-  const priceLabel =
-    naming.priceLabel?.trim() || formatNamingPriceDisplay(naming.price);
+  const priceLabel = formatNamingGalleryItemPrice({
+    price: naming.price,
+    priceLabel: naming.priceLabel,
+  });
   const statusLabel = namingOpportunityStatusConfig(naming.status).label;
   const bodyDesc = guideCardDescription(popup?.body);
   const title =
@@ -177,6 +179,84 @@ function buildNamingLink(
   const found = findNamingHotspotByNamingId(tour, namingId);
   if (!found) return null;
   return buildNamingLinkFromHotspot(tour, found.sceneId, found.hotspot, label);
+}
+
+/**
+ * Open / soon naming cards across the tour (Explore-visible).
+ * Prefer placements on {@link preferSceneId} when provided.
+ */
+export function collectOpenNamingGuideLinks(
+  tour: Tour,
+  options?: { preferSceneId?: string; limit?: number },
+): ChatGuideLink[] {
+  const limit = Math.max(1, options?.limit ?? GUIDE_LINK_PREVIEW_COUNT);
+  const preferSceneId = options?.preferSceneId?.trim();
+  const out: ChatGuideLink[] = [];
+  const seen = new Set<string>();
+
+  const pushFromScene = (sceneId: string) => {
+    const scene = tour.scenes[sceneId];
+    if (!scene) return;
+    for (const hotspot of listSceneInfoHotspots(tour, scene)) {
+      const link = buildNamingLinkFromHotspot(tour, sceneId, hotspot);
+      if (!link || link.status === 'sold') continue;
+      const key = link.namingId ?? link.hotspotId ?? '';
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      out.push(link);
+      if (out.length >= limit) return;
+    }
+  };
+
+  if (preferSceneId) pushFromScene(preferSceneId);
+  if (out.length >= limit) return out;
+
+  for (const item of buildTourNamingDirectory(tour)) {
+    if (preferSceneId && item.sceneId === preferSceneId) continue;
+    const scene = tour.scenes[item.sceneId];
+    if (!scene) continue;
+    const hotspot = findHotspotOnScene(tour, scene, item.hotspotId);
+    if (!hotspot) continue;
+    const link = buildNamingLinkFromHotspot(tour, item.sceneId, hotspot);
+    if (!link || link.status === 'sold') continue;
+    const key = link.namingId ?? link.hotspotId ?? '';
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(link);
+    if (out.length >= limit) break;
+  }
+
+  return out;
+}
+
+/**
+ * Other Explore-visible places (exclude current). Used when an explore question
+ * gets a text-only answer with no model sceneLinks.
+ */
+export function collectOtherAreaGuideLinks(
+  tour: Tour,
+  currentSceneId: string,
+  options?: { limit?: number },
+): ChatGuideLink[] {
+  const limit = Math.max(1, options?.limit ?? GUIDE_LINK_PREVIEW_COUNT);
+  const out: ChatGuideLink[] = [];
+  const seenTitles = new Set<string>();
+
+  for (const [id, scene] of Object.entries(tour.scenes)) {
+    if (id === currentSceneId) continue;
+    if (!isSceneVisibleInExplore(scene)) continue;
+    const title = scene.title?.trim();
+    if (!title) continue;
+    const titleKey = normalizeGuideLinkTitle(title);
+    if (titleKey && seenTitles.has(titleKey)) continue;
+    if (titleKey) seenTitles.add(titleKey);
+    const link = buildSceneLink(tour, id);
+    if (!link) continue;
+    out.push(link);
+    if (out.length >= limit) break;
+  }
+
+  return out;
 }
 
 function findHotspotOnScene(

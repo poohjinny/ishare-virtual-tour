@@ -1,17 +1,21 @@
 import type { ChatGuideCta, TourClient } from '../../types/tour';
 import { cn } from '../../lib/cn';
 import {
+  addressToGoogleMapsHref,
   getClientPhones,
   hasClientContact,
+  phoneToTelHref,
 } from '../../utils/tourClientContact';
 import { isMailtoCtaUrl, openCtaUrl } from '../../utils/popupCtaPlacement';
 import {
+  aiGuideContactFieldsClassName,
   aiGuideContactInfoClassName,
   aiGuideContactItemClassName,
   aiGuideContactLabelClassName,
   aiGuideContactLinkClassName,
   aiGuideContactLogoClassName,
   aiGuideContactValueClassName,
+  aiGuideContactValueAddressClassName,
   aiGuideCtaActionsColsClassName,
   aiGuideCtaClassName,
   aiGuideCtaCompactClassName,
@@ -112,6 +116,9 @@ export function GuideCtaRow({
   const visible = actionCtas(ctas, Boolean(showInfo), client);
   const phones = showInfo ? getClientPhones(client) : [];
   const logoSrc = clientLogo?.trim() || '';
+  const faxHref = showInfo && client.fax ? phoneToTelHref(client.fax) : '';
+  const address = showInfo ? client.address?.trim() || '' : '';
+  const mapsHref = address ? addressToGoogleMapsHref(address, client.name) : '';
 
   if (visible.length === 0 && !showInfo) return null;
 
@@ -124,75 +131,114 @@ export function GuideCtaRow({
       )}
     >
       {showInfo ?
-        <dl className={aiGuideContactInfoClassName}>
+        <div className={aiGuideContactInfoClassName}>
           {logoSrc ?
-            <div className={aiGuideContactItemClassName}>
-              <dt className='sr-only'>Organization</dt>
-              <dd className='m-0'>
-                <img
-                  className={aiGuideContactLogoClassName}
-                  src={logoSrc}
-                  alt={logoAlt?.trim() || client.name || ''}
-                />
-              </dd>
-            </div>
-          : client.name ?
-            <div className={aiGuideContactItemClassName}>
-              <dt className={aiGuideContactLabelClassName}>Organization</dt>
-              <dd className={aiGuideContactValueClassName}>{client.name}</dd>
-            </div>
+            <img
+              className={aiGuideContactLogoClassName}
+              src={logoSrc}
+              alt={logoAlt?.trim() || client.name || ''}
+            />
           : null}
-          {client.email ?
-            <div className={aiGuideContactItemClassName}>
-              <dt className={aiGuideContactLabelClassName}>Email</dt>
-              <dd className={aiGuideContactValueClassName}>
-                <a
-                  className={aiGuideContactLinkClassName}
-                  href={`mailto:${client.email}`}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    openCtaUrl(`mailto:${client.email}`);
-                  }}
-                >
-                  {client.email}
-                </a>
-              </dd>
-            </div>
-          : null}
-          {phones.map((phone) => (
-            <div
-              key={`${phone.label}-${phone.number}`}
-              className={aiGuideContactItemClassName}
-            >
-              <dt className={aiGuideContactLabelClassName}>{phone.label}</dt>
-              <dd className={aiGuideContactValueClassName}>
-                {phone.telHref ?
+          <dl className={aiGuideContactFieldsClassName}>
+            {!logoSrc && client.name ?
+              <div className={aiGuideContactItemClassName}>
+                <dt className={aiGuideContactLabelClassName}>Organization: </dt>
+                <dd className={aiGuideContactValueClassName}>{client.name}</dd>
+              </div>
+            : null}
+            {client.email ?
+              <div className={aiGuideContactItemClassName}>
+                <dt className={aiGuideContactLabelClassName}>Email: </dt>
+                <dd className={aiGuideContactValueClassName}>
                   <a
                     className={aiGuideContactLinkClassName}
-                    href={phone.telHref}
+                    href={`mailto:${client.email}`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      openCtaUrl(`mailto:${client.email}`);
+                    }}
                   >
-                    {phone.number}
+                    {client.email}
                   </a>
-                : phone.number}
-              </dd>
-            </div>
-          ))}
-          {client.website && client.website !== 'https://example.com' ?
-            <div className={aiGuideContactItemClassName}>
-              <dt className={aiGuideContactLabelClassName}>Website</dt>
-              <dd className={aiGuideContactValueClassName}>
-                <a
-                  className={aiGuideContactLinkClassName}
-                  href={client.website}
-                  target='_blank'
-                  rel='noopener noreferrer'
+                </dd>
+              </div>
+            : null}
+            {phones.map((phone) => (
+              <div
+                key={`${phone.label}-${phone.number}`}
+                className={aiGuideContactItemClassName}
+              >
+                <dt className={aiGuideContactLabelClassName}>
+                  {phone.label}:{' '}
+                </dt>
+                <dd className={aiGuideContactValueClassName}>
+                  {phone.telHref ?
+                    <a
+                      className={aiGuideContactLinkClassName}
+                      href={phone.telHref}
+                    >
+                      {phone.number}
+                    </a>
+                  : phone.number}
+                </dd>
+              </div>
+            ))}
+            {client.fax ?
+              <div className={aiGuideContactItemClassName}>
+                <dt className={aiGuideContactLabelClassName}>
+                  {client.faxLabel?.trim() || 'Fax'}:{' '}
+                </dt>
+                <dd className={aiGuideContactValueClassName}>
+                  {faxHref ?
+                    <a className={aiGuideContactLinkClassName} href={faxHref}>
+                      {client.fax}
+                    </a>
+                  : client.fax}
+                </dd>
+              </div>
+            : null}
+            {address ?
+              <div className={aiGuideContactItemClassName}>
+                <dt className={aiGuideContactLabelClassName}>Address: </dt>
+                <dd
+                  className={cn(
+                    aiGuideContactValueClassName,
+                    aiGuideContactValueAddressClassName,
+                  )}
                 >
-                  {formatWebsiteLabel(client.website)}
-                </a>
-              </dd>
-            </div>
-          : null}
-        </dl>
+                  {mapsHref ?
+                    <a
+                      className={aiGuideContactLinkClassName}
+                      href={mapsHref}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      aria-label={`Open in Google Maps: ${address}${
+                        client.name ? `, ${client.name}` : ''
+                      }`}
+                    >
+                      {address}
+                    </a>
+                  : address}
+                </dd>
+              </div>
+            : null}
+            {client.website && client.website !== 'https://example.com' ?
+              <div className={aiGuideContactItemClassName}>
+                <dt className={aiGuideContactLabelClassName}>Website: </dt>
+                <dd className={aiGuideContactValueClassName}>
+                  <a
+                    className={aiGuideContactLinkClassName}
+                    href={client.website}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                  >
+                    {formatWebsiteLabel(client.website)}
+                  </a>
+                </dd>
+              </div>
+            : null}
+          </dl>
+        </div>
       : null}
       {visible.length > 0 ?
         <div

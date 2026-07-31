@@ -17,6 +17,7 @@ import {
   matchTourPlaceSceneIdsFromQuestion,
   withCurrentPlaceSummaryLink,
   withInterestNamingLink,
+  withExplorePlaceLinks,
 } from '../utils/guideMessageExtras';
 import {
   resolveGuideLinks,
@@ -174,6 +175,13 @@ function hydrateGuideExtras(
       sceneId,
       question,
       guideLinks,
+    );
+    guideLinks = withExplorePlaceLinks(
+      tour,
+      sceneId,
+      question,
+      guideLinks,
+      reply,
     );
     guideLinks = withInterestNamingLink(
       tour,

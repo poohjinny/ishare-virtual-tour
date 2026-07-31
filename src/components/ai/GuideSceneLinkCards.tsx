@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ChatGuideLink } from '../../types/tour';
+import { TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD } from '../../constants/tourDirectory';
 import { namingOpportunityStatusShowsBadge } from '../../data/namingOpportunityStatus';
 import { GUIDE_LINK_PREVIEW_COUNT } from '../../utils/guideSceneLinks';
 import { cn } from '../../lib/cn';
@@ -15,13 +16,18 @@ import {
   aiSceneLinkCardBadgeGroupClassName,
   aiSceneLinkCardBodyClassName,
   aiSceneLinkCardDescClassName,
+  aiSceneLinkCardDescPlaceholderClassName,
+  aiSceneLinkCardDescTallClassName,
+  AI_GUIDE_CARD_NAMING_DESC_PLACEHOLDER,
   aiSceneLinkCardKindClassName,
   aiSceneLinkCardMediaClassName,
+  aiSceneLinkCardMediaZoomableClassName,
   aiSceneLinkCardMediaWrapClassName,
   aiSceneLinkCardPriceClassName,
   aiSceneLinkCardStatusBadgeClassName,
   aiSceneLinkCardTitleClassName,
   aiSceneLinkCardTitleRowClassName,
+  aiSceneLinkCardTitleTallClassName,
   aiSceneLinkCardVariants,
   aiSceneLinkListVariants,
   aiSceneLinkShowMoreClassName,
@@ -47,7 +53,7 @@ function cardLabel(link: ChatGuideLink, currentSceneId?: string): string {
     return `View naming opportunity: ${link.title}`;
   }
   if (currentSceneId && link.sceneId === currentSceneId) {
-    return `Recenter on ${link.title}`;
+    return `You are here: ${link.title}`;
   }
   return `Go to ${link.title}`;
 }
@@ -55,6 +61,7 @@ function cardLabel(link: ChatGuideLink, currentSceneId?: string): string {
 function GuideLinkCard({
   link,
   layout,
+  showKindEyebrow,
   currentSceneId,
   onSelectScene,
   onSelectNaming,
@@ -62,6 +69,8 @@ function GuideLinkCard({
 }: {
   link: ChatGuideLink;
   layout: 'single' | 'multi';
+  /** Place + naming in the same reply — disambiguate with an eyebrow. */
+  showKindEyebrow: boolean;
   currentSceneId?: string;
   onSelectScene?: (sceneId: string) => void;
   onSelectNaming?: (sceneId: string, hotspotId: string) => void;
@@ -71,16 +80,22 @@ function GuideLinkCard({
   const isCurrent =
     !isNaming && Boolean(currentSceneId) && link.sceneId === currentSceneId;
   const canOpenNaming = isNaming && Boolean(link.hotspotId) && onSelectNaming;
-  const canOpenScene = Boolean(onSelectScene);
+  const canOpenScene = !isCurrent && Boolean(onSelectScene);
   const canActivate = canOpenNaming || canOpenScene;
   const showStatus =
     isNaming && link.status && namingOpportunityStatusShowsBadge(link.status);
   const price = isNaming ? link.priceLabel?.trim() : undefined;
+  const description = link.description?.trim() || '';
+  const descriptionPlaceholder =
+    isNaming ?
+      AI_GUIDE_CARD_NAMING_DESC_PLACEHOLDER
+    : TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD;
+  const reserveTextHeight = layout === 'multi';
 
   return (
     <div
       className={cn(
-        'flex min-w-0 flex-col gap-3',
+        'flex min-w-0 flex-col gap-1.5',
         layout === 'single' && aiGuideCardWidthClassName,
         layout === 'multi' && 'w-full',
       )}
@@ -96,6 +111,7 @@ function GuideLinkCard({
         disabled={disabled || !canActivate}
         aria-label={cardLabel(link, currentSceneId)}
         onClick={() => {
+          if (!canActivate) return;
           if (canOpenNaming && link.hotspotId) {
             onSelectNaming?.(link.sceneId, link.hotspotId);
             return;
@@ -108,7 +124,10 @@ function GuideLinkCard({
             <img
               src={link.thumbnail}
               alt=''
-              className={aiSceneLinkCardMediaClassName}
+              className={cn(
+                aiSceneLinkCardMediaClassName,
+                canActivate && aiSceneLinkCardMediaZoomableClassName,
+              )}
               loading='lazy'
               decoding='async'
             />
@@ -139,22 +158,45 @@ function GuideLinkCard({
           : null}
         </span>
         <div className={aiSceneLinkCardBodyClassName}>
-          <span className={aiSceneLinkCardKindClassName}>
-            {isNaming ? 'Naming opportunity' : 'Place'}
-          </span>
+          {showKindEyebrow ?
+            <span className={aiSceneLinkCardKindClassName}>
+              {isNaming ? 'Naming opportunity' : 'Place'}
+            </span>
+          : null}
           {isNaming ?
             <div className={aiSceneLinkCardTitleRowClassName}>
-              <span className={aiSceneLinkCardTitleClassName}>
+              <span
+                className={cn(
+                  aiSceneLinkCardTitleClassName,
+                  reserveTextHeight && aiSceneLinkCardTitleTallClassName,
+                )}
+                title={link.title}
+              >
                 {link.title}
               </span>
               {price ?
                 <span className={aiSceneLinkCardPriceClassName}>{price}</span>
               : null}
             </div>
-          : <span className={aiSceneLinkCardTitleClassName}>{link.title}</span>}
-          {link.description ?
-            <p className={aiSceneLinkCardDescClassName}>{link.description}</p>
-          : null}
+          : <span
+              className={cn(
+                aiSceneLinkCardTitleClassName,
+                reserveTextHeight && aiSceneLinkCardTitleTallClassName,
+              )}
+              title={link.title}
+            >
+              {link.title}
+            </span>
+          }
+          <p
+            className={cn(
+              aiSceneLinkCardDescClassName,
+              reserveTextHeight && aiSceneLinkCardDescTallClassName,
+              !description && aiSceneLinkCardDescPlaceholderClassName,
+            )}
+          >
+            {description || descriptionPlaceholder}
+          </p>
         </div>
       </button>
       {isNaming && link.ctas && link.ctas.length > 0 ?
@@ -173,6 +215,7 @@ function GuideLinkCard({
 function GuideLinkRow({
   links,
   compact,
+  showKindEyebrow,
   currentSceneId,
   onSelectScene,
   onSelectNaming,
@@ -181,6 +224,7 @@ function GuideLinkRow({
   links: ChatGuideLink[];
   /** Match half-column width even for a single card (mixed place/NO rows). */
   compact: boolean;
+  showKindEyebrow: boolean;
   currentSceneId?: string;
   onSelectScene?: (sceneId: string) => void;
   onSelectNaming?: (sceneId: string, hotspotId: string) => void;
@@ -195,6 +239,7 @@ function GuideLinkRow({
           key={linkKey(link)}
           link={link}
           layout={layout}
+          showKindEyebrow={showKindEyebrow}
           currentSceneId={currentSceneId}
           onSelectScene={onSelectScene}
           onSelectNaming={onSelectNaming}
@@ -223,6 +268,7 @@ export function GuideSceneLinkCards({
   const needsCollapse = total > GUIDE_LINK_PREVIEW_COUNT;
   // 2 places + 1 NO → keep the lonely NO at grid-column width, not full single.
   const compactRows = total > 1;
+  const showKindEyebrow = places.length > 0 && namings.length > 0;
 
   let visiblePlaces = places;
   let visibleNamings = namings;
@@ -252,6 +298,7 @@ export function GuideSceneLinkCards({
         <GuideLinkRow
           links={visiblePlaces}
           compact={compactRows}
+          showKindEyebrow={showKindEyebrow}
           currentSceneId={currentSceneId}
           onSelectScene={onSelectScene}
           onSelectNaming={onSelectNaming}
@@ -260,6 +307,7 @@ export function GuideSceneLinkCards({
         <GuideLinkRow
           links={visibleNamings}
           compact={compactRows}
+          showKindEyebrow={showKindEyebrow}
           currentSceneId={currentSceneId}
           onSelectScene={onSelectScene}
           onSelectNaming={onSelectNaming}

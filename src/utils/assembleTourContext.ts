@@ -58,6 +58,7 @@ export interface AssembledTourContext {
     name: string;
     sceneId: string;
     sceneTitle: string;
+    status: AssembledNamingContext['status'];
     statusLabel: string;
   }>;
   namings: AssembledNamingContext[];
@@ -149,6 +150,7 @@ function listTourNamingsForGuide(
       name: item.name,
       sceneId: item.sceneId,
       sceneTitle: item.sceneTitle,
+      status: resolveNamingOpportunityStatus(item.statusModifier),
       statusLabel: item.statusLabel,
     });
     if (out.length >= 40) break;

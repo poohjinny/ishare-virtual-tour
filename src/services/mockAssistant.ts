@@ -38,6 +38,31 @@ function formatNamingBlurb(ctx: AssembledTourContext): string {
     .join(' ');
 }
 
+/** Prefer scene pins; fall back to tour-wide catalog (Overview often has none). */
+function namingPool(ctx: AssembledTourContext): Array<{
+  name: string;
+  status: AssembledTourContext['namings'][number]['status'];
+  statusLabel: string;
+  priceLabel?: string;
+  body?: string;
+}> {
+  if (ctx.namings.length > 0) return ctx.namings;
+  return ctx.tourNamings.map((entry) => ({
+    name: entry.name,
+    status: entry.status,
+    statusLabel: entry.statusLabel,
+  }));
+}
+
+function formatTourNamingBlurb(ctx: AssembledTourContext): string {
+  const pool = namingPool(ctx);
+  if (pool.length === 0) return '';
+  return pool
+    .slice(0, 6)
+    .map((entry) => `${entry.name} (${entry.statusLabel})`)
+    .join('; ');
+}
+
 export function getSuggestedQuestions(tour: Tour, sceneId: string): string[] {
   return assembleTourContext(tour, sceneId)?.suggestedQuestions ?? [];
 }
@@ -116,13 +141,18 @@ export function askMockAssistant(
     /\b(buy|purchase|interested|interest|pledge|sponsor|claim)\b/.test(q) ||
     /구매|사고\s*싶|관심|어떻게\s*(사|구매|후원|기부)/.test(question)
   ) {
-    const open = ctx.namings.filter((entry) => entry.status === 'open');
-    const first = open[0] ?? ctx.namings[0];
+    const pool = namingPool(ctx);
+    const open = pool.filter((entry) => entry.status === 'open');
+    const first = open[0] ?? pool[0];
     if (!first) {
-      return `There isn’t a naming opportunity listed to support in ${ctx.sceneTitle} yet. You can ask at reception or explore other areas of the tour.`;
+      return `There isn’t a naming opportunity listed to support in this tour yet. You can ask at reception or explore other areas.`;
     }
     if (first.status === 'open') {
-      return `${first.name} is available (${first.priceLabel}). You can’t check out here like a store — use Express your interest to contact the foundation team, or explore tax-efficient giving if that option is shown.`;
+      const price =
+        'priceLabel' in first && first.priceLabel ?
+          ` (${first.priceLabel})`
+        : '';
+      return `${first.name} is available${price}. You can’t check out here like a store — use Express your interest to contact the foundation team, or explore tax-efficient giving if that option is shown.`;
     }
     if (first.status === 'reserved') {
       return `${first.name} is reserved — a naming commitment is already in progress. Speak with the foundation team if you have questions; I can’t promise it’s still available.`;
@@ -139,11 +169,15 @@ export function askMockAssistant(
     q.includes('donate') ||
     q.includes('gift')
   ) {
-    const blurb = formatNamingBlurb(ctx);
-    if (blurb) {
-      return `Naming opportunities in ${ctx.sceneTitle}: ${blurb}`;
+    const sceneBlurb = formatNamingBlurb(ctx);
+    if (sceneBlurb) {
+      return `Naming opportunities in ${ctx.sceneTitle}: ${sceneBlurb}`;
     }
-    return `There are no naming opportunities listed in ${ctx.sceneTitle} yet.`;
+    const tourBlurb = formatTourNamingBlurb(ctx);
+    if (tourBlurb) {
+      return `There aren’t naming pins in ${ctx.sceneTitle} itself, but across ${ctx.tourTitle} you can support opportunities like: ${tourBlurb}.`;
+    }
+    return `There are no naming opportunities listed in this tour yet.`;
   }
 
   if (

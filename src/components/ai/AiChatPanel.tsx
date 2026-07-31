@@ -34,6 +34,7 @@ import { GuideCtaRow } from './GuideCtaRow';
 import { GuideSceneLinkCards } from './GuideSceneLinkCards';
 import { FollowUpQuestions } from './FollowUpQuestions';
 import { GuideChatMarkdown } from '../../utils/guideChatMarkdown';
+import { formatAssistantReplyPlainText } from '../../utils/guideReplyPlainText';
 import { AiThinkingIndicator } from './AiThinkingIndicator';
 import {
   aiComposerActionsClassName,
@@ -758,6 +759,9 @@ export function AiChatPanel({
     });
   };
 
+  const assistantShareText = (msg: ChatMessage) =>
+    formatAssistantReplyPlainText(msg, { client });
+
   const handleReset = () => {
     if (!canReset) return;
     onReset();
@@ -849,6 +853,8 @@ export function AiChatPanel({
               index > 0 ? (displayMessages[index - 1]?.role ?? null) : null;
             const showTipFollowUps = tipFollowUps?.messageId === msg.id;
             const speaking = readAloud.speakingId === msg.id;
+            const shareText =
+              msg.role === 'assistant' ? assistantShareText(msg) : '';
             return (
               <Fragment key={msg.id}>
                 <div
@@ -864,7 +870,30 @@ export function AiChatPanel({
                         text={msg.content}
                         className={aiMessageProseClassName}
                       />
-                      {msg.content.trim() ?
+                      {(
+                        msg.guideLinks &&
+                        msg.guideLinks.length > 0 &&
+                        (onNavigateScene || onSelectNaming)
+                      ) ?
+                        <GuideSceneLinkCards
+                          links={msg.guideLinks}
+                          currentSceneId={currentSceneId}
+                          onSelectScene={onNavigateScene}
+                          onSelectNaming={onSelectNaming}
+                        />
+                      : null}
+                      {(
+                        msg.guideCtas?.length &&
+                        !(msg.guideLinks && msg.guideLinks.length > 0)
+                      ) ?
+                        <GuideCtaRow
+                          ctas={msg.guideCtas}
+                          client={client}
+                          clientLogo={clientLogo}
+                          logoAlt={logoAlt}
+                        />
+                      : null}
+                      {shareText ?
                         <div className={aiMessageActionsClassName}>
                           <IconTooltip
                             label={
@@ -881,7 +910,7 @@ export function AiChatPanel({
                                 : 'Copy reply'
                               }
                               onClick={() =>
-                                handleCopyMessage(msg.id, msg.content)
+                                handleCopyMessage(msg.id, shareText)
                               }
                             >
                               <MaterialSymbol
@@ -910,7 +939,7 @@ export function AiChatPanel({
                                 }
                                 aria-pressed={speaking}
                                 onClick={() =>
-                                  readAloud.toggle(msg.id, msg.content)
+                                  readAloud.toggle(msg.id, shareText)
                                 }
                               >
                                 <MaterialSymbol
@@ -926,31 +955,6 @@ export function AiChatPanel({
                       : null}
                     </>
                   : msg.content}
-                  {(
-                    msg.role === 'assistant' &&
-                    msg.guideLinks &&
-                    msg.guideLinks.length > 0 &&
-                    (onNavigateScene || onSelectNaming)
-                  ) ?
-                    <GuideSceneLinkCards
-                      links={msg.guideLinks}
-                      currentSceneId={currentSceneId}
-                      onSelectScene={onNavigateScene}
-                      onSelectNaming={onSelectNaming}
-                    />
-                  : null}
-                  {(
-                    msg.role === 'assistant' &&
-                    msg.guideCtas?.length &&
-                    !(msg.guideLinks && msg.guideLinks.length > 0)
-                  ) ?
-                    <GuideCtaRow
-                      ctas={msg.guideCtas}
-                      client={client}
-                      clientLogo={clientLogo}
-                      logoAlt={logoAlt}
-                    />
-                  : null}
                 </div>
                 {showTipFollowUps ?
                   <div

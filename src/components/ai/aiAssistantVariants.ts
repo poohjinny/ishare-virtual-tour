@@ -362,23 +362,27 @@ export const aiSceneLinkListVariants = cva('mt-0 max-w-full self-start', {
 
 export const aiSceneLinkCardVariants = cva(
   cn(
-    'flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-white/85 p-0 text-left shadow-none transition-[border-color,background,box-shadow] duration-200',
-    'hover:bg-white hover:shadow-[0_4px_14px_rgba(15,23,42,0.08)]',
+    'group/card flex cursor-pointer flex-col overflow-hidden rounded-xl border bg-white/85 p-0 text-left shadow-none transition-[border-color,background,box-shadow] duration-200',
+    'hover:border-primary hover:bg-white hover:shadow-[0_4px_14px_rgba(15,23,42,0.08)]',
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
-    'disabled:cursor-default disabled:opacity-50 disabled:hover:bg-white/85 disabled:hover:shadow-none',
+    'disabled:cursor-default disabled:opacity-50 disabled:hover:border-[rgba(15,23,42,0.12)] disabled:hover:bg-white/85 disabled:hover:shadow-none',
   ),
   {
     variants: {
       layout: { single: aiGuideCardWidthClassName, multi: 'min-w-0 w-full' },
       kind: {
-        scene:
-          'border-[rgba(15,23,42,0.12)] hover:border-primary/40 disabled:hover:border-[rgba(15,23,42,0.12)]',
-        naming:
-          'border-[rgba(15,23,42,0.12)] bg-primary/[0.04] hover:border-primary/40 disabled:hover:border-[rgba(15,23,42,0.12)]',
+        scene: 'border-[rgba(15,23,42,0.12)]',
+        naming: 'border-[rgba(15,23,42,0.12)] bg-primary/[0.04]',
       },
       current: {
         false: '',
-        true: 'border-[3px] border-primary hover:border-primary disabled:hover:border-primary',
+        // “You are here” — not a destination; no hover affordance / no dimming.
+        true: cn(
+          'cursor-default border-[3px] border-primary',
+          'hover:border-primary hover:bg-white/85 hover:shadow-none',
+          'disabled:cursor-default disabled:opacity-100',
+          'disabled:hover:border-primary disabled:hover:bg-white/85 disabled:hover:shadow-none',
+        ),
       },
     },
     defaultVariants: { layout: 'single', kind: 'scene', current: false },
@@ -390,7 +394,14 @@ export const aiSceneLinkCardMediaWrapClassName = cn(
 );
 
 export const aiSceneLinkCardMediaClassName = cn(
-  'pointer-events-none block aspect-[2/1] w-full bg-[rgba(15,23,42,0.06)] object-cover object-center',
+  'pointer-events-none block aspect-[2/1] w-full origin-center bg-[rgba(15,23,42,0.06)] object-cover object-center',
+);
+
+/** Explore gallery hero zoom — only on activatable cards. */
+export const aiSceneLinkCardMediaZoomableClassName = cn(
+  'scale-100 transition-transform duration-[var(--tour-gallery-zoom-duration,0.75s)] ease-[var(--tour-gallery-hover-ease,cubic-bezier(0.22,1,0.36,1))]',
+  'group-hover/card:scale-[1.2] group-focus-visible/card:scale-[1.2]',
+  'motion-reduce:transition-none motion-reduce:group-hover/card:scale-100 motion-reduce:group-focus-visible/card:scale-100',
 );
 
 /** Compact status chip — Explore gallery badge is oversized on 17rem AI cards. */
@@ -407,7 +418,7 @@ export const aiSceneLinkCardBodyClassName = cn(
   'flex min-w-0 flex-col gap-1 px-2.5 pt-2 pb-3',
 );
 
-/** Shared place / naming eyebrow above the card title. */
+/** Place / naming eyebrow — only when a reply mixes both card kinds. */
 export const aiSceneLinkCardKindClassName = cn(
   'font-body text-2xs font-medium uppercase tracking-wide text-muted',
 );
@@ -420,6 +431,9 @@ export const aiSceneLinkCardTitleClassName = cn(
   'min-w-0 flex-1 line-clamp-2 font-display text-sm font-semibold leading-snug text-foreground',
 );
 
+/** Multi-card grid only — keep 1-line titles aligned with 2-line peers. */
+export const aiSceneLinkCardTitleTallClassName = 'min-h-[2lh]';
+
 export const aiSceneLinkCardPriceClassName = cn(
   'shrink-0 pt-0.5 font-display text-sm font-semibold tabular-nums leading-snug text-muted',
 );
@@ -429,9 +443,20 @@ export const aiSceneLinkCardMetaClassName = cn(
 );
 
 export const aiSceneLinkCardDescClassName = cn(
-  // Reserve full clamp height so short copy matches ellipsed rows in a grid.
-  'line-clamp-3 min-h-[3lh] font-body text-2xs leading-snug text-muted',
+  'line-clamp-3 font-body text-2xs leading-snug text-muted',
 );
+
+/** Multi-card grid only — keep short copy aligned with 3-line peers. */
+export const aiSceneLinkCardDescTallClassName = 'min-h-[3lh]';
+
+/** Soft empty-state copy when a guide card has no place/naming lead. */
+export const aiSceneLinkCardDescPlaceholderClassName = cn(
+  'italic text-muted/70',
+);
+
+/** Naming card — no body lead. */
+export const AI_GUIDE_CARD_NAMING_DESC_PLACEHOLDER =
+  'Open to learn more about this naming opportunity.';
 
 export const aiSceneLinkShowMoreClassName = cn(
   'mt-0.5 cursor-pointer self-center rounded-md border-none bg-transparent px-0 py-1 font-body text-sm font-medium text-primary underline-offset-2 transition-[color,opacity] duration-150',
@@ -442,26 +467,33 @@ export const aiSceneLinkShowMoreClassName = cn(
 
 /** Contact / donate action block under an assistant reply (not pills, not cards). */
 export const aiGuideCtaRowClassName = cn(
-  'mt-3 flex max-w-full flex-col items-stretch gap-2.5 self-start',
+  'mt-3 flex w-fit max-w-full flex-col items-stretch gap-2.5 self-start',
 );
 
+/** Catalog contact card — logo above, subject:value list below. */
 export const aiGuideContactInfoClassName = cn(
-  'm-0 flex max-w-full flex-col gap-2.5 self-stretch rounded-xl border border-[rgba(15,23,42,0.12)] bg-white/80 px-3.5 py-3',
+  'flex w-fit min-w-[17rem] max-w-full flex-col gap-3 rounded-xl border border-[rgba(15,23,42,0.12)] bg-white/80 px-3.5 py-3',
 );
 
 export const aiGuideContactLogoClassName = cn(
   'mb-0.5 max-h-10 max-w-[11rem] object-contain object-left',
 );
 
-export const aiGuideContactItemClassName = cn('m-0 grid gap-0.5');
+export const aiGuideContactFieldsClassName = cn(
+  'm-0 list-disc space-y-1.5 pl-3 marker:text-muted',
+);
+
+export const aiGuideContactItemClassName = cn('m-0 list-item pl-0');
 
 export const aiGuideContactLabelClassName = cn(
-  'm-0 font-body text-2xs font-medium tracking-wide text-muted',
+  'm-0 inline font-body text-2xs font-medium tracking-wide text-muted',
 );
 
 export const aiGuideContactValueClassName = cn(
-  'm-0 break-words font-body text-sm leading-snug text-foreground',
+  'm-0 inline break-words font-body text-sm leading-snug text-foreground',
 );
+
+export const aiGuideContactValueAddressClassName = cn('whitespace-pre-line');
 
 export const aiGuideContactLinkClassName = cn(
   'text-primary no-underline hover:underline focus-visible:underline focus-visible:outline-none',

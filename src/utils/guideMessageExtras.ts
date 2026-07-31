@@ -1,8 +1,4 @@
-import {
-  namingOpportunityStatusConfig,
-  resolveNamingOpportunityPopupCtas,
-  resolveNamingOpportunityStatus,
-} from '../data/namingOpportunityStatus';
+import { resolveNamingOpportunityPopupCtas } from '../data/namingOpportunityStatus';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import type { ChatGuideCta, ChatGuideLink, Tour } from '../types/tour';
 import { assembleTourContext } from './assembleTourContext';
@@ -10,7 +6,9 @@ import { listSceneInfoHotspots } from './findTourHotspot';
 import {
   buildCurrentPlaceGuideLink,
   capGuideLinks,
-  guideCardDescription,
+  collectOpenNamingGuideLinks,
+  collectOtherAreaGuideLinks,
+  GUIDE_LINK_PREVIEW_COUNT,
   promoteGuideSceneLinkToNaming,
 } from './guideSceneLinks';
 import { resolveNamingPopup } from './namingSceneInherit';
@@ -81,15 +79,15 @@ export function isExpressInterestIntent(question: string, reply = ''): boolean {
 export function isExplorePlacesQuestion(question: string): boolean {
   const q = question.toLowerCase().replace(/\s+/g, ' ').trim();
   return (
-    /\b(where else|how (do|can) i (get|go|reach)|directions?|nearby|other (areas?|places?|rooms?)|take me to|get me to|show me (around|other)|what (can|should) i (explore|see|visit|enjoy)|what (to|can i) (explore|see|visit|enjoy)|places? (to|i can) (explore|visit|see|enjoy)|recommend .{0,24}(place|area|room|spot)|where (can|should) i (go|explore|visit))\b/.test(
+    /\b(where else|how (do|can) i (get|go|reach)|directions?|nearby|other (areas?|places?|rooms?)|take me to|get me to|show me (around|other)|what (can|should) i (explore|see|visit|enjoy|tour)|what (to|can i) (explore|see|visit|enjoy|tour)|what (places?|areas?|rooms?) (can|should|do) i (explore|see|visit|enjoy|tour)|which (places?|areas?|rooms?) (can|should|do) i (explore|see|visit|enjoy|tour)|places? (to|i can) (explore|visit|see|enjoy|tour)|recommend .{0,24}(place|area|room|spot)|where (can|should) i (go|explore|visit))\b/.test(
       q,
     ) ||
     /\b((any|some) more\b|do you have more|have more|anything else|what else|other options?|more (places|areas|rooms|options|spots))\b/.test(
       q,
     ) ||
-    /\bi want to (see|visit|go|explore)\b/.test(q) ||
+    /\bi want to (see|visit|go|explore|tour)\b/.test(q) ||
     /\b(show|take) me (around|there|to)\b/.test(q) ||
-    /어디\s*(로|갈)|다른\s*(곳|장소|공간)|근처|길\s*찾|둘러\s*볼|가\s*볼\s*만|추천|더\s*있|또\s*있/.test(
+    /어디\s*(로|갈)|다른\s*(곳|장소|공간)|근처|길\s*찾|둘러\s*볼|가\s*볼\s*만|추천|더\s*있|또\s*있|투어\s*(할|가능)|어디\s*둘러/.test(
       question,
     )
   );
@@ -237,15 +235,17 @@ export function shouldAttachGuideLinks(
   options?: { tour?: Tour },
 ): boolean {
   if (isWhereAmIQuestion(question)) return true;
-  if (isFactualGapQuestion(question) || isUncertainGuideReply(reply)) {
-    return false;
-  }
+  // Place / naming browse intent wins even when the model hedges
+  // (“ask the foundation”, “none here”) — cards still come from tour data.
   if (
     isExplorePlacesQuestion(question) ||
     isNamingInterestQuestion(question) ||
     isGuideEntityQuestion(question)
   ) {
     return true;
+  }
+  if (isFactualGapQuestion(question) || isUncertainGuideReply(reply)) {
+    return false;
   }
   if (options?.tour) {
     return (
@@ -771,6 +771,16 @@ export function buildGuideCtas(
     : null;
   const clientContact = clientEmailContactCta(tour);
 
+  // Naming / explore cards already answer the question — don't replace with
+  // org contact just because the model hedged (“ask the foundation”).
+  if (hasNamingCards && isNamingInterestQuestion(question)) return [];
+  if (
+    guideLinks.some((link) => link.kind === 'scene') &&
+    isExplorePlacesQuestion(question)
+  ) {
+    return [];
+  }
+
   if (
     isContactInfoQuestion(question) ||
     isWebsiteIntentQuestion(question) ||
@@ -818,8 +828,9 @@ export function withCurrentPlaceSummaryLink(
 }
 
 /**
- * For interest/purchase questions, ensure at least one NO card from this scene
- * so View opportunity is available.
+ * For interest/purchase/browse naming questions, ensure naming cards.
+ * Prefer the current scene; if none, fall back to open opportunities tour-wide
+ * (Overview often has no pins).
  */
 export function withInterestNamingLink(
   tour: Tour,
@@ -832,37 +843,34 @@ export function withInterestNamingLink(
   if (reply && shouldSuppressGuideLinks(question, reply)) return links;
   if (links.some((link) => link.kind === 'naming')) return links;
 
-  const scene = tour.scenes[sceneId];
-  if (!scene) return links;
+  const fallback = collectOpenNamingGuideLinks(tour, {
+    preferSceneId: sceneId,
+    limit: GUIDE_LINK_PREVIEW_COUNT,
+  });
+  if (fallback.length === 0) return links;
+  return capGuideLinks([...fallback, ...links]);
+}
 
-  for (const hotspot of listSceneInfoHotspots(tour, scene)) {
-    const popup = resolveNamingPopup(tour, hotspot, scene);
-    const naming = popup?.namingOpportunity;
-    if (!naming) continue;
-    const status = resolveNamingOpportunityStatus(naming.status);
-    if (status === 'sold') continue;
+/**
+ * For where-else / what-can-I-tour questions, ensure Place cards even when the
+ * model answers with a text-only list and empty sceneLinks.
+ */
+export function withExplorePlaceLinks(
+  tour: Tour,
+  sceneId: string,
+  question: string,
+  links: ChatGuideLink[],
+  reply?: string,
+): ChatGuideLink[] {
+  if (!isExplorePlacesQuestion(question)) return links;
+  if (reply && shouldSuppressGuideLinks(question, reply)) return links;
+  if (links.some((link) => link.kind === 'scene')) return links;
 
-    const statusConfig = namingOpportunityStatusConfig(status);
-    const link: ChatGuideLink = {
-      kind: 'naming',
-      sceneId,
-      namingId: hotspot.namingId?.trim() || hotspot.id,
-      hotspotId: hotspot.id,
-      title: naming.name?.trim() || hotspot.label?.trim() || hotspot.id,
-      description: guideCardDescription(popup.body),
-      thumbnail:
-        hotspot.preview?.image?.trim() ||
-        popup.image?.trim() ||
-        scene.thumbnail?.trim() ||
-        undefined,
-      statusLabel: statusConfig.label,
-      priceLabel: naming.priceLabel?.trim() || undefined,
-      status,
-    };
-    return capGuideLinks([link, ...links]);
-  }
-
-  return links;
+  const fallback = collectOtherAreaGuideLinks(tour, sceneId, {
+    limit: GUIDE_LINK_PREVIEW_COUNT,
+  });
+  if (fallback.length === 0) return links;
+  return capGuideLinks([...fallback, ...links]);
 }
 
 /**

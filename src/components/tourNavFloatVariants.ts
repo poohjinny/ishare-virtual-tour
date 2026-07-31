@@ -1440,13 +1440,13 @@ export const tourNavHelpDividerClassName = cn(
 );
 
 export const tourNavContactBrandVariants = cva(
-  cn('mb-5 flex flex-col items-center gap-[18px] text-center'),
+  cn('mb-5 flex flex-col items-start gap-2 text-left'),
   {
     variants: {
       hasLogo: {
         true: cn(
-          'mt-5 mb-8 gap-0',
-          '[&_.tour-nav-panel-logo]:mx-0 [&_.tour-nav-panel-logo]:mb-0 [&_.tour-nav-panel-logo]:mt-0 [&_.tour-nav-panel-logo]:w-full',
+          'mb-5 gap-0',
+          '[&_.tour-nav-panel-logo]:mx-0 [&_.tour-nav-panel-logo]:mb-0 [&_.tour-nav-panel-logo]:mt-0 [&_.tour-nav-panel-logo]:w-full [&_.tour-nav-panel-logo]:justify-start',
           '[&_a]:max-w-[280px] [&_img]:h-[52px]',
           'max-[480px]:[&_a]:max-w-60 max-[480px]:[&_img]:h-11',
         ),
@@ -1494,16 +1494,20 @@ export const tourNavControlsListClassName = cn(
   '[.ishare-accordion__panel-inner_&]:mt-0',
 );
 
-export const tourNavContactListClassName = cn('m-0 flex flex-col gap-3');
+export const tourNavContactListClassName = cn(
+  'm-0 flex list-disc list-outside flex-col gap-1.5 p-0 pl-3 marker:text-muted',
+  '[&>div]:list-item [&>div]:pl-0.5',
+  '[.ishare-accordion__panel-inner_&]:mt-0',
+);
 
-export const tourNavContactItemClassName = cn('m-0 grid gap-0.5');
+export const tourNavContactItemClassName = cn('m-0');
 
 export const tourNavContactLabelClassName = cn(
-  'm-0 font-display text-xs font-semibold leading-[1.3] tracking-[0.04em] text-muted uppercase',
+  'm-0 inline font-body text-sm font-medium tracking-wide text-muted',
 );
 
 export const tourNavContactValueClassName = cn(
-  'm-0 font-body text-md leading-[1.55] text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
+  'm-0 inline break-words font-body text-md leading-[1.55] text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',
 );
 
 export const tourNavContactValueAddressClassName = cn('whitespace-pre-line');

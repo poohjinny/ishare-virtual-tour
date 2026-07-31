@@ -63,7 +63,7 @@ export function TourContactInfo({
       <dl className={tourNavContactListClassName}>
         {client.website ?
           <div className={tourNavContactItemClassName}>
-            <dt className={tourNavContactLabelClassName}>Website</dt>
+            <dt className={tourNavContactLabelClassName}>Website: </dt>
             <dd className={tourNavContactValueClassName}>
               <a
                 className={tourNavContactLinkClassName}
@@ -79,7 +79,7 @@ export function TourContactInfo({
 
         {client.email ?
           <div className={tourNavContactItemClassName}>
-            <dt className={tourNavContactLabelClassName}>Email</dt>
+            <dt className={tourNavContactLabelClassName}>Email: </dt>
             <dd className={tourNavContactValueClassName}>
               <a
                 className={tourNavContactLinkClassName}
@@ -96,13 +96,10 @@ export function TourContactInfo({
             key={`${phone.label}-${phone.number}`}
             className={tourNavContactItemClassName}
           >
-            <dt className={tourNavContactLabelClassName}>{phone.label}</dt>
+            <dt className={tourNavContactLabelClassName}>{phone.label}: </dt>
             <dd className={tourNavContactValueClassName}>
               {phone.telHref ?
-                <a
-                  className={tourNavContactLinkClassName}
-                  href={phone.telHref}
-                >
+                <a className={tourNavContactLinkClassName} href={phone.telHref}>
                   {phone.number}
                 </a>
               : phone.number}
@@ -113,7 +110,7 @@ export function TourContactInfo({
         {client.fax ?
           <div className={tourNavContactItemClassName}>
             <dt className={tourNavContactLabelClassName}>
-              {client.faxLabel ?? 'Fax'}
+              {client.faxLabel ?? 'Fax'}:{' '}
             </dt>
             <dd className={tourNavContactValueClassName}>
               {faxHref ?
@@ -127,7 +124,7 @@ export function TourContactInfo({
 
         {client.address ?
           <div className={tourNavContactItemClassName}>
-            <dt className={tourNavContactLabelClassName}>Address</dt>
+            <dt className={tourNavContactLabelClassName}>Address: </dt>
             <dd
               className={cn(
                 tourNavContactValueClassName,
