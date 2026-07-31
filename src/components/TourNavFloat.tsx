@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type RefObject,
 } from 'react';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
 import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
@@ -239,11 +240,23 @@ interface TourNavFloatProps {
   showPlayTour?: boolean;
   /** Show immersive ambience tips in Help when the tour has a music bed. */
   showImmersiveAmbience?: boolean;
+  /** Show Ask Tour Guide tips in Help when Guide is enabled for this tour. */
+  showAskGuide?: boolean;
   panelStack?: TourPanelStack;
   /** Close in-scene anchored nav/info panels (e.g. when opening explore chrome). */
   onDismissAnchoredPanels?: () => void;
   /** True while a top-right dock panel is open or exiting (Explore / Help / Share). */
   onChromeDockOpenChange?: (open: boolean) => void;
+  /** Imperative open for Guide “Open Help” / similar chrome CTAs. */
+  dockActionsRef?: RefObject<TourNavDockActions | null>;
+  /** Open Ask Tour Guide from Help copy (closes Help via panel mutex). */
+  onOpenAskGuide?: () => void;
+}
+
+/** Force-open dock panels (does not toggle closed). */
+export interface TourNavDockActions {
+  openExplore: () => void;
+  openHelp: () => void;
 }
 
 type PanelMode = 'explore' | 'help' | 'share' | null;
@@ -403,9 +416,12 @@ export function TourNavFloat({
   embed = false,
   showPlayTour = true,
   showImmersiveAmbience = true,
+  showAskGuide = false,
   panelStack,
   onDismissAnchoredPanels,
   onChromeDockOpenChange,
+  dockActionsRef,
+  onOpenAskGuide,
 }: TourNavFloatProps) {
   const { isMobile, isDesktop } = useTourChromeLayout();
   /** Location picks stay clickable during scene transitions (disabled only blocks chrome). */
@@ -1142,6 +1158,35 @@ export function TourNavFloat({
     },
     [captureExploreDirectoryScroll, onDismissAnchoredPanels, panelStack],
   );
+
+  /** Open a dock panel without toggling closed when already open. */
+  const openDockPanel = useCallback(
+    (next: Exclude<PanelMode, null>) => {
+      if (embed && (next === 'help' || next === 'share')) return;
+      setPanelMode((current) => {
+        if (current === next) return current;
+        onDismissAnchoredPanels?.();
+        if (current === 'explore') {
+          captureExploreDirectoryScroll();
+        }
+        if (current) panelStack?.closePanel(current);
+        panelStack?.openPanel(next);
+        return next;
+      });
+    },
+    [captureExploreDirectoryScroll, embed, onDismissAnchoredPanels, panelStack],
+  );
+
+  useEffect(() => {
+    if (!dockActionsRef) return;
+    dockActionsRef.current = {
+      openExplore: () => openDockPanel('explore'),
+      openHelp: () => openDockPanel('help'),
+    };
+    return () => {
+      dockActionsRef.current = null;
+    };
+  }, [dockActionsRef, openDockPanel]);
 
   /**
    * Open Explore to the place-detail view for a scene — used by the breadcrumb
@@ -2505,6 +2550,9 @@ export function TourNavFloat({
                 viewerType={tourViewerType}
                 showPlayTour={showPlayTour}
                 showImmersiveAmbience={showImmersiveAmbience}
+                showAskGuide={showAskGuide}
+                onOpenExplore={() => openDockPanel('explore')}
+                onOpenAskGuide={onOpenAskGuide}
               />
             </TourGlassPanel>
           </div>

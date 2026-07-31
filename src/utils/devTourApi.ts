@@ -361,6 +361,8 @@ export interface DevUpdateTourPayload {
   faviconFile?: File | null;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
+  /** Persist Tour Guide on this tour (`true` set / `false` clear). */
+  askGuideEnabled?: boolean;
   fontFamily?: string;
   fontSourceUrl?: string;
   clearFontFamily?: boolean;
@@ -453,6 +455,8 @@ export interface DevCreateTourPayload {
   defaultView?: ViewPosition;
   visibility?: 'public' | 'unlisted' | 'internal';
   featured?: boolean;
+  /** When true, write `askGuideEnabled` on the new tour JSON. */
+  askGuideEnabled?: boolean;
   transitionEffect?: 'fade' | 'black';
   transitionSpeed?: string;
   immersiveAudio?: string;

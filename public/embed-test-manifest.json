@@ -319,6 +319,18 @@
           "title": "Allied Health Team Room"
         },
         {
+          "id": "s_jv5lhy0fzb",
+          "title": "Allied Health Team Room"
+        },
+        {
+          "id": "s_ms3jd5bxdx",
+          "title": "Allied Health Team Room"
+        },
+        {
+          "id": "s_y8izxirnap",
+          "title": "Allied Health Team Room"
+        },
+        {
           "id": "s_kl3j76w8q9",
           "title": "Ambulance Off-Load"
         },
@@ -327,11 +339,47 @@
           "title": "Dining / Activity Room"
         },
         {
+          "id": "s_7df4dxgbgk",
+          "title": "Dining / Activity Room"
+        },
+        {
+          "id": "s_c422jvoq5t",
+          "title": "Dining / Activity Room"
+        },
+        {
+          "id": "s_yy6nfi18rd",
+          "title": "Dining / Activity Room"
+        },
+        {
           "id": "s_7ezzd8nh4z",
           "title": "Emergency Department"
         },
         {
+          "id": "s_d2s5ai83yt",
+          "title": "Floor 4"
+        },
+        {
+          "id": "s_mmj82ryz6p",
+          "title": "Floor 5"
+        },
+        {
+          "id": "s_fa241wial8",
+          "title": "Floor 6"
+        },
+        {
           "id": "s_x0w3usny9z",
+          "title": "Galley / Servery"
+        },
+        {
+          "id": "s_53f222bswk",
+          "title": "Galley / Servery"
+        },
+        {
+          "id": "s_thjs1ppqso",
+          "title": "Galley / Servery"
+        },
+        {
+          "id": "s_9axb7djr5z",
           "title": "Galley / Servery"
         },
         {
@@ -339,7 +387,19 @@
           "title": "Inpatient Suites"
         },
         {
-          "id": "s_d2s5ai83yt",
+          "id": "s_c42kwvk6i6",
+          "title": "Inpatient Suites"
+        },
+        {
+          "id": "s_k5znwwhgm4",
+          "title": "Inpatient Suites"
+        },
+        {
+          "id": "s_6uyqibvsr5",
+          "title": "Inpatient Suites"
+        },
+        {
+          "id": "s_qu7z1pbgsb",
           "title": "James Beach Health Care Centre"
         },
         {
@@ -359,7 +419,31 @@
           "title": "Multi Use Lounge / Activity Room"
         },
         {
+          "id": "s_3nv9rl56r7",
+          "title": "Multi Use Lounge / Activity Room"
+        },
+        {
+          "id": "s_aglvzytsd0",
+          "title": "Multi Use Lounge / Activity Room"
+        },
+        {
+          "id": "s_ei1i2wrm71",
+          "title": "Multi Use Lounge / Activity Room"
+        },
+        {
           "id": "s_h8xx646a23",
+          "title": "Nursing Station"
+        },
+        {
+          "id": "s_6u5agl2var",
+          "title": "Nursing Station"
+        },
+        {
+          "id": "s_2hbvd10ndp",
+          "title": "Nursing Station"
+        },
+        {
+          "id": "s_m6i932yb3i",
           "title": "Nursing Station"
         },
         {
@@ -368,6 +452,18 @@
         },
         {
           "id": "s_w0voges2yz",
+          "title": "Quiet / Consult Room"
+        },
+        {
+          "id": "s_vf8l9043xl",
+          "title": "Quiet / Consultant"
+        },
+        {
+          "id": "s_b0p4zlphcm",
+          "title": "Quiet / Consultant"
+        },
+        {
+          "id": "s_lo3hschobb",
           "title": "Quiet / Consultant"
         },
         {
@@ -379,7 +475,31 @@
           "title": "Reception Centre"
         },
         {
+          "id": "s_z7n2u3rr0e",
+          "title": "Reception Centre"
+        },
+        {
+          "id": "s_sdjz2mhlw6",
+          "title": "Reception Centre"
+        },
+        {
+          "id": "s_e4d31i0et7",
+          "title": "Reception Centre"
+        },
+        {
           "id": "s_j2qwfv4t1m",
+          "title": "Report Meeting Room"
+        },
+        {
+          "id": "s_tkfah1p184",
+          "title": "Report Meeting Room"
+        },
+        {
+          "id": "s_h8ukfkaxr9",
+          "title": "Report Meeting Room"
+        },
+        {
+          "id": "s_r9cso9ov3y",
           "title": "Report Meeting Room"
         },
         {
@@ -388,6 +508,18 @@
         },
         {
           "id": "s_k7h3wlz10z",
+          "title": "Staff Facility / Lounge"
+        },
+        {
+          "id": "s_r8ctcgzbei",
+          "title": "Staff Facility / Lounge"
+        },
+        {
+          "id": "s_x48fg4wlvd",
+          "title": "Staff Facility / Lounge"
+        },
+        {
+          "id": "s_31fdtwxt9c",
           "title": "Staff Facility / Lounge"
         },
         {

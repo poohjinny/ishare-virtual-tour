@@ -72,5 +72,16 @@ export function formatAssistantReplyPlainText(
     if (contact) parts.push(contact);
   }
 
+  for (const cta of message.guideCtas ?? []) {
+    if (
+      cta.kind === 'open-help' ||
+      cta.kind === 'open-explore' ||
+      cta.kind === 'open-ask-guide'
+    ) {
+      const label = cta.label?.trim();
+      if (label) parts.push(label);
+    }
+  }
+
   return parts.join('\n\n').trim();
 }

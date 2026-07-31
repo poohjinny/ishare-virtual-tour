@@ -27,6 +27,7 @@ import {
   getTourLoadSplashFadeMs,
 } from '../components/TourLoadSplash';
 import { TourNavFloat } from '../components/TourNavFloat';
+import type { TourNavDockActions } from '../components/TourNavFloat';
 import { TourViewerControlsToggleFab } from '../components/TourViewerControlsToggleFab';
 import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
 import { usePlayTour } from '../hooks/usePlayTour';
@@ -68,7 +69,12 @@ import {
 import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
 import { useTourEmbedMessaging } from '../hooks/useTourEmbedMessaging';
 import { useTourFullscreen } from '../hooks/useTourFullscreen';
-import type { PopupContent, Tour, ViewPosition } from '../types/tour';
+import type {
+  ChatGuideCtaKind,
+  PopupContent,
+  Tour,
+  ViewPosition,
+} from '../types/tour';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import { devFetchTour, type DevTourMutateOptions } from '../utils/devTourApi';
 import { setDevTourCache } from '../services/devTourCache';
@@ -424,6 +430,11 @@ function TourExperience() {
   const [activeNamingHotspotId, setActiveNamingHotspotId] = useState<
     string | null
   >(null);
+  const [activeNavPreview, setActiveNavPreview] = useState<{
+    hotspotId: string;
+    targetSceneId: string;
+    title: string;
+  } | null>(null);
   const [namingOpportunityBusy, setNamingOpportunityBusy] = useState(false);
   const [chromeDockOpen, setChromeDockOpen] = useState(false);
   const [devClickCoords, setDevClickCoords] = useState<ClickCoords | null>(
@@ -695,30 +706,55 @@ function TourExperience() {
   );
 
   const assistantLiveContext = useMemo(() => {
-    if (!activeNamingHotspotId) return undefined;
-    const found = findHotspotInTour(bootstrapTour, activeNamingHotspotId);
-    if (!found?.hotspot || !isNamingHotspot(found.hotspot)) return undefined;
+    if (activeNamingHotspotId) {
+      const found = findHotspotInTour(bootstrapTour, activeNamingHotspotId);
+      if (!found?.hotspot || !isNamingHotspot(found.hotspot)) {
+        return undefined;
+      }
 
-    const sceneId = found.sceneId ?? currentSceneId;
-    const scene = bootstrapTour.scenes[sceneId];
-    const namingName =
-      scene ?
-        stripNamingOpportunitySuffix(
-          resolveNamingPopup(bootstrapTour, found.hotspot, scene)
-            ?.namingOpportunity?.name ?? '',
-        ) || undefined
-      : undefined;
+      const sceneId = found.sceneId ?? currentSceneId;
+      const scene = bootstrapTour.scenes[sceneId];
+      const namingName =
+        scene ?
+          stripNamingOpportunitySuffix(
+            resolveNamingPopup(bootstrapTour, found.hotspot, scene)
+              ?.namingOpportunity?.name ?? '',
+          ) || undefined
+        : undefined;
 
-    return { namingHotspotId: activeNamingHotspotId, namingName };
-  }, [activeNamingHotspotId, bootstrapTour, currentSceneId]);
+      return { namingHotspotId: activeNamingHotspotId, namingName };
+    }
+
+    if (activeNavPreview) {
+      return {
+        navPreviewHotspotId: activeNavPreview.hotspotId,
+        navPreviewTargetSceneId: activeNavPreview.targetSceneId,
+        navPreviewTitle: activeNavPreview.title,
+      };
+    }
+
+    return undefined;
+  }, [activeNamingHotspotId, activeNavPreview, bootstrapTour, currentSceneId]);
 
   const assistant = useTourAssistant(
     bootstrapTour,
     currentSceneId,
     assistantLiveContext,
   );
-  const showAskGuide = isAskGuideEnabled(searchParams.askGuide);
+  const showAskGuide =
+    tour.askGuideEnabled === true || isAskGuideEnabled(searchParams.askGuide);
   const panelStack = useTourPanelStack();
+  const navDockActionsRef = useRef<TourNavDockActions | null>(null);
+
+  const handleGuideChromeAction = useCallback((kind: ChatGuideCtaKind) => {
+    if (kind === 'open-help') {
+      navDockActionsRef.current?.openHelp();
+      return;
+    }
+    if (kind === 'open-explore') {
+      navDockActionsRef.current?.openExplore();
+    }
+  }, []);
 
   const closeInfoPopup = useCallback(() => {
     pendingNamingSelectionRef.current = null;
@@ -778,6 +814,25 @@ function TourExperience() {
       else panelStack.closePanel('anchored-panel');
     },
     [panelStack],
+  );
+
+  const handleNavPreviewChange = useCallback(
+    (
+      preview: {
+        hotspotId: string;
+        targetSceneId: string;
+        title: string;
+      } | null,
+    ) => {
+      setActiveNavPreview(preview);
+      if (!preview || !showAskGuide) return;
+      assistant.noteNavPreviewOpened(
+        preview.targetSceneId,
+        preview.title,
+        preview.hotspotId,
+      );
+    },
+    [assistant.noteNavPreviewOpened, showAskGuide],
   );
 
   const handleRecenterToDefaultView = useCallback(() => {
@@ -1167,6 +1222,7 @@ function TourExperience() {
               onAnchoredPanelVisibilityChange={
                 handleAnchoredPanelVisibilityChange
               }
+              onNavPreviewChange={handleNavPreviewChange}
               onNavigateToScene={handleNavigate}
               onTransitionStart={handleTransitionStart}
               onTransitionEnd={handleTransitionEnd}
@@ -1240,7 +1296,10 @@ function TourExperience() {
           embed={searchParams.embed}
           showPlayTour={playTourEnabled}
           showImmersiveAmbience={Boolean(bootstrapTour.immersiveBackground)}
+          showAskGuide={showAskGuide}
           panelStack={panelStack}
+          dockActionsRef={navDockActionsRef}
+          onOpenAskGuide={showAskGuide ? assistant.open : undefined}
           onDismissAnchoredPanels={() =>
             viewerRef.current?.closeAnchoredPanels()
           }
@@ -1273,6 +1332,8 @@ function TourExperience() {
             splashDone={splashPhase === 'done'}
             namingHotspotId={activeNamingHotspotId}
             namingName={assistantLiveContext?.namingName}
+            navPreviewHotspotId={activeNavPreview?.hotspotId}
+            navPreviewTitle={activeNavPreview?.title}
             chromeDockOpen={chromeDockOpen}
             playTourActive={playTourPhase === 'playing'}
             client={resolveTourClient(tour)}
@@ -1289,6 +1350,7 @@ function TourExperience() {
               void handleNavigate(sceneId);
             }}
             onSelectNaming={handleSelectNamingOpportunity}
+            onChromeAction={handleGuideChromeAction}
           />
         : null}
 

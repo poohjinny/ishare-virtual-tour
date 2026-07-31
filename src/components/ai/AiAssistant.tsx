@@ -1,8 +1,9 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import type { TourClient } from '../../types/tour';
+import type { ChatGuideCtaKind, TourClient } from '../../types/tour';
 import type { useTourAssistant } from '../../hooks/useTourAssistant';
 import {
   getGuideFabNamingBubble,
+  getGuideFabNavPreviewBubble,
   getGuideFabOverviewBubble,
   getGuideFabSceneBubble,
 } from '../../services/mockAssistant';
@@ -39,6 +40,9 @@ interface AiAssistantProps {
   splashDone?: boolean;
   namingHotspotId?: string | null;
   namingName?: string | null;
+  /** Open nav destination preview — FAB nudge like naming. */
+  navPreviewHotspotId?: string | null;
+  navPreviewTitle?: string | null;
   /** Top-right Explore/Help/Share dock — suppress FAB bubble while open. */
   chromeDockOpen?: boolean;
   /** Play Tour slideshow — close proximity bubbles; parent closes the panel. */
@@ -48,6 +52,7 @@ interface AiAssistantProps {
   logoAlt?: string;
   onNavigateScene?: (sceneId: string) => void;
   onSelectNaming?: (sceneId: string, hotspotId: string) => void;
+  onChromeAction?: (kind: ChatGuideCtaKind) => void;
 }
 
 type AnimPhase = 'idle' | 'enter' | 'exit';
@@ -67,6 +72,8 @@ export function AiAssistant({
   splashDone = true,
   namingHotspotId = null,
   namingName = null,
+  navPreviewHotspotId = null,
+  navPreviewTitle = null,
   chromeDockOpen = false,
   playTourActive = false,
   client,
@@ -74,6 +81,7 @@ export function AiAssistant({
   logoAlt,
   onNavigateScene,
   onSelectNaming,
+  onChromeAction,
 }: AiAssistantProps) {
   const {
     isOpen,
@@ -104,6 +112,7 @@ export function AiAssistant({
 
   const seenBubbleKeysRef = useRef(new Set<string>());
   const skipInitialNamingRef = useRef(true);
+  const skipInitialNavPreviewRef = useRef(true);
   const wasGuideUiTestRef = useRef(guideUiTest);
 
   useEffect(() => {
@@ -213,8 +222,9 @@ export function AiAssistant({
     if (!splashDone) return;
     if (playTourActive) return;
     if (!fabShown || isOpen || chromeDockOpen) return;
-    // Naming panel owns the nudge while open — schedule place after it closes.
+    // Naming / nav preview owns the nudge while open — schedule place after it closes.
     if (namingHotspotId?.trim()) return;
+    if (navPreviewHotspotId?.trim()) return;
 
     const key = `scene:${currentSceneId}`;
     if (seenBubbleKeysRef.current.has(key)) return;
@@ -253,6 +263,7 @@ export function AiAssistant({
     isOpen,
     locationTitle,
     namingHotspotId,
+    navPreviewHotspotId,
     playTourActive,
     splashDone,
     tourTitle,
@@ -295,6 +306,49 @@ export function AiAssistant({
     isOpen,
     namingHotspotId,
     namingName,
+    playTourActive,
+  ]);
+
+  // Nav destination preview — invite like naming; place bubble yields while open.
+  useEffect(() => {
+    if (guideUiTest) return;
+    const hotspotId = navPreviewHotspotId?.trim() || '';
+    if (!hotspotId) {
+      skipInitialNavPreviewRef.current = false;
+      return;
+    }
+    if (skipInitialNavPreviewRef.current) {
+      skipInitialNavPreviewRef.current = false;
+      return;
+    }
+    // Naming panel wins if both somehow open.
+    if (namingHotspotId?.trim()) return;
+    if (playTourActive) return;
+    if (!fabShown || isOpen || chromeDockOpen) return;
+
+    const key = `nav-preview:${hotspotId}`;
+    if (seenBubbleKeysRef.current.has(key)) return;
+
+    const place = navPreviewTitle?.trim() || 'that spot';
+    const timer = window.setTimeout(() => {
+      if (seenBubbleKeysRef.current.has(key)) return;
+      seenBubbleKeysRef.current.add(key);
+      setFabBubble({
+        key,
+        text: getGuideFabNavPreviewBubble(place),
+        emphasis: 'place',
+      });
+    }, FAB_BUBBLE_NAMING_DELAY_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    chromeDockOpen,
+    fabShown,
+    guideUiTest,
+    isOpen,
+    namingHotspotId,
+    navPreviewHotspotId,
+    navPreviewTitle,
     playTourActive,
   ]);
 
@@ -413,6 +467,7 @@ export function AiAssistant({
             onSend={sendMessage}
             onNavigateScene={onNavigateScene}
             onSelectNaming={onSelectNaming}
+            onChromeAction={onChromeAction}
             client={client}
             clientLogo={clientLogo}
             logoAlt={logoAlt}

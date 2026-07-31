@@ -41,6 +41,7 @@ import {
   tourNavHelpFaqQuestionClassName,
   tourNavHelpLeadClassName,
   tourNavHelpListClassName,
+  tourNavHelpActionClassName,
   tourNavLogoClassName,
   tourNavLogoLinkClassName,
 } from './tourNavFloatVariants';
@@ -59,6 +60,15 @@ interface TourHelpPanelProps {
 
   /** When false, hide immersive ambience FAQ / using-this-tour tip. */
   showImmersiveAmbience?: boolean;
+
+  /** When true, show Ask Tour Guide FAQ / using-this-tour tip. */
+  showAskGuide?: boolean;
+
+  /** Open Explore from Help copy. */
+  onOpenExplore?: () => void;
+
+  /** Open Ask Tour Guide from Help copy. */
+  onOpenAskGuide?: () => void;
 }
 
 export function TourHelpPanel({
@@ -73,10 +83,16 @@ export function TourHelpPanel({
   showPlayTour = true,
 
   showImmersiveAmbience = true,
+
+  showAskGuide: showAskGuideProp,
+
+  onOpenExplore,
+
+  onOpenAskGuide,
 }: TourHelpPanelProps) {
   const { isCoarsePointer } = useTourChromeLayout();
   const { askGuide } = useAppSearchParams();
-  const showAskGuide = isAskGuideEnabled(askGuide);
+  const showAskGuide = showAskGuideProp ?? isAskGuideEnabled(askGuide);
   const showClientContact = hasClientContact(client);
   const showTourSupport = hasClientContact(PLATFORM_TOUR_SUPPORT);
   const showContact = showClientContact || showTourSupport;
@@ -123,8 +139,18 @@ export function TourHelpPanel({
             </li>
 
             <li>
-              Open Explore tour to browse places and naming opportunities, or
-              use search to jump by name.
+              Open{' '}
+              {onOpenExplore ?
+                <button
+                  type='button'
+                  className={tourNavHelpActionClassName}
+                  onClick={onOpenExplore}
+                >
+                  Explore tour
+                </button>
+              : <strong>Explore tour</strong>}{' '}
+              to browse places and naming opportunities, or use search to jump
+              by name.
             </li>
 
             <li>
@@ -150,8 +176,17 @@ export function TourHelpPanel({
 
             {showAskGuide ?
               <li>
-                Use <strong>Ask Tour Guide</strong> (bottom-right) to ask about
-                this facility.
+                Use{' '}
+                {onOpenAskGuide ?
+                  <button
+                    type='button'
+                    className={tourNavHelpActionClassName}
+                    onClick={onOpenAskGuide}
+                  >
+                    Ask Tour Guide
+                  </button>
+                : <strong>Ask Tour Guide</strong>}{' '}
+                (bottom-right) to ask about this facility.
               </li>
             : null}
 

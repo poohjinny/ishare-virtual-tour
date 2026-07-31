@@ -12,6 +12,7 @@ import {
 } from './tourSceneDev.mjs';
 import { normalizePrimaryColor, saveTourBrandAssets } from './tourBrandDev.mjs';
 import {
+  applyAskGuideEnabled,
   applyDefaultTransition,
   applyImmersiveBackground,
 } from './tourUpdateDev.mjs';
@@ -196,6 +197,7 @@ export async function createTour({
   defaultView,
   visibility = 'unlisted',
   featured = false,
+  askGuideEnabled = false,
   brandingMode = 'client',
   transitionEffect,
   transitionSpeed,
@@ -350,6 +352,7 @@ export async function createTour({
     model: isModel3d ? tourModelWebPath : undefined,
   });
 
+  applyAskGuideEnabled(tour, askGuideEnabled === true);
   applyDefaultTransition({ tour, transitionEffect, transitionSpeed });
   applyImmersiveBackground({
     tour,

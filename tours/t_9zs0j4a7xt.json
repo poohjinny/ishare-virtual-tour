@@ -3,39 +3,27 @@
   "clientId": "qchfoundation",
   "category": "Healthcare",
   "title": "Queensway Carleton Hospital",
+  "askGuideEnabled": true,
   "firstScene": "s_sxeq0eovm7",
-  "defaultTransition": {
-    "speed": "500ms",
-    "effect": "fade"
-  },
+  "defaultTransition": { "speed": "500ms", "effect": "fade" },
   "scenes": {
     "s_sxeq0eovm7": {
       "id": "s_sxeq0eovm7",
       "title": "Overview",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_sxeq0eovm7.webp",
-      "defaultView": {
-        "yaw": 87.6,
-        "pitch": -14.2,
-        "zoom": 45
-      },
+      "defaultView": { "yaw": 87.6, "pitch": -14.2, "zoom": 45 },
       "hotspots": [
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
           "label": "Emergency Department",
-          "position": {
-            "yaw": 113.8,
-            "pitch": -9.4
-          },
+          "position": { "yaw": 113.8, "pitch": -9.4 },
           "targetScene": "s_7ezzd8nh4z"
         },
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 79.9,
-            "pitch": -1.6
-          },
+          "position": { "yaw": 79.9, "pitch": -1.6 },
           "targetScene": "s_qu7z1pbgsb"
         }
       ],
@@ -47,22 +35,13 @@
       "title": "Emergency Department",
       "description": "Queensway Carleton Hospital’s new Emergency Department expansion is being built to meet the urgent realities of Ottawa’s rapidly growing west end. The hospital was originally built in 1976 for a community of about 100,000 people, but it now serves more than 500,000 residents and remains the only full-service hospital in the city’s west end.\n\nToday, the Emergency Department is operating far beyond its intended capacity. Designed for 63,000 visits a year, it now sees more than 83,000 visits annually and is trending toward 100,000, creating longer waits and greater strain on patients, families, and frontline teams.\n\nThis once-in-a-generation expansion will more than double the size of the Emergency Department, add 90 urgently needed inpatient beds, and bring critical diagnostic imaging such as CT and X-ray directly into the department. It will also include a dedicated mental health care space with private treatment rooms, controlled lighting, reduced noise, and a separate entrance to provide safer, more dignified care for patients in crisis.\n\nThe goal is simple: faster diagnosis, shorter wait times, improved patient flow, and better care when every minute matters. This is not just a construction project — it is a vital investment in readiness, safety, and care for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_7ezzd8nh4z.webp",
-      "defaultView": {
-        "yaw": 84.3,
-        "pitch": -42.2,
-        "zoom": 65
-      },
+      "defaultView": { "yaw": 84.3, "pitch": -42.2, "zoom": 65 },
       "hotspots": [
         {
           "id": "info-emergency-department",
           "type": "info",
-          "position": {
-            "yaw": 85.6,
-            "pitch": -24
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 85.6, "pitch": -24 },
+          "popup": { "display": "anchored" },
           "namingId": "no_kew3djcwfv",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-emergency-department.webp"
@@ -71,78 +50,54 @@
         {
           "id": "nav-to-mh-3",
           "type": "nav",
-          "position": {
-            "yaw": 120.3,
-            "pitch": -48.8
-          },
+          "position": { "yaw": 120.3, "pitch": -48.8 },
           "targetScene": "s_8s40pp3yyo"
         },
         {
           "id": "nav-to-ambulance-offload",
           "type": "nav",
-          "position": {
-            "yaw": 111.7,
-            "pitch": -31.7
-          },
+          "position": { "yaw": 111.7, "pitch": -31.7 },
           "targetScene": "s_5dwnzwkhwz"
         },
         {
           "id": "nav-to-mental-health-emergency-services-unit",
           "type": "nav",
           "label": "Mental Health Emergency Services Unit",
-          "position": {
-            "yaw": 77.2,
-            "pitch": -30.6
-          },
+          "position": { "yaw": 77.2, "pitch": -30.6 },
           "targetScene": "s_ud8lmbrt5c"
         },
         {
           "id": "nav-to-acute-care-pod-a",
           "type": "nav",
           "label": "Acute Care Pod A",
-          "position": {
-            "yaw": 91,
-            "pitch": -31.2
-          },
+          "position": { "yaw": 91, "pitch": -31.2 },
           "targetScene": "s_epo1xsg3qz"
         },
         {
           "id": "nav-to-acute-care-pod-b",
           "type": "nav",
           "label": "Acute Care Pod B",
-          "position": {
-            "yaw": 81,
-            "pitch": -36
-          },
+          "position": { "yaw": 81, "pitch": -36 },
           "targetScene": "s_rieg7s3uck"
         },
         {
           "id": "nav-to-acute-care-pod-c",
           "type": "nav",
           "label": "Acute Care Pod C",
-          "position": {
-            "yaw": 89.6,
-            "pitch": -53.6
-          },
+          "position": { "yaw": 89.6, "pitch": -53.6 },
           "targetScene": "s_9lpv5ehvnw"
         },
         {
           "id": "nav-to-acute-care-pod-d",
           "type": "nav",
           "label": "Acute Care Pod D",
-          "position": {
-            "yaw": 71.2,
-            "pitch": -39.4
-          },
+          "position": { "yaw": 71.2, "pitch": -39.4 },
           "targetScene": "s_smiksp7yqr"
         },
         {
           "id": "nav-to-overview",
           "type": "nav",
-          "position": {
-            "yaw": 128.1,
-            "pitch": -49.1
-          },
+          "position": { "yaw": 128.1, "pitch": -49.1 },
           "targetScene": "s_sxeq0eovm7",
           "instant": true,
           "navVariant": "hub"
@@ -150,19 +105,13 @@
         {
           "id": "nav-to-satellite-imaging-unit",
           "type": "nav",
-          "position": {
-            "yaw": 104.9,
-            "pitch": -38.6
-          },
+          "position": { "yaw": 104.9, "pitch": -38.6 },
           "targetScene": "s_uk608rqf4q"
         },
         {
           "id": "nav-to-rapid-assessment-centre",
           "type": "nav",
-          "position": {
-            "yaw": 47.2,
-            "pitch": -45.7
-          },
+          "position": { "yaw": 47.2, "pitch": -45.7 },
           "targetScene": "s_tzlpanycba"
         }
       ],
@@ -175,29 +124,19 @@
       "title": "Walk-in Entrance",
       "description": "When a health crisis happens, every minute matters. Queensway Carleton Hospital’s new Emergency Department is being built to make sure patients and families get expert care faster, with less time spent waiting and worrying.\n\nOriginally designed for a much smaller community, the current department now sees more than 83,000 visits a year and is quickly approaching 100,000. The new Emergency Department will more than double the available care space, add 90 inpatient beds, and bring advanced diagnostic imaging—like CT scans and X-rays—right into the department, so tests and treatment can begin without delay.\n\nPatients arriving by walk‑in will find clearer pathways, private treatment rooms, and spaces designed for comfort, safety, and dignity. A dedicated mental health area will offer a quieter, more secure environment for those in crisis, separate from the busiest emergency zones.\n\nThis is more than an expansion. It is a commitment to faster access, better care, and a system ready for the growing, aging, and increasingly complex needs of Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_t0y42xbmsv.webp",
-      "defaultView": {
-        "yaw": 57,
-        "pitch": -5.2,
-        "zoom": 29
-      },
+      "defaultView": { "yaw": 57, "pitch": -5.2, "zoom": 29 },
       "hotspots": [
         {
           "id": "nav-to-waiting-area",
           "type": "nav",
-          "position": {
-            "yaw": 77.9,
-            "pitch": -3.8
-          },
+          "position": { "yaw": 77.9, "pitch": -3.8 },
           "targetScene": "s_8s40pp3yyo"
         },
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
           "label": "Emergency Department",
-          "position": {
-            "yaw": 207.9,
-            "pitch": -0.9
-          },
+          "position": { "yaw": 207.9, "pitch": -0.9 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -206,10 +145,7 @@
           "id": "info-place",
           "type": "info",
           "role": "placeOverview",
-          "position": {
-            "yaw": 57,
-            "pitch": -5.2
-          },
+          "position": { "yaw": 57, "pitch": -5.2 },
           "popup": {
             "display": "anchored",
             "title": "Walk-in Entrance",
@@ -225,19 +161,12 @@
       "id": "s_8s40pp3yyo",
       "title": "Main Entrance and Waiting Area",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_8s40pp3yyo.webp",
-      "defaultView": {
-        "yaw": 112.8,
-        "pitch": -5.7,
-        "zoom": 11
-      },
+      "defaultView": { "yaw": 112.8, "pitch": -5.7, "zoom": 11 },
       "hotspots": [
         {
           "id": "info-emergency-department-waiting-area",
           "type": "info",
-          "position": {
-            "yaw": 123.5,
-            "pitch": -28.2
-          },
+          "position": { "yaw": 123.5, "pitch": -28.2 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/7a504ec6-3fde-479a-be40-eebb679a9144"
@@ -250,10 +179,7 @@
         {
           "id": "nav-to-walk-in-entrance",
           "type": "nav",
-          "position": {
-            "yaw": 103.3,
-            "pitch": -3.1
-          },
+          "position": { "yaw": 103.3, "pitch": -3.1 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -261,10 +187,7 @@
         {
           "id": "nav-to-ambulance-off-load",
           "type": "nav",
-          "position": {
-            "yaw": 170.3,
-            "pitch": -1
-          },
+          "position": { "yaw": 170.3, "pitch": -1 },
           "targetScene": "s_kl3j76w8q9"
         }
       ],
@@ -276,19 +199,12 @@
       "id": "s_kl3j76w8q9",
       "title": "Ambulance Off-Load",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_kl3j76w8q9.webp",
-      "defaultView": {
-        "yaw": 88.6,
-        "pitch": -1.9,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 88.6, "pitch": -1.9, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-ambulance-offload",
           "type": "info",
-          "position": {
-            "yaw": 90.8,
-            "pitch": -24.4
-          },
+          "position": { "yaw": 90.8, "pitch": -24.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/f626712e-53cd-4ac7-93ca-d6bcd16471a7"
@@ -301,19 +217,13 @@
         {
           "id": "nav-to-waiting-area",
           "type": "nav",
-          "position": {
-            "yaw": 266.6,
-            "pitch": 0.4
-          },
+          "position": { "yaw": 266.6, "pitch": 0.4 },
           "targetScene": "s_8s40pp3yyo"
         },
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
-          "position": {
-            "yaw": 88.9,
-            "pitch": -0.6
-          },
+          "position": { "yaw": 88.9, "pitch": -0.6 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -326,148 +236,102 @@
       "id": "s_d2s5ai83yt",
       "title": "Floor 4",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_d2s5ai83yt.webp",
-      "defaultView": {
-        "yaw": 108.7,
-        "pitch": -63.5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 108.7, "pitch": -63.5, "zoom": 1 },
       "hotspots": [
         {
           "id": "nav-to-inpatient-suites-overview",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 337.3,
-            "pitch": -62.9
-          },
+          "position": { "yaw": 337.3, "pitch": -62.9 },
           "targetScene": "s_zyrfvgi4sg"
         },
         {
           "id": "nav-to-reception-centre",
           "type": "nav",
           "label": "Reception Centre",
-          "position": {
-            "yaw": 140.7,
-            "pitch": -34.7
-          },
+          "position": { "yaw": 140.7, "pitch": -34.7 },
           "targetScene": "s_1tdql8sfba"
         },
         {
           "id": "nav-to-nursing-station",
           "type": "nav",
           "label": "Nursing Station",
-          "position": {
-            "yaw": 33.1,
-            "pitch": -60.9
-          },
+          "position": { "yaw": 33.1, "pitch": -60.9 },
           "targetScene": "s_h8xx646a23"
         },
         {
           "id": "nav-to-multi-use-lounge-activity-room",
           "type": "nav",
           "label": "Multi Use Lounge / Activity Room",
-          "position": {
-            "yaw": 157.7,
-            "pitch": -30.1
-          },
+          "position": { "yaw": 157.7, "pitch": -30.1 },
           "targetScene": "s_vosd6uzi2u"
         },
         {
           "id": "nav-to-quiet-consultant",
           "type": "nav",
-          "position": {
-            "yaw": 134.5,
-            "pitch": -22.3
-          },
+          "position": { "yaw": 134.5, "pitch": -22.3 },
           "targetScene": "s_w0voges2yz"
         },
         {
           "id": "nav-to-dining-activity-room",
           "type": "nav",
           "label": "Dining / Activity Room",
-          "position": {
-            "yaw": 126.9,
-            "pitch": -21.7
-          },
+          "position": { "yaw": 126.9, "pitch": -21.7 },
           "targetScene": "s_0gnezew7qt"
         },
         {
           "id": "nav-to-allied-health-team-room",
           "type": "nav",
           "label": "Allied Health Team Room",
-          "position": {
-            "yaw": 122.9,
-            "pitch": -25.6
-          },
+          "position": { "yaw": 122.9, "pitch": -25.6 },
           "targetScene": "s_oh2aardnvw"
         },
         {
           "id": "nav-to-galley-servery",
           "type": "nav",
           "label": "Galley / Servery",
-          "position": {
-            "yaw": 120.9,
-            "pitch": -19.7
-          },
+          "position": { "yaw": 120.9, "pitch": -19.7 },
           "targetScene": "s_x0w3usny9z"
         },
         {
           "id": "nav-to-report-meeting-room",
           "type": "nav",
           "label": "Report Meeting Room",
-          "position": {
-            "yaw": 112.1,
-            "pitch": -28.5
-          },
+          "position": { "yaw": 112.1, "pitch": -28.5 },
           "targetScene": "s_j2qwfv4t1m"
         },
         {
           "id": "nav-to-staff-facility-lounge",
           "type": "nav",
           "label": "Staff Facility / Lounge",
-          "position": {
-            "yaw": 114.9,
-            "pitch": -18.4
-          },
+          "position": { "yaw": 114.9, "pitch": -18.4 },
           "targetScene": "s_k7h3wlz10z"
         },
         {
           "id": "nav-to-inpatient-suites",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 50,
-            "pitch": -45.3
-          },
+          "position": { "yaw": 50, "pitch": -45.3 },
           "targetScene": "s_zyrfvgi4sg"
         },
         {
           "id": "nav-to-inpatient-suites-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 63.5,
-            "pitch": -47.9
-          },
+          "position": { "yaw": 63.5, "pitch": -47.9 },
           "targetScene": "s_zyrfvgi4sg"
         },
         {
           "id": "nav-to-inpatient-suites-3",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -47.6
-          },
+          "position": { "yaw": 79.5, "pitch": -47.6 },
           "targetScene": "s_zyrfvgi4sg"
         },
         {
           "id": "nav-to-overview",
           "type": "nav",
-          "position": {
-            "yaw": 148.8,
-            "pitch": -15.9
-          },
+          "position": { "yaw": 148.8, "pitch": -15.9 },
           "targetScene": "s_qu7z1pbgsb",
           "instant": true,
           "navVariant": "back"
@@ -475,10 +339,7 @@
         {
           "id": "info-james-beach-health-care-centre",
           "type": "info",
-          "position": {
-            "yaw": 77.2,
-            "pitch": -28.1
-          },
+          "position": { "yaw": 77.2, "pitch": -28.1 },
           "popup": {
             "display": "anchored",
             "title": "James Beach Health Care Centre - Floor"
@@ -495,19 +356,12 @@
       "id": "s_zyrfvgi4sg",
       "title": "Inpatient Suites",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_zyrfvgi4sg.webp",
-      "defaultView": {
-        "yaw": 111,
-        "pitch": 0.2,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 111, "pitch": 0.2, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-inpatient-bed-rooms",
           "type": "info",
-          "position": {
-            "yaw": 101.1,
-            "pitch": -15.8
-          },
+          "position": { "yaw": 101.1, "pitch": -15.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
@@ -520,10 +374,7 @@
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
-          "position": {
-            "yaw": 293,
-            "pitch": -2.6
-          },
+          "position": { "yaw": 293, "pitch": -2.6 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -536,19 +387,12 @@
       "id": "s_h8xx646a23",
       "title": "Nursing Station",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_h8xx646a23.webp",
-      "defaultView": {
-        "yaw": 84.5,
-        "pitch": -17.2,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 84.5, "pitch": -17.2, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-nursing-station",
           "type": "info",
-          "position": {
-            "yaw": 78.3,
-            "pitch": -20.8
-          },
+          "position": { "yaw": 78.3, "pitch": -20.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
@@ -561,10 +405,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 124.7,
-            "pitch": -14
-          },
+          "position": { "yaw": 124.7, "pitch": -14 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -577,19 +418,12 @@
       "id": "s_vosd6uzi2u",
       "title": "Multi Use Lounge / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_vosd6uzi2u.webp",
-      "defaultView": {
-        "yaw": 183.1,
-        "pitch": -8.5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 183.1, "pitch": -8.5, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-multi-use-lounge-activity-room",
           "type": "info",
-          "position": {
-            "yaw": 186.7,
-            "pitch": -40.4
-          },
+          "position": { "yaw": 186.7, "pitch": -40.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
@@ -602,10 +436,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 182.5,
-            "pitch": -5
-          },
+          "position": { "yaw": 182.5, "pitch": -5 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -618,19 +449,12 @@
       "id": "s_1tdql8sfba",
       "title": "Reception Centre",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_1tdql8sfba.webp",
-      "defaultView": {
-        "yaw": 101.6,
-        "pitch": -2.8,
-        "zoom": 55
-      },
+      "defaultView": { "yaw": 101.6, "pitch": -2.8, "zoom": 55 },
       "hotspots": [
         {
           "id": "info-reception-centre",
           "type": "info",
-          "position": {
-            "yaw": 84.9,
-            "pitch": -9.1
-          },
+          "position": { "yaw": 84.9, "pitch": -9.1 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
@@ -643,10 +467,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 128.1,
-            "pitch": -6.7
-          },
+          "position": { "yaw": 128.1, "pitch": -6.7 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -659,19 +480,12 @@
       "id": "s_w0voges2yz",
       "title": "Quiet / Consult Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_w0voges2yz.webp",
-      "defaultView": {
-        "yaw": 231.7,
-        "pitch": -29.9,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 231.7, "pitch": -29.9, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-quiet-consultant",
           "type": "info",
-          "position": {
-            "yaw": 237,
-            "pitch": -32
-          },
+          "position": { "yaw": 237, "pitch": -32 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
@@ -684,10 +498,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 53.9,
-            "pitch": -8.3
-          },
+          "position": { "yaw": 53.9, "pitch": -8.3 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -699,19 +510,12 @@
       "id": "s_oh2aardnvw",
       "title": "Allied Health Team Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_oh2aardnvw.webp",
-      "defaultView": {
-        "yaw": 81,
-        "pitch": -41.3,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 81, "pitch": -41.3, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-allied-health-team-room",
           "type": "info",
-          "position": {
-            "yaw": 82.3,
-            "pitch": -43.4
-          },
+          "position": { "yaw": 82.3, "pitch": -43.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
@@ -724,10 +528,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 111.3,
-            "pitch": -5.6
-          },
+          "position": { "yaw": 111.3, "pitch": -5.6 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -740,22 +541,13 @@
       "id": "s_j2qwfv4t1m",
       "title": "Report Meeting Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_j2qwfv4t1m.webp",
-      "defaultView": {
-        "yaw": 91.4,
-        "pitch": -19.3,
-        "zoom": 32
-      },
+      "defaultView": { "yaw": 91.4, "pitch": -19.3, "zoom": 32 },
       "hotspots": [
         {
           "id": "info-report-meeting-room",
           "type": "info",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -16.9
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 79.5, "pitch": -16.9 },
+          "popup": { "display": "anchored" },
           "namingId": "no_zqz4tno6t3",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room.webp"
@@ -764,10 +556,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 6.9,
-            "pitch": -8.2
-          },
+          "position": { "yaw": 6.9, "pitch": -8.2 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -780,19 +569,12 @@
       "id": "s_x0w3usny9z",
       "title": "Galley / Servery",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_x0w3usny9z.webp",
-      "defaultView": {
-        "yaw": 293.6,
-        "pitch": -13.6,
-        "zoom": 4
-      },
+      "defaultView": { "yaw": 293.6, "pitch": -13.6, "zoom": 4 },
       "hotspots": [
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 75.2,
-            "pitch": -4.3
-          },
+          "position": { "yaw": 75.2, "pitch": -4.3 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -804,19 +586,12 @@
       "id": "s_0gnezew7qt",
       "title": "Dining / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_0gnezew7qt.webp",
-      "defaultView": {
-        "yaw": 73.6,
-        "pitch": -29.2,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 73.6, "pitch": -29.2, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-dining-activity-room",
           "type": "info",
-          "position": {
-            "yaw": 70.4,
-            "pitch": -20
-          },
+          "position": { "yaw": 70.4, "pitch": -20 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
@@ -829,10 +604,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 169.5,
-            "pitch": -12.7
-          },
+          "position": { "yaw": 169.5, "pitch": -12.7 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -845,22 +617,13 @@
       "id": "s_k7h3wlz10z",
       "title": "Staff Facility / Lounge",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_k7h3wlz10z.webp",
-      "defaultView": {
-        "yaw": 329.3,
-        "pitch": -22.6,
-        "zoom": 19
-      },
+      "defaultView": { "yaw": 329.3, "pitch": -22.6, "zoom": 19 },
       "hotspots": [
         {
           "id": "info-staff-facility-lounge",
           "type": "info",
-          "position": {
-            "yaw": 330.7,
-            "pitch": -27.4
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 330.7, "pitch": -27.4 },
+          "popup": { "display": "anchored" },
           "namingId": "no_02ft2ioebi",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge.webp"
@@ -869,10 +632,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre",
           "type": "nav",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -7.4
-          },
+          "position": { "yaw": 79.5, "pitch": -7.4 },
           "targetScene": "s_d2s5ai83yt",
           "instant": true,
           "navVariant": "back"
@@ -885,19 +645,12 @@
       "id": "s_ud8lmbrt5c",
       "title": "Mental Health Emergency Services Unit",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_ud8lmbrt5c.webp",
-      "defaultView": {
-        "yaw": 89.8,
-        "pitch": -4.4,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 89.8, "pitch": -4.4, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-mental-health-emergency-services-unit",
           "type": "info",
-          "position": {
-            "yaw": 93,
-            "pitch": -27.6
-          },
+          "position": { "yaw": 93, "pitch": -27.6 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/709a2a4a-b659-4717-b724-081c67e7a900"
@@ -911,10 +664,7 @@
           "id": "nav-to-mental-health-emergency-services-unit-2",
           "type": "nav",
           "label": "Mental Health Emergency Services Unit - 2",
-          "position": {
-            "yaw": 102,
-            "pitch": -7.8
-          },
+          "position": { "yaw": 102, "pitch": -7.8 },
           "targetScene": "s_g04g0ejaut",
           "instant": true
         },
@@ -922,10 +672,7 @@
           "id": "nav-to-emergency-department",
           "type": "nav",
           "label": "Emergency Department",
-          "position": {
-            "yaw": 268.7,
-            "pitch": -21
-          },
+          "position": { "yaw": 268.7, "pitch": -21 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -939,19 +686,12 @@
       "id": "s_epo1xsg3qz",
       "title": "Acute Care Pod A",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_epo1xsg3qz.webp",
-      "defaultView": {
-        "yaw": 174.8,
-        "pitch": -0.1,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 174.8, "pitch": -0.1, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-acute-care-pod-a",
           "type": "info",
-          "position": {
-            "yaw": 177.7,
-            "pitch": -4.3
-          },
+          "position": { "yaw": 177.7, "pitch": -4.3 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/f8601c47-6a3d-425d-8d85-ec765796909d"
@@ -965,10 +705,7 @@
           "id": "nav-to-emergency-department",
           "type": "nav",
           "label": "Emergency Department",
-          "position": {
-            "yaw": 326.4,
-            "pitch": -9.1
-          },
+          "position": { "yaw": 326.4, "pitch": -9.1 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -983,19 +720,12 @@
       "id": "s_rieg7s3uck",
       "title": "Acute Care Pod B",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_rieg7s3uck.webp",
-      "defaultView": {
-        "yaw": 89.1,
-        "pitch": 10,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 89.1, "pitch": 10, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-acute-care-pod-b",
           "type": "info",
-          "position": {
-            "yaw": 90,
-            "pitch": -13.7
-          },
+          "position": { "yaw": 90, "pitch": -13.7 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/24ad8146-f72d-4428-9a75-a0801853e2d2"
@@ -1009,10 +739,7 @@
           "id": "nav-to-emergency-department",
           "type": "nav",
           "label": "Emergency Department",
-          "position": {
-            "yaw": 267.8,
-            "pitch": -5.8
-          },
+          "position": { "yaw": 267.8, "pitch": -5.8 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -1027,19 +754,12 @@
       "id": "s_9lpv5ehvnw",
       "title": "Acute Care Pod C",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_9lpv5ehvnw.webp",
-      "defaultView": {
-        "yaw": 87.3,
-        "pitch": -5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 87.3, "pitch": -5, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-acute-care-pod-c",
           "type": "info",
-          "position": {
-            "yaw": 94.8,
-            "pitch": -4.8
-          },
+          "position": { "yaw": 94.8, "pitch": -4.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/2013054c-1a9d-428c-b08f-6a670507081b"
@@ -1053,10 +773,7 @@
           "id": "nav-to-emergency-department",
           "type": "nav",
           "label": "Emergency Department",
-          "position": {
-            "yaw": 267.4,
-            "pitch": -2.2
-          },
+          "position": { "yaw": 267.4, "pitch": -2.2 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -1072,28 +789,18 @@
       "title": "Mental Health Emergency Services Unit - 2",
       "description": "When a loved one is experiencing a mental health crisis, care, compassion, and dignity matter as much as speed. Queensway Carleton Hospital’s Emergency Department has long been one of the region’s busiest centres for emergency mental health care and is closely integrated with the Barbara Crook and Dan Greenberg Mental Health Centre.\n\nThe new dedicated emergency mental health care space will provide a safe, tranquil environment for patients in crisis, separate from the high‑volume emergency flow. With natural and controlled lighting, reduced noise, private treatment rooms, and a dedicated entrance, it is designed to offer dignity, privacy, and stability for patients and families at the very moment they need it most.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_g04g0ejaut.webp",
-      "defaultView": {
-        "yaw": 123.4,
-        "pitch": -4.6,
-        "zoom": 20
-      },
+      "defaultView": { "yaw": 123.4, "pitch": -4.6, "zoom": 20 },
       "hotspots": [
         {
           "id": "nav-to-mental-health-emergency-services-unit",
           "type": "nav",
-          "position": {
-            "yaw": 245,
-            "pitch": -23.9
-          },
+          "position": { "yaw": 245, "pitch": -23.9 },
           "targetScene": "s_ud8lmbrt5c"
         },
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
-          "position": {
-            "yaw": 124.7,
-            "pitch": -1.6
-          },
+          "position": { "yaw": 124.7, "pitch": -1.6 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -1107,20 +814,13 @@
       "id": "s_smiksp7yqr",
       "title": "Acute Care Pod D",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_smiksp7yqr.webp",
-      "defaultView": {
-        "yaw": 33.6,
-        "pitch": -10.1,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 33.6, "pitch": -10.1, "zoom": 15 },
       "hotspots": [
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
           "label": "Emergency Department",
-          "position": {
-            "yaw": 296.9,
-            "pitch": -6.6
-          },
+          "position": { "yaw": 296.9, "pitch": -6.6 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -1129,20 +829,14 @@
           "id": "nav-to-acute-care-pod-d-2",
           "type": "nav",
           "label": "Acute Care Pod D - 2",
-          "position": {
-            "yaw": 34.6,
-            "pitch": -1.7
-          },
+          "position": { "yaw": 34.6, "pitch": -1.7 },
           "targetScene": "s_5qt1e2v1kl",
           "instant": true
         },
         {
           "id": "info-acute-care-pod-d",
           "type": "info",
-          "position": {
-            "yaw": 34.1,
-            "pitch": -23.1
-          },
+          "position": { "yaw": 34.1, "pitch": -23.1 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/36b3908b-d2fe-428d-b6cf-78414368d50e"
@@ -1163,19 +857,12 @@
       "title": "Acute Care Pod D - 2",
       "description": "Acute Care Pod D is a vital component of Queensway Carleton Hospital’s new Emergency Department expansion, helping create the capacity needed to care for more patients, more efficiently, in a safer and more organized environment.\n\nWith emergency visits continuing to grow across Ottawa’s west end, the hospital needs dedicated acute care spaces that can support timely assessment, treatment, and monitoring. Acute Care Pod D will provide individual patient bays designed to improve privacy, reduce congestion, and help clinical teams deliver care with greater speed and coordination.\n\nFor patients, this means being moved into an appropriate care space sooner, with better access to nurses, physicians, and essential support services. For families, it means a more dignified and less stressful experience during moments of uncertainty.\n\nFor frontline teams, Acute Care Pod D will support clearer workflows, better patient visibility, and faster access to equipment and nearby clinical resources. The pod will help reduce pressure on other areas of the Emergency Department while improving overall patient flow.\n\nAcute Care Pod D is more than additional treatment space. It is part of a modern Emergency Department built for the realities of today and the needs of tomorrow — helping Queensway Carleton Hospital deliver urgent care that is faster, safer, and more compassionate for families across Ottawa’s west end.",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_5qt1e2v1kl.webp",
-      "defaultView": {
-        "yaw": 90,
-        "pitch": -9,
-        "zoom": 5
-      },
+      "defaultView": { "yaw": 90, "pitch": -9, "zoom": 5 },
       "hotspots": [
         {
           "id": "nav-to-acute-care-pod-d",
           "type": "nav",
-          "position": {
-            "yaw": 271.6,
-            "pitch": -1.8
-          },
+          "position": { "yaw": 271.6, "pitch": -1.8 },
           "targetScene": "s_smiksp7yqr",
           "instant": true,
           "navVariant": "back"
@@ -1183,10 +870,7 @@
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
-          "position": {
-            "yaw": 91.1,
-            "pitch": -1.4
-          },
+          "position": { "yaw": 91.1, "pitch": -1.4 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -1200,19 +884,12 @@
       "id": "s_uk608rqf4q",
       "title": "Satellite Imaging Unit",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_uk608rqf4q.webp",
-      "defaultView": {
-        "yaw": 92.1,
-        "pitch": 0.8,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 92.1, "pitch": 0.8, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-satellite-imaging-unit",
           "type": "info",
-          "position": {
-            "yaw": 91.6,
-            "pitch": -22
-          },
+          "position": { "yaw": 91.6, "pitch": -22 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/0e031edd-6b8c-4b5c-a1b6-327172894834"
@@ -1225,10 +902,7 @@
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
-          "position": {
-            "yaw": 91.8,
-            "pitch": -2.3
-          },
+          "position": { "yaw": 91.8, "pitch": -2.3 },
           "targetScene": "s_7ezzd8nh4z",
           "instant": true,
           "navVariant": "back"
@@ -1242,19 +916,12 @@
       "id": "s_tzlpanycba",
       "title": "Rapid Assessment Centre",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_tzlpanycba.webp",
-      "defaultView": {
-        "yaw": 51.3,
-        "pitch": -3,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 51.3, "pitch": -3, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-rapid-assessment-centre",
           "type": "info",
-          "position": {
-            "yaw": 68.1,
-            "pitch": -1.1
-          },
+          "position": { "yaw": 68.1, "pitch": -1.1 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8fadc41c-48c0-4b33-ab99-df27551cf3ba"
@@ -1273,22 +940,13 @@
       "id": "s_5dwnzwkhwz",
       "title": "Trauma Resuscitation",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_5dwnzwkhwz.webp",
-      "defaultView": {
-        "yaw": 106.5,
-        "pitch": -0.4,
-        "zoom": 40
-      },
+      "defaultView": { "yaw": 106.5, "pitch": -0.4, "zoom": 40 },
       "hotspots": [
         {
           "id": "info-trauma-resuscitation",
           "type": "info",
-          "position": {
-            "yaw": 107.1,
-            "pitch": -17.9
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 107.1, "pitch": -17.9 },
+          "popup": { "display": "anchored" },
           "namingId": "no_5f0c3r63zp",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-trauma-resuscitation.webp"
@@ -1302,55 +960,36 @@
       "id": "s_qu7z1pbgsb",
       "title": "James Beach Health Care Centre",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_qu7z1pbgsb.webp",
-      "defaultView": {
-        "yaw": 83,
-        "pitch": -19,
-        "zoom": 0
-      },
+      "defaultView": { "yaw": 83, "pitch": -19, "zoom": 0 },
       "hotspots": [
         {
           "id": "nav-to-emergency-department",
           "type": "nav",
-          "position": {
-            "yaw": 203.6,
-            "pitch": -25.7
-          },
+          "position": { "yaw": 203.6, "pitch": -25.7 },
           "targetScene": "s_7ezzd8nh4z"
         },
         {
           "id": "nav-to-overview",
           "type": "nav",
-          "position": {
-            "yaw": 238.4,
-            "pitch": -20.4
-          },
+          "position": { "yaw": 238.4, "pitch": -20.4 },
           "targetScene": "s_sxeq0eovm7"
         },
         {
           "id": "nav-to-floors-4",
           "type": "nav",
-          "position": {
-            "yaw": 79.6,
-            "pitch": -20.7
-          },
+          "position": { "yaw": 79.6, "pitch": -20.7 },
           "targetScene": "s_d2s5ai83yt"
         },
         {
           "id": "nav-to-floors-4-2",
           "type": "nav",
-          "position": {
-            "yaw": 79.7,
-            "pitch": -15.8
-          },
+          "position": { "yaw": 79.7, "pitch": -15.8 },
           "targetScene": "s_mmj82ryz6p"
         },
         {
           "id": "nav-to-floors-4-2-2",
           "type": "nav",
-          "position": {
-            "yaw": 79.8,
-            "pitch": -11.4
-          },
+          "position": { "yaw": 79.8, "pitch": -11.4 },
           "targetScene": "s_fa241wial8"
         }
       ],
@@ -1362,149 +1001,103 @@
       "id": "s_mmj82ryz6p",
       "title": "Floor 5",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_mmj82ryz6p.webp",
-      "defaultView": {
-        "yaw": 108.7,
-        "pitch": -63.5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 108.7, "pitch": -63.5, "zoom": 1 },
       "hotspots": [
         {
           "id": "nav-to-inpatient-suites-overview-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 337.3,
-            "pitch": -62.9
-          },
+          "position": { "yaw": 337.3, "pitch": -62.9 },
           "targetScene": "s_c42kwvk6i6"
         },
         {
           "id": "nav-to-reception-centre-2",
           "type": "nav",
           "label": "Reception Centre",
-          "position": {
-            "yaw": 140.7,
-            "pitch": -34.7
-          },
+          "position": { "yaw": 140.7, "pitch": -34.7 },
           "targetScene": "s_z7n2u3rr0e"
         },
         {
           "id": "nav-to-nursing-station-2",
           "type": "nav",
           "label": "Nursing Station",
-          "position": {
-            "yaw": 33.1,
-            "pitch": -60.9
-          },
+          "position": { "yaw": 33.1, "pitch": -60.9 },
           "targetScene": "s_6u5agl2var"
         },
         {
           "id": "nav-to-multi-use-lounge-activity-room-2",
           "type": "nav",
           "label": "Multi Use Lounge / Activity Room",
-          "position": {
-            "yaw": 157.7,
-            "pitch": -30.1
-          },
+          "position": { "yaw": 157.7, "pitch": -30.1 },
           "targetScene": "s_3nv9rl56r7"
         },
         {
           "id": "nav-to-quiet-consultant-2",
           "type": "nav",
           "label": "Quiet / Consultant",
-          "position": {
-            "yaw": 134.5,
-            "pitch": -22.3
-          },
+          "position": { "yaw": 134.5, "pitch": -22.3 },
           "targetScene": "s_vf8l9043xl"
         },
         {
           "id": "nav-to-dining-activity-room-2",
           "type": "nav",
           "label": "Dining / Activity Room",
-          "position": {
-            "yaw": 126.9,
-            "pitch": -21.7
-          },
+          "position": { "yaw": 126.9, "pitch": -21.7 },
           "targetScene": "s_7df4dxgbgk"
         },
         {
           "id": "nav-to-allied-health-team-room-2",
           "type": "nav",
           "label": "Allied Health Team Room",
-          "position": {
-            "yaw": 122.9,
-            "pitch": -25.6
-          },
+          "position": { "yaw": 122.9, "pitch": -25.6 },
           "targetScene": "s_jv5lhy0fzb"
         },
         {
           "id": "nav-to-galley-servery-2",
           "type": "nav",
           "label": "Galley / Servery",
-          "position": {
-            "yaw": 120.9,
-            "pitch": -19.7
-          },
+          "position": { "yaw": 120.9, "pitch": -19.7 },
           "targetScene": "s_53f222bswk"
         },
         {
           "id": "nav-to-report-meeting-room-2",
           "type": "nav",
           "label": "Report Meeting Room",
-          "position": {
-            "yaw": 112.1,
-            "pitch": -28.5
-          },
+          "position": { "yaw": 112.1, "pitch": -28.5 },
           "targetScene": "s_tkfah1p184"
         },
         {
           "id": "nav-to-staff-facility-lounge-2",
           "type": "nav",
           "label": "Staff Facility / Lounge",
-          "position": {
-            "yaw": 114.9,
-            "pitch": -18.4
-          },
+          "position": { "yaw": 114.9, "pitch": -18.4 },
           "targetScene": "s_r8ctcgzbei"
         },
         {
           "id": "nav-to-inpatient-suites-4",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 50,
-            "pitch": -45.3
-          },
+          "position": { "yaw": 50, "pitch": -45.3 },
           "targetScene": "s_c42kwvk6i6"
         },
         {
           "id": "nav-to-inpatient-suites-2-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 63.5,
-            "pitch": -47.9
-          },
+          "position": { "yaw": 63.5, "pitch": -47.9 },
           "targetScene": "s_c42kwvk6i6"
         },
         {
           "id": "nav-to-inpatient-suites-3-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -47.6
-          },
+          "position": { "yaw": 79.5, "pitch": -47.6 },
           "targetScene": "s_c42kwvk6i6"
         },
         {
           "id": "nav-to-overview-2",
           "type": "nav",
-          "position": {
-            "yaw": 148.8,
-            "pitch": -15.9
-          },
+          "position": { "yaw": 148.8, "pitch": -15.9 },
           "targetScene": "s_qu7z1pbgsb",
           "instant": true,
           "navVariant": "back"
@@ -1512,10 +1105,7 @@
         {
           "id": "info-james-beach-health-care-centre-2",
           "type": "info",
-          "position": {
-            "yaw": 77.2,
-            "pitch": -28.1
-          },
+          "position": { "yaw": 77.2, "pitch": -28.1 },
           "popup": {
             "display": "anchored",
             "title": "James Beach Health Care Centre - Floor"
@@ -1532,19 +1122,12 @@
       "id": "s_c42kwvk6i6",
       "title": "Inpatient Suites",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_c42kwvk6i6.webp",
-      "defaultView": {
-        "yaw": 111,
-        "pitch": 0.2,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 111, "pitch": 0.2, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-inpatient-bed-rooms-3",
           "type": "info",
-          "position": {
-            "yaw": 101.1,
-            "pitch": -15.8
-          },
+          "position": { "yaw": 101.1, "pitch": -15.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
@@ -1557,10 +1140,7 @@
         {
           "id": "nav-to-emergency-department-2",
           "type": "nav",
-          "position": {
-            "yaw": 293,
-            "pitch": -2.6
-          },
+          "position": { "yaw": 293, "pitch": -2.6 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1573,19 +1153,12 @@
       "id": "s_z7n2u3rr0e",
       "title": "Reception Centre",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_z7n2u3rr0e.webp",
-      "defaultView": {
-        "yaw": 101.6,
-        "pitch": -2.8,
-        "zoom": 55
-      },
+      "defaultView": { "yaw": 101.6, "pitch": -2.8, "zoom": 55 },
       "hotspots": [
         {
           "id": "info-reception-centre-3",
           "type": "info",
-          "position": {
-            "yaw": 84.9,
-            "pitch": -9.1
-          },
+          "position": { "yaw": 84.9, "pitch": -9.1 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
@@ -1598,10 +1171,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-2",
           "type": "nav",
-          "position": {
-            "yaw": 128.1,
-            "pitch": -6.7
-          },
+          "position": { "yaw": 128.1, "pitch": -6.7 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1614,19 +1184,12 @@
       "id": "s_6u5agl2var",
       "title": "Nursing Station",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_6u5agl2var.webp",
-      "defaultView": {
-        "yaw": 84.5,
-        "pitch": -17.2,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 84.5, "pitch": -17.2, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-nursing-station-3",
           "type": "info",
-          "position": {
-            "yaw": 78.3,
-            "pitch": -20.8
-          },
+          "position": { "yaw": 78.3, "pitch": -20.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
@@ -1639,10 +1202,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-3",
           "type": "nav",
-          "position": {
-            "yaw": 124.7,
-            "pitch": -14
-          },
+          "position": { "yaw": 124.7, "pitch": -14 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1655,19 +1215,12 @@
       "id": "s_3nv9rl56r7",
       "title": "Multi Use Lounge / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_3nv9rl56r7.webp",
-      "defaultView": {
-        "yaw": 183.1,
-        "pitch": -8.5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 183.1, "pitch": -8.5, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-multi-use-lounge-activity-room-3",
           "type": "info",
-          "position": {
-            "yaw": 186.7,
-            "pitch": -40.4
-          },
+          "position": { "yaw": 186.7, "pitch": -40.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
@@ -1680,10 +1233,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-4",
           "type": "nav",
-          "position": {
-            "yaw": 182.5,
-            "pitch": -5
-          },
+          "position": { "yaw": 182.5, "pitch": -5 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1696,19 +1246,12 @@
       "id": "s_vf8l9043xl",
       "title": "Quiet / Consultant",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_vf8l9043xl.webp",
-      "defaultView": {
-        "yaw": 231.7,
-        "pitch": -29.9,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 231.7, "pitch": -29.9, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-quiet-consultant-3",
           "type": "info",
-          "position": {
-            "yaw": 237,
-            "pitch": -32
-          },
+          "position": { "yaw": 237, "pitch": -32 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
@@ -1721,10 +1264,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-5",
           "type": "nav",
-          "position": {
-            "yaw": 53.9,
-            "pitch": -8.3
-          },
+          "position": { "yaw": 53.9, "pitch": -8.3 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1737,19 +1277,12 @@
       "id": "s_7df4dxgbgk",
       "title": "Dining / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_7df4dxgbgk.webp",
-      "defaultView": {
-        "yaw": 73.6,
-        "pitch": -29.2,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 73.6, "pitch": -29.2, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-dining-activity-room-3",
           "type": "info",
-          "position": {
-            "yaw": 70.4,
-            "pitch": -20
-          },
+          "position": { "yaw": 70.4, "pitch": -20 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
@@ -1762,10 +1295,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-6",
           "type": "nav",
-          "position": {
-            "yaw": 169.5,
-            "pitch": -12.7
-          },
+          "position": { "yaw": 169.5, "pitch": -12.7 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1778,19 +1308,12 @@
       "id": "s_jv5lhy0fzb",
       "title": "Allied Health Team Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_jv5lhy0fzb.webp",
-      "defaultView": {
-        "yaw": 81,
-        "pitch": -41.3,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 81, "pitch": -41.3, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-allied-health-team-room-3",
           "type": "info",
-          "position": {
-            "yaw": 82.3,
-            "pitch": -43.4
-          },
+          "position": { "yaw": 82.3, "pitch": -43.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
@@ -1803,10 +1326,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-7",
           "type": "nav",
-          "position": {
-            "yaw": 111.3,
-            "pitch": -5.6
-          },
+          "position": { "yaw": 111.3, "pitch": -5.6 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1819,19 +1339,12 @@
       "id": "s_53f222bswk",
       "title": "Galley / Servery",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_53f222bswk.webp",
-      "defaultView": {
-        "yaw": 293.6,
-        "pitch": -13.6,
-        "zoom": 4
-      },
+      "defaultView": { "yaw": 293.6, "pitch": -13.6, "zoom": 4 },
       "hotspots": [
         {
           "id": "nav-to-james-beach-health-care-centre-8",
           "type": "nav",
-          "position": {
-            "yaw": 75.2,
-            "pitch": -4.3
-          },
+          "position": { "yaw": 75.2, "pitch": -4.3 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1840,10 +1353,7 @@
           "id": "info-place",
           "type": "info",
           "role": "placeOverview",
-          "position": {
-            "yaw": 293.6,
-            "pitch": -13.6
-          },
+          "position": { "yaw": 293.6, "pitch": -13.6 },
           "popup": {
             "display": "anchored",
             "title": "Galley / Servery",
@@ -1858,22 +1368,13 @@
       "id": "s_tkfah1p184",
       "title": "Report Meeting Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_tkfah1p184.webp",
-      "defaultView": {
-        "yaw": 91.4,
-        "pitch": -19.3,
-        "zoom": 32
-      },
+      "defaultView": { "yaw": 91.4, "pitch": -19.3, "zoom": 32 },
       "hotspots": [
         {
           "id": "info-report-meeting-room-3",
           "type": "info",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -16.9
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 79.5, "pitch": -16.9 },
+          "popup": { "display": "anchored" },
           "namingId": "no_ulu3wcv6bh",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room-3.webp"
@@ -1882,10 +1383,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-9",
           "type": "nav",
-          "position": {
-            "yaw": 6.9,
-            "pitch": -8.2
-          },
+          "position": { "yaw": 6.9, "pitch": -8.2 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1898,22 +1396,13 @@
       "id": "s_r8ctcgzbei",
       "title": "Staff Facility / Lounge",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_r8ctcgzbei.webp",
-      "defaultView": {
-        "yaw": 329.3,
-        "pitch": -22.6,
-        "zoom": 19
-      },
+      "defaultView": { "yaw": 329.3, "pitch": -22.6, "zoom": 19 },
       "hotspots": [
         {
           "id": "info-staff-facility-lounge-3",
           "type": "info",
-          "position": {
-            "yaw": 330.7,
-            "pitch": -27.4
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 330.7, "pitch": -27.4 },
+          "popup": { "display": "anchored" },
           "namingId": "no_dd2495tzjk",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge-3.webp"
@@ -1922,10 +1411,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-10",
           "type": "nav",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -7.4
-          },
+          "position": { "yaw": 79.5, "pitch": -7.4 },
           "targetScene": "s_mmj82ryz6p",
           "instant": true,
           "navVariant": "back"
@@ -1938,149 +1424,103 @@
       "id": "s_fa241wial8",
       "title": "Floor 6",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_fa241wial8.webp",
-      "defaultView": {
-        "yaw": 108.7,
-        "pitch": -63.5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 108.7, "pitch": -63.5, "zoom": 1 },
       "hotspots": [
         {
           "id": "nav-to-inpatient-suites-overview-2-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 337.3,
-            "pitch": -62.9
-          },
+          "position": { "yaw": 337.3, "pitch": -62.9 },
           "targetScene": "s_k5znwwhgm4"
         },
         {
           "id": "nav-to-reception-centre-2-2",
           "type": "nav",
           "label": "Reception Centre",
-          "position": {
-            "yaw": 140.7,
-            "pitch": -34.7
-          },
+          "position": { "yaw": 140.7, "pitch": -34.7 },
           "targetScene": "s_sdjz2mhlw6"
         },
         {
           "id": "nav-to-nursing-station-2-2",
           "type": "nav",
           "label": "Nursing Station",
-          "position": {
-            "yaw": 33.1,
-            "pitch": -60.9
-          },
+          "position": { "yaw": 33.1, "pitch": -60.9 },
           "targetScene": "s_2hbvd10ndp"
         },
         {
           "id": "nav-to-multi-use-lounge-activity-room-2-2",
           "type": "nav",
           "label": "Multi Use Lounge / Activity Room",
-          "position": {
-            "yaw": 157.7,
-            "pitch": -30.1
-          },
+          "position": { "yaw": 157.7, "pitch": -30.1 },
           "targetScene": "s_aglvzytsd0"
         },
         {
           "id": "nav-to-quiet-consultant-2-2",
           "type": "nav",
           "label": "Quiet / Consultant",
-          "position": {
-            "yaw": 134.5,
-            "pitch": -22.3
-          },
+          "position": { "yaw": 134.5, "pitch": -22.3 },
           "targetScene": "s_b0p4zlphcm"
         },
         {
           "id": "nav-to-dining-activity-room-2-2",
           "type": "nav",
           "label": "Dining / Activity Room",
-          "position": {
-            "yaw": 126.9,
-            "pitch": -21.7
-          },
+          "position": { "yaw": 126.9, "pitch": -21.7 },
           "targetScene": "s_c422jvoq5t"
         },
         {
           "id": "nav-to-allied-health-team-room-2-2",
           "type": "nav",
           "label": "Allied Health Team Room",
-          "position": {
-            "yaw": 122.9,
-            "pitch": -25.6
-          },
+          "position": { "yaw": 122.9, "pitch": -25.6 },
           "targetScene": "s_ms3jd5bxdx"
         },
         {
           "id": "nav-to-galley-servery-2-2",
           "type": "nav",
           "label": "Galley / Servery",
-          "position": {
-            "yaw": 120.9,
-            "pitch": -19.7
-          },
+          "position": { "yaw": 120.9, "pitch": -19.7 },
           "targetScene": "s_thjs1ppqso"
         },
         {
           "id": "nav-to-report-meeting-room-2-2",
           "type": "nav",
           "label": "Report Meeting Room",
-          "position": {
-            "yaw": 112.1,
-            "pitch": -28.5
-          },
+          "position": { "yaw": 112.1, "pitch": -28.5 },
           "targetScene": "s_h8ukfkaxr9"
         },
         {
           "id": "nav-to-staff-facility-lounge-2-2",
           "type": "nav",
           "label": "Staff Facility / Lounge",
-          "position": {
-            "yaw": 114.9,
-            "pitch": -18.4
-          },
+          "position": { "yaw": 114.9, "pitch": -18.4 },
           "targetScene": "s_x48fg4wlvd"
         },
         {
           "id": "nav-to-inpatient-suites-4-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 50,
-            "pitch": -45.3
-          },
+          "position": { "yaw": 50, "pitch": -45.3 },
           "targetScene": "s_k5znwwhgm4"
         },
         {
           "id": "nav-to-inpatient-suites-2-2-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 63.5,
-            "pitch": -47.9
-          },
+          "position": { "yaw": 63.5, "pitch": -47.9 },
           "targetScene": "s_k5znwwhgm4"
         },
         {
           "id": "nav-to-inpatient-suites-3-2-2",
           "type": "nav",
           "label": "Inpatient Suites",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -47.6
-          },
+          "position": { "yaw": 79.5, "pitch": -47.6 },
           "targetScene": "s_k5znwwhgm4"
         },
         {
           "id": "nav-to-overview-2-2",
           "type": "nav",
-          "position": {
-            "yaw": 148.8,
-            "pitch": -15.9
-          },
+          "position": { "yaw": 148.8, "pitch": -15.9 },
           "targetScene": "s_qu7z1pbgsb",
           "instant": true,
           "navVariant": "back"
@@ -2088,10 +1528,7 @@
         {
           "id": "info-james-beach-health-care-centre-2-2",
           "type": "info",
-          "position": {
-            "yaw": 77.2,
-            "pitch": -28.1
-          },
+          "position": { "yaw": 77.2, "pitch": -28.1 },
           "popup": {
             "display": "anchored",
             "title": "James Beach Health Care Centre - Floor"
@@ -2108,19 +1545,12 @@
       "id": "s_k5znwwhgm4",
       "title": "Inpatient Suites",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_k5znwwhgm4.webp",
-      "defaultView": {
-        "yaw": 111,
-        "pitch": 0.2,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 111, "pitch": 0.2, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-inpatient-bed-rooms-3-2",
           "type": "info",
-          "position": {
-            "yaw": 101.1,
-            "pitch": -15.8
-          },
+          "position": { "yaw": 101.1, "pitch": -15.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
@@ -2133,10 +1563,7 @@
         {
           "id": "nav-to-emergency-department-2-2",
           "type": "nav",
-          "position": {
-            "yaw": 293,
-            "pitch": -2.6
-          },
+          "position": { "yaw": 293, "pitch": -2.6 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2149,19 +1576,12 @@
       "id": "s_sdjz2mhlw6",
       "title": "Reception Centre",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_sdjz2mhlw6.webp",
-      "defaultView": {
-        "yaw": 101.6,
-        "pitch": -2.8,
-        "zoom": 55
-      },
+      "defaultView": { "yaw": 101.6, "pitch": -2.8, "zoom": 55 },
       "hotspots": [
         {
           "id": "info-reception-centre-3-2",
           "type": "info",
-          "position": {
-            "yaw": 84.9,
-            "pitch": -9.1
-          },
+          "position": { "yaw": 84.9, "pitch": -9.1 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
@@ -2174,10 +1594,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-2-2",
           "type": "nav",
-          "position": {
-            "yaw": 128.1,
-            "pitch": -6.7
-          },
+          "position": { "yaw": 128.1, "pitch": -6.7 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2190,19 +1607,12 @@
       "id": "s_2hbvd10ndp",
       "title": "Nursing Station",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_2hbvd10ndp.webp",
-      "defaultView": {
-        "yaw": 84.5,
-        "pitch": -17.2,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 84.5, "pitch": -17.2, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-nursing-station-3-2",
           "type": "info",
-          "position": {
-            "yaw": 78.3,
-            "pitch": -20.8
-          },
+          "position": { "yaw": 78.3, "pitch": -20.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
@@ -2215,10 +1625,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-3-2",
           "type": "nav",
-          "position": {
-            "yaw": 124.7,
-            "pitch": -14
-          },
+          "position": { "yaw": 124.7, "pitch": -14 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2231,19 +1638,12 @@
       "id": "s_aglvzytsd0",
       "title": "Multi Use Lounge / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_aglvzytsd0.webp",
-      "defaultView": {
-        "yaw": 183.1,
-        "pitch": -8.5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 183.1, "pitch": -8.5, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-multi-use-lounge-activity-room-3-2",
           "type": "info",
-          "position": {
-            "yaw": 186.7,
-            "pitch": -40.4
-          },
+          "position": { "yaw": 186.7, "pitch": -40.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
@@ -2256,10 +1656,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-4-2",
           "type": "nav",
-          "position": {
-            "yaw": 182.5,
-            "pitch": -5
-          },
+          "position": { "yaw": 182.5, "pitch": -5 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2272,19 +1669,12 @@
       "id": "s_b0p4zlphcm",
       "title": "Quiet / Consultant",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_b0p4zlphcm.webp",
-      "defaultView": {
-        "yaw": 231.7,
-        "pitch": -29.9,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 231.7, "pitch": -29.9, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-quiet-consultant-3-2",
           "type": "info",
-          "position": {
-            "yaw": 237,
-            "pitch": -32
-          },
+          "position": { "yaw": 237, "pitch": -32 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
@@ -2297,10 +1687,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-5-2",
           "type": "nav",
-          "position": {
-            "yaw": 53.9,
-            "pitch": -8.3
-          },
+          "position": { "yaw": 53.9, "pitch": -8.3 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2313,19 +1700,12 @@
       "id": "s_c422jvoq5t",
       "title": "Dining / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_c422jvoq5t.webp",
-      "defaultView": {
-        "yaw": 73.6,
-        "pitch": -29.2,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 73.6, "pitch": -29.2, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-dining-activity-room-3-2",
           "type": "info",
-          "position": {
-            "yaw": 70.4,
-            "pitch": -20
-          },
+          "position": { "yaw": 70.4, "pitch": -20 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
@@ -2338,10 +1718,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-6-2",
           "type": "nav",
-          "position": {
-            "yaw": 169.5,
-            "pitch": -12.7
-          },
+          "position": { "yaw": 169.5, "pitch": -12.7 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2354,19 +1731,12 @@
       "id": "s_ms3jd5bxdx",
       "title": "Allied Health Team Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_ms3jd5bxdx.webp",
-      "defaultView": {
-        "yaw": 81,
-        "pitch": -41.3,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 81, "pitch": -41.3, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-allied-health-team-room-3-2",
           "type": "info",
-          "position": {
-            "yaw": 82.3,
-            "pitch": -43.4
-          },
+          "position": { "yaw": 82.3, "pitch": -43.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
@@ -2379,10 +1749,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-7-2",
           "type": "nav",
-          "position": {
-            "yaw": 111.3,
-            "pitch": -5.6
-          },
+          "position": { "yaw": 111.3, "pitch": -5.6 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2395,19 +1762,12 @@
       "id": "s_thjs1ppqso",
       "title": "Galley / Servery",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_thjs1ppqso.webp",
-      "defaultView": {
-        "yaw": 293.6,
-        "pitch": -13.6,
-        "zoom": 4
-      },
+      "defaultView": { "yaw": 293.6, "pitch": -13.6, "zoom": 4 },
       "hotspots": [
         {
           "id": "nav-to-james-beach-health-care-centre-8-2",
           "type": "nav",
-          "position": {
-            "yaw": 75.2,
-            "pitch": -4.3
-          },
+          "position": { "yaw": 75.2, "pitch": -4.3 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2416,10 +1776,7 @@
           "id": "info-place",
           "type": "info",
           "role": "placeOverview",
-          "position": {
-            "yaw": 293.6,
-            "pitch": -13.6
-          },
+          "position": { "yaw": 293.6, "pitch": -13.6 },
           "popup": {
             "display": "anchored",
             "title": "Galley / Servery",
@@ -2434,22 +1791,13 @@
       "id": "s_h8ukfkaxr9",
       "title": "Report Meeting Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_h8ukfkaxr9.webp",
-      "defaultView": {
-        "yaw": 91.4,
-        "pitch": -19.3,
-        "zoom": 32
-      },
+      "defaultView": { "yaw": 91.4, "pitch": -19.3, "zoom": 32 },
       "hotspots": [
         {
           "id": "info-report-meeting-room-3-2",
           "type": "info",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -16.9
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 79.5, "pitch": -16.9 },
+          "popup": { "display": "anchored" },
           "namingId": "no_z32j81duw6",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room-3-2.webp"
@@ -2458,10 +1806,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-9-2",
           "type": "nav",
-          "position": {
-            "yaw": 6.9,
-            "pitch": -8.2
-          },
+          "position": { "yaw": 6.9, "pitch": -8.2 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2474,22 +1819,13 @@
       "id": "s_x48fg4wlvd",
       "title": "Staff Facility / Lounge",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_x48fg4wlvd.webp",
-      "defaultView": {
-        "yaw": 329.3,
-        "pitch": -22.6,
-        "zoom": 19
-      },
+      "defaultView": { "yaw": 329.3, "pitch": -22.6, "zoom": 19 },
       "hotspots": [
         {
           "id": "info-staff-facility-lounge-3-2",
           "type": "info",
-          "position": {
-            "yaw": 330.7,
-            "pitch": -27.4
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 330.7, "pitch": -27.4 },
+          "popup": { "display": "anchored" },
           "namingId": "no_75whawiy0s",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge-3-2.webp"
@@ -2498,10 +1834,7 @@
         {
           "id": "nav-to-james-beach-health-care-centre-10-2",
           "type": "nav",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -7.4
-          },
+          "position": { "yaw": 79.5, "pitch": -7.4 },
           "targetScene": "s_fa241wial8",
           "instant": true,
           "navVariant": "back"
@@ -2514,19 +1847,12 @@
       "id": "s_6uyqibvsr5",
       "title": "Inpatient Suites",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_6uyqibvsr5.webp",
-      "defaultView": {
-        "yaw": 111,
-        "pitch": 0.2,
-        "zoom": 15
-      },
+      "defaultView": { "yaw": 111, "pitch": 0.2, "zoom": 15 },
       "hotspots": [
         {
           "id": "info-inpatient-bed-rooms-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 101.1,
-            "pitch": -15.8
-          },
+          "position": { "yaw": 101.1, "pitch": -15.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
@@ -2544,19 +1870,12 @@
       "id": "s_e4d31i0et7",
       "title": "Reception Centre",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_e4d31i0et7.webp",
-      "defaultView": {
-        "yaw": 101.6,
-        "pitch": -2.8,
-        "zoom": 55
-      },
+      "defaultView": { "yaw": 101.6, "pitch": -2.8, "zoom": 55 },
       "hotspots": [
         {
           "id": "info-reception-centre-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 84.9,
-            "pitch": -9.1
-          },
+          "position": { "yaw": 84.9, "pitch": -9.1 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a94d5b20-a773-4167-ba5d-64c7d93728f0"
@@ -2574,19 +1893,12 @@
       "id": "s_m6i932yb3i",
       "title": "Nursing Station",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_m6i932yb3i.webp",
-      "defaultView": {
-        "yaw": 84.5,
-        "pitch": -17.2,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 84.5, "pitch": -17.2, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-nursing-station-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 78.3,
-            "pitch": -20.8
-          },
+          "position": { "yaw": 78.3, "pitch": -20.8 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/92440a6a-5bd1-427b-ab64-41f5bdef4330"
@@ -2604,19 +1916,12 @@
       "id": "s_ei1i2wrm71",
       "title": "Multi Use Lounge / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_ei1i2wrm71.webp",
-      "defaultView": {
-        "yaw": 183.1,
-        "pitch": -8.5,
-        "zoom": 1
-      },
+      "defaultView": { "yaw": 183.1, "pitch": -8.5, "zoom": 1 },
       "hotspots": [
         {
           "id": "info-multi-use-lounge-activity-room-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 186.7,
-            "pitch": -40.4
-          },
+          "position": { "yaw": 186.7, "pitch": -40.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/61d0e63d-a9c5-4da1-8e36-2a4fea4d268f"
@@ -2634,19 +1939,12 @@
       "id": "s_lo3hschobb",
       "title": "Quiet / Consultant",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_lo3hschobb.webp",
-      "defaultView": {
-        "yaw": 231.7,
-        "pitch": -29.9,
-        "zoom": 10
-      },
+      "defaultView": { "yaw": 231.7, "pitch": -29.9, "zoom": 10 },
       "hotspots": [
         {
           "id": "info-quiet-consultant-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 237,
-            "pitch": -32
-          },
+          "position": { "yaw": 237, "pitch": -32 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/a1d234de-7c60-4009-9ea8-9b2ab3b6daa5"
@@ -2664,19 +1962,12 @@
       "id": "s_yy6nfi18rd",
       "title": "Dining / Activity Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_yy6nfi18rd.webp",
-      "defaultView": {
-        "yaw": 73.6,
-        "pitch": -29.2,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 73.6, "pitch": -29.2, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-dining-activity-room-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 70.4,
-            "pitch": -20
-          },
+          "position": { "yaw": 70.4, "pitch": -20 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cfb5e49a-1882-413e-bac9-513a6f9d93ac"
@@ -2694,19 +1985,12 @@
       "id": "s_y8izxirnap",
       "title": "Allied Health Team Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_y8izxirnap.webp",
-      "defaultView": {
-        "yaw": 81,
-        "pitch": -41.3,
-        "zoom": 14
-      },
+      "defaultView": { "yaw": 81, "pitch": -41.3, "zoom": 14 },
       "hotspots": [
         {
           "id": "info-allied-health-team-room-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 82.3,
-            "pitch": -43.4
-          },
+          "position": { "yaw": 82.3, "pitch": -43.4 },
           "popup": {
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cdf02fe7-c3a9-4e85-af3d-9702c5897b5d"
@@ -2724,20 +2008,13 @@
       "id": "s_9axb7djr5z",
       "title": "Galley / Servery",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_9axb7djr5z.webp",
-      "defaultView": {
-        "yaw": 293.6,
-        "pitch": -13.6,
-        "zoom": 4
-      },
+      "defaultView": { "yaw": 293.6, "pitch": -13.6, "zoom": 4 },
       "hotspots": [
         {
           "id": "info-place-2",
           "type": "info",
           "role": "placeOverview",
-          "position": {
-            "yaw": 293.6,
-            "pitch": -13.6
-          },
+          "position": { "yaw": 293.6, "pitch": -13.6 },
           "popup": {
             "display": "anchored",
             "title": "Galley / Servery",
@@ -2752,22 +2029,13 @@
       "id": "s_r9cso9ov3y",
       "title": "Report Meeting Room",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_r9cso9ov3y.webp",
-      "defaultView": {
-        "yaw": 91.4,
-        "pitch": -19.3,
-        "zoom": 32
-      },
+      "defaultView": { "yaw": 91.4, "pitch": -19.3, "zoom": 32 },
       "hotspots": [
         {
           "id": "info-report-meeting-room-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 79.5,
-            "pitch": -16.9
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 79.5, "pitch": -16.9 },
+          "popup": { "display": "anchored" },
           "namingId": "no_2droar7isn",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-report-meeting-room-3-2-2.webp"
@@ -2781,22 +2049,13 @@
       "id": "s_31fdtwxt9c",
       "title": "Staff Facility / Lounge",
       "panorama": "/assets/qchfoundation/t_9zs0j4a7xt/panoramas/s_31fdtwxt9c.webp",
-      "defaultView": {
-        "yaw": 329.3,
-        "pitch": -22.6,
-        "zoom": 19
-      },
+      "defaultView": { "yaw": 329.3, "pitch": -22.6, "zoom": 19 },
       "hotspots": [
         {
           "id": "info-staff-facility-lounge-3-2-2",
           "type": "info",
-          "position": {
-            "yaw": 330.7,
-            "pitch": -27.4
-          },
-          "popup": {
-            "display": "anchored"
-          },
+          "position": { "yaw": 330.7, "pitch": -27.4 },
+          "popup": { "display": "anchored" },
           "namingId": "no_xbx7bn2rlf",
           "preview": {
             "image": "/assets/qchfoundation/t_9zs0j4a7xt/previews/info-staff-facility-lounge-3-2-2.webp"

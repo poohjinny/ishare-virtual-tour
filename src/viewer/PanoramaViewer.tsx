@@ -88,6 +88,10 @@ import {
 } from './infoHotspotActive';
 import { setDevFocusedHotspot } from './devHotspotFocus';
 import { setAnchoredPanelVisibilityListener } from './anchoredPanelVisibility';
+import {
+  setNavPreviewGuideListener,
+  type NavPreviewGuideInfo,
+} from './navPreviewGuideNotify';
 import { navigateToScene, ensureScenePreloaded } from './transition';
 import { bindVirtualTourLifecycleGuard } from './virtualTourLifecycle';
 import { createRecenterViewNavbarButton } from './recenterViewNavbarButton';
@@ -189,6 +193,8 @@ interface PanoramaViewerProps {
   onDismissModalPopups?: () => void;
   /** Anchored hotspot panel on the panorama opened or closed. */
   onAnchoredPanelVisibilityChange?: (visible: boolean) => void;
+  /** In-scene nav preview opened (destination) or closed (`null`). */
+  onNavPreviewChange?: (preview: NavPreviewGuideInfo | null) => void;
   /** Scene nav from panorama hotspots — same path as location menu (TourPage handleNavigate). */
   onNavigateToScene?: (sceneId: string, targetView?: ViewPosition) => void;
   onTransitionStart: () => void;
@@ -253,6 +259,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       onActiveInfoHotspotChange,
       onDismissModalPopups,
       onAnchoredPanelVisibilityChange,
+      onNavPreviewChange,
       onNavigateToScene,
       onTransitionStart,
       onTransitionEnd,
@@ -328,6 +335,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     const onAnchoredPanelVisibilityChangeRef = useLatestRef(
       onAnchoredPanelVisibilityChange,
     );
+    const onNavPreviewChangeRef = useLatestRef(onNavPreviewChange);
     const onNavigateToSceneRef = useLatestRef(onNavigateToScene);
     const onTransitionStartRef = useLatestRef(onTransitionStart);
     const onTransitionEndRef = useLatestRef(onTransitionEnd);
@@ -469,6 +477,13 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         onAnchoredPanelVisibilityChangeRef.current?.(open);
       });
       return () => setAnchoredPanelVisibilityListener(null);
+    }, []);
+
+    useEffect(() => {
+      setNavPreviewGuideListener((preview) => {
+        onNavPreviewChangeRef.current?.(preview);
+      });
+      return () => setNavPreviewGuideListener(null);
     }, []);
 
     useEffect(() => {
@@ -792,7 +807,10 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
         const nextScene = nextTour.scenes[currentId];
         if (!nextScene) {
           const fallbackId =
-            options?.fallbackSceneId && nextTour.scenes[options.fallbackSceneId] ?
+            (
+              options?.fallbackSceneId &&
+              nextTour.scenes[options.fallbackSceneId]
+            ) ?
               options.fallbackSceneId
             : nextTour.firstScene;
           virtualTour.setNodes(nodeConfigs, fallbackId);

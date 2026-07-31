@@ -1,4 +1,8 @@
-import type { ChatGuideCta, TourClient } from '../../types/tour';
+import type {
+  ChatGuideCta,
+  ChatGuideCtaKind,
+  TourClient,
+} from '../../types/tour';
 import { cn } from '../../lib/cn';
 import {
   addressToGoogleMapsHref,
@@ -26,6 +30,16 @@ import {
 
 const MAX_VISIBLE_CTAS = 3;
 
+const CHROME_CTA_KINDS = new Set<ChatGuideCtaKind>([
+  'open-help',
+  'open-explore',
+  'open-ask-guide',
+]);
+
+function isChromeCta(cta: ChatGuideCta): boolean {
+  return CHROME_CTA_KINDS.has(cta.kind);
+}
+
 interface GuideCtaRowProps {
   ctas: ChatGuideCta[];
   client?: TourClient;
@@ -38,6 +52,8 @@ interface GuideCtaRowProps {
   showContactInfo?: boolean;
   /** Stack actions vertically (under naming cards). */
   stack?: boolean;
+  /** In-app chrome actions (Help / Explore / Ask Guide). */
+  onChromeAction?: (kind: ChatGuideCtaKind) => void;
 }
 
 function preferContactThenDonate(ctas: ChatGuideCta[]): ChatGuideCta[] {
@@ -79,7 +95,12 @@ function actionCtas(
     ) {
       return true;
     }
-    if (cta.kind === 'contact' && clientMailto && cta.url === clientMailto) {
+    if (
+      cta.kind === 'contact' &&
+      clientMailto &&
+      cta.url &&
+      cta.url === clientMailto
+    ) {
       return false;
     }
     return true;
@@ -107,6 +128,7 @@ export function GuideCtaRow({
   align = 'card',
   showContactInfo = true,
   stack = false,
+  onChromeAction,
 }: GuideCtaRowProps) {
   const showInfo =
     showContactInfo &&
@@ -122,6 +144,8 @@ export function GuideCtaRow({
     address ? addressToGoogleMapsHref(address, client?.name) : '';
 
   if (visible.length === 0 && !showInfo) return null;
+
+  const chromeOnly = visible.length > 0 && visible.every(isChromeCta);
 
   return (
     <div
@@ -246,26 +270,51 @@ export function GuideCtaRow({
           className={cn(
             'grid',
             stack ? 'gap-1.5' : 'gap-2',
-            aiGuideCtaActionsColsClassName(visible.length, align, stack),
+            aiGuideCtaActionsColsClassName(
+              visible.length,
+              align,
+              stack,
+              chromeOnly,
+            ),
           )}
         >
           {visible.map((cta, index) => {
-            const isMailto = isMailtoCtaUrl(cta.url);
+            const chrome = isChromeCta(cta);
+            const href = cta.url?.trim() || '';
+            const isMailto = Boolean(href) && isMailtoCtaUrl(href);
             // Naming stack: one quiet primary + secondary peers (avoid all-theme clash).
             const isPrimary =
               stack ?
                 index === 0
-              : cta.kind === 'donate' || cta.kind === 'contact';
+              : cta.kind === 'donate' ||
+                cta.kind === 'contact' ||
+                cta.kind === 'open-help';
             const className =
               stack ?
                 isPrimary ? aiGuideCtaCompactPrimaryClassName
                 : aiGuideCtaCompactClassName
               : isPrimary ? aiGuideCtaPrimaryClassName
               : aiGuideCtaClassName;
+
+            if (chrome) {
+              return (
+                <button
+                  key={cta.id}
+                  type='button'
+                  className={className}
+                  onClick={() => onChromeAction?.(cta.kind)}
+                >
+                  {cta.label}
+                </button>
+              );
+            }
+
+            if (!href) return null;
+
             return (
               <a
                 key={cta.id}
-                href={cta.url}
+                href={href}
                 className={className}
                 {...(isMailto ?
                   {}
@@ -273,7 +322,7 @@ export function GuideCtaRow({
                 onClick={(event) => {
                   if (!isMailto) return;
                   event.preventDefault();
-                  openCtaUrl(cta.url);
+                  openCtaUrl(href);
                 }}
               >
                 {cta.label}

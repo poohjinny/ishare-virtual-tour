@@ -1487,6 +1487,12 @@ export const tourNavHelpListClassName = cn(
   '[.ishare-accordion__panel-inner_&]:mt-0',
 );
 
+/** Inline Help action — opens Explore / Ask Guide without leaving the sentence. */
+export const tourNavHelpActionClassName = cn(
+  'inline cursor-pointer border-none bg-transparent p-0 font-[inherit] font-semibold text-primary',
+  'underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+);
+
 export const tourNavControlsListClassName = cn(
   'tour-nav-help-list mt-0 flex list-disc list-outside flex-col gap-2.5 p-0 pl-[1.125rem] font-body text-md leading-[1.55]',
   'text-[color-mix(in_srgb,var(--color-body)_55%,var(--color-muted))]',

@@ -39,7 +39,9 @@ function formatNamingBlurb(ctx: AssembledTourContext): string {
 }
 
 /** Prefer scene pins; fall back to tour-wide catalog (Overview often has none). */
-function namingPool(ctx: AssembledTourContext): Array<{
+function namingPool(
+  ctx: AssembledTourContext,
+): Array<{
   name: string;
   status: AssembledTourContext['namings'][number]['status'];
   statusLabel: string;
@@ -300,6 +302,17 @@ const GUIDE_FAB_NAMING_BUBBLES_GENERIC = [
   'Naming opportunity open — want a quick intro?',
 ] as const;
 
+const GUIDE_FAB_NAV_PREVIEW_BUBBLES = [
+  'Peeking at **{place}** — want a quick intro before you go?',
+  '**{place}** looks interesting — I can tell you more, or you can hop over.',
+  "Here's a preview of **{place}**. Ask me anything about it.",
+  "Looking toward **{place}** — curious what's waiting there?",
+  '**{place}** is next door — want the story before you visit?',
+  "Checking out **{place}**? I've got details if you'd like.",
+  'Nice — **{place}** is on the path. Tap me for a quick briefing.',
+  "You're previewing **{place}**. Happy to fill in the blanks.",
+] as const;
+
 /** Shuffle-bag picker so session lines feel varied without immediate repeats. */
 function createGuideFabBagPicker() {
   let bag: number[] = [];
@@ -336,6 +349,7 @@ const pickOverviewTourBubbleIndex = createGuideFabBagPicker();
 const pickSceneBubbleIndex = createGuideFabBagPicker();
 const pickNamingBubbleIndex = createGuideFabBagPicker();
 const pickNamingGenericBubbleIndex = createGuideFabBagPicker();
+const pickNavPreviewBubbleIndex = createGuideFabBagPicker();
 
 function fillGuideFabTemplate(
   template: string,
@@ -389,4 +403,25 @@ export function getGuideFabNamingBubble(namingName?: string): string {
     GUIDE_FAB_NAMING_BUBBLES_GENERIC.length,
   );
   return GUIDE_FAB_NAMING_BUBBLES_GENERIC[index]!;
+}
+
+/**
+ * FAB speech bubble when a nav destination preview opens (panel closed).
+ * Destination title in `**…**` for emphasis.
+ */
+export function getGuideFabNavPreviewBubble(placeTitle: string): string {
+  const place = placeTitle.trim() || 'that spot';
+  const index = pickNavPreviewBubbleIndex(GUIDE_FAB_NAV_PREVIEW_BUBBLES.length);
+  return fillGuideFabTemplate(GUIDE_FAB_NAV_PREVIEW_BUBBLES[index]!, { place });
+}
+
+/** Chat note when a nav destination preview is opened. */
+export function getNavPreviewOpenNote(
+  tour: Tour,
+  targetSceneId: string,
+  previewTitle?: string,
+): string {
+  const title =
+    previewTitle?.trim() || getSceneTitle(tour, targetSceneId) || 'that place';
+  return `You're previewing ${title} — I can tell you more about it, or help you decide where to go next.`;
 }

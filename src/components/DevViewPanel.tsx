@@ -652,6 +652,7 @@ export function DevViewPanel({
   const [newTourVisibility, setNewTourVisibility] =
     useState<DevCatalogTourVisibility>('unlisted');
   const [newTourFeatured, setNewTourFeatured] = useState(false);
+  const [newTourAskGuideEnabled, setNewTourAskGuideEnabled] = useState(false);
   const [newTourTransitionEffect, setNewTourTransitionEffect] = useState<
     'fade' | 'black'
   >(DEFAULT_DEV_EXPERIENCE_FORM.transitionEffect);
@@ -700,6 +701,7 @@ export function DevViewPanel({
   const [editTourVisibility, setEditTourVisibility] =
     useState<DevCatalogTourVisibility>('unlisted');
   const [editTourFeatured, setEditTourFeatured] = useState(false);
+  const [editTourAskGuideEnabled, setEditTourAskGuideEnabled] = useState(false);
   const [editTourPrimaryColor, setEditTourPrimaryColor] = useState(
     DEFAULT_NEW_TOUR_PRIMARY_COLOR,
   );
@@ -1250,6 +1252,7 @@ export function DevViewPanel({
     setNewTourCategory('Healthcare');
     setNewTourVisibility('unlisted');
     setNewTourFeatured(false);
+    setNewTourAskGuideEnabled(false);
     setNewTourTransitionEffect(DEFAULT_DEV_EXPERIENCE_FORM.transitionEffect);
     setNewTourTransitionSpeed(DEFAULT_DEV_EXPERIENCE_FORM.transitionSpeed);
     setNewTourImmersiveMode(DEFAULT_DEV_EXPERIENCE_FORM.immersiveMode);
@@ -1420,6 +1423,7 @@ export function DevViewPanel({
       catalogEntry ? resolveCatalogTourVisibility(catalogEntry) : 'unlisted',
     );
     setEditTourFeatured(catalogEntry?.featured ?? false);
+    setEditTourAskGuideEnabled(loaded?.askGuideEnabled === true);
 
     const brandingTour = loaded ?? tour;
     const usesCustomBranding = loaded ? tourUsesCustomBranding(loaded) : false;
@@ -1454,6 +1458,7 @@ export function DevViewPanel({
 
         setEditTourTitle(rawTour.title);
         setEditTourProductFullName(rawTour.productFullName ?? '');
+        setEditTourAskGuideEnabled(rawTour.askGuideEnabled === true);
         setEditTourCategory(
           (rawTour.category as TourCategory | undefined) ?? 'Healthcare',
         );
@@ -2133,6 +2138,7 @@ export function DevViewPanel({
         faviconFile: editTourFaviconFile,
         visibility: editTourVisibility,
         featured: editTourFeatured,
+        askGuideEnabled: editTourAskGuideEnabled,
       });
       setEditTourLogoFile(null);
       setEditTourFaviconFile(null);
@@ -2159,6 +2165,7 @@ export function DevViewPanel({
     editImmersivePlaylistManifest,
     editImmersivePlaylistText,
     editImmersiveVolume,
+    editTourAskGuideEnabled,
     editTourCategory,
     editTourFeatured,
     editTourFaviconFile,
@@ -2390,6 +2397,7 @@ export function DevViewPanel({
           : undefined,
         visibility: newTourVisibility,
         featured: newTourFeatured,
+        askGuideEnabled: newTourAskGuideEnabled,
         brandingMode: newTourBrandingMode,
         ...buildDevExperienceApiFields({
           transitionEffect: newTourTransitionEffect,
@@ -2435,6 +2443,7 @@ export function DevViewPanel({
     newTourPanoramaFile,
     newTourPrimaryColor,
     newTourFeatured,
+    newTourAskGuideEnabled,
     newTourImmersiveAudio,
     newTourImmersiveMode,
     newTourImmersivePlaylistManifest,
@@ -7422,6 +7431,31 @@ export function DevViewPanel({
                         </p>
                       </div>
                     </DevPanelFormRow>
+
+                    <DevPanelFormRow>
+                      <div className='col-span-2 flex flex-col gap-1'>
+                        <label
+                          className={devViewPanelFormCheckboxLabelClassName}
+                        >
+                          <input
+                            className={devViewPanelFormCheckboxInputClassName}
+                            type='checkbox'
+                            checked={newTourAskGuideEnabled}
+                            onChange={(e) =>
+                              setNewTourAskGuideEnabled(e.target.checked)
+                            }
+                          />
+                          <span className={devViewPanelToggleNameClassName}>
+                            Enable Ask Tour Guide
+                          </span>
+                        </label>
+                        <p className={devViewPanelSectionHintClassName}>
+                          Shows the Tour Guide FAB and Help guidance on this
+                          tour. Use <code>?askGuide=1</code> to force it on for
+                          QA.
+                        </p>
+                      </div>
+                    </DevPanelFormRow>
                   </DevPanelFormSection>
 
                   <DevPanelExperienceSection
@@ -8112,6 +8146,46 @@ export function DevViewPanel({
                                             on <code>/</code>. Use{' '}
                                             <code>?featured=1</code> for a
                                             featured-only gallery.
+                                          </p>
+                                        </div>
+                                      </DevPanelFormRow>
+
+                                      <DevPanelFormRow>
+                                        <div className='col-span-2 flex flex-col gap-1'>
+                                          <label
+                                            className={
+                                              devViewPanelFormCheckboxLabelClassName
+                                            }
+                                          >
+                                            <input
+                                              className={
+                                                devViewPanelFormCheckboxInputClassName
+                                              }
+                                              type='checkbox'
+                                              checked={editTourAskGuideEnabled}
+                                              onChange={(e) =>
+                                                setEditTourAskGuideEnabled(
+                                                  e.target.checked,
+                                                )
+                                              }
+                                            />
+                                            <span
+                                              className={
+                                                devViewPanelToggleNameClassName
+                                              }
+                                            >
+                                              Enable Ask Tour Guide
+                                            </span>
+                                          </label>
+                                          <p
+                                            className={
+                                              devViewPanelSectionHintClassName
+                                            }
+                                          >
+                                            Shows the Tour Guide FAB and Help
+                                            guidance on this tour. Use{' '}
+                                            <code>?askGuide=1</code> to force it
+                                            on for QA.
                                           </p>
                                         </div>
                                       </DevPanelFormRow>

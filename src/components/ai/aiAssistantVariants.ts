@@ -502,7 +502,7 @@ export const aiGuideContactLinkClassName = cn(
 );
 
 export const aiGuideCtaClassName = cn(
-  'flex min-w-0 cursor-pointer items-center justify-center rounded-lg border border-[rgba(15,23,42,0.12)] bg-white/80 px-2 py-1.5 text-center font-body text-sm font-medium leading-snug text-muted no-underline transition-[background,color,border-color] duration-200',
+  'flex min-w-0 cursor-pointer items-center justify-center rounded-lg border border-[rgba(15,23,42,0.12)] bg-white/80 px-3 py-1.5 text-center font-body text-sm font-medium leading-snug text-muted no-underline transition-[background,color,border-color] duration-200',
   'hover:border-primary hover:bg-primary hover:text-white',
 );
 
@@ -527,12 +527,15 @@ export function aiGuideCtaActionsColsClassName(
   count: number,
   align: 'card' | 'stretch' = 'card',
   stack = false,
+  /** Short in-app actions (Open Help) — hug label, don’t stretch to card width. */
+  fitContent = false,
 ): string {
   if (stack || align === 'stretch') {
     return 'grid-cols-1 w-full max-w-full self-stretch';
   }
   if (count >= 3) return 'grid-cols-3 w-full max-w-full self-stretch';
   if (count === 2) return 'grid-cols-2 w-full max-w-full self-stretch';
+  if (fitContent) return 'grid-cols-1 w-fit max-w-full';
   return cn('grid-cols-1', aiGuideCardWidthClassName);
 }
 

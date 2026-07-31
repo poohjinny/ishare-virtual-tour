@@ -7,6 +7,10 @@ import {
 } from '../components/tourGlassPanelHtml';
 import { setActiveNavHotspot } from './navHotspotActive';
 import {
+  notifyNavPreviewClosed,
+  notifyNavPreviewOpened,
+} from './navPreviewGuideNotify';
+import {
   destroyNavPreviewMiniViewer,
   dismissNavPreviewHero,
   isNavPreviewMiniViewerEnabled,
@@ -95,11 +99,12 @@ export function closeAnchoredNavPreviewPanel(
   markers: MarkersPlugin,
   animate = true,
   clearActive = true,
-  options?: { restoreCamera?: boolean },
+  options?: { restoreCamera?: boolean; notifyGuide?: boolean },
 ): void {
   let clearingActive = false;
   let closedAny = false;
   const restoreCamera = options?.restoreCamera ?? animate;
+  const notifyGuide = options?.notifyGuide !== false;
 
   for (const marker of markers.getMarkers()) {
     if (!marker.data?.navPanel) continue;
@@ -162,6 +167,7 @@ export function closeAnchoredNavPreviewPanel(
   }
 
   if (!closedAny) return;
+  if (notifyGuide) notifyNavPreviewClosed();
   if (restoreCamera) void restoreAnchoredPanelCameraIfNeeded();
   else clearAnchoredPanelCameraRestore();
 }
@@ -204,7 +210,7 @@ export function openAnchoredNavPreviewPanel(
   hideShare = false,
   options?: { skipCameraNudge?: boolean },
 ): void {
-  closeAnchoredNavPreviewPanel(markers, false, false);
+  closeAnchoredNavPreviewPanel(markers, false, false, { notifyGuide: false });
   setActiveNavHotspot(markers, hotspot.id);
 
   const id = panelMarkerId(hotspot.id);
@@ -329,6 +335,11 @@ export function openAnchoredNavPreviewPanel(
   }
 
   notifyAnchoredPanelOpened();
+  notifyNavPreviewOpened({
+    hotspotId: hotspot.id,
+    targetSceneId: preview.targetSceneId,
+    title: preview.title,
+  });
 }
 
 export function toggleAnchoredNavPreviewPanel(

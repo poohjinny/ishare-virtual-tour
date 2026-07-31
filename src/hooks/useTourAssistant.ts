@@ -12,6 +12,7 @@ import { askTourGuide, fetchAskGuideLiveStatus } from '../services/askGuide';
 import {
   getLocationChangeNote,
   getNamingOpenNote,
+  getNavPreviewOpenNote,
   getSceneTitle,
 } from '../services/mockAssistant';
 import {
@@ -40,13 +41,18 @@ function isAbortError(error: unknown): boolean {
   );
 }
 
-export type GuideNavNoteKind = 'scene' | 'naming';
+export type GuideNavNoteKind = 'scene' | 'naming' | 'preview';
 
-export type GuideNavNote = { kind: GuideNavNoteKind; namingName?: string };
+export type GuideNavNote = {
+  kind: GuideNavNoteKind;
+  namingName?: string;
+  previewTitle?: string;
+};
 
 type LastAutoNavNote =
   | { kind: 'scene'; sceneId: string }
-  | { kind: 'naming'; hotspotId: string };
+  | { kind: 'naming'; hotspotId: string }
+  | { kind: 'preview'; hotspotId: string };
 
 function isSameAutoNavNote(
   last: LastAutoNavNote | null,
@@ -56,30 +62,41 @@ function isSameAutoNavNote(
   if (next.kind === 'scene') {
     return last.kind === 'scene' && last.sceneId === next.sceneId;
   }
-  return last.kind === 'naming' && last.hotspotId === next.hotspotId;
+  if (next.kind === 'naming') {
+    return last.kind === 'naming' && last.hotspotId === next.hotspotId;
+  }
+  return last.kind === 'preview' && last.hotspotId === next.hotspotId;
 }
 
-/** Place/NO context bubble — replaces the previous note of the same kind only. */
+/** Place/NO/preview context bubble — replaces the previous note of the same kind only. */
 function navContextMessage(
   tour: Tour,
   sceneId: string,
   note: GuideNavNote | null | undefined,
 ): ChatMessage {
-  const kind = note?.kind === 'naming' ? 'naming' : 'scene';
+  const kind =
+    note?.kind === 'naming' ? 'naming'
+    : note?.kind === 'preview' ? 'preview'
+    : 'scene';
   const followUps = buildNavContextFollowUps({
     tour,
     sceneId,
     kind,
     namingName: note?.namingName,
+    previewTitle: note?.previewTitle,
   });
   const content =
-    kind === 'naming' ?
-      getNamingOpenNote(tour, sceneId, note?.namingName)
+    kind === 'naming' ? getNamingOpenNote(tour, sceneId, note?.namingName)
+    : kind === 'preview' ?
+      getNavPreviewOpenNote(tour, sceneId, note?.previewTitle)
     : getLocationChangeNote(tour, sceneId);
   return {
     id: nextId(),
     role: 'assistant',
-    source: kind === 'naming' ? 'nav-naming' : 'nav-scene',
+    source:
+      kind === 'naming' ? 'nav-naming'
+      : kind === 'preview' ? 'nav-preview'
+      : 'nav-scene',
     content,
     ...(followUps.length ? { followUps } : {}),
   };
@@ -97,6 +114,10 @@ export type TourAssistantLiveContext = {
   /** Open naming pin, if any — used to sync Ask Guide when the panel reopens. */
   namingHotspotId?: string | null;
   namingName?: string | null;
+  /** Open nav preview destination — sync Ask Guide when the panel reopens. */
+  navPreviewHotspotId?: string | null;
+  navPreviewTargetSceneId?: string | null;
+  navPreviewTitle?: string | null;
 };
 
 export function useTourAssistant(
@@ -143,6 +164,11 @@ export function useTourAssistant(
   const tourTitle = tour.title?.trim() || tour.id;
   const liveNamingHotspotId = liveContext?.namingHotspotId?.trim() || '';
   const liveNamingName = liveContext?.namingName?.trim() || undefined;
+  const liveNavPreviewHotspotId =
+    liveContext?.navPreviewHotspotId?.trim() || '';
+  const liveNavPreviewTargetSceneId =
+    liveContext?.navPreviewTargetSceneId?.trim() || '';
+  const liveNavPreviewTitle = liveContext?.navPreviewTitle?.trim() || undefined;
 
   // Tour switch — load that tour’s tab session (same-tab refresh uses lazy init).
   useLayoutEffect(() => {
@@ -217,6 +243,26 @@ export function useTourAssistant(
       return;
     }
 
+    if (liveNavPreviewHotspotId && liveNavPreviewTargetSceneId) {
+      const key: LastAutoNavNote = {
+        kind: 'preview',
+        hotspotId: liveNavPreviewHotspotId,
+      };
+      if (!force && isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
+      lastAutoNavNoteRef.current = key;
+      prevSceneRef.current = currentSceneId;
+      setMessages((prev) =>
+        upsertNavContextMessage(
+          prev,
+          navContextMessage(tour, liveNavPreviewTargetSceneId, {
+            kind: 'preview',
+            previewTitle: liveNavPreviewTitle,
+          }),
+        ),
+      );
+      return;
+    }
+
     if (!force && suppressNextSceneNoteRef.current) {
       suppressNextSceneNoteRef.current = false;
       pendingNavNoteRef.current = null;
@@ -238,7 +284,16 @@ export function useTourAssistant(
         navContextMessage(tour, currentSceneId, pending ?? { kind: 'scene' }),
       );
     });
-  }, [currentSceneId, isOpen, liveNamingHotspotId, liveNamingName, tour]);
+  }, [
+    currentSceneId,
+    isOpen,
+    liveNamingHotspotId,
+    liveNamingName,
+    liveNavPreviewHotspotId,
+    liveNavPreviewTargetSceneId,
+    liveNavPreviewTitle,
+    tour,
+  ]);
 
   /** Next scene change uses this note kind (default: place visit). */
   const prepareNavNote = useCallback((note: GuideNavNote) => {
@@ -264,6 +319,33 @@ export function useTourAssistant(
         upsertNavContextMessage(
           prev,
           navContextMessage(tour, sceneId, { kind: 'naming', namingName }),
+        ),
+      );
+    },
+    [tour],
+  );
+
+  /**
+   * Nav destination preview opened while Ask Guide is open — context for that place.
+   */
+  const noteNavPreviewOpened = useCallback(
+    (targetSceneId: string, previewTitle?: string, hotspotId?: string) => {
+      if (!isOpenRef.current) return;
+
+      const previewKey = hotspotId?.trim();
+      if (previewKey) {
+        const key: LastAutoNavNote = { kind: 'preview', hotspotId: previewKey };
+        if (isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
+        lastAutoNavNoteRef.current = key;
+      }
+
+      setMessages((prev) =>
+        upsertNavContextMessage(
+          prev,
+          navContextMessage(tour, targetSceneId, {
+            kind: 'preview',
+            previewTitle,
+          }),
         ),
       );
     },
@@ -415,6 +497,7 @@ export function useTourAssistant(
   }, [currentSceneId, isSending, runSend]);
 
   const toggle = useCallback(() => setIsOpen((v) => !v), []);
+  const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => {
     stopGenerating();
     setIsOpen(false);
@@ -469,11 +552,23 @@ export function useTourAssistant(
     () =>
       buildNavContextFollowUps({
         tour,
-        sceneId: currentSceneId,
-        kind: liveNamingHotspotId ? 'naming' : 'scene',
+        sceneId: liveNavPreviewTargetSceneId || currentSceneId,
+        kind:
+          liveNamingHotspotId ? 'naming'
+          : liveNavPreviewHotspotId ? 'preview'
+          : 'scene',
         namingName: liveNamingName,
+        previewTitle: liveNavPreviewTitle,
       }),
-    [currentSceneId, liveNamingHotspotId, liveNamingName, tour],
+    [
+      currentSceneId,
+      liveNamingHotspotId,
+      liveNamingName,
+      liveNavPreviewHotspotId,
+      liveNavPreviewTargetSceneId,
+      liveNavPreviewTitle,
+      tour,
+    ],
   );
 
   return {
@@ -485,6 +580,7 @@ export function useTourAssistant(
     canRetry,
     starterQuestions,
     toggle,
+    open,
     close,
     resetChat,
     clearSendError,
@@ -495,6 +591,7 @@ export function useTourAssistant(
     openAndAskAboutNaming,
     prepareNavNote,
     noteNamingOpened,
+    noteNavPreviewOpened,
     suppressNextLocationNote,
     locationTitle,
     tourTitle,

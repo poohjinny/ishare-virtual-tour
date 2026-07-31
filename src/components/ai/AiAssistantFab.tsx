@@ -1,6 +1,4 @@
-import {
-  VIRTUAL_TOUR_GUIDE_FAB_LABEL,
-} from '../../constants/branding';
+import { VIRTUAL_TOUR_GUIDE_FAB_LABEL } from '../../constants/branding';
 import { cn } from '../../lib/cn';
 import { GuideAvatar, type GuideAvatarPresence } from './GuideAvatar';
 import {
@@ -53,7 +51,7 @@ export function AiAssistantFab({
         />
       </span>
       <span className={aiFabLabelClassName}>
-        Ask Tour <span className={aiFabLabelAccentClassName}>Guide</span>
+        Ask <span className={aiFabLabelAccentClassName}>Tour Guide</span>
       </span>
     </button>
   );

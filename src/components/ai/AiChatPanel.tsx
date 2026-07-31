@@ -12,7 +12,11 @@ import {
   VIRTUAL_TOUR_GUIDE_NAME,
   VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE,
 } from '../../constants/branding';
-import type { ChatMessage, TourClient } from '../../types/tour';
+import type {
+  ChatGuideCtaKind,
+  ChatMessage,
+  TourClient,
+} from '../../types/tour';
 import { cn } from '../../lib/cn';
 import { useSpeechToText } from '../../hooks/useSpeechToText';
 import { useTourChromeLayout } from '../../hooks/useTourChromeLayout';
@@ -152,6 +156,8 @@ interface AiChatPanelProps {
   onSend: (text: string) => void;
   onNavigateScene?: (sceneId: string) => void;
   onSelectNaming?: (sceneId: string, hotspotId: string) => void;
+  /** In-app chrome CTAs from a guide reply (e.g. Open Help). */
+  onChromeAction?: (kind: ChatGuideCtaKind) => void;
   /** Catalog client — shown when a reply includes contact / website CTAs. */
   client?: TourClient;
   clientLogo?: string;
@@ -422,6 +428,7 @@ export function AiChatPanel({
   onSend,
   onNavigateScene,
   onSelectNaming,
+  onChromeAction,
   client,
   clientLogo,
   logoAlt,
@@ -891,6 +898,7 @@ export function AiChatPanel({
                           client={client}
                           clientLogo={clientLogo}
                           logoAlt={logoAlt}
+                          onChromeAction={onChromeAction}
                         />
                       : null}
                       {shareText ?

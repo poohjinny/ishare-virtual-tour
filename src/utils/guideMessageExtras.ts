@@ -362,6 +362,24 @@ export function isContactInfoQuestion(question: string): boolean {
   );
 }
 
+/** App chrome / how-to-use — attach Open Help rather than a long manual reply. */
+export function isAppHowToQuestion(question: string): boolean {
+  const q = question.toLowerCase();
+  return (
+    /\b(how (do|can|to) (i |you )?(use|open|find|work|navigate)|help (panel|menu|section|button)|keyboard shortcut|viewer controls?|what (is|does) (the )?(fab|explore|share|help)|using (this )?(app|tour|guide)|where is help)\b/.test(
+      q,
+    ) || /도움말|단축키|사용법|어떻게\s*(쓰|열|찾|하)|헬프/.test(question)
+  );
+}
+
+function openHelpCta(): ChatGuideCta {
+  return { id: 'open-help', label: 'Open Help', kind: 'open-help' };
+}
+
+function replyPointsToHelp(reply: string): boolean {
+  return /\bhelp (section|panel|menu)\b/i.test(reply);
+}
+
 function clientEmailContactCta(tour: Tour): ChatGuideCta | null {
   const email = resolveTourClient(tour)?.email?.trim();
   if (!email) return null;
@@ -570,12 +588,13 @@ export function buildGuideFollowUps(options: {
   return normalizeFollowUps(candidates, exclude);
 }
 
-/** Local follow-ups after a place move or naming open (no model call). */
+/** Local follow-ups after a place move, naming open, or nav preview. */
 export function buildNavContextFollowUps(options: {
   tour: Tour;
   sceneId: string;
-  kind: 'scene' | 'naming';
+  kind: 'scene' | 'naming' | 'preview';
   namingName?: string;
+  previewTitle?: string;
 }): string[] {
   const ctx = assembleTourContext(options.tour, options.sceneId);
   const namings = ctx?.namings ?? [];
@@ -589,6 +608,7 @@ export function buildNavContextFollowUps(options: {
   };
 
   const sceneTitle = ctx?.sceneTitle?.trim();
+  const previewTitle = options.previewTitle?.trim() || sceneTitle;
 
   if (options.kind === 'naming') {
     if (namingName) {
@@ -601,6 +621,20 @@ export function buildNavContextFollowUps(options: {
     push(
       sceneTitle ? `Tell me about ${sceneTitle}` : 'Tell me about this place',
     );
+  } else if (options.kind === 'preview') {
+    push(
+      previewTitle ?
+        `Tell me about ${previewTitle}`
+      : 'Tell me about that place',
+    );
+    if (namings.length > 0) {
+      push(
+        previewTitle ?
+          `What naming opportunities are available in ${previewTitle}?`
+        : 'What naming opportunities are available there?',
+      );
+    }
+    push('Where else can I go?');
   } else {
     push(
       sceneTitle ? `Tell me about ${sceneTitle}` : 'Tell me about this place',
@@ -779,6 +813,10 @@ export function buildGuideCtas(
     isExplorePlacesQuestion(question)
   ) {
     return [];
+  }
+
+  if (isAppHowToQuestion(question) || replyPointsToHelp(reply)) {
+    return [openHelpCta()];
   }
 
   if (

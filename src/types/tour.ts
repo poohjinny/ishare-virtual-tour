@@ -345,6 +345,11 @@ export interface Tour {
   title: string;
   /** Optional override — defaults to `{client.name} Virtual Tour` */
   productFullName?: string;
+  /**
+   * When true, show Tour Guide (Ask Guide) on this tour.
+   * Omitted / false keeps it hidden unless product default or `?askGuide=1`.
+   */
+  askGuideEnabled?: boolean;
   /** Optional per-tour branding override — defaults to catalog client `branding`. */
   branding?: TourBranding;
   /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
@@ -392,12 +397,24 @@ export interface ChatGuideLink {
   ctas?: ChatGuideCta[];
 }
 
-/** External action under an Ask Guide reply (Website / Donate / Contact). */
+/** External or in-app action under an Ask Guide reply. */
+export type ChatGuideCtaKind =
+  | 'website'
+  | 'donate'
+  | 'contact'
+  /** Opens the Help dock panel (closes Ask Guide — mutex). */
+  | 'open-help'
+  /** Opens the Explore dock panel. */
+  | 'open-explore'
+  /** Opens Ask Tour Guide (from Help / other chrome). */
+  | 'open-ask-guide';
+
 export interface ChatGuideCta {
   id: string;
   label: string;
-  url: string;
-  kind: 'website' | 'donate' | 'contact';
+  /** External URL — omit for in-app chrome actions. */
+  url?: string;
+  kind: ChatGuideCtaKind;
 }
 
 /** @deprecated Prefer {@link ChatGuideLink}. */
@@ -408,7 +425,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   /** Auto place/NO context — one of each; replaced on the next Visit / open of that kind. */
-  source?: 'nav-scene' | 'nav-naming';
+  source?: 'nav-scene' | 'nav-naming' | 'nav-preview';
   /** Optional place / naming cards under an assistant reply. */
   guideLinks?: ChatGuideLink[];
   /** Optional Website / Donate actions under the reply. */

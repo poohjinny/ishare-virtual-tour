@@ -121,6 +121,16 @@ function applyProductFullName(tour, productFullName) {
   }
 }
 
+/** true → set; false → omit; undefined → leave unchanged. */
+export function applyAskGuideEnabled(tour, askGuideEnabled) {
+  if (askGuideEnabled === undefined) return;
+  if (askGuideEnabled === true) {
+    tour.askGuideEnabled = true;
+  } else {
+    delete tour.askGuideEnabled;
+  }
+}
+
 export function applyDefaultTransition({
   tour,
   transitionEffect,
@@ -278,6 +288,7 @@ export async function updateTour({
   clearFontFamily,
   clearFontSourceUrl,
   productFullName,
+  askGuideEnabled,
   transitionEffect,
   transitionSpeed,
   clearDefaultTransition,
@@ -388,6 +399,7 @@ export async function updateTour({
   }
 
   applyProductFullName(tour, productFullName);
+  applyAskGuideEnabled(tour, askGuideEnabled);
   applyDefaultTransition({
     tour,
     transitionEffect,

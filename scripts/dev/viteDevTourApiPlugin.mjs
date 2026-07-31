@@ -657,6 +657,7 @@ function validateCreateTourPayload(body) {
     defaultView,
     visibility,
     featured,
+    askGuideEnabled,
     brandingMode,
     transitionEffect,
     transitionSpeed,
@@ -768,6 +769,7 @@ function validateCreateTourPayload(body) {
     defaultView,
     visibility: visibility?.trim() || 'unlisted',
     featured: featured === true,
+    askGuideEnabled: askGuideEnabled === true,
     brandingMode: brandingMode === 'custom' ? 'custom' : 'client',
     transitionEffect:
       typeof transitionEffect === 'string' ? transitionEffect : undefined,
@@ -952,6 +954,7 @@ function validateUpdateTourPayload(body) {
     faviconFileBase64,
     visibility,
     featured,
+    askGuideEnabled,
     brandingMode,
     clientDisplayName,
     clientEmail,
@@ -1048,6 +1051,8 @@ function validateUpdateTourPayload(body) {
     ),
     visibility: normalizedVisibility,
     featured: typeof featured === 'boolean' ? featured : undefined,
+    askGuideEnabled:
+      typeof askGuideEnabled === 'boolean' ? askGuideEnabled : undefined,
     brandingMode: brandingMode === 'custom' ? 'custom' : 'client',
     clientDisplayName:
       typeof clientDisplayName === 'string' ? clientDisplayName : undefined,
