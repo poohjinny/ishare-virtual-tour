@@ -742,7 +742,7 @@ function TourExperience() {
     assistantLiveContext,
   );
   const showAskGuide =
-    tour.askGuideEnabled === true || isAskGuideEnabled(searchParams.askGuide);
+    tour?.askGuideEnabled === true || isAskGuideEnabled(searchParams.askGuide);
   const panelStack = useTourPanelStack();
   const navDockActionsRef = useRef<TourNavDockActions | null>(null);
 
