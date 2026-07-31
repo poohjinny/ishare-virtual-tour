@@ -63,8 +63,14 @@ export interface TourViewerHandle {
   ) => Promise<void>;
   /** Cancel an in-flight camera animate (Play Tour dwell drift, naming frame). */
   stopViewAnimation: () => void | Promise<void>;
-  /** Dev — apply fresh tour JSON without remounting the viewer. */
-  applyTourUpdate: (tour: Tour) => Promise<void>;
+  /**
+   * Dev — apply fresh tour JSON without remounting the viewer.
+   * When the open scene was removed, `fallbackSceneId` is preferred over firstScene.
+   */
+  applyTourUpdate: (
+    tour: Tour,
+    options?: { fallbackSceneId?: string },
+  ) => Promise<void>;
   /** Dev — capture current WebGL frame for 3D scene thumbnail bake (panorama: null). */
   captureSceneThumbnail: () => Promise<Blob | null>;
   /** Dev — read the live camera/view (avoids stale React state when saving defaultView). */

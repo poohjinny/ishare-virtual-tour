@@ -12,6 +12,8 @@ import {
   createScene,
   deleteHotspot,
   deleteScene,
+  duplicateNamingOpportunity,
+  duplicateScene,
   readTourJson,
   replaceScenePanorama,
   replaceTourModel,
@@ -1405,6 +1407,43 @@ export function viteDevTourApiPlugin() {
             return;
           }
 
+          if (req.url === '/__dev/api/scene/duplicate') {
+            const tourId = body?.tourId;
+            const sceneId = body?.sceneId;
+            const namingMode =
+              typeof body?.namingMode === 'string' ?
+                body.namingMode
+              : 'duplicate';
+            const includeChildren = Boolean(body?.includeChildren);
+            const linkUnderSameParent =
+              body?.linkUnderSameParent === undefined ?
+                true
+              : Boolean(body.linkUnderSameParent);
+            if (!tourId || !sceneId) {
+              throw new Error('tourId and sceneId are required');
+            }
+            const result = await duplicateScene({
+              root,
+              toursDir,
+              assetsRoot,
+              tourId,
+              sceneId,
+              namingMode,
+              includeChildren,
+              linkUnderSameParent,
+            });
+            sendJson(res, 200, {
+              ok: true,
+              tourId,
+              scene: result.scene,
+              sourceSceneId: result.sourceSceneId,
+              clonedSceneIds: result.clonedSceneIds,
+              linkedParentId: result.linkedParentId,
+              tourPath: result.tourPath,
+            });
+            return;
+          }
+
           if (req.url === '/__dev/api/scene/replace-model') {
             const { tourId, modelFileBuffer, modelFileName } =
               validateReplaceModelPayload(body);
@@ -1733,6 +1772,37 @@ export function viteDevTourApiPlugin() {
               ok: true,
               tourId,
               record: result.record,
+              tourPath: result.tourPath,
+            });
+            return;
+          }
+
+          if (req.url === '/__dev/api/naming-opportunity/duplicate') {
+            const tourId = body?.tourId;
+            const namingId = body?.namingId;
+            const includePlacements =
+              body?.includePlacements === undefined ?
+                true
+              : Boolean(body.includePlacements);
+            const resetAsOpen = Boolean(body?.resetAsOpen);
+            if (!tourId || !namingId) {
+              throw new Error('tourId and namingId are required');
+            }
+            const result = await duplicateNamingOpportunity({
+              root,
+              toursDir,
+              assetsRoot,
+              tourId,
+              namingId,
+              includePlacements,
+              resetAsOpen,
+            });
+            sendJson(res, 200, {
+              ok: true,
+              tourId,
+              record: result.record,
+              sourceNamingId: result.sourceNamingId,
+              hotspots: result.hotspots,
               tourPath: result.tourPath,
             });
             return;

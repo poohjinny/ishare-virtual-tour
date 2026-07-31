@@ -27,6 +27,7 @@ interface DevToolsProps {
     hotspotId: string | null,
     options?: { animate?: boolean },
   ) => void;
+  activeNamingHotspotId?: string | null;
   openNamingOpportunity?: (sceneId: string, hotspotId: string) => void;
   panelStack?: TourPanelStack;
 }
@@ -42,6 +43,7 @@ export function DevTools({
   captureSceneThumbnail,
   getCurrentView,
   focusHotspot,
+  activeNamingHotspotId = null,
   openNamingOpportunity,
   panelStack,
 }: DevToolsProps) {
@@ -95,6 +97,7 @@ export function DevTools({
           captureSceneThumbnail={captureSceneThumbnail}
           getCurrentView={getCurrentView}
           focusHotspot={focusHotspot}
+          activeNamingHotspotId={activeNamingHotspotId}
           openNamingOpportunity={openNamingOpportunity}
           onClose={() => setPanelOpen(false)}
         />

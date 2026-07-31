@@ -657,21 +657,31 @@ function TourExperience() {
       setDevTourCache(fresh);
       setDevThumbnailVersion(nextMediaVersion);
 
-      const targetSceneId =
+      const requestedSceneId =
         options?.keepCurrentScene ? currentSceneId : (
           (options?.navigateToScene ??
           (fresh.scenes[currentSceneId] ? currentSceneId : fresh.firstScene))
         );
+      const targetSceneId =
+        fresh.scenes[requestedSceneId] ? requestedSceneId : fresh.firstScene;
+      const currentMissing = !fresh.scenes[currentSceneId];
 
       const shouldNavigate =
         !options?.keepCurrentScene && targetSceneId !== currentSceneId;
 
-      await viewerRef.current?.applyTourUpdate(bustedFresh);
+      await viewerRef.current?.applyTourUpdate(bustedFresh, {
+        fallbackSceneId: targetSceneId,
+      });
 
       if (shouldNavigate) {
         const targetView = fresh.scenes[targetSceneId]?.defaultView;
         syncSceneToUrl(targetSceneId, { clearNamingOpportunity: true });
-        await viewerRef.current?.navigateToScene(targetSceneId, targetView);
+        // Panorama applyTourUpdate already setNodes to fallback when the open
+        // scene was deleted — skip a second hop (avoids Overview flash).
+        // model3d applyTourUpdate no-ops when missing, so it still needs navigate.
+        if (!currentMissing || fresh.viewerType === 'model3d') {
+          await viewerRef.current?.navigateToScene(targetSceneId, targetView);
+        }
       }
     },
     [currentSceneId, devThumbnailVersion, route.tourId, syncSceneToUrl],
@@ -1304,6 +1314,7 @@ function TourExperience() {
             focusHotspot={(hotspotId, options) =>
               viewerRef.current?.focusHotspot(hotspotId, options)
             }
+            activeNamingHotspotId={activeNamingHotspotId}
             openNamingOpportunity={openNamingOpportunity}
             panelStack={panelStack}
           />

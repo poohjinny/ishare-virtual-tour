@@ -1,10 +1,10 @@
 /**
- * Auto place-overview info pin — one per panorama scene when there is a real
- * description and no naming pins (NO covers scenes that have naming).
+ * Place-overview info pin — one per panorama scene.
  * Display inherit lives in namingSceneInherit.
  *
- * Sync may create/update pins; it never auto-removes an existing overview.
- * Explicit delete sets `suppressPlaceOverview`.
+ * Create is explicit only (Add-scene checkbox or Manage “Overview” button).
+ * Sync updates an existing pin’s title/body/position; it never auto-creates
+ * unless `{ createIfMissing: true }`, and never auto-removes (delete + suppress).
  */
 
 import { isDefaultSceneDescription } from './devContentPlaceholders.mjs';
@@ -63,8 +63,8 @@ export function resolveFirstPublicNamingBody(tour, scene) {
 }
 
 /**
- * Auto overview only for places without naming pins (NO covers those scenes).
- * Still requires real scene description for sync create.
+ * Auto-create eligibility — real scene description and no naming pins.
+ * Explicit create (Manage button) bypasses this via ensurePlaceOverviewHotspot.
  */
 export function shouldHavePlaceOverview(tour, scene) {
   if (sceneHasNamingPin(tour, scene)) return false;
@@ -150,74 +150,73 @@ export function ensurePlaceOverviewHotspot(tour, scene, position) {
 }
 
 /**
- * Ensure / update the place-overview pin for a panorama scene.
- * Does not auto-remove existing pins — use hotspot delete + suppress for that.
+ * Update the place-overview pin for a panorama scene (title / body / position).
+ * Does not create unless `{ createIfMissing: true }` and the scene qualifies.
+ * Does not auto-remove — use hotspot delete + suppress for that.
+ * @param {{ createIfMissing?: boolean }} [options]
  * @returns {boolean} whether the tour/scene hotspot list changed
  */
-export function syncPlaceOverviewFromScene(tour, scene) {
+export function syncPlaceOverviewFromScene(tour, scene, options = {}) {
   if (!tour || !scene) return false;
   if (tour.viewerType === 'model3d') return false;
 
-  const shouldHave = shouldHavePlaceOverview(tour, scene);
+  const createIfMissing = options.createIfMissing === true;
   const existing = findPlaceOverviewHotspot(tour, scene);
 
-  if (!shouldHave) {
-    // Keep existing overview when public naming is hidden or place copy is
-    // empty — only explicit delete should remove the pin.
+  if (scene.suppressPlaceOverview && !existing) {
     return false;
   }
 
-  if (scene.suppressPlaceOverview) {
-    return false;
-  }
-
-  if (!existing) {
-    if (!Array.isArray(scene.hotspots)) scene.hotspots = [];
-    const clash = scene.hotspots.some(
-      (entry) =>
-        entry.id === PLACE_OVERVIEW_HOTSPOT_ID &&
-        !isPlaceOverviewHotspot(entry),
-    );
-    if (clash) return false;
-    scene.hotspots.push(buildPlaceOverviewHotspot(tour, scene));
-    return true;
-  }
-
-  let changed = false;
-  existing.role = 'placeOverview';
-  if (!existing.popup) {
-    existing.popup = { display: 'anchored', title: '', body: '' };
-    changed = true;
-  }
-  const nextTitle = scene.title?.trim() || existing.popup.title || 'Place';
-  const nextBody = resolvePlaceOverviewBody(
-    tour,
-    scene,
-    existing.popup.body || nextTitle,
-  );
-  if (existing.popup.title !== nextTitle) {
-    existing.popup.title = nextTitle;
-    changed = true;
-  }
-  if (existing.popup.body !== nextBody) {
-    existing.popup.body = nextBody;
-    changed = true;
-  }
-  if (existing.popup.display !== 'anchored' && !existing.popup.display) {
-    existing.popup.display = 'anchored';
-    changed = true;
-  }
-
-  if (!existing.placeOverviewManual) {
-    const nextPos = positionFromDefaultView(scene.defaultView);
-    const cur = existing.position ?? {};
-    if (cur.yaw !== nextPos.yaw || cur.pitch !== nextPos.pitch) {
-      existing.position = nextPos;
+  if (existing) {
+    let changed = false;
+    existing.role = 'placeOverview';
+    if (!existing.popup) {
+      existing.popup = { display: 'anchored', title: '', body: '' };
       changed = true;
     }
+    const nextTitle = scene.title?.trim() || existing.popup.title || 'Place';
+    const nextBody = resolvePlaceOverviewBody(
+      tour,
+      scene,
+      existing.popup.body || nextTitle,
+    );
+    if (existing.popup.title !== nextTitle) {
+      existing.popup.title = nextTitle;
+      changed = true;
+    }
+    if (existing.popup.body !== nextBody) {
+      existing.popup.body = nextBody;
+      changed = true;
+    }
+    if (existing.popup.display !== 'anchored' && !existing.popup.display) {
+      existing.popup.display = 'anchored';
+      changed = true;
+    }
+
+    if (!existing.placeOverviewManual) {
+      const nextPos = positionFromDefaultView(scene.defaultView);
+      const cur = existing.position ?? {};
+      if (cur.yaw !== nextPos.yaw || cur.pitch !== nextPos.pitch) {
+        existing.position = nextPos;
+        changed = true;
+      }
+    }
+
+    return changed;
   }
 
-  return changed;
+  if (!createIfMissing) return false;
+  if (scene.suppressPlaceOverview) return false;
+  if (!shouldHavePlaceOverview(tour, scene)) return false;
+
+  if (!Array.isArray(scene.hotspots)) scene.hotspots = [];
+  const clash = scene.hotspots.some(
+    (entry) =>
+      entry.id === PLACE_OVERVIEW_HOTSPOT_ID && !isPlaceOverviewHotspot(entry),
+  );
+  if (clash) return false;
+  scene.hotspots.push(buildPlaceOverviewHotspot(tour, scene));
+  return true;
 }
 
 /** After Apply defaultView — move non-manual place-overview to view center. */
@@ -246,10 +245,11 @@ export function suppressPlaceOverviewOnDelete(scene, hotspot) {
   return true;
 }
 
-/** Clear suppress when place copy is gone (fresh slate for later content). */
-export function clearPlaceOverviewSuppressIfNoDescription(tour, scene) {
-  if (!scene?.suppressPlaceOverview) return false;
-  if (shouldHavePlaceOverview(tour, scene)) return false;
-  delete scene.suppressPlaceOverview;
-  return true;
+/**
+ * Formerly cleared suppress when description was empty (which let a later
+ * edit auto-create). Suppress now stays sticky until explicit create.
+ * @deprecated No-op — kept so existing callers compile.
+ */
+export function clearPlaceOverviewSuppressIfNoDescription(_tour, _scene) {
+  return false;
 }

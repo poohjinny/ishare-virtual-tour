@@ -770,7 +770,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           /* idle */
         }
       },
-      applyTourUpdate: async (nextTour) => {
+      applyTourUpdate: async (nextTour, options) => {
         const virtualTour = virtualTourRef.current;
         const viewer = viewerRef.current;
         const markers = markersRef.current;
@@ -791,8 +791,12 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
         const nextScene = nextTour.scenes[currentId];
         if (!nextScene) {
-          virtualTour.setNodes(nodeConfigs, nextTour.firstScene);
-          onSceneChangeRef.current(nextTour.firstScene);
+          const fallbackId =
+            options?.fallbackSceneId && nextTour.scenes[options.fallbackSceneId] ?
+              options.fallbackSceneId
+            : nextTour.firstScene;
+          virtualTour.setNodes(nodeConfigs, fallbackId);
+          onSceneChangeRef.current(fallbackId);
           hotspotEnterRef.current?.schedule();
           return;
         }
@@ -971,8 +975,27 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           return;
         }
 
-        const marker = markers.getMarker(hotspotId);
-        const hotspot = marker?.data?.hotspot as Hotspot | undefined;
+        // Unlisted/internal naming pins are filtered out of markers — look up
+        // tour data so Edit/Move can still frame the pin without throwing.
+        let hotspot: Hotspot | undefined;
+        try {
+          const marker = markers.getMarker(hotspotId);
+          hotspot = marker?.data?.hotspot as Hotspot | undefined;
+        } catch {
+          hotspot = undefined;
+        }
+
+        if (!hotspot) {
+          const tour = tourRef.current;
+          const nodeId = virtualTourRef.current?.getCurrentNode()?.id;
+          const host =
+            (nodeId ? tour.scenes[nodeId] : undefined) ??
+            tour.scenes[tour.firstScene];
+          hotspot =
+            host?.hotspots?.find((entry) => entry.id === hotspotId) ??
+            tour.hotspots?.find((entry) => entry.id === hotspotId);
+        }
+
         if (!hotspot || isWorldPosition(hotspot.position)) return;
 
         const zoom = fromPsvZoom(viewer.getZoomLevel());

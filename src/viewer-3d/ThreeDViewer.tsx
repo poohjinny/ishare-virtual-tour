@@ -1309,7 +1309,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
         if (!camera || !controls) return null;
         return readCameraViewPosition(camera, controls);
       },
-      applyTourUpdate: async (newTour) => {
+      applyTourUpdate: async (newTour, _options) => {
         const sceneId = currentSceneIdRef.current;
         const prevTour = tourRef.current;
         const prevScene = prevTour.scenes[sceneId];
@@ -1321,6 +1321,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
 
         const nextScene = newTour.scenes[sceneId];
         if (!nextScene) {
+          // Open scene was removed — TourPage navigates via navigateToScene.
           return;
         }
 

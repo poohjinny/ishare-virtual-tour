@@ -41,7 +41,6 @@ import {
 } from './sceneVisibility.mjs';
 import { assertNamingVisibility } from './namingVisibility.mjs';
 import {
-  clearPlaceOverviewSuppressIfNoDescription,
   markPlaceOverviewManual,
   suppressPlaceOverviewOnDelete,
   syncPlaceOverviewFromScene,
@@ -1085,7 +1084,7 @@ export async function createScene({
 
   if (createPlaceOverview) {
     delete record.suppressPlaceOverview;
-    syncPlaceOverviewFromScene(tour, record);
+    syncPlaceOverviewFromScene(tour, record, { createIfMissing: true });
   } else {
     record.suppressPlaceOverview = true;
   }
@@ -1094,6 +1093,676 @@ export async function createScene({
   writeTourJson(tourPath, tour);
   persistTourContentPlaceholders(toursDir, tourId);
   return { tourPath, scene: record };
+}
+
+const SCENE_DUPLICATE_NAMING_MODES = new Set(['duplicate', 'keep', 'clear']);
+
+function collectTourHotspotIds(tour) {
+  const ids = new Set();
+  for (const hotspot of tour.hotspots ?? []) {
+    if (hotspot?.id) ids.add(hotspot.id);
+  }
+  for (const scene of Object.values(tour.scenes ?? {})) {
+    for (const hotspot of scene.hotspots ?? []) {
+      if (hotspot?.id) ids.add(hotspot.id);
+    }
+  }
+  return ids;
+}
+
+function copyWebAsset(assetsRoot, root, fromWeb, toWeb) {
+  const from = fromWeb?.trim();
+  const to = toWeb?.trim();
+  if (!from || !to || from === to) return false;
+  const fromPath = resolvePanoramaFilePath(assetsRoot, from);
+  if (!existsSync(fromPath)) return false;
+  const toPath = resolvePanoramaFilePath(assetsRoot, to);
+  mkdirSync(dirname(toPath), { recursive: true });
+  copyFileSync(fromPath, toPath);
+  syncAssetToPublic(root, toPath, to);
+  return true;
+}
+
+function insertSceneInOrderAfter(tour, sceneId, afterSceneId) {
+  const id = sceneId?.trim();
+  if (!id || !tour.scenes?.[id]) return ensureTourSceneOrder(tour);
+  ensureTourSceneOrder(tour);
+  tour.sceneOrder = tour.sceneOrder.filter((entry) => entry !== id);
+  const afterIndex = tour.sceneOrder.indexOf(afterSceneId);
+  if (afterIndex >= 0) {
+    tour.sceneOrder.splice(afterIndex + 1, 0, id);
+  } else {
+    tour.sceneOrder.push(id);
+  }
+  return tour.sceneOrder;
+}
+
+function cloneNamingCatalogEntry(tour, sourceNamingId, assetsRoot, root) {
+  const source = tour.namingOpportunities?.[sourceNamingId];
+  if (!source) return null;
+
+  const newId = allocateNamingId(tour);
+  const clone = structuredClone(source);
+  clone.id = newId;
+
+  const logo = clone.donor?.logo?.trim();
+  if (logo) {
+    const nextLogo = buildDefaultNamingDonorLogoWebPath(tour, newId);
+    if (copyWebAsset(assetsRoot, root, logo, nextLogo)) {
+      clone.donor = { ...clone.donor, logo: nextLogo };
+    }
+  }
+
+  tour.namingOpportunities[newId] = clone;
+  return newId;
+}
+
+function remapHotspotNaming(
+  hotspot,
+  namingMode,
+  namingIdMap,
+  tour,
+  assetsRoot,
+  root,
+) {
+  if (namingMode === 'clear') {
+    delete hotspot.namingId;
+    if (hotspot.popup?.namingOpportunity) {
+      delete hotspot.popup.namingOpportunity;
+    }
+    return;
+  }
+
+  if (namingMode === 'keep') return;
+
+  const oldId = hotspot.namingId?.trim();
+  if (!oldId) return;
+
+  let nextId = namingIdMap.get(oldId);
+  if (!nextId) {
+    nextId = cloneNamingCatalogEntry(tour, oldId, assetsRoot, root);
+    if (!nextId) {
+      delete hotspot.namingId;
+      return;
+    }
+    namingIdMap.set(oldId, nextId);
+  }
+  hotspot.namingId = nextId;
+}
+
+function cloneHotspotForSceneDuplicate({
+  hotspot,
+  existingIds,
+  namingMode,
+  namingIdMap,
+  tour,
+  assetsRoot,
+  root,
+  nextSceneId,
+}) {
+  const next = structuredClone(hotspot);
+  const baseId =
+    typeof next.id === 'string' && next.id.trim() ? next.id.trim() : 'hotspot';
+  next.id = resolveUniqueHotspotId(existingIds, baseId);
+  existingIds.add(next.id);
+
+  if (next.sceneId != null) {
+    next.sceneId = nextSceneId;
+  }
+
+  remapHotspotNaming(next, namingMode, namingIdMap, tour, assetsRoot, root);
+
+  const previewImage = next.preview?.image?.trim();
+  if (previewImage) {
+    const nextPreview = buildDefaultHotspotPreviewWebPath(tour, next.id);
+    if (copyWebAsset(assetsRoot, root, previewImage, nextPreview)) {
+      next.preview = { ...next.preview, image: nextPreview };
+    }
+  }
+
+  return next;
+}
+
+function listSceneNavTargetIds(tour, sceneId) {
+  const scene = tour.scenes?.[sceneId];
+  if (!scene) return [];
+  const targets = [];
+  const seen = new Set();
+  const pushNav = (hotspot) => {
+    if (hotspot?.type !== 'nav') return;
+    const target = hotspot.targetScene?.trim();
+    if (!target || !tour.scenes?.[target] || seen.has(target)) return;
+    seen.add(target);
+    targets.push(target);
+  };
+  for (const hotspot of scene.hotspots ?? []) pushNav(hotspot);
+  for (const hotspot of tour.hotspots ?? []) {
+    if (hotspot?.sceneId !== sceneId) continue;
+    pushNav(hotspot);
+  }
+  return targets;
+}
+
+/** BFS parent map from firstScene along nav hotspots (first visit wins). */
+function buildTourSceneParentMap(tour) {
+  const firstSceneId = tour.firstScene?.trim();
+  const parent = new Map();
+  if (!firstSceneId || !tour.scenes?.[firstSceneId]) return parent;
+
+  const queue = [firstSceneId];
+  const visited = new Set([firstSceneId]);
+  while (queue.length > 0) {
+    const sceneId = queue.shift();
+    for (const target of listSceneNavTargetIds(tour, sceneId)) {
+      if (visited.has(target)) continue;
+      visited.add(target);
+      parent.set(target, sceneId);
+      queue.push(target);
+    }
+  }
+  return parent;
+}
+
+/**
+ * Descendants of `rootId` in the tour nav BFS tree (excludes shared branches
+ * reached earlier via another parent — e.g. ED under Overview, not under JB).
+ */
+function listBfsDescendantSceneIds(tour, rootId) {
+  const parentMap = buildTourSceneParentMap(tour);
+  const childrenByParent = new Map();
+  for (const [childId, parentId] of parentMap) {
+    const list = childrenByParent.get(parentId) ?? [];
+    list.push(childId);
+    childrenByParent.set(parentId, list);
+  }
+
+  const ordered = [];
+  const queue = [...(childrenByParent.get(rootId) ?? [])];
+  const seen = new Set(queue);
+  while (queue.length > 0) {
+    const sceneId = queue.shift();
+    ordered.push(sceneId);
+    for (const childId of childrenByParent.get(sceneId) ?? []) {
+      if (seen.has(childId)) continue;
+      seen.add(childId);
+      queue.push(childId);
+    }
+  }
+  return ordered;
+}
+
+function remapHotspotSceneRefs(hotspot, sceneIdMap) {
+  const target = hotspot?.targetScene?.trim();
+  if (target && sceneIdMap.has(target)) {
+    hotspot.targetScene = sceneIdMap.get(target);
+  }
+  const visit = hotspot?.popup?.visitScene?.trim();
+  if (visit && sceneIdMap.has(visit)) {
+    hotspot.popup.visitScene = sceneIdMap.get(visit);
+  }
+}
+
+/** Nudge a copied parent→child nav so it doesn't sit exactly on the original. */
+function offsetDuplicateNavPosition(position) {
+  if (isWorldHotspotPosition(position)) {
+    return {
+      x: roundCoord(position.x + 0.2),
+      y: roundCoord(position.y),
+      z: roundCoord(position.z),
+    };
+  }
+  if (isViewHotspotPosition(position)) {
+    const yaw = Number(position.yaw) || 0;
+    return {
+      yaw: roundCoord((((yaw + 10) % 360) + 360) % 360),
+      pitch: roundCoord(position.pitch),
+    };
+  }
+  return position;
+}
+
+/**
+ * Copy parent→source nav pin(s) so the hub clone sits under the same parent.
+ * Returns the parent scene id when a link was added.
+ */
+function linkCloneUnderSameParent({
+  tour,
+  sourceId,
+  nextHubId,
+  existingIds,
+  assetsRoot,
+  root,
+}) {
+  const parentMap = buildTourSceneParentMap(tour);
+  const parentId = parentMap.get(sourceId);
+  if (!parentId || !tour.scenes?.[parentId]) return null;
+
+  const sourceNavs = [];
+  const seen = new Set();
+  const pushNav = (kind, hotspot) => {
+    if (hotspot?.type !== 'nav') return;
+    if (hotspot.targetScene?.trim() !== sourceId) return;
+    const id = hotspot.id?.trim();
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    sourceNavs.push({ kind, hotspot });
+  };
+
+  for (const hotspot of tour.scenes[parentId].hotspots ?? []) {
+    pushNav('scene', hotspot);
+  }
+  for (const hotspot of tour.hotspots ?? []) {
+    if (hotspot?.sceneId !== parentId) continue;
+    pushNav('tour', hotspot);
+  }
+  if (sourceNavs.length === 0) return null;
+
+  for (const entry of sourceNavs) {
+    const next = structuredClone(entry.hotspot);
+    const baseId =
+      typeof next.id === 'string' && next.id.trim() ? next.id.trim() : 'nav';
+    next.id = resolveUniqueHotspotId(existingIds, baseId);
+    existingIds.add(next.id);
+    next.targetScene = nextHubId;
+    delete next.label;
+    next.position = offsetDuplicateNavPosition(next.position);
+
+    const previewImage = next.preview?.image?.trim();
+    if (previewImage) {
+      const nextPreview = buildDefaultHotspotPreviewWebPath(tour, next.id);
+      if (copyWebAsset(assetsRoot, root, previewImage, nextPreview)) {
+        next.preview = { ...next.preview, image: nextPreview };
+      }
+    }
+
+    if (entry.kind === 'tour' || tour.viewerType === 'model3d') {
+      appendTourHotspot(tour, parentId, next);
+    } else {
+      appendSceneHotspot(tour, parentId, next);
+    }
+  }
+
+  return parentId;
+}
+
+/** Strip trailing ` (copy)` / ` (copy N)` suffixes from a display title. */
+export function stripDuplicateCopySuffix(title) {
+  let next = typeof title === 'string' ? title.trim() : '';
+  if (!next) return '';
+  // Repeat so "Name (copy) (copy)" → "Name".
+  while (/\s*\(copy(?:\s+\d+)?\)$/i.test(next)) {
+    next = next.replace(/\s*\(copy(?:\s+\d+)?\)$/i, '').trim();
+  }
+  return next;
+}
+
+/**
+ * Hub duplicate title: never stack `(copy)`.
+ * Uses `Base (copy)`, then `Base (copy 2)`, …
+ */
+export function nextDuplicateCopyTitle(baseTitle, existingTitles) {
+  const base = stripDuplicateCopySuffix(baseTitle) || 'Untitled';
+  const taken = new Set(
+    [...(existingTitles ?? [])]
+      .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+      .filter(Boolean),
+  );
+  let candidate = `${base} (copy)`;
+  let n = 2;
+  while (taken.has(candidate)) {
+    candidate = `${base} (copy ${n})`;
+    n += 1;
+  }
+  return candidate;
+}
+
+async function cloneSceneRecordForDuplicate({
+  tour,
+  sourceId,
+  root,
+  assetsRoot,
+  existingIds,
+  namingMode,
+  namingIdMap,
+  /** `'hub'` appends a unique `(copy)` suffix; `'child'` keeps a clean title. */
+  titleMode = 'hub',
+}) {
+  const source = tour.scenes?.[sourceId];
+  if (!source) throw new Error(`Scene not found: ${sourceId}`);
+
+  const nextId = allocateOpaqueId('s_', Object.keys(tour.scenes ?? {}));
+  assertEntityId(nextId, 'Scene id');
+
+  const nextScene = structuredClone(source);
+  nextScene.id = nextId;
+  const sourceTitle = source.title?.trim() || sourceId;
+  if (titleMode === 'child') {
+    nextScene.title = stripDuplicateCopySuffix(sourceTitle) || sourceTitle;
+  } else {
+    nextScene.title = nextDuplicateCopyTitle(
+      sourceTitle,
+      Object.values(tour.scenes ?? {}).map((scene) => scene?.title),
+    );
+  }
+
+  if (tour.viewerType === 'model3d') {
+    const thumbFrom = source.thumbnail?.trim() || source.panorama?.trim() || '';
+    const thumbTo = buildDefaultSceneThumbnailWebPath(tour, nextId);
+    if (thumbFrom && copyWebAsset(assetsRoot, root, thumbFrom, thumbTo)) {
+      nextScene.thumbnail = thumbTo;
+      nextScene.panorama = thumbTo;
+    } else {
+      nextScene.thumbnail = thumbTo;
+      nextScene.panorama = thumbTo;
+    }
+    delete nextScene.model;
+  } else {
+    const panoramaFrom = source.panorama?.trim();
+    if (!panoramaFrom) {
+      throw new Error(`Scene "${sourceId}" is missing panorama`);
+    }
+    const panoramaTo = buildDefaultPanoramaWebPath(tour, nextId);
+    if (!copyWebAsset(assetsRoot, root, panoramaFrom, panoramaTo)) {
+      throw new Error(`Could not copy panorama for scene "${sourceId}"`);
+    }
+    nextScene.panorama = panoramaTo;
+
+    const thumbFrom = source.thumbnail?.trim();
+    const thumbTo = buildDefaultSceneThumbnailWebPath(tour, nextId);
+    if (thumbFrom && copyWebAsset(assetsRoot, root, thumbFrom, thumbTo)) {
+      nextScene.thumbnail = thumbTo;
+    } else {
+      delete nextScene.thumbnail;
+    }
+  }
+
+  const sourceHotspots = Array.isArray(source.hotspots) ? source.hotspots : [];
+  nextScene.hotspots = sourceHotspots.map((hotspot) =>
+    cloneHotspotForSceneDuplicate({
+      hotspot,
+      existingIds,
+      namingMode,
+      namingIdMap,
+      tour,
+      assetsRoot,
+      root,
+      nextSceneId: nextId,
+    }),
+  );
+
+  if (!tour.scenes) tour.scenes = {};
+  tour.scenes[nextId] = nextScene;
+
+  if (
+    tour.viewerType !== 'model3d' &&
+    !nextScene.thumbnail?.trim() &&
+    nextScene.panorama?.trim()
+  ) {
+    await bakeSceneThumbnail({
+      root,
+      assetsRoot,
+      tour,
+      sceneId: nextId,
+      view: nextScene.defaultView,
+    });
+  }
+
+  if (Array.isArray(tour.hotspots) && tour.hotspots.length > 0) {
+    const clonedTourHotspots = [];
+    for (const hotspot of tour.hotspots) {
+      if (hotspot?.sceneId !== sourceId) continue;
+      clonedTourHotspots.push(
+        cloneHotspotForSceneDuplicate({
+          hotspot,
+          existingIds,
+          namingMode,
+          namingIdMap,
+          tour,
+          assetsRoot,
+          root,
+          nextSceneId: nextId,
+        }),
+      );
+    }
+    if (clonedTourHotspots.length > 0) {
+      tour.hotspots = [...tour.hotspots, ...clonedTourHotspots];
+    }
+  }
+
+  return nextScene;
+}
+
+/**
+ * Clone a scene (assets + hotspots). Inserts the copy after the source in sceneOrder.
+ * @param {'duplicate'|'keep'|'clear'} namingMode
+ *   duplicate — clone naming catalog entries (recommended for similar floors)
+ *   keep — share the same namingId references
+ *   clear — strip naming pins
+ * @param {boolean} [includeChildren=false]
+ *   When true, also clone BFS descendants under this scene and remap navs
+ *   among the copies (Overview / shared hubs stay shared).
+ * @param {boolean} [linkUnderSameParent=true]
+ *   When true, copy parent→source nav pin(s) so the hub clone sits under the
+ *   same parent in the tour hierarchy.
+ */
+export async function duplicateScene({
+  root,
+  toursDir,
+  assetsRoot,
+  tourId,
+  sceneId,
+  namingMode = 'duplicate',
+  includeChildren = false,
+  linkUnderSameParent = true,
+}) {
+  const mode = String(namingMode ?? 'duplicate')
+    .trim()
+    .toLowerCase();
+  if (!SCENE_DUPLICATE_NAMING_MODES.has(mode)) {
+    throw new Error('namingMode must be duplicate, keep, or clear');
+  }
+
+  const sourceId = sceneId?.trim();
+  if (!sourceId) throw new Error('sceneId is required');
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const source = tour.scenes?.[sourceId];
+  if (!source) throw new Error(`Scene not found: ${sourceId}`);
+
+  const cloneIds = [sourceId];
+  if (includeChildren) {
+    cloneIds.push(...listBfsDescendantSceneIds(tour, sourceId));
+  }
+
+  const existingIds = collectTourHotspotIds(tour);
+  const namingIdMap = new Map();
+  const sceneIdMap = new Map();
+  const clonedScenes = [];
+
+  for (const oldId of cloneIds) {
+    const nextScene = await cloneSceneRecordForDuplicate({
+      tour,
+      sourceId: oldId,
+      root,
+      assetsRoot,
+      existingIds,
+      namingMode: mode,
+      namingIdMap,
+      // Only the duplicated hub gets "(copy)"; child places keep clean titles.
+      titleMode: oldId === sourceId ? 'hub' : 'child',
+    });
+    sceneIdMap.set(oldId, nextScene.id);
+    clonedScenes.push(nextScene);
+  }
+
+  for (const nextScene of clonedScenes) {
+    for (const hotspot of nextScene.hotspots ?? []) {
+      remapHotspotSceneRefs(hotspot, sceneIdMap);
+    }
+  }
+  const clonedHostIds = new Set(sceneIdMap.values());
+  for (const hotspot of tour.hotspots ?? []) {
+    const hostId = hotspot?.sceneId?.trim();
+    if (!hostId || !clonedHostIds.has(hostId)) continue;
+    remapHotspotSceneRefs(hotspot, sceneIdMap);
+  }
+
+  const nextHubId = sceneIdMap.get(sourceId);
+  let linkedParentId = null;
+  if (linkUnderSameParent && nextHubId) {
+    linkedParentId = linkCloneUnderSameParent({
+      tour,
+      sourceId,
+      nextHubId,
+      existingIds,
+      assetsRoot,
+      root,
+    });
+  }
+
+  let insertAfter = sourceId;
+  for (const nextScene of clonedScenes) {
+    insertSceneInOrderAfter(tour, nextScene.id, insertAfter);
+    insertAfter = nextScene.id;
+  }
+
+  writeTourJson(tourPath, tour);
+  persistTourContentPlaceholders(toursDir, tourId);
+  return {
+    tourPath,
+    scene: clonedScenes[0],
+    sourceSceneId: sourceId,
+    clonedSceneIds: clonedScenes.map((entry) => entry.id),
+    linkedParentId,
+  };
+}
+
+/**
+ * Clone a naming catalog entry (`no_*`).
+ * @param {boolean} [includePlacements=true] — also clone placement hotspot(s)
+ * @param {boolean} [resetAsOpen=false] — set status to open and clear donor
+ */
+export async function duplicateNamingOpportunity({
+  root,
+  toursDir,
+  assetsRoot,
+  tourId,
+  namingId,
+  includePlacements = true,
+  resetAsOpen = false,
+}) {
+  const sourceId = namingId?.trim();
+  if (!sourceId) throw new Error('namingId is required');
+
+  const tourPath = resolveTourJsonPath(toursDir, tourId);
+  const tour = readTourJson(tourPath);
+  const source = tour.namingOpportunities?.[sourceId];
+  if (!source) {
+    throw new Error(`Naming opportunity not found: ${sourceId}`);
+  }
+
+  const nextId = cloneNamingCatalogEntry(tour, sourceId, assetsRoot, root);
+  if (!nextId) {
+    throw new Error(`Could not clone naming opportunity: ${sourceId}`);
+  }
+
+  const record = tour.namingOpportunities[nextId];
+  const placementRefs = [];
+  const seenPlacementIds = new Set();
+
+  const pushPlacement = (kind, sceneId, hotspot) => {
+    const hotspotId = hotspot?.id?.trim();
+    if (!hotspotId || seenPlacementIds.has(hotspotId)) return;
+    seenPlacementIds.add(hotspotId);
+    placementRefs.push({ kind, sceneId, hotspot });
+  };
+
+  for (const hotspot of tour.hotspots ?? []) {
+    if (hotspot?.namingId?.trim() === sourceId) {
+      pushPlacement('tour', hotspot.sceneId?.trim() || undefined, hotspot);
+    }
+  }
+
+  if (tour.viewerType !== 'model3d') {
+    for (const [sceneId, scene] of Object.entries(tour.scenes ?? {})) {
+      for (const hotspot of scene.hotspots ?? []) {
+        if (hotspot?.namingId?.trim() === sourceId) {
+          pushPlacement('scene', sceneId, hotspot);
+        }
+      }
+    }
+  }
+
+  const hostSceneId =
+    placementRefs.find((entry) => entry.sceneId)?.sceneId ||
+    Object.keys(tour.scenes ?? {})[0];
+  const hostScene = hostSceneId ? tour.scenes?.[hostSceneId] : undefined;
+  const displayBase =
+    record.name?.trim() ||
+    source.name?.trim() ||
+    hostScene?.title?.trim() ||
+    sourceId;
+  record.name = nextDuplicateCopyTitle(
+    displayBase,
+    Object.values(tour.namingOpportunities ?? {}).map((entry) => entry?.name),
+  );
+
+  if (resetAsOpen) {
+    record.status = 'open';
+    delete record.donor;
+  }
+
+  const clonedHotspots = [];
+  if (includePlacements && placementRefs.length > 0) {
+    const existingIds = collectTourHotspotIds(tour);
+    const touchedSceneIds = new Set();
+
+    for (const entry of placementRefs) {
+      const next = structuredClone(entry.hotspot);
+      const baseId =
+        typeof next.id === 'string' && next.id.trim() ?
+          next.id.trim()
+        : 'hotspot';
+      next.id = resolveUniqueHotspotId(existingIds, baseId);
+      existingIds.add(next.id);
+      next.namingId = nextId;
+
+      const previewImage = next.preview?.image?.trim();
+      if (previewImage) {
+        const nextPreview = buildDefaultHotspotPreviewWebPath(tour, next.id);
+        if (copyWebAsset(assetsRoot, root, previewImage, nextPreview)) {
+          next.preview = { ...next.preview, image: nextPreview };
+        }
+      }
+
+      if (entry.kind === 'tour' || tour.viewerType === 'model3d') {
+        const sceneIdForAppend =
+          entry.sceneId || next.sceneId?.trim() || hostSceneId;
+        if (!sceneIdForAppend) {
+          throw new Error('Could not resolve scene for naming placement clone');
+        }
+        clonedHotspots.push(appendTourHotspot(tour, sceneIdForAppend, next));
+        touchedSceneIds.add(sceneIdForAppend);
+      } else {
+        clonedHotspots.push(appendSceneHotspot(tour, entry.sceneId, next));
+        touchedSceneIds.add(entry.sceneId);
+      }
+    }
+
+    for (const sceneId of touchedSceneIds) {
+      const scene = tour.scenes?.[sceneId];
+      if (scene) syncPlaceOverviewFromScene(tour, scene);
+    }
+  }
+
+  writeTourJson(tourPath, tour);
+  return {
+    tourPath,
+    record,
+    sourceNamingId: sourceId,
+    hotspots: clonedHotspots,
+  };
 }
 
 export async function createNavHotspot({
@@ -1949,7 +2618,6 @@ export function updateScene({
     );
   }
 
-  clearPlaceOverviewSuppressIfNoDescription(tour, scene);
   syncPlaceOverviewFromScene(tour, scene);
 
   writeTourJson(tourPath, tour);

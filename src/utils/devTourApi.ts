@@ -5,6 +5,7 @@ import type {
   NamingOpportunityStatus,
   NavHotspotVariant,
   PopupDisplay,
+  Scene,
   Tour,
   ViewPosition,
 } from '../types/tour';
@@ -678,6 +679,38 @@ export function devDeleteScene(payload: { tourId: string; sceneId: string }) {
     '/scene/delete',
     payload,
   );
+}
+
+export type DevSceneDuplicateNamingMode = 'duplicate' | 'keep' | 'clear';
+
+export function devDuplicateScene(payload: {
+  tourId: string;
+  sceneId: string;
+  namingMode?: DevSceneDuplicateNamingMode;
+  includeChildren?: boolean;
+  linkUnderSameParent?: boolean;
+}) {
+  return postDevTourJson<{
+    ok: true;
+    scene: Scene;
+    sourceSceneId: string;
+    clonedSceneIds: string[];
+    linkedParentId: string | null;
+  }>('/scene/duplicate', payload);
+}
+
+export function devDuplicateNamingOpportunity(payload: {
+  tourId: string;
+  namingId: string;
+  includePlacements?: boolean;
+  resetAsOpen?: boolean;
+}) {
+  return postDevTourJson<{
+    ok: true;
+    record: NamingOpportunityRecord;
+    sourceNamingId: string;
+    hotspots: Hotspot[];
+  }>('/naming-opportunity/duplicate', payload);
 }
 
 export async function devFetchCatalog(): Promise<DevCatalogSnapshot> {

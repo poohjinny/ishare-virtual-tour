@@ -142,7 +142,6 @@ export const devViewPanelTitleClassName = devViewPanelTitleVariants({
   tab: 'scene',
 });
 
-
 export const devViewPanelStickyTourTitleClassName = cn(
   'm-0 text-xs font-semibold leading-snug text-[#f0fdf4]',
 );
@@ -420,6 +419,8 @@ export const devViewPanelScrollbarClassName = cn(
 export const devViewPanelTextareaClassName = cn(
   devViewPanelInputClassName,
   devViewPanelScrollbarClassName,
+  // Default for plain textareas. Auto-grow description fields override
+  // resize/overflow in DevPanelDescriptionTextarea.
   'min-h-[56px] resize-y overflow-y-auto leading-[1.4]',
 );
 
@@ -528,9 +529,9 @@ export const devViewPanelPrimaryTabsVariants = cva(
 );
 
 /** @deprecated Prefer {@link devViewPanelPrimaryTabsVariants}. */
-export const devViewPanelPrimaryTabsClassName = devViewPanelPrimaryTabsVariants({
-  tab: 'scene',
-});
+export const devViewPanelPrimaryTabsClassName = devViewPanelPrimaryTabsVariants(
+  { tab: 'scene' },
+);
 
 /** Section mode tabs — Manage / Create, Existing / New client. */
 export const devViewPanelSecondaryTabsClassName = cn(
@@ -811,13 +812,13 @@ export const devViewPanelManageListItemContentClassName = cn(
 
 /** Icon CTAs pinned to the right of a manage row. */
 export const devViewPanelManageListItemIconActionsClassName = cn(
-  'flex shrink-0 items-center gap-2.5',
+  'flex shrink-0 items-center gap-0',
 );
 
-/** Compact icon-only manage action. */
+/** Compact icon-only manage action — fixed square so gaps read even across glyphs. */
 export const devViewPanelIconBtnVariants = cva(
   cn(
-    'inline-flex shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 leading-none',
+    'inline-flex size-7 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 leading-none',
     'disabled:cursor-not-allowed disabled:opacity-40',
   ),
   {

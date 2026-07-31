@@ -89,6 +89,7 @@ import type { TourCategory } from '../constants/tourCategories';
 import type {
   Hotspot,
   NamingDonorKind,
+  NamingOpportunityRecord,
   NamingOpportunityStatus,
   NavHotspotVariant,
   PopupDisplay,
@@ -101,6 +102,7 @@ import { normalizeNamingDonor } from '../utils/namingDonor';
 import {
   isNamingHotspot,
   resolveHotspotHostScene,
+  resolveHotspotNamingRecord,
   resolveNamingPopup,
 } from '../utils/namingSceneInherit';
 import type { ClickCoords } from '../utils/devHotspotLogger';
@@ -136,6 +138,8 @@ import {
   devCreateTour,
   devDeleteHotspot,
   devDeleteScene,
+  devDuplicateNamingOpportunity,
+  devDuplicateScene,
   devDeleteTour,
   devFetchTour,
   refreshDevCatalogSnapshot,
@@ -162,6 +166,7 @@ import {
   sortSceneGroupsByTourOrder,
 } from '../utils/sceneOrder';
 import { DevPanelReorderHandle } from './DevPanelReorderHandle';
+import { DevPanelDescriptionTextarea } from './DevPanelDescriptionTextarea';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
@@ -185,6 +190,7 @@ import { TOUR_DIRECTORY_GROUP_OTHER } from '../constants/tourDirectory';
 import {
   buildSceneGroups,
   buildSceneGroupSecondaryById,
+  buildSceneParentMap,
   sceneIdsWithTitleCollisions,
   SCENE_GROUP_OTHER_ID,
 } from '../viewer/sceneDepth';
@@ -222,7 +228,6 @@ import {
   devViewPanelTabPanelBodyClassName,
   devViewPanelTabPanelClassName,
   devViewPanelTabVariants,
-  devViewPanelTextareaClassName,
   devViewPanelToggleHintClassName,
   devViewPanelFormCheckboxInputClassName,
   devViewPanelFormCheckboxLabelClassName,
@@ -316,6 +321,8 @@ interface DevViewPanelProps {
     hotspotId: string | null,
     options?: { animate?: boolean },
   ) => void;
+  /** Currently open naming / place-overview hotspot id (viewer selection). */
+  activeNamingHotspotId?: string | null;
   openNamingOpportunity?: (sceneId: string, hotspotId: string) => void;
   onClose?: () => void;
 }
@@ -406,6 +413,30 @@ function confirmDevPanelDelete(message: string): boolean {
   return window.confirm(`${message}\n\nThis cannot be undone.`);
 }
 
+function countBfsDescendantScenes(
+  firstSceneId: string,
+  scenes: Record<string, Scene>,
+  rootId: string,
+  tourHotspots?: Hotspot[],
+): number {
+  const parentMap = buildSceneParentMap(firstSceneId, scenes, tourHotspots);
+  const childrenByParent = new Map<string, string[]>();
+  for (const [childId, parentId] of parentMap) {
+    const list = childrenByParent.get(parentId) ?? [];
+    list.push(childId);
+    childrenByParent.set(parentId, list);
+  }
+
+  let count = 0;
+  const queue = [...(childrenByParent.get(rootId) ?? [])];
+  while (queue.length > 0) {
+    const sceneId = queue.shift()!;
+    count += 1;
+    queue.push(...(childrenByParent.get(sceneId) ?? []));
+  }
+  return count;
+}
+
 function formatHotspotPosition(hotspot: Hotspot): string {
   if (isWorldPosition(hotspot.position)) {
     return formatCoords(hotspot.position);
@@ -465,6 +496,7 @@ export function DevViewPanel({
   captureSceneThumbnail,
   getCurrentView,
   focusHotspot,
+  activeNamingHotspotId = null,
   openNamingOpportunity,
   onClose,
 }: DevViewPanelProps) {
@@ -528,6 +560,15 @@ export function DevViewPanel({
   const [catalogEditNamingId, setCatalogEditNamingId] = useState<string | null>(
     null,
   );
+  const [duplicatingNamingId, setDuplicatingNamingId] = useState<string | null>(
+    null,
+  );
+  const [
+    duplicateNamingIncludePlacements,
+    setDuplicateNamingIncludePlacements,
+  ] = useState(true);
+  const [duplicateNamingResetAsOpen, setDuplicateNamingResetAsOpen] =
+    useState(false);
   const [catalogEditName, setCatalogEditName] = useState('');
   const [catalogEditPrice, setCatalogEditPrice] = useState('');
   const [catalogEditStatus, setCatalogEditStatus] = useState<
@@ -571,6 +612,14 @@ export function DevViewPanel({
   const [editSceneVisibility, setEditSceneVisibility] =
     useState<DevCatalogTourVisibility>('public');
   const [editSceneAsFirst, setEditSceneAsFirst] = useState(false);
+  const [duplicatingSceneId, setDuplicatingSceneId] = useState<string | null>(
+    null,
+  );
+  const [duplicateCloneNamings, setDuplicateCloneNamings] = useState(true);
+  const [duplicateIncludeChildren, setDuplicateIncludeChildren] =
+    useState(true);
+  const [duplicateLinkUnderParent, setDuplicateLinkUnderParent] =
+    useState(true);
   const [sceneManageStatus, setSceneManageStatus] =
     useState<ActionStatus>('idle');
   const [sceneManageError, setSceneManageError] = useState<string | null>(null);
@@ -1241,6 +1290,7 @@ export function DevViewPanel({
     setEditingHotspotId(null);
     setMovingHotspotId(null);
     setCatalogEditNamingId(null);
+    setDuplicatingNamingId(null);
     setNamingCatalogError(null);
     setNamingCatalogStatus('idle');
     setPanelTab('naming');
@@ -2541,8 +2591,8 @@ export function DevViewPanel({
   );
 
   const startCatalogNamingEdit = useCallback(
-    (namingId: string) => {
-      const record = tour.namingOpportunities?.[namingId];
+    (namingId: string, recordOverride?: NamingOpportunityRecord) => {
+      const record = recordOverride ?? tour.namingOpportunities?.[namingId];
       if (!record) return;
       const placement = findNamingHotspotByNamingId(tour, namingId);
       const hostScene =
@@ -2551,6 +2601,7 @@ export function DevViewPanel({
       const sceneVideo = hostScene?.previewVideoUrl?.trim() ?? '';
       const storedBody = record.body?.trim() ?? '';
       const storedVideo = record.videoUrl?.trim() ?? '';
+      setDuplicatingNamingId(null);
       setCatalogEditNamingId(namingId);
       setEditingHotspotId(null);
       setMovingHotspotId(null);
@@ -2575,6 +2626,59 @@ export function DevViewPanel({
     },
     [scene.id, tour],
   );
+
+  const startDuplicateNaming = useCallback(
+    (namingId: string) => {
+      const record = tour.namingOpportunities?.[namingId];
+      if (!record) return;
+      const placement = findNamingHotspotByNamingId(tour, namingId);
+      setCatalogEditNamingId(null);
+      setEditingHotspotId(null);
+      setMovingHotspotId(null);
+      setDuplicatingNamingId(namingId);
+      setDuplicateNamingIncludePlacements(Boolean(placement));
+      setDuplicateNamingResetAsOpen(false);
+      setHotspotManageError(null);
+    },
+    [tour],
+  );
+
+  const duplicateNamingCatalogEntry = useCallback(async () => {
+    if (!scene.tourId || !duplicatingNamingId) return;
+    const source = tour.namingOpportunities?.[duplicatingNamingId];
+    if (!source) return;
+
+    setHotspotManageStatus('working');
+    setHotspotManageError(null);
+
+    try {
+      const result = await devDuplicateNamingOpportunity({
+        tourId: scene.tourId,
+        namingId: duplicatingNamingId,
+        includePlacements: duplicateNamingIncludePlacements,
+        resetAsOpen: duplicateNamingResetAsOpen,
+      });
+      setDuplicatingNamingId(null);
+      await onTourMutated?.({ keepCurrentScene: true });
+      startCatalogNamingEdit(result.record.id, result.record);
+      setHotspotManageStatus('done');
+    } catch (error) {
+      setHotspotManageStatus('error');
+      setHotspotManageError(
+        error instanceof DevTourApiError ?
+          error.message
+        : 'Could not duplicate naming opportunity',
+      );
+    }
+  }, [
+    duplicateNamingIncludePlacements,
+    duplicateNamingResetAsOpen,
+    duplicatingNamingId,
+    onTourMutated,
+    scene.tourId,
+    startCatalogNamingEdit,
+    tour.namingOpportunities,
+  ]);
 
   const saveCatalogNamingEdit = useCallback(async () => {
     if (!scene.tourId || !catalogEditNamingId) return;
@@ -2676,6 +2780,9 @@ export function DevViewPanel({
         if (catalogEditNamingId === namingId) {
           setCatalogEditNamingId(null);
         }
+        if (duplicatingNamingId === namingId) {
+          setDuplicatingNamingId(null);
+        }
         if (editingHotspotId === placement.hotspot.id) {
           setEditingHotspotId(null);
         }
@@ -2690,7 +2797,14 @@ export function DevViewPanel({
         );
       }
     },
-    [catalogEditNamingId, editingHotspotId, onTourMutated, scene.tourId, tour],
+    [
+      catalogEditNamingId,
+      duplicatingNamingId,
+      editingHotspotId,
+      onTourMutated,
+      scene.tourId,
+      tour,
+    ],
   );
 
   const openNavTargetScene = useCallback(
@@ -2712,8 +2826,8 @@ export function DevViewPanel({
   const openNamingHotspot = useCallback(
     (sceneId: string, hotspotId: string) => {
       if (!openNamingOpportunity) return;
+      // Keep the current Dev tab (e.g. Namings manage/edit) — only move the viewer.
       openNamingOpportunity(sceneId, hotspotId);
-      setPanelTab('scene');
     },
     [openNamingOpportunity],
   );
@@ -2830,13 +2944,26 @@ export function DevViewPanel({
       setSceneManageError(null);
 
       try {
+        const parentSceneId = buildSceneParentMap(
+          tour.firstScene,
+          tour.scenes,
+          tour.hotspots,
+        ).get(sceneId);
+        const deleteFallbackSceneId =
+          parentSceneId && tour.scenes[parentSceneId] ?
+            parentSceneId
+          : tour.firstScene;
+
         await devDeleteScene({ tourId: scene.tourId, sceneId });
         if (editingSceneId === sceneId) {
           setEditingSceneId(null);
         }
+        if (duplicatingSceneId === sceneId) {
+          setDuplicatingSceneId(null);
+        }
         await onTourMutated?.(
           sceneId === scene.id ?
-            { navigateToScene: tour.firstScene }
+            { navigateToScene: deleteFallbackSceneId }
           : undefined,
         );
         setSceneManageStatus('done');
@@ -2850,11 +2977,13 @@ export function DevViewPanel({
       }
     },
     [
+      duplicatingSceneId,
       editingSceneId,
       onTourMutated,
       scene.id,
       scene.tourId,
       tour.firstScene,
+      tour.hotspots,
       tour.scenes,
     ],
   );
@@ -2868,6 +2997,7 @@ export function DevViewPanel({
 
   const startEditScene = useCallback(
     (entry: Scene) => {
+      setDuplicatingSceneId(null);
       setEditingSceneId(entry.id);
       setEditSceneTitle(entry.title);
       setEditSceneDescription(entry.description ?? '');
@@ -2878,6 +3008,55 @@ export function DevViewPanel({
     },
     [tour.firstScene],
   );
+
+  const startDuplicateScene = useCallback((entry: Scene) => {
+    setEditingSceneId(null);
+    setDuplicatingSceneId(entry.id);
+    setDuplicateCloneNamings(true);
+    setDuplicateIncludeChildren(true);
+    setDuplicateLinkUnderParent(true);
+    setSceneManageError(null);
+  }, []);
+
+  const duplicateTourScene = useCallback(async () => {
+    if (!scene.tourId || !duplicatingSceneId) return;
+
+    const sceneEntry = tour.scenes[duplicatingSceneId];
+    if (!sceneEntry) return;
+
+    setSceneManageStatus('working');
+    setSceneManageError(null);
+
+    try {
+      const result = await devDuplicateScene({
+        tourId: scene.tourId,
+        sceneId: duplicatingSceneId,
+        namingMode: duplicateCloneNamings ? 'duplicate' : 'keep',
+        includeChildren: duplicateIncludeChildren,
+        linkUnderSameParent: duplicateLinkUnderParent,
+      });
+      setDuplicatingSceneId(null);
+      await onTourMutated?.({ navigateToScene: result.scene.id });
+      startEditScene(result.scene);
+      setSceneManageStatus('done');
+    } catch (error) {
+      setSceneManageStatus('error');
+      setSceneManageError(
+        error instanceof DevTourApiError ?
+          error.message
+        : 'Could not duplicate scene',
+      );
+    }
+  }, [
+    duplicateCloneNamings,
+    duplicateIncludeChildren,
+    duplicateLinkUnderParent,
+    duplicatingSceneId,
+    onTourMutated,
+    scene.tourId,
+    startEditScene,
+    tour.scenes,
+  ]);
 
   const saveSceneEdit = useCallback(async () => {
     if (!scene.tourId || !editingSceneId) return;
@@ -3529,14 +3708,15 @@ export function DevViewPanel({
               <span className={devViewPanelFieldLabelClassName}>
                 Body (optional)
               </span>
-              <textarea
-                className={devViewPanelTextareaClassName}
+              <DevPanelDescriptionTextarea
                 value={noBody}
                 onChange={(e) => setNoBody(e.target.value)}
                 placeholder={inheritedNoBody || 'Uses scene description'}
-                rows={3}
                 spellCheck={true}
               />
+              <p className={devViewPanelSectionHintClassName}>
+                Supports **bold** and *italic*.
+              </p>
             </label>
             <label className={devViewPanelFieldClassName}>
               <span className={devViewPanelFieldLabelClassName}>
@@ -3624,6 +3804,7 @@ export function DevViewPanel({
             onChange={(filter) => {
               setNamingManageFilter(filter);
               setCatalogEditNamingId(null);
+              setDuplicatingNamingId(null);
             }}
             tabs={DEV_NAMING_MANAGE_FILTER_TABS.map((tab) => ({
               id: tab.id,
@@ -3636,6 +3817,11 @@ export function DevViewPanel({
               <ul className={devViewPanelManageListClassName}>
                 {filteredNamingCatalogRows.map((row) => {
                   const isEditing = catalogEditNamingId === row.record.id;
+                  const isDuplicating = duplicatingNamingId === row.record.id;
+                  const hasPlacement = Boolean(row.placement);
+                  const isCurrent =
+                    Boolean(activeNamingHotspotId) &&
+                    row.placement?.hotspot.id === activeNamingHotspotId;
                   const hostSceneBody =
                     row.placement ?
                       tour.scenes[row.placement.sceneId]?.description?.trim() ||
@@ -3654,7 +3840,8 @@ export function DevViewPanel({
                       key={row.record.id}
                       className={cn(
                         devViewPanelManageListItemClassName,
-                        isEditing && devViewPanelManageListItemActiveClassName,
+                        (isEditing || isDuplicating || isCurrent) &&
+                          devViewPanelManageListItemActiveClassName,
                       )}
                       onMouseEnter={() => {
                         if (row.placement?.sceneId === currentSceneId) {
@@ -3719,6 +3906,18 @@ export function DevViewPanel({
                                   {statusConfig.shortLabel}
                                 </Badge>
                               : null}
+                              {isCurrent ?
+                                <Badge
+                                  variant='fill'
+                                  size='sm'
+                                  tone='none'
+                                  className={devSceneManageBadgeVariants({
+                                    kind: 'current',
+                                  })}
+                                >
+                                  Current
+                                </Badge>
+                              : null}
                             </div>
                           </div>
                           <div
@@ -3756,7 +3955,9 @@ export function DevViewPanel({
                                 tone: 'secondary',
                               })}
                               disabled={
-                                hotspotManageStatus === 'working' || isEditing
+                                hotspotManageStatus === 'working' ||
+                                isEditing ||
+                                isDuplicating
                               }
                               onClick={() =>
                                 startCatalogNamingEdit(row.record.id)
@@ -3766,6 +3967,29 @@ export function DevViewPanel({
                             >
                               <MaterialSymbol
                                 name='edit'
+                                sizePx={MATERIAL_SYMBOL_SIZE_18}
+                                className={materialSymbolLayoutClassName}
+                                aria-hidden
+                              />
+                            </button>
+                            <button
+                              type='button'
+                              className={devViewPanelIconBtnVariants({
+                                tone: 'secondary',
+                              })}
+                              disabled={
+                                hotspotManageStatus === 'working' ||
+                                isEditing ||
+                                isDuplicating
+                              }
+                              onClick={() =>
+                                startDuplicateNaming(row.record.id)
+                              }
+                              aria-label={`Duplicate ${row.displayName}`}
+                              title='Duplicate'
+                            >
+                              <MaterialSymbol
+                                name='control_point_duplicate'
                                 sizePx={MATERIAL_SYMBOL_SIZE_18}
                                 className={materialSymbolLayoutClassName}
                                 aria-hidden
@@ -4087,8 +4311,7 @@ export function DevViewPanel({
                               <span className={devViewPanelFieldLabelClassName}>
                                 Body (optional)
                               </span>
-                              <textarea
-                                className={devViewPanelTextareaClassName}
+                              <DevPanelDescriptionTextarea
                                 value={catalogEditBody}
                                 onChange={(e) =>
                                   setCatalogEditBody(e.target.value)
@@ -4096,8 +4319,10 @@ export function DevViewPanel({
                                 placeholder={
                                   hostSceneBody || 'Uses scene description'
                                 }
-                                rows={3}
                               />
+                              <p className={devViewPanelSectionHintClassName}>
+                                Supports **bold** and *italic*.
+                              </p>
                             </label>
                             <label className={devViewPanelFieldClassName}>
                               <span className={devViewPanelFieldLabelClassName}>
@@ -4156,6 +4381,108 @@ export function DevViewPanel({
                                 disabled={hotspotManageStatus === 'working'}
                               >
                                 Save catalog
+                              </button>
+                            </div>
+                          </DevPanelFormGroup>
+                        : isDuplicating ?
+                          <DevPanelFormGroup inline manageEdit>
+                            <p className={devViewPanelSectionHintClassName}>
+                              Duplicate “{row.displayName}” as a new naming
+                              opportunity.
+                            </p>
+                            <div className={devViewPanelToggleListClassName}>
+                              <label
+                                className={
+                                  devViewPanelToggleLabelMultilineClassName
+                                }
+                              >
+                                <input
+                                  type='checkbox'
+                                  className={devViewPanelToggleInputClassName}
+                                  checked={duplicateNamingIncludePlacements}
+                                  onChange={(e) =>
+                                    setDuplicateNamingIncludePlacements(
+                                      e.currentTarget.checked,
+                                    )
+                                  }
+                                  disabled={
+                                    hotspotManageStatus === 'working' ||
+                                    !hasPlacement
+                                  }
+                                />
+                                <span
+                                  className={cn(
+                                    devViewPanelToggleTextClassName,
+                                    'flex flex-col gap-0.5',
+                                  )}
+                                >
+                                  <span>Clone placement pin</span>
+                                  <span
+                                    className={devViewPanelToggleHintClassName}
+                                  >
+                                    {!hasPlacement ?
+                                      'No placement pin on this naming — catalog entry only.'
+                                    : duplicateNamingIncludePlacements ?
+                                      'Also copy the hotspot on the same scene.'
+                                    : 'Catalog only — place a pin later if needed.'
+                                    }
+                                  </span>
+                                </span>
+                              </label>
+                              <label
+                                className={
+                                  devViewPanelToggleLabelMultilineClassName
+                                }
+                              >
+                                <input
+                                  type='checkbox'
+                                  className={devViewPanelToggleInputClassName}
+                                  checked={duplicateNamingResetAsOpen}
+                                  onChange={(e) =>
+                                    setDuplicateNamingResetAsOpen(
+                                      e.currentTarget.checked,
+                                    )
+                                  }
+                                  disabled={hotspotManageStatus === 'working'}
+                                />
+                                <span
+                                  className={cn(
+                                    devViewPanelToggleTextClassName,
+                                    'flex flex-col gap-0.5',
+                                  )}
+                                >
+                                  <span>Reset as open</span>
+                                  <span
+                                    className={devViewPanelToggleHintClassName}
+                                  >
+                                    Set status to open and clear donor details
+                                    on the copy.
+                                  </span>
+                                </span>
+                              </label>
+                            </div>
+                            <div className={devViewPanelActionsClassName}>
+                              <button
+                                type='button'
+                                className={devViewPanelBtnVariants({
+                                  tone: 'secondary',
+                                })}
+                                onClick={() => setDuplicatingNamingId(null)}
+                                disabled={hotspotManageStatus === 'working'}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type='button'
+                                className={devViewPanelBtnVariants({
+                                  tone: 'primary',
+                                })}
+                                onClick={() =>
+                                  void duplicateNamingCatalogEntry()
+                                }
+                                disabled={hotspotManageStatus === 'working'}
+                              >
+                                Duplicate naming
                               </button>
                             </div>
                           </DevPanelFormGroup>
@@ -4289,6 +4616,33 @@ export function DevViewPanel({
                                 >
                                   {hotspotKindLabel(hotspot)}
                                 </Badge>
+                                {isNamingInfoHotspot(hotspot) ?
+                                  (() => {
+                                    const namingVisibility =
+                                      resolveNamingVisibility(
+                                        resolveHotspotNamingRecord(
+                                          tour,
+                                          hotspot,
+                                        ),
+                                      );
+                                    return (
+                                      <Badge
+                                        variant='fill'
+                                        size='sm'
+                                        tone='none'
+                                        className={devSceneManageBadgeVariants({
+                                          kind: namingVisibility,
+                                        })}
+                                      >
+                                        {namingVisibility === 'public' ?
+                                          'Public'
+                                        : namingVisibility === 'unlisted' ?
+                                          'Unlisted'
+                                        : 'Internal'}
+                                      </Badge>
+                                    );
+                                  })()
+                                : null}
                                 {hotspot.instant ?
                                   <Badge
                                     variant='fill'
@@ -4860,13 +5214,11 @@ export function DevViewPanel({
                                   >
                                     Body
                                   </span>
-                                  <textarea
-                                    className={devViewPanelTextareaClassName}
+                                  <DevPanelDescriptionTextarea
                                     value={editInfoBody}
                                     onChange={(e) =>
                                       setEditInfoBody(e.target.value)
                                     }
-                                    rows={3}
                                   />
                                 </label>
                                 <label className={devViewPanelFieldClassName}>
@@ -5468,14 +5820,15 @@ export function DevViewPanel({
                       <span className={devViewPanelFieldLabelClassName}>
                         Body (optional)
                       </span>
-                      <textarea
-                        className={devViewPanelTextareaClassName}
+                      <DevPanelDescriptionTextarea
                         value={infoBody}
                         onChange={(e) => setInfoBody(e.target.value)}
                         placeholder='Leave empty for placeholder copy from the title…'
-                        rows={3}
                         spellCheck={true}
                       />
+                      <p className={devViewPanelSectionHintClassName}>
+                        Supports **bold** and *italic*.
+                      </p>
                     </label>
 
                     <label className={devViewPanelFieldClassName}>
@@ -5660,11 +6013,26 @@ export function DevViewPanel({
     const isCurrent = entry.id === scene.id;
     const isFirst = entry.id === tour.firstScene;
     const isEditing = editingSceneId === entry.id;
-    const showReorder = allowReorder && !isEditing;
+    const isDuplicating = duplicatingSceneId === entry.id;
+    const showReorder = allowReorder && !isEditing && !isDuplicating;
     const canDelete = entry.id !== tour.firstScene;
     const groupSecondary = sceneManageSecondaryById[entry.id];
     const sceneVisibility = resolveSceneVisibility(entry);
     const peerIndex = peerIds.indexOf(entry.id);
+    const childPlaceCount = countBfsDescendantScenes(
+      tour.firstScene,
+      tour.scenes,
+      entry.id,
+      tour.hotspots,
+    );
+    const parentSceneId = buildSceneParentMap(
+      tour.firstScene,
+      tour.scenes,
+      tour.hotspots,
+    ).get(entry.id);
+    const parentSceneTitle =
+      parentSceneId ? tour.scenes[parentSceneId]?.title?.trim() : '';
+    const canLinkUnderParent = Boolean(parentSceneId);
     const isSceneDropTarget =
       sceneOrderDropTarget?.kind === 'scene' &&
       sceneOrderDropTarget.sceneId === entry.id &&
@@ -5680,7 +6048,8 @@ export function DevViewPanel({
           showReorder ?
             devViewPanelManageListItemReorderRowClassName
           : devViewPanelManageListItemClassName,
-          (isEditing || isCurrent) && devViewPanelManageListItemActiveClassName,
+          (isEditing || isDuplicating || isCurrent) &&
+            devViewPanelManageListItemActiveClassName,
           isSceneDropTarget && devViewPanelReorderDropTargetClassName,
           isSceneDragging && 'opacity-55',
         )}
@@ -5835,12 +6204,31 @@ export function DevViewPanel({
                 type='button'
                 className={devViewPanelIconBtnVariants({ tone: 'secondary' })}
                 onClick={() => startEditScene(entry)}
-                disabled={sceneManageStatus === 'working' || isEditing}
+                disabled={
+                  sceneManageStatus === 'working' || isEditing || isDuplicating
+                }
                 aria-label={`Edit ${entry.title}`}
                 title='Edit'
               >
                 <MaterialSymbol
                   name='edit'
+                  sizePx={MATERIAL_SYMBOL_SIZE_18}
+                  className={materialSymbolLayoutClassName}
+                  aria-hidden
+                />
+              </button>
+              <button
+                type='button'
+                className={devViewPanelIconBtnVariants({ tone: 'secondary' })}
+                onClick={() => startDuplicateScene(entry)}
+                disabled={
+                  sceneManageStatus === 'working' || isEditing || isDuplicating
+                }
+                aria-label={`Duplicate ${entry.title}`}
+                title='Duplicate'
+              >
+                <MaterialSymbol
+                  name='control_point_duplicate'
                   sizePx={MATERIAL_SYMBOL_SIZE_18}
                   className={materialSymbolLayoutClassName}
                   aria-hidden
@@ -5938,17 +6326,15 @@ export function DevViewPanel({
                 <span className={devViewPanelFieldLabelClassName}>
                   Description
                 </span>
-                <textarea
-                  className={devViewPanelTextareaClassName}
+                <DevPanelDescriptionTextarea
                   value={editSceneDescription}
                   onChange={(e) => setEditSceneDescription(e.target.value)}
-                  rows={2}
                   placeholder='Optional client place copy — leave empty to remove'
                 />
                 <p className={devViewPanelSectionHintClassName}>
                   When set, Explore / nav and place overview use this copy.
                   Leave empty to inherit the first public naming body (short in
-                  nav, full in place overview).
+                  nav, full in place overview). Supports **bold** and *italic*.
                 </p>
               </label>
               <div className={devViewPanelFieldClassName}>
@@ -6081,6 +6467,116 @@ export function DevViewPanel({
                 </button>
               </div>
             </DevPanelFormGroup>
+          : isDuplicating ?
+            <DevPanelFormGroup inline manageEdit>
+              <p className={devViewPanelSectionHintClassName}>
+                Duplicate “{entry.title}” as a new scene
+                {childPlaceCount > 0 ?
+                  ` (${childPlaceCount} child place${
+                    childPlaceCount === 1 ? '' : 's'
+                  } in the tour hierarchy)`
+                : ''}
+                .
+              </p>
+              <div className={devViewPanelToggleListClassName}>
+                <label className={devViewPanelToggleLabelMultilineClassName}>
+                  <input
+                    type='checkbox'
+                    className={devViewPanelToggleInputClassName}
+                    checked={duplicateCloneNamings}
+                    onChange={(e) =>
+                      setDuplicateCloneNamings(e.currentTarget.checked)
+                    }
+                    disabled={sceneManageStatus === 'working'}
+                  />
+                  <span
+                    className={cn(
+                      devViewPanelToggleTextClassName,
+                      'flex flex-col gap-0.5',
+                    )}
+                  >
+                    <span>Clone naming opportunities</span>
+                    <span className={devViewPanelToggleHintClassName}>
+                      {duplicateCloneNamings ?
+                        'New catalog entries for this copy (recommended for similar floors).'
+                      : 'Pins keep sharing the original catalog entries.'}
+                    </span>
+                  </span>
+                </label>
+                <label className={devViewPanelToggleLabelMultilineClassName}>
+                  <input
+                    type='checkbox'
+                    className={devViewPanelToggleInputClassName}
+                    checked={duplicateLinkUnderParent}
+                    onChange={(e) =>
+                      setDuplicateLinkUnderParent(e.currentTarget.checked)
+                    }
+                    disabled={
+                      sceneManageStatus === 'working' || !canLinkUnderParent
+                    }
+                  />
+                  <span
+                    className={cn(
+                      devViewPanelToggleTextClassName,
+                      'flex flex-col gap-0.5',
+                    )}
+                  >
+                    <span>Link under same parent</span>
+                    <span className={devViewPanelToggleHintClassName}>
+                      {!canLinkUnderParent ?
+                        'No parent in the tour hierarchy (root or unreachable).'
+                      : `Add a nav from “${parentSceneTitle || parentSceneId}” to the copy so it sits in the same place.`
+                      }
+                    </span>
+                  </span>
+                </label>
+                <label className={devViewPanelToggleLabelMultilineClassName}>
+                  <input
+                    type='checkbox'
+                    className={devViewPanelToggleInputClassName}
+                    checked={duplicateIncludeChildren}
+                    onChange={(e) =>
+                      setDuplicateIncludeChildren(e.currentTarget.checked)
+                    }
+                    disabled={
+                      sceneManageStatus === 'working' || childPlaceCount === 0
+                    }
+                  />
+                  <span
+                    className={cn(
+                      devViewPanelToggleTextClassName,
+                      'flex flex-col gap-0.5',
+                    )}
+                  >
+                    <span>Include child places</span>
+                    <span className={devViewPanelToggleHintClassName}>
+                      {childPlaceCount === 0 ?
+                        'No child places under this scene in the tour hierarchy.'
+                      : 'Clone the subtree and remap navs among the copies. Shared hubs (reached via another parent) stay shared.'
+                      }
+                    </span>
+                  </span>
+                </label>
+              </div>
+              <div className={devViewPanelActionsClassName}>
+                <button
+                  type='button'
+                  className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                  onClick={() => setDuplicatingSceneId(null)}
+                  disabled={sceneManageStatus === 'working'}
+                >
+                  Cancel
+                </button>
+                <button
+                  type='button'
+                  className={devViewPanelBtnVariants({ tone: 'primary' })}
+                  onClick={() => void duplicateTourScene()}
+                  disabled={sceneManageStatus === 'working'}
+                >
+                  Duplicate scene
+                </button>
+              </div>
+            </DevPanelFormGroup>
           : null}
         </div>
       </li>
@@ -6152,11 +6648,9 @@ export function DevViewPanel({
             <span className={devViewPanelFieldLabelClassName}>
               Description (optional)
             </span>
-            <textarea
-              className={devViewPanelTextareaClassName}
+            <DevPanelDescriptionTextarea
               value={sceneDescription}
               onChange={(e) => setSceneDescription(e.target.value)}
-              rows={2}
               spellCheck={true}
             />
           </label>
@@ -6177,8 +6671,8 @@ export function DevViewPanel({
                 </span>
                 <span className={devViewPanelToggleHintClassName}>
                   {' '}
-                  — Off by default. When off, this scene won&apos;t get an auto
-                  overview pin (even after you add a description later).
+                  — Off by default. Overview pins are never auto-created on edit
+                  — use this checkbox or Manage → Overview later.
                 </span>
               </span>
             </label>
@@ -6850,12 +7344,10 @@ export function DevViewPanel({
                       <span className={devViewPanelFieldLabelClassName}>
                         Tour summary (optional)
                       </span>
-                      <textarea
-                        className={devViewPanelTextareaClassName}
+                      <DevPanelDescriptionTextarea
                         value={newTourSummary}
                         onChange={(e) => setNewTourSummary(e.target.value)}
                         placeholder='Short marketing blurb for gallery cards and share previews'
-                        rows={2}
                         spellCheck={true}
                       />
                       <p className={devViewPanelSectionHintClassName}>
@@ -7458,16 +7950,12 @@ export function DevViewPanel({
                                         >
                                           Tour summary (optional)
                                         </span>
-                                        <textarea
-                                          className={
-                                            devViewPanelTextareaClassName
-                                          }
+                                        <DevPanelDescriptionTextarea
                                           value={editTourSummary}
                                           onChange={(e) =>
                                             setEditTourSummary(e.target.value)
                                           }
                                           placeholder='Short marketing blurb for gallery cards and share previews'
-                                          rows={2}
                                           spellCheck={true}
                                         />
                                         <p
