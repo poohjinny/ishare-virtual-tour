@@ -118,7 +118,8 @@ export function GuideCtaRow({
   const logoSrc = clientLogo?.trim() || '';
   const faxHref = showInfo && client.fax ? phoneToTelHref(client.fax) : '';
   const address = showInfo ? client.address?.trim() || '' : '';
-  const mapsHref = address ? addressToGoogleMapsHref(address, client.name) : '';
+  const mapsHref =
+    address ? addressToGoogleMapsHref(address, client?.name) : '';
 
   if (visible.length === 0 && !showInfo) return null;
 
