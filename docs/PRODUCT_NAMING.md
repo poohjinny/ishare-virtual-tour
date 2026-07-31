@@ -52,9 +52,11 @@ Intro list row
 
 ## AI assistant — Virtual Tour Guide
 
-- Shared across all client tours.
-- Constant: `VIRTUAL_TOUR_GUIDE_NAME` in `src/constants/branding.ts`.
-- Short CTA: `Ask Guide` (`VIRTUAL_TOUR_GUIDE_CTA`).
+- Shared across all client tours; enable per tour with `askGuideEnabled`.
+- Display name: `Tour Guide` (`VIRTUAL_TOUR_GUIDE_NAME`).
+- FAB label: `Ask Tour Guide` (`VIRTUAL_TOUR_GUIDE_FAB_LABEL`).
+- Composer hint / short CTA: `Ask a question` (`VIRTUAL_TOUR_GUIDE_CTA`).
+- Constants live in `src/constants/branding.ts`.
 
 ## UI component — `TourProductBranding`
 

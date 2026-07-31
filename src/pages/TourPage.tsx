@@ -746,15 +746,22 @@ function TourExperience() {
   const panelStack = useTourPanelStack();
   const navDockActionsRef = useRef<TourNavDockActions | null>(null);
 
-  const handleGuideChromeAction = useCallback((kind: ChatGuideCtaKind) => {
-    if (kind === 'open-help') {
-      navDockActionsRef.current?.openHelp();
-      return;
-    }
-    if (kind === 'open-explore') {
-      navDockActionsRef.current?.openExplore();
-    }
-  }, []);
+  const handleGuideChromeAction = useCallback(
+    (kind: ChatGuideCtaKind) => {
+      if (kind === 'open-help') {
+        navDockActionsRef.current?.openHelp();
+        return;
+      }
+      if (kind === 'open-explore') {
+        navDockActionsRef.current?.openExplore();
+        return;
+      }
+      if (kind === 'open-ask-guide') {
+        assistant.open();
+      }
+    },
+    [assistant.open],
+  );
 
   const closeInfoPopup = useCallback(() => {
     pendingNamingSelectionRef.current = null;

@@ -111,16 +111,18 @@ Code: [`src/constants/tourOrigin.ts`](../src/constants/tourOrigin.ts),
 
 ## Ask Guide (live AI) readiness
 
-Product FAB stays **off** by default (`SHOW_ASK_GUIDE = false`). QA with
-`?askGuide=1` (force mock with `?guideMock=1`).
+Tour Guide shows when **`tour.askGuideEnabled`** is true (Dev → Tours create /
+edit). Global `SHOW_ASK_GUIDE` remains `false` so unpublished tours stay quiet.
+QA overrides: `?askGuide=1` (force on), `?guideMock=1` (scripted replies).
 
-| Piece                                                                            | Status                      |
-| -------------------------------------------------------------------------------- | --------------------------- |
-| Chat UI + mock fallback                                                          | Ready                       |
-| DEV live via Vite `/__dev/api/ask-guide` + `OPENAI_API_KEY`                      | Ready                       |
-| Production API — Cloudflare Worker [`workers/ask-guide/`](../workers/ask-guide/) | Ready to deploy             |
-| Client prod wiring (`VITE_ASK_GUIDE_API_URL`)                                    | Ready                       |
-| Product default FAB on                                                           | Later — after API is stable |
+| Piece                                                                            | Status                              |
+| -------------------------------------------------------------------------------- | ----------------------------------- |
+| Chat UI + mock fallback                                                          | Ready                               |
+| DEV live via Vite `/__dev/api/ask-guide` + `OPENAI_API_KEY`                      | Ready                               |
+| Production API — Cloudflare Worker [`workers/ask-guide/`](../workers/ask-guide/) | Live (set `VITE_ASK_GUIDE_API_URL`) |
+| Client prod wiring (`VITE_ASK_GUIDE_API_URL`)                                    | Ready                               |
+| Per-tour enable (`askGuideEnabled`)                                              | Ready                               |
+| Global product default (`SHOW_ASK_GUIDE = true`)                                 | Optional — prefer per-tour          |
 
 ### Smoke (live on tour.ishare.ca)
 
@@ -129,7 +131,7 @@ Product FAB stays **off** by default (`SHOW_ASK_GUIDE = false`). QA with
    `VITE_ASK_GUIDE_API_URL=https://ishare-ask-guide.<subdomain>.workers.dev/api`
    (workflow already passes it into the production build when set).
 3. Push / re-run deploy.
-4. Open `https://tour.ishare.ca/{tourId}?askGuide=1` → live reply.
+4. Open a tour with `askGuideEnabled` (or `?askGuide=1`) → live reply.
 5. Open `…?askGuide=1&guideMock=1` → scripted mock.
 
 ---

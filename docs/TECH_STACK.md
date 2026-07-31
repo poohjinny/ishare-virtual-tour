@@ -62,7 +62,7 @@ rendering engine.
 
 The scene-aware assistant assembles context from tour JSON + catalog
 (`assembleTourContext`) — scene copy, namings, and suggested chips. Mock replies
-still power demos without keys.
+still power demos without keys (`?guideMock=1`).
 
 **Live path:**
 
@@ -71,10 +71,11 @@ still power demos without keys.
   [`workers/ask-guide/`](../workers/ask-guide/) → `POST /api/tour/chat`. Client
   `VITE_ASK_GUIDE_API_URL=https://….workers.dev/api`
 - Optional: Azure Functions in [`api/`](../api/) (same contract)
-- FAB stays off until product flip (`SHOW_ASK_GUIDE`); QA with `?askGuide=1`.
+- **Per-tour on:** `tour.askGuideEnabled` (Dev Tours form). Global
+  `SHOW_ASK_GUIDE` stays off; force with `?askGuide=1`.
 
-Later: iShare platform `POST /v1/tour/chat` and/or Azure OpenAI with the same
-client contract.
+Later (platform DB): server may assemble context instead of the browser — same
+chat UI, different API base.
 
 ---
 

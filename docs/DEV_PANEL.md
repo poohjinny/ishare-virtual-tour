@@ -243,7 +243,7 @@ Single accordion card: **URL flags**. Toggles apply immediately via URL
 | `skipLanding`       | Skip landing zoom — start at `defaultView`                          |
 | `splashHold`        | Hold load splash longer (loader UX test)                            |
 | `firstVisitHint`    | Force first-visit coach pill (ignores localStorage)                 |
-| `askGuide`          | Show Ask Guide FAB + panel (overrides product default off)          |
+| `askGuide`          | Force Tour Guide on (overrides missing `askGuideEnabled`)           |
 | `guideMock`         | Chat with scripted mock replies — no OpenAI (alias: `askGuideMock`) |
 | `guideUiTest`       | Frozen UI preview — scroll + thinking fixtures (alias: `chatTest`)  |
 

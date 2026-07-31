@@ -259,10 +259,13 @@ Scene-aware assistant over assembled tour + catalog context
 - [x] Mock assistant — scene/tour copy, namings, suggested question chips
 - [x] Guide FAB + chat panel (`AiAssistant`, `AiChatPanel`)
 - [x] CSS orb avatar (`GuideAvatar`) — shared mark, no per-tour guide image
+- [x] Voice input (mic) + read aloud + copy on replies
+- [x] Per-tour `askGuideEnabled` (Dev Tours create/edit) + Help ↔ Guide chrome
+      CTAs
 
 **Backlog**
 
-- [ ] **Voice input** — hide or clearly disable “coming soon” mic in chat
+- _(none for Phase 1 mock UI)_
 
 ### 3D viewer prototype
 
@@ -443,8 +446,9 @@ a production 3D tour is onboarded.
 
 ### Live AI assistant
 
-Ask Guide UI stays product-off (`SHOW_ASK_GUIDE = false`); QA with
-`?askGuide=1`.
+Tour Guide (Ask Guide) is **per-tour** via `tour.askGuideEnabled` (Dev Tours
+form). Global `SHOW_ASK_GUIDE` stays `false` as a product safety default; QA can
+still force with `?askGuide=1`.
 
 **In-repo path (early live):**
 
@@ -466,10 +470,11 @@ POST /api/tour/chat
 }
 ```
 
-Phase 1 sends **client-assembled** `context` (no tour DB yet). Keys stay
-server-side (`OPENAI_API_KEY`). Later platform path may move to
-`POST /v1/tour/chat` with server-side context assembly — swap the client base
-URL only.
+The browser builds a small **context pack** from the loaded tour JSON (current
+place, namings, facility summary) and sends it with the chat. API keys stay
+server-side (`OPENAI_API_KEY`). A later platform path may move that packing to
+the server (`POST /v1/tour/chat`) when tours are DB-backed — same client chat
+UI, different base URL.
 
 See [DEPLOY.md — Ask Guide](./DEPLOY.md#ask-guide-live-ai-readiness) and
 [workers/ask-guide/README.md](../workers/ask-guide/README.md).

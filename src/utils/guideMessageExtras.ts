@@ -1,5 +1,6 @@
 import { resolveNamingOpportunityPopupCtas } from '../data/namingOpportunityStatus';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
+import { VIRTUAL_TOUR_GUIDE_FAB_LABEL } from '../constants/branding';
 import type { ChatGuideCta, ChatGuideLink, Tour } from '../types/tour';
 import { assembleTourContext } from './assembleTourContext';
 import { listSceneInfoHotspots } from './findTourHotspot';
@@ -374,6 +375,23 @@ export function isAppHowToQuestion(question: string): boolean {
 
 function openHelpCta(): ChatGuideCta {
   return { id: 'open-help', label: 'Open Help', kind: 'open-help' };
+}
+
+function openExploreCta(): ChatGuideCta {
+  return { id: 'open-explore', label: 'Explore tour', kind: 'open-explore' };
+}
+
+function openAskGuideCta(): ChatGuideCta {
+  return {
+    id: 'open-ask-guide',
+    label: VIRTUAL_TOUR_GUIDE_FAB_LABEL,
+    kind: 'open-ask-guide',
+  };
+}
+
+/** How-to replies — short chrome shortcuts instead of a product manual. */
+function appHowToChromeCtas(): ChatGuideCta[] {
+  return [openHelpCta(), openExploreCta(), openAskGuideCta()];
 }
 
 function replyPointsToHelp(reply: string): boolean {
@@ -816,7 +834,7 @@ export function buildGuideCtas(
   }
 
   if (isAppHowToQuestion(question) || replyPointsToHelp(reply)) {
-    return [openHelpCta()];
+    return appHowToChromeCtas();
   }
 
   if (
