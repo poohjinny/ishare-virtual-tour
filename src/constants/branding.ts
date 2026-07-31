@@ -33,8 +33,11 @@ export const CLIENT_INTRO_HERO_VIDEO = withBaseUrl(
 /** Unified AI assistant product name (shared across all client tours). */
 export const VIRTUAL_TOUR_GUIDE_NAME = 'Tour Guide';
 
-/** Short CTA label on nav preview and assistant FAB hover. */
-export const VIRTUAL_TOUR_GUIDE_CTA = 'Ask Guide';
+/** Short action hint — Explore ask CTA. */
+export const VIRTUAL_TOUR_GUIDE_CTA = 'Ask a question';
+
+/** Visible FAB label on the tour chrome. */
+export const VIRTUAL_TOUR_GUIDE_FAB_LABEL = 'Ask Tour Guide';
 
 /**
  * Ask Guide FAB + panel product default. Keep off until the live guide API

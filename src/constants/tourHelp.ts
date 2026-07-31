@@ -71,8 +71,8 @@ export const TOUR_HELP_FAQ: TourHelpFaqItem[] = [
   },
   {
     id: 'ask-guide',
-    question: 'How do I use Ask Guide?',
-    answer: `Tap Ask Guide in the bottom-right corner to chat with ${VIRTUAL_TOUR_GUIDE_NAME} about this facility and your current location.`,
+    question: `How do I use ${VIRTUAL_TOUR_GUIDE_NAME}?`,
+    answer: `Tap Ask Tour Guide in the bottom-right corner to ask about this facility and your current location.`,
   },
   TOUR_HELP_FAQ_PLAY_TOUR,
   TOUR_HELP_FAQ_IMMERSIVE,
@@ -105,8 +105,8 @@ export const TOUR_HELP_FAQ_3D: TourHelpFaqItem[] = [
   },
   {
     id: 'ask-guide',
-    question: 'How do I use Ask Guide?',
-    answer: `Tap Ask Guide in the bottom-right corner to chat with ${VIRTUAL_TOUR_GUIDE_NAME} about this facility and your current location.`,
+    question: `How do I use ${VIRTUAL_TOUR_GUIDE_NAME}?`,
+    answer: `Tap Ask Tour Guide in the bottom-right corner to ask about this facility and your current location.`,
   },
   TOUR_HELP_FAQ_PLAY_TOUR,
   TOUR_HELP_FAQ_IMMERSIVE,

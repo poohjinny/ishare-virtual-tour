@@ -1,4 +1,6 @@
-import { VIRTUAL_TOUR_GUIDE_NAME } from '../../constants/branding';
+import {
+  VIRTUAL_TOUR_GUIDE_FAB_LABEL,
+} from '../../constants/branding';
 import { cn } from '../../lib/cn';
 import { GuideAvatar, type GuideAvatarPresence } from './GuideAvatar';
 import {
@@ -36,7 +38,7 @@ export function AiAssistantFab({
       onClick={onClick}
       onPointerEnter={onWarmup}
       onFocus={onWarmup}
-      aria-label={`Open ${VIRTUAL_TOUR_GUIDE_NAME}`}
+      aria-label={VIRTUAL_TOUR_GUIDE_FAB_LABEL}
       aria-expanded={false}
     >
       <span className={aiFabAvatarClassName}>
@@ -51,7 +53,7 @@ export function AiAssistantFab({
         />
       </span>
       <span className={aiFabLabelClassName}>
-        Ask <span className={aiFabLabelAccentClassName}>Guide</span>
+        Ask Tour <span className={aiFabLabelAccentClassName}>Guide</span>
       </span>
     </button>
   );

@@ -69,16 +69,17 @@ export const aiFabBubbleTailClassName = cn(
 );
 
 const aiFabHoverClassName = cn(
-  'hover:max-w-[160px] hover:bg-[var(--ishare-float-glass-bg-hover)] hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
-  'focus-visible:max-w-[160px] focus-visible:bg-[var(--ishare-float-glass-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  // Fits “Ask Tour Guide” + avatar + label padding (was 160px for “Ask Guide”).
+  'hover:max-w-[14rem] hover:bg-[var(--ishare-float-glass-bg-hover)] hover:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
+  'focus-visible:max-w-[14rem] focus-visible:bg-[var(--ishare-float-glass-bg-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light focus-visible:shadow-[0_12px_28px_rgba(15,23,42,0.22),0_0_28px_rgba(var(--ishare-primary-rgb),0.38)]',
 );
 
 export const aiFabVariants = cva(
   cn(
     // overflow-visible so mild ring glow / specular aren’t clipped by the glass pill.
     // Label collapse still clips via aiFabLabelClassName’s own overflow-hidden.
-    'ai-fab group/fab relative box-border inline-flex h-[var(--tour-chrome-ai-fab-size)] min-h-[var(--tour-chrome-ai-fab-size)] min-w-[var(--tour-chrome-ai-fab-size)] w-auto max-w-[var(--tour-chrome-ai-fab-size)] cursor-pointer flex-row items-center justify-center overflow-visible rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-1.5 shadow-[var(--ishare-float-glass-shadow)]',
-    'hover:justify-start focus-visible:justify-start',
+    // Always justify-start: center→start on hover reflows the avatar at the end of expand.
+    'ai-fab group/fab relative box-border inline-flex h-[var(--tour-chrome-ai-fab-size)] min-h-[var(--tour-chrome-ai-fab-size)] min-w-[var(--tour-chrome-ai-fab-size)] w-auto max-w-[var(--tour-chrome-ai-fab-size)] cursor-pointer flex-row items-center justify-start overflow-visible rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-1.5 shadow-[var(--ishare-float-glass-shadow)]',
     'max-[480px]:self-end',
     'max-[480px]:hover:max-w-[var(--tour-chrome-ai-fab-size)] max-[480px]:focus-visible:max-w-[var(--tour-chrome-ai-fab-size)]',
   ),
@@ -191,12 +192,13 @@ export const guideAvatarMarkClassName = cn(
 
 export const aiFabLabelClassName = cn(
   // Collapsed: take no flex width so the orb stays optically centered in the circle.
-  'ai-fab__label shrink-0 whitespace-nowrap overflow-hidden font-display text-lg font-medium text-foreground',
+  // min-w-0: default min-width:auto uses full text width and can grow the pill ahead of the label.
+  'ai-fab__label min-w-0 shrink-0 overflow-hidden whitespace-nowrap font-display text-lg font-medium text-foreground',
   'max-w-0 opacity-0 pl-0 pr-0',
   'transition-[max-width,opacity,padding] duration-[240ms] ease-out',
   'max-[480px]:hidden',
-  'group-hover/fab:max-w-[7rem] group-hover/fab:opacity-100 group-hover/fab:pl-2 group-hover/fab:pr-2.5 group-hover/fab:duration-[320ms] group-hover/fab:delay-150 group-hover/fab:ease-out',
-  'group-focus-visible/fab:max-w-[7rem] group-focus-visible/fab:opacity-100 group-focus-visible/fab:pl-2 group-focus-visible/fab:pr-2.5 group-focus-visible/fab:duration-[320ms] group-focus-visible/fab:delay-150 group-focus-visible/fab:ease-out',
+  'group-hover/fab:max-w-[10rem] group-hover/fab:opacity-100 group-hover/fab:pl-2 group-hover/fab:pr-2.5 group-hover/fab:duration-[320ms] group-hover/fab:delay-150 group-hover/fab:ease-out',
+  'group-focus-visible/fab:max-w-[10rem] group-focus-visible/fab:opacity-100 group-focus-visible/fab:pl-2 group-focus-visible/fab:pr-2.5 group-focus-visible/fab:duration-[320ms] group-focus-visible/fab:delay-150 group-focus-visible/fab:ease-out',
 );
 
 export const aiFabLabelAccentClassName = cn('font-semibold text-primary');

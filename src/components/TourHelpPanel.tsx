@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import {
   PLATFORM_PRODUCT_LOGO,
   isAskGuideEnabled,
-  VIRTUAL_TOUR_GUIDE_NAME,
 } from '../constants/branding';
 
 import type { TourClient, TourViewerType } from '../types/tour';
@@ -151,8 +150,8 @@ export function TourHelpPanel({
 
             {showAskGuide ?
               <li>
-                Use <strong>Ask Guide</strong> (bottom-right) to chat with{' '}
-                {VIRTUAL_TOUR_GUIDE_NAME} about this facility.
+                Use <strong>Ask Tour Guide</strong> (bottom-right) to ask about
+                this facility.
               </li>
             : null}
 

@@ -646,21 +646,14 @@
 
 @layer components {
   .ai-fab {
-    transform-origin: bottom right;
+    /* Right-anchored: expand left without scaling the whole pill (scale + width
+       made the avatar drift further left as the chip widened). */
+    transform-origin: right center;
     backface-visibility: hidden;
     transition:
       max-width var(--ai-fab-expand-duration) cubic-bezier(0.4, 0, 0.2, 1),
       background 220ms ease,
-      box-shadow 220ms ease,
-      transform var(--ai-fab-expand-duration) cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @media (hover: hover) {
-
-    .ai-fab:hover:not(.animate-ai-fab-out):not(.animate-ai-fab-in),
-    .ai-fab:focus-visible:not(.animate-ai-fab-out):not(.animate-ai-fab-in) {
-      transform: scale(1.03);
-    }
+      box-shadow 220ms ease;
   }
 
   /* Nav dock controls — shared idle hover timing (Tailwind multi-prop transition is not emitted) */
