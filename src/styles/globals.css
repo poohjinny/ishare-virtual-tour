@@ -86,6 +86,7 @@
   --animate-error-card-in: error-card-in 0.34s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both;
   --animate-guide-avatar-orb: guide-avatar-orb-breathe 4.5s ease-in-out infinite;
   --animate-guide-avatar-orb-pulse: guide-avatar-orb-breathe 1.7s ease-in-out infinite;
+  --animate-guide-avatar-ring-specular: guide-avatar-ring-specular 4.5s ease-in-out infinite;
   --animate-ai-fab-in: ai-fab-in 0.14s ease-out forwards;
   --animate-ai-fab-out: ai-fab-out 0.14s ease-in forwards;
   --animate-ai-fab-bubble-in: ai-fab-bubble-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -194,24 +195,29 @@
 
 @keyframes guide-avatar-orb-breathe {
 
+  /* Transform/filter only — box-shadow stays on ring/orb layers so presence morph can transition cleanly. */
   0%,
   100% {
     transform: scale(0.94);
     filter: brightness(0.96);
-    box-shadow:
-      inset 0 -2px 8px rgba(var(--ishare-primary-rgb), 0.18),
-      0 0 0 1px rgba(var(--ishare-primary-rgb), 0.2),
-      0 2px 5px rgba(var(--ishare-primary-rgb), 0.22);
   }
 
   50% {
     transform: scale(1.08);
     filter: brightness(1.1);
-    box-shadow:
-      inset 0 -4px 14px rgba(var(--ishare-primary-rgb), 0.3),
-      0 0 0 1px rgba(var(--ishare-primary-rgb), 0.3),
-      0 5px 16px rgba(var(--ishare-primary-rgb), 0.42),
-      0 0 20px rgba(var(--ishare-primary-rgb), 0.24);
+  }
+}
+
+/** Catch-light intensity only — stays fixed on the rim (not a spinner). */
+@keyframes guide-avatar-ring-specular {
+
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
   }
 }
 

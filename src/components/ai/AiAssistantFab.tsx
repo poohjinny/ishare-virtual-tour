@@ -1,9 +1,10 @@
 import { VIRTUAL_TOUR_GUIDE_NAME } from '../../constants/branding';
 import { cn } from '../../lib/cn';
-import { GuideAvatar } from './GuideAvatar';
+import { GuideAvatar, type GuideAvatarPresence } from './GuideAvatar';
 import {
   aiFabAvatarClassName,
   aiFabGuideMarkClassName,
+  aiFabGuideMarkIdleClassName,
   aiFabGuideMarkPulseClassName,
   aiFabLabelAccentClassName,
   aiFabLabelClassName,
@@ -12,18 +13,22 @@ import {
 
 interface AiAssistantFabProps {
   phase: 'idle' | 'enter' | 'exit';
-  /** Faster orb pulse while a proximity bubble is up. */
-  pulse?: boolean;
+  /**
+   * Proximity bubble visible — avatar morphs ring→orb and uses the faster pulse.
+   */
+  speaking?: boolean;
   onClick: () => void;
   onWarmup?: () => void;
 }
 
 export function AiAssistantFab({
   phase,
-  pulse = false,
+  speaking = false,
   onClick,
   onWarmup,
 }: AiAssistantFabProps) {
+  const presence: GuideAvatarPresence = speaking ? 'orb' : 'ring';
+
   return (
     <button
       type='button'
@@ -36,9 +41,12 @@ export function AiAssistantFab({
     >
       <span className={aiFabAvatarClassName}>
         <GuideAvatar
+          presence={presence}
           className={cn(
             aiFabGuideMarkClassName,
-            pulse && aiFabGuideMarkPulseClassName,
+            speaking ?
+              aiFabGuideMarkPulseClassName
+            : aiFabGuideMarkIdleClassName,
           )}
         />
       </span>

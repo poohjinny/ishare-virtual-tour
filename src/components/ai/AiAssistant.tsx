@@ -384,7 +384,7 @@ export function AiAssistant({
           : null}
           <AiAssistantFab
             phase={fabPhase}
-            pulse={Boolean(fabBubble) && bubblePhase === 'enter'}
+            speaking={Boolean(bubbleView) && bubblePhase === 'enter'}
             onClick={handleFabClick}
             onWarmup={preloadAiChatPanel}
           />

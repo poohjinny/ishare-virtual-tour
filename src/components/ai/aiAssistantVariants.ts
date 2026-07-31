@@ -75,7 +75,9 @@ const aiFabHoverClassName = cn(
 
 export const aiFabVariants = cva(
   cn(
-    'ai-fab group/fab relative box-border inline-flex h-[var(--tour-chrome-ai-fab-size)] min-h-[var(--tour-chrome-ai-fab-size)] min-w-[var(--tour-chrome-ai-fab-size)] w-auto max-w-[var(--tour-chrome-ai-fab-size)] cursor-pointer flex-row items-center justify-center overflow-hidden rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-1.5 shadow-[var(--ishare-float-glass-shadow)]',
+    // overflow-visible so mild ring glow / specular aren’t clipped by the glass pill.
+    // Label collapse still clips via aiFabLabelClassName’s own overflow-hidden.
+    'ai-fab group/fab relative box-border inline-flex h-[var(--tour-chrome-ai-fab-size)] min-h-[var(--tour-chrome-ai-fab-size)] min-w-[var(--tour-chrome-ai-fab-size)] w-auto max-w-[var(--tour-chrome-ai-fab-size)] cursor-pointer flex-row items-center justify-center overflow-visible rounded-full border-none bg-[var(--ishare-float-glass-bg)] p-1.5 shadow-[var(--ishare-float-glass-shadow)]',
     'hover:justify-start focus-visible:justify-start',
     'max-[480px]:self-end',
     'max-[480px]:hover:max-w-[var(--tour-chrome-ai-fab-size)] max-[480px]:focus-visible:max-w-[var(--tour-chrome-ai-fab-size)]',
@@ -97,21 +99,92 @@ export const aiFabAvatarClassName = cn(
   'inline-flex size-[calc(var(--tour-chrome-ai-fab-size)-0.75rem)] shrink-0 items-center justify-center overflow-visible leading-none',
 );
 
-/** FAB orb — inset within the pill so outer shadow is not clipped by `overflow-hidden`. */
+/** FAB avatar — slightly inset so breathe scale sits clear of the pill edge. */
 export const aiFabGuideMarkClassName = cn(
-  'size-[calc(var(--tour-chrome-ai-fab-size)-1.25rem)]',
+  'size-[calc(var(--tour-chrome-ai-fab-size)-1rem)]',
   'origin-center',
-  'shadow-[inset_0_-2px_8px_rgba(var(--ishare-primary-rgb),0.2),0_0_0_1px_rgba(var(--ishare-primary-rgb),0.22),0_2px_6px_rgba(var(--ishare-primary-rgb),0.28)]',
 );
 
-/** Faster breathe — only while the proximity bubble is visible. */
+/** Slow breathe while the FAB is idle (ring). */
+export const aiFabGuideMarkIdleClassName = cn(
+  'animate-guide-avatar-orb motion-reduce:animate-none',
+);
+
+/** Faster breathe — while the proximity bubble is visible (orb). */
 export const aiFabGuideMarkPulseClassName = cn(
   'animate-guide-avatar-orb-pulse motion-reduce:animate-none',
 );
 
-/** Default Ask Guide avatar — primary-tinted orb when no per-tour image override. */
+/**
+ * Guide mark shell — ring↔orb presence morphs via layered children (same footprint).
+ * Default `orb` for panel header; FAB passes `ring` when idle.
+ */
+export const guideAvatarShellClassName = cn(
+  'guide-avatar-mark relative block size-full shrink-0',
+);
+
+/** Morph timing — slower than the bubble so the fill reads as intentional. */
+const guideAvatarMorphTransitionClassName = cn(
+  'transition-[opacity,transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+  'motion-reduce:transition-none',
+);
+
+export const guideAvatarLayerClassName = cn(
+  'pointer-events-none absolute inset-0 rounded-full',
+  guideAvatarMorphTransitionClassName,
+);
+
+/** Idle ring — thick stroke + soft static bloom (not the punchy bloom). */
+export const guideAvatarRingLayerClassName = cn(
+  guideAvatarLayerClassName,
+  'border-[6px] border-[rgba(var(--ishare-primary-rgb),0.72)] bg-[rgba(var(--ishare-primary-rgb),0.08)]',
+  'shadow-[0_0_16px_rgba(var(--ishare-primary-rgb),0.3),inset_0_0_12px_rgba(var(--ishare-primary-rgb),0.12)]',
+);
+
+export const guideAvatarRingLayerActiveClassName = cn('scale-100 opacity-100');
+
+export const guideAvatarRingLayerInactiveClassName = cn(
+  'scale-[1.08] opacity-0 motion-reduce:scale-100',
+);
+
+/**
+ * Fixed specular catch-light on the ring rim (glass/metal reflection) — not a
+ * spinning loader sheen. Masked to the stroke; soft opacity breathe only.
+ */
+export const guideAvatarRingSpecularClassName = cn(
+  'pointer-events-none absolute inset-0 rounded-full',
+  'transition-opacity duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+  'motion-reduce:transition-none',
+  'bg-[radial-gradient(circle_at_30%_24%,rgba(255,255,255,0.95)_0%,rgba(255,255,255,0.55)_14%,rgba(255,255,255,0.12)_28%,transparent_46%)]',
+  '[mask:radial-gradient(farthest-side,transparent_calc(100%-7px),#000_calc(100%-6px),#000_calc(100%-1px),transparent_100%)]',
+  '[-webkit-mask:radial-gradient(farthest-side,transparent_calc(100%-7px),#000_calc(100%-6px),#000_calc(100%-1px),transparent_100%)]',
+);
+
+export const guideAvatarRingSpecularActiveClassName = cn(
+  'animate-guide-avatar-ring-specular motion-reduce:animate-none motion-reduce:opacity-80',
+);
+
+export const guideAvatarRingSpecularInactiveClassName = cn(
+  'opacity-0 animate-none',
+);
+
+/** Active filled orb — used in panel + when proximity bubble is up. */
+export const guideAvatarOrbLayerClassName = cn(
+  guideAvatarLayerClassName,
+  'bg-[radial-gradient(circle_at_36%_30%,rgba(255,255,255,0.94)_0%,rgba(var(--ishare-primary-rgb),0.9)_30%,rgba(var(--ishare-primary-rgb),0.52)_58%,rgba(var(--ishare-primary-rgb),0.14)_100%)]',
+  'shadow-[inset_0_-3px_10px_rgba(var(--ishare-primary-rgb),0.22),0_0_0_1px_rgba(var(--ishare-primary-rgb),0.24),0_4px_14px_rgba(var(--ishare-primary-rgb),0.3)]',
+);
+
+export const guideAvatarOrbLayerActiveClassName = cn('scale-100 opacity-100');
+
+export const guideAvatarOrbLayerInactiveClassName = cn(
+  'scale-[0.78] opacity-0 motion-reduce:scale-100',
+);
+
+/** @deprecated Use {@link GuideAvatar} (layered shell). */
 export const guideAvatarMarkClassName = cn(
-  'block size-full shrink-0 rounded-full',
+  guideAvatarShellClassName,
+  'rounded-full',
   'bg-[radial-gradient(circle_at_36%_30%,rgba(255,255,255,0.94)_0%,rgba(var(--ishare-primary-rgb),0.9)_30%,rgba(var(--ishare-primary-rgb),0.52)_58%,rgba(var(--ishare-primary-rgb),0.14)_100%)]',
   'shadow-[inset_0_-3px_10px_rgba(var(--ishare-primary-rgb),0.22),0_0_0_1px_rgba(var(--ishare-primary-rgb),0.24),0_4px_14px_rgba(var(--ishare-primary-rgb),0.3)]',
 );
