@@ -124,9 +124,9 @@ const STATUS_CONFIG: Record<
     ],
   },
   soon: {
-    label: 'Coming soon',
-    shortLabel: 'Soon',
-    hotspotLabel: 'Coming soon',
+    label: 'Coming',
+    shortLabel: 'Coming',
+    hotspotLabel: 'Coming',
     cssModifier: 'soon',
     ctas: [
       {

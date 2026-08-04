@@ -324,40 +324,27 @@ export function exploreDirectorySortGroupsForContext(
   }));
 }
 
-function sortOptionLabel(sort: ExploreDirectorySort): string {
-  for (const group of EXPLORE_DIRECTORY_SORT_GROUP_ORDER) {
-    const field = resolveExploreSortField(sort, group);
-    if (!field) continue;
-    const direction = resolveExploreSortDirection(sort, field);
-    return `${field.label} · ${exploreSortDirectionLabel(field, direction)}`;
-  }
-  return 'Sort';
-}
-
 export function tourNavExploreRefineActionLabel(input: {
   context: ExploreDirectorySortContext;
   locationsSort: ExploreDirectorySort;
   namingSort: ExploreDirectorySort;
   namingPriceFilterActive?: boolean;
 }): string {
-  const {
-    context,
-    locationsSort,
-    namingSort,
-    namingPriceFilterActive = false,
-  } = input;
-
-  const filterNote = namingPriceFilterActive ? ' · Price filtered' : '';
+  const { context, namingPriceFilterActive = false } = input;
 
   if (context === 'locations') {
-    return `Refine locations: ${sortOptionLabel(locationsSort)}`;
+    return 'Open refine to change how locations are sorted.';
   }
 
   if (context === 'naming') {
-    return `Refine naming: ${sortOptionLabel(namingSort)}${filterNote}`;
+    return namingPriceFilterActive ?
+        'Open refine to change naming sort and price filters.'
+      : 'Open refine to change how naming opportunities are sorted.';
   }
 
-  return `Refine · Locations: ${sortOptionLabel(locationsSort)} · Naming: ${sortOptionLabel(namingSort)}${filterNote}`;
+  return namingPriceFilterActive ?
+      'Open refine to change sorting and naming price filters.'
+    : 'Open refine to change how locations and naming are sorted.';
 }
 
 /** @deprecated Use {@link tourNavExploreRefineActionLabel}. */

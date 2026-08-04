@@ -14,7 +14,7 @@ import {
   resolvePlayTourStopDwellMs,
   resolvePlayTourStopView,
 } from '../utils/playTour';
-import type { TourViewerHandle } from '../viewer/viewerHandle';
+import type { TourViewerHandle } from '../viewer-shared/viewerHandle';
 
 export type PlayTourPhase = 'idle' | 'playing' | 'paused';
 

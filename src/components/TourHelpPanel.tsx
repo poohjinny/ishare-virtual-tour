@@ -130,7 +130,7 @@ export function TourHelpPanel({
       </p>
 
       <Accordion gap='default'>
-        <AccordionItem title={TOUR_HELP_SECTION_USING} iconPosition='right'>
+        <AccordionItem title={TOUR_HELP_SECTION_USING}>
           <ul className={tourNavHelpListClassName}>
             <li>
               The breadcrumb shows where you are in the tour — tap a stop with a
@@ -198,10 +198,7 @@ export function TourHelpPanel({
         </AccordionItem>
 
         {!isCoarsePointer && (
-          <AccordionItem
-            title={TOUR_HELP_SECTION_SHORTCUTS}
-            iconPosition='right'
-          >
+          <AccordionItem title={TOUR_HELP_SECTION_SHORTCUTS}>
             <ul className={tourNavHelpListClassName}>
               {keyboardShortcuts.map((item) => (
                 <li key={item}>{item}</li>
@@ -210,7 +207,7 @@ export function TourHelpPanel({
           </AccordionItem>
         )}
 
-        <AccordionItem title={TOUR_HELP_SECTION_CONTROLS} iconPosition='right'>
+        <AccordionItem title={TOUR_HELP_SECTION_CONTROLS}>
           <ul className={tourNavControlsListClassName}>
             {viewerControls.map((item) => (
               <li key={item}>{item}</li>
@@ -218,7 +215,7 @@ export function TourHelpPanel({
           </ul>
         </AccordionItem>
 
-        <AccordionItem title={TOUR_HELP_SECTION_FAQ} iconPosition='right'>
+        <AccordionItem title={TOUR_HELP_SECTION_FAQ}>
           <dl className={tourNavHelpFaqListClassName}>
             {faqItems.map((item) => (
               <div key={item.id} className={tourNavHelpFaqItemClassName}>
@@ -233,7 +230,7 @@ export function TourHelpPanel({
         </AccordionItem>
 
         {showContact && (
-          <AccordionItem title={TOUR_HELP_SECTION_CONTACT} iconPosition='right'>
+          <AccordionItem title={TOUR_HELP_SECTION_CONTACT}>
             {showClientContact ?
               <TourContactInfo client={client} logo={logo} embedded />
             : null}

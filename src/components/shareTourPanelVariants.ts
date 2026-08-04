@@ -4,7 +4,7 @@ import { tourGlassPanelBodyLeadClassName } from './tourGlassPanelVariants';
 
 export const shareTourPanelRootClassName = cn(
   'flex min-w-0 flex-col gap-3.5 px-5 pb-5',
-  'max-[480px]:px-[22px] max-[480px]:pb-[18px]',
+  'max-[480px]:px-[1.375rem] max-[480px]:pb-[1.125rem]',
 );
 
 export const shareTourPanelLeadClassName = cn(
@@ -12,7 +12,7 @@ export const shareTourPanelLeadClassName = cn(
   '[&_strong]:font-semibold [&_strong]:text-foreground',
 );
 
-export const shareTourPanelUrlFieldClassName = cn('mt-2.5 block min-w-0');
+export const shareTourPanelUrlFieldClassName = cn('block min-w-0');
 
 export const shareTourPreviewSectionClassName = cn(
   'flex min-w-0 flex-col gap-2',
@@ -41,7 +41,7 @@ export const shareTourPreviewBodyClassName = cn(
 );
 
 export const shareTourPreviewHostClassName = cn(
-  'text-[11px] font-medium uppercase tracking-[0.04em] text-muted',
+  'text-[0.6875rem] font-medium uppercase tracking-[0.04em] text-muted',
 );
 
 export const shareTourPreviewTitleClassName = cn(
@@ -61,7 +61,7 @@ export const shareTourPanelUrlInputClassName = cn(
 );
 
 export const shareTourCopyButtonVariants = cva(
-  'inline-flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary p-0 text-white transition-[background,transform] duration-150 hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/90',
+  'inline-flex size-[1.875rem] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-primary p-0 text-white transition-[background,transform] duration-150 hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/90',
   {
     variants: {
       state: { idle: '', copied: 'bg-primary/82', failed: 'bg-muted' },
@@ -98,7 +98,7 @@ export const shareTourAppIconVariants = cva(
         native: 'bg-primary',
         email: 'bg-[#0078d4]',
         instagram:
-          'bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285aeb_90%)] [&_svg]:size-[21px] [&_svg]:drop-shadow-[0_1px_1px_rgba(15,23,42,0.22)]',
+          'bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285aeb_90%)] [&_svg]:size-[1.3125rem] [&_svg]:drop-shadow-[0_1px_1px_rgba(15,23,42,0.22)]',
         whatsapp: 'bg-[#25d366]',
         facebook: 'bg-[#1877f2]',
         x: 'bg-[#0f1419]',

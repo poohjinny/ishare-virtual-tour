@@ -14,6 +14,9 @@ export const MATERIAL_SYMBOL_SIZE_22 = 22;
 export const MATERIAL_SYMBOL_SIZE_23 = 23;
 export const MATERIAL_SYMBOL_SIZE_24 = 24;
 
+/** Panel header actions — dock chrome + anchored (search, close, share, …). */
+export const MATERIAL_SYMBOL_SIZE_CHROME_HEADER = MATERIAL_SYMBOL_SIZE_20;
+
 /** Shared layout — pair with a `MATERIAL_SYMBOL_SIZE_*` constant. */
 export const materialSymbolLayoutClassName = 'shrink-0 leading-none';
 

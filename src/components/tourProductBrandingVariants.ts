@@ -4,7 +4,7 @@ import { cn } from '../lib/cn';
 export const tourProductBrandingVariants = cva(
   cn(
     'relative m-0 flex items-center justify-center gap-2.5 p-0 font-display leading-[1.2]',
-    '[--tour-product-branding-accent:var(--color-primary)] [--tour-product-branding-icon-size:26px] [--tour-product-branding-logo-height:36px]',
+    '[--tour-product-branding-accent:var(--color-primary)] [--tour-product-branding-icon-size:1.625rem] [--tour-product-branding-logo-height:2.25rem]',
   ),
   {
     variants: {

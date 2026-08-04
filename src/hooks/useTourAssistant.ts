@@ -124,7 +124,9 @@ export function useTourAssistant(
   tour: Tour,
   currentSceneId: string,
   liveContext?: TourAssistantLiveContext,
+  options?: { guideMock?: boolean },
 ) {
+  const guideMock = options?.guideMock === true;
   const storageKey = askGuideSessionKey(tour);
   const storageKeyRef = useRef(storageKey);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -199,9 +201,14 @@ export function useTourAssistant(
   }, [storageKey, messages, isOpen]);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || !isOpen) return;
+    // Debug `guideMock` wins over a stale live probe — badge / notice flip immediately.
+    if (guideMock) {
+      setLiveMode(false);
+      return;
+    }
+    if (!isOpen) return;
     void fetchAskGuideLiveStatus(true).then(setLiveMode);
-  }, [isOpen]);
+  }, [isOpen, guideMock]);
 
   /**
    * Keep Ask Guide place/NO context aligned with the live tour while the panel

@@ -9,6 +9,17 @@ import {
 const SHORT_VIEWPORT_MQ = '(max-height: 700px)';
 const COARSE_POINTER_MQ = '(pointer: coarse)';
 
+function readForceCoarsePointer(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return (
+      new URLSearchParams(window.location.search).get('deviceTouch') === '1'
+    );
+  } catch {
+    return false;
+  }
+}
+
 function readLayout() {
   if (typeof window === 'undefined') {
     return {
@@ -21,7 +32,8 @@ function readLayout() {
   return {
     chromeMode: resolveTourChromeModeFromMatchMedia(),
     isShortViewport: window.matchMedia(SHORT_VIEWPORT_MQ).matches,
-    isCoarsePointer: window.matchMedia(COARSE_POINTER_MQ).matches,
+    isCoarsePointer:
+      readForceCoarsePointer() || window.matchMedia(COARSE_POINTER_MQ).matches,
   };
 }
 

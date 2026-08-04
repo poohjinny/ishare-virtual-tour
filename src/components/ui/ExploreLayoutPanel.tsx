@@ -1,10 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import type { ExploreDirectoryLayout } from '../../constants/tourNavActions';
-import {
-  segmentedTabLayoutPanelAnimateInClassName,
-  segmentedTabPanelContentClassName,
-} from './segmentedTabsClasses';
+import { segmentedTabLayoutPanelAnimateInClassName } from './segmentedTabsClasses';
 
 interface ExploreLayoutPanelProps {
   layout: ExploreDirectoryLayout;
@@ -53,7 +50,7 @@ export function ExploreLayoutPanel({
   return (
     <div
       ref={contentRef}
-      className={cn(segmentedTabPanelContentClassName, className)}
+      className={cn('w-full min-w-0 overflow-hidden', className)}
     >
       {children}
     </div>

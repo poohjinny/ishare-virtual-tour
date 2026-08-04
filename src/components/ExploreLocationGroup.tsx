@@ -4,12 +4,15 @@ import { cn } from '../lib/cn';
 import { ExploreGroupMediaReadyProvider } from './ExploreGroupMediaReady';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import { MATERIAL_SYMBOL_SIZE_20 } from './ui/materialSymbolClasses';
+import { IconTooltip } from './ui/IconTooltip';
 import {
   tourNavLocationGroupChevronClassName,
+  tourNavLocationGroupChevronIconClassName,
   tourNavLocationGroupChevronOpenClassName,
   tourNavLocationGroupClassName,
   tourNavLocationGroupExpandedClassName,
   tourNavLocationGroupHeaderClassName,
+  tourNavLocationGroupHeaderOpenClassName,
   tourNavLocationGroupMetaClassName,
   tourNavLocationGroupPanelClassName,
   tourNavLocationGroupPanelContentClassName,
@@ -95,6 +98,8 @@ export function ExploreLocationGroup({
     };
   }, [expanded]);
 
+  const toggleLabel = expanded ? `Collapse ${title}` : `Expand ${title}`;
+
   return (
     <section
       className={cn(
@@ -102,28 +107,60 @@ export function ExploreLocationGroup({
         expanded && tourNavLocationGroupExpandedClassName,
       )}
     >
-      <button
-        type='button'
-        id={headingId}
-        className={tourNavLocationGroupHeaderClassName}
-        aria-expanded={expanded}
-        aria-controls={regionId}
-        disabled={disabled}
-        onClick={onToggle}
+      <div
+        className={cn(
+          'w-full',
+          expanded && tourNavLocationGroupHeaderOpenClassName,
+        )}
+        data-directory-pin-source='group'
+        data-directory-pin-key={headingId}
+        data-directory-pin-row=''
       >
-        <MaterialSymbol
-          name='chevron_right'
-          sizePx={MATERIAL_SYMBOL_SIZE_20}
-          className={cn(
-            tourNavLocationGroupChevronClassName,
-            expanded && tourNavLocationGroupChevronOpenClassName,
-          )}
-        />
-        <span className={tourNavLocationGroupTitleClassName}>{title}</span>
-        {metaLabel ?
-          <span className={tourNavLocationGroupMetaClassName}>{metaLabel}</span>
-        : null}
-      </button>
+        <IconTooltip
+          label={toggleLabel}
+          placement='top'
+          disabled={disabled}
+          className='block w-full'
+        >
+          <button
+            type='button'
+            id={headingId}
+            className={tourNavLocationGroupHeaderClassName}
+            aria-expanded={expanded}
+            aria-controls={regionId}
+            aria-label={toggleLabel}
+            disabled={disabled}
+            onClick={onToggle}
+          >
+            <span
+              className={cn(
+                tourNavLocationGroupChevronClassName,
+                expanded && tourNavLocationGroupChevronOpenClassName,
+              )}
+            >
+              <MaterialSymbol
+                name='chevron_right'
+                sizePx={MATERIAL_SYMBOL_SIZE_20}
+                className={tourNavLocationGroupChevronIconClassName}
+              />
+            </span>
+            <span
+              className={tourNavLocationGroupTitleClassName}
+              data-directory-pin-group-title=''
+            >
+              {title}
+            </span>
+            {metaLabel ?
+              <span
+                className={tourNavLocationGroupMetaClassName}
+                data-directory-pin-group-meta=''
+              >
+                {metaLabel}
+              </span>
+            : null}
+          </button>
+        </IconTooltip>
+      </div>
       <div ref={panelRef} className={tourNavLocationGroupPanelClassName}>
         <div className={tourNavLocationGroupPanelInnerClassName}>
           <div

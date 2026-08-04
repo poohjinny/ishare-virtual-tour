@@ -31,6 +31,7 @@ import {
   MATERIAL_SYMBOL_SIZE_14,
   MATERIAL_SYMBOL_SIZE_18,
   MATERIAL_SYMBOL_SIZE_22,
+  MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
 } from '../ui/materialSymbolClasses';
 import { PlatformBrandLink } from '../PlatformBrandLink';
 import { GuideAvatar } from './GuideAvatar';
@@ -84,6 +85,13 @@ import {
   aiPanelSymbolClassName,
   aiPanelThreadClassName,
   aiPanelTitleClassName,
+  aiPanelTitleRowClassName,
+  aiPanelConnectionStatusClassName,
+  aiPanelConnectionStatusDotClassName,
+  aiPanelConnectionStatusLiveClassName,
+  aiPanelConnectionStatusLiveDotClassName,
+  aiPanelConnectionStatusMutedClassName,
+  aiPanelConnectionStatusMutedDotClassName,
   aiPanelVariants,
 } from './aiAssistantVariants';
 
@@ -169,7 +177,7 @@ function ResetIcon() {
     <MaterialSymbol
       name='refresh'
       className={aiPanelHeaderIconClassName}
-      sizePx={MATERIAL_SYMBOL_SIZE_22}
+      sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
     />
   );
 }
@@ -455,6 +463,23 @@ export function AiChatPanel({
     [guideUiTest, messages],
   );
   const showMockNotice = guideMock && !liveMode;
+  // Debug mock flag wins — don't keep showing Live after guideMock=1.
+  const connectionStatus =
+    guideMock ?
+      {
+        label: 'Preview',
+        aria: 'AI preview mode',
+        textClass: aiPanelConnectionStatusMutedClassName,
+        dotClass: aiPanelConnectionStatusMutedDotClassName,
+      }
+    : liveMode ?
+      {
+        label: 'Live',
+        aria: 'AI connected',
+        textClass: aiPanelConnectionStatusLiveClassName,
+        dotClass: aiPanelConnectionStatusLiveDotClassName,
+      }
+    : null;
   const showUiTestNotice = guideUiTest && !noticeDismissed;
   const showUiTestError = guideUiTest && !errorDismissed;
   const showSendError = Boolean(sendError) && !guideUiTest && !errorDismissed;
@@ -788,9 +813,29 @@ export function AiChatPanel({
           <div className={aiPanelHeaderMainClassName}>
             <GuideAvatar className={aiPanelSymbolClassName} />
             <div className={aiPanelHeaderTextClassName}>
-              <p id='ai-guide-panel-title' className={aiPanelTitleClassName}>
-                Tour Guide
-              </p>
+              <div className={aiPanelTitleRowClassName}>
+                <p id='ai-guide-panel-title' className={aiPanelTitleClassName}>
+                  Tour Guide
+                </p>
+                {connectionStatus ?
+                  <span
+                    className={cn(
+                      aiPanelConnectionStatusClassName,
+                      connectionStatus.textClass,
+                    )}
+                    aria-label={connectionStatus.aria}
+                  >
+                    <span
+                      className={cn(
+                        aiPanelConnectionStatusDotClassName,
+                        connectionStatus.dotClass,
+                      )}
+                      aria-hidden='true'
+                    />
+                    {connectionStatus.label}
+                  </span>
+                : null}
+              </div>
               <p className={aiPanelPoweredByClassName}>
                 Powered by <PlatformBrandLink brandId='fundingMattersAiSuite' />
               </p>
@@ -815,7 +860,9 @@ export function AiChatPanel({
               onClick={onClose}
               aria-label='Close'
             >
-              <GlassPanelCloseIcon />
+              <GlassPanelCloseIcon
+                sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
+              />
             </button>
           </div>
         </>
@@ -1024,7 +1071,7 @@ export function AiChatPanel({
             variant='error'
             onDismiss={() => setErrorDismissed(true)}
           >
-            Sample error — Ask Guide live unavailable (guideUiTest).
+            Sample error — Tour Guide live unavailable (guideUiTest).
           </AiPanelBanner>
         : null}
       </div>

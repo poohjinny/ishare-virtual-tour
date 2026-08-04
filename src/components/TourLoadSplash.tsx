@@ -3,10 +3,10 @@ import { cn } from '../lib/cn';
 import { PLATFORM_PRODUCT_LOGO } from '../constants/branding';
 
 /** White overlay fade — applied via `--tour-load-splash-fade-ms` on the splash root */
-export const TOUR_LOAD_SPLASH_OVERLAY_FADE_MS = 3200;
+export const TOUR_LOAD_SPLASH_OVERLAY_FADE_MS = 4200;
 
 /** Shorter curtain for iframe embed — parent page already provides context. */
-export const TOUR_LOAD_SPLASH_EMBED_OVERLAY_FADE_MS = 1100;
+export const TOUR_LOAD_SPLASH_EMBED_OVERLAY_FADE_MS = 1600;
 
 export const TOUR_LOAD_SPLASH_FADE_MS = TOUR_LOAD_SPLASH_OVERLAY_FADE_MS + 120;
 
@@ -46,7 +46,18 @@ export function TourLoadSplash({
   const splashLogo = logo ?? PLATFORM_PRODUCT_LOGO;
   const splashAlt = logoAlt ?? productName ?? 'Virtual Tour';
   const [fadeOut, setFadeOut] = useState(false);
+  const [logoIn, setLogoIn] = useState(false);
+  const logoRef = useRef<HTMLImageElement>(null);
   const exitNotifiedRef = useRef(false);
+
+  useEffect(() => {
+    setLogoIn(false);
+    const img = logoRef.current;
+    if (img?.complete && img.naturalWidth > 0) {
+      const frame = requestAnimationFrame(() => setLogoIn(true));
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [splashLogo]);
 
   useEffect(() => {
     if (!exiting) {
@@ -92,13 +103,17 @@ export function TourLoadSplash({
       }}
     >
       <img
+        ref={logoRef}
         className={cn(
           'tour-load-splash__logo',
+          logoIn && 'tour-load-splash__logo--in',
           fadeOut && 'tour-load-splash__logo--out',
         )}
         src={splashLogo}
         alt={splashAlt}
         draggable={false}
+        onLoad={() => setLogoIn(true)}
+        onError={() => setLogoIn(true)}
       />
     </div>
   );

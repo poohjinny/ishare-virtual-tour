@@ -8,10 +8,7 @@ import {
 import { cn } from '../lib/cn';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import {
-  MATERIAL_SYMBOL_SIZE_18,
-  MATERIAL_SYMBOL_SIZE_22,
-} from './ui/materialSymbolClasses';
+import { MATERIAL_SYMBOL_SIZE_CHROME_HEADER } from './ui/materialSymbolClasses';
 import {
   tourNavExploreSearchCloseClassName,
   tourNavExploreSearchIconClassName,
@@ -75,7 +72,7 @@ export function ExplorePanelSearch({
           <MaterialSymbol
             name='search'
             className={tourNavExploreSearchIconClassName}
-            sizePx={MATERIAL_SYMBOL_SIZE_22}
+            sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
           />
         </button>
       </IconTooltip>
@@ -90,7 +87,7 @@ export function ExplorePanelSearch({
         <MaterialSymbol
           name='search'
           className={cn(tourNavExploreSearchIconClassName, 'text-muted')}
-          sizePx={MATERIAL_SYMBOL_SIZE_22}
+          sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
         />
         <div className={tourNavExploreSearchInputWrapClassName}>
           <input
@@ -125,7 +122,7 @@ export function ExplorePanelSearch({
             <MaterialSymbol
               name='close'
               className={tourNavSearchCloseIconClassName}
-              sizePx={MATERIAL_SYMBOL_SIZE_18}
+              sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
             />
           </button>
         </IconTooltip>

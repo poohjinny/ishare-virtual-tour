@@ -1,6 +1,13 @@
 import type { IshareTooltipPlacement } from '../components/ui/tooltipClasses';
+import {
+  ensureIshareTooltipDelegation,
+  hideIshareTooltip,
+  refreshIshareTooltipIfActive,
+  showIshareTooltip,
+} from './ishareTooltipRuntime';
 
 const TOOLTIP_HOST_CLASS = 'ishare-tooltip-host';
+const TOOLTIP_PORTAL_CLASS = 'ishare-tooltip-host--portal';
 
 /** Apply dark iShare tooltip to a DOM element (PSV navbar, HTML markers). */
 export function applyIshareTooltipDom(
@@ -8,7 +15,8 @@ export function applyIshareTooltipDom(
   label: string,
   placement: IshareTooltipPlacement = 'top',
 ): void {
-  element.classList.add(TOOLTIP_HOST_CLASS);
+  ensureIshareTooltipDelegation();
+  element.classList.add(TOOLTIP_HOST_CLASS, TOOLTIP_PORTAL_CLASS);
   element.setAttribute('data-ishare-tooltip', label);
   element.setAttribute('data-ishare-tooltip-placement', placement);
   element.removeAttribute('title');
@@ -21,6 +29,7 @@ export function setIshareTooltipLabel(
 ): void {
   element.setAttribute('data-ishare-tooltip', label);
   element.removeAttribute('title');
+  refreshIshareTooltipIfActive(element);
 }
 
 /** Upgrade native `title` tooltips inside a root (e.g. PSV navbar). */
@@ -28,9 +37,16 @@ export function upgradeNativeTooltipsIn(
   root: ParentNode,
   placement: IshareTooltipPlacement = 'top',
 ): void {
+  ensureIshareTooltipDelegation();
   root.querySelectorAll<HTMLElement>('[title]').forEach((element) => {
-    const label = element.getAttribute('title');
-    if (!label) return;
-    applyIshareTooltipDom(element, label, placement);
+    const nextLabel = element.getAttribute('title');
+    if (!nextLabel) return;
+    applyIshareTooltipDom(element, nextLabel, placement);
   });
 }
+
+export {
+  hideIshareTooltip,
+  showIshareTooltip,
+  ensureIshareTooltipDelegation,
+};

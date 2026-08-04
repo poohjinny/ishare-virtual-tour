@@ -3,7 +3,7 @@ import { resolvePopupCta } from '../data/giftabulatorBrand';
 import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import { ShareTourHeaderButton } from './ShareTourHeaderButton';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
+import { MATERIAL_SYMBOL_SIZE_CHROME_HEADER } from './ui/materialSymbolClasses';
 
 const HEADER_BTN_ICON_CLASS = 'tour-glass-panel__header-btn-icon';
 
@@ -21,7 +21,7 @@ export function PopupCtaHeaderLink({ cta }: { cta: PopupCta }) {
       <MaterialSymbol
         name={isMailtoCtaUrl(resolved.url) ? 'mail' : 'open_in_new'}
         className={HEADER_BTN_ICON_CLASS}
-        sizePx={MATERIAL_SYMBOL_SIZE_16}
+        sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
       />
     </a>
   );

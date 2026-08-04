@@ -43,6 +43,8 @@ import {
 import { TourMarkerIcon } from './icons/TourMarkerIcon';
 import { ExploreDirectoryLead } from './ExploreDirectoryLead';
 import { ExploreDirectoryPanel } from './ExploreDirectoryPanel';
+import { ExploreDirectoryScrollPins } from './ExploreDirectoryScrollPins';
+import { ExploreDirectoryScrollToTop } from './ExploreDirectoryScrollToTop';
 import { ExploreNamingDescriptionView } from './ExploreNamingDescriptionView';
 import { ExploreNamingDirectoryListItem } from './ExploreNamingDirectoryListItem';
 import { ExploreNamingGalleryCard } from './ExploreNamingGalleryCard';
@@ -54,6 +56,7 @@ import { ExploreSceneDetailPanel } from './ExploreSceneDetailPanel';
 import { ExploreSceneGalleryCard } from './ExploreSceneGalleryCard';
 import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import { findNamingHotspotInTour } from '../utils/findTourHotspot';
+import { useExploreDirectoryScrollPins } from '../hooks/useExploreDirectoryScrollPins';
 import { notifyExploreDirectoryScroll } from '../utils/exploreDirectoryScrollIdle';
 import { TOUR_HELP_PANEL_TITLE } from '../constants/tourHelp';
 import {
@@ -89,7 +92,7 @@ import {
   listSceneSiblings,
   sceneIdsWithTitleCollisions,
   SCENE_GROUP_OTHER_ID,
-} from '../viewer/sceneDepth';
+} from '../viewer-shared/sceneDepth';
 import type {
   Hotspot,
   NamingOpportunityRecord,
@@ -127,6 +130,7 @@ import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
   MATERIAL_SYMBOL_SIZE_20,
+  MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
 } from './ui/materialSymbolClasses';
 import { TourHelpPanel } from './TourHelpPanel';
 import { TourHelpFooter } from './TourHelpFooter';
@@ -179,6 +183,7 @@ import {
   tourNavLogoLinkClassName,
   tourNavNamingSceneSubgroupsClassName,
   tourNavNamingSceneSubheaderClassName,
+  tourNavDirectoryPinScrollStackClassName,
   tourNavPanelScrollClassName,
   tourNavPanelScrollInnerClassName,
   tourNavSceneDetailShellClassName,
@@ -188,6 +193,11 @@ import {
   tourNavSectionTitleIconClassName,
   tourNavSectionTitleLabelClassName,
   tourNavSectionTitleRowClassName,
+  tourNavSectionTitleToggleClassName,
+  tourNavSectionTitleToggleOpenClassName,
+  tourNavSectionTitleClusterClassName,
+  tourNavSectionTitleClusterButtonClassName,
+  tourNavSectionTitleChevronClassName,
 } from './tourNavFloatVariants';
 
 interface TourNavFloatProps {
@@ -1014,6 +1024,88 @@ export function TourNavFloat({
     new Set(),
   );
 
+  const exploreDirectoryPinContentKey = useMemo(
+    () =>
+      [
+        exploreSceneDetailId ?? '',
+        exploreNamingDetail ?
+          `${exploreNamingDetail.sceneId}:${exploreNamingDetail.hotspotId}`
+        : '',
+        currentSceneId,
+        isExploreSearchActive ? 's' : 'd',
+        directoryTab,
+        exploreLayout,
+        exploreLocationsSort,
+        exploreNamingSort,
+        exploreSortedScenes.length,
+        exploreSortedNamingItems.length,
+        isLocationsGroupingActive ? 'g' : 'f',
+        [...expandedGroups].join(','),
+        [...expandedNamingGroups].join(','),
+      ].join('|'),
+    [
+      exploreSceneDetailId,
+      exploreNamingDetail,
+      currentSceneId,
+      isExploreSearchActive,
+      directoryTab,
+      exploreLayout,
+      exploreLocationsSort,
+      exploreNamingSort,
+      exploreSortedScenes.length,
+      exploreSortedNamingItems.length,
+      isLocationsGroupingActive,
+      expandedGroups,
+      expandedNamingGroups,
+    ],
+  );
+
+  const exploreSearchPinContentKey = useMemo(
+    () =>
+      [
+        exploreSearch,
+        exploreSortedFilteredScenes.length,
+        exploreSortedFilteredNamingItems.length,
+      ].join('|'),
+    [
+      exploreSearch,
+      exploreSortedFilteredScenes.length,
+      exploreSortedFilteredNamingItems.length,
+    ],
+  );
+
+  const { pins: exploreDirectoryPins, updatePins: updateExploreDirectoryPins } =
+    useExploreDirectoryScrollPins(
+      exploreScrollRef,
+      exploreDirectoryPinContentKey,
+    );
+
+  const { pins: exploreSearchPins, updatePins: updateExploreSearchPins } =
+    useExploreDirectoryScrollPins(
+      exploreSearchScrollRef,
+      exploreSearchPinContentKey,
+    );
+
+  // After scroll restore / scene changes, remeasure pins against live DOM.
+  useLayoutEffect(() => {
+    if (displayPanel !== 'explore') return;
+    if (exploreSceneDetailId != null || exploreNamingDetail != null) return;
+    if (isExploreSearchActive) {
+      updateExploreSearchPins();
+      return;
+    }
+    updateExploreDirectoryPins();
+  }, [
+    currentSceneId,
+    displayPanel,
+    exploreDirectoryEnterToken,
+    exploreNamingDetail,
+    exploreSceneDetailId,
+    isExploreSearchActive,
+    updateExploreDirectoryPins,
+    updateExploreSearchPins,
+  ]);
+
   const currentGroupIdRef = useRef(currentGroupId);
   useEffect(() => {
     currentGroupIdRef.current = currentGroupId;
@@ -1054,6 +1146,36 @@ export function TourNavFloat({
       return next;
     });
   }, []);
+
+  const setLocationGroupsExpanded = useCallback(
+    (expanded: boolean) => {
+      if (!locationGroups?.length) return;
+      setExpandedGroups(() => {
+        if (!expanded) return new Set();
+        return new Set(locationGroups.map((group) => group.id));
+      });
+    },
+    [locationGroups],
+  );
+
+  const setNamingGroupsExpanded = useCallback(
+    (expanded: boolean) => {
+      if (!namingSectorGroups.length) return;
+      setExpandedNamingGroups(() => {
+        if (!expanded) return new Set();
+        return new Set(namingSectorGroups.map((group) => group.id));
+      });
+    },
+    [namingSectorGroups],
+  );
+
+  const locationGroupsAnyExpanded =
+    Boolean(locationGroups?.length) &&
+    locationGroups!.some((group) => expandedGroups.has(group.id));
+
+  const namingGroupsAnyExpanded =
+    namingSectorGroups.length > 0 &&
+    namingSectorGroups.some((group) => expandedNamingGroups.has(group.id));
 
   const locationsGalleryListRef = useRef<HTMLUListElement>(null);
   const locationsListRef = useRef<HTMLUListElement>(null);
@@ -1658,24 +1780,97 @@ export function TourNavFloat({
     headingId: string,
     tab: 'locations' | 'naming',
     label: string,
-  ) => (
-    <div className={tourNavSectionTitleRowClassName}>
-      <span
-        className={tourNavSectionTitleDividerLineClassName}
-        aria-hidden='true'
-      />
+    options?: {
+      denseBottom?: boolean;
+      /** When set, the label cluster expands/collapses every group in the section. */
+      groupsToggle?: {
+        /** True when any group is open — Collapse all is the default action. */
+        anyExpanded: boolean;
+        onToggle: () => void;
+      };
+    },
+  ) => {
+    const groupsToggle = options?.groupsToggle;
+    const tooltipLabel =
+      groupsToggle?.anyExpanded ? `Collapse ${label}` : `Expand ${label}`;
+
+    const titleBlock = (
       <h3 id={headingId} className={tourNavSectionTitleClassName}>
         <span className={tourNavSectionTitleIconClassName} aria-hidden='true'>
           <ExploreDirectoryTabIcon tab={tab} sizePx={MATERIAL_SYMBOL_SIZE_18} />
         </span>
-        <span className={tourNavSectionTitleLabelClassName}>{label}</span>
+        <span
+          className={tourNavSectionTitleLabelClassName}
+          data-directory-pin-label=''
+        >
+          {label}
+        </span>
       </h3>
-      <span
-        className={tourNavSectionTitleDividerLineClassName}
-        aria-hidden='true'
-      />
-    </div>
-  );
+    );
+
+    const chevron =
+      groupsToggle ?
+        <span
+          className={cn(
+            tourNavSectionTitleToggleClassName,
+            groupsToggle.anyExpanded && tourNavSectionTitleToggleOpenClassName,
+          )}
+          aria-hidden='true'
+        >
+          <MaterialSymbol
+            name='chevron_right'
+            sizePx={MATERIAL_SYMBOL_SIZE_20}
+            className={tourNavSectionTitleChevronClassName}
+          />
+        </span>
+      : null;
+
+    const cluster =
+      groupsToggle ?
+        <IconTooltip label={tooltipLabel} placement='top' disabled={disabled}>
+          <button
+            type='button'
+            className={tourNavSectionTitleClusterButtonClassName}
+            data-directory-pin-section-toggle=''
+            aria-expanded={groupsToggle.anyExpanded}
+            aria-label={tooltipLabel}
+            disabled={disabled}
+            onClick={groupsToggle.onToggle}
+          >
+            {titleBlock}
+            {chevron}
+          </button>
+        </IconTooltip>
+      : <span className={tourNavSectionTitleClusterClassName}>
+          {titleBlock}
+        </span>;
+
+    return (
+      <div
+        className={cn(
+          tourNavSectionTitleRowClassName,
+          options?.denseBottom && 'mb-0',
+        )}
+        data-directory-pin-source='section'
+        data-directory-pin-row=''
+        data-directory-pin-tab={tab}
+        data-directory-pin-key={`section-${tab}`}
+        {...(options?.denseBottom ?
+          { 'data-directory-pin-dense-bottom': '' }
+        : {})}
+      >
+        <span
+          className={tourNavSectionTitleDividerLineClassName}
+          aria-hidden='true'
+        />
+        {cluster}
+        <span
+          className={tourNavSectionTitleDividerLineClassName}
+          aria-hidden='true'
+        />
+      </div>
+    );
+  };
 
   const renderLocationsList = (
     items: Scene[],
@@ -2057,6 +2252,16 @@ export function TourNavFloat({
                 'tour-nav-directory-locations-heading',
                 'locations',
                 TOUR_DIRECTORY_SECTION_LOCATIONS,
+                {
+                  groupsToggle:
+                    isLocationsGroupingActive && locationGroups?.length ?
+                      {
+                        anyExpanded: locationGroupsAnyExpanded,
+                        onToggle: () =>
+                          setLocationGroupsExpanded(!locationGroupsAnyExpanded),
+                      }
+                    : undefined,
+                },
               )}
             {isLocationsGroupingActive ?
               renderGroupedLocations({
@@ -2086,6 +2291,16 @@ export function TourNavFloat({
                 'tour-nav-directory-naming-heading',
                 'naming',
                 TOUR_DIRECTORY_SECTION_NAMING,
+                {
+                  groupsToggle:
+                    namingSectorGroups.length > 0 ?
+                      {
+                        anyExpanded: namingGroupsAnyExpanded,
+                        onToggle: () =>
+                          setNamingGroupsExpanded(!namingGroupsAnyExpanded),
+                      }
+                    : undefined,
+                },
               )}
 
             <ExploreLayoutPanel layout={exploreLayout}>
@@ -2219,12 +2434,12 @@ export function TourNavFloat({
                         <MaterialSymbol
                           name='view_list'
                           className={tourGlassPanelCloseIconClassName}
-                          sizePx={MATERIAL_SYMBOL_SIZE_20}
+                          sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
                         />
                       : <MaterialSymbol
                           name='grid_view'
                           className={tourGlassPanelCloseIconClassName}
-                          sizePx={MATERIAL_SYMBOL_SIZE_20}
+                          sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
                         />
                       }
                     </button>
@@ -2294,22 +2509,30 @@ export function TourNavFloat({
             </ExploreSceneDetailPanel>
           </div>
         : isExploreSearchActive ?
-          <div
-            id='tour-nav-explore-search-results'
-            ref={exploreSearchScrollRef}
-            className={tourNavPanelScrollClassName}
-            role='region'
-            aria-label='Search results'
-            onScroll={() => {
-              notifyExploreDirectoryScroll();
-            }}
-          >
-            <div className={tourNavPanelScrollInnerClassName}>
-              {renderDirectorySearchResults(
-                exploreSortedFilteredScenes,
-                exploreSortedFilteredNamingItems,
-              )}
+          <div className={tourNavDirectoryPinScrollStackClassName}>
+            <ExploreDirectoryScrollPins
+              pins={exploreSearchPins}
+              scrollRef={exploreSearchScrollRef}
+            />
+            <div
+              id='tour-nav-explore-search-results'
+              ref={exploreSearchScrollRef}
+              className={tourNavPanelScrollClassName}
+              role='region'
+              aria-label='Search results'
+              onScroll={() => {
+                notifyExploreDirectoryScroll();
+                updateExploreSearchPins();
+              }}
+            >
+              <div className={tourNavPanelScrollInnerClassName}>
+                {renderDirectorySearchResults(
+                  exploreSortedFilteredScenes,
+                  exploreSortedFilteredNamingItems,
+                )}
+              </div>
             </div>
+            <ExploreDirectoryScrollToTop scrollRef={exploreSearchScrollRef} />
           </div>
         : <ExploreDirectoryPanel enterToken={exploreDirectoryEnterToken}>
             {exploreLead ?
@@ -2317,18 +2540,26 @@ export function TourNavFloat({
             : null}
             {renderDirectoryTabs()}
 
-            <div
-              ref={exploreScrollRef}
-              className={tourNavPanelScrollClassName}
-              onScroll={(event) => {
-                exploreDirectoryScrollTopRef.current =
-                  event.currentTarget.scrollTop;
-                notifyExploreDirectoryScroll();
-              }}
-            >
-              <div className={tourNavPanelScrollInnerClassName}>
-                {renderDirectoryBody()}
+            <div className={tourNavDirectoryPinScrollStackClassName}>
+              <ExploreDirectoryScrollPins
+                pins={exploreDirectoryPins}
+                scrollRef={exploreScrollRef}
+              />
+              <div
+                ref={exploreScrollRef}
+                className={tourNavPanelScrollClassName}
+                onScroll={(event) => {
+                  exploreDirectoryScrollTopRef.current =
+                    event.currentTarget.scrollTop;
+                  notifyExploreDirectoryScroll();
+                  updateExploreDirectoryPins();
+                }}
+              >
+                <div className={tourNavPanelScrollInnerClassName}>
+                  {renderDirectoryBody()}
+                </div>
               </div>
+              <ExploreDirectoryScrollToTop scrollRef={exploreScrollRef} />
             </div>
           </ExploreDirectoryPanel>
         }
@@ -2597,7 +2828,7 @@ export function TourNavFloat({
           </IconTooltip>
 
           {!embed &&
-            (isDesktop ?
+            (!isMobile ?
               <>
                 <IconTooltip label={TOUR_NAV_ACTION_SHARE} placement='left'>
                   <button

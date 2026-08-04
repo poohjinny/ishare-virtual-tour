@@ -13,7 +13,7 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 import type { Tour } from '../types/tour';
-import type { TourViewerHandle } from '../viewer/viewerHandle';
+import type { TourViewerHandle } from '../viewer-shared/viewerHandle';
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,

@@ -96,7 +96,7 @@
   }
 
   .ishare-badge--fill-lg.ishare-badge--price {
-    padding: 5px 14px;
+    padding: 0.3125rem 0.875rem;
   }
 
   .ishare-badge--fill-lg.ishare-badge--price .ishare-badge__label {
@@ -141,8 +141,8 @@
   }
 
   .ishare-badge__dot {
-    width: 5px;
-    height: 5px;
+    width: 0.3125rem;
+    height: 0.3125rem;
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -186,8 +186,8 @@
   }
 
   .ishare-scrollbar::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
+    width: 0.4375rem;
+    height: 0.4375rem;
   }
 
   .ishare-scrollbar::-webkit-scrollbar-button {
@@ -227,20 +227,19 @@
     background: transparent;
   }
 
-  /* ── Dark tooltips (Google Sans) — hover only, bubble only (no arrow) ── */
+  /* ── Dark tooltips (Google Sans) — body-portaled bubble (no arrow) ── */
   .ishare-tooltip-host {
     position: relative;
     display: inline-flex;
     max-width: 100%;
   }
 
-  .ishare-tooltip-host::after {
-    content: attr(data-ishare-tooltip);
-    position: absolute;
-    z-index: 500;
+  .ishare-tooltip-bubble {
+    position: fixed;
+    z-index: var(--ishare-tooltip-z-index, 500);
     pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
+    box-sizing: border-box;
+    max-width: min(16rem, calc(100vw - 1rem));
     font-family: var(--ishare-font-display);
     font-size: var(--text-sm);
     font-weight: 500;
@@ -248,84 +247,49 @@
     letter-spacing: 0.01em;
     color: #f8fafc;
     background: rgba(15, 23, 42, 0.94);
-    padding: 6px 10px;
-    border-radius: 8px;
-    white-space: nowrap;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.5rem;
+    white-space: normal;
+    overflow-wrap: anywhere;
     box-shadow:
       0 8px 24px rgba(15, 23, 42, 0.28),
       0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    opacity: 0;
+    /*
+     * TW v4-friendly individual `translate` (not `transform`) so placement
+     * slides don’t get overridden by transform utilities / preflight.
+     * Default = top: rise into place (legacy ::after).
+     */
+    translate: 0 0.35rem;
     transition:
       opacity 140ms ease,
-      transform 140ms ease,
-      visibility 140ms ease;
+      translate 140ms ease;
   }
 
-  @media (hover: hover) {
-    .ishare-tooltip-host:hover::after {
-      opacity: 1;
-      visibility: visible;
-    }
+  .ishare-tooltip-bubble:not(.ishare-tooltip-bubble--entered)[data-ishare-tooltip-placement='bottom'] {
+    translate: 0 -0.35rem;
+  }
 
-    .ishare-tooltip-host[data-ishare-tooltip-placement='top']::after,
-    .ishare-tooltip-host:not([data-ishare-tooltip-placement])::after {
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translate(-50%, 4px);
-    }
+  .ishare-tooltip-bubble:not(.ishare-tooltip-bubble--entered)[data-ishare-tooltip-placement='left'] {
+    translate: 0.35rem 0;
+  }
 
-    .ishare-tooltip-host[data-ishare-tooltip-placement='top']:hover::after,
-    .ishare-tooltip-host:not([data-ishare-tooltip-placement]):hover::after {
-      transform: translate(-50%, 0);
-    }
+  .ishare-tooltip-bubble:not(.ishare-tooltip-bubble--entered)[data-ishare-tooltip-placement='right'] {
+    translate: -0.35rem 0;
+  }
 
-    .ishare-tooltip-host[data-ishare-tooltip-placement='bottom']::after {
-      top: calc(100% + 8px);
-      left: 50%;
-      transform: translate(-50%, -4px);
-    }
+  .ishare-tooltip-bubble:not(.ishare-tooltip-bubble--entered)[data-ishare-tooltip-placement='top'] {
+    translate: 0 0.35rem;
+  }
 
-    .ishare-tooltip-host[data-ishare-tooltip-placement='bottom']:hover::after {
-      transform: translate(-50%, 0);
-    }
-
-    .ishare-tooltip-host[data-ishare-tooltip-placement='left']::after {
-      right: calc(100% + 8px);
-      top: 50%;
-      transform: translate(4px, -50%);
-    }
-
-    .ishare-tooltip-host[data-ishare-tooltip-placement='left']:hover::after {
-      transform: translate(0, -50%);
-    }
-
-    .ishare-tooltip-host[data-ishare-tooltip-placement='right']::after {
-      left: calc(100% + 8px);
-      top: 50%;
-      transform: translate(-4px, -50%);
-    }
-
-    .ishare-tooltip-host[data-ishare-tooltip-placement='right']:hover::after {
-      transform: translate(0, -50%);
-    }
+  .ishare-tooltip-bubble--entered {
+    opacity: 1;
+    translate: 0 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ishare-tooltip-host::after {
+    .ishare-tooltip-bubble {
       transition: none;
-    }
-  }
-
-  /*
-   * Sibling menus scroll — keep the CSS tooltip box out of the scrollport until
-   * hover (always-on ::after still expands overflow even when opacity:0).
-   */
-  [data-tour-breadcrumb-sibling-menu] .ishare-tooltip-host::after {
-    display: none;
-  }
-
-  @media (hover: hover) {
-    [data-tour-breadcrumb-sibling-menu] .ishare-tooltip-host:hover::after {
-      display: block;
     }
   }
 
@@ -333,15 +297,15 @@
   .ishare-accordion {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 0.625rem;
   }
 
   .ishare-accordion--gap-md {
-    gap: 8px;
+    gap: 0.5rem;
   }
 
   .ishare-accordion--gap-sm {
-    gap: 6px;
+    gap: 0.375rem;
   }
 
   .ishare-accordion__item {
@@ -370,10 +334,10 @@
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
     width: 100%;
     margin: 0;
-    padding: 12px 14px;
+    padding: .9rem 1rem;
     border: none;
     border-radius: 0;
     background: none;
@@ -388,7 +352,7 @@
   }
 
   .ishare-accordion__item--nested>.ishare-accordion__trigger {
-    padding: 10px 14px;
+    padding: 0.5rem 0.75rem;
   }
 
   .ishare-accordion__item--panel-mounted>.ishare-accordion__trigger {
@@ -399,7 +363,7 @@
   .ishare-accordion__trigger-main {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 0.375rem;
     min-width: 0;
     flex: 1 1 0;
     overflow: hidden;
@@ -407,7 +371,7 @@
 
   .ishare-accordion__trigger--icon-right .ishare-accordion__trigger-main {
     justify-content: space-between;
-    gap: 8px;
+    gap: 0.5rem;
     width: 100%;
   }
 
@@ -440,9 +404,9 @@
   .ishare-accordion__icon {
     display: grid;
     place-items: center;
-    flex: 0 0 22px;
-    width: 22px;
-    height: 22px;
+    flex: 0 0 1.375rem;
+    width: 1.375rem;
+    height: 1.375rem;
     /* Box matches the glyph so the open/close rotation pivots on its true center. */
     transform-origin: center;
     color: var(--ishare-text-muted);
@@ -495,7 +459,7 @@
   }
 
   .ishare-accordion__trigger--icon-right .ishare-accordion__icon {
-    flex: 0 0 22px;
+    flex: 0 0 1.375rem;
   }
 
   .ishare-accordion__panel-inner {
@@ -543,19 +507,11 @@
   }
 
   .ishare-accordion__item--animated.ishare-accordion__item--panel-mounted:not(.ishare-accordion__item--nested) .ishare-accordion__panel-inner {
-    padding: 14px 14px 18px 14px;
-  }
-
-  .ishare-accordion__item--animated.ishare-accordion__item--panel-mounted.ishare-accordion__item--icon-left:not(.ishare-accordion__item--nested) .ishare-accordion__panel-inner {
-    padding-left: 36px;
-  }
-
-  .ishare-accordion__item--animated.ishare-accordion__item--panel-mounted.ishare-accordion__item--icon-right:not(.ishare-accordion__item--nested) .ishare-accordion__panel-inner {
-    padding-right: 36px;
+    padding: 0.875rem;
   }
 
   .ishare-accordion__item--animated.ishare-accordion__item--panel-mounted.ishare-accordion__item--nested .ishare-accordion__panel-inner {
-    padding: 12px 14px 14px 14px;
+    padding: 0.75rem;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -643,21 +599,21 @@
 
   /* ── Naming price range filter (Explore directory) ── */
   .naming-price-filter__input::-webkit-slider-runnable-track {
-    height: 4px;
+    height: 0.25rem;
     background: transparent;
   }
 
   .naming-price-filter__input::-moz-range-track {
-    height: 4px;
+    height: 0.25rem;
     background: transparent;
   }
 
   .naming-price-filter__input::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 11px;
-    height: 11px;
-    margin-top: -3.5px;
-    border: 3px solid color-mix(in srgb, var(--ishare-text-muted) 32%, #fff);
+    width: 0.6875rem;
+    height: 0.6875rem;
+    margin-top: -0.21875rem;
+    border: 0.1875rem solid color-mix(in srgb, var(--ishare-text-muted) 32%, #fff);
     border-radius: 50%;
     background: color-mix(in srgb, var(--ishare-text-muted) 42%, #fff);
     box-shadow: none;
@@ -671,9 +627,9 @@
   }
 
   .naming-price-filter__input::-moz-range-thumb {
-    width: 11px;
-    height: 11px;
-    border: 3px solid color-mix(in srgb, var(--ishare-text-muted) 32%, #fff);
+    width: 0.6875rem;
+    height: 0.6875rem;
+    border: 0.1875rem solid color-mix(in srgb, var(--ishare-text-muted) 32%, #fff);
     border-radius: 50%;
     background: color-mix(in srgb, var(--ishare-text-muted) 42%, #fff);
     box-shadow: none;
@@ -687,25 +643,25 @@
   }
 
   .naming-price-filter__input:focus-visible::-webkit-slider-thumb {
-    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 0 0 0.1875rem rgba(15, 23, 42, 0.1);
   }
 
   .naming-price-filter__input:focus-visible::-moz-range-thumb {
-    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 0 0 0.1875rem rgba(15, 23, 42, 0.1);
   }
 
   .naming-price-filter:not(.naming-price-filter--active) .naming-price-filter__input:not(:disabled):hover::-webkit-slider-thumb {
     transform: scale(1.06);
     border-color: #fff;
     background: var(--ishare-primary);
-    box-shadow: 0 0 0 3px rgba(var(--ishare-primary-rgb), 0.15);
+    box-shadow: 0 0 0 0.1875rem rgba(var(--ishare-primary-rgb), 0.15);
   }
 
   .naming-price-filter:not(.naming-price-filter--active) .naming-price-filter__input:not(:disabled):hover::-moz-range-thumb {
     transform: scale(1.06);
     border-color: #fff;
     background: var(--ishare-primary);
-    box-shadow: 0 0 0 3px rgba(var(--ishare-primary-rgb), 0.15);
+    box-shadow: 0 0 0 0.1875rem rgba(var(--ishare-primary-rgb), 0.15);
   }
 
   .naming-price-filter--active .naming-price-filter__input:not(:disabled):hover::-webkit-slider-thumb {
@@ -743,5 +699,169 @@
 
   .naming-price-filter--active .naming-price-filter__input:focus-visible::-moz-range-thumb {
     box-shadow: 0 0 0 3px rgba(var(--ishare-primary-rgb), 0.22);
+  }
+
+  /*
+   * Dev panel checkbox — checked fill matches tab `--dev-panel-primary`
+   * (same as the label’s has-[:checked] text).
+   */
+  .dev-panel-checkbox {
+    --dev-panel-checkbox-accent: var(--dev-panel-primary, var(--dev-chrome-accent, #4ade80));
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    border: 1px solid var(--dev-panel-border);
+    border-radius: 2px;
+    background-color: var(--dev-panel-input-bg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.55rem;
+    transition:
+      border-color 150ms ease-out,
+      background-color 150ms ease-out;
+  }
+
+  .dev-panel-checkbox:hover {
+    border-color: color-mix(in srgb, var(--dev-panel-fg) 45%, transparent);
+  }
+
+  .dev-panel-checkbox:checked {
+    border-color: var(--dev-panel-checkbox-accent);
+    background-color: var(--dev-panel-checkbox-accent);
+    /* Dark tick on accent fill (readable on green / teal / pink / yellow). */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%230f172a' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 6.2 5 8.7 9.5 3.5'/%3E%3C/svg%3E");
+  }
+
+  .dev-panel-checkbox:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 1px var(--dev-panel-bg),
+      0 0 0 2px var(--dev-panel-checkbox-accent);
+  }
+
+  /*
+   * Dev panel radio — same accent as checkbox, circular with inner dot.
+   * Used for exclusive choices (e.g. branding mode).
+   */
+  .dev-panel-radio {
+    --dev-panel-radio-accent: var(--dev-panel-primary, var(--dev-chrome-accent, #4ade80));
+    appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    border: 1px solid var(--dev-panel-border);
+    border-radius: 999px;
+    background-color: var(--dev-panel-input-bg);
+    background-position: center;
+    background-repeat: no-repeat;
+    transition:
+      border-color 150ms ease-out,
+      background-color 150ms ease-out,
+      background-image 150ms ease-out;
+  }
+
+  .dev-panel-radio:hover {
+    border-color: color-mix(in srgb, var(--dev-panel-fg) 45%, transparent);
+  }
+
+  .dev-panel-radio:checked {
+    border-color: var(--dev-panel-radio-accent);
+    background-image: radial-gradient(circle,
+        var(--dev-panel-radio-accent) 0 38%,
+        transparent 40%);
+  }
+
+  .dev-panel-radio:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 1px var(--dev-panel-bg),
+      0 0 0 2px var(--dev-panel-radio-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .dev-panel-checkbox,
+    .dev-panel-radio {
+      transition: none;
+    }
+  }
+
+  /*
+   * Dev tools panel host — open/close + layout-enter motion.
+   * Tour stage width stays snap-only; this animates the panel chrome only.
+   */
+  .dev-tools-panel-host {
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s;
+  }
+
+  .dev-tools-panel-host[data-open='true'] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .dev-tools-panel-host[data-open='false'] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.2s;
+  }
+
+  .dev-tools-panel-host[data-dev-layout='floating'][data-open='false'] {
+    transform: translateY(6px) scale(0.98);
+  }
+
+  .dev-tools-panel-host[data-dev-layout='overlay'][data-open='false'],
+  .dev-tools-panel-host[data-dev-layout='push'][data-open='false'] {
+    transform: translateX(-12px);
+  }
+
+  /*
+   * Push host backing matches presentation rail underpaint. DevTools delays the
+   * stage rail until open/layout motion ends so the underpaint never flashes
+   * through translucent glass mid-animation.
+   */
+  .dev-tools-panel-host[data-dev-layout='push'] {
+    background: #fff;
+  }
+
+  .dev-tools-panel-host[data-dev-layout='push'][data-dev-theme='light'] {
+    background: #000;
+  }
+
+  .dev-tools-panel-host[data-layout-enter='1'] {
+    animation: dev-tools-panel-layout-enter 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes dev-tools-panel-layout-enter {
+    from {
+      opacity: 0.4;
+      transform: translateX(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dev-tools-panel-host {
+      transition: none;
+    }
+
+    .dev-tools-panel-host[data-open='false'] {
+      transition: none;
+      transform: none;
+    }
+
+    .dev-tools-panel-host[data-layout-enter='1'] {
+      animation: none;
+    }
   }
 }

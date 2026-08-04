@@ -87,7 +87,9 @@ export const tourNavHistoryGroupBtnClassName = cn(
 export const tourNavHistoryBtnIconClassName = materialSymbolCompactClassName;
 
 export const tourNavBreadcrumbListClassName = cn(
-  'm-0 flex min-w-0 max-w-full list-none flex-nowrap items-center gap-0 overflow-hidden p-0',
+  // pl reserves room for the current-scene pulse ring at the trail root
+  // (no separator gap to the left) without widening dot↔title spacing.
+  'm-0 flex min-w-0 max-w-full list-none flex-nowrap items-center gap-0 overflow-hidden p-0 pl-1.5',
   'font-display text-md font-normal leading-[1.25] tracking-[-0.01em]',
   'max-[480px]:text-sm',
 );
@@ -134,7 +136,7 @@ export const tourNavBreadcrumbPulseDotClassName = cn(
   'relative size-2 shrink-0 rounded-full bg-primary',
   'shadow-[0_0_0_0_rgba(var(--ishare-primary-rgb),0.45)]',
   'animate-tour-nav-dot-glow motion-reduce:animate-none',
-  'max-[480px]:size-[7px]',
+  'max-[480px]:size-[0.4375rem]',
   // inset-0 keeps the ring geometrically centered while scale() expands.
   'before:pointer-events-none before:absolute before:inset-0 before:z-0',
   'before:rounded-full before:border before:border-[rgba(var(--ishare-primary-rgb),0.7)]',
@@ -183,8 +185,8 @@ export const TOUR_BREADCRUMB_SIBLING_MENU_ATTR =
 export const tourBreadcrumbSiblingMenuSelector = `[${TOUR_BREADCRUMB_SIBLING_MENU_ATTR}]`;
 
 export const tourNavBreadcrumbSiblingMenuClassName = cn(
-  'ishare-scrollbar fixed z-[var(--tour-chrome-menu-z-index)] m-0 flex max-h-[min(240px,40vh)] w-max min-w-[10rem] flex-col gap-0',
-  'max-w-[min(240px,calc(100vw-32px))] list-none overflow-x-clip overflow-y-auto overscroll-contain rounded-lg origin-top',
+  'ishare-scrollbar fixed z-[var(--tour-chrome-menu-z-index)] m-0 flex max-h-[min(15rem,40vh)] w-max min-w-[10rem] flex-col gap-0',
+  'max-w-[min(15rem,calc(100vw-2rem))] list-none overflow-x-clip overflow-y-auto overscroll-contain rounded-lg origin-top',
   'border border-[color:var(--ishare-border)] bg-white/92 p-1 shadow-[var(--ishare-glass-dock-shadow)]',
 );
 
@@ -234,7 +236,7 @@ export const tourNavBreadcrumbSceneInfoButtonClassName = cn(
 
 export const tourNavActionsRootClassName = cn(
   'absolute top-[var(--tour-chrome-inset-top)] right-[var(--tour-chrome-inset-right)] z-[var(--tour-chrome-z-index)] flex flex-col-reverse items-end',
-  '[--tour-directory-space:16px] [--tour-directory-divider-space:32px] [--tour-directory-section-group-lead-extra:8px] [--tour-directory-group-gap:28px] [--tour-directory-group-content-lead:8px]',
+  '[--tour-directory-space:1rem] [--tour-directory-divider-space:2rem] [--tour-directory-section-group-lead-extra:0.5rem] [--tour-directory-group-gap-idle:1.25rem] [--tour-directory-group-content-lead:0.5rem]',
 );
 
 export const tourNavActionsDockClassName = cn(
@@ -245,7 +247,7 @@ export const tourNavActionsDockClassName = cn(
 export const tourNavDockOverflowWrapClassName = cn('relative');
 
 export const tourNavDockOverflowMenuClassName = cn(
-  'absolute top-[calc(100%+6px)] right-0 z-20 m-0 w-max min-w-[190px] max-w-[min(260px,calc(100vw-96px))] list-none rounded-lg origin-top-right',
+  'absolute top-[calc(100%+0.375rem)] right-0 z-20 m-0 w-max min-w-[11.875rem] max-w-[min(16.25rem,calc(100vw-6rem))] list-none rounded-lg origin-top-right',
   'border border-[color:var(--ishare-border)] bg-white/95 p-1.5 shadow-[0_12px_28px_rgba(15,23,42,0.14)]',
 );
 
@@ -301,7 +303,7 @@ export const tourNavExploreSearchPillVariants = cva(
         false:
           'h-[var(--ishare-panel-header-btn-size)] w-[var(--ishare-panel-header-btn-size)] max-w-[var(--ishare-panel-header-btn-size)] shrink-0 border-b border-transparent pb-0',
         true: cn(
-          'h-[var(--ishare-panel-header-btn-size)] min-w-0 w-full max-w-[240px] flex-1 basis-24 gap-1.5',
+          'h-[var(--ishare-panel-header-btn-size)] min-w-0 w-full max-w-[15rem] flex-1 basis-24 gap-1.5',
           'border-b border-[color:var(--ishare-border)]',
           'focus-within:border-primary-light',
         ),
@@ -335,7 +337,7 @@ export const tourNavExploreSearchCloseClassName = cn(
 export const tourNavExploreSortRootClassName = cn('relative shrink-0');
 
 export const tourNavExploreRefineMenuClassName = cn(
-  'fixed z-[var(--tour-chrome-menu-z-index)] m-0 w-max max-w-[min(280px,calc(100vw-96px))] rounded-lg origin-top-right',
+  'fixed z-[var(--tour-chrome-menu-z-index)] m-0 w-max max-w-[min(17.5rem,calc(100vw-6rem))] rounded-lg origin-top-right',
   'border border-[color:var(--ishare-border)] bg-white/92 p-2 shadow-[var(--ishare-glass-dock-shadow)]',
 );
 
@@ -366,7 +368,7 @@ export const tourNavExploreRefineTriggerActiveClassName = cn(
 );
 
 export const tourNavExploreSortMenuClassName = cn(
-  'absolute top-[calc(100%+6px)] right-0 z-30 m-0 w-max min-w-[190px] max-w-[min(260px,calc(100vw-96px))] list-none rounded-lg origin-top-right',
+  'absolute top-[calc(100%+0.375rem)] right-0 z-30 m-0 w-max min-w-[11.875rem] max-w-[min(16.25rem,calc(100vw-6rem))] list-none rounded-lg origin-top-right',
   'border border-[color:var(--ishare-border)] bg-white/92 p-1 shadow-[var(--ishare-glass-dock-shadow)]',
 );
 
@@ -461,7 +463,6 @@ export const tourNavPanelSlotVariants = cva(
     // Lift the header above the overlaid FAB dock so title + close stay clickable
     // (explore's directory header already does this in CSS).
     '[&_.tour-glass-panel__header]:relative [&_.tour-glass-panel__header]:z-10',
-    '[&_.tour-glass-panel__header]:py-3.5',
     '[&_.tour-glass-panel__title-row]:items-center',
     '[&_.tour-glass-panel__title-actions]:min-w-0',
     '[&_.tour-glass-panel__title-actions]:overflow-visible',
@@ -473,16 +474,16 @@ export const tourNavPanelSlotVariants = cva(
     variants: {
       panel: {
         explore: cn(
-          '[&_.tour-glass-panel]:w-[min(var(--tour-explore-panel-width),calc(100vw-48px))]',
-          'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),var(--tour-explore-panel-width-mobile-max))]',
+          '[&_.tour-glass-panel]:w-[min(var(--tour-explore-panel-width),calc(100vw-3rem))]',
+          'max-[480px]:[&_.tour-glass-panel]:w-[var(--tour-chrome-dock-panel-width)]',
         ),
         help: cn(
-          '[&_.tour-glass-panel]:w-[min(420px,calc(100vw-48px))]',
-          'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
+          '[&_.tour-glass-panel]:w-[min(26.25rem,calc(100vw-3rem))]',
+          'max-[480px]:[&_.tour-glass-panel]:w-[var(--tour-chrome-dock-panel-width)]',
         ),
         share: cn(
-          '[&_.tour-glass-panel]:w-[min(420px,calc(100vw-48px))]',
-          'max-[480px]:[&_.tour-glass-panel]:w-[min(calc(100vw-32px),360px)]',
+          '[&_.tour-glass-panel]:w-[min(26.25rem,calc(100vw-3rem))]',
+          'max-[480px]:[&_.tour-glass-panel]:w-[var(--tour-chrome-dock-panel-width)]',
         ),
       },
     },
@@ -497,7 +498,7 @@ export const tourNavPanelScrollClassName = cn(
 );
 
 export const tourNavPanelScrollInnerClassName = cn(
-  'px-[var(--tour-directory-inline-padding,20px)] pb-5 max-[480px]:pb-[18px]',
+  'px-[var(--tour-directory-inline-padding,1.25rem)] pb-5 max-[480px]:pb-[1.125rem]',
 );
 
 /**
@@ -513,17 +514,22 @@ export const tourNavPanelLogoClassName = cn(
 );
 
 export const tourNavLogoLinkClassName = cn(
-  'block max-w-60 bg-transparent p-0 no-underline max-[480px]:max-w-[200px]',
+  'block max-w-60 bg-transparent p-0 no-underline max-[480px]:max-w-[12.5rem]',
 );
 
 export const tourNavLogoClassName = cn(
   'block h-11 w-full object-contain object-center max-[480px]:h-9',
 );
 
-export const tourNavListClassName = cn('m-0 flex list-none flex-col gap-1 p-0');
+export const tourNavListClassName = cn(
+  'tour-nav-directory-list',
+  'm-0 flex list-none flex-col gap-1 p-0',
+);
 
 export const tourNavLocationGalleryListClassName = cn(
-  'm-0 grid list-none grid-cols-2 items-stretch gap-3 p-0 max-[480px]:grid-cols-1',
+  'tour-nav-directory-gallery',
+  /* Leave margin-bottom free — open groups set it in globals (@layer components). */
+  'mt-0 ml-0 mr-0 grid list-none grid-cols-2 items-stretch gap-3 p-0 max-[480px]:grid-cols-1',
 );
 
 /** Client intro catalog cards — lighter chrome than explore gallery (no 2px border). */
@@ -552,7 +558,7 @@ export const tourNavLocationGalleryCardClassName = cva(
           '[&_.tour-nav-gallery-card-hero]:after:inset-0',
           '[&_.tour-nav-gallery-card-hero]:after:z-[5]',
           '[&_.tour-nav-gallery-card-hero]:after:rounded-lg',
-          '[&_.tour-nav-gallery-card-hero]:after:border-[4px]',
+          '[&_.tour-nav-gallery-card-hero]:after:border-[0.25rem]',
           '[&_.tour-nav-gallery-card-hero]:after:border-primary',
           '[&_.tour-nav-gallery-card-hero]:after:content-[""]',
         ),
@@ -595,7 +601,7 @@ export const tourNavLocationGalleryCardMetaClassName = cn(
 
 /** Hero badge placement — shared by location + naming gallery cards. */
 export const tourNavLocationGalleryHeroBadgePlacementClassName = cn(
-  'pointer-events-none absolute top-2 right-2 z-[2] max-w-[calc(100%-16px)]',
+  'pointer-events-none absolute top-2 right-2 z-[2] max-w-[calc(100%-1rem)]',
 );
 
 /** Inline row for current + status chips on naming gallery heroes. */
@@ -805,7 +811,7 @@ export const tourNavDirectoryItemVariants = cva(
         false: cn(
           'cursor-pointer',
           'border-transparent bg-transparent',
-          'hover:bg-white/[0.3] focus-within:bg-white/[0.3]',
+          'hover:bg-white/[0.55] focus-within:bg-white/[0.55]',
         ),
         true: 'cursor-default',
       },
@@ -815,7 +821,7 @@ export const tourNavDirectoryItemVariants = cva(
         kind: 'location',
         active: false,
         class: cn(
-          'hover:bg-white/[0.3] focus-within:bg-white/[0.3]',
+          'hover:bg-white/[0.55] focus-within:bg-white/[0.55]',
           'hover:text-foreground focus-within:text-foreground',
           'hover:[&_[data-tour-nav-location-icon]]:text-primary',
           'focus-within:[&_[data-tour-nav-location-icon]]:text-primary',
@@ -849,7 +855,7 @@ export const tourNavDirectoryItemVariants = cva(
           'bg-[var(--ishare-active-item-bg)]',
           'border-[color:var(--ishare-active-item-border)]',
           'text-foreground',
-          'hover:enabled:bg-white/[0.3] focus-visible:enabled:bg-white/[0.3]',
+          'hover:enabled:bg-white/[0.55] focus-visible:enabled:bg-white/[0.55]',
           '[&_.tour-nav-item-label]:font-semibold',
           '[&_.tour-nav-item-meta]:font-normal',
           '[&_.tour-nav-item-description]:font-normal',
@@ -1047,16 +1053,25 @@ export const tourNavEmptyClassName = cn(
 
 /** Section chrome (Locations / Naming) — label centered between hairlines. */
 export const tourNavSectionTitleRowClassName = cn(
+  'tour-nav-directory-section-title',
   'mb-[var(--tour-directory-space)] flex items-center gap-5 py-1.5',
 );
 
 export const tourNavSectionTitleClassName = cn(
   'm-0 flex min-w-0 shrink-0 items-center gap-1',
   'font-display text-sm font-semibold uppercase leading-none tracking-[0.04em] text-muted',
+  'transition-colors duration-150',
+  'group-hover/section-toggle:text-foreground',
+  'group-focus-visible/section-toggle:text-foreground',
+  'motion-reduce:transition-none',
 );
 
 export const tourNavSectionTitleIconClassName = cn(
   'inline-flex size-[1.125rem] shrink-0 items-center justify-center text-muted',
+  'transition-colors duration-150',
+  'group-hover/section-toggle:text-foreground',
+  'group-focus-visible/section-toggle:text-foreground',
+  'motion-reduce:transition-none',
 );
 
 export const tourNavSectionTitleLabelClassName = cn('min-w-0 leading-none');
@@ -1068,7 +1083,7 @@ export const tourNavSectionTitleDividerLineClassName = cn(
 
 /** Pinned "current location" block above the grouped directory lists. */
 export const tourNavCurrentPinnedClassName = cn(
-  'mb-[var(--tour-directory-space,16px)] flex flex-col',
+  'mb-[var(--tour-directory-space,1rem)] flex flex-col',
 );
 
 export const tourNavCurrentPinnedLabelClassName = cn(
@@ -1112,7 +1127,7 @@ export const tourNavCurrentDetailHeroChipClassName = cn(
 );
 
 export const tourNavDirectoryLeadRootClassName = cn(
-  'relative mx-[var(--tour-directory-inline-padding,20px)] mb-1 box-border w-[calc(100%-2*var(--tour-directory-inline-padding,20px))] max-w-full min-w-0 shrink-0',
+  'relative mx-[var(--tour-directory-inline-padding,1.25rem)] mb-1 box-border w-[calc(100%-2*var(--tour-directory-inline-padding,1.25rem))] max-w-full min-w-0 shrink-0',
 );
 
 /** @deprecated Use {@link tourNavDirectoryLeadRootClassName} + {@link tourNavDirectoryLeadBodyClassName}. */
@@ -1211,7 +1226,7 @@ export const exploreDirectoryBackAnimateInClassName =
 export const EXPLORE_DIRECTORY_BACK_ENTER_X_PX = -16;
 
 export const tourNavExploreDirectoryPanelClassName = cn(
-  'flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,16px)]',
+  'flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,1rem)]',
   'motion-reduce:animate-none',
 );
 
@@ -1224,14 +1239,14 @@ export const tourNavSceneDetailLayoutClassName = cn(
  * Visit footer can stay full-bleed of the panel body.
  */
 export const tourNavSceneDetailMainClassName = cn(
-  'tour-nav-scene-detail-main ishare-scrollbar flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,16px)]',
+  'tour-nav-scene-detail-main ishare-scrollbar flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,1rem)]',
   'overflow-x-clip overflow-y-scroll',
-  'px-[var(--tour-directory-inline-padding,20px)] pb-5 max-[480px]:pb-[18px]',
+  'px-[var(--tour-directory-inline-padding,1.25rem)] pb-5 max-[480px]:pb-[1.125rem]',
 );
 
 /** Hero image → title/description block. */
 export const tourNavSceneDetailHeroCopyStackClassName = cn(
-  'flex flex-col gap-[var(--tour-directory-divider-space,24px)]',
+  'flex flex-col gap-[var(--tour-directory-divider-space,1.5rem)]',
 );
 
 export const tourNavSceneDetailBackClassName = cn(
@@ -1256,7 +1271,7 @@ export const tourNavSceneDetailHeroClassName = (
     active &&
       cn(
         'after:pointer-events-none after:absolute after:inset-0 after:z-[5]',
-        'after:rounded-xl after:border-[4px] after:border-primary after:content-[""]',
+        'after:rounded-xl after:border-[0.25rem] after:border-primary after:content-[""]',
       ),
   );
 
@@ -1268,7 +1283,7 @@ export const tourNavSceneDetailHeroSkeletonClassName =
   PREVIEW_HERO_SKELETON_CLASS;
 
 export const tourNavSceneDetailCopyClassName = cn(
-  'flex min-w-0 flex-col gap-[var(--tour-directory-space,16px)]',
+  'flex min-w-0 flex-col gap-[var(--tour-directory-space,1rem)]',
 );
 
 export const tourNavSceneDetailTitleClassName = cn(
@@ -1306,7 +1321,7 @@ export const tourNavLocationGalleryHeroTitleActionsClassName = cn(
 );
 
 export const tourNavDirectoryTabsClassName = cn(
-  'mx-[var(--tour-directory-inline-padding,20px)] mb-2 mt-0 box-border w-[calc(100%-2*var(--tour-directory-inline-padding,20px))] max-w-full min-w-0 shrink-0 overflow-y-hidden',
+  'mx-[var(--tour-directory-inline-padding,1.25rem)] mb-2 mt-0 box-border w-[calc(100%-2*var(--tour-directory-inline-padding,1.25rem))] max-w-full min-w-0 shrink-0 overflow-y-hidden',
   segmentedTabsTrackChromeClassName,
   // Desktop — equal full-width pills
   'min-[1024px]:[&_[data-segmented-tab]]:min-w-0 min-[1024px]:[&_[data-segmented-tab]]:flex-1 min-[1024px]:[&_[data-segmented-tab]]:basis-0 min-[1024px]:[&_[data-segmented-tab]]:overflow-hidden',
@@ -1326,7 +1341,7 @@ export const tourNavDirectoryGroupedListClassName = cva('flex flex-col', {
   variants: {
     /** Extra lead when section title is followed by a group header (not images). */
     sectionLead: {
-      true: '[&>:first-child]:mt-[var(--tour-directory-section-group-lead-extra,8px)]',
+      true: '[&>:first-child]:mt-[var(--tour-directory-section-group-lead-extra,0.5rem)]',
       false: '',
     },
   },
@@ -1335,7 +1350,7 @@ export const tourNavDirectoryGroupedListClassName = cva('flex flex-col', {
 
 /** Collapsible department group in the grouped locations list. */
 export const tourNavLocationGroupClassName = cn(
-  'tour-nav-location-group flex flex-col [&+&]:mt-[var(--tour-directory-group-gap,28px)]',
+  'tour-nav-location-group flex flex-col',
 );
 
 export const tourNavLocationGroupExpandedClassName =
@@ -1351,22 +1366,145 @@ export const tourNavLocationGroupPanelContentClassName =
   'tour-nav-location-group__content';
 
 export const tourNavLocationGroupHeaderClassName = cn(
-  // Flush left with the list-item card; pr keeps trailing meta lined up with
-  // item content (px-3 + 1px border).
-  'flex w-full items-center gap-1 border-none bg-transparent p-0 pr-[calc(0.75rem+1px)] text-left',
+  'tour-nav-location-group__header group/dept',
+  'flex w-full items-center gap-1 border-none bg-transparent pt-0 px-0 pb-0 text-left',
   'cursor-pointer',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
   'disabled:cursor-not-allowed disabled:opacity-50',
 );
 
+/** Space under an open department title before list/gallery (also on pin bar). */
+export const tourNavLocationGroupHeaderOpenClassName = cn(
+  'pb-[var(--tour-directory-group-content-lead,0.5rem)]',
+);
+
+/** Outside-scroll pin strip shell. */
+export const tourNavDirectoryPinBarShellClassName = cn(
+  'tour-nav-directory-pin-bar',
+  'shrink-0 overflow-hidden',
+);
+
+/** Outside-scroll pin strip for Explore section + department titles.
+ * Extra right pad matches the scroller’s scrollbar gutter (set as
+ * `--directory-pin-scrollbar-gutter` from ExploreDirectoryScrollPins). */
+export const tourNavDirectoryPinBarClassName = cn(
+  'flex flex-col gap-0',
+  'pl-[var(--tour-directory-inline-padding,1.25rem)]',
+  'pr-[calc(var(--tour-directory-inline-padding,1.25rem)+var(--directory-pin-scrollbar-gutter,0px))]',
+);
+
+/**
+ * Pin bar + scroller — no flex gap between them so pinned header spacing
+ * matches in-flow (section mb / department title pb), not panel gap.
+ * `relative` hosts the scroll-to-top control over the scroller body.
+ */
+export const tourNavDirectoryPinScrollStackClassName = cn(
+  'relative flex min-h-0 min-w-0 flex-1 flex-col',
+);
+
+/** Explore body — clips scroll-to-top enter/exit to the scroller stack. */
+export const tourNavDirectoryScrollToTopHostClassName = cn(
+  'pointer-events-none absolute inset-0 z-10 overflow-hidden',
+);
+
+/** Resting slot — bottom-right inside the explore body. */
+export const tourNavDirectoryScrollToTopClassName = cn(
+  'absolute right-3.5 bottom-3.5',
+  'transition-[translate,opacity,scale] duration-[320ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+  'motion-reduce:transition-none',
+);
+
+export const tourNavDirectoryScrollToTopEnteredClassName = cn(
+  'translate-y-0 scale-100 opacity-100',
+);
+
+/** Exit / pre-enter: below the body + fade. */
+export const tourNavDirectoryScrollToTopExitedClassName = cn(
+  'translate-y-[calc(100%+0.875rem)] scale-90 opacity-0',
+);
+
+export const tourNavDirectoryScrollToTopBtnClassName = cn(
+  'pointer-events-auto flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full border-none',
+  'bg-primary text-white',
+  'shadow-[0_14px_32px_rgba(15,23,42,0.28),0_6px_14px_rgba(15,23,42,0.16)]',
+  'transition-[background,box-shadow,translate] duration-200 ease-out',
+  'hover:bg-primary-dark hover:-translate-y-1.5',
+  'hover:shadow-[0_20px_40px_rgba(15,23,42,0.34),0_10px_18px_rgba(15,23,42,0.2)]',
+  'focus-visible:bg-primary-dark',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+  'active:translate-y-0 active:scale-[0.96]',
+  'motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:active:scale-100',
+);
+
+export const tourNavDirectoryPinSectionClassName = cn(
+  'mb-[var(--tour-directory-space)] flex items-center gap-5 py-1.5',
+);
+
+/** Clickable center cluster between hairlines — expand/collapse all groups. */
+export const tourNavSectionTitleClusterButtonClassName = cn(
+  'group/section-toggle',
+  'inline-flex min-w-0 shrink-0 items-center gap-2 rounded-md px-0.5 py-0.5',
+  'cursor-pointer border-none bg-transparent font-[inherit] text-inherit',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+  'disabled:cursor-not-allowed disabled:opacity-50',
+);
+
+/** Wrapper that rotates — material glyph itself is not transformed (matches Help accordion). */
+export const tourNavSectionTitleToggleClassName = cn(
+  'inline-flex size-5 shrink-0 items-center justify-center origin-center',
+  'text-muted transition-[color,rotate] duration-300 ease-out',
+  'group-hover/section-toggle:text-primary',
+  'group-focus-visible/section-toggle:text-primary',
+  'motion-reduce:transition-none',
+);
+
+export const tourNavSectionTitleToggleOpenClassName = cn(
+  'rotate-90 text-primary',
+);
+
+/** Glyph inside the rotating wrapper — no transform here. */
+export const tourNavSectionTitleChevronClassName = cn('block leading-none');
+
+/** @deprecated Open state lives on the toggle wrapper now. */
+export const tourNavSectionTitleChevronOpenClassName =
+  tourNavSectionTitleToggleOpenClassName;
+
+/** Non-interactive section label cluster (no groups toggle). */
+export const tourNavSectionTitleClusterClassName = cn(
+  'flex min-w-0 shrink-0 items-center gap-0.5',
+);
+
+/** @deprecated Row is no longer the click target — use cluster button. */
+export const tourNavSectionTitleRowButtonClassName = cn(
+  'tour-nav-directory-section-title',
+  'mb-[var(--tour-directory-space)] flex w-full items-center gap-5 py-1.5',
+  'cursor-pointer border-none bg-transparent p-0 font-[inherit] text-inherit',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+  'disabled:cursor-not-allowed disabled:opacity-50',
+);
+
+export const tourNavDirectoryPinGroupClassName = cn(
+  'group/dept flex w-full items-center gap-1 border-none bg-transparent pt-0 px-0 pb-0 text-left',
+  'cursor-pointer',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-light',
+);
+
+/** Wrapper that rotates — material glyph itself is not transformed (matches section / Help accordion).
+ * TW v4 `rotate-*` sets the `rotate` property (not `transform`); transition must name `rotate`. */
 export const tourNavLocationGroupChevronClassName = cn(
-  'shrink-0 text-muted transition-transform duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
+  'inline-flex size-5 shrink-0 items-center justify-center origin-center',
+  'text-muted transition-[color,rotate] duration-[var(--tour-directory-group-expand-duration,0.35s)] ease-[var(--tour-directory-group-expand-ease,cubic-bezier(0.22,1,0.36,1))]',
+  'group-hover/dept:text-primary group-focus-visible/dept:text-primary',
   'motion-reduce:transition-none',
 );
 
 export const tourNavLocationGroupChevronOpenClassName = cn(
   'rotate-90 text-primary',
 );
+
+/** Glyph inside the rotating wrapper — no transform here. */
+export const tourNavLocationGroupChevronIconClassName =
+  cn('block leading-none');
 
 export const tourNavLocationGroupTitleClassName = cn(
   'min-w-0 flex-1 truncate font-display text-lg font-semibold text-foreground',
@@ -1378,7 +1516,10 @@ export const tourNavLocationGroupMetaClassName = cn(
 );
 
 /** Wraps the per-scene naming subgroups inside a sector group (list view). */
-export const tourNavNamingSceneSubgroupsClassName = cn('flex flex-col gap-3');
+export const tourNavNamingSceneSubgroupsClassName = cn(
+  'tour-nav-naming-scene-subgroups',
+  'flex flex-col gap-3',
+);
 
 /** Scene (place) subheader above its naming items — smaller than the sector title.
  *  Align with the list-item thumbnail column (naming row px-3.5 + 1px border). */
@@ -1447,7 +1588,7 @@ export const tourNavContactBrandVariants = cva(
         true: cn(
           'mb-5 gap-0',
           '[&_.tour-nav-panel-logo]:mx-0 [&_.tour-nav-panel-logo]:mb-0 [&_.tour-nav-panel-logo]:mt-0 [&_.tour-nav-panel-logo]:w-full [&_.tour-nav-panel-logo]:justify-start',
-          '[&_a]:max-w-[280px] [&_img]:h-[52px]',
+          '[&_a]:max-w-[17.5rem] [&_img]:h-[3.25rem]',
           'max-[480px]:[&_a]:max-w-60 max-[480px]:[&_img]:h-11',
         ),
         false: '',

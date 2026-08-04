@@ -49,7 +49,7 @@ function categoryFilterId(category: CategoryFilter): string {
 
 const INTRO_PANEL_CLASS = cn(
   'tour-glass-panel--intro relative z-[1] mx-auto flex w-[min(640px,calc(100vw-48px))] shrink-0 flex-col',
-  'max-[480px]:w-[min(100%,calc(100vw-32px))]',
+  'max-[480px]:w-[min(100%,calc(100vw-2rem))]',
   '[&_.tour-glass-panel__header]:shrink-0',
 );
 
@@ -64,7 +64,7 @@ const INTRO_FILTERS_CLASS = cn(
 );
 
 const INTRO_GALLERY_SCROLL_INNER_CLASS = cn(
-  'px-5 pb-5 max-[480px]:px-4 max-[480px]:pb-[18px]',
+  'px-5 pb-5 max-[480px]:px-4 max-[480px]:pb-[1.125rem]',
 );
 
 export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {

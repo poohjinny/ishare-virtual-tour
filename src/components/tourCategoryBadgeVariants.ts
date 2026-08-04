@@ -11,7 +11,7 @@ export type TourCategoryBadgeSlug =
   | 'demo';
 
 export const tourCategoryBadgeVariants = cva(
-  'max-w-[120px] gap-0.5 border-none px-1.5 py-[2px] pr-2 pl-1.5 font-display font-semibold tracking-tight',
+  'max-w-[7.5rem] gap-0.5 border-none px-1.5 py-[0.125rem] pr-2 pl-1.5 font-display font-semibold tracking-tight',
   {
     variants: {
       category: {

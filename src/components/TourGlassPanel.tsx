@@ -5,7 +5,7 @@ import { BADGE_CLASS } from './ui/badgeClasses';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
-  MATERIAL_SYMBOL_SIZE_22,
+  MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
   materialSymbolBadgeClassName,
 } from './ui/materialSymbolClasses';
 import {
@@ -26,7 +26,7 @@ export type TourGlassPanelAnimation = 'enter' | 'exit' | 'none';
 
 export function GlassPanelCloseIcon({
   className,
-  sizePx = MATERIAL_SYMBOL_SIZE_22,
+  sizePx = MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
 }: {
   className?: string;
   sizePx?: number;

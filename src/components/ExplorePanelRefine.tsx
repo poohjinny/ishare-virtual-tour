@@ -44,7 +44,7 @@ import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
-  MATERIAL_SYMBOL_SIZE_22,
+  MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
 } from './ui/materialSymbolClasses';
 import {
   tourNavExploreRefineFilterBlockClassName,
@@ -356,7 +356,7 @@ export function ExplorePanelRefine({
           <MaterialSymbol
             name='tune'
             className={tourGlassPanelCloseIconClassName}
-            sizePx={MATERIAL_SYMBOL_SIZE_22}
+            sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
           />
         </button>
       </IconTooltip>

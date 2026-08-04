@@ -1,7 +1,7 @@
 import { useEffect, type RefObject } from 'react';
 
 import { isTypingTarget } from '../utils/isTypingTarget';
-import { handleTourFullscreenHotkey } from '../viewer/tourFullscreenNavbarButton';
+import { handleTourFullscreenHotkey } from '../viewer-shared/tourFullscreen';
 
 interface UseTourViewerShortcutsOptions {
   disabled?: boolean;

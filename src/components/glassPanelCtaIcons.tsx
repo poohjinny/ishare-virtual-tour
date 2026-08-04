@@ -32,7 +32,7 @@ export function PopupCtaIcon({ kind }: { kind: PopupCtaIconKind }) {
 
 export function materialSymbolHtml(
   name: string,
-  options: { className?: string; sizePx: number; filled?: boolean },
+  options: { className?: string; sizePx?: number; filled?: boolean } = {},
 ): string {
   const { className = '', sizePx, filled = false } = options;
   const classes = [
@@ -43,8 +43,13 @@ export function materialSymbolHtml(
   ]
     .filter(Boolean)
     .join(' ');
-  const variation = materialSymbolVariation(filled ? 1 : 0, sizePx);
-  return `<span class="${classes}" style="font-size:${sizePx}px;line-height:1;font-variation-settings:${variation}" aria-hidden="true">${name}</span>`;
+  const opsz = sizePx ?? 16;
+  const variation = materialSymbolVariation(filled ? 1 : 0, opsz);
+  const sizeStyle =
+    sizePx !== undefined ?
+      `font-size:${sizePx / 16}rem;line-height:1;`
+    : 'line-height:1;';
+  return `<span class="${classes}" style="${sizeStyle}font-variation-settings:${variation}" aria-hidden="true">${name}</span>`;
 }
 
 export function glassPanelCtaIconHtml(

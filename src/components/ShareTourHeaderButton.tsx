@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
 import {
   TOUR_SHARE_COPIED_LABEL,
@@ -6,9 +6,13 @@ import {
 } from '../constants/tourShare';
 import type { ShareMessage } from '../utils/buildShareUrl';
 import { shareTourView, type ShareTourResult } from '../utils/shareTour';
+import { refreshIshareTooltipIfActive } from '../utils/ishareTooltipRuntime';
 import { ShareIcon } from './icons/ShareIcon';
-import { tooltipHostClassName } from './ui/tooltipClasses';
-import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
+import {
+  tooltipHostClassName,
+  tooltipHostPortalClassName,
+} from './ui/tooltipClasses';
+import { MATERIAL_SYMBOL_SIZE_CHROME_HEADER } from './ui/materialSymbolClasses';
 
 interface ShareTourHeaderButtonProps {
   shareUrl: string;
@@ -26,6 +30,7 @@ export function ShareTourHeaderButton({
   tooltipLabel,
   preferNative = true,
 }: ShareTourHeaderButtonProps) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleClick = useCallback(async () => {
@@ -40,12 +45,20 @@ export function ShareTourHeaderButton({
   const idleTooltip = tooltipLabel ?? ariaLabel;
   const tooltip = feedback ?? idleTooltip;
 
+  useEffect(() => {
+    const button = buttonRef.current;
+    if (!button) return;
+    refreshIshareTooltipIfActive(button);
+  }, [tooltip]);
+
   return (
     <button
+      ref={buttonRef}
       type='button'
       className={cn(
         'tour-glass-panel__header-btn',
         tooltipHostClassName,
+        tooltipHostPortalClassName,
         feedback && 'opacity-92',
       )}
       aria-label={feedback ?? ariaLabel}
@@ -56,7 +69,7 @@ export function ShareTourHeaderButton({
     >
       <ShareIcon
         className='tour-glass-panel__header-btn-icon'
-        sizePx={MATERIAL_SYMBOL_SIZE_16}
+        sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
       />
     </button>
   );

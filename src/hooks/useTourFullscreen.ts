@@ -3,7 +3,7 @@ import {
   bindPresentationFullscreenSync,
   isTourPresentationFullscreen,
   toggleTourFullscreen,
-} from '../viewer/tourFullscreenNavbarButton';
+} from '../viewer-shared/tourFullscreen';
 
 /** Syncs React state with tour / browser fullscreen (3D icon + label). */
 export function useTourFullscreen(

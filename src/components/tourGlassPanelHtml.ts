@@ -21,7 +21,7 @@ import {
   buildInlineMarkdownParagraphsHtml,
   formatInlineMarkdownHtml,
 } from '../utils/inlineMarkdown';
-import { formatCountValue } from '../viewer/navPreviewTotalCount';
+import { formatCountValue } from '../viewer-shared/navPreviewTotalCount';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import {
   glassPanelCtaIconHtml,
@@ -29,7 +29,7 @@ import {
 } from './glassPanelCtaIcons';
 import {
   MATERIAL_SYMBOL_SIZE_16,
-  MATERIAL_SYMBOL_SIZE_22,
+  MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
 } from './ui/materialSymbolClasses';
 import {
   resolvePopupCtaIconKind,
@@ -82,7 +82,7 @@ import {
 import {
   ANCHORED_PANEL_GAP_PX,
   NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
-} from '../viewer/anchoredPanelPosition';
+} from '../viewer-shared/anchoredPanelGap';
 
 export { youtubeEmbedUrl, initPopupVideoPlayers };
 
@@ -102,7 +102,7 @@ export const TOUR_DOCK_PANEL_WIDTH = 480;
 
 /**
  * Per-side breathing room used to cap anchored panel height. Kept larger than
- * NUDGE_TARGET_MARGIN_PX (24) in anchoredPanelCameraNudge so the fitted panel
+ * ANCHORED_PANEL_VIEWPORT_MARGIN_PX (24) in anchoredPanelLayout so the fitted panel
  * lands inside the nudge safe area — the camera nudge then rarely fires and
  * never has to make a large (jumpy) correction.
  */
@@ -333,7 +333,7 @@ function escapeHtml(text: string): string {
 export function glassPanelCloseIconHtml(): string {
   return materialSymbolHtml('close', {
     className: GLASS_PANEL.closeIcon,
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
+    sizePx: MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
   });
 }
 

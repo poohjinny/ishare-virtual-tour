@@ -40,17 +40,28 @@ export const VIRTUAL_TOUR_GUIDE_CTA = 'Ask a question';
 export const VIRTUAL_TOUR_GUIDE_FAB_LABEL = 'Ask Tour Guide';
 
 /**
- * Ask Guide FAB + panel product default. Keep off until the live guide API
- * is wired; flip to `true` to ship it. Dev QA can still force it on with
- * `?askGuide=1` (see Debug URL flags).
+ * Tour Guide FAB + panel product default. Keep off until the live guide API
+ * is wired; flip to `true` to ship it. Dev QA overrides with `?askGuide=1|0`
+ * (see Debug → Tour Guide).
  */
 export const SHOW_ASK_GUIDE = false;
 
-/** Effective Ask Guide visibility — product default or `?askGuide=1`. */
-export function isAskGuideEnabled(urlOverride = false): boolean {
-  return SHOW_ASK_GUIDE || urlOverride;
+/**
+ * Effective Tour Guide visibility.
+ *
+ * - `urlFlag === true` (`?askGuide=1`) — force on
+ * - `urlFlag === false` (`?askGuide=0`) — force off (Debug QA)
+ * - `urlFlag == null` — {@link SHOW_ASK_GUIDE} or per-tour `askGuideEnabled`
+ */
+export function isAskGuideEnabled(
+  urlFlag: boolean | null = null,
+  tourEnabled = false,
+): boolean {
+  if (urlFlag === true) return true;
+  if (urlFlag === false) return false;
+  return SHOW_ASK_GUIDE || tourEnabled;
 }
 
-/** Shown in Ask Guide body lead when `?guideMock=1` (scripted replies). */
+/** Shown in Tour Guide body lead when `?guideMock=1` (scripted replies). */
 export const VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE =
   'Demo preview — responses are scripted for now. Live AI assistance is coming in a future update.';

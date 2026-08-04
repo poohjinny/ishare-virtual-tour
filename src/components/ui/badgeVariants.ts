@@ -6,21 +6,15 @@ export const badgeVariants = cva(
     variants: {
       variant: {
         outline:
-          'gap-[7px] border border-[rgba(15,23,42,0.1)] bg-transparent py-1.5 pl-2.5 pr-[11px] text-2xs font-medium text-muted',
+          'gap-[0.4375rem] border border-[rgba(15,23,42,0.1)] bg-transparent py-1.5 pl-2.5 pr-[0.6875rem] text-2xs font-medium text-muted',
         fill: 'border-none',
       },
       size: {
-        sm: 'px-2 py-[3px] text-2xs font-medium',
-        lg: 'gap-1.5 px-3 py-[5px] font-display text-xs font-bold uppercase tracking-[0.04em]',
+        sm: 'px-2 py-[0.1875rem] text-2xs font-medium',
+        lg: 'gap-1.5 px-3 py-[0.3125rem] font-display text-xs font-bold uppercase tracking-[0.04em]',
       },
       tone: { none: '', muted: '', primary: '', accent: '' },
-      status: {
-        none: '',
-        open: '',
-        sold: '',
-        reserved: '',
-        soon: '',
-      },
+      status: { none: '', open: '', sold: '', reserved: '', soon: '' },
       uppercase: { true: 'uppercase tracking-[0.04em]', false: '' },
     },
     compoundVariants: [
@@ -78,7 +72,7 @@ export const badgeVariants = cva(
   },
 );
 
-export const badgeDotVariants = cva('size-[5px] shrink-0 rounded-full', {
+export const badgeDotVariants = cva('size-[0.3125rem] shrink-0 rounded-full', {
   variants: {
     tone: {
       muted: 'bg-muted/65',

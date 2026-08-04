@@ -138,7 +138,7 @@ export const guideAvatarLayerClassName = cn(
 /** Idle ring — thick stroke + soft static bloom (not the punchy bloom). */
 export const guideAvatarRingLayerClassName = cn(
   guideAvatarLayerClassName,
-  'border-[6px] border-[rgba(var(--ishare-primary-rgb),0.72)] bg-[rgba(var(--ishare-primary-rgb),0.08)]',
+  'border-[0.375rem] border-[rgba(var(--ishare-primary-rgb),0.72)] bg-[rgba(var(--ishare-primary-rgb),0.08)]',
   'shadow-[0_0_16px_rgba(var(--ishare-primary-rgb),0.3),inset_0_0_12px_rgba(var(--ishare-primary-rgb),0.12)]',
 );
 
@@ -206,11 +206,14 @@ export const aiFabLabelAccentClassName = cn('font-semibold text-primary');
 export const aiPanelVariants = cva(
   cn(
     // Height follows content; cap taller than the old fixed 640px panel.
-    'tour-glass-panel--ai h-auto max-h-[min(900px,calc(100vh-72px))] w-[480px] [transform-origin:bottom_right]',
-    '[--ai-panel-avatar-size:48px] [--ai-panel-header-gap:14px] [--ai-panel-inline-padding:24px]',
+    'tour-glass-panel--ai h-auto max-h-[min(56.25rem,calc(100vh-4.5rem))] w-[30rem] [transform-origin:bottom_right]',
+    // Header scale shares dock chrome tokens; body keep a slightly roomier inline pad.
+    '[--ai-panel-avatar-size:var(--tour-chrome-panel-header-avatar-size,2.5rem)]',
+    '[--ai-panel-header-gap:var(--tour-chrome-panel-header-gap,0.75rem)]',
+    '[--ai-panel-inline-padding:1.5rem]',
     '[&_.tour-glass-panel__shell]:h-auto [&_.tour-glass-panel__shell]:max-h-full [&_.tour-glass-panel__shell]:min-h-0',
-    '[&_.tour-glass-panel__header]:flex-row [&_.tour-glass-panel__header]:items-center [&_.tour-glass-panel__header]:justify-between [&_.tour-glass-panel__header]:gap-3 [&_.tour-glass-panel__header]:px-[var(--ai-panel-inline-padding)]',
-    'max-[480px]:max-h-[min(840px,calc(100vh-56px))] max-[480px]:w-full',
+    '[&_.tour-glass-panel__header]:flex-row [&_.tour-glass-panel__header]:items-center [&_.tour-glass-panel__header]:justify-between',
+    'max-[480px]:max-h-[min(52.5rem,calc(100vh-3.5rem))] max-[480px]:w-full',
   ),
   {
     variants: {
@@ -225,8 +228,8 @@ export const aiPanelVariants = cva(
 );
 
 export const aiPanelFallbackClassName = cn(
-  'tour-glass-panel--ai box-border h-auto max-h-[min(900px,calc(100vh-72px))] w-[480px] animate-ai-panel-in rounded-xl bg-[var(--ishare-glass-shell-bg)] shadow-[var(--ishare-glass-dock-shadow)] [transform-origin:bottom_right]',
-  'max-[480px]:max-h-[min(840px,calc(100vh-56px))] max-[480px]:w-full',
+  'tour-glass-panel--ai box-border h-auto max-h-[min(56.25rem,calc(100vh-4.5rem))] w-[30rem] animate-ai-panel-in rounded-xl bg-[var(--ishare-glass-body-bg)] shadow-[var(--ishare-glass-dock-shadow)] [transform-origin:bottom_right]',
+  'max-[480px]:max-h-[min(52.5rem,calc(100vh-3.5rem))] max-[480px]:w-full',
 );
 
 export const aiPanelHeaderMainClassName = cn(
@@ -237,11 +240,35 @@ export const aiPanelSymbolClassName = cn(
   'size-[var(--ai-panel-avatar-size)] shrink-0 object-contain object-center',
 );
 
-export const aiPanelHeaderTextClassName = cn('flex min-w-0 flex-col gap-1.5');
+export const aiPanelHeaderTextClassName = cn('flex min-w-0 flex-col gap-1');
+
+export const aiPanelTitleRowClassName = cn(
+  'flex min-w-0 flex-wrap items-center gap-2',
+);
 
 export const aiPanelTitleClassName = cn(
-  'm-0 font-display text-lg-plus font-semibold leading-[1.2] text-foreground',
+  'm-0 font-display font-semibold leading-[1.2] text-foreground',
+  'text-[length:var(--tour-chrome-panel-header-title-size,var(--ishare-font-size-lg-plus))]',
 );
+
+/** Compact outline status pill beside Tour Guide — Live / Preview. */
+export const aiPanelConnectionStatusClassName = cn(
+  'inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-[0.1875rem] font-body text-2xs font-medium leading-none tracking-[0.02em]',
+);
+
+export const aiPanelConnectionStatusDotClassName = cn(
+  'size-1.5 shrink-0 rounded-full',
+);
+
+export const aiPanelConnectionStatusLiveClassName = cn(
+  'border-primary/35 text-primary',
+);
+export const aiPanelConnectionStatusLiveDotClassName = cn('bg-primary');
+
+export const aiPanelConnectionStatusMutedClassName = cn(
+  'border-[rgba(15,23,42,0.14)] text-muted',
+);
+export const aiPanelConnectionStatusMutedDotClassName = cn('bg-muted/70');
 
 export const aiPanelPoweredByClassName = cn(
   'm-0 max-w-full self-start font-body text-xs leading-snug text-muted',
@@ -252,7 +279,8 @@ export const aiPanelHeaderActionsClassName = cn(
 );
 
 export const aiPanelHeaderBtnClassName = cn(
-  'flex size-8 shrink-0 cursor-pointer items-center justify-center p-0 transition-[background,color,opacity] duration-150',
+  'flex shrink-0 cursor-pointer items-center justify-center p-0 transition-[background,color,opacity] duration-150',
+  'size-[var(--tour-chrome-panel-header-btn-size,2rem)]',
 );
 
 export const aiPanelHeaderIconClassName = materialSymbolCompactClassName;
@@ -302,7 +330,7 @@ export const aiMessageSpeakClassName = cn(
 export const aiMessageActionsClassName = cn('mt-1 flex items-center gap-0');
 
 export const aiComposerStopClassName = cn(
-  'flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-[rgba(15,23,42,0.08)] text-foreground transition-[background,transform] duration-150',
+  'flex size-[1.875rem] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-[rgba(15,23,42,0.08)] text-foreground transition-[background,transform] duration-150',
   'hover:bg-[rgba(15,23,42,0.14)] active:scale-95',
 );
 
@@ -325,7 +353,7 @@ export const aiThinkingLabelClassName = cn(
 export const aiMessageVariants = cva('text-md leading-[1.75] shadow-none', {
   variants: {
     role: {
-      user: 'max-w-[82%] self-end rounded-lg border border-[#e7eaef] bg-white px-[15px] py-[11px] text-body',
+      user: 'max-w-[82%] self-end rounded-lg border border-[#e7eaef] bg-white px-[0.9375rem] py-[0.6875rem] text-body',
       assistant: 'max-w-full self-start px-0 py-0 text-body',
     },
   },
@@ -380,7 +408,7 @@ export const aiSceneLinkCardVariants = cva(
         false: '',
         // “You are here” — not a destination; no hover affordance / no dimming.
         true: cn(
-          'cursor-default border-[3px] border-primary',
+          'cursor-default border-[0.1875rem] border-primary',
           'hover:border-primary hover:bg-white/85 hover:shadow-none',
           'disabled:cursor-default disabled:opacity-100',
           'disabled:hover:border-primary disabled:hover:bg-white/85 disabled:hover:shadow-none',
@@ -408,7 +436,7 @@ export const aiSceneLinkCardMediaZoomableClassName = cn(
 
 /** Compact status chip — Explore gallery badge is oversized on 17rem AI cards. */
 export const aiSceneLinkCardBadgeGroupClassName = cn(
-  'pointer-events-none absolute top-1.5 right-1.5 z-[2] max-w-[calc(100%-12px)]',
+  'pointer-events-none absolute top-1.5 right-1.5 z-[2] max-w-[calc(100%-0.75rem)]',
   'flex flex-row flex-wrap items-center justify-end gap-1',
 );
 
@@ -572,7 +600,7 @@ export const aiComposerClassName = cn(
  * `overflow-visible` keeps the mic listening ring from clipping.
  */
 export const aiComposerShellClassName = cn(
-  'relative z-[1] mx-auto flex min-h-[44px] max-w-full items-center gap-0.5 overflow-visible rounded-full border border-[rgba(15,23,42,0.12)] bg-white/90 py-1.5 pl-4 pr-1.5',
+  'relative z-[1] mx-auto flex min-h-[2.75rem] max-w-full items-center gap-0.5 overflow-visible rounded-full border border-[rgba(15,23,42,0.12)] bg-white/90 py-1.5 pl-4 pr-1.5',
   'transition-[width,border-color] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
   'focus-within:border-primary',
   'motion-reduce:transition-none',
@@ -587,7 +615,7 @@ export const aiComposerShellExpandedClassName = cn('w-full');
  * global pill input radius that clipped caret/selection). Height matches mic/send.
  */
 export const aiComposerInputClassName = cn(
-  'ai-composer-input h-[30px] min-w-0 flex-1 border-none bg-transparent py-0 font-display text-md leading-[30px] text-body caret-foreground outline-none',
+  'ai-composer-input h-[1.875rem] min-w-0 flex-1 border-none bg-transparent py-0 font-display text-md leading-[1.875rem] text-body caret-foreground outline-none',
   'placeholder:text-muted',
 );
 
@@ -596,7 +624,7 @@ export const aiComposerActionsClassName = cn(
 );
 
 export const aiComposerVoiceClassName = cn(
-  'relative flex size-[30px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-muted transition-[background,color,transform] duration-200 hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground',
+  'relative flex size-[1.875rem] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-transparent text-muted transition-[background,color,transform] duration-200 hover:bg-[rgba(15,23,42,0.06)] hover:text-foreground',
 );
 
 export const aiComposerVoiceListeningClassName = cn(
@@ -606,7 +634,7 @@ export const aiComposerVoiceListeningClassName = cn(
 
 /** Idle listening halo — soft breathe so the control reads as “live”. */
 export const aiComposerVoiceRingIdleClassName = cn(
-  'pointer-events-none absolute inset-[-3px] rounded-full border-2 border-primary/45 motion-reduce:hidden',
+  'pointer-events-none absolute inset-[-0.1875rem] rounded-full border-2 border-primary/45 motion-reduce:hidden',
   'animate-ai-voice-listen',
 );
 
@@ -631,7 +659,7 @@ export const aiComposerSendSlotClosedClassName = cn(
 export const aiComposerSendSlotInnerClassName = cn('min-w-0 overflow-hidden');
 
 export const aiComposerSendClassName = cn(
-  'flex size-[30px] shrink-0 origin-center cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]',
+  'flex size-[1.875rem] shrink-0 origin-center cursor-pointer items-center justify-center rounded-full border-none bg-primary text-white transition-[background,color,transform,opacity] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]',
   'hover:bg-primary-dark active:scale-95',
   'disabled:cursor-default disabled:bg-primary/35 disabled:text-white/80 disabled:hover:bg-primary/35 disabled:active:scale-100',
   'motion-reduce:transition-none',

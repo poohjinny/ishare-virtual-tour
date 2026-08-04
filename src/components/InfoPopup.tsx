@@ -27,7 +27,7 @@ import {
 } from './tourGlassPanelHtml';
 import { GlassPanelHeaderActions } from './GlassPanelHeaderActions';
 import { GlassPanelCloseIcon } from './TourGlassPanel';
-import { MATERIAL_SYMBOL_SIZE_16 } from './ui/materialSymbolClasses';
+import { MATERIAL_SYMBOL_SIZE_CHROME_HEADER } from './ui/materialSymbolClasses';
 import {
   infoPopupBackdropVariants,
   infoPopupImageClassName,
@@ -198,7 +198,7 @@ export function InfoPopup({
       >
         <GlassPanelCloseIcon
           className={hasHero ? ANCHORED_PANEL.closeIcon : undefined}
-          sizePx={MATERIAL_SYMBOL_SIZE_16}
+          sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
         />
       </button>
     </>

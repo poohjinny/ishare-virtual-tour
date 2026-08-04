@@ -5,7 +5,7 @@ import {
 import { CTA_MATERIAL_SYMBOL_CLASS } from '../glassPanelCtaIcons';
 
 export function accordionChevronHtml(): string {
-  return `<span class="${CTA_MATERIAL_SYMBOL_CLASS}" style="font-size:16px;line-height:1" aria-hidden="true">expand_more</span>`;
+  return `<span class="${CTA_MATERIAL_SYMBOL_CLASS}" style="font-size:1rem;line-height:1" aria-hidden="true">expand_more</span>`;
 }
 
 export function buildAccordionIconHtml(): string {

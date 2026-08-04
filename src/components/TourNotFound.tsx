@@ -95,7 +95,7 @@ export function TourNotFound({
           aria-label='iShare — opens in a new tab'
         >
           <img
-            className='block h-[46px] w-auto max-w-[min(220px,calc(100vw-48px))] object-contain'
+            className='block h-[2.875rem] w-auto max-w-[min(13.75rem,calc(100vw-3rem))] object-contain'
             src={PLATFORM_PRODUCT_LOGO}
             alt=''
             draggable={false}

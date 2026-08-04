@@ -60,7 +60,7 @@ function ControlsFabButton({
   );
 }
 
-/** Desktop show/hide for the bottom viewer toolbar — separate from the pill. */
+/** Show/hide for the bottom viewer toolbar — separate from the pill (desktop + tablet). */
 export function TourViewerControlsToggleFab({
   collapsed,
   onToggle,

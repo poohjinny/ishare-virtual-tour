@@ -3,7 +3,7 @@
  * Content adapters stay separate; this is only hero / main / footer shell.
  */
 import { materialSymbolHtml } from './glassPanelCtaIcons';
-import { MATERIAL_SYMBOL_SIZE_22 } from './ui/materialSymbolClasses';
+import { MATERIAL_SYMBOL_SIZE_CHROME_HEADER } from './ui/materialSymbolClasses';
 
 const ROOT_ANCHORED =
   'tour-glass-panel tour-glass-panel--anchored psv--capture-event';
@@ -60,14 +60,14 @@ export function anchoredPanelAnchorArrowHtml(): string {
 export function anchoredPanelCloseIconHtml(): string {
   return materialSymbolHtml('close', {
     className: ANCHORED_PANEL.closeIcon,
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
+    sizePx: MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
   });
 }
 
 export function anchoredPanelShareIconHtml(): string {
   return materialSymbolHtml('share', {
     className: ANCHORED_PANEL.headerBtnIcon,
-    sizePx: MATERIAL_SYMBOL_SIZE_22,
+    sizePx: MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
   });
 }
 
@@ -79,8 +79,8 @@ export function buildAnchoredPanelShareButtonHtml(options: {
 }): string {
   const className =
     options.inline ?
-      `${ANCHORED_PANEL.headerBtn} ${ANCHORED_PANEL.headerBtnInline} ishare-tooltip-host`
-    : `${ANCHORED_PANEL.headerBtn} ishare-tooltip-host`;
+      `${ANCHORED_PANEL.headerBtn} ${ANCHORED_PANEL.headerBtnInline} ishare-tooltip-host ishare-tooltip-host--portal`
+    : `${ANCHORED_PANEL.headerBtn} ishare-tooltip-host ishare-tooltip-host--portal`;
 
   return `<button
             type="button"

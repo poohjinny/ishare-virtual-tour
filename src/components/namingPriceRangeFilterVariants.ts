@@ -65,7 +65,7 @@ export const namingPriceFilterInputMaxClassName = cn(
 );
 
 export const namingPriceFilterRootClassName = cn(
-  'mb-[var(--tour-directory-space,16px)] flex flex-col gap-2.5 px-1',
+  'mb-[var(--tour-directory-space,1rem)] flex flex-col gap-2.5 px-1',
 );
 
 export const namingPriceFilterRootEmbeddedClassName = cn(

@@ -9,7 +9,7 @@ interface MaterialSymbolProps extends HTMLAttributes<HTMLSpanElement> {
   name: string;
   flip?: 'vertical' | 'horizontal';
   filled?: boolean;
-  /** Pixel size — inline `font-size` (reliable inside badges vs Tailwind alone). */
+  /** Design px at 16px root — emitted as rem so icons track UI scale. */
   sizePx?: number;
 }
 
@@ -33,7 +33,10 @@ export function MaterialSymbol({
       )}
       style={{
         ...style,
-        ...(sizePx !== undefined && { fontSize: `${sizePx}px`, lineHeight: 1 }),
+        ...(sizePx !== undefined && {
+          fontSize: `${sizePx / 16}rem`,
+          lineHeight: 1,
+        }),
         fontVariationSettings: materialSymbolVariation(
           filled ? 1 : 0,
           sizePx ?? 20,
