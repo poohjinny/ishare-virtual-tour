@@ -11,6 +11,16 @@ export interface AppSearchParams {
   /** Dev panel — hotspot coords, landing JSON copy. */
   dev: boolean;
   /**
+   * Device viewport preview iframe — suppress nested DevTools.
+   * URL: `deviceFrame=1`.
+   */
+  deviceFrame: boolean;
+  /**
+   * Force coarse-pointer JS paths inside a device preview iframe.
+   * URL: `deviceTouch=1`.
+   */
+  deviceTouch: boolean;
+  /**
    * Ask Guide frozen UI fixtures (scroll + thinking).
    * URL: `guideUiTest=1` (legacy alias: `chatTest=1`).
    */
@@ -27,8 +37,11 @@ export interface AppSearchParams {
   splashHold: boolean;
   /** Force first-visit coach pill (dev QA — overrides embed/dev off). */
   firstVisitHint: boolean;
-  /** Force Ask Guide FAB + panel (dev QA — overrides product default off). */
-  askGuide: boolean;
+  /**
+   * Tour Guide visibility override — `?askGuide=1|0`.
+   * `null` = use product default / per-tour `askGuideEnabled`.
+   */
+  askGuide: boolean | null;
   /**
    * Force scripted Ask Guide replies (no OpenAI).
    * URL: `guideMock=1` (legacy alias: `askGuideMock=1`).
@@ -45,6 +58,8 @@ export function useAppSearchParams(): AppSearchParams {
       embed,
       intro: parseTriStateFlag(searchParams.get('intro')),
       dev: searchParams.get('dev') === '1',
+      deviceFrame: searchParams.get('deviceFrame') === '1',
+      deviceTouch: searchParams.get('deviceTouch') === '1',
       guideUiTest:
         searchParams.get('guideUiTest') === '1' ||
         searchParams.get('chatTest') === '1',
@@ -54,7 +69,7 @@ export function useAppSearchParams(): AppSearchParams {
       skipLanding: searchParams.get('skipLanding') === '1',
       splashHold: searchParams.get('splashHold') === '1',
       firstVisitHint: searchParams.get('firstVisitHint') === '1',
-      askGuide: searchParams.get('askGuide') === '1',
+      askGuide: parseTriStateFlag(searchParams.get('askGuide')),
       guideMock:
         searchParams.get('guideMock') === '1' ||
         searchParams.get('askGuideMock') === '1',

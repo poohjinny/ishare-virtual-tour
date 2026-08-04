@@ -151,6 +151,8 @@ export const PRESERVED_SEARCH_KEYS = [
   'embed',
   'intro',
   'dev',
+  'deviceFrame',
+  'deviceTouch',
   'notFoundTest',
   'loadErrorTest',
   'panoramaErrorTest',

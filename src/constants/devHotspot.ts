@@ -117,16 +117,16 @@ export function getDevHotspotSectionConfig(
   switch (scope) {
     case 'model3d-tour':
       return {
-        title: 'Hotspots',
+        title: 'Manage hotspots',
         description:
-          'Placements on the current viewpoint — nav, naming (where), and info. Naming business fields live on the Naming tab.',
-        emptyMessage: 'No hotspots on this viewpoint yet.',
+          'All placements on the 3D model — nav, naming (where), and info. Optional home viewpoint is for authoring; pins still appear in every view. Naming business fields live on the Naming tab.',
+        emptyMessage: 'No hotspots on this model yet.',
         addButtonLabel: 'Add hotspot',
         createTabs: DEV_HOTSPOT_TABS_MODEL3D,
       };
     default:
       return {
-        title: 'Hotspots',
+        title: 'Manage hotspots',
         description:
           'Placements on this scene — nav, naming (where), info, and place overview. Naming business fields live on the Naming tab.',
         emptyMessage: 'No hotspots on this scene yet.',

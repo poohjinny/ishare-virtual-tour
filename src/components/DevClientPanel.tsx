@@ -30,7 +30,6 @@ import {
   DevPanelSection,
   DevPanelSectionAccordion,
 } from './DevPanelSectionAccordion';
-import { Badge } from './ui/Badge';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import {
   MATERIAL_SYMBOL_SIZE_18,
@@ -38,7 +37,6 @@ import {
 } from './ui/materialSymbolClasses';
 import { cn } from '../lib/cn';
 import {
-  devSceneManageBadgeVariants,
   devViewPanelActionsClassName,
   devViewPanelInlineActionsClassName,
   devViewPanelBtnVariants,
@@ -56,13 +54,14 @@ import {
   devViewPanelManageListItemClassName,
   devViewPanelManageListItemContentClassName,
   formatManageListItemId,
+  devViewPanelManageListItemDescBulletItemClassName,
+  devViewPanelManageListItemDescBulletListClassName,
   devViewPanelManageListItemDescStackClassName,
   devViewPanelManageListItemHeadMainClassName,
   devViewPanelManageListItemIconActionsClassName,
   devViewPanelManageListItemLogoClassName,
   devViewPanelManageListItemLogoWrapClassName,
   devViewPanelManageListItemMainRowWithLogoClassName,
-  devViewPanelManageListItemSceneBadgesClassName,
   devViewPanelManageListItemTitleClassName,
   devViewPanelSectionHintClassName,
   devViewPanelSlugPreviewClassName,
@@ -772,6 +771,7 @@ export function DevClientPanel({
 
   return (
     <DevPanelSectionAccordion
+      persistKey='tab:client'
       defaultOpenIndex={1}
       ensureCloseIndex={0}
       ensureCloseKey={clientAddCloseKey}
@@ -976,24 +976,6 @@ export function DevClientPanel({
                               {client.name}
                             </span>
                           </div>
-                          {isCurrent ?
-                            <div
-                              className={
-                                devViewPanelManageListItemSceneBadgesClassName
-                              }
-                            >
-                              <Badge
-                                variant='fill'
-                                size='sm'
-                                tone='none'
-                                className={devSceneManageBadgeVariants({
-                                  kind: 'current',
-                                })}
-                              >
-                                Current
-                              </Badge>
-                            </div>
-                          : null}
                         </div>
                         <div
                           className={
@@ -1039,16 +1021,30 @@ export function DevClientPanel({
                       <div
                         className={devViewPanelManageListItemDescStackClassName}
                       >
-                        <p className='m-0' title={client.id}>
-                          {formatManageListItemId('client', client.id)}
-                        </p>
-                        {contactRows.length > 0 ?
-                          contactRows.map((row) => (
-                            <p key={row.key} className='m-0'>
+                        <ul
+                          className={
+                            devViewPanelManageListItemDescBulletListClassName
+                          }
+                        >
+                          <li
+                            className={
+                              devViewPanelManageListItemDescBulletItemClassName
+                            }
+                            title={client.id}
+                          >
+                            {formatManageListItemId('client', client.id)}
+                          </li>
+                          {contactRows.map((row) => (
+                            <li
+                              key={row.key}
+                              className={
+                                devViewPanelManageListItemDescBulletItemClassName
+                              }
+                            >
                               {row.label}:{' '}
                               {row.href ?
                                 <a
-                                  className='text-[#94a3b8] underline-offset-2 hover:text-[#86efac] hover:underline'
+                                  className='text-[var(--dev-panel-muted)] underline-offset-2 hover:text-[color:var(--dev-panel-primary,#4ade80)] hover:underline'
                                   href={row.href}
                                   {...(row.external ?
                                     {
@@ -1060,9 +1056,12 @@ export function DevClientPanel({
                                   {row.value}
                                 </a>
                               : row.value}
-                            </p>
-                          ))
-                        : <p className='m-0'>No contact</p>}
+                            </li>
+                          ))}
+                        </ul>
+                        {contactRows.length === 0 ?
+                          <p className='m-0'>No contact</p>
+                        : null}
                       </div>
 
                       {isDeleting ?

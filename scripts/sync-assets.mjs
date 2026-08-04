@@ -1,7 +1,6 @@
 import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { generateEmbedTestManifest } from './generate-embed-test-manifest.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = join(root, 'assets');
@@ -28,4 +27,3 @@ if (existsSync(faviconSrc)) {
 }
 
 console.log('Synced assets/ → public/assets/');
-generateEmbedTestManifest();

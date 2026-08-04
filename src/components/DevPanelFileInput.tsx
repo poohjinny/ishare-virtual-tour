@@ -37,7 +37,7 @@ export function DevPanelFileInput({
       <span
         className={cn(
           devViewPanelFileNameClassName,
-          !hasFile && 'text-[#64748b]',
+          !hasFile && 'text-[var(--dev-panel-muted)]',
         )}
         title={hasFile ? file.name : 'No file chosen'}
       >

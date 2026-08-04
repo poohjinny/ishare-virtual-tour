@@ -62,3 +62,21 @@ export function postTourEmbedMessage(message: TourEmbedMessagePayload): void {
     '*',
   );
 }
+
+/** Parent harness — narrow `message` events to known tour embed payloads. */
+export function parseTourEmbedMessage(data: unknown): TourEmbedMessage | null {
+  if (!data || typeof data !== 'object') return null;
+  const message = data as Record<string, unknown>;
+  if (message.source !== TOUR_EMBED_MESSAGE_SOURCE) return null;
+  if (typeof message.tourId !== 'string' || typeof message.type !== 'string') {
+    return null;
+  }
+  if (
+    message.type !== 'tour:ready' &&
+    message.type !== 'tour:scene' &&
+    message.type !== 'tour:resize'
+  ) {
+    return null;
+  }
+  return data as TourEmbedMessage;
+}

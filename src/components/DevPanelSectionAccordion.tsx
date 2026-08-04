@@ -4,11 +4,13 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useMemo,
   useState,
   type ReactElement,
   type ReactNode,
 } from 'react';
 import { cn } from '../lib/cn';
+import { useDevPanelSectionPersist } from './DevPanelSectionPersist';
 import { DevPanelSection, type DevPanelSectionProps } from './DevPanelSection';
 import {
   devViewPanelNestedSectionStackClassName,
@@ -23,6 +25,11 @@ type DevPanelSectionAccordionProps = {
   /** Section index open on first render; default is all collapsed. */
   defaultOpenIndex?: number;
   /**
+   * When set, open indices are stored on the parent DevViewPanel persist
+   * context so they survive tab switches (panels unmount per tab).
+   */
+  persistKey?: string;
+  /**
    * When `ensureOpenKey` changes to a new positive value, open this section
    * index (e.g. jump to Add from an external CTA).
    */
@@ -34,6 +41,8 @@ type DevPanelSectionAccordionProps = {
    */
   ensureCloseIndex?: number;
   ensureCloseKey?: number;
+  /** Fires whenever the open set changes (sorted ascending). */
+  onOpenIndicesChange?: (openIndices: readonly number[]) => void;
   /**
    * `nested` — tighter section pad (Manage Scenes groups).
    * `default` — top-level tab accordion pad.
@@ -67,16 +76,49 @@ function collectDevPanelSections(
 export function DevPanelSectionAccordion({
   children,
   defaultOpenIndex,
+  persistKey,
   ensureOpenIndex,
   ensureOpenKey = 0,
   ensureCloseIndex,
   ensureCloseKey = 0,
+  onOpenIndicesChange,
   variant = 'default',
 }: DevPanelSectionAccordionProps) {
   const sections = collectDevPanelSections(children);
-  const [openIndices, setOpenIndices] = useState<Set<number>>(() =>
-    defaultOpenIndex === undefined ? new Set() : new Set([defaultOpenIndex]),
+  const persist = useDevPanelSectionPersist();
+
+  const [openIndices, setOpenIndices] = useState<Set<number>>(() => {
+    if (persistKey && persist) {
+      const remembered = persist.read(persistKey);
+      if (remembered !== undefined) return new Set(remembered);
+    }
+    return defaultOpenIndex === undefined ?
+        new Set()
+      : new Set([defaultOpenIndex]);
+  });
+
+  const openIndicesKey = useMemo(
+    () => [...openIndices].sort((a, b) => a - b).join(','),
+    [openIndices],
   );
+
+  useEffect(() => {
+    if (!persistKey || !persist) return;
+    persist.write(
+      persistKey,
+      openIndicesKey.length === 0 ?
+        []
+      : openIndicesKey.split(',').map((value) => Number(value)),
+    );
+  }, [openIndicesKey, persist, persistKey]);
+
+  useEffect(() => {
+    onOpenIndicesChange?.(
+      openIndicesKey.length === 0 ?
+        []
+      : openIndicesKey.split(',').map((value) => Number(value)),
+    );
+  }, [onOpenIndicesChange, openIndicesKey]);
 
   useEffect(() => {
     if (ensureOpenKey <= 0 || ensureOpenIndex == null) return;

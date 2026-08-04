@@ -1,38 +1,102 @@
-import { useEffect, useState } from 'react';
-import { DevViewPanel, type DevSceneOption } from './DevViewPanel';
-import type { ClickCoords, DevSceneRef } from '../utils/devHotspotLogger';
-import type { Tour, ViewPosition } from '../types/tour';
-import type { DevTourMutateOptions } from '../utils/devTourApi';
-import type { TourPanelStack } from '../hooks/useTourPanelStack';
-import { prefersMobileTourChrome } from '../hooks/useTourChromeLayout';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
+import { DevViewPanel } from './DevViewPanel';
+import { useTourPanelStack } from '../hooks/useTourPanelStack';
 import { isTypingTarget } from '../utils/isTypingTarget';
 import {
-  readRememberedDevPanelOpen,
-  writeRememberedDevPanelOpen,
-} from '../utils/devPanelUiState';
-import { cn } from '../lib/cn';
-import { devFabVariants, devToolsStackClassName } from './devViewPanelVariants';
+  useDevTourBridge,
+  type DevTourBridgeSnapshot,
+} from '../utils/devTourBridge';
+import { DEV_SHELL_TOUR_ID } from '../constants/devPanel';
+import {
+  getDevPanelPrefs,
+  setDevPanelOpen,
+  useDevPanelPrefs,
+} from '../utils/devPanelPrefs';
+import type { Tour } from '../types/tour';
+import {
+  DEV_TOOLS_DRAWER_WIDTH,
+  DEV_TOOLS_PUSH_RAIL_VAR,
+  devFabVariants,
+  devToolsFabAnchorClassName,
+  devToolsPanelHostVariants,
+} from './devViewPanelVariants';
 
-interface DevToolsProps {
-  tour: Tour;
-  onTourMutated?: (options?: DevTourMutateOptions) => Promise<void>;
-  scene: DevSceneRef;
-  currentSceneId: string;
-  sceneOptions: DevSceneOption[];
-  view: ViewPosition | null;
-  clickCoords: ClickCoords | null;
-  captureSceneThumbnail?: () => Promise<Blob | null>;
-  getCurrentView?: () => ViewPosition | null;
-  focusHotspot?: (
-    hotspotId: string | null,
-    options?: { animate?: boolean },
-  ) => void;
-  activeNamingHotspotId?: string | null;
-  openNamingOpportunity?: (sceneId: string, hotspotId: string) => void;
-  panelStack?: TourPanelStack;
+const EMPTY_SHELL_TOUR: Tour = {
+  id: DEV_SHELL_TOUR_ID,
+  title: '',
+  firstScene: '',
+  scenes: {},
+};
+
+/** Host open/layout motion duration — keep in sync with components-layer.css. */
+const DEV_PANEL_MOTION_MS = 240;
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
 }
 
-export function DevTools({
+function buildShellBridge(
+  panelStack: DevTourBridgeSnapshot['panelStack'],
+): DevTourBridgeSnapshot {
+  return {
+    tour: EMPTY_SHELL_TOUR,
+    scene: {
+      id: '',
+      title: undefined,
+      clientId: '',
+      tourId: DEV_SHELL_TOUR_ID,
+    },
+    currentSceneId: '',
+    sceneOptions: [],
+    view: null,
+    clickCoords: null,
+    activeNamingHotspotId: null,
+    panelStack,
+    captureSceneThumbnail: async () => null,
+    getCurrentView: () => null,
+    animateToView: () => undefined,
+    focusHotspot: () => undefined,
+    syncLayoutSize: () => undefined,
+  };
+}
+
+type DevToolsHostProps = { presentationRootRef: RefObject<HTMLElement | null> };
+
+/** Always mounted under `?dev=1` — works with or without a live tour bridge. */
+export function DevToolsHost({ presentationRootRef }: DevToolsHostProps) {
+  const bridge = useDevTourBridge();
+  const localPanelStack = useTourPanelStack();
+  const { deviceMode } = useDevPanelPrefs();
+  const shell = useMemo(
+    () => buildShellBridge(localPanelStack),
+    [localPanelStack],
+  );
+  const snapshot = bridge ?? shell;
+  // Preview unmounts TourExperience — use the host stack so Escape / register
+  // still work. Live tours keep the experience stack for dock mutex.
+  const panelStack =
+    deviceMode ? localPanelStack : (bridge?.panelStack ?? localPanelStack);
+
+  return (
+    <DevTools
+      {...snapshot}
+      panelStack={panelStack}
+      presentationRootRef={presentationRootRef}
+    />
+  );
+}
+
+function DevTools({
   tour,
   onTourMutated,
   scene,
@@ -42,27 +106,37 @@ export function DevTools({
   clickCoords,
   captureSceneThumbnail,
   getCurrentView,
+  animateToView,
   focusHotspot,
+  syncLayoutSize,
   activeNamingHotspotId = null,
   openNamingOpportunity,
+  onHotspotPlacementCaptureChange,
+  onHotspotMoveIdChange,
+  registerHotspotMoveCommit,
   panelStack,
-}: DevToolsProps) {
-  const [panelOpen, setPanelOpen] = useState(() =>
-    readRememberedDevPanelOpen(!prefersMobileTourChrome()),
+  presentationRootRef,
+}: DevTourBridgeSnapshot & {
+  presentationRootRef: RefObject<HTMLElement | null>;
+}) {
+  const { layout, theme, panelOpen } = useDevPanelPrefs();
+  const [layoutEnter, setLayoutEnter] = useState(false);
+  const [pushRailReady, setPushRailReady] = useState(
+    () => layout === 'push' && panelOpen,
   );
+  const prevLayoutRef = useRef(layout);
+  const skipLayoutEnterRef = useRef(true);
+  const bootPushRailRef = useRef(true);
+  /** Push rail waits for panel motion so underpaint does not flash mid-fade. */
+  const pushRailOpen = layout === 'push' && panelOpen && pushRailReady;
 
   useEffect(() => {
-    writeRememberedDevPanelOpen(panelOpen);
-  }, [panelOpen]);
-
-  useEffect(() => {
-    return panelStack?.registerPanel('dev-panel', () => {
-      setPanelOpen(false);
+    return panelStack.registerPanel('dev-panel', () => {
+      setDevPanelOpen(false);
     });
   }, [panelStack]);
 
   useEffect(() => {
-    if (!panelStack) return;
     if (panelOpen) panelStack.openPanel('dev-panel');
     else panelStack.closePanel('dev-panel');
   }, [panelOpen, panelStack]);
@@ -74,17 +148,108 @@ export function DevTools({
       if (isTypingTarget(event.target)) return;
 
       event.preventDefault();
-      setPanelOpen((open) => !open);
+      setDevPanelOpen(!getDevPanelPrefs().panelOpen);
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  /** Push: snap stage width, sync WebGL/PSV in the same layout pass. */
+  useLayoutEffect(() => {
+    const root = presentationRootRef.current;
+    if (!root) return;
+
+    root.style.setProperty(
+      DEV_TOOLS_PUSH_RAIL_VAR,
+      pushRailOpen ? DEV_TOOLS_DRAWER_WIDTH : '0px',
+    );
+    void root.offsetWidth;
+    syncLayoutSize();
+  }, [presentationRootRef, pushRailOpen, syncLayoutSize]);
+
+  useEffect(() => {
+    return () => {
+      presentationRootRef.current?.style.removeProperty(
+        DEV_TOOLS_PUSH_RAIL_VAR,
+      );
+    };
+  }, [presentationRootRef]);
+
+  /**
+   * Open / switch-to-push: animate panel first (over the stage), then commit
+   * the rail. Close / leave-push: drop the rail immediately.
+   */
+  useLayoutEffect(() => {
+    if (layout !== 'push' || !panelOpen) {
+      setPushRailReady(false);
+      return;
+    }
+
+    if (bootPushRailRef.current) {
+      bootPushRailRef.current = false;
+      setPushRailReady(true);
+      return;
+    }
+
+    if (prefersReducedMotion()) {
+      setPushRailReady(true);
+      return;
+    }
+
+    setPushRailReady(false);
+    const fallbackId = window.setTimeout(() => {
+      setPushRailReady(true);
+    }, DEV_PANEL_MOTION_MS);
+    return () => window.clearTimeout(fallbackId);
+  }, [layout, panelOpen]);
+
+  /** Layout mode change — short panel-only enter. */
+  useLayoutEffect(() => {
+    if (skipLayoutEnterRef.current) {
+      skipLayoutEnterRef.current = false;
+      prevLayoutRef.current = layout;
+      return;
+    }
+    if (prevLayoutRef.current === layout) return;
+    prevLayoutRef.current = layout;
+    if (!panelOpen) return;
+    setLayoutEnter(true);
+  }, [layout, panelOpen]);
+
+  const commitPushRailIfNeeded = () => {
+    if (layout === 'push' && panelOpen) setPushRailReady(true);
+  };
+
   return (
-    <div className={devToolsStackClassName}>
-      {/* Keep mounted so tab / accordion / draft state survives close and scene nav. */}
-      <div className={cn(!panelOpen && 'hidden')} aria-hidden={!panelOpen}>
+    <>
+      {/* Keep mounted so tab / draft state survives close, layout, and scene nav. */}
+      <div
+        className={devToolsPanelHostVariants({ layout })}
+        data-open={panelOpen ? 'true' : 'false'}
+        data-dev-layout={layout}
+        data-dev-theme={theme}
+        data-layout-enter={layoutEnter ? '1' : undefined}
+        aria-hidden={!panelOpen}
+        aria-label='Dev panel'
+        onTransitionEnd={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (
+            event.propertyName !== 'opacity' &&
+            event.propertyName !== 'transform'
+          ) {
+            return;
+          }
+          commitPushRailIfNeeded();
+        }}
+        onAnimationEnd={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (event.animationName === 'dev-tools-panel-layout-enter') {
+            setLayoutEnter(false);
+          }
+          commitPushRailIfNeeded();
+        }}
+      >
         <DevViewPanel
           id='dev-view-panel'
           tour={tour}
@@ -96,24 +261,32 @@ export function DevTools({
           clickCoords={clickCoords}
           captureSceneThumbnail={captureSceneThumbnail}
           getCurrentView={getCurrentView}
+          animateToView={animateToView}
           focusHotspot={focusHotspot}
           activeNamingHotspotId={activeNamingHotspotId}
           openNamingOpportunity={openNamingOpportunity}
-          onClose={() => setPanelOpen(false)}
+          onHotspotPlacementCaptureChange={onHotspotPlacementCaptureChange}
+          onHotspotMoveIdChange={onHotspotMoveIdChange}
+          registerHotspotMoveCommit={registerHotspotMoveCommit}
+          onClose={() => setDevPanelOpen(false)}
+          panelOpen={panelOpen}
         />
       </div>
+
       {!panelOpen ?
-        <button
-          type='button'
-          className={devFabVariants({ open: panelOpen })}
-          aria-expanded={panelOpen}
-          aria-controls='dev-view-panel'
-          aria-label='Show dev panel (`)'
-          onClick={() => setPanelOpen((open) => !open)}
-        >
-          Dev
-        </button>
+        <div className={devToolsFabAnchorClassName}>
+          <button
+            type='button'
+            className={devFabVariants({ open: false })}
+            aria-expanded={false}
+            aria-controls='dev-view-panel'
+            aria-label='Show dev panel (`)'
+            onClick={() => setDevPanelOpen(true)}
+          >
+            Dev
+          </button>
+        </div>
       : null}
-    </div>
+    </>
   );
 }

@@ -1,13 +1,10 @@
-export type DevPanelTab =
-  | 'scene'
-  | 'scenes'
-  | 'naming'
-  | 'tour'
-  | 'client'
-  | 'debug';
+export type DevPanelTab = 'scene' | 'scenes' | 'naming' | 'tour' | 'client';
 
-/** Order: current Scene → catalogs → Tour/Client settings → Debug. */
-export const DEV_PANEL_TABS: {
+/** DevTools placeholder when `?dev=1` is on intro / no live tour. */
+export const DEV_SHELL_TOUR_ID = '__dev_shell__';
+
+/** Primary tab strip — Debug is a header dropdown (not a tab). */
+export const DEV_PANEL_PRIMARY_TABS: {
   id: DevPanelTab;
   label: string;
   /** Lead under the tab strip — what this tab is for. */
@@ -43,13 +40,31 @@ export const DEV_PANEL_TABS: {
     description:
       'Catalog clients shared across tours — display name, contact, and branding (logo, color, fonts). Tours can inherit this branding or override it. Create clients here first, then add tours on the Tours tab.',
   },
-  {
-    id: 'debug',
-    label: 'Debug',
-    description:
-      'Local QA tools for this page. Toggle preserved URL flags without a reload, and open guide / chat / frozen UI fixtures to verify chrome and layouts while you author.',
-  },
 ];
+
+/** Header Debug dropdown copy (not a primary tab). */
+export const DEV_PANEL_DEBUG_MENU = {
+  label: 'Debug',
+  description:
+    'Local QA tools for this page. Toggle preserved URL flags without a reload, and open Tour Guide / chat / frozen UI fixtures to verify chrome and layouts while you author.',
+} as const;
+
+/** Primary tabs (for description lookup). */
+export const DEV_PANEL_TABS: {
+  id: DevPanelTab;
+  label: string;
+  description: string;
+}[] = DEV_PANEL_PRIMARY_TABS;
+
+export type DevPanelTheme = 'light' | 'dark';
+
+/**
+ * Dev panel placement:
+ * - floating — inset card over the tour (legacy)
+ * - overlay — full-height drawer over the tour
+ * - push — full-height drawer; shrinks the tour stage
+ */
+export type DevPanelLayout = 'floating' | 'overlay' | 'push';
 
 export type DevCatalogTourVisibility = 'public' | 'unlisted' | 'internal';
 

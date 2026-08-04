@@ -1,4 +1,4 @@
-import { loadTour } from '../data/loadTour';
+import { loadTour, tryLoadTour } from '../data/loadTour';
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
@@ -105,10 +105,10 @@ function escapeHtmlAttribute(value: string): string {
 export function buildEmbedIframeHtml(
   options: Omit<BuildShareUrlOptions, 'namingHotspotId'> & { title?: string },
 ): string {
-  const tour = loadTour(options.tourId);
+  const tour = tryLoadTour(options.tourId);
   const src = buildAbsoluteEmbedUrl(options);
   const title = escapeHtmlAttribute(
-    options.title ?? getTourProductFullName(tour),
+    options.title ?? (tour ? getTourProductFullName(tour) : options.tourId),
   );
 
   return `<iframe
@@ -118,28 +118,6 @@ export function buildEmbedIframeHtml(
   loading="lazy"
   style="width:100%; height:min(80vh, 720px); border:0;"
 ></iframe>`;
-}
-
-export interface BuildEmbedTestPageOptions {
-  tourId: string;
-  sceneId: string;
-  /** Include `dev=1` on the iframe tour URL (default true). */
-  dev?: boolean;
-}
-
-/** Local parent-page harness — `public/embed-test.html` */
-export function buildEmbedTestPageUrl({
-  tourId,
-  sceneId,
-  dev = true,
-}: BuildEmbedTestPageOptions): string {
-  const base = import.meta.env.BASE_URL;
-  const path = `${base}embed-test.html`.replace(/([^:]\/)\/+/g, '$1');
-  const url = new URL(path, window.location.origin);
-  url.searchParams.set('tour', tourId);
-  url.searchParams.set('scene', sceneId);
-  if (!dev) url.searchParams.set('dev', '0');
-  return url.href;
 }
 
 function buildAbsoluteTourUrl(relative: string): string {
