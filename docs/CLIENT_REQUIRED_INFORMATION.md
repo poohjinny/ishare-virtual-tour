@@ -40,10 +40,10 @@ Copy this into an email or shared doc and tick items off with the client.
 | 5   | [Branding](#5-branding)                                        | **Required**                |
 | 6   | [Naming opportunities](#6-naming-opportunities)                | If applicable               |
 | 7   | [General info hotspots](#7-general-info-hotspots)              | Optional                    |
-| 8   | [Floor plan](#8-floor-plan)                                    | Optional                    |
-| 9   | [Immersive audio](#9-immersive-audio)                          | Optional                    |
-| 10  | [Launch & embed](#10-launch--embed)                            | **Required** before go-live |
-| 11  | [Approvals & legal](#11-approvals--legal)                      | **Required** before go-live |
+| 8   | [Immersive audio](#8-immersive-audio)                          | Optional                    |
+| 9   | [Launch & embed](#9-launch--embed)                             | **Required** before go-live |
+| 10  | [Approvals & legal](#10-approvals--legal)                      | **Required** before go-live |
+| —   | Tour Guide (Ask Guide) enablement                              | Optional — see §2           |
 
 ---
 
@@ -73,15 +73,16 @@ multiple tours (e.g. hospital + inpatient wing campaign).
 
 ## 2. Tour scope & naming
 
-| Field                    | Required    | Example                           | Notes                                    |
-| ------------------------ | ----------- | --------------------------------- | ---------------------------------------- |
-| Tour / campaign title    | Yes         | Med/Surg Inpatient                | Facility or project name in Explore      |
-| Tour category            | Yes         | Healthcare                        | From platform list (see below)           |
-| Product display name     | Optional    | `{Client} Virtual Tour`           | Defaults from organization name          |
-| Public visibility        | Yes         | `public` / `unlisted` / `private` | See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) |
-| Featured on iShare intro | Optional    | yes / no                          | Portfolio gallery only                   |
-| Target go-live date      | Recommended |                                   |                                          |
-| Primary audience         | Recommended | Major donors, board, public       | Shapes copy tone                         |
+| Field                    | Required    | Example                           | Notes                                           |
+| ------------------------ | ----------- | --------------------------------- | ----------------------------------------------- |
+| Tour / campaign title    | Yes         | Med/Surg Inpatient                | Facility or project name in Explore             |
+| Tour category            | Yes         | Healthcare                        | From platform list (see below)                  |
+| Product display name     | Optional    | `{Client} Virtual Tour`           | Defaults from organization name                 |
+| Public visibility        | Yes         | `public` / `unlisted` / `private` | See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)        |
+| Featured on iShare intro | Optional    | yes / no                          | Portfolio gallery only                          |
+| Enable Tour Guide        | Optional    | yes / no                          | Per-tour Ask Tour Guide FAB (`askGuideEnabled`) |
+| Target go-live date      | Recommended |                                   |                                                 |
+| Primary audience         | Recommended | Major donors, board, public       | Shapes copy tone                                |
 
 **Categories (current platform):** Healthcare, Education, Culture, Sporting
 Venues, International Aid, Social Services, Tourism.
@@ -152,17 +153,17 @@ clinical spec sheet.
 Required when the tour supports **capital campaign / naming** CTAs. Each NO is
 one anchored panel in the panorama.
 
-| Field                                  | Required | Example                                      | Notes                                                    |
-| -------------------------------------- | -------- | -------------------------------------------- | -------------------------------------------------------- |
-| Legal / display name                   | Yes      | Inpatient Bed Rooms Naming Opportunity       |                                                          |
-| Campaign price                         | Yes\*    | `25000` or `$25,000`                         | \*Not required for `sold`                                |
-| Status                                 | Yes      | `on_sale`, `reserved`, `coming_soon`, `sold` | See [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) |
-| Body copy (2–4 short paragraphs)       | Yes      | Stewardship story                            | Supports line breaks                                     |
-| Scene where it appears                 | Yes      | Inpatient Suites                             |                                                          |
-| Physical anchor (what donor is naming) | Yes      | Bed bay area, reception desk                 | For architect camera + hotspot                           |
-| Video URL                              | Optional | Synthesia / YouTube embed                    |                                                          |
-| Hero / popup image                     | Optional |                                              |                                                          |
-| Custom CTA override                    | Optional |                                              | Rare — discuss with product                              |
+| Field                                  | Required | Example                                | Notes                                                    |
+| -------------------------------------- | -------- | -------------------------------------- | -------------------------------------------------------- |
+| Legal / display name                   | Yes      | Inpatient Bed Rooms Naming Opportunity |                                                          |
+| Campaign price                         | Yes\*    | `25000` or `$25,000`                   | \*Not required for `sold`                                |
+| Status                                 | Yes      | `open`, `reserved`, `soon`, `sold`     | See [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) |
+| Body copy (2–4 short paragraphs)       | Yes      | Stewardship story                      | Supports line breaks                                     |
+| Scene where it appears                 | Yes      | Inpatient Suites                       |                                                          |
+| Physical anchor (what donor is naming) | Yes      | Bed bay area, reception desk           | For architect camera + hotspot                           |
+| Video URL                              | Optional | Synthesia / YouTube embed              |                                                          |
+| Hero / popup image                     | Optional |                                        |                                                          |
+| Custom CTA override                    | Optional |                                        | Rare — discuss with product                              |
 
 **Statuses and donor CTAs (primary):**
 
@@ -191,22 +192,7 @@ Optional **non-fundraising** info points (ℹ️ icon) — history, programs, pl
 
 ---
 
-## 8. Floor plan
-
-Optional minimap in the lower-left of the tour.
-
-| Field                                        | Required       | Notes                                                             |
-| -------------------------------------------- | -------------- | ----------------------------------------------------------------- |
-| Floor plan artwork                           | Yes if minimap | SVG preferred                                                     |
-| Pixel width × height                         | Yes            | Match SVG viewBox                                                 |
-| Dot position per scene (`x`, `y`, `heading`) | Yes            | Engineering places after panoramas exist — client can mark up PDF |
-
-Architect may supply the SVG; engineering maps scene dots. See
-[ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md#floor-plan).
-
----
-
-## 9. Immersive audio
+## 8. Immersive audio
 
 Optional ambient background music during the tour.
 
@@ -219,7 +205,7 @@ Optional ambient background music during the tour.
 
 ---
 
-## 10. Launch & embed
+## 9. Launch & embed
 
 | Item                                    | Required                             |
 | --------------------------------------- | ------------------------------------ |
@@ -231,11 +217,12 @@ Optional ambient background music during the tour.
 | Post-launch content owner               | Yes — who updates NO status/prices?  |
 
 **Embed flag:** `?embed=1` for minimal chrome on client sites —
-[EMBED.md](./EMBED.md).
+[EMBED.md](./EMBED.md). Parent iframe `src` is updated per tour at launch
+([ROADMAP Client rollout](./ROADMAP.md#client-rollout-until-cms-exists)).
 
 ---
 
-## 11. Approvals & legal
+## 10. Approvals & legal
 
 | Item                                                     | Required before launch |
 | -------------------------------------------------------- | ---------------------- |
@@ -263,9 +250,9 @@ Copy for the client:
 ## Intake template — naming opportunities
 
 ```markdown
-| Scene            | NO name                                | Status  | Price (CAD) | Short description for approval | Video?         |
-| ---------------- | -------------------------------------- | ------- | ----------- | ------------------------------ | -------------- |
-| Inpatient Suites | Inpatient Bed Rooms Naming Opportunity | on_sale | 25,000      | …                              | Synthesia link |
+| Scene            | NO name                                | Status | Price (CAD) | Short description for approval | Video?         |
+| ---------------- | -------------------------------------- | ------ | ----------- | ------------------------------ | -------------- |
+| Inpatient Suites | Inpatient Bed Rooms Naming Opportunity | open   | 25,000      | …                              | Synthesia link |
 ```
 
 ---

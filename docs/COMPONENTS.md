@@ -73,19 +73,25 @@ variants locally.
 
 ```
 src/components/ui/
-  Badge.tsx              React badge
-  badgeVariants.ts       cva variants (React)
-  badgeClasses.ts        Class strings for HTML popups
+  Badge.tsx / NamingStatusBadge.tsx
+  badgeVariants.ts / badgeClasses.ts
 
-  Accordion.tsx          React accordion (details/summary)
-  AccordionChevron.tsx   React chevron icon
-  accordionClasses.ts    Class strings + helpers
-  accordionChevronHtml.ts  HTML trigger/chevron builders
+  Accordion.tsx / AccordionChevron.tsx
+  accordionClasses.ts / accordionChevronHtml.ts
+
+  SegmentedTabs.tsx / SegmentedTabPanel.tsx
+  IconTooltip.tsx
+  MaterialSymbol.tsx
+  ExploreLayoutPanel.tsx
 ```
 
-Feature components (`TourHelpPanel`, `TourNavFloat`, `TourGlassPanel`)
-**consume** `ui/*`. Viewer HTML builders (`tourGlassPanelHtml.ts`) **import
-class constants and HTML helpers** from `ui/*`.
+Feature components (`TourHelpPanel`, `TourNavFloat`, `TourGlassPanel`,
+`ShareTourPanel`, `AiAssistant`, Explore directory/detail, `TourFirstVisitHint`,
+`TourLoadSplash`, `ClientIntroPicker`) **consume** `ui/*`. Viewer HTML builders
+(`tourGlassPanelHtml.ts`) **import class constants and HTML helpers** from
+`ui/*`.
+
+Floor-plan minimap was removed — do not reintroduce `FloorPlanMinimap`.
 
 ---
 
@@ -102,7 +108,7 @@ import { Badge } from './ui/Badge';
 import { NamingStatusBadge } from './ui/NamingStatusBadge';
 
 <Badge variant="outline" tone="muted">Location</Badge>
-<NamingStatusBadge status="on_sale" />
+<NamingStatusBadge status="open" />
 ```
 
 **HTML popups**
@@ -110,13 +116,13 @@ import { NamingStatusBadge } from './ui/NamingStatusBadge';
 ```ts
 import { BADGE_CLASS } from './ui/badgeClasses';
 
-`<span class="${BADGE_CLASS.fillLgStatus('on-sale')}">
-  <span class="${BADGE_CLASS.label}">On sale</span>
+`<span class="${BADGE_CLASS.fillLgStatus('open')}">
+  <span class="${BADGE_CLASS.label}">Available</span>
 </span>`;
 ```
 
 **Variants:** `outline` | `fill`; sizes `sm` | `lg`; tones `primary` | `accent`
-| `muted`; naming status modifiers `on-sale` | `sold` | `reserved`.
+| `muted`; naming status modifiers `open` | `soon` | `sold` | `reserved`.
 
 ---
 
@@ -172,10 +178,10 @@ Nav preview naming uses dedicated `nav-preview-panel__naming-*` classes — see
 These are shared patterns but still feature-scoped. Prefer aligning with them
 before inventing new panel chrome:
 
-| Shell             | React                | HTML                               | Notes                          |
-| ----------------- | -------------------- | ---------------------------------- | ------------------------------ |
-| Glass panel       | `TourGlassPanel.tsx` | `tourGlassPanelHtml.ts`            | Header, body, footer, CTA row  |
-| Nav dock          | `TourNavFloat.tsx`   | —                                  | Explore / Search / Help        |
+| Shell             | React                | HTML                                  | Notes                          |
+| ----------------- | -------------------- | ------------------------------------- | ------------------------------ |
+| Glass panel       | `TourGlassPanel.tsx` | `tourGlassPanelHtml.ts`               | Header, body, footer, CTA row  |
+| Nav dock          | `TourNavFloat.tsx`   | —                                     | Explore / Search / Help        |
 | Nav preview panel | —                    | `glass-panels-layer.css` + glass HTML | Hero, naming section overrides |
 
 When adding panel UI, check whether it belongs **inside** an existing shell with

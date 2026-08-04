@@ -160,7 +160,7 @@ window.addEventListener('message', (event) => {
 });
 ```
 
-Local QA without DNS: `public/embed-test.html` or dev panel **Debug → embed**.
+Local QA without DNS: Dev → **Debug** → **Viewport** → **Embed mode**.
 
 ---
 

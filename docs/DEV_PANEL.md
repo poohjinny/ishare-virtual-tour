@@ -28,11 +28,11 @@ scenes. See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) for the full URL contract.
 
 Authoring touches two catalog layers plus per-tour JSON:
 
-| Layer          | Source                                     | What it holds                                                                             |
-| -------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| **Client**     | `tours/catalog.json` → `clients[]`         | Display name, website, contact, **shared branding** (logo, favicon, primary color, fonts) |
-| **Tour entry** | `tours/catalog.json` → `clients[].tours[]` | Tour id, display name, category, `visibility`, `featured`, optional `summary`             |
-| **Tour body**  | `tours/{tourId}.json`                      | Scenes, hotspots, transitions, immersive bg, optional **tour-only** `branding` override   |
+| Layer          | Source                                     | What it holds                                                                                                              |
+| -------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| **Client**     | `tours/catalog.json` → `clients[]`         | Display name, website, contact, **shared branding** (logo, favicon, primary color, fonts)                                  |
+| **Tour entry** | `tours/catalog.json` → `clients[].tours[]` | Tour id, display name, category, `visibility`, `featured`, optional `summary`                                              |
+| **Tour body**  | `tours/{tourId}.json`                      | Scenes, hotspots, naming catalog, transitions, immersive bg, optional **tour-only** `branding`, optional `askGuideEnabled` |
 
 **Branding resolution** (runtime): `catalog.clients[].branding` is the default;
 `tour.branding` overrides when present. Dev create/update uses
@@ -57,59 +57,174 @@ and `…/thumbnails/`.
 
 ```
 ┌─ Sticky header ─────────────────────────────┐
-│  [logo] Tour name | Client    ▼ Switch tour │
+│  [logo] Tour name | Switch tour    Intro  ✕ │
 ├─ Primary tabs ──────────────────────────────┤
-│  Scene  |  Tour  |  Client  |  Debug       │
+│  Scene | Scenes | Namings | Tours | Clients | Debug │
 ├─ Accordion sections (per tab) ──────────────┤
 │  …                                          │
 └─────────────────────────────────────────────┘
 ```
 
-| Tab        | Purpose                                                                 |
-| ---------- | ----------------------------------------------------------------------- |
-| **Scene**  | Current scene — panorama, hotspots                                      |
-| **Tour**   | Open tour — metadata, floor plan, scenes, tour-only overrides           |
-| **Client** | Catalog clients — contact, shared branding, create client _(see below)_ |
-| **Debug**  | URL flag toggles, embed QA                                              |
+| Tab         | Purpose                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------ |
+| **Scene**   | Current place — landing view / panorama, hotspots (nav, naming pins, info, place overview) |
+| **Scenes**  | Tour scene list — add, edit, duplicate, reorder Explore order, delete                      |
+| **Namings** | Tour-level naming opportunity catalog (the “what”); place pins under Scene → Hotspots      |
+| **Tours**   | Catalog tours — create under a client, edit metadata / experience / branding, delete       |
+| **Clients** | Catalog clients — contact + shared branding; create clients here before Tours → Add        |
+| **Debug**   | URL flags, Tour Guide fixtures, Device / Embed viewport modes                              |
 
-**Code:** `src/components/DevTools.tsx`, `src/components/DevViewPanel.tsx`
+Sticky **Intro** opens the tour picker at `/?intro=1` (not a Debug flag card).
+
+**Code:** `src/constants/devPanel.ts`, `src/components/DevTools.tsx`,
+`src/components/DevViewPanel.tsx`
 
 ---
 
-## Client tab
+## Keyboard shortcuts
 
-> **Goal:** Match the catalog model — client settings should not live only
-> inside Tour. Tour tab should focus on the open tour.
+| Key     | Action                       |
+| ------- | ---------------------------- |
+| `` ` `` | Toggle dev panel open/closed |
 
-### Target UX
+Shortcuts are ignored while typing in inputs (`isTypingTarget`). Landing view
+(`defaultView` + thumbnail bake) is **Apply defaultView** on the Scene tab — pan
+/ orbit first so a live camera readout exists.
 
-Secondary tabs: **Manage** | **Create**
+---
+
+## Scene tab
+
+### Panorama / Viewpoint
+
+| Block                | What it does                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Landing view**     | Saves the current camera as `defaultView` and rebakes the scene thumbnail                                            |
+| **Replace panorama** | Upload JPG/PNG/WebP → overwrites `{sceneId}.webp` via shared encode (≤**8192**w, WebP q**90**) and rebakes thumbnail |
+
+(3D model tours show **Viewpoint** instead of Replace panorama.)
+
+### Hotspots
+
+**Add hotspot** opens create tabs: **Overview** | **Navigation** | **Naming** |
+**Info** (Overview omitted on model3d tours).
 
 #### Manage
 
-1. Pick a client from the catalog list (name, id, tour count).
-2. Edit **client-only** fields:
-   - Identity — display name (id is read-only after create)
-   - Website, email, phone(s), fax, address
-   - **Shared branding** — primary color, logo alt, logo, favicon, fonts
-   - Suggest contact / branding from website URL
-3. Show tours under this client with links to open each tour (Tour tab manages
-   tour body).
+Lists hotspots on the **current scene** (filters: All / Nav / NO / Info). Each
+row shows name, kind badge, and actions:
+
+| Action     | Flow                                                       |
+| ---------- | ---------------------------------------------------------- |
+| **Move**   | Click **Move** → click panorama → **Apply click position** |
+| **Edit**   | Inline form for nav / naming / info / overview → **Save**  |
+| **Delete** | Removes hotspot from scene JSON                            |
+
+Naming rows edit the **placement** (which catalog entry); business fields live
+on the **Namings** tab.
 
 #### Create
 
-Create a **client without a tour** — name, id, website, contact, branding. After
-save, add tours from Tour → Create (existing client picker only).
+1. **Click the panorama** for marker position (yaw / pitch shown in form).
+2. Choose type: **Overview** | **Navigation** | **Naming** | **Info**
+3. Fill fields → **Create**.
 
-### Migration from Tour tab
+| Type           | Notes                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------- |
+| **Overview**   | Place-overview pin (`info-place`) — one per scene; inherits scene title / description |
+| **Navigation** | Target scene; id auto-slugged from name                                               |
+| **Naming**     | Pick an existing catalog entry (create entries on **Namings** first)                  |
+| **Info**       | Title, body, display mode, optional media / visit-scene                               |
 
-| Phase     | Status                                                                          |
-| --------- | ------------------------------------------------------------------------------- |
-| **Done**  | Client tab — Manage (contact + shared branding) and Create (standalone client)  |
-| **Done**  | `POST /__dev/api/client/create`, `PATCH /__dev/api/client/update`               |
-| **Done**  | Tour → Manage: client contact removed; branding = inherit vs tour override only |
-| **Done**  | Tour → Create: existing client picker only (new clients on Client tab)          |
-| **Later** | Admin CMS port                                                                  |
+---
+
+## Scenes tab
+
+Accordion: **Add scene** | **Manage scenes**.
+
+### Add scene
+
+New panorama (or 3D viewpoint) with title, optional description / video URLs,
+visibility. Panorama tours can check **Create place overview hotspot** (off by
+default — otherwise add Overview later under Scene → Hotspots).
+
+### Manage scenes
+
+Groups follow nav hierarchy. Drag reorders the **Explore tour list only** — not
+in-viewer floor links. Actions per scene: **Open**, **Edit**, **Duplicate**,
+**Delete** (not `firstScene`).
+
+#### Duplicate
+
+Copies the scene (and optionally its child places). Options:
+
+| Option                         | Effect                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------ |
+| **Clone naming opportunities** | On → new catalog entries (`namingMode: 'duplicate'`); off → share originals (`keep`) |
+| **Link under same parent**     | Add a nav from the same parent to the copy                                           |
+| **Include child places**       | Clone the nav subtree and remap links among copies                                   |
+
+API also accepts `namingMode: 'clear'` (strip naming links on the copy) —
+`POST /__dev/api/scene/duplicate`. The panel checkbox only toggles duplicate /
+keep.
+
+Edit fields: title, description, preview/video URLs, visibility, set as first
+scene.
+
+---
+
+## Namings tab
+
+Tour-level **naming opportunity catalog** — name, price, status, donor, body,
+video, image, visibility. Create / edit / duplicate / delete entries here.
+
+Place pins on a scene under **Scene → Hotspots → Naming**. Deleting a catalog
+entry also removes its hotspot placements.
+
+Duplicate options: include placements; reset copy as open (clear donor).
+
+---
+
+## Tours tab
+
+Accordion: **Add tour** | **Manage tours**.
+
+### Add tour
+
+Pick an **existing catalog client** (create clients on **Clients**), then tour
+details, experience, optional branding override, and first scene panorama.
+
+| Field                     | Notes                                                     |
+| ------------------------- | --------------------------------------------------------- |
+| **Enable Ask Tour Guide** | Writes `askGuideEnabled: true` on the new tour JSON       |
+| Branding                  | Use client branding, or custom override on this tour only |
+
+### Manage tours
+
+Filter by client. Per tour: open, copy public link, edit, delete.
+
+Edit includes basics (title, category, summary, visibility, featured), **Enable
+Ask Tour Guide** (`askGuideEnabled`), experience (transitions / immersive),
+branding mode, and a **Danger zone** (deletes tour JSON, catalog entry, assets).
+
+Shared client contact / branding: **Clients** tab.
+
+---
+
+## Clients tab
+
+Accordion: **Add client** | **Manage clients**.
+
+#### Add client
+
+Create a **client without a tour** — name, id, website, contact, shared
+branding. Then add tours from Tours → Add.
+
+#### Manage clients
+
+Pick a client; edit identity, contact, shared branding (color, logo, favicon,
+fonts). Suggest contact / branding from website URL. Lists tours under the
+client.
 
 ### Dev API
 
@@ -118,170 +233,75 @@ save, add tours from Tour → Create (existing client picker only).
 | `GET /__dev/api/catalog/clients` | List clients                                  |
 | `POST /__dev/api/client/create`  | New `clients[]` entry + optional brand assets |
 | `PATCH /__dev/api/client/update` | Patch contact + `clients[].branding`          |
-
----
-
-## Keyboard shortcuts
-
-| Key     | Action                                              |
-| ------- | --------------------------------------------------- |
-| `` ` `` | Toggle dev panel open/closed                        |
-| `L`     | Apply landing view (`defaultView` + thumbnail bake) |
-
-Shortcuts are ignored while typing in inputs (`isTypingTarget`).
-
----
-
-## Scene tab
-
-### Panorama
-
-| Block                | What it does                                                                                                         |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Landing view**     | Saves the current camera as `defaultView` and rebakes the scene thumbnail                                            |
-| **Replace panorama** | Upload JPG/PNG/WebP → overwrites `{sceneId}.webp` via shared encode (≤**8192**w, WebP q**90**) and rebakes thumbnail |
-
-Landing view requires a live camera readout (pan the scene first). Button label
-also shows **`(L)`** for the keyboard shortcut.
-
-### Hotspots
-
-Secondary tabs: **Manage** | **Create**
-
-#### Manage
-
-Lists every hotspot on the **current scene**. Each row shows:
-
-**name · category · id**
-
-- **name** — nav label or popup title
-- **category** — `Nav`, `NO`, or `Info`
-- **id** — JSON hotspot id (`code`)
-
-Actions per hotspot:
-
-| Action     | Flow                                                       |
-| ---------- | ---------------------------------------------------------- |
-| **Move**   | Click **Move** → click panorama → **Apply click position** |
-| **Edit**   | Inline form for nav / NO / info fields → **Save**          |
-| **Delete** | Removes hotspot from scene JSON                            |
-
-#### Create
-
-1. **Click the panorama** for marker position (yaw / pitch shown in form).
-2. Choose type tab: **Navigation** | **Naming opportunity** | **Info**
-3. Fill fields → **Create** button.
-
-Nav hotspots need a target scene; id is auto-slugged from the name (preview
-shown). Session storage remembers recent names for faster re-entry.
-
----
-
-## Tour tab
-
-Accordion sections:
-
-### Tour
-
-Secondary tabs: **Manage** | **Create**
-
-#### Manage _(open tour)_
-
-Edits the tour currently loaded in the viewer.
-
-| Section         | Writes to                                | Notes                                                                                           |
-| --------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **Basics**      | `tours/{id}.json`, catalog tour entry    | Title, category, summary, visibility, featured, product name, transitions, immersive background |
-| **Branding**    | `tours/{id}.json` when custom            | **Use client branding** inherits from Client tab; **Custom** overrides on this tour only        |
-| **Danger zone** | deletes tour JSON, catalog entry, assets | Irreversible                                                                                    |
-
-Shared client contact and branding: **Client** tab.
-
-#### Create _(new tour)_
-
-Pick an **existing catalog client** (add new clients on the **Client** tab),
-then tour details, optional branding override, and first scene.
-
-Branding on create:
-
-- **Use client branding** — inherits `clients[].branding` (no `tour.branding`).
-- **Custom branding for this tour** — saves to `tours/{id}.json` `branding`
-  only.
-
-Changes write to `tours/{tourId}.json` and `tours/catalog.json`.
-
-### Floor plan
-
-Upload or replace `floorplan.svg`, set dimensions, edit per-scene `map` pin (x,
-y, heading).
-
-### Scenes
-
-**Manage** — list all scenes: **Open**, **Edit** (title, description, map pin),
-**Delete** (not `firstScene`).
-
-**Create** — new scene with panorama upload, title, description, optional
-defaultView from current camera.
+| `POST /__dev/api/client/delete`  | Remove client (when allowed)                  |
 
 ---
 
 ## Debug tab
 
-Single accordion card: **URL flags**. Toggles apply immediately via URL
-`replace` (no full page reload). Source of truth:
-`src/constants/devUrlFlags.ts`.
+Two accordion cards (source: `src/constants/devUrlFlags.ts`). Toggles apply
+immediately via URL `replace` (no full page reload).
 
 ### URL flags
 
-| Flag                | Effect                                                              |
-| ------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `embed`             | `?embed=1` — trim Share/Help FABs, lighter splash, postMessage      |
-| `intro`             | `?intro=1                                                           | 0`— force or skip client tour picker at`/` (tri-state select + Open button) |
-| `notFoundTest`      | Force tour not-found (404) screen                                   |
-| `loadErrorTest`     | Force viewer load-error overlay (panorama + 3D)                     |
-| `disableNavPreview` | Disable nav hotspot mini viewer                                     |
-| `skipLanding`       | Skip landing zoom — start at `defaultView`                          |
-| `splashHold`        | Hold load splash longer (loader UX test)                            |
-| `firstVisitHint`    | Force first-visit coach pill (ignores localStorage)                 |
-| `askGuide`          | Force Tour Guide on (overrides missing `askGuideEnabled`)           |
-| `guideMock`         | Chat with scripted mock replies — no OpenAI (alias: `askGuideMock`) |
-| `guideUiTest`       | Frozen UI preview — scroll + thinking fixtures (alias: `chatTest`)  |
+General QA — **not** intro / Tour Guide (those are separate):
 
-Combine with `dev=1` as needed, e.g. `?dev=1&embed=1`.
+| Flag                | Effect                                              |
+| ------------------- | --------------------------------------------------- |
+| `notFoundTest`      | Force tour not-found (404) screen                   |
+| `loadErrorTest`     | Force viewer load-error overlay (panorama + 3D)     |
+| `disableNavPreview` | Disable nav hotspot mini viewer                     |
+| `skipLanding`       | Skip landing zoom — start at `defaultView`          |
+| `splashHold`        | Hold load splash longer (loader UX test)            |
+| `firstVisitHint`    | Force first-visit coach pill (ignores localStorage) |
 
-### Embed subsection
+`embed=1` is applied by **Embed mode** (Viewport), not as a Debug URL-flag
+checkbox — see below.
 
-Shown below the checkboxes **only when `embed` is checked**. Product guide:
-[EMBED.md](./EMBED.md). Dev-panel QA fields:
+**Intro gallery** — sticky header **Intro** button → `/?intro=1` (tri-state
+`intro` query still works from the URL; it is not listed on this card).
 
-| Field               | Meaning                                                           |
-| ------------------- | ----------------------------------------------------------------- |
-| **In iframe**       | `window.parent !== window` — parent actually receives messages    |
-| **Fullscreen API**  | Iframe only — needs parent `allow="fullscreen"` for control pill  |
-| **Message source**  | Filter key for parent listeners: `ishare-virtual-tour`            |
-| **Embed URL**       | Production-style link for current scene (`?embed=1`, no `dev`)    |
-| **Iframe HTML**     | Ready-to-paste host markup (`allow="fullscreen"` included)        |
-| **Copy actions**    | Copy embed URL or iframe HTML; **Open iframe test** for parent QA |
-| **postMessage log** | Last 20 outbound messages (scrollable)                            |
+### Tour Guide
 
-**Log entries** appear after embed mode is on and the tour loads/navigates.
-Typical sequence:
+Separate group for guide / chat fixtures:
+
+| Flag          | Effect                                                                                       |
+| ------------- | -------------------------------------------------------------------------------------------- |
+| `askGuide`    | Show Tour Guide FAB + panel (overrides missing `askGuideEnabled`)                            |
+| `guideMock`   | Chat with scripted mock replies — no OpenAI (alias: `askGuideMock`)                          |
+| `guideUiTest` | Frozen UI preview — scroll + thinking fixtures; also turns on `askGuide` (alias: `chatTest`) |
+
+Product default: guide shows when `tour.askGuideEnabled === true`. Use
+`?askGuide=1` for QA without enabling the tour flag.
+
+Combine with `dev=1` as needed, e.g. `?dev=1&askGuide=1`.
+
+### Viewport — Device / Embed
+
+**Debug → Viewport**:
+
+| Mode            | Purpose                                                        |
+| --------------- | -------------------------------------------------------------- |
+| **Device mode** | Layout / rem / breakpoint QA (presets + responsive resize)     |
+| **Embed mode**  | Host iframe harness (`?embed=1`) — Copy URL/HTML, Messages log |
+
+Embed mode toolbar:
+
+| Control       | Meaning                                                         |
+| ------------- | --------------------------------------------------------------- |
+| **Copy URL**  | Production-style link (`?embed=1`, no `dev`)                    |
+| **Copy HTML** | Ready-to-paste iframe markup (`allow="fullscreen"` included)    |
+| **Messages**  | Parent `postMessage` log (`tour:ready` / `tour:scene` / resize) |
+
+Typical message sequence:
 
 1. `tour:ready` — after first panorama reveal (splash done)
 2. `tour:scene` — on scene or naming-panel change
 3. `tour:resize` — on viewport height change
 
-In a top-level tab, log lines show `[local only]` — the dev panel still records
-them, but nothing is posted to a parent. In an iframe, lines show `[parent]`.
-
-**Iframe test** — **Open iframe test** (or
-[`/embed-test.html`](http://localhost:5173/embed-test.html) while `npm run dev`
-is running). Parent page logs `postMessage`; inside the iframe Dev panel shows
-**In iframe: yes** and `[parent]` log lines.
-
 Full `postMessage` contract: [EMBED.md](./EMBED.md).
 
-**Code:** `src/components/DevPanelEmbedDebug.tsx`,
+**Code:** `src/components/DevEmbedPreviewFrame.tsx`,
 `src/hooks/useTourEmbedMessaging.ts`
 
 ---
@@ -296,17 +316,19 @@ preserving query flags (`dev`, `embed`, etc.).
 
 ## What gets written
 
-| Action                                        | Files / paths touched                                             |
-| --------------------------------------------- | ----------------------------------------------------------------- |
-| Tour CRUD                                     | `tours/{id}.json`, `tours/catalog.json`                           |
-| Client contact / shared branding (Client tab) | `tours/catalog.json` `clients[]`                                  |
-| Tour-only branding                            | `tours/{id}.json` `branding`, `assets/{clientId}/{tourId}/brand/` |
-| Client branding                               | `catalog.json` `clients[].branding`, `assets/{clientId}/brand/`   |
-| Scene / hotspot                               | `tours/{id}.json` (scene graph)                                   |
-| Panorama / scene thumb                        | `assets/{clientId}/{tourId}/panoramas/`, `…/thumbnails/`          |
+| Action                                     | Files / paths touched                                             |
+| ------------------------------------------ | ----------------------------------------------------------------- |
+| Tour CRUD                                  | `tours/{id}.json`, `tours/catalog.json`                           |
+| Client contact / shared branding (Clients) | `tours/catalog.json` `clients[]`                                  |
+| Tour-only branding                         | `tours/{id}.json` `branding`, `assets/{clientId}/{tourId}/brand/` |
+| Client branding                            | `catalog.json` `clients[].branding`, `assets/{clientId}/brand/`   |
+| Scene / hotspot / naming catalog           | `tours/{id}.json` (scene graph + `namingOpportunities`)           |
+| Scene duplicate                            | `tours/{id}.json` (+ optional cloned naming assets)               |
+| Panorama / scene thumb                     | `assets/{clientId}/{tourId}/panoramas/`, `…/thumbnails/`          |
 
 The viewer refreshes from an in-memory dev cache after mutations — no manual
-page reload. API routes live under `/__dev/api` (Vite dev server only).
+page reload. API routes live under `/__dev/api` (Vite plugin
+`viteDevTourApiPlugin` — dev server only).
 
 ---
 
@@ -316,8 +338,6 @@ page reload. API routes live under `/__dev/api` (Vite dev server only).
 - **No auth / audit** — JSON edits are local and immediate; production will use
   Admin + publish
   ([ROADMAP Sprint B½](./ROADMAP.md#sprint-b½--dev-panel-authoring-dev1)).
-- **Client vs tour UX** — client contact and shared branding live on the
-  **Client** tab; Tour tab handles tour body and optional branding override.
 - **Click-to-place** — hotspots are positioned by panorama click, not drag (drag
   planned for Admin).
 - **Phone** — panel defaults open and can overlap chrome; see

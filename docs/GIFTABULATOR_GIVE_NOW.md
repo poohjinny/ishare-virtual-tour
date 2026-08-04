@@ -67,7 +67,7 @@ NO at **$150,000** (after bounded scaling):
    unchanged.
 
 ```json
-"namingOpportunity": { "name": "...", "price": "150000", "status": "on_sale" }
+"namingOpportunity": { "name": "...", "price": "150000", "status": "open" }
 ```
 
 Price is parsed with `parseNamingPrice()` — `"$150,000"` and `"150000"` both

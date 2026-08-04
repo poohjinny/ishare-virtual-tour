@@ -2,17 +2,17 @@
 
 ## Overview
 
-| Layer       | Technology                             | Version                                  |
-| ----------- | -------------------------------------- | ---------------------------------------- |
-| Runtime     | React                                  | ^19                                      |
-| Language    | TypeScript                             | ~5.7                                     |
-| Build tool  | Vite                                   | ^6                                       |
-| 360 viewer  | Photo Sphere Viewer (PSV)              | ^5.11                                    |
-| PSV plugins | markers-plugin, virtual-tour-plugin    | ^5.11                                    |
-| 3D viewer   | Three.js (GLTF walkthrough)            | ^0.170                                   |
-| Styling     | CSS + design tokens                    | —                                        |
-| AI (MVP)    | Client-side mock (JSON + FAQ matching) | —                                        |
-| Deployment  | Static SPA                             | Vercel / Netlify / Azure Static Web Apps |
+| Layer       | Technology                                 | Version                                  |
+| ----------- | ------------------------------------------ | ---------------------------------------- |
+| Runtime     | React                                      | ^19                                      |
+| Language    | TypeScript                                 | ~5.7                                     |
+| Build tool  | Vite                                       | ^6                                       |
+| 360 viewer  | Photo Sphere Viewer (PSV)                  | ^5.11                                    |
+| PSV plugins | markers-plugin, virtual-tour-plugin        | ^5.11                                    |
+| 3D viewer   | Three.js (GLTF walkthrough)                | ^0.170                                   |
+| Styling     | CSS + design tokens                        | —                                        |
+| AI (MVP)    | Tour Guide — mock + live Cloudflare Worker | per-tour `askGuideEnabled`               |
+| Deployment  | Static SPA                                 | Vercel / Netlify / Azure Static Web Apps |
 
 ## Why This Stack
 
@@ -55,8 +55,8 @@ Three.js is already a transitive dependency of PSV, so adding it as a direct
 dependency does not introduce a new library to the build graph.
 
 Both viewer implementations conform to the shared `TourViewerHandle` interface
-(`src/viewer/viewerHandle.ts`), allowing `TourPage` to remain agnostic to the
-rendering engine.
+(`src/viewer-shared/viewerHandle.ts`), allowing `TourPage` to remain agnostic to
+the rendering engine.
 
 ### Mock AI + live Ask Guide
 
@@ -180,9 +180,11 @@ ishare-virtual-tour/
 │   ├── data/loadTour.ts
 │   ├── viewer/
 │   │   ├── PanoramaViewer.tsx   # PSV instance + plugins
+│   │   └── transition.ts        # VT setCurrentNode wrapper (see SCENE_TRANSITIONS.md)
+│   ├── viewer-shared/
 │   │   ├── viewerHandle.ts      # TourViewerHandle — shared viewer interface
 │   │   ├── buildMarkers.ts      # Hotspot HTML → marker config
-│   │   └── transition.ts        # VT setCurrentNode wrapper (see SCENE_TRANSITIONS.md)
+│   │   └── anchoredPanelLayout.ts
 │   ├── components/
 │   │   ├── SceneNav.tsx
 │   │   ├── TourHeader.tsx
@@ -199,7 +201,8 @@ ishare-virtual-tour/
 │   │   ├── globals.css          # @theme + layer imports
 │   │   ├── components-layer.css # badge, accordion, skeleton shells
 │   │   ├── glass-panels-layer.css
-│   │   └── psv-layer.css        # PSV navbar + hotspot markers
+│   │   ├── hotspot-layer.css    # Shared hotspot pill chrome
+│   │   └── psv-layer.css        # PSV navbar + marker host
 │   ├── viewer-3d/
 │   │   └── ThreeDViewer.tsx   # Three.js GLTF walkthrough (lazy-loaded)
 │   └── utils/
@@ -234,7 +237,7 @@ useTourState
         ├─► history stack → Back button
         └─► isTransitioning → disable nav during animation
 
-TourViewerHandle (src/viewer/viewerHandle.ts)
+TourViewerHandle (src/viewer-shared/viewerHandle.ts)
         │
         ├─► PanoramaViewer implements via useImperativeHandle
         └─► ThreeDViewer   implements via useImperativeHandle
@@ -247,7 +250,8 @@ TourViewerHandle (src/viewer/viewerHandle.ts)
 - **Design tokens:** `src/styles/globals.css` `@theme` — iShare brand colours
   (runtime override via `clientTheme.ts`)
 - **Layer CSS:** `components-layer.css`, `glass-panels-layer.css`,
-  `psv-layer.css` — HTML marker shells and PSV chrome
+  `hotspot-layer.css` — shared HTML hotspot pill chrome; `psv-layer.css` — PSV
+  navbar + marker host
 - **React UI:** Tailwind utilities + `cn()` + `cva()` (`*Variants.ts`)
 
 See [STYLING.md](./STYLING.md) for migration conventions.

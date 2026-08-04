@@ -75,7 +75,7 @@ Optional body for non-obvious context:
 Fix anchored NO panel gap below body content.
 
 Use [data-info-panel] selectors and sync marker height to rendered panel
-so the 32px hotspot gap stays correct after content-height sizing.
+so the 15px hotspot gap stays correct after content-height sizing.
 ```
 
 **Prefixes** (use when helpful, not required):
@@ -123,13 +123,13 @@ Each commit should **build** (`npm run build`) at that point when possible.
 
 ## Files often touched together (keep in one commit)
 
-| Task                       | Files                                                                                           |
-| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| Task                       | Files                                                                                               |
+| -------------------------- | --------------------------------------------------------------------------------------------------- |
 | Anchored NO panel sizing   | `glass-panels-layer.css`, `tourGlassPanelHtml.ts`, `anchoredPanelPosition.ts`, `infoPanelMarker.ts` |
-| Fullscreen overlay         | `tourFullscreenNavbarButton.ts`, `PanoramaViewer.tsx`, `TourPage.tsx`, `psv-layer.css`             |
-| Viewer controls preference | `useViewerControlsVisible.ts`, `viewerControlsPreference.ts`, `TourPage.tsx`                    |
-| Explore directory UX       | `TourNavFloat.tsx`, `tourNavFloatVariants.ts`, `tourNavActions.ts`                              |
-| Shared UI primitive        | `ui/Badge.*`, `badgeVariants.ts`, `badgeClasses.ts` + consumers in same task only                  |
+| Fullscreen overlay         | `viewer-shared/tourFullscreen.ts`, `PanoramaViewer.tsx`, `TourPage.tsx`, `psv-layer.css`            |
+| Viewer controls preference | `useViewerControlsVisible.ts`, `viewerControlsPreference.ts`, `TourPage.tsx`                        |
+| Explore directory UX       | `TourNavFloat.tsx`, `tourNavFloatVariants.ts`, `tourNavActions.ts`                                  |
+| Shared UI primitive        | `ui/Badge.*`, `badgeVariants.ts`, `badgeClasses.ts` + consumers in same task only                   |
 
 ---
 

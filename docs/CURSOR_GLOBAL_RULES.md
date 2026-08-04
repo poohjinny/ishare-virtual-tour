@@ -13,6 +13,10 @@
   one pass.
 - No new npm deps without discussion. Tests only when requested or clearly
   valuable.
+- **Viewer-type isolation:** panorama (`viewer/`, PSV) vs model3d (`viewer-3d/`)
+  — shared contracts OK; do not silently restyle the other type (hotspot size,
+  backgrounds, gradients). See `.cursor/rules/viewer-type-isolation.mdc` and
+  [CODING_GUIDELINES.md](./CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).
 
 ## Safety
 

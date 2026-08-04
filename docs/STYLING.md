@@ -26,13 +26,14 @@ React components         ← className + cn() + cva()
 @layer base shims        ← --ishare-* aliases (legacy CSS, removed over time)
 ```
 
-| Layer              | Approach                                                          |
-| ------------------ | ----------------------------------------------------------------- |
-| **Design tokens**  | `@theme` in `globals.css` only                                    |
-| **Runtime brand**  | `--brand-*` on `:root` via `clientTheme.ts` → `--color-primary`   |
-| **React UI**       | Tailwind utilities + `cn()` + `class-variance-authority`          |
-| **HTML markers**   | `@layer components` with `@apply` — stable class names in strings |
-| **PSV / hotspots** | `psv-layer.css` — PSV chrome + HTML hotspot markers               |
+| Layer               | Approach                                                          |
+| ------------------- | ----------------------------------------------------------------- |
+| **Design tokens**   | `@theme` in `globals.css` only                                    |
+| **Runtime brand**   | `--brand-*` on `:root` via `clientTheme.ts` → `--color-primary`   |
+| **React UI**        | Tailwind utilities + `cn()` + `class-variance-authority`          |
+| **HTML markers**    | `@layer components` with `@apply` — stable class names in strings |
+| **Hotspot markers** | `hotspot-layer.css` — shared nav/info/general-info pill chrome    |
+| **PSV chrome**      | `psv-layer.css` — PSV navbar + marker host stacking / enter       |
 
 ---
 
@@ -43,7 +44,8 @@ React components         ← className + cn() + cva()
 | `src/styles/globals.css`            | `@import 'tailwindcss'`, full `@theme`, legacy `--ishare-*` shims |
 | `src/styles/components-layer.css`   | `@layer components` — badge/accordion/skeleton for HTML markers   |
 | `src/styles/glass-panels-layer.css` | `@layer components` — glass panel, nav preview, info popup shells |
-| `src/styles/psv-layer.css`          | PSV navbar chrome + HTML hotspot marker styles                    |
+| `src/styles/hotspot-layer.css`      | Shared HTML hotspot pill chrome (PSV + 3D CSS2D)                  |
+| `src/styles/psv-layer.css`          | PSV navbar chrome + PSV marker host stacking / enter              |
 | `src/lib/cn.ts`                     | `clsx` + `tailwind-merge` helper                                  |
 | `src/utils/clientTheme.ts`          | Sets `--brand-primary*` at runtime per tour                       |
 
@@ -52,7 +54,7 @@ React components         ← className + cn() + cva()
 ## Import order (`main.tsx`)
 
 1. `globals.css` (includes `components-layer.css`, `glass-panels-layer.css`,
-   `psv-layer.css`)
+   `hotspot-layer.css`, `psv-layer.css`, `viewer-3d-layer.css`)
 2. No other global CSS imports in `main.tsx`
 
 No per-component CSS imports in `main.tsx` long-term — only globals that HTML
@@ -136,7 +138,7 @@ until touched — prefer Material when refactoring those surfaces.
 | **1** | `ui/*` — Badge, Accordion, SegmentedTabs, PreviewSkeleton | done   |
 | **2** | Leaf pages — TourErrorState, LoadSplash                   | done   |
 | **3** | Intro — ClientIntro*, ShareTour*, PlatformBrandLink       | done   |
-| **4** | Tour chrome — TourNavFloat, AiAssistant, FloorPlanMinimap | done   |
+| **4** | Tour chrome — TourNavFloat, AiAssistant                   | done   |
 | **5** | Glass / markers — `@layer components` + shrink CSS files  | done   |
 | **6** | PSV trim — layout/hotspots dead code removal              | done   |
 

@@ -61,8 +61,35 @@ Shared visuals must work in **both** HTML paths — see
 | `'panorama'` (def) | `PanoramaViewer` (PSV)    | `React.lazy` |
 | `'model3d'`        | `ThreeDViewer` (Three.js) | `React.lazy` |
 
-Both implement `TourViewerHandle` (`src/viewer/viewerHandle.ts`) — the
+Both implement `TourViewerHandle` (`src/viewer-shared/viewerHandle.ts`) — the
 imperative contract between orchestrator and renderer.
+
+### Viewer-type isolation (panorama vs model3d)
+
+Reuse shared contracts and tour chrome when it helps. **Changing one viewer must
+not silently restyle or resize the other.**
+
+| Surface                 | Own here                                                                 |
+| ----------------------- | ------------------------------------------------------------------------ |
+| Panorama                | `src/viewer/`, `.viewer-container` / `.psv-*`, most of `psv-layer.css`   |
+| Shared hotspot pills    | `hotspot-layer.css` (`.hotspot-nav` / `.hotspot-info` / …)               |
+| Model3d                 | `src/viewer-3d/`, `.viewer-3d-*`, `viewer-3d-layer.css`, `.hotspot-3d-*` |
+| Shared JS (both)        | `src/viewer-shared/` — handle, markers HTML, panel layout, scene depth   |
+| Shared only by decision | Design tokens both already consume; React dock panels                    |
+
+**Required practice**
+
+1. Before editing hotspot / marker / background / navbar styles, decide
+   panorama-only vs model3d-only vs intentional shared.
+2. Scope CSS under the owning container — do not “fix” 3D by widening a global
+   hotspot font or padding used by panorama (or the reverse).
+3. Shared token or HTML-builder changes → verify **both** viewer types, or
+   document which type was out of scope.
+4. No drive-by restyles of the other medium while fixing one (past regressions:
+   3D hotspot text size, model clear-color / gradient).
+
+Cursor enforces this via `.cursor/rules/viewer-type-isolation.mdc`
+(`alwaysApply`).
 
 ### Data over hard-coding
 
@@ -104,19 +131,21 @@ ishare-virtual-tour/
 │   ├── styles/          globals.css (@theme), layout, hotspots
 │   ├── types/           tour.ts — canonical tour schema
 │   ├── utils/           Paths, directory, popup layout, preferences
-│   ├── viewer/          PSV, markers, transitions, viewerHandle
+│   ├── viewer/          PSV-only (markers, camera, transitions)
+│   ├── viewer-shared/   Shared viewer contract + hotspot/panel helpers
 │   └── viewer-3d/       Three.js GLTF walkthrough (lazy-loaded)
 └── docs/
 ```
 
-| Layer           | Responsibility                                    |
-| --------------- | ------------------------------------------------- |
-| `types/tour.ts` | Shapes only — no runtime logic                    |
-| `data/`         | Load, normalize, naming opportunity rules         |
-| `viewer/`       | PSV, markers, camera, transitions, `viewerHandle` |
-| `viewer-3d/`    | Three.js GLTF viewer (lazy-loaded for `model3d`)  |
-| `components/`   | React trees + colocated feature CSS               |
-| `utils/`        | Stateless helpers shared across layers            |
+| Layer            | Responsibility                                                   |
+| ---------------- | ---------------------------------------------------------------- |
+| `types/tour.ts`  | Shapes only — no runtime logic                                   |
+| `data/`          | Load, normalize, naming opportunity rules                        |
+| `viewer/`        | PSV-only: markers, camera, transitions                           |
+| `viewer-shared/` | Shared contract, hotspot HTML, panel layout, scene graph helpers |
+| `viewer-3d/`     | Three.js GLTF viewer (lazy-loaded for `model3d`)                 |
+| `components/`    | React trees + colocated feature CSS                              |
+| `utils/`         | Stateless helpers shared across layers                           |
 
 ---
 
@@ -171,20 +200,20 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 
 ### Hotspots
 
-- HTML: [`buildMarkers.ts`](../src/viewer/buildMarkers.ts)
+- HTML: [`buildMarkers.ts`](../src/viewer-shared/buildMarkers.ts)
 - `data-hotspot-type="nav" | "info"` — click routing in `PanoramaViewer`
 - `namingOpportunity` on info popup → anchored glass panel
 
 ### Anchored panels (NO / info / nav preview)
 
-| Concern           | Location                                                              |
-| ----------------- | --------------------------------------------------------------------- |
-| HTML build        | `tourGlassPanelHtml.ts`                                               |
-| Panel CSS         | `TourGlassPanel.css`, `NavPreviewPanel.css`                           |
-| Open/close        | `infoPanelMarker.ts`, `navPreviewPanelMarker.ts`                      |
-| Height measure    | `glassPanelMarkerSize`, `#glass-panel-measure-host`                   |
-| Hotspot gap       | `anchoredPanelPosition.ts` — **32px** (`ANCHORED_PANEL_GAP_PX`)       |
-| `data-info-panel` | On **`<article>`** — `[data-info-panel='true']`, not `:has()` on self |
+| Concern           | Location                                                                 |
+| ----------------- | ------------------------------------------------------------------------ |
+| HTML build        | `tourGlassPanelHtml.ts`                                                  |
+| Panel CSS         | `TourGlassPanel.css`, `NavPreviewPanel.css`                              |
+| Open/close        | `infoPanelMarker.ts`, `navPreviewPanelMarker.ts`                         |
+| Height measure    | `glassPanelMarkerSize`, `#glass-panel-measure-host`                      |
+| Hotspot gap       | `viewer-shared/anchoredPanelGap.ts` — **15px** (`ANCHORED_PANEL_GAP_PX`) |
+| `data-info-panel` | On **`<article>`** — `[data-info-panel='true']`, not `:has()` on self    |
 
 ### Scene navigation & URL
 
@@ -230,7 +259,7 @@ hand-roll footer buttons in JSON unless overriding.
 | UI                                 | Source                                                                                      |
 | ---------------------------------- | ------------------------------------------------------------------------------------------- |
 | Tab / splash title                 | `getTourProductFullName(tour)`                                                              |
-| AI assistant                       | `VIRTUAL_TOUR_GUIDE_NAME`                                                                   |
+| Tour Guide (Ask Guide)             | `VIRTUAL_TOUR_GUIDE_NAME` / `VIRTUAL_TOUR_GUIDE_FAB_LABEL`                                  |
 | **iShare Virtual Tour** (platform) | Platform-level UI only — e.g. client intro `/` (`TourProductBranding` without `clientName`) |
 
 ---

@@ -13,16 +13,17 @@
 ┌──────────────────────────────────────────────────────────┐
 │ Breadcrumb + history              TourNavFloat (FAB dock) │
 ├──────────────────────────────────────────────────────────┤
-│ Floor plan minimap (optional)     Panorama viewer        │
-│ (bottom-left)                      Guide FAB (bottom-right)│
-│                                    PSV controls (bottom)   │
+│                                  Panorama / 3D viewer     │
+│                                  Guide FAB (bottom-right) │
+│                                  PSV controls (desktop)   │
 └──────────────────────────────────────────────────────────┘
 ```
 
 - Client intro at `/` when multiple **public** catalog tours (see
   [Home policy](#home-policy--catalog-visibility)).
 - Glass panels: Explore, Help, Share, naming-opportunity popups, nav previews,
-  AI chat.
+  Tour Guide chat (when enabled).
+- Floor-plan minimap was removed from the product.
 - Component details: [COMPONENTS.md](./COMPONENTS.md).
 
 ---
@@ -42,12 +43,15 @@
 - Loads GLTF/GLB from `scene.model` URL.
 - Lazy-loaded via `React.lazy` — zero bundle cost for panorama-only tours.
 - Shares `TourViewerHandle` interface with `PanoramaViewer`.
-- Prototype: hotspot rendering and panel integration are stubs.
+- Prototype: markers + anchored panels work; nav-preview / place-overview /
+  modal InfoPopup parity with panorama is thinner — see
+  [ROADMAP.md — 3D model tours](./ROADMAP.md#3d-model-tours-production).
 
 ### Navigation
 
-- **TourNavFloat** — Explore, Search, Share, Controls, Help.
+- **TourNavFloat** — Explore, Share, Help (embed hides Share/Help).
 - **Breadcrumb + history** — back / forward across visited scenes.
+- **Play Tour** — optional guided walkthrough when `tour.playTour` is set.
 - **`targetView`** on nav transitions (yaw / pitch / zoom).
 - Navigation disabled during transitions.
 
@@ -63,18 +67,22 @@ See [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md) for tuning. Sequence:
 
 ### Hotspots and popups
 
-- Nav: animated CSS markers, 48px touch target.
-- Info: React `InfoPopup` modal (ESC / backdrop / close).
+- Nav: animated CSS markers, 48px touch target; optional nav-preview card.
+- Info: React `InfoPopup` modal and/or anchored glass (ESC / backdrop / close).
 - Naming opportunities: anchored glass panels — see
   [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md).
+- Place overview: info hotspot with `role: 'placeOverview'`.
 
-### AI assistant (mock)
+### Tour Guide (Ask Guide)
 
-- Guide FAB + chat panel with current-scene badge.
-- Suggested question chips per scene.
-- `mockAssistant.ts`: FAQ match → facts → fallback.
-- Production LLM contract:
-  [ROADMAP.md — Phase 2](./ROADMAP.md#phase-2--platform-integration).
+- FAB label **Ask Tour Guide**; chat panel with scene context + cards/CTAs.
+- Enabled per tour via `askGuideEnabled` (Dev Tours form). Global
+  `SHOW_ASK_GUIDE` stays off; QA with `?askGuide=1`. Force mock with
+  `?guideMock=1`.
+- Live: Cloudflare Worker + `VITE_ASK_GUIDE_API_URL` — see
+  [DEPLOY.md — Ask Guide](./DEPLOY.md#ask-guide-live-ai-readiness).
+- Client mock fallback when live is unavailable.
+- Naming / product copy: [PRODUCT_NAMING.md](./PRODUCT_NAMING.md).
 
 ---
 
@@ -87,16 +95,22 @@ Engineering notes: [CODING_GUIDELINES.md](./CODING_GUIDELINES.md).
 
 - `viewerType` — `'panorama'` (default) or `'model3d'`.
 - `firstScene` — starting scene id.
-- Per scene: `title`, `panorama`, `defaultView`, `hotspots[]`.
-- For 3D tours: `scene.model` — GLTF/GLB URL (used instead of `panorama`).
-- Hotspot types: `nav` | `info` | `nav-preview` | naming (see tour JSON).
-- Nav hotspots: `targetScene`, `targetView` (orientation after transition).
+- `askGuideEnabled` — optional; show Tour Guide FAB when `true`.
+- `playTour` — optional guided walkthrough sequence.
+- `namingOpportunities` — tour-level naming catalog (pins use `namingId`).
+- `sceneOrder` — optional Explore / Play authoring order.
+- `immersiveBackground` — optional BGM / playlist.
+- Per scene: `title`, `panorama` (or `model`), `description`, `thumbnail`,
+  `defaultView`, `hotspots[]`, optional `visibility`.
+- Hotspot types: `nav` | `info` (naming via `namingId`; place overview via
+  `role: 'placeOverview'`). Nav may include preview / `instant` / `targetView`.
 
 ### Catalog (`tours/catalog.json`)
 
 - `categories[]` — display order on client intro.
 - `clients[]` — each with `id`, `name`, `tours[]`.
-- Per tour: `id`, `category`, `name`, optional `visibility`, `featured`.
+- Per tour: `id`, `category`, `name`, optional `visibility`, `featured`,
+  `summary`.
 
 ---
 
@@ -141,8 +155,8 @@ Example:
 ```
 
 - **`visibility`** — defaults to `public` when omitted.
-- **`featured`** — optional; for curated marketing links (full gallery still
-  lists all `public` tours unless a `?featured=1` mode is added later).
+- **`featured`** — optional; curated marketing. Intro can filter with
+  `?featured=1` (`isFeaturedGalleryMode`).
 
 **Implementation:** `listCatalogTours()` → intro (`public` only);
 `listRoutableCatalogTours()` → routing (`public` + `unlisted`); `internal`
@@ -152,16 +166,20 @@ excluded from `isKnownTourId` until dev gating exists.
 
 ## URL query contract
 
-| Param                | Values              | Role                                                                                        |
-| -------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
-| `embed`              | `1`                 | Client delivery — skip intro; trim Share/Help FABs; lighter splash; `postMessage` to parent |
-| `intro`              | `1` / `0` / omitted | Tri-state override for intro at `/` only                                                    |
-| `no`                 | hotspot id          | Open naming-opportunity panel                                                               |
-| `dev`, `chatTest`, … | `1`                 | Dev / QA only — not for production links                                                    |
+| Param                      | Values              | Role                                                                                        |
+| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| `embed`                    | `1`                 | Client delivery — skip intro; trim Share/Help FABs; lighter splash; `postMessage` to parent |
+| `intro`                    | `1` / `0` / omitted | Tri-state override for intro at `/` only                                                    |
+| `no`                       | hotspot id          | Open naming-opportunity panel                                                               |
+| `askGuide`                 | `1`                 | Force Tour Guide on (QA)                                                                    |
+| `guideMock`                | `1`                 | Scripted Guide replies (no OpenAI); alias `askGuideMock`                                    |
+| `featured`                 | `1`                 | Intro gallery featured-only filter                                                          |
+| `dev`                      | `1`                 | Dev panel — not for production links                                                        |
+| `guideUiTest` / `chatTest` | `1`                 | Guide UI fixtures — not for production                                                      |
 
 **Path vs query:** Tour and scene identity live in the path
-(`/{tourId}/{sceneId}`). Product flags (`embed`, `no`) stay in the query.
-Preserved across in-app navigation via `PRESERVED_SEARCH_KEYS` in
+(`/{tourId}/{sceneId}`). Product flags (`embed`, `no`, Guide flags) stay in the
+query. Preserved across in-app navigation via `PRESERVED_SEARCH_KEYS` in
 `src/utils/tourPaths.ts`.
 
 **Canonical embed link:**

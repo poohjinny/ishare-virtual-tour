@@ -55,7 +55,9 @@ phones.
 
 - [x] `viewport-fit=cover` in `index.html`
 - [ ] `tourGlassPanelHtml.ts` — `viewportMaxPanelWidth()` not reactive to
-      rotate/resize
+  ```
+  rotate/resize
+  ```
 
 ---
 
@@ -89,7 +91,7 @@ Modals: InfoPopup (sheet ≤640px), ClientIntro (landing)
 | **Breadcrumb**       | Mobile: current scene; compact: full path left; desktop: centered        |
 | **Minimap**          | `FloorPlanMinimap` returns null when `!isDesktop`                        |
 | **PSV pill**         | Hidden `.tour-page` ≤1023px; desktop zoom/move reliability fix           |
-| **Safe-area**        | `--tour-chrome-inset-*` on `.tour-page`                                  |
+| **Safe-area**        | `--tour-chrome-inset-`\* on `.tour-page`                                 |
 | **Share panel**      | Mobile width + body padding parity with explore/help                     |
 | **Explore panel**    | Directory body padding token; scroll at panel edge; mobile `22px` inline |
 | **AI Guide panel**   | Body overflow fix (single scroll region); mobile panel sizing            |
@@ -105,20 +107,30 @@ Modals: InfoPopup (sheet ≤640px), ClientIntro (landing)
 
 - [x] **Explore header** — search pill uses panel flex width (not `100vw` calc)
 - [x] **Directory tabs** — scrollable segmented tabs; active tab scrolls into
-      view
+  ```
+  view
+  ```
 - [ ] **Panel width JS** — `tourGlassPanelHtml.ts` listen `resize` /
-      `orientationchange`
+  ```
+  `orientationchange`
+  ```
 - [ ] **Help panel** — hide keyboard-shortcuts section on `(pointer: coarse)`
-      (decided, not wired)
+  ```
+  (decided, not wired)
+  ```
 - [ ] **Dev default closed** — extend to compact and/or `(pointer: coarse)`
-      (today: mobile only via `prefersMobileTourChrome()`)
+  ```
+  (today: mobile only via `prefersMobileTourChrome()`)
+  ```
 
 ### P2 — touch targets & sheets
 
 - [ ] **Share / copy** — social tiles ~40px; copy ~30px (target 44px primary)
 - [ ] **InfoPopup** — optional swipe-to-dismiss; header safe-area polish
 - [ ] **Hotspot markers** — 48px touch target per
-      [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) (CSS in `psv-layer.css`)
+  ```
+  [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) (CSS in `psv-layer.css`)
+  ```
 
 ### P3 — QA & docs
 
@@ -169,18 +181,19 @@ Run on a **real phone** after changes:
 
 ## Key files
 
-| Concern            | Path                                                                     |
-| ------------------ | ------------------------------------------------------------------------ |
-| Chrome breakpoints | `src/constants/tourChrome.ts`                                            |
-| Layout hook        | `src/hooks/useTourChromeLayout.ts`                                       |
-| Tour shell         | `src/pages/TourPage.tsx`                                                 |
-| Nav + panels       | `src/components/TourNavFloat.tsx`, `tourNavFloatVariants.ts`             |
-| PSV pill chrome    | `src/styles/psv-layer.css`, `src/viewer/syncPsvNavbarDesktopControls.ts` |
-| Glass panels       | `src/styles/glass-panels-layer.css`                                      |
-| AI panel           | `src/components/ai/aiAssistantVariants.ts`, `AiChatPanel.tsx`            |
-| Dev overlay        | `src/components/DevTools.tsx`, `devViewPanelVariants.ts`                 |
-| Minimap            | `src/components/FloorPlanMinimap.tsx`                                    |
-| Viewport meta      | `index.html`                                                             |
+| Concern             | Path                                                                     |
+| ------------------- | ------------------------------------------------------------------------ |
+| Chrome breakpoints  | `src/constants/tourChrome.ts`                                            |
+| Layout hook         | `src/hooks/useTourChromeLayout.ts`                                       |
+| Tour shell          | `src/pages/TourPage.tsx`                                                 |
+| Nav + panels        | `src/components/TourNavFloat.tsx`, `tourNavFloatVariants.ts`             |
+| Hotspot pill chrome | `src/styles/hotspot-layer.css`                                           |
+| PSV navbar / host   | `src/styles/psv-layer.css`, `src/viewer/syncPsvNavbarDesktopControls.ts` |
+| Glass panels        | `src/styles/glass-panels-layer.css`                                      |
+| AI panel            | `src/components/ai/aiAssistantVariants.ts`, `AiChatPanel.tsx`            |
+| Dev overlay         | `src/components/DevTools.tsx`, `devViewPanelVariants.ts`                 |
+| Minimap             | `src/components/FloorPlanMinimap.tsx`                                    |
+| Viewport meta       | `index.html`                                                             |
 
 ---
 

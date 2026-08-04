@@ -54,8 +54,6 @@ Deliver one folder per tour, matching the repo layout:
     ├── panoramas/           # REQUIRED — one {sceneId}.webp per scene
     ├── brand/               # If not already supplied by client intake
     │   └── logo.png         # Only if engineering asks you to include it
-    ├── maps/                # OPTIONAL — floor plan
-    │   └── floorplan.svg
     ├── thumbnails/          # OPTIONAL — we usually auto-generate
     └── delivery-notes.md    # REQUIRED — your readme (template below)
 ```
@@ -178,22 +176,6 @@ copy and price come from client intake — not from you.
 
 ---
 
-## Floor plan (optional)
-
-If the tour includes a minimap:
-
-| Deliverable          | Spec                                            |
-| -------------------- | ----------------------------------------------- |
-| `maps/floorplan.svg` | Clean vector; north up or mark orientation      |
-| Canvas size          | Document `width` × `height` in pixels (viewBox) |
-| Room labels          | Match scene titles where possible               |
-| Scene dot guide      | PDF or SVG layer with approximate dot per scene |
-
-Engineering sets normalized `map.x`, `map.y` (0–1), and `map.heading` per scene
-in JSON after panoramas are in the viewer.
-
----
-
 ## Brand folder (usually from client)
 
 Normally supplied in client intake, not by 3D. Include only if asked:
@@ -279,7 +261,7 @@ You do **not** need to deliver:
 | ------------------------------- | ---------------------------------------------- |
 | Scene thumbnails                | `npm run generate-thumbnails`                  |
 | WebP re-compress (if oversized) | `scripts/convert-jpg-to-webp.mjs` or manual QA |
-| `tours/{tourId}.json`           | Hotspots, transitions, map coords, scene copy  |
+| `tours/{tourId}.json`           | Hotspots, transitions, scene copy              |
 | Hotspot yaw/pitch/zoom          | Dev panel `?dev=1`                             |
 | Catalog entry                   | `tours/catalog.json`                           |
 | 3D model optimization           | Mesh merging, LOD if needed (model3d tours)    |

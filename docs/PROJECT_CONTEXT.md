@@ -4,8 +4,10 @@
 > **What to build next:** [ROADMAP.md](./ROADMAP.md).  
 > **Product contracts:** [PRODUCT_SPEC.md](./PRODUCT_SPEC.md).
 
-Phase 0 (proof demo) is complete. Delivered scope and active backlog live in
-[ROADMAP.md](./ROADMAP.md) only — not duplicated here.
+Phase 0 (proof demo) and **Phase 1 (Production v1)** are complete — see
+[ROADMAP.md](./ROADMAP.md). Parent-site iframe `src` swaps happen per tour at
+launch (Client rollout), not as a Phase 1 blocker. Active backlog lives in
+ROADMAP only — not duplicated here.
 
 ---
 
@@ -20,15 +22,15 @@ Known limitations:
 - **No contextual AI** — cannot answer location-specific questions
 
 This project is an **in-house virtual tour** to deliver a better experience and
-eventually replace the SeekBeak embed.
+replace SeekBeak embeds on ishare.ca / client sites.
 
 ---
 
 ## Stakeholder pitch
 
-> "We design entry views per scene, show the full tour path in a side panel, use
-> zoom + fade transitions, and provide an AI assistant that knows where you are
-> — things the SeekBeak embed cannot do with configuration alone."
+> "We design entry views per scene, show the full tour path in Explore, use
+> zoom + fade transitions, and provide a Tour Guide that knows where you are —
+> things the SeekBeak embed cannot do with configuration alone."
 
 ---
 
