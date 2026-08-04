@@ -7,7 +7,7 @@ import {
 import {
   createImmersiveBackgroundController,
   type ImmersiveBackgroundController,
-} from '../viewer/immersiveBackgroundController';
+} from '../viewer-shared/immersiveBackgroundController';
 
 /** Tour-scoped immersive bed — survives PanoramaViewer remounts during scene navigation. */
 export function useImmersiveBackground(

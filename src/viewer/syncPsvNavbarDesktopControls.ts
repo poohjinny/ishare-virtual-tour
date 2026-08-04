@@ -1,14 +1,13 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 import { resolveTourChromeModeFromMatchMedia } from '../constants/tourChrome';
+import { TOUR_NAVBAR_ZOOM_BUTTON_IDS } from '../viewer-shared/tourNavbarZoomOrder';
 import { reapplyPlayTourNavbarInteractionGuard } from './playTourNavbarButton';
 
 const PSV_TOUCH_SUPPORT_KEY = 'photoSphereViewer_touchSupport';
 const PSV_MENU_BUTTON_ID = 'menu';
 
 const ZOOM_MOVE_NAVBAR_BUTTON_IDS = [
-  'zoomIn',
-  'zoomOut',
-  'zoomRange',
+  ...TOUR_NAVBAR_ZOOM_BUTTON_IDS,
   'moveUp',
   'moveDown',
   'moveLeft',

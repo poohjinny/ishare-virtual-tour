@@ -1,19 +1,24 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 
-import { ANCHORED_PANEL_GAP_PX } from './anchoredPanelPosition';
-import { tourBreadcrumbSelector } from '../components/tourNavFloatVariants';
+import { ANCHORED_PANEL_GAP_PX } from '../viewer-shared/anchoredPanelGap';
+import {
+  ANCHORED_PANEL_LAYOUT_MEASURE_ATTEMPTS,
+  ANCHORED_PANEL_VIEWPORT_MARGIN_PX,
+  type PanelScreenRect,
+} from '../viewer-shared/anchoredPanelLayout';
+import {
+  ANCHORED_PANEL_CLIP_NUDGE_MAX_SHIFT_DEG,
+  ANCHORED_PANEL_REVEAL_MAX_SHIFT_DEG,
+  absoluteYawDeltaDeg,
+  applyAnchoredPanelClipNudgeShiftsDeg,
+  computeAnchoredPanelClipNudgeShiftsDeg,
+  measureAnchoredPanelScreenRect,
+  perspectiveFocalLengthPx,
+  resolveAnchoredPanelClipInsets,
+  resolveAnchoredPanelNudgeDurationMs,
+} from '../viewer-shared/anchoredPanelClipNudge';
 
-const NUDGE_DURATION_MS = 600;
-/** Floor / ceiling when scaling nudge duration by angular travel. */
-const NUDGE_DURATION_MIN_MS = 500;
-const NUDGE_DURATION_MAX_MS = 1400;
-/**
- * Angular travel (°) that should take ~NUDGE_DURATION_MS — keeps small clip
- * nudges snappy while large off-view reveals don't whip at the same clock time.
- */
-const NUDGE_DURATION_REF_DEG = 18;
-const MAX_MEASURE_ATTEMPTS = 36;
-const PANEL_ENTER_ANIM_MS = 220;
+const MAX_MEASURE_ATTEMPTS = ANCHORED_PANEL_LAYOUT_MEASURE_ATTEMPTS;
 
 /**
  * Frames a present-but-off-view panel is allowed before we frame the camera.
@@ -24,27 +29,14 @@ const PANEL_ENTER_ANIM_MS = 220;
  */
 const OFF_VIEW_GRACE_FRAMES = 4;
 
-/** Breathing room a clipped panel is shifted to (generous, per side). */
-const NUDGE_TARGET_MARGIN_PX = 24;
-
 /** Cap per-axis camera correction so oversized panels never warp the view. */
-const MAX_NUDGE_SHIFT_DEG = 60;
+const MAX_NUDGE_SHIFT_DEG = ANCHORED_PANEL_CLIP_NUDGE_MAX_SHIFT_DEG;
 
 /**
  * Off-view reveal may need a larger single step than a clip nudge (host can sit
  * well outside the frustum). Still a "scroll into view" delta, not a re-center.
  */
-const MAX_REVEAL_SHIFT_DEG = 120;
-
-/** Extra gap kept below the floating breadcrumb so a nudged panel clears it. */
-const BREADCRUMB_CLEARANCE_PX = 12;
-
-export interface PanelScreenRect {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
+const MAX_REVEAL_SHIFT_DEG = ANCHORED_PANEL_REVEAL_MAX_SHIFT_DEG;
 
 /** Hotspot (panel host) spherical position in degrees. */
 export interface AnchoredPanelNudgeAnchor {
@@ -115,19 +107,11 @@ async function animateCameraOrientation(
   }
 
   const position = viewer.getPosition();
-  const yawDelta = Math.abs(
-    normalizeYawDeltaDeg(targetYawDeg - radToDeg(position.yaw)),
-  );
+  const yawDelta = absoluteYawDeltaDeg(radToDeg(position.yaw), targetYawDeg);
   const pitchDelta = Math.abs(targetPitchDeg - radToDeg(position.pitch));
   // Combined travel — yaw usually dominates; keep pitch from being ignored.
   const travelDeg = Math.hypot(yawDelta, pitchDelta);
-  const durationMs = Math.round(
-    clamp(
-      NUDGE_DURATION_MS * (travelDeg / NUDGE_DURATION_REF_DEG),
-      NUDGE_DURATION_MIN_MS,
-      NUDGE_DURATION_MAX_MS,
-    ),
-  );
+  const durationMs = resolveAnchoredPanelNudgeDurationMs(travelDeg);
 
   try {
     await stopActiveViewerAnimation(viewer);
@@ -149,58 +133,11 @@ async function animateCameraOrientation(
   }
 }
 
-/**
- * Resolves once the panel's entrance scale animation finishes — or immediately
- * under reduced-motion / when no entrance animation is present. Heavy embeds
- * (WebGL / video hero) still wait on this so they don’t compete with the enter
- * animation; camera clip-nudge may run in parallel with enter.
- */
-export function waitForAnchoredPanelEnter(panelEl: HTMLElement): Promise<void> {
-  if (prefersReducedMotion()) return Promise.resolve();
-
-  const enterEl =
-    panelEl.querySelector('.tour-glass-panel--anchored-enter') ??
-    panelEl.querySelector('.tour-glass-panel__shell--enter');
-  if (!(enterEl instanceof HTMLElement)) return Promise.resolve();
-
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      enterEl.removeEventListener('animationend', onEnd);
-      resolve();
-    };
-
-    const onEnd = (event: AnimationEvent) => {
-      if (event.target !== enterEl) return;
-      if (
-        event.animationName !== 'tour-glass-panel-in' &&
-        event.animationName !== 'tour-glass-panel-anchored-in'
-      ) {
-        return;
-      }
-      finish();
-    };
-
-    enterEl.addEventListener('animationend', onEnd);
-    window.setTimeout(finish, PANEL_ENTER_ANIM_MS);
-  });
-}
-
 export function measurePanelScreenRect(
   viewer: Viewer,
   panelEl: HTMLElement,
 ): PanelScreenRect {
-  const containerRect = viewer.container.getBoundingClientRect();
-  const panelRect = panelEl.getBoundingClientRect();
-
-  return {
-    left: panelRect.left - containerRect.left,
-    top: panelRect.top - containerRect.top,
-    right: panelRect.right - containerRect.left,
-    bottom: panelRect.bottom - containerRect.top,
-  };
+  return measureAnchoredPanelScreenRect(viewer.container, panelEl);
 }
 
 function degToRad(deg: number): number {
@@ -216,93 +153,6 @@ function normalizeYawDeltaDeg(deg: number): number {
   return ((((deg + 180) % 360) + 360) % 360) - 180;
 }
 
-/**
- * Pre-reveal camera pose — restored when the panel closes after an off-view
- * reveal. Clip nudges never set this. Cleared on scene transitions / forced
- * camera moves that shouldn't reverse.
- */
-type AnchoredPanelCameraRestore = {
-  viewer: Viewer;
-  yawDeg: number;
-  pitchDeg: number;
-};
-
-let pendingOffViewCameraRestore: AnchoredPanelCameraRestore | null = null;
-
-export function clearAnchoredPanelCameraRestore(): void {
-  pendingOffViewCameraRestore = null;
-}
-
-function captureOffViewCameraRestore(viewer: Viewer): void {
-  if (pendingOffViewCameraRestore) return;
-  const position = viewer.getPosition();
-  pendingOffViewCameraRestore = {
-    viewer,
-    yawDeg: radToDeg(position.yaw),
-    pitchDeg: radToDeg(position.pitch),
-  };
-}
-
-/**
- * Reverse an off-view reveal when the panel closes. No-op for clip-only nudges
- * or when restore was cleared (scene change, forceDefault, etc.).
- */
-export async function restoreAnchoredPanelCameraIfNeeded(): Promise<boolean> {
-  const target = pendingOffViewCameraRestore;
-  pendingOffViewCameraRestore = null;
-  if (!target) return false;
-
-  const position = target.viewer.getPosition();
-  const currentYaw = radToDeg(position.yaw);
-  const currentPitch = radToDeg(position.pitch);
-  const yawDelta = normalizeYawDeltaDeg(target.yawDeg - currentYaw);
-  if (
-    Math.abs(yawDelta) < 0.25 &&
-    Math.abs(target.pitchDeg - currentPitch) < 0.25
-  ) {
-    return false;
-  }
-
-  await animateCameraOrientation(
-    target.viewer,
-    currentYaw + yawDelta,
-    target.pitchDeg,
-  );
-  return true;
-}
-
-/**
- * Top safe inset (px, in viewer-container space): the greater of the base margin
- * and the floating breadcrumb's bottom edge + clearance, so a nudged panel never
- * tucks under the breadcrumb. Falls back to the base margin when the breadcrumb
- * is absent/hidden.
- */
-function resolveTopMarginPx(viewer: Viewer): number {
-  if (typeof document === 'undefined') return NUDGE_TARGET_MARGIN_PX;
-
-  const breadcrumb = document.querySelector(tourBreadcrumbSelector);
-  if (!(breadcrumb instanceof HTMLElement) || breadcrumb.offsetHeight <= 0) {
-    return NUDGE_TARGET_MARGIN_PX;
-  }
-
-  const containerTop = viewer.container.getBoundingClientRect().top;
-  const breadcrumbBottom =
-    breadcrumb.getBoundingClientRect().bottom -
-    containerTop +
-    BREADCRUMB_CLEARANCE_PX;
-
-  return Math.max(NUDGE_TARGET_MARGIN_PX, breadcrumbBottom);
-}
-
-/**
- * Camera pitch (deg) that seats a panel of `panelHeightPx`, anchored directly
- * above its hotspot, centered on screen at the given PSV zoom.
- *
- * Drops the hotspot below center by half the (panel + gap) using the rectilinear
- * center-column relation (y = f·tan θ), not a linear pixel→angle approximation
- * which overshoots at extreme pitch. Returns null when the viewport/FOV is
- * degenerate.
- */
 function panelFitCameraPitchDeg(
   viewer: Viewer,
   anchorPitchDeg: number,
@@ -312,12 +162,16 @@ function panelFitCameraPitchDeg(
   const vh = viewer.container.clientHeight;
   if (vh <= 0) return null;
 
-  const vFov = degToRad(viewer.dataHelper.zoomLevelToFov(psvZoom));
-  if (!(vFov > 0)) return null;
-  const focalPx = vh / 2 / Math.tan(vFov / 2);
+  const focalPx = perspectiveFocalLengthPx(
+    viewer.dataHelper.zoomLevelToFov(psvZoom),
+    vh,
+  );
   if (!(focalPx > 0)) return null;
 
-  const maxDropPx = Math.max(0, (vh - 2 * NUDGE_TARGET_MARGIN_PX) / 2);
+  const maxDropPx = Math.max(
+    0,
+    (vh - 2 * ANCHORED_PANEL_VIEWPORT_MARGIN_PX) / 2,
+  );
   const hotspotDropPx = Math.min(
     (panelHeightPx + ANCHORED_PANEL_GAP_PX) / 2,
     maxDropPx,
@@ -347,46 +201,28 @@ export function computeAnchoredPanelNudgeTarget(
   const vh = viewer.container.clientHeight;
   if (vw <= 0 || vh <= 0) return null;
 
-  const vFov = degToRad(
+  const focalPx = perspectiveFocalLengthPx(
     viewer.dataHelper.zoomLevelToFov(viewer.getZoomLevel()),
+    vh,
   );
-  if (!(vFov > 0)) return null;
-  const focalPx = vh / 2 / Math.tan(vFov / 2);
   if (!(focalPx > 0)) return null;
 
-  const maxShift = options?.maxShiftDeg ?? MAX_NUDGE_SHIFT_DEG;
-  const m = NUDGE_TARGET_MARGIN_PX;
-  // Top uses a breadcrumb-aware inset so the panel never tucks under it.
-  const topMargin = resolveTopMarginPx(viewer);
-  const topOver = Math.max(0, topMargin - rect.top);
-  const bottomOver = Math.max(0, rect.bottom - (vh - m));
-  const leftOver = Math.max(0, m - rect.left);
-  const rightOver = Math.max(0, rect.right - (vw - m));
-
-  if (topOver === 0 && bottomOver === 0 && leftOver === 0 && rightOver === 0) {
-    return null;
-  }
-
-  // Panel taller than the safe area — bias toward showing the top (title/hero).
-  const effectiveBottomOver = topOver > 0 && bottomOver > 0 ? 0 : bottomOver;
-
-  // Push down/right to clear top/left; up/left to clear bottom/right.
-  const pitchShiftDeg = clamp(
-    radToDeg((topOver - effectiveBottomOver) / focalPx),
-    -maxShift,
-    maxShift,
-  );
-  const yawShiftDeg = clamp(
-    radToDeg((rightOver - leftOver) / focalPx),
-    -maxShift,
-    maxShift,
-  );
+  const shifts = computeAnchoredPanelClipNudgeShiftsDeg({
+    viewportWidth: vw,
+    viewportHeight: vh,
+    focalPx,
+    rect,
+    insets: resolveAnchoredPanelClipInsets(viewer.container),
+    maxShiftDeg: options?.maxShiftDeg ?? MAX_NUDGE_SHIFT_DEG,
+  });
+  if (!shifts) return null;
 
   const pos = viewer.getPosition();
-  return {
-    yawDeg: radToDeg(pos.yaw) + yawShiftDeg,
-    pitchDeg: clamp(radToDeg(pos.pitch) + pitchShiftDeg, -89, 89),
-  };
+  const next = applyAnchoredPanelClipNudgeShiftsDeg(
+    { yaw: radToDeg(pos.yaw), pitch: radToDeg(pos.pitch) },
+    shifts,
+  );
+  return { yawDeg: next.yaw, pitchDeg: next.pitch };
 }
 
 /**
@@ -538,7 +374,6 @@ export async function revealCameraForOffViewPanel(
   getPanelEl?: () => HTMLElement | null | undefined,
 ): Promise<boolean> {
   let moved = false;
-  let capturedRestore = false;
 
   // Up to two reveal steps when the host sits far outside the frustum.
   for (let step = 0; step < 2; step++) {
@@ -564,11 +399,6 @@ export async function revealCameraForOffViewPanel(
       break;
     }
 
-    if (!capturedRestore) {
-      captureOffViewCameraRestore(viewer);
-      capturedRestore = true;
-    }
-
     await animateCameraOrientation(viewer, targetYaw, targetPitch);
     moved = true;
   }
@@ -576,10 +406,6 @@ export async function revealCameraForOffViewPanel(
   const panelEl = getPanelEl?.();
   if (panelEl && !isPanelMarkerOffView(panelEl)) {
     if (await nudgeCameraForClippedPanel(viewer, panelEl)) moved = true;
-  }
-
-  if (!moved && capturedRestore) {
-    clearAnchoredPanelCameraRestore();
   }
 
   return moved;

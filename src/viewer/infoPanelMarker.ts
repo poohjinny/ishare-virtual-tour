@@ -20,7 +20,7 @@ import {
 import {
   mountNavPreviewImageHero,
   mountNavPreviewVideoHero,
-} from './navPreviewMiniViewer';
+} from '../viewer-shared/navPreviewMiniViewer';
 import { setActiveInfoHotspot } from './infoHotspotActive';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import { bindGlassPanelCtaOverflowTitles } from '../utils/glassPanelCtaOverflow';
@@ -29,20 +29,22 @@ import {
   anchoredPanelMarkerPosition,
   correctAnchoredPanelPixelGap,
   fitAnchoredPanelMarkerSize,
-  INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
   measureHotspotHalfHeightPx,
 } from './anchoredPanelPosition';
+import { INFO_HOTSPOT_HALF_HEIGHT_FALLBACK_PX } from '../viewer-shared/anchoredPanelGap';
 import {
-  clearAnchoredPanelCameraRestore,
   revealCameraForOffViewPanel,
-  restoreAnchoredPanelCameraIfNeeded,
   scheduleNudgeCameraForClippedPanel,
-  waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
+import {
+  ANCHORED_PANEL_EXIT_MS,
+  waitForAnchoredPanelEnter,
+} from '../viewer-shared/anchoredPanelLayout';
+import { createAnchoredPanelSettleGate } from '../viewer-shared/anchoredPanelOpenReveal';
 import { notifyAnchoredPanelOpened } from './anchoredPanelVisibility';
 
 const PANEL_ID_SUFFIX = '-panel';
-const PANEL_EXIT_MS = 200;
+const PANEL_EXIT_MS = ANCHORED_PANEL_EXIT_MS;
 
 const closingPanelIds = new Set<string>();
 const closingPanelTimeouts = new Map<string, number>();
@@ -118,16 +120,12 @@ export function syncInfoPanelPosition(markers: MarkersPlugin): void {
 export function closeAnchoredInfoPanel(
   markers: MarkersPlugin,
   animate = true,
-  options?: { restoreCamera?: boolean },
 ): void {
   releaseAllTourMedia();
   let clearingActive = false;
-  let closedAny = false;
-  const restoreCamera = options?.restoreCamera ?? animate;
 
   for (const marker of markers.getMarkers()) {
     if (!marker.data?.infoPanel) continue;
-    closedAny = true;
 
     clearInfoPanelPositionTrack();
 
@@ -179,10 +177,6 @@ export function closeAnchoredInfoPanel(
     }, PANEL_EXIT_MS);
     closingPanelTimeouts.set(id, timeoutId);
   }
-
-  if (!closedAny) return;
-  if (restoreCamera) void restoreAnchoredPanelCameraIfNeeded();
-  else clearAnchoredPanelCameraRestore();
 }
 
 export function getOpenAnchoredPanelHostId(
@@ -277,10 +271,8 @@ export function openAnchoredInfoPanel(
 
   // Heavy hero media waits until enter + camera have both settled. Camera nudge
   // may already be running in parallel with the entrance scale.
-  let cameraSettled = options?.skipCameraNudge ?? false;
-  let enterDone = false;
-  const revealMedia = () => {
-    if (!cameraSettled || !enterDone) return;
+  const skipNudge = options?.skipCameraNudge ?? false;
+  const gate = createAnchoredPanelSettleGate(() => {
     const live = markers.getMarker(id);
     if (!(live?.domElement instanceof HTMLElement)) return;
     if (live.domElement.querySelector('.anchored-panel__hero--video')) {
@@ -288,16 +280,18 @@ export function openAnchoredInfoPanel(
     } else if (live.domElement.querySelector('.anchored-panel__hero--image')) {
       mountNavPreviewImageHero(live.domElement);
     }
-  };
+  });
 
   void waitForAnchoredPanelEnter(marker.domElement).then(() => {
-    enterDone = true;
-    revealMedia();
+    gate.markEnterDone();
   });
 
   // NO entries pre-frame the camera in one move, so their panel open skips this
   // follow-up clip-correcting nudge to avoid a second, redundant camera move.
-  if (options?.skipCameraNudge) return;
+  if (skipNudge) {
+    gate.markCameraSettled();
+    return;
+  }
 
   const hostPosition = hotspot.position as ViewPosition;
   scheduleNudgeCameraForClippedPanel(
@@ -310,8 +304,7 @@ export function openAnchoredInfoPanel(
     },
     {
       afterSettled: () => {
-        cameraSettled = true;
-        revealMedia();
+        gate.markCameraSettled();
       },
       onPanelOffView: () =>
         revealCameraForOffViewPanel(

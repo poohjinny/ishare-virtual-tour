@@ -9,8 +9,8 @@ import {
   isModel3dTour,
   resolveModel3dNamingTargetView,
 } from './findTourHotspot';
-import { resolveNamingOpportunityView } from '../viewer/pendingNamingInfoHotspot';
-import { buildSceneGroups, SCENE_GROUP_OTHER_ID } from '../viewer/sceneDepth';
+import { resolveNamingOpportunityView } from '../viewer-shared/namingOpportunityView';
+import { buildSceneGroups, SCENE_GROUP_OTHER_ID } from '../viewer-shared/sceneDepth';
 import { isSceneVisibleInExplore } from './sceneVisibility';
 import { stripInlineMarkdown } from './inlineMarkdown';
 import {

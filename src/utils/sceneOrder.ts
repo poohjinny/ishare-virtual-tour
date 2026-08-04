@@ -3,7 +3,7 @@ import {
   buildSceneVisitOrder,
   SCENE_GROUP_OTHER_ID,
   type SceneGroup,
-} from '../viewer/sceneDepth';
+} from '../viewer-shared/sceneDepth';
 
 type TourOrderPick = Pick<
   Tour,

@@ -10,7 +10,7 @@ import {
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
 import { listSceneInfoHotspots } from './findTourHotspot';
-import { buildSceneGroups } from '../viewer/sceneDepth';
+import { buildSceneGroups } from '../viewer-shared/sceneDepth';
 import {
   formatNamingPriceAbbrev,
   parseNamingPrice,

@@ -1,31 +1,34 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
-import { tourNavbarMaterialSymbolHtml } from './tourNavbarMaterialSymbol';
+import { tourNavbarMaterialSymbolHtml } from '../viewer-shared/tourNavbarMaterialSymbol';
 
-const ZOOM_ICON_BY_BUTTON_ID = { zoomIn: 'add', zoomOut: 'remove' } as const;
+/** Built-in PSV buttons that ship SVG icons — swap once for Material Symbols. */
+const NAVBAR_ICON_BY_BUTTON_ID = {
+  zoomIn: 'add',
+  zoomOut: 'remove',
+  moveLeft: 'chevron_left',
+  moveRight: 'chevron_right',
+  moveUp: 'expand_less',
+  moveDown: 'expand_more',
+} as const;
 
 /**
- * PSV built-in zoom SVGs fill the icon box more heavily than Material Symbols
- * used by the rest of the navbar — swap them for visual weight parity.
+ * Replace PSV's built-in SVG icons with the same Material Symbol markup used by
+ * custom navbar buttons (recenter, play, fullscreen, …).
  */
 export function patchPsvZoomButtonIcons(viewer: Viewer): void {
-  for (const [id, icon] of Object.entries(ZOOM_ICON_BY_BUTTON_ID)) {
+  for (const [id, icon] of Object.entries(NAVBAR_ICON_BY_BUTTON_ID)) {
     const button = viewer.navbar.getButton(id, false);
     if (!button) continue;
 
     const host = button.container;
+    if (host.querySelector('.psv-navbar-material-symbol')) continue;
+
+    const svg = host.querySelector('.psv-button-svg, svg');
     const next = tourNavbarMaterialSymbolHtml(icon);
-    const existingSvg = host.querySelector('.psv-button-svg');
-    if (existingSvg) {
-      existingSvg.outerHTML = next;
-      continue;
+    if (svg) {
+      svg.outerHTML = next;
+    } else {
+      host.innerHTML = next;
     }
-
-    const existingSymbol = host.querySelector('.psv-navbar-material-symbol');
-    if (existingSymbol) {
-      existingSymbol.outerHTML = next;
-      continue;
-    }
-
-    host.insertAdjacentHTML('beforeend', next);
   }
 }

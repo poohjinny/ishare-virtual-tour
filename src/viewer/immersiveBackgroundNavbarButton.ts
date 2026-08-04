@@ -2,11 +2,13 @@ import type { NavbarCustomButton, Viewer } from '@photo-sphere-viewer/core';
 import type {
   ImmersiveBackgroundController,
   ImmersiveBgButtonState,
-} from './immersiveBackgroundController';
+} from '../viewer-shared/immersiveBackgroundController';
 import { applyIshareTooltipDom } from '../utils/ishareTooltipDom';
-import { tourNavbarMaterialSymbolHtml } from './tourNavbarMaterialSymbol';
-
-export const IMMERSIVE_BG_NAVBAR_BUTTON_ID = 'immersive-bg';
+import { tourNavbarMaterialSymbolHtml } from '../viewer-shared/tourNavbarMaterialSymbol';
+import {
+  IMMERSIVE_BG_NAVBAR_BUTTON_ID,
+  toggleImmersiveBackgroundPlayback,
+} from '../viewer-shared/immersiveBackgroundPlayback';
 
 const IMMERSIVE_BG_OFF_ICON = tourNavbarMaterialSymbolHtml('music_note');
 const IMMERSIVE_BG_PLAY_ICON = tourNavbarMaterialSymbolHtml('play_arrow', {
@@ -107,34 +109,6 @@ function syncButton(
   root.setAttribute('aria-busy', state === 'loading' ? 'true' : 'false');
   root.setAttribute('aria-label', resolveAriaLabel(state));
   applyIshareTooltipDom(root, resolveTitle(state), 'top');
-}
-
-/** Play / pause — shared by navbar button and keyboard shortcut (M). */
-export function toggleImmersiveBackgroundPlayback(
-  controller: ImmersiveBackgroundController,
-): void {
-  if (controller.isEnabled()) {
-    controller.pause();
-    return;
-  }
-
-  void controller.toggle();
-}
-
-/** Start ambience if it isn’t already on (Play Tour companion). */
-export function ensureImmersiveBackgroundPlaying(
-  controller: ImmersiveBackgroundController,
-): void {
-  if (controller.isEnabled()) return;
-  void controller.toggle();
-}
-
-/** Pause ambience when Play Tour pauses (no-op if already off). */
-export function ensureImmersiveBackgroundPaused(
-  controller: ImmersiveBackgroundController,
-): void {
-  if (!controller.isEnabled()) return;
-  controller.pause();
 }
 
 function applyImmersiveBackgroundNavbarButtonOff(viewer: Viewer): void {

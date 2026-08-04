@@ -1,16 +1,15 @@
 import type { NavbarCustomButton, Viewer } from '@photo-sphere-viewer/core';
 import type { PlayTourPhase } from '../hooks/usePlayTour';
 import { applyIshareTooltipDom } from '../utils/ishareTooltipDom';
-import { tourNavbarMaterialSymbolHtml } from './tourNavbarMaterialSymbol';
+import { tourNavbarMaterialSymbolHtml } from '../viewer-shared/tourNavbarMaterialSymbol';
+import { TOUR_NAVBAR_ZOOM_BUTTON_IDS } from '../viewer-shared/tourNavbarZoomOrder';
 import { RECENTER_VIEW_NAVBAR_BUTTON_ID } from './recenterViewNavbarButton';
 
 export const PLAY_TOUR_NAVBAR_BUTTON_ID = 'play-tour';
 
 /** Camera / framing controls that fight Play Tour ken-burns — lock while playing. */
 const PLAY_TOUR_LOCKED_NAVBAR_BUTTON_IDS = [
-  'zoomIn',
-  'zoomOut',
-  'zoomRange',
+  ...TOUR_NAVBAR_ZOOM_BUTTON_IDS,
   'moveUp',
   'moveDown',
   'moveLeft',

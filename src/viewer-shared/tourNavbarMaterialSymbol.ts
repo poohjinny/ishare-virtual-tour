@@ -5,7 +5,7 @@ export const PSV_NAVBAR_MATERIAL_SYMBOL_CLASS = 'psv-navbar-material-symbol';
 export const PSV_NAVBAR_MATERIAL_SYMBOL_FILLED_CLASS =
   'psv-navbar-material-symbol--filled';
 
-/** Material Symbol HTML for PSV / 3D navbar buttons (16px — matches `--psv-nav-icon-size`). */
+/** Material Symbol HTML for PSV / 3D navbar buttons (tracks `--psv-nav-icon-size` / UI rem). */
 export function tourNavbarMaterialSymbolHtml(
   name: string,
   { filled = false }: { filled?: boolean } = {},

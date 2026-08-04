@@ -83,4 +83,9 @@ export interface TourViewerHandle {
     hotspotId: string | null,
     options?: { animate?: boolean },
   ) => void;
+  /**
+   * Sync renderer size to the current container box before paint.
+   * Used when Dev push/overlay changes the tour stage width in the same frame.
+   */
+  syncLayoutSize: () => void;
 }

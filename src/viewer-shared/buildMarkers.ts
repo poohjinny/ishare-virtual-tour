@@ -18,7 +18,31 @@ import {
   isNamingHotspot,
 } from '../utils/namingSceneInherit';
 import { isPlaceOverviewHotspot } from '../utils/placeOverview';
+import {
+  resolveHotspotMarkerVisibility,
+  type SceneVisibility,
+} from '../utils/sceneVisibility';
 import type { Hotspot, Scene, Tour, ViewPosition } from '../types/tour';
+
+function visibilityLabel(visibility: SceneVisibility): string | null {
+  if (visibility === 'unlisted') return 'Unlisted';
+  if (visibility === 'internal') return 'Internal';
+  return null;
+}
+
+/** Dim dashed chrome for pins hidden from visitors (authoring only). */
+function authoringGhostClassName(
+  tour: Tour,
+  hotspot: Hotspot,
+): { className: string; visibilityNote: string | null } {
+  const visibility = resolveHotspotMarkerVisibility(tour, hotspot);
+  const note = visibilityLabel(visibility);
+  if (!note) return { className: '', visibilityNote: null };
+  return {
+    className: ` hotspot--authoring-ghost hotspot--visibility-${visibility}`,
+    visibilityNote: note,
+  };
+}
 
 export function escapeHtml(text: string): string {
   return text
@@ -87,28 +111,20 @@ export function buildNamingHotspotAriaLabel(
   return `${name} · ${statusConfig.label}`;
 }
 
-const NAV_HOTSPOT_ICON_SIZE_PX = 16;
-
 function buildNavLeadingHtml(hotspot: Hotspot): string {
   const variant = resolveNavHotspotVariant(hotspot);
 
   if (variant === 'back') {
     return `<span class="hotspot-nav__icon" aria-hidden="true">${materialSymbolHtml(
       'arrow_back',
-      {
-        className: 'hotspot-nav__icon-symbol',
-        sizePx: NAV_HOTSPOT_ICON_SIZE_PX,
-      },
+      { className: 'hotspot-nav__icon-symbol' },
     )}</span>`;
   }
 
   if (variant === 'hub') {
     return `<span class="hotspot-nav__icon" aria-hidden="true">${materialSymbolHtml(
       'home',
-      {
-        className: 'hotspot-nav__icon-symbol',
-        sizePx: NAV_HOTSPOT_ICON_SIZE_PX,
-      },
+      { className: 'hotspot-nav__icon-symbol' },
     )}</span>`;
   }
 
@@ -119,28 +135,31 @@ function buildNavHtml(hotspot: Hotspot, tour: Tour): string {
   const label = resolveNavHotspotLabel(hotspot, tour);
   const variant = resolveNavHotspotVariant(hotspot);
   const variantClass = navHotspotVariantModifierClass(variant);
-  const ariaLabel = buildNavHotspotAriaLabel(label, variant);
+  const { className: ghostClass, visibilityNote } = authoringGhostClassName(
+    tour,
+    hotspot,
+  );
+  const ariaLabel =
+    visibilityNote ?
+      `${buildNavHotspotAriaLabel(label, variant)} (${visibilityNote})`
+    : buildNavHotspotAriaLabel(label, variant);
 
-  return `
-    <button type="button" class="hotspot-nav${variantClass ? ` ${variantClass}` : ''}" data-hotspot-type="nav" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}">
-      <span class="hotspot-nav__pill">
-        ${buildNavLeadingHtml(hotspot)}
-        <span class="hotspot-nav__label">${escapeHtml(label)}</span>
-      </span>
-    </button>
-  `;
+  const visibilityHtml =
+    visibilityNote ?
+      `<span class="hotspot-nav__visibility" aria-hidden="true">${escapeHtml(visibilityNote)}</span>`
+    : '';
+
+  /* Compact markup — no whitespace text nodes between flex children (PSV
+   * was growing the chip via anonymous flex items / font metrics). */
+  return `<button type="button" class="hotspot-nav${variantClass ? ` ${variantClass}` : ''}${ghostClass}" data-hotspot-type="nav" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}"><span class="hotspot-nav__pill">${buildNavLeadingHtml(hotspot)}<span class="hotspot-nav__label">${escapeHtml(label)}</span>${visibilityHtml}</span></button>`;
 }
-
-const HOTSPOT_GENERAL_INFO_ICON_SIZE_PX = 16;
 
 const HOTSPOT_GENERAL_INFO_ICON_HTML = materialSymbolHtml('info_i', {
   className: 'hotspot-general-info__icon-symbol',
-  sizePx: HOTSPOT_GENERAL_INFO_ICON_SIZE_PX,
 });
 
 const HOTSPOT_PLACE_OVERVIEW_ICON_HTML = materialSymbolHtml('flag', {
   className: 'hotspot-general-info__icon-symbol',
-  sizePx: HOTSPOT_GENERAL_INFO_ICON_SIZE_PX,
 });
 
 function buildGeneralInfoHtml(
@@ -168,7 +187,7 @@ function buildGeneralInfoHtml(
     : HOTSPOT_GENERAL_INFO_ICON_HTML;
 
   return `
-    <button type="button" class="hotspot-general-info${modifierClass} ishare-tooltip-host" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}" data-ishare-tooltip="${escapeHtml(tooltipLabel)}" data-ishare-tooltip-placement="top">
+    <button type="button" class="hotspot-general-info${modifierClass} ishare-tooltip-host ishare-tooltip-host--portal" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}" data-ishare-tooltip="${escapeHtml(tooltipLabel)}" data-ishare-tooltip-placement="top">
       <span class="hotspot-general-info__chip" aria-hidden="true">
         <span class="hotspot-general-info__icon">${iconHtml}</span>
       </span>
@@ -188,10 +207,16 @@ function buildInfoHtml(
   const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
   const popup = resolveNamingPopup(tour, hotspot, scene);
   const naming = popup?.namingOpportunity;
-  const ariaLabel =
+  const baseAria =
     naming ?
       buildNamingHotspotAriaLabel(hotspot, tour, hostScene)
     : (hotspot.popup?.title?.trim() ?? hotspot.label?.trim() ?? 'Information');
+  const { className: ghostClass, visibilityNote } = authoringGhostClassName(
+    tour,
+    hotspot,
+  );
+  const ariaLabel =
+    visibilityNote ? `${baseAria} (${visibilityNote})` : baseAria;
   const statusClass =
     (
       naming &&
@@ -201,14 +226,40 @@ function buildInfoHtml(
     : '';
 
   return `
-    <button type="button" class="hotspot-info${statusClass}" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}">
+    <button type="button" class="hotspot-info${statusClass}${ghostClass}" data-hotspot-type="info" data-hotspot-id="${escapeHtml(hotspot.id)}" aria-expanded="false" aria-label="${escapeHtml(ariaLabel)}">
       <span class="hotspot-info__pulse" aria-hidden="true"></span>
       <span class="hotspot-info__pill">
         <span class="hotspot-info__icon-wrap">${INFO_HEART_SVG}</span>
         <span class="hotspot-info__label">${buildNamingHotspotPillLabelHtml(hotspot, tour, hostScene)}</span>
+        ${
+          visibilityNote ?
+            `<span class="hotspot-info__visibility" aria-hidden="true">${escapeHtml(visibilityNote)}</span>`
+          : ''
+        }
       </span>
     </button>
   `;
+}
+
+/** Shared pill / chip HTML for panorama markers and model3d CSS2D labels. */
+export function buildHotspotMarkerHtml(
+  hotspot: Hotspot,
+  tour: Tour,
+  hostScene?: Scene,
+): string {
+  const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
+  const displayHotspot =
+    isNamingHotspot(hotspot) ?
+      { ...hotspot, popup: resolveNamingPopup(tour, hotspot, scene) }
+    : hotspot;
+
+  if (displayHotspot.type === 'nav') {
+    return buildNavHtml(displayHotspot, tour);
+  }
+  if (isGeneralInfoHotspot(displayHotspot)) {
+    return buildGeneralInfoHtml(displayHotspot, tour, hostScene);
+  }
+  return buildInfoHtml(displayHotspot, tour, hostScene);
 }
 
 export function hotspotToMarkerConfig(
@@ -216,24 +267,13 @@ export function hotspotToMarkerConfig(
   tour: Tour,
   hostScene?: Scene,
 ) {
-  const scene = resolveHotspotHostScene(tour, hotspot, hostScene);
-  const displayHotspot =
-    isNamingHotspot(hotspot) ?
-      { ...hotspot, popup: resolveNamingPopup(tour, hotspot, scene) }
-    : hotspot;
-
-  const html =
-    displayHotspot.type === 'nav' ? buildNavHtml(displayHotspot, tour)
-    : isGeneralInfoHotspot(displayHotspot) ?
-      buildGeneralInfoHtml(displayHotspot, tour, hostScene)
-    : buildInfoHtml(displayHotspot, tour, hostScene);
-
   const pos = hotspot.position as ViewPosition;
   return {
     id: hotspot.id,
     position: { yaw: `${pos.yaw}deg`, pitch: `${pos.pitch}deg` },
-    html,
+    html: buildHotspotMarkerHtml(hotspot, tour, hostScene),
     anchor: 'center center' as const,
+    hoverScale: false,
     data: { hotspot },
   };
 }

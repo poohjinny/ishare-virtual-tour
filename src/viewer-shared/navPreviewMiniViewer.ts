@@ -12,7 +12,7 @@ import {
   getTourPerfPauseState,
   subscribeTourPerfPause,
   type TourPerfPauseState,
-} from './viewerPerfPause';
+} from './tourPerfPause';
 import { initPopupVideoPlayers } from '../utils/popupVideo';
 
 /** Nav preview hero — on by default; `?disableNavPreview=1` disables (debug). */
@@ -50,10 +50,10 @@ function prefersReducedMotion(): boolean {
 }
 
 function syncHeroHeight(hero: HTMLElement): void {
-  const marker = hero.closest('.psv-marker');
+  const host = hero.closest('.psv-marker, .hotspot-3d-anchored-panel');
   const width =
-    marker instanceof HTMLElement && marker.offsetWidth > 0 ?
-      marker.offsetWidth
+    host instanceof HTMLElement && host.offsetWidth > 0 ?
+      host.offsetWidth
     : resolveNavPreviewPanelWidth();
   const useVideoAspect =
     hero.getAttribute('data-hero-aspect') !== 'panorama' &&
@@ -62,6 +62,12 @@ function syncHeroHeight(hero: HTMLElement): void {
   hero.style.height = `${resolveNavPreviewHeroHeight(width, {
     video: useVideoAspect,
   })}px`;
+}
+
+/** Lock hero height to the host width before camera framing (avoids post-fit grow). */
+export function prepareNavPreviewHeroLayout(root: ParentNode): void {
+  const hero = root.querySelector('.anchored-panel__hero');
+  if (hero instanceof HTMLElement) syncHeroHeight(hero);
 }
 
 function markHeroLoaded(hero: HTMLElement): void {

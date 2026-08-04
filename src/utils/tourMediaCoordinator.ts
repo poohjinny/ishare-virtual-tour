@@ -1,4 +1,4 @@
-import type { ImmersiveBackgroundController } from '../viewer/immersiveBackgroundController';
+import type { ImmersiveBackgroundController } from '../viewer-shared/immersiveBackgroundController';
 
 /** Immersive ambience is lowest — foreground media mutes it while playing. */
 export const TOUR_MEDIA_PRIORITY = {

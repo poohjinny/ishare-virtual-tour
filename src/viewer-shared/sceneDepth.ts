@@ -1,5 +1,6 @@
 import type { Hotspot, Scene, Tour } from '../types/tour';
 import { resolveSceneNavHotspots } from '../utils/resolveSceneHotspots';
+import type { SceneVisibilityAudience } from '../utils/sceneVisibility';
 
 /** BFS depth from firstScene along nav hotspots (overview = 0). */
 export function buildSceneDepths(tour: Tour): Record<string, number> {
@@ -43,12 +44,17 @@ export interface SceneGroup {
  * reachable beneath it (that isn't itself a level-1 branch) joins that group.
  * The firstScene is excluded (callers render it standalone). Scenes unreachable
  * via nav hotspots are collected into an "other" group.
+ *
+ * Pass `{ dev: true }` for authoring lists so unlisted / internal scenes stay
+ * in their nav departments (visitor Explore keeps the default — public edges
+ * only, and Explore already omits non-public scenes from `scenes`).
  */
 export function buildSceneGroups(
   tour: Pick<Tour, 'hotspots'>,
   scenes: Record<string, Scene>,
   firstSceneId: string,
   otherGroupTitle: string,
+  audience: SceneVisibilityAudience = {},
 ): SceneGroup[] {
   const groupRootOf = new Map<string, string>();
   const visited = new Set<string>();
@@ -66,7 +72,11 @@ export function buildSceneGroups(
     const scene = scenes[sceneId];
     if (!scene) continue;
 
-    for (const hotspot of resolveSceneNavHotspots({ ...tour, scenes }, scene)) {
+    for (const hotspot of resolveSceneNavHotspots(
+      { ...tour, scenes },
+      scene,
+      audience,
+    )) {
       const target = hotspot.targetScene!;
       if (visited.has(target) || !scenes[target]) continue;
       visited.add(target);
@@ -275,8 +285,15 @@ export function buildSceneGroupSecondaryById(
   scenes: Record<string, Scene>,
   firstSceneId: string,
   otherGroupTitle: string,
+  audience: SceneVisibilityAudience = {},
 ): Record<string, string> {
-  const groups = buildSceneGroups(tour, scenes, firstSceneId, otherGroupTitle);
+  const groups = buildSceneGroups(
+    tour,
+    scenes,
+    firstSceneId,
+    otherGroupTitle,
+    audience,
+  );
   const out: Record<string, string> = {};
 
   for (const group of groups) {

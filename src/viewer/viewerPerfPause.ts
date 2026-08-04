@@ -1,85 +1,17 @@
 import type { Viewer } from '@photo-sphere-viewer/core';
 
-const PERF_PAUSE_CLASS = 'viewer-area--perf-pause';
+import {
+  applyViewerRenderPerfPause,
+  subscribeTourPerfPause,
+  type TourPerfPauseState,
+} from '../viewer-shared/tourPerfPause';
 
-export interface TourPerfPauseState {
-  chromePaused: boolean;
-  viewerRenderPaused: boolean;
-}
+const PERF_PAUSE_CLASS = 'viewer-area--perf-pause';
 
 export interface ViewerPerfPauseOptions {
   /** Tour shell — `.viewer-area` so chrome (nav, AI) pauses too. */
   scope: HTMLElement;
   getViewer?: () => Viewer | null;
-}
-
-type PerfPauseListener = (state: TourPerfPauseState) => void;
-
-let signalsBound = false;
-let currentState: TourPerfPauseState = {
-  chromePaused: false,
-  viewerRenderPaused: false,
-};
-const subscribers = new Set<PerfPauseListener>();
-
-function computeState(): TourPerfPauseState {
-  const chromePaused = document.hidden;
-  return {
-    chromePaused,
-    viewerRenderPaused: chromePaused || !document.hasFocus(),
-  };
-}
-
-function publish(next: TourPerfPauseState): void {
-  if (
-    next.chromePaused === currentState.chromePaused &&
-    next.viewerRenderPaused === currentState.viewerRenderPaused
-  ) {
-    return;
-  }
-
-  currentState = next;
-  subscribers.forEach((listener) => listener(currentState));
-}
-
-function syncSignals(): void {
-  publish(computeState());
-}
-
-/** Shared tab / focus signals for tour chrome, main PSV, and nav preview. */
-export function ensureTourPerfPauseSignals(): void {
-  if (signalsBound) return;
-  signalsBound = true;
-
-  document.addEventListener('visibilitychange', syncSignals);
-  window.addEventListener('focus', syncSignals);
-  window.addEventListener('blur', syncSignals);
-  syncSignals();
-}
-
-export function getTourPerfPauseState(): TourPerfPauseState {
-  return { ...currentState };
-}
-
-export function subscribeTourPerfPause(
-  listener: PerfPauseListener,
-): () => void {
-  ensureTourPerfPauseSignals();
-  subscribers.add(listener);
-  listener(currentState);
-  return () => subscribers.delete(listener);
-}
-
-export function applyViewerRenderPerfPause(
-  viewer: Viewer,
-  paused: boolean,
-): void {
-  if (paused) {
-    viewer.needsContinuousUpdate(false);
-    return;
-  }
-
-  viewer.needsUpdate();
 }
 
 /**
@@ -92,7 +24,7 @@ export function bindViewerPerfPause({
   getViewer,
 }: ViewerPerfPauseOptions): () => void {
   const unsubscribe = subscribeTourPerfPause(
-    ({ chromePaused, viewerRenderPaused }) => {
+    ({ chromePaused, viewerRenderPaused }: TourPerfPauseState) => {
       scope.classList.toggle(PERF_PAUSE_CLASS, chromePaused);
 
       const viewer = getViewer?.() ?? null;

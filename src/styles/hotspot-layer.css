@@ -1,0 +1,596 @@
+/*
+ * Shared HTML hotspot marker chrome (nav / info / general-info).
+ * Used by PSV markers and 3D CSS2D overlays. Imported via globals.css.
+ * PSV marker host stacking / enter animations stay in psv-layer.css.
+ * 3D host wrap / enter stay in viewer-3d-layer.css.
+ */
+
+:root,
+.viewer-container,
+.viewer-3d-container,
+.hotspot-3d-wrap {
+  /*
+   * Hotspot chips are screen-space overlays. Chrome + label both use rem so
+   * they track UI scale together (narrow / device-frame viewports). Values
+   * match the previous 16px-root px tokens (26 / 9 / 1 / 1.5).
+   * PSV's `.psv-container * { box-sizing: content-box }` is overridden in
+   * psv-layer.css so padding/border stay inside this token (border-box).
+   */
+  --ishare-hotspot-label-size: 0.71875rem;
+  --ishare-hotspot-label-line-height: 1.1;
+  --ishare-hotspot-label-weight: 500;
+  --ishare-hotspot-glass-padding-block: 0.0625rem;
+  --ishare-hotspot-glass-padding-inline: 0.5625rem;
+  --ishare-hotspot-info-padding-inline-start: 0.5rem;
+  --ishare-hotspot-glass-border-width: 0.09375rem;
+  --ishare-hotspot-glass-block-size: 1.625rem;
+  --ishare-hotspot-glass-gap: 0.375rem;
+  --ishare-hotspot-info-gap: 0.25rem;
+  --ishare-hotspot-icon-size: 1rem;
+  --ishare-hotspot-nav-dot-size: 0.5rem;
+  --ishare-hotspot-info-icon-wrap: 1.125rem;
+  --ishare-hotspot-info-icon-size: 0.8125rem;
+  --ishare-hotspot-place-overview-bump: 0.125rem;
+  /* Solid white + alpha (no backdrop blur) — pills skip a per-frame blur pass,
+     cutting compositor cost. A faint border keeps them legible over bright
+     panorama regions now that the frosted edge is gone. */
+  --ishare-hotspot-glass-bg: rgba(255, 255, 255, 0.75);
+  --ishare-hotspot-glass-bg-hover: rgba(255, 255, 255, 0.9);
+}
+
+.hotspot-nav__pill,
+.hotspot-general-info__chip {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+/* ?? Nav hotspot ? scene transition (pill label) ?? */
+
+.hotspot-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  /* After `font: inherit` — kill inherited line-box strut on the control. */
+  line-height: 0;
+  font-size: 0;
+  appearance: none;
+  cursor: pointer;
+  pointer-events: auto;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hotspot-nav__pill {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ishare-hotspot-glass-gap);
+  box-sizing: border-box;
+  min-height: var(--ishare-hotspot-glass-block-size);
+  height: var(--ishare-hotspot-glass-block-size);
+  padding: var(--ishare-hotspot-glass-padding-block) var(--ishare-hotspot-glass-padding-inline);
+  border-radius: 999px;
+  background: var(--ishare-hotspot-glass-bg);
+  border: var(--ishare-hotspot-glass-border-width) solid transparent;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+  /* Kill whitespace text-node flex items from marker HTML templates. */
+  font-size: 0;
+  line-height: 0;
+  transition:
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.hotspot-nav__dot {
+  flex-shrink: 0;
+  width: var(--ishare-hotspot-nav-dot-size);
+  height: var(--ishare-hotspot-nav-dot-size);
+  border-radius: 50%;
+  background: var(--ishare-primary);
+  transform-origin: center;
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.hotspot-nav__icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ishare-hotspot-icon-size);
+  height: var(--ishare-hotspot-icon-size);
+  overflow: hidden;
+  color: var(--ishare-primary);
+  transition:
+    color 0.22s ease,
+    transform 0.22s ease;
+}
+
+.hotspot-nav__icon-symbol {
+  display: block;
+  width: var(--ishare-hotspot-icon-size);
+  height: var(--ishare-hotspot-icon-size);
+  overflow: hidden;
+  font-size: var(--ishare-hotspot-icon-size);
+  line-height: 1;
+}
+
+.hotspot-nav--back .hotspot-nav__icon,
+.hotspot-nav--hub .hotspot-nav__icon {
+  color: color-mix(in srgb, var(--ishare-text-body) 72%, var(--ishare-text-muted));
+}
+
+.hotspot-nav:not(.hotspot-nav--active) .hotspot-nav__pill {
+  transition:
+    box-shadow 0.22s ease,
+    background 0.22s ease;
+}
+
+.hotspot-nav__label {
+  display: block;
+  flex-shrink: 1;
+  min-width: 0;
+  min-height: 0;
+  height: calc(var(--ishare-hotspot-label-size) * var(--ishare-hotspot-label-line-height));
+  font-family: var(--ishare-display-font);
+  font-size: var(--ishare-hotspot-label-size);
+  font-weight: var(--ishare-hotspot-label-weight);
+  line-height: var(--ishare-hotspot-label-line-height);
+  letter-spacing: -0.01em;
+  color: var(--ishare-text);
+  white-space: nowrap;
+  /* Soft viewport cap only — avoid idle ellipsis on normal-length titles. */
+  max-width: min(22rem, 75vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Authoring-only: unlisted/internal pins shown under ?dev=1 (hidden for visitors). */
+.hotspot--authoring-ghost .hotspot-nav__pill,
+.hotspot--authoring-ghost .hotspot-info__pill {
+  opacity: 0.58;
+  border-style: dashed;
+  filter: grayscale(0.15);
+}
+
+/* Dev Manage hover / focus — full opacity so the pin reads like a live marker. */
+.hotspot--authoring-ghost.hotspot--dev-focus .hotspot-nav__pill,
+.hotspot--authoring-ghost.hotspot--dev-focus .hotspot-info__pill {
+  opacity: 1;
+  filter: none;
+}
+
+.hotspot-nav__visibility,
+.hotspot-info__visibility {
+  flex-shrink: 0;
+  min-height: 0;
+  font-family: var(--ishare-display-font);
+  font-size: 0.625rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(71, 85, 105, 0.9);
+}
+
+.hotspot-info__visibility {
+  color: rgba(255, 255, 255, 0.62);
+  margin-left: 0.35em;
+}
+
+.hotspot-nav__visibility {
+  margin-left: 0.35em;
+}
+
+.hotspot-nav.hotspot--dev-focus .hotspot-nav__pill,
+.hotspot-info.hotspot--dev-focus .hotspot-info__pill,
+.hotspot-general-info.hotspot--dev-focus .hotspot-general-info__chip {
+  outline: 0.1875rem solid var(--ishare-accent);
+  outline-offset: 0.25rem;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.85),
+    0 0 18px rgba(232, 168, 56, 0.55);
+  animation: hotspot-dev-focus-pulse 1.2s ease-in-out infinite;
+}
+
+/* Manage → Move — drag-armed cursor on the focused marker */
+.hotspot-nav.hotspot--dev-move,
+.hotspot-info.hotspot--dev-move,
+.hotspot-general-info.hotspot--dev-move {
+  cursor: grab;
+}
+
+.hotspot-nav.hotspot--dev-move.hotspot--dev-dragging,
+.hotspot-info.hotspot--dev-move.hotspot--dev-dragging,
+.hotspot-general-info.hotspot--dev-move.hotspot--dev-dragging,
+.hotspot-nav.hotspot--dev-move:active,
+.hotspot-info.hotspot--dev-move:active,
+.hotspot-general-info.hotspot--dev-move:active {
+  cursor: grabbing;
+}
+
+@keyframes hotspot-dev-focus-pulse {
+
+  0%,
+  100% {
+    outline-offset: 0.25rem;
+  }
+
+  50% {
+    outline-offset: 0.4375rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .hotspot-nav.hotspot--dev-focus .hotspot-nav__pill,
+  .hotspot-info.hotspot--dev-focus .hotspot-info__pill,
+  .hotspot-general-info.hotspot--dev-focus .hotspot-general-info__chip {
+    animation: none;
+  }
+}
+
+.hotspot-nav:not(.hotspot-nav--active):hover .hotspot-nav__pill,
+.hotspot-nav:not(.hotspot-nav--active):focus-visible .hotspot-nav__pill {
+  background: var(--ishare-hotspot-glass-bg-hover);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+
+.hotspot-nav:focus-visible .hotspot-nav__pill {
+  outline: none;
+}
+
+/* Active ? panel open: glass pill, theme label, dot pulse, theme glow */
+.hotspot-nav--active .hotspot-nav__pill,
+.hotspot-nav--active:hover .hotspot-nav__pill,
+.hotspot-nav--active:focus-visible .hotspot-nav__pill {
+  background: var(--ishare-hotspot-glass-bg-hover);
+  box-shadow: var(--ishare-hotspot-active-glow);
+}
+
+.hotspot-nav--active:hover .hotspot-nav__pill,
+.hotspot-nav--active:focus-visible .hotspot-nav__pill {
+  box-shadow: var(--ishare-hotspot-active-glow-strong);
+}
+
+.hotspot-nav--active .hotspot-nav__label,
+.hotspot-nav--active:hover .hotspot-nav__label,
+.hotspot-nav--active:focus-visible .hotspot-nav__label {
+  color: var(--ishare-primary);
+}
+
+.hotspot-nav--active .hotspot-nav__dot,
+.hotspot-nav--active:hover .hotspot-nav__dot,
+.hotspot-nav--active:focus-visible .hotspot-nav__dot {
+  background: var(--ishare-primary);
+  box-shadow: var(--ishare-active-icon-dot-ring);
+  animation: none;
+  transform: none;
+}
+
+.hotspot-nav--active .hotspot-nav__icon,
+.hotspot-nav--active:hover .hotspot-nav__icon,
+.hotspot-nav--active:focus-visible .hotspot-nav__icon {
+  color: var(--ishare-primary);
+}
+
+.hotspot-nav--back:not(.hotspot-nav--active):hover .hotspot-nav__icon,
+.hotspot-nav--back:not(.hotspot-nav--active):focus-visible .hotspot-nav__icon,
+.hotspot-nav--hub:not(.hotspot-nav--active):hover .hotspot-nav__icon,
+.hotspot-nav--hub:not(.hotspot-nav--active):focus-visible .hotspot-nav__icon {
+  color: var(--ishare-primary);
+}
+
+/* ?? General info hotspot ? glass chip + colored icon (lowest priority tier) ?? */
+
+.hotspot-general-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  line-height: 0;
+  font-size: 0;
+  appearance: none;
+  cursor: pointer;
+  pointer-events: auto;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hotspot-general-info__chip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--ishare-hotspot-glass-block-size);
+  height: var(--ishare-hotspot-glass-block-size);
+  min-height: var(--ishare-hotspot-glass-block-size);
+  border-radius: 50%;
+  background: var(--ishare-hotspot-glass-bg);
+  border: var(--ishare-hotspot-glass-border-width) solid transparent;
+  padding: var(--ishare-hotspot-glass-padding-block);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  color: var(--ishare-text);
+  transition:
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease;
+}
+
+.hotspot-general-info__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.hotspot-general-info__icon-symbol {
+  display: block;
+  font-size: var(--ishare-hotspot-icon-size);
+  line-height: 1;
+}
+
+.hotspot-general-info:not(.hotspot-general-info--active):hover .hotspot-general-info__chip,
+.hotspot-general-info:not(.hotspot-general-info--active):focus-visible .hotspot-general-info__chip {
+  background: var(--ishare-hotspot-glass-bg-hover);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+
+.hotspot-general-info:focus-visible .hotspot-general-info__chip {
+  outline: none;
+}
+
+.hotspot-general-info--active .hotspot-general-info__chip,
+.hotspot-general-info--active:hover .hotspot-general-info__chip,
+.hotspot-general-info--active:focus-visible .hotspot-general-info__chip {
+  background: var(--ishare-hotspot-glass-bg);
+  box-shadow: var(--ishare-hotspot-active-glow);
+  color: var(--ishare-primary);
+}
+
+.hotspot-general-info--active:hover .hotspot-general-info__chip,
+.hotspot-general-info--active:focus-visible .hotspot-general-info__chip {
+  box-shadow: var(--ishare-hotspot-active-glow-strong);
+}
+
+/* Place-overview — square chip; side matches nav pill height (optical bump:
+ * equal circles read smaller than pills, so a small bump keeps perceived size aligned). */
+.hotspot-general-info--place-overview .hotspot-general-info__chip {
+  width: calc(var(--ishare-hotspot-glass-block-size) + var(--ishare-hotspot-place-overview-bump));
+  height: calc(var(--ishare-hotspot-glass-block-size) + var(--ishare-hotspot-place-overview-bump));
+  min-width: calc(var(--ishare-hotspot-glass-block-size) + var(--ishare-hotspot-place-overview-bump));
+  min-height: calc(var(--ishare-hotspot-glass-block-size) + var(--ishare-hotspot-place-overview-bump));
+}
+
+/* ?? Info hotspot ? naming opportunity pill (primary + heart) ?? */
+
+.hotspot-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  line-height: 0;
+  font-size: 0;
+  appearance: none;
+  cursor: pointer;
+  pointer-events: auto;
+  outline: none;
+  overflow: visible;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hotspot-info__pulse {
+  position: absolute;
+  /* Pin to host center — scale(sx, sy) stays concentric with the pill. */
+  left: 50%;
+  top: 50%;
+  width: calc(100% + var(--ishare-hotspot-glass-gap));
+  height: calc(100% + var(--ishare-hotspot-glass-gap));
+  z-index: 0;
+  border-radius: 999px;
+  transform-origin: center center;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(255, 255, 255, 0.58);
+  background: rgba(var(--ishare-primary-rgb), 0.18);
+  animation: hotspot-info-pulse 2.4s ease-out infinite;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.hotspot-info__pill {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ishare-hotspot-info-gap);
+  box-sizing: border-box;
+  min-height: var(--ishare-hotspot-glass-block-size);
+  height: var(--ishare-hotspot-glass-block-size);
+  padding: var(--ishare-hotspot-glass-padding-block) var(--ishare-hotspot-glass-padding-inline) var(--ishare-hotspot-glass-padding-block) var(--ishare-hotspot-info-padding-inline-start);
+  border-radius: 999px;
+  background: var(--ishare-primary);
+  color: #fff;
+  border: var(--ishare-hotspot-glass-border-width) solid transparent;
+  box-shadow: 0 8px 24px rgba(var(--ishare-primary-rgb), 0.28);
+  overflow: hidden;
+  font-size: 0;
+  line-height: 0;
+  transition:
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease;
+}
+
+.hotspot-info__icon-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ishare-hotspot-info-icon-wrap);
+  height: var(--ishare-hotspot-info-icon-wrap);
+  overflow: visible;
+  color: rgba(255, 255, 255, 0.58);
+  border-radius: 50%;
+  transition:
+    color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    width 0.22s ease,
+    height 0.22s ease;
+}
+
+.hotspot-info__icon {
+  width: var(--ishare-hotspot-info-icon-size);
+  height: var(--ishare-hotspot-info-icon-size);
+  display: block;
+  overflow: visible;
+}
+
+.hotspot-info__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  flex-shrink: 1;
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(var(--ishare-hotspot-label-size) * var(--ishare-hotspot-label-line-height));
+  font-family: var(--ishare-display-font);
+  font-size: var(--ishare-hotspot-label-size);
+  font-weight: var(--ishare-hotspot-label-weight);
+  line-height: var(--ishare-hotspot-label-line-height);
+  letter-spacing: -0.01em;
+  color: #fff;
+  white-space: nowrap;
+  /* Soft viewport cap only — avoid idle ellipsis on normal-length titles. */
+  max-width: min(22rem, 75vw);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hotspot-info__name {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hotspot-info__label-sep,
+.hotspot-info__status {
+  flex-shrink: 0;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.hotspot-info__label-sep {
+  opacity: 0.85;
+}
+
+.hotspot-info:hover .hotspot-info__pill,
+.hotspot-info:focus-visible .hotspot-info__pill {
+  background: var(--ishare-primary-dark);
+  box-shadow: 0 12px 28px rgba(var(--ishare-primary-rgb), 0.34);
+}
+
+.hotspot-info--active:hover .hotspot-info__pill,
+.hotspot-info--active:focus-visible .hotspot-info__pill {
+  background: var(--ishare-hotspot-glass-bg-hover);
+  box-shadow: var(--ishare-hotspot-active-glow-strong);
+}
+
+.hotspot-info:hover .hotspot-info__icon-wrap,
+.hotspot-info:focus-visible .hotspot-info__icon-wrap {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.hotspot-info--active .hotspot-info__icon-wrap,
+.hotspot-info--active:hover .hotspot-info__icon-wrap,
+.hotspot-info--active:focus-visible .hotspot-info__icon-wrap {
+  width: var(--ishare-hotspot-info-icon-wrap);
+  height: var(--ishare-hotspot-info-icon-wrap);
+  background: var(--ishare-active-icon-leading-bg);
+  box-shadow: var(--ishare-active-icon-leading-ring);
+  color: var(--ishare-primary);
+}
+
+.hotspot-info--active .hotspot-info__icon {
+  width: var(--ishare-hotspot-info-icon-size);
+  height: var(--ishare-hotspot-info-icon-size);
+}
+
+.hotspot-info:focus-visible .hotspot-info__pill {
+  outline: 0.125rem solid var(--ishare-primary-light);
+  outline-offset: 0.125rem;
+}
+
+/* Active — popup open: glass pill, theme label/icon + glow (no pulse — already engaged) */
+.hotspot-info--active .hotspot-info__pill {
+  background: var(--ishare-hotspot-glass-bg-hover);
+  border-color: transparent;
+  box-shadow: var(--ishare-hotspot-active-glow);
+}
+
+.hotspot-info--active .hotspot-info__label {
+  color: inherit;
+}
+
+.hotspot-info--active .hotspot-info__name {
+  color: var(--ishare-primary);
+}
+
+.hotspot-info--active .hotspot-info__label-sep,
+.hotspot-info--active .hotspot-info__status {
+  color: rgba(var(--ishare-primary-rgb), 0.52);
+}
+
+.hotspot-info--active .hotspot-info__pulse {
+  animation: none;
+  opacity: 0;
+}
+
+/* Sold — primary pill (same brand confidence); no pulse. Status lives in label / directory. */
+.hotspot-info--status-sold .hotspot-info__pulse {
+  animation: none;
+  opacity: 0;
+}
+
+/* Pause infinite chrome motion when the tab is hidden or the window loses focus. */
+.viewer-area--perf-pause .hotspot-info__pulse {
+  animation: none;
+  opacity: 0.35;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .hotspot-nav--active .hotspot-nav__dot {
+    box-shadow: var(--ishare-active-icon-dot-ring);
+  }
+
+  .hotspot-info__pulse {
+    animation: none;
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}

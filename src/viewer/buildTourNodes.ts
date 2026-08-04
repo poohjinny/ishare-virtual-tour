@@ -6,9 +6,9 @@ import {
   VIEWER_MARKER_AUDIENCE,
   type SceneVisibilityAudience,
 } from '../utils/sceneVisibility';
-import { hotspotToMarkerConfig } from './buildMarkers';
+import { hotspotToMarkerConfig } from '../viewer-shared/buildMarkers';
 
-function markersForScene(
+export function markersForScene(
   tour: Tour,
   scene: Scene,
   audience: SceneVisibilityAudience = VIEWER_MARKER_AUDIENCE,

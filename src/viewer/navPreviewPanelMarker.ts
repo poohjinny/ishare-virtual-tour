@@ -16,7 +16,7 @@ import {
   isNavPreviewMiniViewerEnabled,
   mountNavPreviewMiniViewer,
   mountNavPreviewVideoHero,
-} from './navPreviewMiniViewer';
+} from '../viewer-shared/navPreviewMiniViewer';
 import { initPopupVideoPlayers } from '../utils/popupVideo';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import {
@@ -27,21 +27,23 @@ import {
   anchoredPanelMarkerPosition,
   correctAnchoredPanelPixelGap,
   measureHotspotHalfHeightPx,
-  NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
 } from './anchoredPanelPosition';
-import { bindNavPreviewNamingAccordion } from './navPreviewNamingAccordion';
-import { animateNavPreviewTotal } from './navPreviewTotalCount';
+import { NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX } from '../viewer-shared/anchoredPanelGap';
+import { bindNavPreviewNamingAccordion } from '../viewer-shared/navPreviewNamingAccordion';
+import { animateNavPreviewTotal } from '../viewer-shared/navPreviewTotalCount';
 import {
-  clearAnchoredPanelCameraRestore,
   revealCameraForOffViewPanel,
-  restoreAnchoredPanelCameraIfNeeded,
   scheduleNudgeCameraForClippedPanel,
-  waitForAnchoredPanelEnter,
 } from './anchoredPanelCameraNudge';
+import {
+  ANCHORED_PANEL_EXIT_MS,
+  waitForAnchoredPanelEnter,
+} from '../viewer-shared/anchoredPanelLayout';
+import { createAnchoredPanelSettleGate } from '../viewer-shared/anchoredPanelOpenReveal';
 import { notifyAnchoredPanelOpened } from './anchoredPanelVisibility';
 
 const PANEL_ID_SUFFIX = '-nav-panel';
-const PANEL_EXIT_MS = 200;
+const PANEL_EXIT_MS = ANCHORED_PANEL_EXIT_MS;
 
 const closingPanelIds = new Set<string>();
 const closingPanelTimeouts = new Map<string, number>();
@@ -99,11 +101,10 @@ export function closeAnchoredNavPreviewPanel(
   markers: MarkersPlugin,
   animate = true,
   clearActive = true,
-  options?: { restoreCamera?: boolean; notifyGuide?: boolean },
+  options?: { notifyGuide?: boolean },
 ): void {
   let clearingActive = false;
   let closedAny = false;
-  const restoreCamera = options?.restoreCamera ?? animate;
   const notifyGuide = options?.notifyGuide !== false;
 
   for (const marker of markers.getMarkers()) {
@@ -168,8 +169,6 @@ export function closeAnchoredNavPreviewPanel(
 
   if (!closedAny) return;
   if (notifyGuide) notifyNavPreviewClosed();
-  if (restoreCamera) void restoreAnchoredPanelCameraIfNeeded();
-  else clearAnchoredPanelCameraRestore();
 }
 
 export function getOpenNavPreviewHostId(markers: MarkersPlugin): string | null {
@@ -263,10 +262,8 @@ export function openAnchoredNavPreviewPanel(
     // Panel chrome + text show immediately. Camera may nudge in parallel with
     // the enter scale. Heavy hero (WebGL / video) waits until BOTH enter and
     // camera have settled — mounting it mid-motion caused open jank.
-    let cameraSettled = options?.skipCameraNudge ?? false;
-    let enterDone = false;
-    const revealHero = () => {
-      if (!cameraSettled || !enterDone) return;
+    const skipNudge = options?.skipCameraNudge ?? false;
+    const gate = createAnchoredPanelSettleGate(() => {
       const panelMarker = markers.getMarker(id);
       if (!(panelMarker?.domElement instanceof HTMLElement)) return;
       animateNavPreviewTotal(panelMarker.domElement);
@@ -284,16 +281,14 @@ export function openAnchoredNavPreviewPanel(
       if (preview.bodyVideoUrl?.trim()) {
         initPopupVideoPlayers(panelMarker.domElement);
       }
-    };
-
-    void waitForAnchoredPanelEnter(marker.domElement).then(() => {
-      enterDone = true;
-      revealHero();
     });
 
-    if (options?.skipCameraNudge) {
-      cameraSettled = true;
-      revealHero();
+    void waitForAnchoredPanelEnter(marker.domElement).then(() => {
+      gate.markEnterDone();
+    });
+
+    if (skipNudge) {
+      gate.markCameraSettled();
       notifyAnchoredPanelOpened();
       return;
     }
@@ -308,12 +303,11 @@ export function openAnchoredNavPreviewPanel(
       },
       {
         afterSettled: () => {
-          cameraSettled = true;
           const panelMarker = markers.getMarker(id);
           if (panelMarker?.domElement instanceof HTMLElement) {
             refreshGlassPanelCtaOverflowTitles(panelMarker.domElement);
           }
-          revealHero();
+          gate.markCameraSettled();
         },
         onPanelOffView: () =>
           revealCameraForOffViewPanel(
