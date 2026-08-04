@@ -14,13 +14,13 @@
       "panorama": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_hpajghgqrv.webp",
       "thumbnail": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_hpajghgqrv.webp",
       "defaultView": {
-        "yaw": -80.9,
-        "pitch": 67.9,
-        "zoom": 1.35,
+        "yaw": -88.9,
+        "pitch": -7.8,
+        "zoom": 5.96,
         "target": {
-          "x": -9.39,
-          "y": 1.58,
-          "z": -0.27
+          "x": -0.75,
+          "y": 4.16,
+          "z": -0.32
         }
       },
       "hotspots": []
@@ -28,7 +28,7 @@
     "s_xihtcolrwu": {
       "id": "s_xihtcolrwu",
       "title": "1st Floor",
-      "description": "Explore test1 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Ground-level walk through the Sponza colonnade — arches, columns, and the open atrium floor.",
       "panorama": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_xihtcolrwu.webp",
       "thumbnail": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_xihtcolrwu.webp",
       "defaultView": {
@@ -46,17 +46,17 @@
     "s_kanukh723s": {
       "id": "s_kanukh723s",
       "title": "2nd Floor",
-      "description": "Explore test2 at 3D Walkthrough Demo. Scene description and donor content can be updated in the dev panel or tour JSON.",
+      "description": "Upper gallery walkway overlooking the atrium — same model, elevated viewpoint.",
       "panorama": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_kanukh723s.webp",
       "thumbnail": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_kanukh723s.webp",
       "defaultView": {
-        "yaw": -104.7,
-        "pitch": -8.8,
+        "yaw": -92,
+        "pitch": -6,
         "zoom": 1.35,
         "target": {
-          "x": -0.93,
-          "y": 1.58,
-          "z": -4.89
+          "x": -8.02,
+          "y": 5.3,
+          "z": -0.17
         }
       },
       "hotspots": []
@@ -162,7 +162,37 @@
       "preview": {
         "image": "/assets/ishare-demos/t_ctx4e6rkty/previews/info-naming-opportunity-2-2.webp"
       },
-      "sceneId": "s_hpajghgqrv"
+      "sceneId": "s_kanukh723s"
+    },
+    {
+      "id": "nav-to-1st-floor",
+      "type": "nav",
+      "position": {
+        "x": -9.4,
+        "y": 1.1,
+        "z": -0.29
+      },
+      "targetScene": "s_xihtcolrwu",
+      "targetView": {
+        "yaw": -90.7,
+        "pitch": -0.6,
+        "zoom": 1.35,
+        "target": {
+          "x": 8.41,
+          "y": 1.58,
+          "z": -0.36
+        }
+      }
+    },
+    {
+      "id": "nav-to-2nd-floor",
+      "type": "nav",
+      "position": {
+        "x": 7.2,
+        "y": 4.11,
+        "z": -0.29
+      },
+      "targetScene": "s_kanukh723s"
     }
   ],
   "defaultTransition": {

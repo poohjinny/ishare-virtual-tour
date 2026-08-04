@@ -42,14 +42,12 @@
     {
       "id": "nav-to-living-area",
       "type": "nav",
-      "label": "Living Area",
       "position": {
         "x": 6,
         "y": 2,
         "z": 6
       },
-      "targetScene": "s_onaext778x",
-      "navVariant": "hub"
+      "targetScene": "s_onaext778x"
     },
     {
       "id": "monitor-screen",
@@ -58,8 +56,8 @@
       "sceneId": "s_onaext778x",
       "position": {
         "x": -0.95,
-        "y": 10.79,
-        "z": 6.01
+        "y": 10.58,
+        "z": 5.88
       },
       "popup": {
         "title": "Monitor Station",
@@ -80,13 +78,13 @@
       "panorama": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_onaext778x.webp",
       "thumbnail": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_onaext778x.webp",
       "defaultView": {
-        "yaw": -134.9,
-        "pitch": -15.1,
-        "zoom": 29.62,
+        "yaw": -135.5,
+        "pitch": -26.1,
+        "zoom": 38.72,
         "target": {
-          "x": 7.48,
-          "y": 6.64,
-          "z": 7.51
+          "x": 7.4,
+          "y": 7.32,
+          "z": 6.99
         }
       },
       "hotspots": []
