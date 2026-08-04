@@ -237,6 +237,19 @@ export function computeLandingOrbitMaxDistance(
   return maxDistance;
 }
 
+/**
+ * User zoom-out ceiling — stable per model + camera frustum.
+ * Always `fit × 1.2` (padding 1 = true fit). Do **not** fold in `view.zoom`:
+ * that made maxDistance (and the zoom bar) jump on every scene / hotspot view.
+ */
+export function computeUserOrbitMaxDistance(
+  modelRoot: THREE.Object3D,
+  camera: THREE.PerspectiveCamera,
+): number {
+  const fit = computeModelBBoxFitDistance(modelRoot, camera, 1);
+  return fit * 1.2;
+}
+
 export function heroLandingStartPose(
   anim: SphericalLandingAnim,
 ): LandingCameraPose {

@@ -3,10 +3,11 @@ import { IconTooltip } from '../components/ui/IconTooltip';
 import { MaterialSymbol } from '../components/ui/MaterialSymbol';
 import { cn } from '../lib/cn';
 import type { PlayTourPhase } from '../hooks/usePlayTour';
-import type { ImmersiveBackgroundController } from '../viewer/immersiveBackgroundController';
-import type { ImmersiveBgButtonState } from '../viewer/immersiveBackgroundController';
-import { toggleImmersiveBackgroundPlayback } from '../viewer/immersiveBackgroundNavbarButton';
-import { tourNavbarMaterialSymbolProps } from '../viewer/tourNavbarMaterialSymbol';
+import type { ImmersiveBackgroundController } from '../viewer-shared/immersiveBackgroundController';
+import type { ImmersiveBgButtonState } from '../viewer-shared/immersiveBackgroundController';
+import { toggleImmersiveBackgroundPlayback } from '../viewer-shared/immersiveBackgroundPlayback';
+import { tourNavbarMaterialSymbolProps } from '../viewer-shared/tourNavbarMaterialSymbol';
+import { TourNavbarZoomControls } from '../viewer-shared/TourNavbarZoomControls';
 
 const NAVBAR_SYMBOL_PROPS = tourNavbarMaterialSymbolProps;
 
@@ -122,6 +123,9 @@ export interface ThreeDViewerControlsProps {
   onRecenter: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  /** 0 = zoomed out, 1 = zoomed in (PSV zoomRange convention). */
+  zoomLevel?: number;
+  onZoomLevelChange?: (level: number) => void;
   fullscreenActive?: boolean;
   onFullscreenToggle?: () => void;
   disabled?: boolean;
@@ -136,6 +140,8 @@ export function ThreeDViewerControls({
   onRecenter,
   onZoomIn,
   onZoomOut,
+  zoomLevel = 0.5,
+  onZoomLevelChange,
   fullscreenActive = false,
   onFullscreenToggle,
   disabled = false,
@@ -155,29 +161,39 @@ export function ThreeDViewerControls({
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
-      <IconTooltip label='Zoom in' placement='top'>
-        <button
-          type='button'
-          className='psv-button psv-zoom-in-button'
+      {onZoomLevelChange ?
+        <TourNavbarZoomControls
           disabled={navigationLocked}
-          aria-label='Zoom in'
-          onClick={onZoomIn}
-        >
-          <MaterialSymbol name='add' {...NAVBAR_SYMBOL_PROPS} />
-        </button>
-      </IconTooltip>
-
-      <IconTooltip label='Zoom out' placement='top'>
-        <button
-          type='button'
-          className='psv-button psv-zoom-out-button'
-          disabled={navigationLocked}
-          aria-label='Zoom out'
-          onClick={onZoomOut}
-        >
-          <MaterialSymbol name='remove' {...NAVBAR_SYMBOL_PROPS} />
-        </button>
-      </IconTooltip>
+          onZoomIn={onZoomIn}
+          onZoomOut={onZoomOut}
+          zoomLevel={zoomLevel}
+          onZoomLevelChange={onZoomLevelChange}
+        />
+      : <>
+          <IconTooltip label='Zoom out' placement='top'>
+            <button
+              type='button'
+              className='psv-button psv-zoom-out-button'
+              disabled={navigationLocked}
+              aria-label='Zoom out'
+              onClick={onZoomOut}
+            >
+              <MaterialSymbol name='remove' {...NAVBAR_SYMBOL_PROPS} />
+            </button>
+          </IconTooltip>
+          <IconTooltip label='Zoom in' placement='top'>
+            <button
+              type='button'
+              className='psv-button psv-zoom-in-button'
+              disabled={navigationLocked}
+              aria-label='Zoom in'
+              onClick={onZoomIn}
+            >
+              <MaterialSymbol name='add' {...NAVBAR_SYMBOL_PROPS} />
+            </button>
+          </IconTooltip>
+        </>
+      }
 
       <IconTooltip label='Default view' placement='top'>
         <button

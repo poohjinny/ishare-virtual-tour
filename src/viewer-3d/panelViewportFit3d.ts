@@ -1,271 +1,121 @@
-import { Vector3 } from 'three';
+/**
+ * Model3d anchored-panel viewport fit — applies shared clip-nudge math
+ * (`anchoredPanelClipNudge`) via orbit yaw/pitch. Does not re-center on the
+ * hotspot; probes from the caller's base view (normally the current camera).
+ */
+
 import type { PerspectiveCamera } from 'three';
 import type { Vector3 as Vector3Type } from 'three';
 import type { ViewPosition } from '../types/tour';
+import {
+  measureAnchoredPanelBottomInsetPx,
+  measureAnchoredPanelTopInsetPx,
+  type PanelScreenRect,
+} from '../viewer-shared/anchoredPanelLayout';
+import {
+  ANCHORED_PANEL_CLIP_NUDGE_MAX_SHIFT_DEG,
+  anchoredPanelNeedsClipFit,
+  applyAnchoredPanelClipNudgeShiftsDeg,
+  computeAnchoredPanelClipNudgeShiftsDeg,
+  measureAnchoredPanelScreenRect,
+  perspectiveFocalLengthPx,
+  resolveAnchoredPanelClipInsets,
+} from '../viewer-shared/anchoredPanelClipNudge';
 
-const VIEWPORT_MARGIN_PX = 16;
-const BREADCRUMB_GAP_PX = 12;
-/** Small visual gap below measured breadcrumb bottom — not a framing fudge factor. */
-const TOP_SAFETY_PX = 12;
-const MIN_SHIFT_PX = 4;
-const MAX_MEASURE_ATTEMPTS = 24;
-const PANEL_ENTER_ANIM_MS = 220;
+export {
+  waitForAnchoredPanelEnter as waitForPanelEnterAnimation,
+  waitForAnchoredPanelLayout,
+  type PanelScreenRect,
+} from '../viewer-shared/anchoredPanelLayout';
+
+export {
+  measureAnchoredPanelHeaderTopPx as measurePanelHeaderTopPx,
+  measureAnchoredPanelScreenRect,
+} from '../viewer-shared/anchoredPanelClipNudge';
+
 const MAX_PROBE_PASSES = 8;
-const TOP_FIT_TOLERANCE_PX = 3;
 
-export interface PanelScreenRect {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-function waitAnimationFrames(count: number): Promise<void> {
-  if (count <= 0) return Promise.resolve();
-  return new Promise((resolve) => {
-    const step = () => {
-      count -= 1;
-      if (count <= 0) resolve();
-      else requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  });
-}
-
-function resolvePanelMeasureElement(panelRoot: HTMLElement): HTMLElement {
-  return (
-    panelRoot.querySelector('.tour-glass-panel--anchored') ??
-    panelRoot.querySelector('.tour-glass-panel') ??
-    panelRoot
-  );
-}
-
-/** Bottom inset — matches tour chrome gutter. */
+/** @deprecated Prefer measureAnchoredPanelBottomInsetPx — kept for call sites. */
 export function measureViewerBottomInsetPx(container: HTMLElement): number {
-  const tourPage = container.closest('.tour-page');
-  if (!tourPage) return VIEWPORT_MARGIN_PX;
-  const style = getComputedStyle(tourPage);
-  const raw = style.getPropertyValue('--tour-chrome-inset-bottom').trim();
-  const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) ?
-      parsed + VIEWPORT_MARGIN_PX
-    : VIEWPORT_MARGIN_PX;
+  return measureAnchoredPanelBottomInsetPx(container);
 }
 
-/** Top inset below breadcrumb row (Tour location nav). */
+/** @deprecated Prefer measureAnchoredPanelTopInsetPx — kept for call sites. */
 export function measureViewerTopInsetPx(container: HTMLElement): number {
-  const containerRect = container.getBoundingClientRect();
-  const tourPage = container.closest('.tour-page');
-  const breadcrumb = tourPage?.querySelector('nav[aria-label="Tour location"]');
-  if (breadcrumb instanceof HTMLElement) {
-    const bottom =
-      breadcrumb.getBoundingClientRect().bottom - containerRect.top;
-    return Math.max(
-      VIEWPORT_MARGIN_PX,
-      bottom + BREADCRUMB_GAP_PX + TOP_SAFETY_PX,
-    );
-  }
-
-  const style = tourPage ? getComputedStyle(tourPage) : null;
-  const insetTop = Number.parseFloat(
-    style?.getPropertyValue('--tour-chrome-inset-top') ?? '',
-  );
-  const breadcrumbHeight = Number.parseFloat(
-    style?.getPropertyValue('--tour-chrome-breadcrumb-row-height') ?? '',
-  );
-  if (Number.isFinite(insetTop) && Number.isFinite(breadcrumbHeight)) {
-    return insetTop + breadcrumbHeight + BREADCRUMB_GAP_PX + TOP_SAFETY_PX;
-  }
-
-  return 80;
+  return measureAnchoredPanelTopInsetPx(container);
 }
 
-/** Header top edge in container coordinates — primary fit target. */
-export function measurePanelHeaderTopPx(
+/**
+ * Pitch + yaw view correction so the anchored panel clears chrome insets
+ * (breadcrumb top, side/bottom margins) — same overflow math as PSV clip-nudge.
+ */
+export function computePanelFitView(
+  camera: PerspectiveCamera,
   container: HTMLElement,
-  panelRoot: HTMLElement,
-): number {
-  const containerRect = container.getBoundingClientRect();
-  const header =
-    panelRoot.querySelector('.tour-glass-panel__header') ??
-    panelRoot.querySelector('.tour-glass-panel__shell') ??
-    resolvePanelMeasureElement(panelRoot);
-  return header.getBoundingClientRect().top - containerRect.top;
-}
+  currentView: ViewPosition,
+  rect: PanelScreenRect,
+  topInsetPx = measureAnchoredPanelTopInsetPx(container),
+  bottomInsetPx = measureAnchoredPanelBottomInsetPx(container),
+): ViewPosition | null {
+  const vw = container.clientWidth;
+  const vh = container.clientHeight;
+  if (vw <= 0 || vh <= 0) return null;
 
-export function measureAnchoredPanelScreenRect(
-  container: HTMLElement,
-  panelRoot: HTMLElement,
-): PanelScreenRect {
-  const containerRect = container.getBoundingClientRect();
-  const panelRect =
-    resolvePanelMeasureElement(panelRoot).getBoundingClientRect();
-  const headerTop = measurePanelHeaderTopPx(container, panelRoot);
+  const focalPx = perspectiveFocalLengthPx(camera.fov, vh);
+  if (!(focalPx > 0)) return null;
+
+  const insets = {
+    topPx: topInsetPx,
+    bottomPx: bottomInsetPx,
+    sidePx: resolveAnchoredPanelClipInsets(container).sidePx,
+  };
+
+  const shifts = computeAnchoredPanelClipNudgeShiftsDeg({
+    viewportWidth: vw,
+    viewportHeight: vh,
+    focalPx,
+    rect,
+    insets,
+    maxShiftDeg: ANCHORED_PANEL_CLIP_NUDGE_MAX_SHIFT_DEG,
+  });
+  if (!shifts) return null;
+
+  const next = applyAnchoredPanelClipNudgeShiftsDeg(
+    { yaw: currentView.yaw, pitch: currentView.pitch },
+    shifts,
+  );
 
   return {
-    left: panelRect.left - containerRect.left,
-    top: headerTop,
-    right: panelRect.right - containerRect.left,
-    bottom: panelRect.bottom - containerRect.top,
+    ...currentView,
+    yaw: +next.yaw.toFixed(2),
+    pitch: +next.pitch.toFixed(2),
   };
 }
 
-/**
- * Ray-based pitch correction so `panelTopPx` aligns with `targetTopPx`.
- * Positive return value increases pitch (look up) and moves the panel down on screen.
- */
-export function computeVerticalPitchCorrectionDeg(
-  camera: PerspectiveCamera,
-  container: HTMLElement,
-  panelTopPx: number,
-  targetTopPx: number,
-  panelCenterXPx = container.clientWidth / 2,
-): number {
-  if (panelTopPx >= targetTopPx - 2) return 0;
-
-  const vh = container.clientHeight;
-  const vw = container.clientWidth;
-  if (vh <= 0 || vw <= 0) return 0;
-
-  const camPos = camera.position;
-  const ndcX = (panelCenterXPx / vw) * 2 - 1;
-  const ndcPanel = new Vector3(ndcX, -(panelTopPx / vh) * 2 + 1, 0.5);
-  const ndcTarget = new Vector3(ndcX, -(targetTopPx / vh) * 2 + 1, 0.5);
-
-  const dirPanel = ndcPanel.clone().unproject(camera).sub(camPos).normalize();
-  const dirTarget = ndcTarget.clone().unproject(camera).sub(camPos).normalize();
-
-  const pitchPanel = Math.asin(clamp(dirPanel.y, -1, 1));
-  const pitchTarget = Math.asin(clamp(dirTarget.y, -1, 1));
-
-  return ((pitchPanel - pitchTarget) * 180) / Math.PI;
-}
-
-/**
- * Vertical screen-space shift (px) so the panel fits below breadcrumb.
- * Positive shiftY moves the panel down on screen (via pitch orbit).
- */
-export function computePanelVerticalFitShiftPx(
-  container: HTMLElement,
-  rect: PanelScreenRect,
-  topInsetPx = measureViewerTopInsetPx(container),
-  bottomInsetPx = measureViewerBottomInsetPx(container),
-): number {
-  const vh = container.clientHeight;
-  const panelHeight = rect.bottom - rect.top;
-
-  if (panelHeight <= vh - topInsetPx - bottomInsetPx) {
-    if (rect.top < topInsetPx) return topInsetPx - rect.top;
-    if (rect.bottom > vh - bottomInsetPx) {
-      return vh - bottomInsetPx - rect.bottom;
-    }
-    return 0;
-  }
-
-  if (rect.top < topInsetPx) return topInsetPx - rect.top;
-  return 0;
-}
-
+/** @deprecated Use computePanelFitView — kept for call sites during transition. */
 export function computePanelVerticalFitView(
   camera: PerspectiveCamera,
   container: HTMLElement,
   currentView: ViewPosition,
   rect: PanelScreenRect,
-  topInsetPx = measureViewerTopInsetPx(container),
-  bottomInsetPx = measureViewerBottomInsetPx(container),
+  topInsetPx = measureAnchoredPanelTopInsetPx(container),
+  bottomInsetPx = measureAnchoredPanelBottomInsetPx(container),
 ): ViewPosition | null {
-  let pitchDeg = computeVerticalPitchCorrectionDeg(
+  return computePanelFitView(
     camera,
     container,
-    rect.top,
+    currentView,
+    rect,
     topInsetPx,
-    (rect.left + rect.right) / 2,
+    bottomInsetPx,
   );
-
-  if (Math.abs(pitchDeg) < 0.15) {
-    const shiftY = computePanelVerticalFitShiftPx(
-      container,
-      rect,
-      topInsetPx,
-      bottomInsetPx,
-    );
-    if (Math.abs(shiftY) < MIN_SHIFT_PX) return null;
-    pitchDeg = (shiftY / container.clientHeight) * camera.fov;
-  }
-
-  if (Math.abs(pitchDeg) < 0.15) return null;
-
-  return {
-    ...currentView,
-    pitch: +clamp(currentView.pitch + pitchDeg, -89, 89).toFixed(2),
-  };
-}
-
-export async function waitForPanelEnterAnimation(
-  panelRoot: HTMLElement,
-): Promise<void> {
-  if (
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  ) {
-    return;
-  }
-
-  const shell = panelRoot.querySelector('.tour-glass-panel__shell--enter');
-  if (!(shell instanceof HTMLElement)) return;
-
-  await new Promise<void>((resolve) => {
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      shell.removeEventListener('animationend', onEnd);
-      resolve();
-    };
-
-    const onEnd = (event: AnimationEvent) => {
-      if (event.target !== shell) return;
-      if (
-        event.animationName !== 'tour-glass-panel-in' &&
-        event.animationName !== 'tour-glass-panel-anchored-in'
-      ) {
-        return;
-      }
-      finish();
-    };
-
-    shell.addEventListener('animationend', onEnd);
-    window.setTimeout(finish, PANEL_ENTER_ANIM_MS);
-  });
-}
-
-export async function waitForAnchoredPanelLayout(
-  getPanelRoot: () => HTMLElement | null | undefined,
-): Promise<HTMLElement | null> {
-  for (let attempt = 0; attempt < MAX_MEASURE_ATTEMPTS; attempt += 1) {
-    const panelRoot = getPanelRoot();
-    if (panelRoot && panelRoot.offsetHeight > 0) {
-      const header = panelRoot.querySelector('.tour-glass-panel__header');
-      if (header instanceof HTMLElement && header.offsetHeight > 0) {
-        return panelRoot;
-      }
-      if (!panelRoot.querySelector('.tour-glass-panel__header')) {
-        return panelRoot;
-      }
-    }
-    await waitAnimationFrames(1);
-  }
-  return null;
 }
 
 export interface ResolvePanelFramingView3dOptions {
   container: HTMLElement;
   camera: PerspectiveCamera;
   panelRoot: HTMLElement;
+  /** Probe starting orientation — use the *current* camera for clip-nudge. */
   baseView: ViewPosition;
   applyView: (view: ViewPosition) => void;
   restoreCamera: (camPos: Vector3Type, target: Vector3Type) => void;
@@ -276,7 +126,7 @@ export interface ResolvePanelFramingView3dOptions {
 
 /**
  * Probe panel placement at `baseView` (no animation), then return one combined view
- * so framing runs in a single camera transition.
+ * so framing runs in a single camera transition (pitch + yaw clip-nudge only).
  */
 export function resolvePanelFramingView3d(
   options: ResolvePanelFramingView3dOptions,
@@ -286,9 +136,7 @@ export function resolvePanelFramingView3d(
   options.applyView(options.baseView);
   options.renderLabels();
 
-  const topInset = measureViewerTopInsetPx(options.container);
-  const bottomInset = measureViewerBottomInsetPx(options.container);
-
+  const insets = resolveAnchoredPanelClipInsets(options.container);
   let framingView = options.baseView;
 
   for (let pass = 0; pass < MAX_PROBE_PASSES; pass += 1) {
@@ -297,20 +145,27 @@ export function resolvePanelFramingView3d(
       options.panelRoot,
     );
 
-    if (rect.top >= topInset - TOP_FIT_TOLERANCE_PX) break;
+    if (!anchoredPanelNeedsClipFit(options.container, rect, insets)) {
+      break;
+    }
 
-    const nextView = computePanelVerticalFitView(
+    const nextView = computePanelFitView(
       options.camera,
       options.container,
       options.readView(),
       rect,
-      topInset,
-      bottomInset,
+      insets.topPx,
+      insets.bottomPx,
     );
     if (!nextView) break;
 
-    const prevPitch = options.readView().pitch;
-    if (Math.abs(nextView.pitch - prevPitch) < 0.05) break;
+    const prev = options.readView();
+    if (
+      Math.abs(nextView.pitch - prev.pitch) < 0.05 &&
+      Math.abs(nextView.yaw - prev.yaw) < 0.05
+    ) {
+      break;
+    }
 
     options.applyView(nextView);
     options.renderLabels();

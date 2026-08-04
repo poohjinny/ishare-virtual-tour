@@ -150,6 +150,39 @@ export function collectFloorRaycastTargets(
   return modelRoot ? [modelRoot] : [];
 }
 
+const _floorHitNormal = new THREE.Vector3();
+
+/**
+ * First walkable floor hit under the pointer (same filter as the cursor ring).
+ * Returns null when the ray misses or only hits walls/ceilings.
+ */
+export function resolveFloorClickPoint(
+  raycaster: THREE.Raycaster,
+  pointer: THREE.Vector2,
+  camera: THREE.Camera,
+  walkTargets: THREE.Object3D[],
+): THREE.Vector3 | null {
+  if (walkTargets.length === 0) return null;
+
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(walkTargets, true);
+
+  for (const hit of hits) {
+    if (!hit.face) continue;
+
+    _floorHitNormal.copy(hit.face.normal);
+    const mesh = hit.object;
+    if (mesh instanceof THREE.Mesh) {
+      _floorHitNormal.transformDirection(mesh.matrixWorld);
+    }
+
+    if (_floorHitNormal.y < FLOOR_NORMAL_MIN_Y) continue;
+    return hit.point.clone();
+  }
+
+  return null;
+}
+
 export function isFinePointerDevice(): boolean {
   return (
     typeof window !== 'undefined' &&
