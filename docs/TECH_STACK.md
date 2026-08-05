@@ -205,6 +205,9 @@ ishare-virtual-tour/
 │   │   └── psv-layer.css        # PSV navbar + marker host
 │   ├── viewer-3d/
 │   │   └── ThreeDViewer.tsx   # Three.js GLTF walkthrough (lazy-loaded)
+│   ├── viewer-xr/
+│   │   ├── PanoramaXrSession.ts # Seated WebXR equirect + nav rays
+│   │   └── webxrSession.ts      # Shared enter/exit immersive-vr
 │   └── utils/
 │       ├── devHotspotLogger.ts
 │       ├── urlParams.ts
@@ -338,5 +341,5 @@ rewritten to `/{tourId}/{sceneId}`; they are not kept in the URL after redirect.
 | Viewport zones       | Extend tour JSON + `viewer.getPosition()`               |
 | Thumbnails           | Generated assets in `public/assets/thumbs/`             |
 | 3D hotspots          | Raycasting + world-position markers in ThreeDViewer     |
-| VR / XR              | WebXR session on Three.js viewer (Phase 3)              |
+| VR / XR              | WebXR + Three.js: seated panorama sphere, then model3d  |
 | 3D scene transitions | Multi-room GLTF + camera path animation in ThreeDViewer |

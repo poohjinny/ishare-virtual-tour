@@ -50,8 +50,11 @@ import {
 } from '../constants/tourShare';
 import {
   popupCtaRowClassName,
+  popupCtaSizeClassName,
   popupCtaWrapClassName,
+  resolvePopupCtaSizeLayout,
   resolvePopupFooterLayout,
+  type PopupCtaSizeLayout,
 } from '../utils/popupCtaLayout';
 import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
 import {
@@ -342,9 +345,10 @@ function buildPopupFooterInnerHtml(ctas: PopupCta[]): string {
   if (!layout) return '';
 
   const { mode, primary, secondaries } = layout;
-  const primaryButton = buildPopupCtaButtonHtml({
-    ...primary,
-    variant: 'primary',
+  const primaryForRender = { ...primary, variant: 'primary' as const };
+  const primaryHasIcon = shouldShowPopupCtaIcon(primaryForRender, false);
+  const primaryButton = buildPopupCtaButtonHtml(primaryForRender, {
+    sizeLayout: resolvePopupCtaSizeLayout(mode, { hasIcon: primaryHasIcon }),
   });
 
   if (secondaries.length === 0) {
@@ -354,7 +358,13 @@ function buildPopupFooterInnerHtml(ctas: PopupCta[]): string {
   }
 
   const secondaryButtons = secondaries
-    .map((cta) => buildPopupCtaButtonHtml({ ...cta, variant: 'secondary' }))
+    .map((cta) => {
+      const secondary = { ...cta, variant: 'secondary' as const };
+      const hasIcon = shouldShowPopupCtaIcon(secondary, true);
+      return buildPopupCtaButtonHtml(secondary, {
+        sizeLayout: resolvePopupCtaSizeLayout(mode, { hasIcon }),
+      });
+    })
     .join('');
 
   if (mode === 'row-equal') {
@@ -507,15 +517,22 @@ export function buildGlassPanelCtaTextHtml(label: string): string {
   return `<span class="${GLASS_PANEL.ctaText}" data-cta-label="${escapeHtml(label)}">${escapeHtml(label)}</span>`;
 }
 
-export function buildPopupCtaButtonHtml(cta: PopupCta): string {
+export function buildPopupCtaButtonHtml(
+  cta: PopupCta,
+  options?: { sizeLayout?: PopupCtaSizeLayout },
+): string {
   const resolved = resolvePopupCta(cta);
   const labelHtml = buildPopupCtaTextHtml(cta);
   const isSecondary = cta.variant === 'secondary';
+  const showIcon = shouldShowPopupCtaIcon(cta, isSecondary);
   const iconHtml =
-    shouldShowPopupCtaIcon(cta, isSecondary) ?
+    showIcon ?
       glassPanelCtaIconHtml(resolvePopupCtaIconKind(cta), GLASS_PANEL.ctaIcon)
     : '';
-  const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''}${iconHtml ? ' tour-glass-panel__cta--has-trailing-icon' : ''}`;
+  const sizeLayout =
+    options?.sizeLayout ??
+    (showIcon ? 'full' : 'default');
+  const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''} ${popupCtaSizeClassName(sizeLayout)}`;
   const isMailto = isMailtoCtaUrl(resolved.url);
   const targetAttrs =
     isMailto ? '' : ' target="_blank" rel="noopener noreferrer"';
@@ -824,7 +841,7 @@ export function buildAnchoredPopupHtml(
     <div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
       <button
         type="button"
-        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-postfix-icon"
+        class="${GLASS_PANEL.cta} ${popupCtaSizeClassName('wide')}"
         data-visit-scene="${escapeHtml(visitSceneId)}"
         aria-label="${escapeHtml(visitCtaLabel)}"
       >${buildGlassPanelCtaTextHtml(visitCtaLabel)}${glassPanelCtaArrowIconHtml()}</button>
@@ -1195,7 +1212,7 @@ export function buildAnchoredNavPreviewHtml(
     <div class="${GLASS_PANEL.ctaWrap} tour-glass-panel__cta-wrap--full">
       <button
         type="button"
-        class="${GLASS_PANEL.cta} tour-glass-panel__cta--has-postfix-icon"
+        class="${GLASS_PANEL.cta} ${popupCtaSizeClassName('wide')}"
         data-nav-panel-go="true"
         aria-label="${escapeHtml(visitAriaLabel)}"
       >${buildGlassPanelCtaTextHtml(ctaLabel)}${glassPanelCtaArrowIconHtml()}</button>

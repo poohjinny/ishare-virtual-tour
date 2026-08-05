@@ -165,6 +165,7 @@ import { runAnchoredPanelOpenReveal } from '../viewer-shared/anchoredPanelOpenRe
 import { ThreeDViewerControls } from './ThreeDViewerControls';
 import { cn } from '../lib/cn';
 import { VIEWER_CONTROLS_VISIBLE_DEFAULT } from '../utils/viewerControlsPreference';
+import { enterImmersiveVr, exitImmersiveVr } from '../viewer-xr/webxrSession';
 
 export interface ThreeDViewerProps {
   tour: Tour;
@@ -183,6 +184,8 @@ export interface ThreeDViewerProps {
   onPlayTourToggle?: () => void;
   /** `?dev=1` — allow nav hotspots to internal scenes. */
   devMode?: boolean;
+  /** WebXR presenting state for TourPage chrome (hide Explore / Ask Guide). */
+  onXrPresentingChange?: (presenting: boolean) => void;
   onSceneChange: (sceneId: string) => void;
   onInfoHotspot: (popup: PopupContent) => void;
   onNavigateToScene?: (sceneId: string, targetView?: ViewPosition) => void;
@@ -459,6 +462,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
       playTourEnabled = false,
       playTourPhase = 'idle',
       onPlayTourToggle,
+      onXrPresentingChange,
       // Authoring chrome; unlisted/internal markers show as ghosts when true.
       devMode: _devMode = false,
     },
@@ -471,7 +475,10 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
     const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const controlsRef = useRef<OrbitControls | null>(null);
     const smoothOrbitZoomRef = useRef<SmoothOrbitZoomHandle | null>(null);
-    const animFrameRef = useRef(0);
+    const xrSessionRef = useRef<XRSession | null>(null);
+    const xrPresentingRef = useRef(false);
+    const onXrPresentingChangeRef = useRef(onXrPresentingChange);
+    onXrPresentingChangeRef.current = onXrPresentingChange;
     const currentSceneIdRef = useRef(initialSceneId);
     const transitioningRef = useRef(false);
     const tourRef = useRef(tour);
@@ -1681,6 +1688,31 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
       syncLayoutSize: () => {
         syncLayoutSizeRef.current();
       },
+      enterImmersiveVr: async () => {
+        const renderer = rendererRef.current;
+        if (!renderer || xrPresentingRef.current) return;
+        const session = await enterImmersiveVr(renderer);
+        xrSessionRef.current = session;
+        xrPresentingRef.current = true;
+        const controls = controlsRef.current;
+        if (controls) controls.enabled = false;
+        onXrPresentingChangeRef.current?.(true);
+        const onEnd = () => {
+          session.removeEventListener('end', onEnd);
+          xrSessionRef.current = null;
+          xrPresentingRef.current = false;
+          if (controlsRef.current) controlsRef.current.enabled = true;
+          onXrPresentingChangeRef.current?.(false);
+        };
+        session.addEventListener('end', onEnd);
+      },
+      exitImmersiveVr: async () => {
+        await exitImmersiveVr(xrSessionRef.current);
+        xrSessionRef.current = null;
+        xrPresentingRef.current = false;
+        if (controlsRef.current) controlsRef.current.enabled = true;
+        onXrPresentingChangeRef.current?.(false);
+      },
     }));
 
     useEffect(() => {
@@ -1798,6 +1830,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
       renderer.toneMappingExposure = 1.05;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.xr.enabled = true;
       container.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
@@ -2259,8 +2292,6 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
 
       // -- Render loop --------------------------------------------------------
       const animate = () => {
-        animFrameRef.current = requestAnimationFrame(animate);
-
         const now = performance.now();
         const dt = Math.min((now - prevTime) / 1000, 0.1);
         prevTime = now;
@@ -2317,7 +2348,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
             syncOrbitControls(camera, controls);
             focusClickAnim = null;
           }
-        } else {
+        } else if (!xrPresentingRef.current) {
           let orbitChanged = false;
           orbitOffset.copy(camera.position).sub(controls.target);
           orbitSpherical.setFromVector3(orbitOffset);
@@ -2376,15 +2407,18 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
           }
         }
 
-        controls.enabled = !(
-          landingAnimRef.current ||
-          sceneTransitionAnimRef.current ||
-          panelPanAnimRef.current ||
-          focusClickAnim ||
-          hotspotMoveDragRef.current
-        );
+        controls.enabled =
+          !xrPresentingRef.current &&
+          !(
+            landingAnimRef.current ||
+            sceneTransitionAnimRef.current ||
+            panelPanAnimRef.current ||
+            focusClickAnim ||
+            hotspotMoveDragRef.current
+          );
 
         if (
+          !xrPresentingRef.current &&
           !landingAnimRef.current &&
           !sceneTransitionAnimRef.current &&
           !panelPanAnimRef.current &&
@@ -2408,6 +2442,7 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
         }
 
         if (
+          !xrPresentingRef.current &&
           !landingAnimRef.current &&
           !sceneTransitionAnimRef.current &&
           !panelPanAnimRef.current &&
@@ -2432,7 +2467,8 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
         renderer.render(scene, camera);
         labelRenderer.render(scene, camera);
       };
-      animate();
+      // setAnimationLoop is required for WebXR; also drives flat Orbit view.
+      renderer.setAnimationLoop(animate);
 
       // Resize handler
       const onResize = () => {
@@ -2496,7 +2532,10 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
         }
         hotspotEnterRef.current = null;
         hotspotEnter.destroy();
-        cancelAnimationFrame(animFrameRef.current);
+        renderer.setAnimationLoop(null);
+        void exitImmersiveVr(xrSessionRef.current);
+        xrSessionRef.current = null;
+        xrPresentingRef.current = false;
         syncLayoutSizeRef.current = () => {};
         resizeObserver.disconnect();
         window.removeEventListener('keydown', onKeyDown);

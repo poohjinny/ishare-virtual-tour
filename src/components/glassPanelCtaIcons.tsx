@@ -16,6 +16,7 @@ export const POPUP_CTA_MATERIAL_ICONS: Record<PopupCtaIconKind, string> = {
   bell: 'notifications',
   external: 'open_in_new',
   heart: 'favorite',
+  volunteer: 'volunteer_activism',
 };
 
 function ctaIconClassName(className = CTA_ICON_CLASS): string {

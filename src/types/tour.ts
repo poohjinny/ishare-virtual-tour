@@ -47,7 +47,7 @@ export interface PopupCta {
   /** Footer button style — defaults to primary */
   variant?: 'primary' | 'secondary';
   /** Footer icon — set from NO status defaults; URL/label heuristics when omitted */
-  iconKind?: 'arrow' | 'mail' | 'bell' | 'external' | 'heart';
+  iconKind?: 'arrow' | 'mail' | 'bell' | 'external' | 'heart' | 'volunteer';
 }
 
 export type NamingOpportunityStatus = 'open' | 'reserved' | 'soon' | 'sold';

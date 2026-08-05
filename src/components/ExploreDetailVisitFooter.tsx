@@ -1,6 +1,7 @@
 import { VIRTUAL_TOUR_GUIDE_CTA } from '../constants/branding';
 import { PopupCtaArrowIcon } from './popupContentUi';
 import { tourNavSceneDetailFooterClassName } from './tourNavFloatVariants';
+import { popupCtaSizeClassName } from '../utils/popupCtaLayout';
 
 interface ExploreDetailVisitFooterProps {
   label: string;
@@ -11,7 +12,7 @@ interface ExploreDetailVisitFooterProps {
   onAsk?: () => void;
 }
 
-/** Glass panel footer shell; Visit CTA fills width and wraps long labels. */
+/** Glass panel footer shell — Visit uses shared wide/full CTA sizes. */
 export function ExploreDetailVisitFooter({
   label,
   disabled = false,
@@ -33,7 +34,7 @@ export function ExploreDetailVisitFooter({
         {showAsk ?
           <button
             type='button'
-            className='tour-glass-panel__cta tour-glass-panel__cta--secondary border border-[rgba(15,23,42,0.14)] bg-white/80 text-foreground'
+            className={`tour-glass-panel__cta tour-glass-panel__cta--secondary ${popupCtaSizeClassName('default')}`}
             disabled={disabled}
             aria-label={askLabel}
             onClick={onAsk}
@@ -48,7 +49,7 @@ export function ExploreDetailVisitFooter({
         : null}
         <button
           type='button'
-          className='tour-glass-panel__cta tour-glass-panel__cta--has-postfix-icon'
+          className={`tour-glass-panel__cta ${popupCtaSizeClassName(showAsk ? 'full' : 'wide')}`}
           data-visit-scene=''
           disabled={disabled}
           aria-label={label}

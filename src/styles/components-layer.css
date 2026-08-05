@@ -864,4 +864,72 @@
       animation: none;
     }
   }
+
+  /* WebXR host — keep laid out (never display:none) so emulator input works. */
+  .panorama-xr-host {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .panorama-xr-host--active {
+    z-index: 40;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .panorama-xr-canvas {
+    display: block;
+  }
+
+  .tour-enter-vr-btn {
+    position: absolute;
+    right: 1rem;
+    bottom: 5.5rem;
+    z-index: 45;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.72);
+    color: #f8fafc;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  .tour-enter-vr-btn:hover:enabled {
+    background: rgba(15, 23, 42, 0.88);
+  }
+
+  .tour-enter-vr-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .tour-enter-vr-btn--active {
+    border-color: color-mix(in srgb, var(--color-primary, #38bdf8) 55%, white);
+    background: color-mix(in srgb,
+        var(--color-primary, #38bdf8) 28%,
+        rgba(15, 23, 42, 0.75));
+  }
+
+  @media (max-width: 720px) {
+    .tour-enter-vr-btn {
+      right: 0.75rem;
+      bottom: 4.75rem;
+      min-height: 2.25rem;
+      font-size: 0.75rem;
+    }
+  }
 }

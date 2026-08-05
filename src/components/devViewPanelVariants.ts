@@ -375,13 +375,15 @@ const DEV_PANEL_ROOT_THEME = {
  */
 export const devViewPanelThemeTokensClassName = cn(
   /*
-   * Flat regions — alphas from --ishare-glass-*-alpha (same in light/dark).
-   * Light uses glass white fills; dark uses black with identical alphas.
+   * Same paint model as tour glass: root/shell = continuous base (`--dev-panel-bg`),
+   * body region clear, header = thin overlay on the shell.
+   * Dark: black + shared --ishare-glass-*-alpha / chrome-overlay-alpha.
+   * Light: white shell 0.94 + header wash ~0.333 → effective ~0.96.
    *
    * `--dev-panel-surface` elevates cards/tabs/groups above the body:
    * dark → black wash (darker); light → denser white (brighter / less bleed).
    */
-  '[--dev-panel-bg:rgba(0,0,0,var(--ishare-glass-body-alpha,0.9))] [--dev-panel-body-bg:rgba(0,0,0,var(--ishare-glass-body-alpha,0.9))] [--dev-panel-header-bg:rgba(0,0,0,var(--ishare-glass-header-alpha,0.95))]',
+  '[--dev-panel-bg:rgba(0,0,0,var(--ishare-glass-body-alpha,0.9))] [--dev-panel-body-bg:transparent] [--dev-panel-header-bg:rgba(0,0,0,var(--ishare-glass-chrome-overlay-alpha,0.5))]',
   '[--dev-panel-fg:#e2e8f0] [--dev-panel-muted:#94a3b8]',
   '[--dev-panel-input-bg:rgba(15,23,42,0.75)] [--dev-panel-input-fg:#f0fdf4]',
   '[--dev-panel-surface:rgba(0,0,0,0.35)]',
@@ -390,8 +392,8 @@ export const devViewPanelThemeTokensClassName = cn(
   '[--dev-panel-logo-plate:#ffffff] [--dev-panel-logo-plate-ring:rgba(148,163,184,0.45)]',
   /* Header chrome (Debug/Settings/Close) — fixed Dev green, not tab accent. */
   '[--dev-chrome-accent:#4ade80]',
-  /* Light — slightly denser white glass + darker muted for 2xs mono on tour bleed. */
-  'data-[dev-theme=light]:[--dev-panel-bg:rgba(255,255,255,0.94)] data-[dev-theme=light]:[--dev-panel-body-bg:rgba(255,255,255,0.94)] data-[dev-theme=light]:[--dev-panel-header-bg:rgba(255,255,255,0.96)]',
+  /* Light — denser white shell; thin header wash to keep ~0.96 effective. */
+  'data-[dev-theme=light]:[--dev-panel-bg:rgba(255,255,255,0.94)] data-[dev-theme=light]:[--dev-panel-body-bg:transparent] data-[dev-theme=light]:[--dev-panel-header-bg:rgba(255,255,255,0.333)]',
   'data-[dev-theme=light]:[--dev-panel-fg:#0f172a]',
   'data-[dev-theme=light]:[--dev-panel-muted:#475569] data-[dev-theme=light]:[--dev-panel-input-bg:#ffffff]',
   'data-[dev-theme=light]:[--dev-panel-input-fg:#0f172a] data-[dev-theme=light]:[--dev-panel-surface:rgba(255,255,255,0.72)]',
@@ -401,9 +403,9 @@ export const devViewPanelThemeTokensClassName = cn(
 
 export const devViewPanelRootVariants = cva(
   cn(
-    // Drawer fill — edge-to-edge in the aside (no floating card chrome).
+    // Continuous base glass on the root — body region stays clear; header overlays.
     // Theme tokens: --dev-panel-* set via data-dev-theme on the root.
-    'flex h-full min-h-0 w-full flex-col overflow-hidden border-y-0 border-l-0 border-r bg-transparent font-mono text-xs text-[var(--dev-panel-fg)]',
+    'flex h-full min-h-0 w-full flex-col overflow-hidden border-y-0 border-l-0 border-r bg-[var(--dev-panel-bg)] font-mono text-xs text-[var(--dev-panel-fg)]',
     'transition-[border-color,background-color,color] duration-200 ease-out motion-reduce:transition-none',
     devViewPanelThemeTokensClassName,
   ),

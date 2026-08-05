@@ -88,4 +88,11 @@ export interface TourViewerHandle {
    * Used when Dev push/overlay changes the tour stage width in the same frame.
    */
   syncLayoutSize: () => void;
+  /**
+   * WebXR — enter immersive-vr when the viewer owns a Three.js renderer
+   * (model3d). Panorama tours use TourPage's PanoramaXrSession instead.
+   */
+  enterImmersiveVr?: () => Promise<void>;
+  /** WebXR — end the active immersive session when the viewer started it. */
+  exitImmersiveVr?: () => Promise<void>;
 }

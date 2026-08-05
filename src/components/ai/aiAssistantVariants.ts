@@ -228,7 +228,8 @@ export const aiPanelVariants = cva(
 );
 
 export const aiPanelFallbackClassName = cn(
-  'tour-glass-panel--ai box-border h-auto max-h-[min(56.25rem,calc(100vh-4.5rem))] w-[30rem] animate-ai-panel-in rounded-xl bg-[var(--ishare-glass-body-bg)] shadow-[var(--ishare-glass-dock-shadow)] [transform-origin:bottom_right]',
+  /* Shell-less skeleton — paint base glass on the root (same pigment as __shell). */
+  'tour-glass-panel--ai box-border h-auto max-h-[min(56.25rem,calc(100vh-4.5rem))] w-[30rem] animate-ai-panel-in rounded-xl bg-[var(--ishare-glass-shell-bg)] shadow-[var(--ishare-glass-dock-shadow)] [transform-origin:bottom_right]',
   'max-[480px]:max-h-[min(52.5rem,calc(100vh-3.5rem))] max-[480px]:w-full',
 );
 

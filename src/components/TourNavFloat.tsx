@@ -142,7 +142,7 @@ import {
 import { cn } from '../lib/cn';
 import { ShareIcon } from './icons/ShareIcon';
 import {
-  tourNavActionsDockClassName,
+  tourNavActionsDockVariants,
   tourNavActionsRootClassName,
   tourNavDockOverflowWrapClassName,
   TOUR_BREADCRUMB_ATTR,
@@ -1497,6 +1497,13 @@ export function TourNavFloat({
     onChromeDockOpenChange?.(panelMode !== null || displayPanel !== null);
   }, [displayPanel, onChromeDockOpenChange, panelMode]);
 
+  // Panel owns the corner — drop overflow menus while the FAB dock is hidden.
+  useEffect(() => {
+    if (panelMode !== null || displayPanel !== null) {
+      setDockOverflowOpen(false);
+    }
+  }, [displayPanel, panelMode]);
+
   useEffect(() => {
     if (panelMode === null) return;
 
@@ -1782,6 +1789,11 @@ export function TourNavFloat({
     label: string,
     options?: {
       denseBottom?: boolean;
+      /**
+       * True while this section is mirrored in the sticky pin bar — collapse
+       * in-flow via React so HMR remounts don’t leave a duplicate title.
+       */
+      pinned?: boolean;
       /** When set, the label cluster expands/collapses every group in the section. */
       groupsToggle?: {
         /** True when any group is open — Collapse all is the default action. */
@@ -1791,6 +1803,8 @@ export function TourNavFloat({
     },
   ) => {
     const groupsToggle = options?.groupsToggle;
+    const pinned = Boolean(options?.pinned);
+    const pinKey = `section-${tab}`;
     const tooltipLabel =
       groupsToggle?.anyExpanded ? `Collapse ${label}` : `Expand ${label}`;
 
@@ -1854,9 +1868,16 @@ export function TourNavFloat({
         data-directory-pin-source='section'
         data-directory-pin-row=''
         data-directory-pin-tab={tab}
-        data-directory-pin-key={`section-${tab}`}
+        data-directory-pin-key={pinKey}
         {...(options?.denseBottom ?
           { 'data-directory-pin-dense-bottom': '' }
+        : {})}
+        {...(pinned ?
+          {
+            'data-directory-pin-active': '',
+            'aria-hidden': true as const,
+            'data-directory-pin-a11y-hidden': '1',
+          }
         : {})}
       >
         <span
@@ -2253,6 +2274,8 @@ export function TourNavFloat({
                 'locations',
                 TOUR_DIRECTORY_SECTION_LOCATIONS,
                 {
+                  pinned:
+                    exploreDirectoryPins.section?.key === 'section-locations',
                   groupsToggle:
                     isLocationsGroupingActive && locationGroups?.length ?
                       {
@@ -2292,6 +2315,8 @@ export function TourNavFloat({
                 'naming',
                 TOUR_DIRECTORY_SECTION_NAMING,
                 {
+                  pinned:
+                    exploreDirectoryPins.section?.key === 'section-naming',
                   groupsToggle:
                     namingSectorGroups.length > 0 ?
                       {
@@ -2342,6 +2367,9 @@ export function TourNavFloat({
               'tour-nav-search-locations-heading',
               'locations',
               TOUR_DIRECTORY_SECTION_LOCATIONS,
+              {
+                pinned: exploreSearchPins.section?.key === 'section-locations',
+              },
             )}
             <ExploreLayoutPanel layout='list'>
               {renderLocationsList(sceneResults, {
@@ -2361,6 +2389,7 @@ export function TourNavFloat({
               'tour-nav-search-naming-heading',
               'naming',
               TOUR_DIRECTORY_SECTION_NAMING,
+              { pinned: exploreSearchPins.section?.key === 'section-naming' },
             )}
             <ExploreLayoutPanel layout='list'>
               {renderNamingList(namingResults, {
@@ -2811,7 +2840,14 @@ export function TourNavFloat({
           </div>
         )}
 
-        <div className={tourNavActionsDockClassName}>
+        <div
+          className={tourNavActionsDockVariants({
+            visibility:
+              panelMode !== null || displayPanel !== null ? 'hidden' : 'shown',
+          })}
+          aria-hidden={panelMode !== null || displayPanel !== null}
+          inert={panelMode !== null || displayPanel !== null ? true : undefined}
+        >
           <IconTooltip label={TOUR_NAV_ACTION_EXPLORE} placement='left'>
             <button
               type='button'

@@ -15,7 +15,8 @@ First real-device pass: **PSV pan/zoom is fine**; **React chrome** needed
 structure — overlapping fixed UI, breakpoint drift, panel padding/scroll bugs.
 
 This file is the **layout spec + QA reference**. Sprint checkboxes stay in
-ROADMAP.
+ROADMAP. For **how to size chrome** (`rem` vs `px`), see
+[STYLING.md § Units](./STYLING.md#units--rem-first-responsive-chrome).
 
 ---
 

@@ -1,7 +1,13 @@
 import type { PopupCta } from '../types/tour';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 
-export type PopupCtaIconKind = 'arrow' | 'mail' | 'bell' | 'external' | 'heart';
+export type PopupCtaIconKind =
+  | 'arrow'
+  | 'mail'
+  | 'bell'
+  | 'external'
+  | 'heart'
+  | 'volunteer';
 
 /** Primary footer CTA icon — status config first, then label + destination URL. */
 export function resolvePopupCtaIconKind(cta: PopupCta): PopupCtaIconKind {
@@ -11,7 +17,7 @@ export function resolvePopupCtaIconKind(cta: PopupCta): PopupCtaIconKind {
   const label = resolved.label.toLowerCase();
   const url = cta.url.trim().toLowerCase();
 
-  if (resolved.kind === 'giftabulator') return 'external';
+  if (resolved.kind === 'giftabulator') return 'volunteer';
 
   if (url.startsWith('mailto:')) {
     if (label.includes('notify')) return 'bell';
@@ -25,7 +31,7 @@ export function resolvePopupCtaIconKind(cta: PopupCta): PopupCtaIconKind {
   return 'arrow';
 }
 
-/** Footer CTA icon — secondary Giftabulator keeps open-in-new. */
+/** Footer CTA icon — secondary Giftabulator keeps its branded mark. */
 export function shouldShowPopupCtaIcon(
   cta: PopupCta,
   isSecondary: boolean,

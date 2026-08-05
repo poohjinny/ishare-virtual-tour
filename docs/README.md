@@ -31,7 +31,7 @@ Project documentation for the iShare virtual tour platform.
 | [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)                     | Engineering reference — structure, **viewer-type isolation**, styling   |
 | [DEV_PANEL.md](./DEV_PANEL.md)                                     | Dev panel (`?dev=1`) — Scene/Scenes/Namings/Tours/Clients/Debug         |
 | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                               | Git commit/push guidelines — one task per commit                        |
-| [STYLING.md](./STYLING.md)                                         | Tailwind + custom CSS hybrid — migration rules                          |
+| [STYLING.md](./STYLING.md)                                         | Tailwind + custom CSS; **rem-first** responsive units                   |
 | [TECH_STACK.md](./TECH_STACK.md)                                   | Technology choices (PSV + Three.js), Tour Guide, dependencies           |
 | [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md)                     | Scene transition UX, zoom semantics, tuning                             |
 | [COMPONENTS.md](./COMPONENTS.md)                                   | Shared UI components — React and HTML marker popups                     |

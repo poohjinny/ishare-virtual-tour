@@ -13,6 +13,7 @@ import {
   resolvePopupContentCtas,
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
+import { popupCtaSizeClassName } from '../utils/popupCtaLayout';
 import {
   TOUR_SHARE_OPPORTUNITY_ARIA,
   TOUR_SHARE_OPPORTUNITY_LABEL,
@@ -244,7 +245,7 @@ export function InfoPopup({
             <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
               <button
                 type='button'
-                className='tour-glass-panel__cta tour-glass-panel__cta--has-postfix-icon'
+                className={`tour-glass-panel__cta ${popupCtaSizeClassName('wide')}`}
                 data-visit-scene={visitSceneId}
                 onClick={handleVisitScene}
                 aria-label={visitCtaLabel!}

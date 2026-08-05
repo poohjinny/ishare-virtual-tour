@@ -239,9 +239,29 @@ export const tourNavActionsRootClassName = cn(
   '[--tour-directory-space:1rem] [--tour-directory-divider-space:2rem] [--tour-directory-section-group-lead-extra:0.5rem] [--tour-directory-group-gap-idle:1.25rem] [--tour-directory-group-content-lead:0.5rem]',
 );
 
-export const tourNavActionsDockClassName = cn(
-  'relative flex items-center gap-1.5 overflow-visible',
+export const tourNavActionsDockVariants = cva(
+  cn(
+    // Keep layout size when hidden so the panel’s -mt fab alignment stays put.
+    'relative flex items-center gap-1.5 overflow-visible',
+    'transition-opacity duration-150 ease-out motion-reduce:transition-none',
+  ),
+  {
+    variants: {
+      visibility: {
+        shown: 'pointer-events-auto opacity-100',
+        // Invisible but still occupying the FAB row — clears header overlap
+        // while Explore / Share / Help is open (close via panel X / Esc / outside).
+        hidden: 'pointer-events-none opacity-0',
+      },
+    },
+    defaultVariants: { visibility: 'shown' },
+  },
 );
+
+/** @deprecated Prefer {@link tourNavActionsDockVariants}. */
+export const tourNavActionsDockClassName = tourNavActionsDockVariants({
+  visibility: 'shown',
+});
 
 /** ⋯ overflow menu anchor (mobile + compact). */
 export const tourNavDockOverflowWrapClassName = cn('relative');
@@ -458,10 +478,9 @@ export const tourNavExploreSortDirectionLabelClassName = cn(
 
 export const tourNavPanelSlotVariants = cva(
   cn(
-    // Align the panel top with the FAB dock row (was dropped below it).
+    // Align the panel top with the FAB dock row (dock stays in layout while
+    // faded out so this offset remains valid).
     '-mt-[var(--tour-chrome-fab-size)] origin-top-right',
-    // Lift the header above the overlaid FAB dock so title + close stay clickable
-    // (explore's directory header already does this in CSS).
     '[&_.tour-glass-panel__header]:relative [&_.tour-glass-panel__header]:z-10',
     '[&_.tour-glass-panel__title-row]:items-center',
     '[&_.tour-glass-panel__title-actions]:min-w-0',

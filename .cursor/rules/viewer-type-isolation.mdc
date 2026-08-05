@@ -1,0 +1,65 @@
+---
+description:
+  Isolate panorama vs model3d viewer changes — never silently restyle the other
+  type
+alwaysApply: true
+---
+
+# Viewer-type isolation (panorama vs model3d)
+
+Reuse shared contracts and chrome when it helps (`TourViewerHandle`, dock
+panels, tokens). **Do not** let a fix or polish for one `viewerType` silently
+change the other.
+
+## Hard rules
+
+1. **Know the surface.** Before editing hotspot / marker / viewer chrome /
+   background styles or markup, identify whether the change is:
+   - **Panorama-only** (`viewerType: 'panorama'` — PSV, `src/viewer/`, `.psv-*`,
+     most `psv-layer.css`)
+   - **Model3d-only** (`viewerType: 'model3d'` — `src/viewer-3d/`,
+     `.viewer-3d-*`, `viewer-3d-layer.css`, `.hotspot-3d-*`)
+   - **Truly shared** (`src/viewer-shared/`, `hotspot-layer.css`, tokens both
+     already consume intentionally)
+
+2. **Scope CSS.** Prefer selectors under the owning container:
+   - 3D: `.viewer-3d-container …`, `.hotspot-3d-wrap …`
+   - Panorama: `.viewer-container …` / `.psv-*` (not bare global hotspot rules
+     unless both types must match **by product decision**)
+   - Never “fix” 3D by changing a shared hotspot font/padding token used by
+     panorama without checking a panorama tour.
+
+3. **Shared tokens need dual QA.** If you change `--ishare-hotspot-*`, glass
+   tokens, or hotspot HTML builders used by both paths, verify **both** a
+   panorama tour and a `model3d` tour (or explicitly leave a note that only one
+   type was checked and why).
+
+4. **No drive-by viewer restyles.** While fixing one viewer, do not “tidy” the
+   other’s background gradient, label size, navbar, or marker chrome unless the
+   user asked. Regressions have already landed this way (3D hotspot text scale,
+   model clear-color / gradient).
+
+5. **Branch logic, don’t blur it.** Prefer `viewerType` / container class forks
+   over one style that almost fits both. Shared components are fine; shared
+   **defaults that fight one medium** are not.
+
+## When editing these paths
+
+Treat as high-risk coupling:
+
+- `src/styles/psv-layer.css`, `src/styles/hotspot-layer.css`,
+  `src/styles/viewer-3d-layer.css`, `src/styles/components-layer.css` (hotspot /
+  glass)
+- `src/viewer-shared/buildMarkers.ts`, `src/viewer-shared/**` shared chrome
+- `src/viewer/**` (PSV-only), `src/viewer-3d/**`
+- `src/styles/globals.css` hotspot / float tokens
+
+## Verify
+
+After visual CSS or marker changes: open one panorama tour and one model3d tour
+(or state which type was out of scope). Confirm hotspot label size, pill
+padding, and viewer background look unchanged on the type you did not intend to
+change.
+
+Human doc:
+[CODING_GUIDELINES.md — Viewer-type isolation](../docs/CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).

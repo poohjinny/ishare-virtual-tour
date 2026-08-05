@@ -8,7 +8,7 @@ import {
 /** Giftabulator popup CTA copy — brand metadata lives in `platformBrands.ts`. */
 export const GIFTABULATOR_PRODUCT = {
   ...GIFTABULATOR,
-  ctaLabel: 'See your tax-efficient giving',
+  ctaLabel: 'See tax-efficient giving',
   ctaDescription: platformBrandAriaLabel(GIFTABULATOR),
   ariaLabel: `See your tax-efficient giving with ${platformBrandMarkedName(GIFTABULATOR)}`,
 } as const;

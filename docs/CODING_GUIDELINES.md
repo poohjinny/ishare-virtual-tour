@@ -7,22 +7,22 @@ linked specs.
 
 ## Document map
 
-| Topic                          | Document                                               | When to read                                   |
-| ------------------------------ | ------------------------------------------------------ | ---------------------------------------------- |
-| **Git commit / push**          | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                   | Before every push                              |
-| **Tailwind + custom CSS**      | [STYLING.md](./STYLING.md)                             | Migrating React components off colocated CSS   |
-| **Shared UI (React + HTML)**   | [COMPONENTS.md](./COMPONENTS.md)                       | Badges, accordions, glass panels               |
-| **Naming opportunity CTAs**    | [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md)   | NO popups, status, Giftabulator footer         |
-| **Giftabulator give-now URLs** | [GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md) | `calc` prefill, preset, bounded scaling        |
-| **Product / copy names**       | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)               | Tab title, Help, Guide, splash                 |
-| **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                       | PSV, Vite, iframe embed                        |
-| **Performance playbook**       | [PERFORMANCE.md](./PERFORMANCE.md)                     | When embed/mobile feels slow (no task list)    |
-| **Mobile React UI layout**     | [MOBILE.md](./MOBILE.md)                               | Phone chrome, collisions, safe-area            |
-| **Client assets**              | [`assets/README.md`](../assets/README.md)              | Panoramas, logos, new client                   |
-| **Backlog & phasing**          | [ROADMAP.md](./ROADMAP.md)                             | What to build next                             |
-| **Product contracts**          | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                   | URL, embed, catalog, schemas                   |
-| **Dev panel (`?dev=1`)**       | [DEV_PANEL.md](./DEV_PANEL.md)                         | Local authoring, Debug tab, embed QA           |
-| **Embed (`?embed=1`)**         | [EMBED.md](./EMBED.md)                                 | iframe delivery, postMessage, host integration |
+| Topic                          | Document                                               | When to read                                             |
+| ------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
+| **Git commit / push**          | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                   | Before every push                                        |
+| **Tailwind + custom CSS**      | [STYLING.md](./STYLING.md)                             | Migrating off colocated CSS; **rem-first** chrome sizing |
+| **Shared UI (React + HTML)**   | [COMPONENTS.md](./COMPONENTS.md)                       | Badges, accordions, glass panels                         |
+| **Naming opportunity CTAs**    | [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md)   | NO popups, status, Giftabulator footer                   |
+| **Giftabulator give-now URLs** | [GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md) | `calc` prefill, preset, bounded scaling                  |
+| **Product / copy names**       | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)               | Tab title, Help, Guide, splash                           |
+| **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                       | PSV, Vite, iframe embed                                  |
+| **Performance playbook**       | [PERFORMANCE.md](./PERFORMANCE.md)                     | When embed/mobile feels slow (no task list)              |
+| **Mobile React UI layout**     | [MOBILE.md](./MOBILE.md)                               | Phone chrome, collisions, safe-area                      |
+| **Client assets**              | [`assets/README.md`](../assets/README.md)              | Panoramas, logos, new client                             |
+| **Backlog & phasing**          | [ROADMAP.md](./ROADMAP.md)                             | What to build next                                       |
+| **Product contracts**          | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                   | URL, embed, catalog, schemas                             |
+| **Dev panel (`?dev=1`)**       | [DEV_PANEL.md](./DEV_PANEL.md)                         | Local authoring, Debug tab, embed QA                     |
+| **Embed (`?embed=1`)**         | [EMBED.md](./EMBED.md)                                 | iframe delivery, postMessage, host integration           |
 
 ---
 
@@ -35,6 +35,9 @@ linked specs.
 - **Config over literals** — tour data in `tours/*.json`, labels in
   `src/constants/*`, tokens in `globals.css` `@theme`, not scattered in
   components.
+- **Rem-first chrome** — size React/CSS UI with `rem` (and tokens) so it follows
+  root UI scale; use `px` only when necessary. See
+  [STYLING.md § Units](./STYLING.md#units--rem-first-responsive-chrome).
 - **Reuse** — `ui/*`, existing hooks/utils; extract on third duplication.
 - **Readable over clever** — straightforward logic; avoid unnecessary
   abstractions.

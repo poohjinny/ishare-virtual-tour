@@ -42,7 +42,9 @@ import {
 import { TourNavFloat } from '../components/TourNavFloat';
 import type { TourNavDockActions } from '../components/TourNavFloat';
 import { TourViewerControlsToggleFab } from '../components/TourViewerControlsToggleFab';
+import { EnterVrButton } from '../components/EnterVrButton';
 import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
+import { PanoramaXrSession } from '../viewer-xr/PanoramaXrSession';
 import { usePlayTour } from '../hooks/usePlayTour';
 import {
   loadTour,
@@ -658,6 +660,9 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
 
   const viewerRef = useRef<TourViewerHandle>(null);
   const viewerAreaRef = useRef<HTMLDivElement>(null);
+  const panoramaXrHostRef = useRef<HTMLDivElement>(null);
+  const panoramaXrSessionRef = useRef<PanoramaXrSession | null>(null);
+  const [xrActive, setXrActive] = useState(false);
   const fullscreenRootRef = presentationRootRef ?? viewerAreaRef;
   const { active: viewerFullscreen, toggle: toggleViewerFullscreen } =
     useTourFullscreen(fullscreenRootRef);
@@ -1297,6 +1302,15 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
         sceneId,
         targetView ?? scene.defaultView,
       );
+
+      const xrSession = panoramaXrSessionRef.current;
+      if (xrSession && tour) {
+        try {
+          await xrSession.setTourScene(tour, sceneId);
+        } catch {
+          // Keep flat viewer navigation even if XR texture reload fails.
+        }
+      }
     },
     [
       bootstrapTour.scenes,
@@ -1304,8 +1318,81 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
       pauseForManualNav,
       sceneAudience,
       syncSceneToUrl,
+      tour,
     ],
   );
+
+  const handleEnterVr = useCallback(async () => {
+    if (!tour || xrActive) return;
+
+    if (bootstrapTour.viewerType === 'model3d') {
+      await viewerRef.current?.enterImmersiveVr?.();
+      return;
+    }
+
+    // Lay out the XR host before constructing the GL canvas / requestSession.
+    setXrActive(true);
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+
+    const host = panoramaXrHostRef.current;
+    if (!host || host.clientWidth < 2 || host.clientHeight < 2) {
+      setXrActive(false);
+      return;
+    }
+
+    const session = new PanoramaXrSession({
+      container: host,
+      tour,
+      sceneId: currentSceneId,
+      onNavigate: (targetSceneId) => {
+        void handleNavigate(targetSceneId);
+      },
+      onSessionEnd: () => {
+        panoramaXrSessionRef.current = null;
+        setXrActive(false);
+      },
+    });
+    panoramaXrSessionRef.current = session;
+    try {
+      await session.start();
+    } catch {
+      panoramaXrSessionRef.current = null;
+      setXrActive(false);
+      session.dispose();
+    }
+  }, [
+    bootstrapTour.viewerType,
+    currentSceneId,
+    handleNavigate,
+    tour,
+    xrActive,
+  ]);
+
+  const handleExitVr = useCallback(async () => {
+    if (bootstrapTour.viewerType === 'model3d') {
+      await viewerRef.current?.exitImmersiveVr?.();
+      return;
+    }
+    const session = panoramaXrSessionRef.current;
+    if (!session) {
+      setXrActive(false);
+      return;
+    }
+    await session.end();
+  }, [bootstrapTour.viewerType]);
+
+  const handleXrPresentingChange = useCallback((presenting: boolean) => {
+    setXrActive(presenting);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      panoramaXrSessionRef.current?.dispose();
+      panoramaXrSessionRef.current = null;
+    };
+  }, []);
 
   const handleDismissModalPopups = useCallback(() => {
     pendingNamingSelectionRef.current = null;
@@ -1563,6 +1650,7 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
                   onInitialTourReveal={onInitialTourReveal}
                   onViewerLoadError={handleViewerLoadError}
                   onViewerLoadRecovered={handleViewerLoadRecovered}
+                  onXrPresentingChange={handleXrPresentingChange}
                 />
               : <PanoramaViewer
                   key={tour.id}
@@ -1618,14 +1706,33 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
               }
             </Suspense>
 
-            {!isMobile && !searchParams.embed ?
+            <div
+              ref={panoramaXrHostRef}
+              className={
+                xrActive && bootstrapTour.viewerType !== 'model3d' ?
+                  'panorama-xr-host panorama-xr-host--active'
+                : 'panorama-xr-host'
+              }
+              aria-hidden={!xrActive}
+            />
+
+            {!xrActive && !isMobile && !searchParams.embed ?
               <TourViewerControlsToggleFab
                 collapsed={!viewerControlsVisible}
                 onToggle={toggleControlsVisible}
               />
             : null}
 
-            {showLoadError && (
+            <EnterVrButton
+              embed={searchParams.embed}
+              ready={tourReady && splashPhase === 'done'}
+              xrActive={xrActive}
+              disabled={isTransitioning}
+              onEnterVr={handleEnterVr}
+              onExitVr={handleExitVr}
+            />
+
+            {!xrActive && showLoadError && (
               <ViewerLoadError
                 sceneTitle={tour.scenes[loadErrorSceneId]?.title}
                 canGoHome={currentSceneId !== tour.firstScene}
@@ -1634,54 +1741,58 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
               />
             )}
 
-            <TourNavFloat
-              scenes={scenes}
-              tourId={tour.id}
-              tourHotspots={tour.hotspots}
-              tourViewerType={tour.viewerType}
-              namingOpportunities={tour.namingOpportunities}
-              currentSceneId={currentSceneId}
-              firstSceneId={tour.firstScene}
-              sceneOrder={tour.sceneOrder}
-              tourTitle={productFullName}
-              exploreLead={exploreLead}
-              client={resolveTourClient(tour)}
-              clientLogo={tourBranding?.logo}
-              logoAlt={tourBranding?.logoAlt}
-              websiteUrl={getTourWebsite(tour)}
-              disabled={isTransitioning}
-              namingOpportunityBusy={namingOpportunityBusy}
-              showHistoryBack={showBack && currentSceneId !== tour.firstScene}
-              showHistoryForward={showForward}
-              onHistoryBack={handleHistoryBack}
-              onHistoryForward={handleHistoryForward}
-              onSelectScene={handleNavigate}
-              onSelectNamingOpportunity={handleSelectNamingOpportunity}
-              onVisitNamingPlace={handleVisitNamingPlace}
-              onBreadcrumbNavigate={handleBreadcrumbNavigate}
-              onRecenterCurrentScene={handleVisitCurrentScene}
-              onAskAboutScene={
-                showAskGuide ? assistant.openAndAskAboutScene : undefined
-              }
-              onAskAboutNaming={
-                showAskGuide ? assistant.openAndAskAboutNaming : undefined
-              }
-              onTogglePlaceOverview={() =>
-                viewerRef.current?.togglePlaceOverview() ?? false
-              }
-              activeNamingHotspotId={activeNamingHotspotId}
-              embed={searchParams.embed}
-              showPlayTour={playTourEnabled}
-              showImmersiveAmbience={Boolean(bootstrapTour.immersiveBackground)}
-              showAskGuide={showAskGuide}
-              panelStack={panelStack}
-              dockActionsRef={navDockActionsRef}
-              onOpenAskGuide={showAskGuide ? assistant.open : undefined}
-              onDismissAnchoredPanels={() =>
-                viewerRef.current?.closeAnchoredPanels()
-              }
-              onChromeDockOpenChange={setChromeDockOpen}
-            />
+            {!xrActive ?
+              <TourNavFloat
+                scenes={scenes}
+                tourId={tour.id}
+                tourHotspots={tour.hotspots}
+                tourViewerType={tour.viewerType}
+                namingOpportunities={tour.namingOpportunities}
+                currentSceneId={currentSceneId}
+                firstSceneId={tour.firstScene}
+                sceneOrder={tour.sceneOrder}
+                tourTitle={productFullName}
+                exploreLead={exploreLead}
+                client={resolveTourClient(tour)}
+                clientLogo={tourBranding?.logo}
+                logoAlt={tourBranding?.logoAlt}
+                websiteUrl={getTourWebsite(tour)}
+                disabled={isTransitioning}
+                namingOpportunityBusy={namingOpportunityBusy}
+                showHistoryBack={showBack && currentSceneId !== tour.firstScene}
+                showHistoryForward={showForward}
+                onHistoryBack={handleHistoryBack}
+                onHistoryForward={handleHistoryForward}
+                onSelectScene={handleNavigate}
+                onSelectNamingOpportunity={handleSelectNamingOpportunity}
+                onVisitNamingPlace={handleVisitNamingPlace}
+                onBreadcrumbNavigate={handleBreadcrumbNavigate}
+                onRecenterCurrentScene={handleVisitCurrentScene}
+                onAskAboutScene={
+                  showAskGuide ? assistant.openAndAskAboutScene : undefined
+                }
+                onAskAboutNaming={
+                  showAskGuide ? assistant.openAndAskAboutNaming : undefined
+                }
+                onTogglePlaceOverview={() =>
+                  viewerRef.current?.togglePlaceOverview() ?? false
+                }
+                activeNamingHotspotId={activeNamingHotspotId}
+                embed={searchParams.embed}
+                showPlayTour={playTourEnabled}
+                showImmersiveAmbience={Boolean(
+                  bootstrapTour.immersiveBackground,
+                )}
+                showAskGuide={showAskGuide}
+                panelStack={panelStack}
+                dockActionsRef={navDockActionsRef}
+                onOpenAskGuide={showAskGuide ? assistant.open : undefined}
+                onDismissAnchoredPanels={() =>
+                  viewerRef.current?.closeAnchoredPanels()
+                }
+                onChromeDockOpenChange={setChromeDockOpen}
+              />
+            : null}
 
             {splashPhase !== 'done' && (
               <TourLoadSplash
@@ -1697,9 +1808,11 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
 
             <LoadProgressBar progress={loadProgress} visible={loadBarVisible} />
 
-            <TourFirstVisitHint visible={hintVisible} />
+            {!xrActive ?
+              <TourFirstVisitHint visible={hintVisible} />
+            : null}
 
-            {showAskGuide ?
+            {!xrActive && showAskGuide ?
               <AiAssistant
                 assistant={assistant}
                 guideUiTest={searchParams.guideUiTest}
@@ -1740,7 +1853,7 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
         }
       </div>
 
-      {tourReady && tour ?
+      {tourReady && tour && !xrActive ?
         <InfoPopup
           popup={activePopup}
           tour={tour}

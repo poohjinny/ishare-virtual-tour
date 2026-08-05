@@ -142,38 +142,11 @@ function defaultSectionPins(
   return { section: el ? readSectionPin(el) : null, group: null };
 }
 
-function clearPinnedSectionCollapse(root: HTMLElement) {
-  root.querySelectorAll('[data-directory-pin-active]').forEach((node) => {
-    node.removeAttribute('data-directory-pin-active');
-    if (node.getAttribute('data-directory-pin-a11y-hidden') === '1') {
-      node.removeAttribute('aria-hidden');
-      node.removeAttribute('data-directory-pin-a11y-hidden');
-    }
-  });
-}
-
-/**
- * Collapse the in-flow section that the pin bar is mirroring so the heading
- * isn’t duplicated. Groups stay in-flow (they’re past the clip when pinned).
- */
-function syncPinnedSectionCollapse(
-  root: HTMLElement,
-  pins: ExploreDirectoryScrollPinsState,
-) {
-  clearPinnedSectionCollapse(root);
-  if (!pins.section) return;
-  const el = findPinSource(root, pins.section.key);
-  if (!el) return;
-  const box = pinSourceLayoutBox(el);
-  box.setAttribute('data-directory-pin-active', '');
-  box.setAttribute('aria-hidden', 'true');
-  box.setAttribute('data-directory-pin-a11y-hidden', '1');
-}
-
 /**
  * First section is always the default pin. Scroll only updates department /
  * later section pins; returning to top restores the default.
- * Display collapses the mirrored in-flow section — never rewrites scrollTop.
+ * In-flow section collapse is React-driven (`data-directory-pin-active` on the
+ * heading) so HMR remounts stay in sync — never rewrite scrollTop here.
  */
 function resolvePins(root: HTMLElement): ExploreDirectoryScrollPinsState {
   const defaults = defaultSectionPins(root);
@@ -286,12 +259,6 @@ export function useExploreDirectoryScrollPins(
   }, [contentKey, updatePinsNow, scrollRef]);
 
   useLayoutEffect(() => {
-    const root = scrollRef.current;
-    if (!root) return;
-    syncPinnedSectionCollapse(root, pins);
-  }, [pins, scrollRef, pins.section?.key]);
-
-  useLayoutEffect(() => {
     const onResize = () => updatePins();
     window.addEventListener('resize', onResize);
     return () => {
@@ -302,13 +269,6 @@ export function useExploreDirectoryScrollPins(
       }
     };
   }, [updatePins]);
-
-  useLayoutEffect(() => {
-    const root = scrollRef.current;
-    return () => {
-      if (root) clearPinnedSectionCollapse(root);
-    };
-  }, [scrollRef]);
 
   return { pins, updatePins };
 }

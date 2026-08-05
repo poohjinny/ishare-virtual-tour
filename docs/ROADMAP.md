@@ -439,12 +439,12 @@ API), then move to Admin when auth and publish exist — same payload shapes.
 
 ### 8 — Three.js placement
 
-| Use                         | Approach                                            |
-| --------------------------- | --------------------------------------------------- |
-| 360 panorama tour           | **PSV** (current)                                   |
-| 3D model walkthrough (GLTF) | **ThreeDViewer** (`src/viewer-3d/`) — **shipped**   |
-| Custom 3D depth / overlays  | Extend `ThreeDViewer` or `viewer/extensions/`       |
-| VR / XR (Phase 3)           | WebXR session on `ThreeDViewer` — decide at Phase 3 |
+| Use                         | Approach                                                            |
+| --------------------------- | ------------------------------------------------------------------- |
+| 360 panorama tour           | **PSV** (current)                                                   |
+| 3D model walkthrough (GLTF) | **ThreeDViewer** (`src/viewer-3d/`) — **shipped**                   |
+| Custom 3D depth / overlays  | Extend `ThreeDViewer` or `viewer/extensions/`                       |
+| VR / XR (Phase 3)           | WebXR + Three.js: panorama seated sphere first, then `ThreeDViewer` |
 
 Both viewers conform to `TourViewerHandle`
 (`src/viewer-shared/viewerHandle.ts`). `TourPage` switches via `React.lazy`
@@ -580,12 +580,28 @@ live pricing updates become urgent.
 
 ### VR / XR support
 
-Immersive viewing on supported headsets; `ThreeDViewer` is the natural WebXR
-entry point (Three.js + `XRSession`). Reuse panoramas, hotspots, and naming data
-— no duplicate content per format.
+Immersive viewing on supported headsets via **WebXR** (session API) +
+**Three.js** (engine). Same tour JSON, panoramas, hotspots, and naming — no
+duplicate content per format. Native OpenXR / visionOS apps stay out of scope.
 
-**Open questions:** Which headsets/browsers for v1? Full walk mode vs seated
-360°?
+**v1 decisions (locked):**
+
+| Topic             | Choice                                                                     |
+| ----------------- | -------------------------------------------------------------------------- |
+| Session           | WebXR `immersive-vr`                                                       |
+| Engine            | Three.js (`WebGLRenderer.xr`)                                              |
+| Headset / browser | Meta Quest Browser first; PC VR browsers nice-to-have                      |
+| Mode              | Seated look-around (no teleport / room-scale walk)                         |
+| Content order     | **Panorama** equirect sphere MVP first, then **model3d** on `ThreeDViewer` |
+| Flat UI           | Keep Photo Sphere Viewer; XR is a parallel seated path (PSV has no WebXR)  |
+
+**Ship checklist:**
+
+- [x] Enter/Exit VR for panorama tours (Quest Browser / WebXR-capable)
+- [x] Hide flat Explore / Dev / Ask Guide chrome while XR session is active
+- [x] Nav hotspot select via controller ray in XR
+- [x] Reuse shared WebXR session helper on `ThreeDViewer`
+- [x] Embed / iframe: hide Enter VR (WebXR permission / top-level)
 
 ### 3D model tours (production)
 
@@ -657,6 +673,7 @@ Prototype shipped in Phase 1. Production-readiness requires:
 | 2026-08-01 | Cancel Floor plan coverage (+ bulk pin editor); floor-plan feature later fully removed                                                                                                       |
 | 2026-08-01 | Phase 1 sync — Tour Guide live + per-tour enable + Help chrome CTAs; Play Tour / place overview / scene duplicate delivered; drop mock-only framing (knowledge JSON already removed earlier) |
 | 2026-07-03 | 3D viewer prototype — ThreeDViewer, TourViewerHandle, lazy-load, demo tour + catalog                                                                                                         |
+| 2026-08-04 | VR/XR v1 — WebXR + Three.js seated panorama first; Quest Browser; model3d WebXR next                                                                                                         |
 | 2026-07-03 | Share panel link preview + Gmail web compose for Share via Email                                                                                                                             |
 | 2026-07-03 | Share link OG meta — per tour/scene Open Graph + Twitter Card tags                                                                                                                           |
 | 2026-07-03 | AI guide section (Phase 1 mock) — move voice-input backlog out of Sprint C                                                                                                                   |

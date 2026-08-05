@@ -79,6 +79,28 @@ duplicate hex elsewhere.
 
 ---
 
+## Units — rem-first (responsive chrome)
+
+Tour **React / CSS chrome** sizes with **`rem`** (and tokenized spacing/type) so
+it follows the app UI scale. Root `font-size` is a viewport `clamp()` in
+`globals.css` (`--ishare-font-size-base`); JS readers use
+[`uiScale.ts`](../src/utils/uiScale.ts). The PSV / Three canvas stays
+px-projected and is not scaled by rem.
+
+**Default:** padding, gap, radius, widths/heights, icon `font-size`, panel
+chrome → `rem`, theme tokens, or Tailwind spacing that resolves to rem.
+
+**`px` only when necessary** (hairlines, media-query breakpoints already in px,
+canvas/PSV projection, or a third-party API that demands device pixels). Prefer
+a shared constant/token over a one-off literal.
+
+Do not lock phone portrait to a fixed `16px` root — that fought the rem
+migration (see comment on `--ishare-font-size-base` in `globals.css`).
+
+Layout breakpoints and chrome collisions remain in [MOBILE.md](./MOBILE.md).
+
+---
+
 ## Icons
 
 **Default: Material Symbols Rounded** (ligature font). The font is loaded in
@@ -103,10 +125,9 @@ import { materialSymbolPanelHeaderClassName } from './ui/materialSymbolClasses';
 <MaterialSymbol name='sort' className={materialSymbolPanelHeaderClassName} />;
 ```
 
-Size icons with **`font-size` only** (`text-[18px]`,
-`tour-glass-panel__close-icon`, etc.). Let the **parent**
-(`flex items-center justify-center`) center the glyph — do not set fixed
-`width`/`height` on the ligature span or use `translate` offsets.
+Size icons with **`font-size` only** (prefer rem / size tokens over raw `px`).
+Let the **parent** (`flex items-center justify-center`) center the glyph — do
+not set fixed `width`/`height` on the ligature span or use `translate` offsets.
 
 **Do not** add new hand-drawn SVG icon files for routine UI (sort, layout
 toggle, tabs, chevrons, etc.) unless the task or design spec asks for custom
@@ -147,6 +168,8 @@ until touched — prefer Material when refactoring those surfaces.
 ## Do not
 
 - Add hex values outside `globals.css` `@theme`.
+- Use `px` for routine chrome sizing when `rem` / tokens would scale correctly
+  (see [Units — rem-first](#units--rem-first-responsive-chrome)).
 - Put long Tailwind utility strings in PSV HTML (purge risk) — use
   `@layer components`.
 - Reintroduce `tokens.css` or `tailwind.config.js` (v4 CSS-first).

@@ -10,8 +10,11 @@ import {
 } from '../utils/popupCtaPlacement';
 import {
   popupCtaRowClassName,
+  popupCtaSizeClassName,
   popupCtaWrapClassName,
+  resolvePopupCtaSizeLayout,
   resolvePopupFooterLayout,
+  type PopupCtaSizeLayout,
 } from '../utils/popupCtaLayout';
 import { GENERAL_INFO_BADGE_LABEL } from '../data/generalInfoHotspot';
 import {
@@ -416,18 +419,28 @@ function GlassPanelCtaText({
   );
 }
 
-export function PopupCtaButton({ cta }: { cta: PopupCta }) {
+export function PopupCtaButton({
+  cta,
+  sizeLayout,
+}: {
+  cta: PopupCta;
+  /** Shared glass CTA size — full | wide | default. */
+  sizeLayout?: PopupCtaSizeLayout;
+}) {
   const resolved = resolvePopupCta(cta);
   const isSecondary = cta.variant === 'secondary';
   const showIcon = shouldShowPopupCtaIcon(cta, isSecondary);
   const isMailto = isMailtoCtaUrl(resolved.url);
+  const layout =
+    sizeLayout ??
+    (showIcon ? 'full' : 'default');
 
   return (
     <a
       className={cn(
         'tour-glass-panel__cta',
         isSecondary && 'tour-glass-panel__cta--secondary',
-        showIcon && 'tour-glass-panel__cta--has-trailing-icon',
+        popupCtaSizeClassName(layout),
       )}
       href={resolved.url}
       {...(isMailto ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
@@ -453,8 +466,18 @@ export function PopupCtasFooter({ ctas }: { ctas: PopupCta[] }) {
   if (!layout) return null;
 
   const { mode, primary, secondaries } = layout;
+  const primaryShowIcon = shouldShowPopupCtaIcon(
+    { ...primary, variant: 'primary' },
+    false,
+  );
+  const primarySize = resolvePopupCtaSizeLayout(mode, {
+    hasIcon: primaryShowIcon,
+  });
   const primaryButton = (
-    <PopupCtaButton cta={{ ...primary, variant: 'primary' }} />
+    <PopupCtaButton
+      cta={{ ...primary, variant: 'primary' }}
+      sizeLayout={primarySize}
+    />
   );
 
   if (secondaries.length === 0) {
@@ -465,12 +488,17 @@ export function PopupCtasFooter({ ctas }: { ctas: PopupCta[] }) {
     );
   }
 
-  const secondaryButtons = secondaries.map((cta, index) => (
-    <PopupCtaButton
-      key={`${cta.url}-${cta.label ?? cta.product ?? index}`}
-      cta={{ ...cta, variant: 'secondary' }}
-    />
-  ));
+  const secondaryButtons = secondaries.map((cta, index) => {
+    const secondary = { ...cta, variant: 'secondary' as const };
+    const showIcon = shouldShowPopupCtaIcon(secondary, true);
+    return (
+      <PopupCtaButton
+        key={`${cta.url}-${cta.label ?? cta.product ?? index}`}
+        cta={secondary}
+        sizeLayout={resolvePopupCtaSizeLayout(mode, { hasIcon: showIcon })}
+      />
+    );
+  });
 
   if (mode === 'row-equal') {
     return (
@@ -507,7 +535,10 @@ export function PopupCtasContent({ ctas }: { ctas: PopupCta[] }) {
 
   return (
     <div className='tour-glass-panel__cta-wrap tour-glass-panel__cta-wrap--full'>
-      <PopupCtaButton cta={{ ...primary, variant: 'primary' }} />
+      <PopupCtaButton
+        cta={{ ...primary, variant: 'primary' }}
+        sizeLayout='wide'
+      />
     </div>
   );
 }

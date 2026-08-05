@@ -21,7 +21,7 @@ interface IconTooltipProps {
   label: string;
   placement?: IshareTooltipPlacement;
   className?: string;
-  /** When true, renders children only (no hover tooltip). */
+  /** When true, host stays mounted but hover/focus tooltips are off. */
   disabled?: boolean;
   children: ReactNode;
 }
@@ -33,6 +33,7 @@ function canUseHoverTooltips(): boolean {
 /**
  * Dark iShare tooltip — shared body portal runtime (ancestor overflow safe).
  * Same layer as HTML/`data-ishare-tooltip` hosts.
+ * Host span is always rendered so toggling `disabled` does not reflow flex/grid parents.
  */
 export function IconTooltip({
   label,
@@ -59,9 +60,9 @@ export function IconTooltip({
 
   useEffect(() => () => hideIshareTooltip(hostRef.current), []);
 
-  if (disabled) {
-    return children as ReactElement;
-  }
+  useEffect(() => {
+    if (disabled) close();
+  }, [close, disabled]);
 
   return (
     <span
@@ -72,10 +73,14 @@ export function IconTooltip({
         className,
       )}
       onPointerEnter={() => {
-        if (canUseHoverTooltips()) open();
+        if (disabled || !canUseHoverTooltips()) return;
+        open();
       }}
       onPointerLeave={close}
-      onFocus={open}
+      onFocus={() => {
+        if (disabled) return;
+        open();
+      }}
       onBlur={close}
     >
       {children as ReactElement}

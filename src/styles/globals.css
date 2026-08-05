@@ -588,15 +588,18 @@
       0 10px 28px rgba(15, 23, 42, 0.14),
       0 4px 12px rgba(15, 23, 42, 0.08);
     /*
-     * Panel regions are single-layer (no shell underpaint). Alphas are the
-     * former shell(0.75)+section composites so the look stays the same.
-     * Shell token stays for structure/call sites but paints transparent.
-     * Shared alphas — tour glass (white) and Dev panel dark (black) both use these.
+     * Glass paint model: shell = continuous base; body region clear; header /
+     * footer = thin overlays on the shell (avoids abutting-slab seams).
+     *
+     * --*-alpha = effective look (pigment / tip / docs).
+     * --ishare-glass-chrome-overlay-alpha stacks on body-alpha so
+     *   1-(1-body)*(1-overlay) ≈ header/footer alpha (0.9+0.5 → ~0.95).
+     * Shared with Dev panel dark (black) via the same alpha tokens.
      */
     --ishare-glass-body-alpha: 0.9;
     --ishare-glass-header-alpha: 0.95;
     --ishare-glass-footer-alpha: 0.95;
-    --ishare-glass-shell-bg: transparent;
+    --ishare-glass-chrome-overlay-alpha: 0.5;
     --ishare-float-glass-bg: rgba(255, 255, 255, 0.75);
     --ishare-float-glass-bg-hover: rgba(255, 255, 255, 0.9);
     --ishare-float-glass-shadow: var(--ishare-glass-dock-shadow);
@@ -605,8 +608,17 @@
       0 4px 10px rgba(15, 23, 42, 0.08);
     --ishare-glass-anchored-border: 1px solid rgba(15, 23, 42, 0.11);
     --ishare-glass-body-bg: rgba(255, 255, 255, var(--ishare-glass-body-alpha));
+    --ishare-glass-shell-bg: var(--ishare-glass-body-bg);
     --ishare-glass-header-bg: rgba(255, 255, 255, var(--ishare-glass-header-alpha));
     --ishare-glass-footer-bg: rgba(255, 255, 255, var(--ishare-glass-footer-alpha));
+    --ishare-glass-header-overlay-bg: rgba(255,
+        255,
+        255,
+        var(--ishare-glass-chrome-overlay-alpha));
+    --ishare-glass-footer-overlay-bg: rgba(255,
+        255,
+        255,
+        var(--ishare-glass-chrome-overlay-alpha));
     --ishare-glass-divider: 1px solid rgba(15, 23, 42, 0.08);
     /* Card outline inside glass panels (help accordion item, naming card) */
     --ishare-glass-card-border: rgba(15, 23, 42, 0.12);
@@ -807,7 +819,8 @@
   }
 
   /* Hide the in-flow section row while its mirror is in the pin bar
-   * (default first-section pin + later section pins). */
+   * (default first-section pin + later section pins). Attr is React-driven
+   * from TourNavFloat so HMR remounts keep the collapse. */
   [data-directory-pin-active],
   [data-directory-pin-row][data-directory-pin-active] {
     visibility: hidden;
