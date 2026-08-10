@@ -15,8 +15,6 @@ interface AnchoredPanelShellProps {
   'aria-modal'?: boolean | 'true' | 'false';
   dataAttrs?: Record<string, string | undefined>;
   hero?: ReactNode;
-  /** Share/close chrome for no-hero panels — pinned above the scroll body. */
-  toolbar?: ReactNode;
   /**
    * Title / identity block pinned above the scroll body so copy can scroll
    * underneath without losing place context.
@@ -29,7 +27,7 @@ interface AnchoredPanelShellProps {
 }
 
 /**
- * Shared React shell for media panels: optional hero + main(toolbar? + header? + body + footer).
+ * Shared React shell for media panels: optional hero + main(header? + body + footer).
  * Matches {@link buildAnchoredMediaPanelHtml}.
  */
 export function AnchoredPanelShell({
@@ -41,7 +39,6 @@ export function AnchoredPanelShell({
   'aria-modal': ariaModal,
   dataAttrs,
   hero,
-  toolbar,
   header,
   footer,
   bodyClassName,
@@ -73,7 +70,6 @@ export function AnchoredPanelShell({
       >
         {hero}
         <div className={ANCHORED_PANEL.main}>
-          {toolbar}
           {header ?
             <div className={ANCHORED_PANEL.header}>{header}</div>
           : null}
@@ -107,16 +103,4 @@ export function AnchoredPanelHeroActions({
   children: ReactNode;
 }) {
   return <div className={ANCHORED_PANEL.heroActions}>{children}</div>;
-}
-
-export function AnchoredPanelBodyToolbar({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  return (
-    <div className={ANCHORED_PANEL.bodyToolbar}>
-      <div className={ANCHORED_PANEL.toolbarActions}>{children}</div>
-    </div>
-  );
 }

@@ -11,6 +11,13 @@ const SHELL = 'tour-glass-panel__shell';
 const ANCHORED_ENTER = 'tour-glass-panel--anchored-enter';
 const ANCHOR_ARROW = 'anchored-panel__anchor-arrow';
 
+/** Light header chrome (matches dock / tour-glass-panel header buttons). */
+const PANEL_TITLE_ACTIONS = 'tour-glass-panel__title-actions';
+const PANEL_HEADER_BTN = 'tour-glass-panel__header-btn';
+const PANEL_HEADER_BTN_ICON = 'tour-glass-panel__header-btn-icon';
+const PANEL_CLOSE = 'tour-glass-panel__close';
+const PANEL_CLOSE_ICON = 'tour-glass-panel__close-icon';
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -35,13 +42,9 @@ export const ANCHORED_PANEL = {
   /** Pinned title/intro above the scroll body. */
   header: 'anchored-panel__header',
   body: 'anchored-panel__body',
-  bodyToolbar: 'anchored-panel__body-toolbar',
-  toolbarActions: 'anchored-panel__toolbar-actions',
   close: 'anchored-panel__close',
-  closeInline: 'anchored-panel__close--inline',
   closeIcon: 'anchored-panel__close-icon',
   headerBtn: 'anchored-panel__header-btn',
-  headerBtnInline: 'anchored-panel__header-btn--inline',
   headerBtnIcon: 'anchored-panel__header-btn-icon',
   /** Bottom tip pointing at the host hotspot (info + nav preview). */
   anchorArrow: ANCHOR_ARROW,
@@ -64,6 +67,13 @@ export function anchoredPanelCloseIconHtml(): string {
   });
 }
 
+function panelCloseIconHtml(): string {
+  return materialSymbolHtml('close', {
+    className: PANEL_CLOSE_ICON,
+    sizePx: MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
+  });
+}
+
 export function anchoredPanelShareIconHtml(): string {
   return materialSymbolHtml('share', {
     className: ANCHORED_PANEL.headerBtnIcon,
@@ -71,16 +81,29 @@ export function anchoredPanelShareIconHtml(): string {
   });
 }
 
+function panelShareIconHtml(): string {
+  return materialSymbolHtml('share', {
+    className: PANEL_HEADER_BTN_ICON,
+    sizePx: MATERIAL_SYMBOL_SIZE_CHROME_HEADER,
+  });
+}
+
+/**
+ * Share control for anchored panels.
+ * `surface: 'onMedia'` — dark disc over hero; `'onPanel'` — light header chrome.
+ */
 export function buildAnchoredPanelShareButtonHtml(options: {
   dataAttr: string;
   ariaLabel: string;
   tooltipLabel: string;
-  inline?: boolean;
+  surface?: 'onMedia' | 'onPanel';
 }): string {
+  const onPanel = options.surface === 'onPanel';
   const className =
-    options.inline ?
-      `${ANCHORED_PANEL.headerBtn} ${ANCHORED_PANEL.headerBtnInline} ishare-tooltip-host ishare-tooltip-host--portal`
+    onPanel ?
+      `${PANEL_HEADER_BTN} ishare-tooltip-host ishare-tooltip-host--portal`
     : `${ANCHORED_PANEL.headerBtn} ishare-tooltip-host ishare-tooltip-host--portal`;
+  const icon = onPanel ? panelShareIconHtml() : anchoredPanelShareIconHtml();
 
   return `<button
             type="button"
@@ -89,24 +112,23 @@ export function buildAnchoredPanelShareButtonHtml(options: {
             aria-label="${escapeHtml(options.ariaLabel)}"
             data-ishare-tooltip="${escapeHtml(options.tooltipLabel)}"
             data-ishare-tooltip-placement="left"
-          >${anchoredPanelShareIconHtml()}</button>`;
+          >${icon}</button>`;
 }
 
 export function buildAnchoredPanelCloseButtonHtml(options: {
   closeDataAttr: string;
-  inline?: boolean;
+  surface?: 'onMedia' | 'onPanel';
 }): string {
-  const className =
-    options.inline ?
-      `${ANCHORED_PANEL.close} ${ANCHORED_PANEL.closeInline}`
-    : ANCHORED_PANEL.close;
+  const onPanel = options.surface === 'onPanel';
+  const className = onPanel ? PANEL_CLOSE : ANCHORED_PANEL.close;
+  const icon = onPanel ? panelCloseIconHtml() : anchoredPanelCloseIconHtml();
 
   return `<button
             type="button"
             class="${className}"
             data-${options.closeDataAttr}="true"
             aria-label="Close"
-          >${anchoredPanelCloseIconHtml()}</button>`;
+          >${icon}</button>`;
 }
 
 export function buildAnchoredPanelHeroActionsHtml(options: {
@@ -119,19 +141,21 @@ export function buildAnchoredPanelHeroActionsHtml(options: {
         </div>`;
 }
 
-export function buildAnchoredPanelBodyToolbarHtml(options: {
+/**
+ * Share/close for panels without a hero — reuse dock title-actions chrome
+ * (no separate body-toolbar strip).
+ */
+export function buildAnchoredPanelTitleActionsHtml(options: {
   shareHtml?: string;
   closeDataAttr: string;
 }): string {
-  return `<div class="${ANCHORED_PANEL.bodyToolbar}">
-        <div class="${ANCHORED_PANEL.toolbarActions}">
+  return `<div class="${PANEL_TITLE_ACTIONS}">
           ${options.shareHtml ?? ''}
           ${buildAnchoredPanelCloseButtonHtml({
             closeDataAttr: options.closeDataAttr,
-            inline: true,
+            surface: 'onPanel',
           })}
-        </div>
-      </div>`;
+        </div>`;
 }
 
 export interface AnchoredMediaPanelShellOptions {
@@ -141,11 +165,6 @@ export interface AnchoredMediaPanelShellOptions {
   animate?: boolean;
   rootDataAttrs?: Record<string, string>;
   heroHtml: string;
-  /**
-   * Optional share/close chrome for no-hero panels.
-   * Rendered above the scroll body so it stays pinned.
-   */
-  toolbarHtml?: string;
   /**
    * Optional title/intro block pinned above the scroll body
    * (identity stays visible while copy scrolls).
@@ -157,7 +176,7 @@ export interface AnchoredMediaPanelShellOptions {
 }
 
 /**
- * Shared article shell: hero (optional) + main(toolbar? + header? + body + footer).
+ * Shared article shell: hero (optional) + main(header? + body + footer).
  */
 export function buildAnchoredMediaPanelHtml(
   options: AnchoredMediaPanelShellOptions,
@@ -168,7 +187,6 @@ export function buildAnchoredMediaPanelHtml(
     animate = true,
     rootDataAttrs = {},
     heroHtml,
-    toolbarHtml = '',
     headerHtml = '',
     bodyHtml,
     footerHtml = '',
@@ -190,7 +208,6 @@ export function buildAnchoredMediaPanelHtml(
       <div class="${SHELL}">
         ${heroHtml}
         <div class="${ANCHORED_PANEL.main}">
-          ${toolbarHtml}
           ${headerHtml}
           ${bodyHtml}
           ${footerHtml}

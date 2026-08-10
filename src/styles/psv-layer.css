@@ -55,8 +55,9 @@
   --tour-chrome-inset-bottom: max(var(--tour-chrome-inset), env(safe-area-inset-bottom, 0px));
   --tour-chrome-inset-left: max(var(--tour-chrome-inset), env(safe-area-inset-left, 0px));
   --tour-chrome-ai-fab-size: 4rem;
-  /* Top-right dock/directory panels share this cap so they grow as tall as the
-     viewport allows while clearing the bottom-right Ask Guide avatar. */
+  /* Top dock panels (Explore / Help / Share) share this cap — as tall as the
+     viewport allows while clearing the bottom-right Ask Guide avatar.
+     Scroll surface: Share/Help = glass body; Explore = inner scroller (pins). */
   --tour-chrome-top-panel-max-height: calc(100vh - var(--tour-chrome-inset-top) - var(--tour-chrome-inset-bottom) - var(--tour-chrome-ai-fab-size) - var(--tour-chrome-inset));
   --tour-explore-panel-width: 36.25rem;
   /* Phone dock panels — span between chrome safe insets (actions root is

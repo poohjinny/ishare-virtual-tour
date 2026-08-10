@@ -3,8 +3,7 @@ import { cn } from '../lib/cn';
 import { tourGlassPanelBodyLeadClassName } from './tourGlassPanelVariants';
 
 export const shareTourPanelRootClassName = cn(
-  'flex min-w-0 flex-col gap-3.5 px-5 pb-5',
-  'max-[480px]:px-[1.375rem] max-[480px]:pb-[1.125rem]',
+  'flex min-w-0 flex-col gap-3.5',
 );
 
 export const shareTourPanelLeadClassName = cn(

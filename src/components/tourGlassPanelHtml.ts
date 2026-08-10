@@ -66,9 +66,9 @@ import { PREVIEW_HERO_SKELETON_CLASS } from './ui/previewHeroSkeletonClasses';
 import {
   ANCHORED_PANEL,
   buildAnchoredMediaPanelHtml,
-  buildAnchoredPanelBodyToolbarHtml,
   buildAnchoredPanelHeroActionsHtml,
   buildAnchoredPanelShareButtonHtml,
+  buildAnchoredPanelTitleActionsHtml,
 } from './anchoredPanelChrome';
 import {
   initPopupVideoPlayers,
@@ -754,10 +754,13 @@ export function buildAnchoredPopupHtml(
   const hasVideo = Boolean(trimmedVideoUrl);
   const hasImage = Boolean(trimmedImage) && !hasVideo;
   const hasHero = hasVideo || hasImage;
-  // Place-overview matches default nav panorama strip (8/16), not 16:9 video.
+  // Place-overview matches default nav panorama strip (8/16). Catalog image +
+  // scene-thumbnail heroes match video 16:9 — same as syncHeroHeight / InfoPopup.
+  // (Using panorama aspect here then remounting to 16:9 made the hero jump open.)
   const matchNavPanoramaHero = Boolean(options?.shareAsLocation);
+  const useVideoHeroAspect = !matchNavPanoramaHero && hasHero;
   const heroHeight = resolveNavPreviewHeroHeight(undefined, {
-    video: matchNavPanoramaHero ? false : hasVideo,
+    video: useVideoHeroAspect,
   });
   const heroAspectAttr =
     matchNavPanoramaHero ? ' data-hero-aspect="panorama"' : '';
@@ -768,15 +771,7 @@ export function buildAnchoredPopupHtml(
         dataAttr: 'info-panel-share',
         ariaLabel: shareAria,
         tooltipLabel: shareLabel,
-      })
-    : '';
-  const shareInlineHtml =
-    showShare ?
-      buildAnchoredPanelShareButtonHtml({
-        dataAttr: 'info-panel-share',
-        ariaLabel: shareAria,
-        tooltipLabel: shareLabel,
-        inline: true,
+        surface: hasHero ? 'onMedia' : 'onPanel',
       })
     : '';
 
@@ -805,10 +800,10 @@ export function buildAnchoredPopupHtml(
       </div>`
     : '';
 
-  const toolbarHtml =
+  const titleActionsHtml =
     hasHero ? '' : (
-      buildAnchoredPanelBodyToolbarHtml({
-        shareHtml: shareInlineHtml,
+      buildAnchoredPanelTitleActionsHtml({
+        shareHtml,
         closeDataAttr: 'info-panel-close',
       })
     );
@@ -821,8 +816,18 @@ export function buildAnchoredPopupHtml(
       ${donorCreditHtml}
     </div>`;
 
-  const headerHtml = `<div class="${ANCHORED_PANEL.header}">
+  const headerHtml =
+    hasHero ?
+      `<div class="${ANCHORED_PANEL.header}">
     ${introHtml}
+  </div>`
+    : `<div class="${ANCHORED_PANEL.header}">
+    <div class="${GLASS_PANEL.titleRow}">
+      <div class="${GLASS_PANEL.headerLeading}">
+        ${introHtml}
+      </div>
+      ${titleActionsHtml}
+    </div>
   </div>`;
 
   const bodyHtml = `<div class="${GLASS_PANEL.body} ${ANCHORED_PANEL.body} ishare-scrollbar">
@@ -860,7 +865,6 @@ export function buildAnchoredPopupHtml(
     titleId,
     animate: options?.animate ?? true,
     heroHtml,
-    toolbarHtml,
     headerHtml,
     bodyHtml,
     footerHtml: ctaFooterHtml + visitFooterHtml,
@@ -1129,15 +1133,7 @@ export function buildAnchoredNavPreviewHtml(
         dataAttr: 'nav-panel-share',
         ariaLabel: TOUR_SHARE_LOCATION_ARIA,
         tooltipLabel: TOUR_SHARE_LOCATION_LABEL,
-      })
-    );
-  const navShareInlineHtml =
-    hideShare ? '' : (
-      buildAnchoredPanelShareButtonHtml({
-        dataAttr: 'nav-panel-share',
-        ariaLabel: TOUR_SHARE_LOCATION_ARIA,
-        tooltipLabel: TOUR_SHARE_LOCATION_LABEL,
-        inline: true,
+        surface: hasHero ? 'onMedia' : 'onPanel',
       })
     );
 
@@ -1177,10 +1173,10 @@ export function buildAnchoredNavPreviewHtml(
       </div>`
     : '';
 
-  const toolbarHtml =
+  const titleActionsHtml =
     hasHero ? '' : (
-      buildAnchoredPanelBodyToolbarHtml({
-        shareHtml: navShareInlineHtml,
+      buildAnchoredPanelTitleActionsHtml({
+        shareHtml: navShareHtml,
         closeDataAttr: 'nav-panel-close',
       })
     );
@@ -1222,9 +1218,22 @@ export function buildAnchoredNavPreviewHtml(
 
   const introInnerHtml = `${namingTotalHtml}${titleHtml}`;
   const headerHtml =
-    introInnerHtml.trim() ?
-      `<div class="${ANCHORED_PANEL.header}">
+    introInnerHtml.trim() || titleActionsHtml ?
+      hasHero ?
+        `<div class="${ANCHORED_PANEL.header}">
       <div class="nav-preview-panel__intro">${introInnerHtml}</div>
+    </div>`
+      : `<div class="${ANCHORED_PANEL.header}">
+      <div class="${GLASS_PANEL.titleRow}">
+        <div class="${GLASS_PANEL.headerLeading}">
+          ${
+            introInnerHtml.trim() ?
+              `<div class="nav-preview-panel__intro">${introInnerHtml}</div>`
+            : ''
+          }
+        </div>
+        ${titleActionsHtml}
+      </div>
     </div>`
     : '';
 
@@ -1243,7 +1252,6 @@ export function buildAnchoredNavPreviewHtml(
     rootExtraClass: 'tour-glass-panel--nav-preview',
     animate: options?.animate ?? true,
     heroHtml,
-    toolbarHtml,
     headerHtml,
     bodyHtml,
     footerHtml,
