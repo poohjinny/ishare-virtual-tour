@@ -546,6 +546,15 @@
             "body": "As the first point of contact at the Ken Sargent House, the reception area serves as the heart of this home away from home, where families are greeted with care and compassion during their most challenging times. \n\nNaming this space offers a unique opportunity to leave a lasting legacy, honouring the values of generosity and kindness that the Ken Sargent House embodies. \n\nBy supporting this initiative, you help provide a welcoming environment for families when they need it most, ensuring they feel comforted and supported as they navigate difficult journeys together."
           },
           "placeOverviewManual": true
+        },
+        {
+          "id": "nav-to-donor-wall",
+          "type": "nav",
+          "position": {
+            "yaw": 314.5,
+            "pitch": 0.7
+          },
+          "targetScene": "s_f24tksel8t"
         }
       ],
       "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_vddzraqi1q.webp",
