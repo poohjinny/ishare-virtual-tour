@@ -22,11 +22,13 @@ import {
   tourNavCurrentDetailHeroChipClassName,
   tourNavSceneDetailBackClassName,
   tourNavSceneDetailBodyClassName,
+  tourNavSceneDetailBodyScrollClassName,
   tourNavSceneDetailCopyClassName,
   tourNavSceneDetailHeroClassName,
   tourNavSceneDetailHeroCopyStackClassName,
   tourNavSceneDetailHeroImageClassName,
   tourNavSceneDetailHeroSkeletonClassName,
+  tourNavSceneDetailInlinePadClassName,
   tourNavSceneDetailLayoutClassName,
   tourNavSceneDetailMainClassName,
   tourNavSceneDetailTitleClassName,
@@ -144,18 +146,33 @@ export function ExploreSceneDescriptionView({
           </div>
 
           <div className={tourNavSceneDetailCopyClassName}>
-            <h3 className={tourNavSceneDetailTitleClassName}>{scene.title}</h3>
+            <h3
+              className={cn(
+                tourNavSceneDetailTitleClassName,
+                tourNavSceneDetailInlinePadClassName,
+                'shrink-0',
+              )}
+            >
+              {scene.title}
+            </h3>
 
-            {description ?
-              <InlineMarkdownParagraphs
-                text={description}
-                className='flex flex-col gap-3'
-                paragraphClassName={tourNavSceneDetailBodyClassName}
-              />
-            : null}
+            {description || bodyVideoUrl ?
+              <div className={tourNavSceneDetailBodyScrollClassName}>
+                {description ?
+                  <InlineMarkdownParagraphs
+                    text={description}
+                    className='flex flex-col gap-3'
+                    paragraphClassName={tourNavSceneDetailBodyClassName}
+                  />
+                : null}
 
-            {bodyVideoUrl ?
-              <PopupVideoEmbed videoUrl={bodyVideoUrl} title={scene.title} />
+                {bodyVideoUrl ?
+                  <PopupVideoEmbed
+                    videoUrl={bodyVideoUrl}
+                    title={scene.title}
+                  />
+                : null}
+              </div>
             : null}
           </div>
         </div>

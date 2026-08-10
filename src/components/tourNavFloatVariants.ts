@@ -510,7 +510,8 @@ export const tourNavPanelSlotVariants = cva(
   },
 );
 
-/** Shared panel scroller (Explore, intro gallery, …). Full-bleed scrollport;
+/** Inner scrollport when the glass body is overflow:hidden (Explore list/search/
+ * detail pins; intro gallery). Share/Help keep default body scroll instead.
  * `overflow-y: scroll` keeps thin-track width stable without scrollbar-gutter. */
 export const tourNavPanelScrollClassName = cn(
   'ishare-scrollbar min-h-0 min-w-0 flex-1 overflow-x-clip overflow-y-scroll',
@@ -521,8 +522,8 @@ export const tourNavPanelScrollInnerClassName = cn(
 );
 
 /**
- * Detail drill-in shell — column host (no own scroll). Main scrolls inside the
- * view; Visit footer sits full-bleed below like a glass panel footer.
+ * Detail drill-in shell — column host (no own scroll). Main pins chrome;
+ * body copy scrolls inside the view. Visit footer sits full-bleed below.
  */
 export const tourNavSceneDetailShellClassName = cn(
   'flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
@@ -1254,22 +1255,27 @@ export const tourNavSceneDetailLayoutClassName = cn(
 );
 
 /**
- * Scrollable back + hero/copy. Horizontal + bottom padding live here so the
- * Visit footer can stay full-bleed of the panel body.
+ * Pinned detail chrome host (back + hero/title). No inline pad here — pad
+ * lives on chrome pieces / the body scrollport so the scrollbar isn’t nested
+ * inside a padded parent. Visit footer stays full-bleed below.
  */
 export const tourNavSceneDetailMainClassName = cn(
-  'tour-nav-scene-detail-main ishare-scrollbar flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,1rem)]',
-  'overflow-x-clip overflow-y-scroll',
-  'px-[var(--tour-directory-inline-padding,1.25rem)] pb-5 max-[480px]:pb-[1.125rem]',
+  'tour-nav-scene-detail-main flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,1rem)]',
+  'overflow-hidden',
 );
 
-/** Hero image → title/description block. */
+/** Horizontal inset for pinned detail chrome (title block, etc.). */
+export const tourNavSceneDetailInlinePadClassName =
+  'px-[var(--tour-directory-inline-padding,1.25rem)]';
+
+/** Hero image → title + body-scroll stack. */
 export const tourNavSceneDetailHeroCopyStackClassName = cn(
-  'flex flex-col gap-[var(--tour-directory-divider-space,1.5rem)]',
+  'flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-divider-space,1.5rem)]',
 );
 
 export const tourNavSceneDetailBackClassName = cn(
-  'inline-flex w-fit cursor-pointer items-center gap-1.5 rounded-full border-none bg-transparent p-0 font-display text-sm font-semibold text-primary',
+  'inline-flex w-fit shrink-0 cursor-pointer items-center gap-1.5 rounded-full border-none bg-transparent p-0 font-display text-sm font-semibold text-primary',
+  'ms-[var(--tour-directory-inline-padding,1.25rem)]',
   'transition-opacity duration-150 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
   'disabled:pointer-events-none disabled:opacity-45',
 );
@@ -1279,13 +1285,14 @@ export const tourNavSceneDetailBackClassName = cn(
  * match it to avoid the container background peeking below the player. Static
  * thumbnails use the taller 16/10 crop.
  * Active uses the same primary inset border as gallery current cards.
+ * `mx` (not parent pad) keeps the body scrollbar from sitting inside side pad.
  */
 export const tourNavSceneDetailHeroClassName = (
   hasVideo = false,
   active = false,
 ) =>
   cn(
-    'relative w-full overflow-hidden rounded-xl bg-[#e2e8f0]',
+    'relative mx-[var(--tour-directory-inline-padding,1.25rem)] shrink-0 overflow-hidden rounded-xl bg-[#e2e8f0]',
     hasVideo ? 'aspect-[16/9]' : 'aspect-[16/10]',
     active &&
       cn(
@@ -1301,12 +1308,25 @@ export const tourNavSceneDetailHeroImageClassName = cn(
 export const tourNavSceneDetailHeroSkeletonClassName =
   PREVIEW_HERO_SKELETON_CLASS;
 
+/** Title + body stack (no pad — pad is on title chrome / body scrollport). */
 export const tourNavSceneDetailCopyClassName = cn(
-  'flex min-w-0 flex-col gap-[var(--tour-directory-space,1rem)]',
+  'flex min-h-0 min-w-0 flex-1 flex-col gap-[var(--tour-directory-space,1rem)]',
 );
 
 export const tourNavSceneDetailTitleClassName = cn(
   'm-0 min-w-0 flex-1 font-display text-lg-plus font-semibold leading-[1.3] tracking-tight text-foreground',
+);
+
+/**
+ * Only body copy (and optional body media) scrolls. Padding lives on this
+ * scrollport so content is inset while the scrollbar tracks the full edge.
+ * `overflow-y: auto` avoids a phantom scrollbar when the text is short.
+ */
+export const tourNavSceneDetailBodyScrollClassName = cn(
+  'ishare-scrollbar flex min-h-0 flex-1 flex-col gap-[var(--tour-directory-space,1rem)]',
+  'overflow-x-clip overflow-y-auto',
+  'px-[var(--tour-directory-inline-padding,1.25rem)]',
+  'pb-5 max-[480px]:pb-[1.125rem]',
 );
 
 export const tourNavSceneDetailBodyClassName = cn(
@@ -1538,12 +1558,15 @@ export const tourNavLocationGroupMetaClassName = cn(
 export const tourNavNamingSceneSubgroupsClassName = cn(
   'tour-nav-naming-scene-subgroups',
   'flex flex-col gap-3',
+  // Extra air under the department title before the first place label (list).
+  // Content lead alone reads tight against the small place subheader.
+  'pt-2',
 );
 
 /** Scene (place) subheader above its naming items — smaller than the sector title.
  *  Align with the list-item thumbnail column (naming row px-3.5 + 1px border). */
 export const tourNavNamingSceneSubheaderClassName = cn(
-  'mb-1.5 min-w-0 truncate pl-[calc(0.875rem+1px)] pr-1',
+  'm-0 mb-1.5 min-w-0 truncate pl-[calc(0.875rem+1px)] pr-1',
   'font-display text-xs font-semibold text-foreground/75',
 );
 

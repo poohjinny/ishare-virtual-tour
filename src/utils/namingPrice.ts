@@ -103,7 +103,7 @@ export function formatNamingGalleryItemPrice(item: {
   return formatNamingPriceAbbrev(amount);
 }
 
-/** Explore directory — sector group header totals (e.g. `$1,250,000 total`). */
+/** Explore directory — sector group header totals (e.g. `$1.3M total`). */
 export const SHOW_SECTOR_NAMING_TOTAL = true;
 
 /**
@@ -112,9 +112,18 @@ export const SHOW_SECTOR_NAMING_TOTAL = true;
  */
 export const SHOW_NAV_PREVIEW_NAMING_TOTAL = false;
 
-/** Sector group header — full currency total, same format as item prices. */
-export function formatNamingSectorGroupTotalLabel(total: number): string {
-  const price = formatNamingPriceDisplay(total);
+/**
+ * Sector group header total — matches Explore item price form for the active
+ * layout (gallery → abbreviated, list → full currency).
+ */
+export function formatNamingSectorGroupTotalLabel(
+  total: number,
+  layout: 'gallery' | 'list' = 'gallery',
+): string {
+  const price =
+    layout === 'list' ?
+      formatNamingPriceDisplay(total)
+    : formatNamingPriceAbbrev(total);
   return price ? `${price} total` : '';
 }
 

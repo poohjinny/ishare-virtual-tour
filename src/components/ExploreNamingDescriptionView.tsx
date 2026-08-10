@@ -22,11 +22,13 @@ import { MATERIAL_SYMBOL_SIZE_20 } from './ui/materialSymbolClasses';
 import {
   tourNavCurrentDetailHeroChipClassName,
   tourNavSceneDetailBackClassName,
+  tourNavSceneDetailBodyScrollClassName,
   tourNavSceneDetailCopyClassName,
   tourNavSceneDetailHeroClassName,
   tourNavSceneDetailHeroCopyStackClassName,
   tourNavSceneDetailHeroImageClassName,
   tourNavSceneDetailHeroSkeletonClassName,
+  tourNavSceneDetailInlinePadClassName,
   tourNavSceneDetailLayoutClassName,
   tourNavSceneDetailMainClassName,
   tourNavSceneDetailTitleClassName,
@@ -145,7 +147,12 @@ export function ExploreNamingDescriptionView({
           </div>
 
           <div className={tourNavSceneDetailCopyClassName}>
-            <div className='tour-glass-panel__title-block'>
+            <div
+              className={cn(
+                'tour-glass-panel__title-block shrink-0',
+                tourNavSceneDetailInlinePadClassName,
+              )}
+            >
               <div className='tour-glass-panel__title-line'>
                 <h3 className={tourNavSceneDetailTitleClassName}>{title}</h3>
                 {popup?.namingOpportunity ?
@@ -168,7 +175,9 @@ export function ExploreNamingDescriptionView({
             </div>
 
             {body ?
-              <PopupBodyCopy body={body} />
+              <div className={tourNavSceneDetailBodyScrollClassName}>
+                <PopupBodyCopy body={body} />
+              </div>
             : null}
           </div>
         </div>
