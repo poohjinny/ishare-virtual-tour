@@ -49,7 +49,9 @@ export const aiFabBubbleDismissClassName = cn(
 
 /** Place / naming name inside the FAB proximity line (icon/dot + name as one unit). */
 export const aiFabBubbleEmphasisClassName = cn(
-  'ms-1.5 inline-flex items-center gap-1 align-middle font-semibold leading-none text-foreground',
+  // align-middle: center the (dot|heart + name) unit to the surrounding leading-relaxed line — not baseline.
+  // whitespace-nowrap: keep dot/heart + name together; wrap the whole chip, not mid-name.
+  'ms-1.5 inline-flex items-center gap-1 align-middle whitespace-nowrap font-semibold leading-relaxed text-foreground',
 );
 
 /** Theme place marker before a location name in the FAB bubble. */
@@ -286,6 +288,11 @@ export const aiPanelHeaderBtnClassName = cn(
 
 export const aiPanelHeaderIconClassName = materialSymbolCompactClassName;
 
+/** Hosts the thread scroller + scroll-to-bottom FAB (Explore-style overlay). */
+export const aiPanelThreadScrollStackClassName = cn(
+  'relative flex min-h-0 min-w-0 flex-1 flex-col',
+);
+
 export const aiPanelMessagesClassName = cn(
   'ishare-scrollbar flex min-h-0 flex-1 flex-col gap-3 overflow-x-clip overflow-y-scroll p-[var(--ai-panel-inline-padding)]',
 );
@@ -302,12 +309,15 @@ export const aiMessageGapTurnClassName = 'mt-7';
 export const aiPanelIntroClassName = cn('flex flex-col gap-3 self-stretch');
 
 export const aiPanelNoticeClassName = cn(
-  'flex max-w-full items-start gap-1.5 self-stretch rounded-lg border border-[#e8c878] bg-[#fdf4e3] px-3 py-2 text-sm leading-normal text-muted',
+  'flex max-w-full flex-col items-stretch gap-2 self-stretch rounded-lg border border-[#e8c878] bg-[#fdf4e3] px-3 py-2 text-sm leading-normal text-muted',
 );
 
 export const aiPanelErrorClassName = cn(
-  'flex max-w-full items-start gap-1.5 self-stretch rounded-lg border border-[rgba(239,68,68,0.35)] bg-[rgba(239,68,68,0.08)] px-3 py-2 text-sm leading-normal text-danger',
+  'flex max-w-full flex-col items-stretch gap-2 self-stretch rounded-lg border border-[rgba(239,68,68,0.35)] bg-[rgba(239,68,68,0.08)] px-3 py-2 text-sm leading-normal text-danger',
 );
+
+/** Message + dismiss row inside notice / error banners. */
+export const aiPanelBannerTopClassName = cn('flex min-w-0 items-start gap-1.5');
 
 /** Close control inside notice / error banners. */
 export const aiPanelBannerDismissClassName = cn(
@@ -315,9 +325,11 @@ export const aiPanelBannerDismissClassName = cn(
   'text-current/70 hover:bg-black/5 hover:text-current',
 );
 
+/** Retry — compact guide CTA shape, below the error copy (not inline). */
 export const aiPanelBannerRetryClassName = cn(
-  'mt-px shrink-0 cursor-pointer rounded-md border-none bg-transparent px-1.5 py-0.5 font-display text-xs font-semibold text-current underline-offset-2 transition-[background,opacity] duration-150',
-  'hover:bg-black/5 hover:underline',
+  'flex w-fit max-w-full cursor-pointer items-center justify-center self-start rounded-md border border-danger/30 bg-white/80 px-2.5 py-1.5 font-body text-2xs font-medium leading-snug text-danger no-underline transition-[background,color,border-color] duration-200',
+  'hover:border-danger/45 hover:bg-danger/10 hover:text-danger',
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger',
 );
 
 export const aiPanelBannerBodyClassName = cn('m-0 min-w-0 flex-1');
@@ -445,6 +457,16 @@ export const aiSceneLinkCardStatusBadgeClassName = cn(
   'px-1.5 py-1 text-[0.5625rem] font-medium leading-none tracking-[0.03em]',
 );
 
+/**
+ * Compact "You are here" chip — Tour Guide place cards only.
+ * Explore gallery/hero keeps `tourNavCurrentHeroChipClassName` unchanged.
+ */
+export const aiSceneLinkCardHereChipClassName = cn(
+  'pointer-events-none absolute left-1.5 top-1.5 z-[2] inline-flex items-center gap-0.5',
+  'rounded-full bg-primary px-1.5 py-0.5 pr-2 shadow-sm',
+  'font-display text-[0.5625rem] font-bold uppercase leading-none tracking-[0.03em] text-white',
+);
+
 export const aiSceneLinkCardBodyClassName = cn(
   'flex min-w-0 flex-col gap-1 px-2.5 pt-2 pb-3',
 );
@@ -466,7 +488,7 @@ export const aiSceneLinkCardTitleClassName = cn(
 export const aiSceneLinkCardTitleTallClassName = 'min-h-[2lh]';
 
 export const aiSceneLinkCardPriceClassName = cn(
-  'shrink-0 pt-0.5 font-display text-sm font-semibold tabular-nums leading-snug text-muted',
+  'shrink-0 font-display text-sm font-semibold tabular-nums leading-snug text-muted',
 );
 
 export const aiSceneLinkCardMetaClassName = cn(
@@ -593,6 +615,11 @@ export const aiFollowUpUserBubbleClassName = cn('flex flex-col gap-2');
 /** Pinned under the scroll thread — outer inset only; shell owns the surface. */
 export const aiComposerClassName = cn(
   'flex w-full shrink-0 flex-col items-stretch overflow-visible p-[calc(var(--ai-panel-inline-padding)/1.25)]',
+);
+
+/** Fine print under the composer (privacy / data handling). */
+export const aiComposerPrivacyClassName = cn(
+  'm-0 mx-auto max-w-[22rem] pt-2 text-center font-body text-xs leading-snug text-muted',
 );
 
 /**

@@ -51,7 +51,7 @@ export interface AssembledTourContext {
   otherAreas: Array<{ id: string; title: string }>;
   /**
    * Tour-wide naming catalog for Ask Guide links —
-   * `id | name | sceneTitle | status` (current scene namings stay in `namings`).
+   * `id | name | sceneTitle | status | price` (current scene namings stay in `namings`).
    */
   tourNamings: Array<{
     id: string;
@@ -60,6 +60,8 @@ export interface AssembledTourContext {
     sceneTitle: string;
     status: AssembledNamingContext['status'];
     statusLabel: string;
+    price: number;
+    priceLabel: string;
   }>;
   namings: AssembledNamingContext[];
   suggestedQuestions: string[];
@@ -145,6 +147,8 @@ function listTourNamingsForGuide(
     const namingId = found?.hotspot.namingId?.trim() || item.hotspotId;
     if (seen.has(namingId)) continue;
     seen.add(namingId);
+    const priceLabel =
+      item.priceLabel?.trim() || formatNamingPriceDisplay(item.price);
     out.push({
       id: namingId,
       name: item.name,
@@ -152,6 +156,8 @@ function listTourNamingsForGuide(
       sceneTitle: item.sceneTitle,
       status: resolveNamingOpportunityStatus(item.statusModifier),
       statusLabel: item.statusLabel,
+      price: item.price,
+      priceLabel,
     });
     if (out.length >= 40) break;
   }

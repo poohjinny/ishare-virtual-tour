@@ -106,7 +106,7 @@ export const DEV_ASK_GUIDE_FLAG_TOGGLES: DevUrlFlagToggle[] = [
   {
     key: 'guideUiTest',
     label: 'Frozen UI preview',
-    hint: 'Markdown sample, scroll fixtures, thinking, FAB bubble, notice + error (no chat / no API)',
+    hint: 'Markdown sample, scroll fixtures, thinking, FAB bubble, notice + error with Retry (no chat / no API)',
     isOn: (params) => params.guideUiTest,
     urlPatch: (enabled) => ({
       guideUiTest: enabled ? '1' : null,

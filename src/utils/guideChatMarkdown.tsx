@@ -1,9 +1,22 @@
 import { Fragment, type ReactNode } from 'react';
+import {
+  namingOpportunityStatusConfig,
+  namingOpportunityStatusFromParenLabel,
+} from '../data/namingOpportunityStatus';
+import { cn } from '../lib/cn';
+import { NamingStatusBadge } from '../components/ui/NamingStatusBadge';
 
 const LIST_ITEM_RE = /^(\s*)([-*•]|\d+[.)])\s+(.*)$/;
 const QUOTE_RE = /^>\s?(.*)$/;
 const INLINE_TOKEN_RE =
   /(\*\*[^*]+?\*\*|__[^_]+?__|~~[^~]+?~~|`[^`]+?`|\[[^\]]+?\]\([^)\s]+\)|\*[^*]+?\*|_[^_\s][^_]*?_|https?:\/\/[^\s<>\]]+)/g;
+/** Guide lists often append status after the name: `Family Corridor (Open)`. */
+const STATUS_PAREN_RE = /(\s*)\(([^)\n]+)\)/g;
+
+/** Compact fill chip aligned with guide card status badges. */
+const guideInlineStatusBadgeClassName = cn(
+  'mx-1 align-middle px-1.5 py-0.5 text-[0.5625rem] font-medium leading-none tracking-[0.03em]',
+);
 
 function isSafeHttpUrl(raw: string): boolean {
   try {
@@ -26,6 +39,46 @@ function trimTrailingPunctuation(url: string): {
   return { href, trailing };
 }
 
+function renderPlainWithStatusBadges(
+  text: string,
+  keyPrefix: string,
+): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  let lastIndex = 0;
+  let tokenIndex = 0;
+
+  for (const match of text.matchAll(STATUS_PAREN_RE)) {
+    const full = match[0];
+    const start = match.index ?? 0;
+    const inner = match[2] ?? '';
+    const status = namingOpportunityStatusFromParenLabel(inner);
+    if (!status) continue;
+
+    if (start > lastIndex) {
+      nodes.push(text.slice(lastIndex, start));
+    }
+
+    const config = namingOpportunityStatusConfig(status);
+    nodes.push(
+      <NamingStatusBadge
+        key={`${keyPrefix}-st${tokenIndex++}`}
+        status={status}
+        compact
+        includeOpen
+        ariaLabel={config.label}
+        className={guideInlineStatusBadgeClassName}
+      />,
+    );
+    lastIndex = start + full.length;
+  }
+
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+
+  return nodes;
+}
+
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
@@ -35,7 +88,12 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
     const raw = match[0];
     const start = match.index ?? 0;
     if (start > lastIndex) {
-      nodes.push(text.slice(lastIndex, start));
+      nodes.push(
+        ...renderPlainWithStatusBadges(
+          text.slice(lastIndex, start),
+          `${keyPrefix}-p${tokenIndex}`,
+        ),
+      );
     }
 
     const key = `${keyPrefix}-i${tokenIndex++}`;
@@ -84,7 +142,12 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
   }
 
   if (lastIndex < text.length) {
-    nodes.push(text.slice(lastIndex));
+    nodes.push(
+      ...renderPlainWithStatusBadges(
+        text.slice(lastIndex),
+        `${keyPrefix}-t`,
+      ),
+    );
   }
 
   return nodes;
@@ -120,6 +183,25 @@ function listDepth(indent: string): number {
   return Math.floor(spaces / 2);
 }
 
+/**
+ * Ask Guide option lists are almost always flat peers. Models still emit
+ * leading spaces / restarted `1.` that look nested; ignore depth so every
+ * item stays a sibling (no CSS `ol ol` / `pl-5` nesting indent).
+ *
+ * Mental check: `1. a\n2. b\n3. c` and `- a\n- b` → one list, three/two
+ * root `<li>`s — never `<li>a<ol><li>b`.
+ */
+function flattenGuideListDepth(flat: FlatListItem[]): FlatListItem[] {
+  return flat.map((entry) =>
+    entry.depth === 0 ? entry : { ...entry, depth: 0 },
+  );
+}
+
+/**
+ * Nest flat list rows by depth. Root frame is depth 0 (holds peer items).
+ * Do not use a depth -1 sentinel: `entry.depth > -1` is always true, so the
+ * 2nd+ depth-0 peer was incorrectly nested under the first `<li>`.
+ */
 function nestListItems(
   flat: FlatListItem[],
 ): { type: 'ul' | 'ol'; items: ListItem[] } | null {
@@ -128,21 +210,23 @@ function nestListItems(
   const rootType = flat[0]?.listType ?? 'ul';
   const rootItems: ListItem[] = [];
   const stack: Array<{ depth: number; items: ListItem[] }> = [
-    { depth: -1, items: rootItems },
+    { depth: 0, items: rootItems },
   ];
 
   for (const entry of flat) {
-    while (stack.length > 1 && (stack.at(-1)?.depth ?? -1) >= entry.depth) {
+    const depth = Math.max(0, entry.depth);
+
+    while (stack.length > 1 && (stack.at(-1)?.depth ?? 0) > depth) {
       stack.pop();
     }
 
     let parent = stack.at(-1);
     if (!parent) continue;
 
-    while (entry.depth > parent.depth + 1) {
+    while (depth > parent.depth) {
       const last = parent.items.at(-1);
       if (!last) break;
-      if (!last.children) {
+      if (!last.children || last.children.type !== entry.listType) {
         last.children = { type: entry.listType, items: [] };
       }
       stack.push({ depth: parent.depth + 1, items: last.children.items });
@@ -151,22 +235,28 @@ function nestListItems(
     }
 
     if (!parent) continue;
-
-    if (entry.depth > parent.depth) {
-      const last = parent.items.at(-1);
-      if (last) {
-        if (!last.children || last.children.type !== entry.listType) {
-          last.children = { type: entry.listType, items: [] };
-        }
-        stack.push({ depth: entry.depth, items: last.children.items });
-        parent = stack.at(-1) ?? parent;
-      }
-    }
-
     parent.items.push({ text: entry.text });
   }
 
   return { type: rootType, items: rootItems };
+}
+
+/** Blank lines between list items flush separate lists — merge adjacent same-type lists. */
+function coalesceAdjacentLists(blocks: Block[]): Block[] {
+  const out: Block[] = [];
+  for (const block of blocks) {
+    const prev = out.at(-1);
+    if (
+      prev &&
+      (block.type === 'ol' || block.type === 'ul') &&
+      prev.type === block.type
+    ) {
+      prev.items.push(...block.items);
+      continue;
+    }
+    out.push(block);
+  }
+  return out;
 }
 
 function renderList(
@@ -208,7 +298,7 @@ function parseBlocks(text: string): Block[] {
   };
 
   const flushList = () => {
-    const nested = nestListItems(flatList);
+    const nested = nestListItems(flattenGuideListDepth(flatList));
     flatList = [];
     if (nested) blocks.push(nested);
   };
@@ -218,7 +308,8 @@ function parseBlocks(text: string): Block[] {
     if (!trimmedEnd.trim()) {
       flushParagraph();
       flushQuote();
-      flushList();
+      // Keep the active list open across blank lines so "1. a\\n\\n1. b"
+      // (or 1.\\n\\n2.) stay one <ol> — lazy restarts still merge via coalesce.
       continue;
     }
 
@@ -237,9 +328,18 @@ function parseBlocks(text: string): Block[] {
       const indent = listMatch[1] ?? '';
       const marker = listMatch[2] ?? '-';
       const itemText = listMatch[3] ?? '';
+      const listType: 'ul' | 'ol' = /^\d+[.)]$/.test(marker) ? 'ol' : 'ul';
+      // Switching marker family after a gap starts a new list block.
+      if (
+        flatList.length > 0 &&
+        flatList[0]?.listType !== listType &&
+        listDepth(indent) === 0
+      ) {
+        flushList();
+      }
       flatList.push({
         depth: listDepth(indent),
-        listType: /^\d+[.)]$/.test(marker) ? 'ol' : 'ul',
+        listType,
         text: itemText,
       });
       continue;
@@ -253,7 +353,7 @@ function parseBlocks(text: string): Block[] {
   flushParagraph();
   flushQuote();
   flushList();
-  return blocks;
+  return coalesceAdjacentLists(blocks);
 }
 
 /** Safe subset used by Ask Guide assistant replies. */

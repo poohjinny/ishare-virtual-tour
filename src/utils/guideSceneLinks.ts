@@ -44,9 +44,10 @@ function normalizeGuideLinkTitle(title: string): string {
 }
 
 /**
- * Dedupe guide cards by id, then by display title.
- * Same title for a place + its inherited naming (e.g. both "Covered Porch")
- * collapses to one card — prefer the scene/place card for navigation.
+ * Dedupe guide cards by id, then by display title within the same kind.
+ * Keep place + naming even when titles match (e.g. "Kitchen" place vs NO) —
+ * collapsing naming→place was dropping NO cards after reply inference.
+ * Same-name NOs (e.g. two "Family Corridor") stay as separate id keys.
  */
 export function capGuideLinks(links: ChatGuideLink[]): ChatGuideLink[] {
   const byId: ChatGuideLink[] = [];
@@ -59,22 +60,25 @@ export function capGuideLinks(links: ChatGuideLink[]): ChatGuideLink[] {
   }
 
   const out: ChatGuideLink[] = [];
-  const indexByTitle = new Map<string, number>();
+  const indexByKindTitle = new Map<string, number>();
   for (const link of byId) {
     const titleKey = normalizeGuideLinkTitle(link.title);
     if (!titleKey) {
       out.push(link);
       continue;
     }
-    const existingIndex = indexByTitle.get(titleKey);
-    if (existingIndex === undefined) {
-      indexByTitle.set(titleKey, out.length);
+    // Naming cards: id dedupe only — duplicate display names are real (two
+    // Family Corridor opportunities on different floors).
+    if (link.kind === 'naming') {
       out.push(link);
       continue;
     }
-    const existing = out[existingIndex];
-    if (existing && existing.kind === 'naming' && link.kind === 'scene') {
-      out[existingIndex] = link;
+    const kindTitleKey = `scene:${titleKey}`;
+    const existingIndex = indexByKindTitle.get(kindTitleKey);
+    if (existingIndex === undefined) {
+      indexByKindTitle.set(kindTitleKey, out.length);
+      out.push(link);
+      continue;
     }
   }
   return out;
@@ -375,9 +379,24 @@ export function inferGuideSceneLinksFromText(
 
   candidates.sort((a, b) => a.index - b.index || b.titleLen - a.titleLen);
 
+  // Drop shorter title hits nested inside a longer match (e.g. place
+  // "Corridor" inside naming "Family Corridor") so NO cards aren't replaced
+  // by weaker place cards.
+  const nestedFiltered = candidates.filter((candidate) => {
+    const start = candidate.index;
+    const end = start + candidate.titleLen;
+    return !candidates.some(
+      (other) =>
+        other !== candidate &&
+        other.titleLen > candidate.titleLen &&
+        other.index <= start &&
+        other.index + other.titleLen >= end,
+    );
+  });
+
   const out: ChatGuideLink[] = [];
   const seen = new Set<string>();
-  for (const candidate of candidates) {
+  for (const candidate of nestedFiltered) {
     if (seen.has(candidate.key)) continue;
     const link = candidate.build();
     if (!link) continue;
@@ -419,14 +438,25 @@ export function resolveGuideLinks(
 
   if (merged.length > 0) {
     if (!allowTextInference) return capGuideLinks(merged);
-    // Model often lists naming names as sceneLinks — still attach naming cards
-    // from reply text so interest answers are not place-only.
-    const inferredNamings = inferGuideSceneLinksFromText(
+    const inferred = inferGuideSceneLinksFromText(
       tour,
       currentSceneId,
       reply,
-    ).filter((link) => link.kind === 'naming');
-    return capGuideLinks([...merged, ...inferredNamings]);
+    );
+    const inferredNamings = inferred.filter((link) => link.kind === 'naming');
+    const inferredScenes = inferred.filter((link) => link.kind === 'scene');
+    const modelScenes = merged.filter((link) => link.kind === 'scene');
+    // Reply-mentioned namings win over dumping full namingLinks (e.g. every
+    // price-range match). Model sceneLinks still keep for directions turns.
+    if (inferredNamings.length > 0) {
+      return capGuideLinks([
+        ...inferredNamings,
+        ...modelScenes,
+        ...inferredScenes,
+      ]);
+    }
+    // No naming names in prose — keep model links; still merge inferred places.
+    return capGuideLinks([...merged, ...inferredScenes]);
   }
 
   if (!allowTextInference) return [];

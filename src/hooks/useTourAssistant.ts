@@ -10,6 +10,8 @@ import { flushSync } from 'react-dom';
 import type { ChatMessage, Tour } from '../types/tour';
 import { askTourGuide, fetchAskGuideLiveStatus } from '../services/askGuide';
 import {
+  getExplorePlaceAskNote,
+  getExplorePlaceAskQuestion,
   getLocationChangeNote,
   getNamingOpenNote,
   getNavPreviewOpenNote,
@@ -41,12 +43,14 @@ function isAbortError(error: unknown): boolean {
   );
 }
 
-export type GuideNavNoteKind = 'scene' | 'naming' | 'preview';
+export type GuideNavNoteKind = 'scene' | 'naming' | 'preview' | 'explore-place';
 
 export type GuideNavNote = {
   kind: GuideNavNoteKind;
   namingName?: string;
   previewTitle?: string;
+  /** Explore Ask about a place — scene of interest (may differ from viewer). */
+  exploreSceneId?: string;
 };
 
 type LastAutoNavNote =
@@ -77,18 +81,24 @@ function navContextMessage(
   const kind =
     note?.kind === 'naming' ? 'naming'
     : note?.kind === 'preview' ? 'preview'
+    : note?.kind === 'explore-place' ? 'explore-place'
     : 'scene';
   const followUps = buildNavContextFollowUps({
     tour,
     sceneId,
-    kind,
+    // Follow-ups match preview (interest in a place, not “you’re here”).
+    kind: kind === 'explore-place' ? 'preview' : kind,
     namingName: note?.namingName,
-    previewTitle: note?.previewTitle,
+    previewTitle:
+      kind === 'explore-place' ?
+        note?.previewTitle || getSceneTitle(tour, sceneId)
+      : note?.previewTitle,
   });
   const content =
     kind === 'naming' ? getNamingOpenNote(tour, sceneId, note?.namingName)
     : kind === 'preview' ?
       getNavPreviewOpenNote(tour, sceneId, note?.previewTitle)
+    : kind === 'explore-place' ? getExplorePlaceAskNote(tour, sceneId)
     : getLocationChangeNote(tour, sceneId);
   return {
     id: nextId(),
@@ -96,6 +106,7 @@ function navContextMessage(
     source:
       kind === 'naming' ? 'nav-naming'
       : kind === 'preview' ? 'nav-preview'
+        // Explore interest sits in the place slot (replaces “here we are”).
       : 'nav-scene',
     content,
     ...(followUps.length ? { followUps } : {}),
@@ -230,6 +241,23 @@ export function useTourAssistant(
       lastAutoNavNoteRef.current = null;
     }
 
+    // Explore Ask about a place — interest note wins over live naming/preview.
+    const pending = pendingNavNoteRef.current;
+    if (pending?.kind === 'explore-place' && pending.exploreSceneId?.trim()) {
+      pendingNavNoteRef.current = null;
+      const noteSceneId = pending.exploreSceneId.trim();
+      lastAutoNavNoteRef.current = { kind: 'scene', sceneId: noteSceneId };
+      prevSceneRef.current = currentSceneId;
+      setMessages((prev) => {
+        const withoutNaming = prev.filter((msg) => msg.source !== 'nav-naming');
+        return upsertNavContextMessage(
+          withoutNaming,
+          navContextMessage(tour, noteSceneId, pending),
+        );
+      });
+      return;
+    }
+
     if (liveNamingHotspotId) {
       const key: LastAutoNavNote = {
         kind: 'naming',
@@ -280,7 +308,6 @@ export function useTourAssistant(
     const key: LastAutoNavNote = { kind: 'scene', sceneId: currentSceneId };
     if (!force && isSameAutoNavNote(lastAutoNavNoteRef.current, key)) return;
 
-    const pending = pendingNavNoteRef.current;
     pendingNavNoteRef.current = null;
     lastAutoNavNoteRef.current = key;
     prevSceneRef.current = currentSceneId;
@@ -529,14 +556,36 @@ export function useTourAssistant(
 
   const openAndAskAboutScene = useCallback(
     (sceneId: string) => {
-      const question = 'Tell me about this place';
+      const question = getExplorePlaceAskQuestion(tour, sceneId);
+      const note: GuideNavNote = {
+        kind: 'explore-place',
+        exploreSceneId: sceneId,
+        previewTitle: getSceneTitle(tour, sceneId),
+      };
+      if (isOpenRef.current) {
+        // Panel already open — layout sync won’t re-run; write interest note now.
+        pendingNavNoteRef.current = null;
+        lastAutoNavNoteRef.current = { kind: 'scene', sceneId };
+        setMessages((prev) => {
+          const withoutNaming = prev.filter(
+            (msg) => msg.source !== 'nav-naming',
+          );
+          return upsertNavContextMessage(
+            withoutNaming,
+            navContextMessage(tour, sceneId, note),
+          );
+        });
+      } else {
+        // Open-sync uses interest framing for this place (not “here we are”).
+        pendingNavNoteRef.current = note;
+      }
       setIsOpen(true);
       if (isSending) return;
       void runSend(question, messagesRef.current, sceneId, {
         appendUser: true,
       });
     },
-    [isSending, runSend],
+    [isSending, runSend, tour],
   );
 
   const openAndAskAboutNaming = useCallback(

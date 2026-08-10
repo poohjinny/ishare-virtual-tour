@@ -84,8 +84,8 @@ const STATUS_CONFIG: Record<
       {
         preset: 'contact',
         label: 'Express interest',
-        sublabel: 'Contact our team about this naming opportunity',
-        ariaLabel: 'Express your interest in this naming opportunity',
+        sublabel: 'Contact the team about this naming opportunity',
+        ariaLabel: 'Express interest in this naming opportunity',
         iconKind: 'mail',
         variant: 'primary',
       },
@@ -106,11 +106,11 @@ const STATUS_CONFIG: Record<
     ctas: [
       {
         preset: 'contact',
-        label: 'Speak with our team',
+        label: 'Speak with the team',
         contactIntent: 'simple',
         sublabel:
           'A naming commitment is in progress — reach out with questions',
-        ariaLabel: 'Speak with our team about this reserved naming opportunity',
+        ariaLabel: 'Speak with the team about this reserved naming opportunity',
         iconKind: 'mail',
         variant: 'primary',
       },
@@ -155,9 +155,9 @@ const STATUS_CONFIG: Record<
     ctas: [
       {
         preset: 'website',
-        label: 'Support our mission',
-        sublabel: 'Thank you to our naming partners',
-        ariaLabel: 'Visit our website to support our mission',
+        label: 'Support the mission',
+        sublabel: 'Thank you to the naming partners',
+        ariaLabel: 'Visit the website to support the mission',
         iconKind: 'heart',
         variant: 'primary',
       },
@@ -239,6 +239,42 @@ export function namingOpportunityStatusDisplayLabel(
 ): string {
   const config = namingOpportunityStatusConfig(status);
   return compact ? config.shortLabel : config.label;
+}
+
+/**
+ * Map guide-reply parentheticals like `(Open)` / `(Coming soon)` to a status.
+ * Returns null for unrelated parentheses (e.g. `(none)`).
+ */
+export function namingOpportunityStatusFromParenLabel(
+  label: string,
+): NamingOpportunityStatus | null {
+  const key = label.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!key) return null;
+
+  const aliases: Record<string, NamingOpportunityStatus> = {
+    open: 'open',
+    reserved: 'reserved',
+    rsvd: 'reserved',
+    sold: 'sold',
+    named: 'sold',
+    closed: 'sold',
+    coming: 'soon',
+    soon: 'soon',
+    'coming soon': 'soon',
+  };
+  const aliased = aliases[key];
+  if (aliased) return aliased;
+
+  for (const status of NAMING_OPPORTUNITY_STATUS_ORDER) {
+    const config = STATUS_CONFIG[status];
+    if (
+      config.label.toLowerCase() === key ||
+      config.shortLabel.toLowerCase() === key
+    ) {
+      return status;
+    }
+  }
+  return null;
 }
 
 /** @deprecated Use {@link resolvePopupContentCtas} */

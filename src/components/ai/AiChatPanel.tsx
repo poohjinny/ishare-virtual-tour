@@ -11,6 +11,7 @@ import { CHAT_SCROLL_TEST_MESSAGES } from '../../data/chatScrollTestMessages';
 import {
   VIRTUAL_TOUR_GUIDE_NAME,
   VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE,
+  VIRTUAL_TOUR_GUIDE_PRIVACY_NOTICE,
 } from '../../constants/branding';
 import type {
   ChatGuideCtaKind,
@@ -41,11 +42,13 @@ import { FollowUpQuestions } from './FollowUpQuestions';
 import { GuideChatMarkdown } from '../../utils/guideChatMarkdown';
 import { formatAssistantReplyPlainText } from '../../utils/guideReplyPlainText';
 import { AiThinkingIndicator } from './AiThinkingIndicator';
+import { AiThreadScrollToBottom } from './AiThreadScrollToBottom';
 import {
   aiComposerActionsClassName,
   aiComposerClassName,
   aiComposerIconClassName,
   aiComposerInputClassName,
+  aiComposerPrivacyClassName,
   aiComposerSendClassName,
   aiComposerSendHiddenClassName,
   aiComposerSendIconClassName,
@@ -72,6 +75,7 @@ import {
   aiPanelBannerBodyClassName,
   aiPanelBannerDismissClassName,
   aiPanelBannerRetryClassName,
+  aiPanelBannerTopClassName,
   aiPanelErrorClassName,
   aiPanelHeaderActionsClassName,
   aiPanelHeaderBtnClassName,
@@ -84,6 +88,7 @@ import {
   aiPanelPoweredByClassName,
   aiPanelSymbolClassName,
   aiPanelThreadClassName,
+  aiPanelThreadScrollStackClassName,
   aiPanelTitleClassName,
   aiPanelTitleRowClassName,
   aiPanelConnectionStatusClassName,
@@ -113,7 +118,25 @@ function AiPanelBanner({
       }
       role={variant === 'error' ? 'alert' : 'note'}
     >
-      <p className={aiPanelBannerBodyClassName}>{children}</p>
+      <div className={aiPanelBannerTopClassName}>
+        <p className={aiPanelBannerBodyClassName}>{children}</p>
+        {onDismiss ?
+          <button
+            type='button'
+            className={aiPanelBannerDismissClassName}
+            onClick={onDismiss}
+            aria-label={
+              variant === 'error' ? 'Dismiss error' : 'Dismiss notice'
+            }
+          >
+            <MaterialSymbol
+              name='close'
+              sizePx={MATERIAL_SYMBOL_SIZE_14}
+              aria-hidden
+            />
+          </button>
+        : null}
+      </div>
       {onRetry ?
         <button
           type='button'
@@ -123,23 +146,16 @@ function AiPanelBanner({
           Retry
         </button>
       : null}
-      {onDismiss ?
-        <button
-          type='button'
-          className={aiPanelBannerDismissClassName}
-          onClick={onDismiss}
-          aria-label={variant === 'error' ? 'Dismiss error' : 'Dismiss notice'}
-        >
-          <MaterialSymbol
-            name='close'
-            sizePx={MATERIAL_SYMBOL_SIZE_14}
-            aria-hidden
-          />
-        </button>
-      : null}
     </div>
   );
 }
+
+/** Fixture copy mirrors the live failure banner so wrap + Retry layout can be QA’d. */
+const GUIDE_UI_TEST_ERROR_MESSAGE =
+  'Live Tour Guide could not answer just now. Check the browser console for details, then try again.';
+
+/** Streaming grows a few dozen px; cards/images usually jump more — offer FAB. */
+const THREAD_CARD_GROWTH_PX = 88;
 
 interface AiChatPanelProps {
   panelPhase: 'idle' | 'enter' | 'exit';
@@ -448,12 +464,17 @@ export function AiChatPanel({
   const [errorDismissed, setErrorDismissed] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
+  /** Inner column whose height grows with streaming / cards (scroll root size may not). */
+  const threadContentRef = useRef<HTMLDivElement>(null);
   const threadSpacerRef = useRef<HTMLDivElement>(null);
   const composerFormRef = useRef<HTMLFormElement>(null);
   const composerInputRef = useRef<HTMLInputElement>(null);
   /** ChatGPT-style: follow new output while near the bottom; stop if user scrolls up. */
   const stickToBottomRef = useRef(true);
   const lastScrollOutputKeyRef = useRef<string>('');
+  /** Track scrollHeight so ResizeObserver can tell streaming vs card-size jumps. */
+  const lastThreadScrollHeightRef = useRef(0);
+  const programmaticScrollRef = useRef(false);
   const hasInput = input.trim().length > 0;
   const readAloud = useSpeechSynthesis();
   const canReset = !guideUiTest && messages.length > 0 && !isSending;
@@ -558,26 +579,48 @@ export function AiChatPanel({
     return remaining <= thresholdPx;
   };
 
-  const scrollThreadToBottom = (behavior: ScrollBehavior = 'auto') => {
+  const scrollThreadToBottom = () => {
     const root = messagesRef.current;
     if (!root) return;
     const top = Math.max(0, root.scrollHeight - root.clientHeight);
-    // `scrollTop` is more reliable than smooth `scrollTo` when layout is still
-    // settling (composer expand, panel enter).
-    if (behavior === 'auto') {
-      root.scrollTop = top;
-      return;
-    }
-    root.scrollTo({ top, behavior });
+    programmaticScrollRef.current = true;
+    // Instant pin for streaming / small layout settle.
+    root.scrollTop = top;
+    lastThreadScrollHeightRef.current = root.scrollHeight;
+    requestAnimationFrame(() => {
+      programmaticScrollRef.current = false;
+    });
   };
 
-  /** Re-pin after layout catches up (composer focus grow, panel anim, etc.). */
+  /**
+   * Re-pin after layout catches up while stick-to-bottom.
+   * Small growth (streaming) → instant pin.
+   * Large sudden growth (cards / CTAs / images) → leave reading position;
+   * scroll-to-bottom FAB covers the rest.
+   */
   const settleThreadToBottom = () => {
     if (!stickToBottomRef.current) return;
-    scrollThreadToBottom('auto');
+    const root = messagesRef.current;
+    if (!root) return;
+
+    const height = root.scrollHeight;
+    const prevHeight = lastThreadScrollHeightRef.current;
+    const growth = prevHeight > 0 ? height - prevHeight : 0;
+    lastThreadScrollHeightRef.current = height;
+
+    if (growth >= THREAD_CARD_GROWTH_PX) {
+      if (!isNearBottom(root)) {
+        stickToBottomRef.current = false;
+      }
+      return;
+    }
+
+    scrollThreadToBottom();
     requestAnimationFrame(() => {
       if (!stickToBottomRef.current) return;
-      scrollThreadToBottom('auto');
+      scrollThreadToBottom();
+      const next = messagesRef.current;
+      if (next) lastThreadScrollHeightRef.current = next.scrollHeight;
     });
   };
 
@@ -586,10 +629,26 @@ export function AiChatPanel({
     if (!root) return;
 
     const onScroll = () => {
+      if (isNearBottom(root)) {
+        stickToBottomRef.current = true;
+        return;
+      }
+      // Mid programmatic pin: remaining can briefly look large — don’t drop stick.
+      if (programmaticScrollRef.current) return;
+      stickToBottomRef.current = false;
+    };
+    const onUserScrollIntent = () => {
+      programmaticScrollRef.current = false;
       stickToBottomRef.current = isNearBottom(root);
     };
     root.addEventListener('scroll', onScroll, { passive: true });
-    return () => root.removeEventListener('scroll', onScroll);
+    root.addEventListener('wheel', onUserScrollIntent, { passive: true });
+    root.addEventListener('touchmove', onUserScrollIntent, { passive: true });
+    return () => {
+      root.removeEventListener('scroll', onScroll);
+      root.removeEventListener('wheel', onUserScrollIntent);
+      root.removeEventListener('touchmove', onUserScrollIntent);
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -599,19 +658,12 @@ export function AiChatPanel({
     // Spacer was for pin-user-to-top; ChatGPT follows the bottom instead.
     if (spacer) spacer.style.height = '0px';
 
-    let settleTimer = 0;
-    const followWithSettle = () => {
-      stickToBottomRef.current = true;
-      scrollThreadToBottom('smooth');
-      settleTimer = window.setTimeout(() => settleThreadToBottom(), 320);
-    };
-
     if (displayMessages.length === 0 && !isSending && !sendError) {
       stickToBottomRef.current = true;
       lastScrollOutputKeyRef.current = '';
       // Bottom so greeting/starters aren’t clipped under a growing composer.
-      scrollThreadToBottom('auto');
-      return () => window.clearTimeout(settleTimer);
+      scrollThreadToBottom();
+      return;
     }
 
     const outputKey = [
@@ -622,7 +674,7 @@ export function AiChatPanel({
     ].join('|');
 
     const isNewOutput = outputKey !== lastScrollOutputKeyRef.current;
-    if (!isNewOutput) return () => window.clearTimeout(settleTimer);
+    if (!isNewOutput) return;
 
     const previousKey = lastScrollOutputKeyRef.current;
     lastScrollOutputKeyRef.current = outputKey;
@@ -633,15 +685,16 @@ export function AiChatPanel({
       !previousKey.startsWith(`${latestUserMessageId}|`);
 
     if (isNewUserTurn) {
-      followWithSettle();
-      return () => window.clearTimeout(settleTimer);
+      stickToBottomRef.current = true;
+      settleThreadToBottom();
+      return;
     }
 
     // Thinking / assistant reply / error — follow only if still stuck to bottom.
     if (stickToBottomRef.current || isNearBottom(root)) {
-      followWithSettle();
+      stickToBottomRef.current = true;
+      settleThreadToBottom();
     }
-    return () => window.clearTimeout(settleTimer);
   }, [
     displayMessages,
     isSending,
@@ -650,24 +703,40 @@ export function AiChatPanel({
     latestAssistantMessageId,
   ]);
 
-  // Composer / panel chrome can shrink the thread — keep true bottom if sticking.
+  // Thread content height (streaming / cards) + chrome resize — follow if sticking.
   useEffect(() => {
     const root = messagesRef.current;
+    const content = threadContentRef.current;
     const form = composerFormRef.current;
     if (!root || typeof ResizeObserver === 'undefined') return;
+    lastThreadScrollHeightRef.current = root.scrollHeight;
     let frame = 0;
     const ro = new ResizeObserver(() => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
+        // Small growth pins while sticking; large card jumps defer to FAB.
         settleThreadToBottom();
       });
     });
     ro.observe(root);
+    if (content) ro.observe(content);
     if (form) ro.observe(form);
     return () => {
       window.cancelAnimationFrame(frame);
       ro.disconnect();
     };
+  }, []);
+
+  // Card thumbnails can settle after first layout — re-pin if still sticking.
+  useEffect(() => {
+    const content = threadContentRef.current;
+    if (!content) return;
+    const onLoadCapture = (event: Event) => {
+      if (!(event.target instanceof HTMLImageElement)) return;
+      settleThreadToBottom();
+    };
+    content.addEventListener('load', onLoadCapture, true);
+    return () => content.removeEventListener('load', onLoadCapture, true);
   }, []);
 
   const panelClass = aiPanelVariants({ phase: panelPhase });
@@ -868,212 +937,224 @@ export function AiChatPanel({
         </>
       }
     >
-      <div className={aiPanelMessagesClassName} ref={messagesRef}>
-        {!guideUiTest && (
-          <div className={aiPanelIntroClassName}>
-            {showMockNotice && !noticeDismissed ?
-              <AiPanelBanner
-                variant='notice'
-                onDismiss={() => setNoticeDismissed(true)}
-              >
-                {VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE}
-              </AiPanelBanner>
-            : null}
-            <div className={aiMessageVariants({ role: 'assistant' })}>
-              <GuideChatMarkdown
-                text={greeting}
-                className={aiMessageProseClassName}
-              />
-            </div>
-            {showStarters ?
-              <div
-                className={cn(
-                  aiMessageVariants({ role: 'user' }),
-                  aiFollowUpUserBubbleClassName,
-                )}
-              >
-                <FollowUpQuestions
-                  questions={starterQuestions}
-                  onSelect={handleFollowUpSelect}
-                  disabled={!canCompose}
-                />
-              </div>
-            : null}
-          </div>
-        )}
-        <div className={aiPanelThreadClassName}>
-          {displayMessages.map((msg, index) => {
-            const previousRole =
-              index > 0 ? (displayMessages[index - 1]?.role ?? null) : null;
-            const showTipFollowUps = tipFollowUps?.messageId === msg.id;
-            const speaking = readAloud.speakingId === msg.id;
-            const shareText =
-              msg.role === 'assistant' ? assistantShareText(msg) : '';
-            return (
-              <Fragment key={msg.id}>
-                <div
-                  data-msg-id={msg.id}
-                  className={cn(
-                    aiMessageVariants({ role: msg.role }),
-                    threadItemSpacingClass(previousRole, msg.role),
-                  )}
-                >
-                  {msg.role === 'assistant' ?
-                    <>
-                      <GuideChatMarkdown
-                        text={msg.content}
-                        className={aiMessageProseClassName}
-                      />
-                      {(
-                        msg.guideLinks &&
-                        msg.guideLinks.length > 0 &&
-                        (onNavigateScene || onSelectNaming)
-                      ) ?
-                        <GuideSceneLinkCards
-                          links={msg.guideLinks}
-                          currentSceneId={currentSceneId}
-                          onSelectScene={onNavigateScene}
-                          onSelectNaming={onSelectNaming}
-                        />
-                      : null}
-                      {(
-                        msg.guideCtas?.length &&
-                        !(msg.guideLinks && msg.guideLinks.length > 0)
-                      ) ?
-                        <GuideCtaRow
-                          ctas={msg.guideCtas}
-                          client={client}
-                          clientLogo={clientLogo}
-                          logoAlt={logoAlt}
-                          onChromeAction={onChromeAction}
-                        />
-                      : null}
-                      {shareText ?
-                        <div className={aiMessageActionsClassName}>
-                          <IconTooltip
-                            label={
-                              copiedMessageId === msg.id ? 'Copied' : 'Copy'
-                            }
-                            placement='top'
-                          >
-                            <button
-                              type='button'
-                              className={aiMessageSpeakClassName}
-                              aria-label={
-                                copiedMessageId === msg.id ?
-                                  'Copied'
-                                : 'Copy reply'
-                              }
-                              onClick={() =>
-                                handleCopyMessage(msg.id, shareText)
-                              }
-                            >
-                              <MaterialSymbol
-                                name={
-                                  copiedMessageId === msg.id ?
-                                    'check'
-                                  : 'content_copy'
-                                }
-                                sizePx={MATERIAL_SYMBOL_SIZE_18}
-                                aria-hidden
-                              />
-                            </button>
-                          </IconTooltip>
-                          {readAloud.supported ?
-                            <IconTooltip
-                              label={
-                                speaking ? 'Stop reading aloud' : 'Read aloud'
-                              }
-                              placement='top'
-                            >
-                              <button
-                                type='button'
-                                className={aiMessageSpeakClassName}
-                                aria-label={
-                                  speaking ? 'Stop reading aloud' : 'Read aloud'
-                                }
-                                aria-pressed={speaking}
-                                onClick={() =>
-                                  readAloud.toggle(msg.id, shareText)
-                                }
-                              >
-                                <MaterialSymbol
-                                  name={speaking ? 'stop' : 'graphic_eq'}
-                                  sizePx={MATERIAL_SYMBOL_SIZE_18}
-                                  filled={speaking}
-                                  aria-hidden
-                                />
-                              </button>
-                            </IconTooltip>
-                          : null}
-                        </div>
-                      : null}
-                    </>
-                  : msg.content}
+      <div className={aiPanelThreadScrollStackClassName}>
+        <div className={aiPanelMessagesClassName} ref={messagesRef}>
+          <div ref={threadContentRef} className='flex w-full flex-col gap-3'>
+            {!guideUiTest && (
+              <div className={aiPanelIntroClassName}>
+                {showMockNotice && !noticeDismissed ?
+                  <AiPanelBanner
+                    variant='notice'
+                    onDismiss={() => setNoticeDismissed(true)}
+                  >
+                    {VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE}
+                  </AiPanelBanner>
+                : null}
+                <div className={aiMessageVariants({ role: 'assistant' })}>
+                  <GuideChatMarkdown
+                    text={greeting}
+                    className={aiMessageProseClassName}
+                  />
                 </div>
-                {showTipFollowUps ?
+                {showStarters ?
                   <div
                     className={cn(
                       aiMessageVariants({ role: 'user' }),
                       aiFollowUpUserBubbleClassName,
-                      threadItemSpacingClass(msg.role, 'user'),
                     )}
                   >
                     <FollowUpQuestions
-                      questions={tipFollowUps.questions}
+                      questions={starterQuestions}
                       onSelect={handleFollowUpSelect}
                       disabled={!canCompose}
                     />
                   </div>
                 : null}
-              </Fragment>
-            );
-          })}
-          {showThinking ?
-            <div
-              className={threadItemSpacingClass(
-                displayMessages.at(-1)?.role ?? null,
-                'assistant',
-              )}
-            >
-              <AiThinkingIndicator />
+              </div>
+            )}
+            <div className={aiPanelThreadClassName}>
+              {displayMessages.map((msg, index) => {
+                const previousRole =
+                  index > 0 ? (displayMessages[index - 1]?.role ?? null) : null;
+                const showTipFollowUps = tipFollowUps?.messageId === msg.id;
+                const speaking = readAloud.speakingId === msg.id;
+                const shareText =
+                  msg.role === 'assistant' ? assistantShareText(msg) : '';
+                return (
+                  <Fragment key={msg.id}>
+                    <div
+                      data-msg-id={msg.id}
+                      className={cn(
+                        aiMessageVariants({ role: msg.role }),
+                        threadItemSpacingClass(previousRole, msg.role),
+                      )}
+                    >
+                      {msg.role === 'assistant' ?
+                        <>
+                          <GuideChatMarkdown
+                            text={msg.content}
+                            className={aiMessageProseClassName}
+                          />
+                          {(
+                            msg.guideLinks &&
+                            msg.guideLinks.length > 0 &&
+                            (onNavigateScene || onSelectNaming)
+                          ) ?
+                            <GuideSceneLinkCards
+                              links={msg.guideLinks}
+                              currentSceneId={currentSceneId}
+                              onSelectScene={onNavigateScene}
+                              onSelectNaming={onSelectNaming}
+                            />
+                          : null}
+                          {(
+                            msg.guideCtas?.length &&
+                            !(msg.guideLinks && msg.guideLinks.length > 0)
+                          ) ?
+                            <GuideCtaRow
+                              ctas={msg.guideCtas}
+                              client={client}
+                              clientLogo={clientLogo}
+                              logoAlt={logoAlt}
+                              onChromeAction={onChromeAction}
+                            />
+                          : null}
+                          {shareText ?
+                            <div className={aiMessageActionsClassName}>
+                              <IconTooltip
+                                label={
+                                  copiedMessageId === msg.id ? 'Copied' : 'Copy'
+                                }
+                                placement='top'
+                              >
+                                <button
+                                  type='button'
+                                  className={aiMessageSpeakClassName}
+                                  aria-label={
+                                    copiedMessageId === msg.id ?
+                                      'Copied'
+                                    : 'Copy reply'
+                                  }
+                                  onClick={() =>
+                                    handleCopyMessage(msg.id, shareText)
+                                  }
+                                >
+                                  <MaterialSymbol
+                                    name={
+                                      copiedMessageId === msg.id ?
+                                        'check'
+                                      : 'content_copy'
+                                    }
+                                    sizePx={MATERIAL_SYMBOL_SIZE_18}
+                                    aria-hidden
+                                  />
+                                </button>
+                              </IconTooltip>
+                              {readAloud.supported ?
+                                <IconTooltip
+                                  label={
+                                    speaking ? 'Stop reading aloud' : (
+                                      'Read aloud'
+                                    )
+                                  }
+                                  placement='top'
+                                >
+                                  <button
+                                    type='button'
+                                    className={aiMessageSpeakClassName}
+                                    aria-label={
+                                      speaking ? 'Stop reading aloud' : (
+                                        'Read aloud'
+                                      )
+                                    }
+                                    aria-pressed={speaking}
+                                    onClick={() =>
+                                      readAloud.toggle(msg.id, shareText)
+                                    }
+                                  >
+                                    <MaterialSymbol
+                                      name={speaking ? 'stop' : 'graphic_eq'}
+                                      sizePx={MATERIAL_SYMBOL_SIZE_18}
+                                      filled={speaking}
+                                      aria-hidden
+                                    />
+                                  </button>
+                                </IconTooltip>
+                              : null}
+                            </div>
+                          : null}
+                        </>
+                      : msg.content}
+                    </div>
+                    {showTipFollowUps ?
+                      <div
+                        className={cn(
+                          aiMessageVariants({ role: 'user' }),
+                          aiFollowUpUserBubbleClassName,
+                          threadItemSpacingClass(msg.role, 'user'),
+                        )}
+                      >
+                        <FollowUpQuestions
+                          questions={tipFollowUps.questions}
+                          onSelect={handleFollowUpSelect}
+                          disabled={!canCompose}
+                        />
+                      </div>
+                    : null}
+                  </Fragment>
+                );
+              })}
+              {showThinking ?
+                <div
+                  className={threadItemSpacingClass(
+                    displayMessages.at(-1)?.role ?? null,
+                    'assistant',
+                  )}
+                >
+                  <AiThinkingIndicator />
+                </div>
+              : null}
+              {/* Lets the latest user question sit near the top while the reply grows below. */}
+              <div
+                ref={threadSpacerRef}
+                aria-hidden='true'
+                className='pointer-events-none shrink-0'
+              />
             </div>
-          : null}
-          {/* Lets the latest user question sit near the top while the reply grows below. */}
-          <div
-            ref={threadSpacerRef}
-            aria-hidden='true'
-            className='pointer-events-none shrink-0'
-          />
+            {showUiTestNotice ?
+              <AiPanelBanner
+                variant='notice'
+                onDismiss={() => setNoticeDismissed(true)}
+              >
+                Preview notice — scripted replies only (guideUiTest).
+              </AiPanelBanner>
+            : null}
+            {showSendError ?
+              <AiPanelBanner
+                variant='error'
+                onRetry={canRetry && onRetryError ? onRetryError : undefined}
+                onDismiss={() => {
+                  setErrorDismissed(true);
+                  onDismissError?.();
+                }}
+              >
+                {sendError!}
+              </AiPanelBanner>
+            : null}
+            {showUiTestError ?
+              <AiPanelBanner
+                variant='error'
+                onRetry={() => {
+                  /* Preview only — same Retry chrome as a live send failure. */
+                }}
+                onDismiss={() => setErrorDismissed(true)}
+              >
+                {GUIDE_UI_TEST_ERROR_MESSAGE}
+              </AiPanelBanner>
+            : null}
+          </div>
         </div>
-        {showUiTestNotice ?
-          <AiPanelBanner
-            variant='notice'
-            onDismiss={() => setNoticeDismissed(true)}
-          >
-            Preview notice — scripted replies only (guideUiTest).
-          </AiPanelBanner>
-        : null}
-        {showSendError ?
-          <AiPanelBanner
-            variant='error'
-            onRetry={canRetry && onRetryError ? onRetryError : undefined}
-            onDismiss={() => {
-              setErrorDismissed(true);
-              onDismissError?.();
-            }}
-          >
-            {sendError!}
-          </AiPanelBanner>
-        : null}
-        {showUiTestError ?
-          <AiPanelBanner
-            variant='error'
-            onDismiss={() => setErrorDismissed(true)}
-          >
-            Sample error — Tour Guide live unavailable (guideUiTest).
-          </AiPanelBanner>
-        : null}
+        <AiThreadScrollToBottom scrollRef={messagesRef} />
       </div>
       <form
         ref={composerFormRef}
@@ -1104,6 +1185,9 @@ export function AiChatPanel({
           onSubmitRequest={commitComposerText}
           inputRef={composerInputRef}
         />
+        <p className={aiComposerPrivacyClassName}>
+          {VIRTUAL_TOUR_GUIDE_PRIVACY_NOTICE}
+        </p>
       </form>
     </TourGlassPanel>
   );

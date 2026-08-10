@@ -12,8 +12,8 @@ import {
   shouldAttachGuideLinks,
   shouldInferGuideLinksFromText,
   attachNamingGuideLinkCtas,
-  isExpressInterestIntent,
   isPrimarilyPlaceChoiceQuestion,
+  matchTourNamingIdsFromQuestion,
   matchTourPlaceSceneIdsFromQuestion,
   withCurrentPlaceSummaryLink,
   withInterestNamingLink,
@@ -22,6 +22,7 @@ import {
 import {
   resolveGuideLinks,
   resolveGuideSceneLinks,
+  resolveGuideNamingLinks,
   buildCurrentPlaceGuideLink,
   capGuideLinks,
 } from '../utils/guideSceneLinks';
@@ -122,6 +123,7 @@ function hydrateGuideExtras(
     (rawSceneLinks?.some((entry) => entry?.sceneId?.trim()) ?? false) ||
     (rawNamingLinks?.some((entry) => entry?.namingId?.trim()) ?? false);
   const placeChoiceIds = matchTourPlaceSceneIdsFromQuestion(tour, question);
+  const namingChoiceIds = matchTourNamingIdsFromQuestion(tour, question);
   const attachLinks = shouldAttachGuideLinks(question, reply, { tour });
   const allowTextInference = shouldInferGuideLinksFromText(
     question,
@@ -134,6 +136,10 @@ function hydrateGuideExtras(
     ...(rawSceneLinks ?? []),
     ...placeChoiceIds.map((id) => ({ sceneId: id })),
   ];
+  const namingLinkInputs = [
+    ...(rawNamingLinks ?? []),
+    ...namingChoiceIds.map((id) => ({ namingId: id })),
+  ];
 
   let guideLinks: ChatGuideLink[] = [];
   // Opt-in: only resolve cards when the question warrants them (ignore leftover model links).
@@ -143,10 +149,11 @@ function hydrateGuideExtras(
       sceneId,
       reply,
       sceneLinkInputs,
-      rawNamingLinks,
+      namingLinkInputs,
       { allowTextInference },
     );
-    // Question-only scrape when the visitor typed a place name (reply may not repeat it).
+    // Question-only scrape when the visitor typed a place / naming name
+    // (reply may not repeat it).
     if (placeChoiceIds.length > 0) {
       const choiceLinks = resolveGuideSceneLinks(
         tour,
@@ -163,10 +170,20 @@ function hydrateGuideExtras(
         ...(currentChoice ? [currentChoice] : []),
       ]);
     }
+    if (namingChoiceIds.length > 0) {
+      guideLinks = capGuideLinks([
+        ...guideLinks,
+        ...resolveGuideNamingLinks(
+          tour,
+          namingChoiceIds.map((id) => ({ namingId: id })),
+        ),
+      ]);
+    }
     if (isPrimarilyPlaceChoiceQuestion(question, placeChoiceIds)) {
       const choiceOnly = guideLinks.filter(
         (link) =>
-          link.kind === 'scene' && placeChoiceIds.includes(link.sceneId),
+          link.kind === 'naming' ||
+          (link.kind === 'scene' && placeChoiceIds.includes(link.sceneId)),
       );
       if (choiceOnly.length > 0) guideLinks = choiceOnly;
     }
@@ -193,12 +210,11 @@ function hydrateGuideExtras(
     guideLinks = attachNamingGuideLinkCtas(
       tour,
       capGuideLinks(shapeGuideLinksForQuestion(tour, question, guideLinks)),
-      { includeSupportCtas: isExpressInterestIntent(question, reply) },
     );
   }
 
-  // Naming support CTAs are on each card when includeSupportCtas was set.
-  // Place cards stay suppressed; contact referral CTAs still attach.
+  // Naming support CTAs (status panel helpers) sit on each naming card.
+  // Place cards stay visit-via-card; contact referral CTAs still attach.
   const guideCtas = buildGuideCtas(tour, sceneId, guideLinks, question, reply);
   const followUps = buildGuideFollowUps({
     question,

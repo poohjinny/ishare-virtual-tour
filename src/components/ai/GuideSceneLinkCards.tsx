@@ -6,10 +6,8 @@ import { GUIDE_LINK_PREVIEW_COUNT } from '../../utils/guideSceneLinks';
 import { cn } from '../../lib/cn';
 import { ExploreCurrentHereLabel } from '../ExploreCurrentHereLabel';
 import { NamingStatusBadge } from '../ui/NamingStatusBadge';
-import {
-  tourNavCurrentHeroChipClassName,
-  tourNavLocationGalleryStatusBadgeVariants,
-} from '../tourNavFloatVariants';
+import { MATERIAL_SYMBOL_SIZE_12 } from '../ui/materialSymbolClasses';
+import { tourNavLocationGalleryStatusBadgeVariants } from '../tourNavFloatVariants';
 import { GuideCtaRow } from './GuideCtaRow';
 import {
   aiGuideCardWidthClassName,
@@ -19,6 +17,7 @@ import {
   aiSceneLinkCardDescPlaceholderClassName,
   aiSceneLinkCardDescTallClassName,
   AI_GUIDE_CARD_NAMING_DESC_PLACEHOLDER,
+  aiSceneLinkCardHereChipClassName,
   aiSceneLinkCardKindClassName,
   aiSceneLinkCardMediaClassName,
   aiSceneLinkCardMediaZoomableClassName,
@@ -138,7 +137,8 @@ function GuideLinkCard({
           }
           {isCurrent ?
             <ExploreCurrentHereLabel
-              className={tourNavCurrentHeroChipClassName}
+              className={aiSceneLinkCardHereChipClassName}
+              sizePx={MATERIAL_SYMBOL_SIZE_12}
             />
           : null}
           {showStatus && link.status ?
@@ -214,7 +214,6 @@ function GuideLinkCard({
 
 function GuideLinkRow({
   links,
-  compact,
   showKindEyebrow,
   currentSceneId,
   onSelectScene,
@@ -222,8 +221,6 @@ function GuideLinkRow({
   disabled,
 }: {
   links: ChatGuideLink[];
-  /** Match half-column width even for a single card (mixed place/NO rows). */
-  compact: boolean;
   showKindEyebrow: boolean;
   currentSceneId?: string;
   onSelectScene?: (sceneId: string) => void;
@@ -231,7 +228,8 @@ function GuideLinkRow({
   disabled: boolean;
 }) {
   if (links.length === 0) return null;
-  const layout = links.length > 1 || compact ? 'multi' : 'single';
+  // Per-row: 2+ in this row → half grid; a lonely single stays full.
+  const layout = links.length > 1 ? 'multi' : 'single';
   return (
     <div className={aiSceneLinkListVariants({ layout })}>
       {links.map((link) => (
@@ -266,8 +264,6 @@ export function GuideSceneLinkCards({
   const namings = links.filter((link) => link.kind === 'naming');
   const total = places.length + namings.length;
   const needsCollapse = total > GUIDE_LINK_PREVIEW_COUNT;
-  // 2 places + 1 NO → keep the lonely NO at grid-column width, not full single.
-  const compactRows = total > 1;
   const showKindEyebrow = places.length > 0 && namings.length > 0;
 
   let visiblePlaces = places;
@@ -297,7 +293,6 @@ export function GuideSceneLinkCards({
       <div className='flex max-w-full flex-col items-stretch gap-2.5'>
         <GuideLinkRow
           links={visiblePlaces}
-          compact={compactRows}
           showKindEyebrow={showKindEyebrow}
           currentSceneId={currentSceneId}
           onSelectScene={onSelectScene}
@@ -306,7 +301,6 @@ export function GuideSceneLinkCards({
         />
         <GuideLinkRow
           links={visibleNamings}
-          compact={compactRows}
           showKindEyebrow={showKindEyebrow}
           currentSceneId={currentSceneId}
           onSelectScene={onSelectScene}

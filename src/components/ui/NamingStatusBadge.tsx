@@ -13,6 +13,11 @@ export interface NamingStatusBadgeProps {
   ariaLabel?: string;
   /** Search / compact lists — uses status short label when `status` is set */
   compact?: boolean;
+  /**
+   * Guide reply text may surface Open as a chip. Explore gallery/list and
+   * guide cards still hide Open via {@link namingOpportunityStatusShowsBadge}.
+   */
+  includeOpen?: boolean;
   uppercase?: boolean;
   className?: string;
 }
@@ -23,6 +28,7 @@ export function NamingStatusBadge({
   label: labelProp,
   ariaLabel: ariaLabelProp,
   compact = false,
+  includeOpen = false,
   uppercase = true,
   className = '',
 }: NamingStatusBadgeProps) {
@@ -43,6 +49,7 @@ export function NamingStatusBadge({
 
   if (!statusModifier || !label) return null;
   if (
+    !includeOpen &&
     !namingOpportunityStatusShowsBadge(
       status ?? (statusModifier as NamingOpportunityStatus),
     )

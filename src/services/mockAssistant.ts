@@ -53,6 +53,7 @@ function namingPool(
     name: entry.name,
     status: entry.status,
     statusLabel: entry.statusLabel,
+    priceLabel: entry.priceLabel,
   }));
 }
 
@@ -61,7 +62,11 @@ function formatTourNamingBlurb(ctx: AssembledTourContext): string {
   if (pool.length === 0) return '';
   return pool
     .slice(0, 6)
-    .map((entry) => `${entry.name} (${entry.statusLabel})`)
+    .map((entry) => {
+      const price =
+        entry.priceLabel?.trim() ? `, ${entry.priceLabel.trim()}` : '';
+      return `${entry.name} (${entry.statusLabel}${price})`;
+    })
     .join('; ');
 }
 
@@ -154,7 +159,7 @@ export function askMockAssistant(
         'priceLabel' in first && first.priceLabel ?
           ` (${first.priceLabel})`
         : '';
-      return `${first.name} is available${price}. You can’t check out here like a store — use Express your interest to contact the foundation team, or explore tax-efficient giving if that option is shown.`;
+      return `${first.name} is available${price}. You can’t check out here like a store — use Express interest to contact the foundation team, or explore tax-efficient giving if that option is shown.`;
     }
     if (first.status === 'reserved') {
       return `${first.name} is reserved — a naming commitment is already in progress. Speak with the foundation team if you have questions; I can’t promise it’s still available.`;
@@ -187,6 +192,7 @@ export function askMockAssistant(
     q.includes('tell me about') ||
     q.includes('about this') ||
     q.includes('about the tour') ||
+    q.includes('know more about') ||
     /여기가|뭐하는|투어에 대한|설명해/.test(question)
   ) {
     const namingBlurb = formatNamingBlurb(ctx);
@@ -202,6 +208,26 @@ export function askMockAssistant(
 export function getLocationChangeNote(tour: Tour, sceneId: string): string {
   const title = getSceneTitle(tour, sceneId);
   return `Here we are at ${title} — I'd love to tell you more about this space, or help you explore what's nearby.`;
+}
+
+/**
+ * Explore place detail → Ask Guide user question.
+ * Interest / curiosity — not “tell me about this place” (implies already there).
+ */
+export function getExplorePlaceAskQuestion(tour: Tour, sceneId: string): string {
+  const title = getSceneTitle(tour, sceneId).trim();
+  return title ?
+      `I'd like to know more about ${title}`
+    : "I'd like to know more about this place";
+}
+
+/**
+ * Chat note when Ask Guide opens from Explore about a place.
+ * Same hospitality as visit notes, without claiming they have arrived.
+ */
+export function getExplorePlaceAskNote(tour: Tour, sceneId: string): string {
+  const title = getSceneTitle(tour, sceneId).trim() || 'this place';
+  return `Looking at ${title} — happy to tell you more about this space, or help you explore what's nearby.`;
 }
 
 /** Compact sticky notice after a place move (Ask Guide panel). */

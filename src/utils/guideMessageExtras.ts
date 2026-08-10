@@ -2,17 +2,19 @@ import { resolveNamingOpportunityPopupCtas } from '../data/namingOpportunityStat
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import type { ChatGuideCta, ChatGuideLink, Tour } from '../types/tour';
 import { assembleTourContext } from './assembleTourContext';
-import { listSceneInfoHotspots } from './findTourHotspot';
+import { listSceneInfoHotspots, findNamingHotspotInTour } from './findTourHotspot';
 import {
   buildCurrentPlaceGuideLink,
   capGuideLinks,
   collectOpenNamingGuideLinks,
   collectOtherAreaGuideLinks,
   GUIDE_LINK_PREVIEW_COUNT,
+  inferGuideSceneLinksFromText,
   promoteGuideSceneLinkToNaming,
 } from './guideSceneLinks';
 import { resolveNamingPopup } from './namingSceneInherit';
 import { getTourWebsite, resolveTourClient } from './resolveTourClient';
+import { buildTourNamingDirectory } from './tourDirectory';
 
 const MAX_FOLLOW_UPS = 6;
 const MAX_GUIDE_CTAS = 3;
@@ -34,27 +36,34 @@ export function isWhereAmIQuestion(question: string): boolean {
 export function isNamingInterestQuestion(question: string): boolean {
   const q = question.toLowerCase();
   return (
-    /\b(buy|purchase|purchasing|how (do|can) i (get|give|donate|support)|interested|interest|pledge|sponsor|claim)\b/.test(
+    /\b(buy|purchase|purchasing|how (do|can) i (get|give|donate|support)|donat(e|ion|ing)|make a donation|interested|interest|pledge|sponsor|claim)\b/.test(
       q,
     ) ||
-    /\bnaming opportunit|\bnamings?\b|\bexpress(ing)? (my |your )?interest\b/.test(
+    /\bnaming\b|\bnamings?\b|\bopportunit|\bexpress(ing)? (my |your )?interest\b/.test(
       q,
     ) ||
-    /구매|사고\s*싶|관심|후원\s*하|기부\s*하|어떻게\s*(사|구매|후원|기부)|네이밍|후원\s*기회/.test(
+    // Gift / price-range browse (“between $100k and $250k”, “between 100,000 and 250,000”).
+    /\b(between|under|over|above|below|from)\b.{0,48}(\$?\d{1,3}(?:,\d{3})+|\$|dollars?|\d[\d,]*\s*k\b)/.test(
+      q,
+    ) ||
+    /\b(\$?\d{1,3}(?:,\d{3})+|\$[\d,]+|\d[\d,]*\s*k\b).{0,40}\b(and|to|–|-)\b.{0,20}(\$?\d{1,3}(?:,\d{3})+|\$[\d,]+|\d[\d,]*\s*k\b)/.test(
+      q,
+    ) ||
+    /구매|사고\s*싶|관심|후원\s*하|기부\s*하|어떻게\s*(사|구매|후원|기부)|네이밍|후원\s*기회|가격대|달러/.test(
       question,
     )
   );
 }
 
 /**
- * “Express your interest” / how-to-support — not mere naming browse
+ * “Express interest” / how-to-support — not mere naming browse
  * (“what naming opportunities are here?”).
  */
 export function isExpressInterestIntent(question: string, reply = ''): boolean {
   const q = question.toLowerCase().replace(/\s+/g, ' ').trim();
   const r = reply.toLowerCase().replace(/\s+/g, ' ').trim();
   if (
-    /\b(buy|purchase|purchasing|how (do|can) i (get|give|donate|support)|interested|interest|pledge|sponsor|claim)\b/.test(
+    /\b(buy|purchase|purchasing|how (do|can) i (get|give|donate|support)|donat(e|ion|ing)|make a donation|interested|interest|pledge|sponsor|claim)\b/.test(
       q,
     ) ||
     /\bexpress(ing)? (my |your )?interest\b/.test(q) ||
@@ -67,7 +76,7 @@ export function isExpressInterestIntent(question: string, reply = ''): boolean {
   // Model invited them to express interest / contact the foundation about naming.
   return (
     /\bexpress(ing)? (your |my )?interest\b/.test(r) ||
-    /\b(use|tap|click|choose)\b.{0,48}\bexpress your interest\b/.test(r) ||
+    /\b(use|tap|click|choose)\b.{0,48}\bexpress (your )?interest\b/.test(r) ||
     /\bcontact the foundation\b.{0,40}\b(naming|interest|support)\b/.test(r) ||
     /\b(naming|opportunity)\b.{0,48}\b(express interest|get in touch|reach out)\b/.test(
       r,
@@ -152,6 +161,8 @@ function normalizePlaceMatchText(text: string): string {
 /**
  * Visitor named a tour place as the message (e.g. “communal space”, “the gazebo”).
  * Used so a destination choice still gets a tappable go-card.
+ * Skips place titles that are only a nested fragment of a better-matching
+ * naming name (e.g. “Corridor” inside “Family Corridor”).
  */
 export function matchTourPlaceSceneIdsFromQuestion(
   tour: Tour,
@@ -160,6 +171,10 @@ export function matchTourPlaceSceneIdsFromQuestion(
   const q = normalizePlaceMatchText(question);
   if (q.length < 3) return [];
 
+  const namingNames = buildTourNamingDirectory(tour)
+    .map((item) => normalizePlaceMatchText(item.name))
+    .filter((name) => name.length >= 3);
+
   const candidates: Array<{ sceneId: string; titleNorm: string; len: number }> =
     [];
   for (const [sceneId, scene] of Object.entries(tour.scenes)) {
@@ -167,6 +182,19 @@ export function matchTourPlaceSceneIdsFromQuestion(
     if (!title || title.length < 3) continue;
     const titleNorm = normalizePlaceMatchText(title);
     if (titleNorm.length < 3) continue;
+    // Prefer an exact / fuller naming match over a nested place title.
+    if (
+      namingNames.some(
+        (name) =>
+          (name === q ||
+            q === `the ${name}` ||
+            (q.includes(name) && name.length > titleNorm.length)) &&
+          name.includes(titleNorm) &&
+          name !== titleNorm,
+      )
+    ) {
+      continue;
+    }
     candidates.push({ sceneId, titleNorm, len: titleNorm.length });
   }
   candidates.sort((a, b) => b.len - a.len);
@@ -195,6 +223,55 @@ export function matchTourPlaceSceneIdsFromQuestion(
   return matched;
 }
 
+/** Visitor named a naming opportunity (`no_*` ids for resolveGuideNamingLinks). */
+export function matchTourNamingIdsFromQuestion(
+  tour: Tour,
+  question: string,
+): string[] {
+  const q = normalizePlaceMatchText(question);
+  if (q.length < 3) return [];
+
+  const candidates: Array<{
+    namingId: string;
+    nameNorm: string;
+    len: number;
+  }> = [];
+  for (const item of buildTourNamingDirectory(tour)) {
+    const name = item.name?.trim();
+    if (!name || name.length < 3) continue;
+    const nameNorm = normalizePlaceMatchText(name);
+    if (nameNorm.length < 3) continue;
+    const found = findNamingHotspotInTour(tour, item.hotspotId);
+    const namingId =
+      found?.hotspot.namingId?.trim() ||
+      found?.hotspot.id?.trim() ||
+      item.hotspotId.trim();
+    if (!namingId) continue;
+    candidates.push({ namingId, nameNorm, len: nameNorm.length });
+  }
+  candidates.sort((a, b) => b.len - a.len);
+
+  const matched: string[] = [];
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (seen.has(candidate.namingId)) continue;
+    const { nameNorm, len } = candidate;
+    const compactChoice =
+      q === nameNorm ||
+      q === `the ${nameNorm}` ||
+      q === `tell me about ${nameNorm}` ||
+      q === `tell me about the ${nameNorm}`;
+    const namedInShort =
+      q.length <= len + 24 && (q.includes(nameNorm) || nameNorm.includes(q));
+    const namedInSentence = len >= 5 && q.includes(nameNorm);
+    if (!compactChoice && !namedInShort && !namedInSentence) continue;
+    if (!compactChoice && len < 5 && q.length > len + 4) continue;
+    seen.add(candidate.namingId);
+    matched.push(candidate.namingId);
+  }
+  return matched;
+}
+
 /** Short place-name messages — prefer that place’s card only. */
 export function isPrimarilyPlaceChoiceQuestion(
   question: string,
@@ -214,6 +291,7 @@ export function isGuideEntityQuestion(question: string): boolean {
   if (!q) return false;
   return (
     /\btell me about\b/.test(q) ||
+    /\b(i('d| would) like to know more about|know more about)\b/.test(q) ||
     /\b(how (do|can) i get to|take me to|go to|visit)\b/.test(q) ||
     /\bi want to (see|visit|go|explore)\b/.test(q) ||
     /\bwhat (is|are|does|do)\b.{0,48}\b(room|space|area|suite|naming|opportunit|price|cost)\b/.test(
@@ -249,7 +327,8 @@ export function shouldAttachGuideLinks(
   }
   if (options?.tour) {
     return (
-      matchTourPlaceSceneIdsFromQuestion(options.tour, question).length > 0
+      matchTourPlaceSceneIdsFromQuestion(options.tour, question).length > 0 ||
+      matchTourNamingIdsFromQuestion(options.tour, question).length > 0
     );
   }
   return false;
@@ -697,7 +776,7 @@ function namingCtasFromPopup(
     if (isContact && !contact && resolved.kind !== 'giftabulator') {
       contact = {
         id: `contact:${hotspotId}`,
-        label: resolved.label || 'Express your interest',
+        label: resolved.label || 'Express interest',
         url,
         kind: 'contact',
       };
@@ -759,15 +838,16 @@ function namingCtaBundleForLink(
 }
 
 /**
- * Attach per-naming support CTAs (Giftabulator gt / express interest).
- * Only when the turn is about supporting / interest — not on browse cards.
+ * Attach per-naming support CTAs (Express interest / Giftabulator / …) from
+ * the same status helpers as the anchored NO panel. Default on whenever
+ * naming cards are present — browse and interest turns alike.
  */
 export function attachNamingGuideLinkCtas(
   tour: Tour,
   links: ChatGuideLink[],
   options?: { includeSupportCtas?: boolean },
 ): ChatGuideLink[] {
-  if (options?.includeSupportCtas !== true) return links;
+  if (options?.includeSupportCtas === false) return links;
 
   return links.map((link) => {
     if (link.kind !== 'naming') return link;
@@ -877,8 +957,8 @@ export function withCurrentPlaceSummaryLink(
 
 /**
  * For interest/purchase/browse naming questions, ensure naming cards.
- * Prefer the current scene; if none, fall back to open opportunities tour-wide
- * (Overview often has no pins).
+ * Prefer namings mentioned in the reply; only then fall back to open
+ * opportunities (Overview often has no pins). Never invent a price-range dump.
  */
 export function withInterestNamingLink(
   tour: Tour,
@@ -891,6 +971,16 @@ export function withInterestNamingLink(
   if (reply && shouldSuppressGuideLinks(question, reply)) return links;
   if (links.some((link) => link.kind === 'naming')) return links;
 
+  if (reply?.trim()) {
+    const fromReply = inferGuideSceneLinksFromText(tour, sceneId, reply).filter(
+      (link) => link.kind === 'naming',
+    );
+    if (fromReply.length > 0) {
+      return capGuideLinks([...fromReply, ...links]);
+    }
+  }
+
+  // No names in the reply — light open-opportunity preview only (not a range dump).
   const fallback = collectOpenNamingGuideLinks(tour, {
     preferSceneId: sceneId,
     limit: GUIDE_LINK_PREVIEW_COUNT,

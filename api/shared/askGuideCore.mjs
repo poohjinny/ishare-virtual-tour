@@ -35,8 +35,13 @@ function formatTourNamings(tourNamings) {
       const name = entry.name || id;
       const sceneTitle = entry.sceneTitle || entry.sceneId || '';
       const status = entry.statusLabel || '';
+      const priceLabel =
+        (typeof entry.priceLabel === 'string' && entry.priceLabel.trim()) ||
+        (typeof entry.price === 'number' && Number.isFinite(entry.price) ?
+          `$${Math.round(entry.price).toLocaleString('en-US')}`
+        : '');
       if (!id) return null;
-      return `- ${id} | ${name} | ${sceneTitle} | ${status}`;
+      return `- ${id} | ${name} | ${sceneTitle} | ${status} | ${priceLabel || '(no price)'}`;
     })
     .filter(Boolean)
     .join('\n');
@@ -70,7 +75,7 @@ function formatContextBlock(context) {
     `Scene description: ${context.sceneDescription || '(none)'}`,
     'Other areas in this tour (id | title) — use these ids in sceneLinks:',
     formatOtherAreas(context.otherAreas),
-    'Tour naming opportunities (id | name | scene | status) — use these ids in namingLinks:',
+    'Tour naming opportunities (id | name | scene | status | price) — use these ids in namingLinks:',
     formatTourNamings(context.tourNamings),
     'Naming opportunities in this scene (details):',
     namingLines,
@@ -107,10 +112,13 @@ Naming availability (critical):
 - For “what naming opportunities / can I support / available namings” questions: use “Tour naming opportunities”. Never say there are none when that list is non-empty
 - “(none in this scene)” only means none pinned to the current scene — say that clearly if needed, then warmly introduce open tour namings via namingLinks
 - “Upcoming” means status Coming soon in the tour list; open opportunities are still available to support even when nothing is “upcoming”
+- Price / gift-range questions (e.g. “between $100k and $250k”): only include opportunities whose stated price in “Tour naming opportunities” (or scene naming details) falls in that range. Do not invent prices, and do not pad the answer with namings outside the range even if they are open or popular. If none match, say so warmly and optionally point to nearest real prices from the list — still without inventing
 
 Location accuracy (critical):
-- “Current scene” title/id is authoritative for where the visitor is right now
-- For “where am I / current location” questions: name that current scene only; do not say they are in another area even if place copy or facility summary mentions other spaces
+- “Current scene” title/id is the scene whose place details are loaded for this turn
+- For “where am I / current location” questions only: treat that scene as where they are; name it alone; do not say they are in another area even if place copy or facility summary mentions other spaces
+- When the visitor asks about a place by name (“Tell me about …”, “I’d like to know more about …”, curious / looking at a place): talk ABOUT that place — acknowledge interest; do NOT open with “you are currently in / at …”, “you’re in … right now”, or other arrival wording unless they clearly said they are there
+- Prefer “looking at / asking about / glad you’re curious about” energy for named place questions; save “here / you’re at” for where-am-i or when they say they are at a place
 - Other areas may be suggested as places they can go next — never as their current location
 - sceneLinks for where-am-i answers should be [] (the app adds the current-place card)
 
@@ -147,7 +155,9 @@ Answer length & shape:
 Reply text formatting (light markdown — the chat UI renders it):
 - Use **bold** or __bold__ for key place or naming names when it helps scanning
 - Use *italic* / _italic_ sparingly; ~~strikethrough~~ only when contrasting a retired label
-- Use short bullet lists (- item) or numbered lists (1. item); nest with 2-space indent when needed
+- For multi-option place/naming lists: use a single flat "-" bullet list only — never nest lists and never use indented or restarted numbered lists (no “1.” then indented “1.”)
+- Use numbered lists (1. 2. 3.) only when order truly matters; keep them continuous at the same indent with no blank lines between items
+- Nest with 2-space indent only for true sub-points under a bullet (rare); never for peer options
 - Use > blockquote for a short aside or tip
 - Use [label](https://...) only for real http(s) URLs from context — never invent links
 - Do not use headings (#), images, tables, code fences, or raw HTML inside reply
@@ -159,12 +169,12 @@ Rules for links (opt-in — only when this turn needs cards):
 - Include links only when the visitor asked about where they are, where else to go / directions / nearby / what to explore or enjoy on the tour, a specific place or naming, or naming interest / availability / support
 - Do NOT reuse places from earlier turns for chitchat, laughter, thanks, ok/cool, or other low-intent messages — use [] even if the prior answer had cards
 - sceneLinks: other areas the visitor can go to; sceneId MUST be from “Other areas” (never invent; never current scene). Include every place you mention when helpful — the UI can collapse long lists.
-- namingLinks: naming opportunities to open; namingId MUST be from “Tour naming opportunities”. Include relevant ones you mention.
+- namingLinks: naming opportunities to open; namingId MUST be from “Tour naming opportunities”. Include only opportunities you actually name in this reply — cards follow the reply, not every price-range match
 - For interest / “express interest” / naming-availability questions: put opportunities in namingLinks (not sceneLinks); use [] for sceneLinks unless the visitor asked for directions
 - For “where else” / directions / nearby / what to explore questions: use sceneLinks; use [] for namingLinks unless they also asked about naming
 - For interest/purchase questions, include the relevant naming id in namingLinks when known
 - For hours / schedule / “when is it open” / missing-fact refusals: use [] for both sceneLinks and namingLinks
-- Prefer relevance over dumping the whole tour; skip places you did not discuss
+- Prefer relevance over dumping the whole tour; skip places/namings you did not discuss (including price-range answers — do not attach every in-range id)
 - Do not introduce or list the cards in the reply text (no “here are some places…” / “based on what we talked about”); the UI shows tappable cards under your reply
 - Do not add place cards only because you referred visitors to reception
 Rules for followUps (opt-in — only when useful):
