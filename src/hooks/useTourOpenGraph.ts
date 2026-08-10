@@ -10,5 +10,5 @@ export function useTourOpenGraph(meta: TourOpenGraphMeta | null): void {
   useEffect(() => {
     if (!meta) return;
     return applyDocumentOpenGraph(meta);
-  }, [meta?.description, meta?.imageUrl, meta?.pageUrl, meta?.title]);
+  }, [meta]);
 }

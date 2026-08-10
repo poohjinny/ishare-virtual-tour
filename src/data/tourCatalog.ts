@@ -78,6 +78,17 @@ export function findCatalogTour(
   return findCatalogClient(clientId)?.tours.find((tour) => tour.id === tourId);
 }
 
+/** Locate a catalog tour entry by tour id (any client). */
+export function findCatalogTourById(
+  tourId: string,
+): CatalogTourEntry | undefined {
+  for (const client of listCatalogClients()) {
+    const tour = client.tours.find((entry) => entry.id === tourId);
+    if (tour) return tour;
+  }
+  return undefined;
+}
+
 export interface CatalogTourListItem {
   tourId: string;
   clientId: string;

@@ -916,18 +916,12 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
 
     return resolveTourSceneOpenGraph({
       tour,
-      tourTitle: productFullName,
+      tourTitle: tour.title,
       sceneId: currentSceneId,
       namingHotspotId: activeNamingHotspotId,
       logoPath: tourBranding?.logo,
     });
-  }, [
-    activeNamingHotspotId,
-    currentSceneId,
-    productFullName,
-    tour,
-    tourBranding?.logo,
-  ]);
+  }, [activeNamingHotspotId, currentSceneId, tour, tourBranding?.logo]);
 
   useTourOpenGraph(openGraphMeta);
 
@@ -1752,6 +1746,7 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
                 firstSceneId={tour.firstScene}
                 sceneOrder={tour.sceneOrder}
                 tourTitle={productFullName}
+                facilityTitle={tour.title}
                 exploreLead={exploreLead}
                 client={resolveTourClient(tour)}
                 clientLogo={tourBranding?.logo}
@@ -1857,7 +1852,6 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
         <InfoPopup
           popup={activePopup}
           tour={tour}
-          tourTitle={productFullName}
           sceneId={currentSceneId}
           namingHotspotId={activeNamingHotspotId}
           embed={searchParams.embed}

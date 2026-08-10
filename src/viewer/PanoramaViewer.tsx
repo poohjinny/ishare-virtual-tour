@@ -38,10 +38,8 @@ import {
   VIEWER_MARKER_AUDIENCE,
 } from '../utils/sceneVisibility';
 import { resolveTourSceneTransitionEffect } from '../utils/tourTransition';
-import {
-  buildAbsoluteShareUrl,
-  buildShareMessage,
-} from '../utils/buildShareUrl';
+import { buildAbsoluteShareUrl } from '../utils/buildShareUrl';
+import { resolveTourSceneOpenGraph } from '../utils/tourOpenGraph';
 import {
   TOUR_SHARE_LOCATION_LABEL,
   TOUR_SHARE_OPPORTUNITY_ARIA,
@@ -1733,14 +1731,22 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
             if (!navTarget?.tourId) return;
 
             const tour = tourRef.current;
-            const sceneTitle =
-              tour.scenes[navTarget.sceneId]?.title ?? navTarget.sceneId;
-            const shareUrl = buildAbsoluteShareUrl({
-              tourId: navTarget.tourId,
+            const openGraph = resolveTourSceneOpenGraph({
+              tour,
+              tourTitle: tour.title,
               sceneId: navTarget.sceneId,
-              firstSceneId: tour.firstScene,
             });
-            const message = buildShareMessage(tour.title, sceneTitle);
+            const shareUrl =
+              openGraph.pageUrl ??
+              buildAbsoluteShareUrl({
+                tourId: navTarget.tourId,
+                sceneId: navTarget.sceneId,
+                firstSceneId: tour.firstScene,
+              });
+            const message = {
+              title: openGraph.title,
+              text: openGraph.description ?? '',
+            };
 
             void shareTourView({ shareUrl, message, preferNative: true }).then(
               (result) => {
@@ -1778,14 +1784,24 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
             const sceneId = virtualTour.getCurrentNode()?.id ?? tour.firstScene;
             const namingHotspotId =
               panel.hasAttribute('data-info-panel-naming') ? hotspotId : null;
-            const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
-            const shareUrl = buildAbsoluteShareUrl({
-              tourId: tour.id,
+            const openGraph = resolveTourSceneOpenGraph({
+              tour,
+              tourTitle: tour.title,
               sceneId,
-              firstSceneId: tour.firstScene,
               namingHotspotId,
             });
-            const message = buildShareMessage(tour.title, sceneTitle);
+            const shareUrl =
+              openGraph.pageUrl ??
+              buildAbsoluteShareUrl({
+                tourId: tour.id,
+                sceneId,
+                firstSceneId: tour.firstScene,
+                namingHotspotId,
+              });
+            const message = {
+              title: openGraph.title,
+              text: openGraph.description ?? '',
+            };
 
             void shareTourView({ shareUrl, message, preferNative: true }).then(
               (result) => {

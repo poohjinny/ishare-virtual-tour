@@ -44,6 +44,7 @@ import {
   WhatsAppBrandIcon,
   XBrandIcon,
 } from './icons/ShareBrandIcons';
+import { aiFabBubblePlaceDotClassName } from './ai/aiAssistantVariants';
 import {
   shareTourAppIconVariants,
   shareTourAppLabelClassName,
@@ -228,7 +229,12 @@ export function ShareTourPanel({
   return (
     <div className={shareTourPanelRootClassName}>
       <p className={shareTourPanelLeadClassName}>
-        {TOUR_SHARE_LEAD}: <strong>{contextLabel}</strong>.
+        {TOUR_SHARE_LEAD}:{' '}
+        <strong className='inline-flex items-center gap-1 align-middle leading-relaxed whitespace-nowrap'>
+          <span className={aiFabBubblePlaceDotClassName} aria-hidden='true' />
+          {contextLabel}
+        </strong>
+        .
       </p>
 
       <ShareLinkPreview

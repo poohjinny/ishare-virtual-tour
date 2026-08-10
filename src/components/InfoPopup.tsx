@@ -22,6 +22,7 @@ import {
   buildAbsoluteShareUrl,
   buildShareMessage,
 } from '../utils/buildShareUrl';
+import { resolveShareDescription } from '../utils/tourOpenGraph';
 import {
   resolveGlassPanelWidth,
   resolveNavPreviewHeroHeight,
@@ -41,7 +42,6 @@ import {
 import { cn } from '../lib/cn';
 import { ANCHORED_PANEL } from './anchoredPanelChrome';
 import {
-  AnchoredPanelBodyToolbar,
   AnchoredPanelHeroActions,
   AnchoredPanelShell,
 } from './AnchoredPanelShell';
@@ -51,7 +51,6 @@ const POPUP_EXIT_MS = 280;
 interface InfoPopupProps {
   popup: PopupContent | null;
   tour: Tour;
-  tourTitle: string;
   sceneId: string;
   namingHotspotId?: string | null;
   embed?: boolean;
@@ -62,7 +61,6 @@ interface InfoPopupProps {
 export function InfoPopup({
   popup,
   tour,
-  tourTitle,
   sceneId,
   namingHotspotId = null,
   embed = false,
@@ -151,8 +149,14 @@ export function InfoPopup({
   );
 
   const shareMessage = useMemo(
-    () => buildShareMessage(tourTitle, sceneTitle, namingName),
-    [namingName, sceneTitle, tourTitle],
+    () =>
+      buildShareMessage(
+        tour.title,
+        sceneTitle,
+        namingName,
+        resolveShareDescription({ tour, sceneId, namingHotspotId }),
+      ),
+    [namingHotspotId, namingName, sceneId, sceneTitle, tour],
   );
 
   const panelWidth = useMemo(
@@ -168,8 +172,9 @@ export function InfoPopup({
   const hasVideo = Boolean(shown.videoUrl?.trim());
   const hasImage = Boolean(shown.image?.trim()) && !hasVideo;
   const hasHero = hasVideo || hasImage;
+  // Catalog image + video heroes share 16:9 (same as in-viewer image chrome).
   const heroHeight =
-    panelWidth != null ?
+    panelWidth != null && hasHero ?
       resolveNavPreviewHeroHeight(panelWidth, { video: true })
     : undefined;
 
@@ -189,11 +194,7 @@ export function InfoPopup({
       <button
         ref={closeRef}
         type='button'
-        className={
-          hasHero ?
-            ANCHORED_PANEL.close
-          : `${ANCHORED_PANEL.close} ${ANCHORED_PANEL.closeInline}`
-        }
+        className={hasHero ? ANCHORED_PANEL.close : 'tour-glass-panel__close'}
         onClick={handleDismiss}
         aria-label='Close'
       >
@@ -235,6 +236,40 @@ export function InfoPopup({
         <AnchoredPanelHeroActions>{chromeActions}</AnchoredPanelHeroActions>
       </div>
     : undefined;
+
+  const intro = (
+    <div className='info-panel__intro'>
+      <div className={infoPopupTitleBlockClassName}>
+        <div className={infoPopupTitleLineClassName}>
+          <h2 id='info-popup-title' className={infoPopupTitleClassName}>
+            {shown.title}
+          </h2>
+          {shown.namingOpportunity ?
+            <div className='tour-glass-panel__title-line-trailing'>
+              <PopupHeaderMeta popup={shown} />
+              <NamingOpportunityPrice opportunity={shown.namingOpportunity} />
+            </div>
+          : null}
+        </div>
+        {shown.namingOpportunity?.priceLabel ?
+          <p className={infoPopupPriceLabelClassName}>
+            {shown.namingOpportunity.priceLabel}
+          </p>
+        : null}
+      </div>
+      {shown.namingOpportunity ?
+        <NamingDonorCreditBlock opportunity={shown.namingOpportunity} />
+      : null}
+    </div>
+  );
+
+  const header =
+    hasHero ? intro : (
+      <div className='tour-glass-panel__title-row'>
+        <div className='tour-glass-panel__header-leading'>{intro}</div>
+        <div className='tour-glass-panel__title-actions'>{chromeActions}</div>
+      </div>
+    );
 
   const footer =
     hasFooterCtas ?
@@ -290,38 +325,7 @@ export function InfoPopup({
         }
         onClick={(e) => e.stopPropagation()}
         hero={hero}
-        toolbar={
-          !hasHero ?
-            <AnchoredPanelBodyToolbar>{chromeActions}</AnchoredPanelBodyToolbar>
-          : undefined
-        }
-        header={
-          <div className='info-panel__intro'>
-            <div className={infoPopupTitleBlockClassName}>
-              <div className={infoPopupTitleLineClassName}>
-                <h2 id='info-popup-title' className={infoPopupTitleClassName}>
-                  {shown.title}
-                </h2>
-                {shown.namingOpportunity ?
-                  <div className='tour-glass-panel__title-line-trailing'>
-                    <PopupHeaderMeta popup={shown} />
-                    <NamingOpportunityPrice
-                      opportunity={shown.namingOpportunity}
-                    />
-                  </div>
-                : null}
-              </div>
-              {shown.namingOpportunity?.priceLabel ?
-                <p className={infoPopupPriceLabelClassName}>
-                  {shown.namingOpportunity.priceLabel}
-                </p>
-              : null}
-            </div>
-            {shown.namingOpportunity ?
-              <NamingDonorCreditBlock opportunity={shown.namingOpportunity} />
-            : null}
-          </div>
-        }
+        header={header}
         footer={footer}
       >
         <PopupBodyCopy body={shown.body} />

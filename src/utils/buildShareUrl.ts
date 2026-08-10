@@ -132,21 +132,33 @@ export interface ShareMessage {
   text: string;
 }
 
+/**
+ * Share + Open Graph copy. Pass the facility name (`tour.title`), not the
+ * client product line (`{Client} Virtual Tour`).
+ *
+ * Prefer a real {@link description} (catalog summary, scene copy, naming body).
+ * The template strings are fallbacks only when no authored copy exists.
+ */
 export function buildShareMessage(
   tourTitle: string,
   sceneTitle: string,
   namingOpportunityName?: string | null,
+  description?: string | null,
 ): ShareMessage {
+  const authored = description?.trim() || '';
+
   if (namingOpportunityName) {
     return {
       title: `${namingOpportunityName} — ${tourTitle}`,
-      text: `Explore the ${namingOpportunityName} naming opportunity at ${sceneTitle} in ${tourTitle}.`,
+      text:
+        authored ||
+        `Explore the ${namingOpportunityName} naming opportunity at ${sceneTitle} in ${tourTitle}.`,
     };
   }
 
   return {
     title: `${sceneTitle} — ${tourTitle}`,
-    text: `Explore ${sceneTitle} in ${tourTitle}.`,
+    text: authored || `Explore ${sceneTitle} in ${tourTitle}.`,
   };
 }
 

@@ -12,7 +12,6 @@ import { useTourChromeLayout } from '../hooks/useTourChromeLayout';
 import { TOUR_CHROME_COMPACT_MAX_PX } from '../constants/tourChrome';
 import { useFlipListReorder } from '../hooks/useFlipListReorder';
 import { isTypingTarget } from '../utils/isTypingTarget';
-import { withBaseUrl } from '../utils/assetUrl';
 import {
   TOUR_BREADCRUMB_CURRENT_TOOLTIP,
   TOUR_DIRECTORY_PANEL_TITLE,
@@ -78,6 +77,10 @@ import {
   buildAbsoluteShareUrl,
   buildShareMessage,
 } from '../utils/buildShareUrl';
+import {
+  resolveShareDescription,
+  resolveSceneShareImageUrl,
+} from '../utils/tourOpenGraph';
 import { ShareTourPanel } from './ShareTourPanel';
 import { ExploreLocationGroup } from './ExploreLocationGroup';
 import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
@@ -212,7 +215,13 @@ interface TourNavFloatProps {
   firstSceneId: string;
   /** Author Explore / Play order — when omitted, runtime fills via nav BFS. */
   sceneOrder?: string[];
+  /** Client tour product name — Help welcome (`{Client} Virtual Tour`). */
   tourTitle?: string;
+  /**
+   * Facility / catalog title (`tour.title`) — Share panel + OG-aligned copy.
+   * Falls back to {@link tourTitle} when omitted.
+   */
+  facilityTitle?: string;
   client?: TourClient;
   clientLogo?: string;
   logoAlt?: string;
@@ -403,6 +412,7 @@ export function TourNavFloat({
   firstSceneId,
   sceneOrder,
   tourTitle = 'Virtual Tour',
+  facilityTitle,
   client,
   clientLogo,
   logoAlt,
@@ -593,7 +603,7 @@ export function TourNavFloat({
   const exploreTour = useMemo(
     (): Tour => ({
       id: tourId,
-      title: tourTitle ?? '',
+      title: facilityTitle?.trim() || tourTitle || '',
       firstScene: firstSceneId,
       scenes: tourDirectoryContext.scenes,
       hotspots: tourHotspots,
@@ -602,6 +612,7 @@ export function TourNavFloat({
       ...(sceneOrder ? { sceneOrder } : {}),
     }),
     [
+      facilityTitle,
       firstSceneId,
       namingOpportunities,
       sceneOrder,
@@ -799,20 +810,39 @@ export function TourNavFloat({
     [activeNamingHotspotId, currentSceneId, firstSceneId, tourId],
   );
 
-  const shareMessage = useMemo(
+  const shareMessage = useMemo(() => {
+    const shareTourTitle = facilityTitle?.trim() || tourTitle;
+    const description = resolveShareDescription({
+      tour: exploreTour,
+      sceneId: currentSceneId,
+      namingHotspotId: activeNamingHotspotId,
+    });
+    return buildShareMessage(
+      shareTourTitle,
+      currentSceneTitle,
+      activeNamingItem?.name,
+      description,
+    );
+  }, [
+    activeNamingHotspotId,
+    activeNamingItem?.name,
+    currentSceneId,
+    currentSceneTitle,
+    exploreTour,
+    facilityTitle,
+    tourTitle,
+  ]);
+
+  const sharePreviewImageUrl = useMemo(
     () =>
-      buildShareMessage(tourTitle, currentSceneTitle, activeNamingItem?.name),
-    [activeNamingItem?.name, currentSceneTitle, tourTitle],
+      resolveSceneShareImageUrl(
+        exploreTour,
+        currentSceneId,
+        clientLogo,
+        activeNamingHotspotId,
+      ),
+    [activeNamingHotspotId, clientLogo, currentSceneId, exploreTour],
   );
-
-  const sharePreviewImageUrl = useMemo(() => {
-    const scene = scenes.find((entry) => entry.id === currentSceneId);
-    const thumbnail = scene?.thumbnail?.trim();
-    if (thumbnail) return withBaseUrl(thumbnail);
-    if (clientLogo?.trim()) return withBaseUrl(clientLogo);
-    return undefined;
-  }, [clientLogo, currentSceneId, scenes]);
-
   const shareContextLabel = activeNamingItem?.name ?? currentSceneTitle;
 
   const namingPriceBounds = useMemo(
@@ -2221,7 +2251,7 @@ export function TourNavFloat({
               title={group.title}
               metaLabel={
                 SHOW_SECTOR_NAMING_TOTAL ?
-                  formatNamingSectorGroupTotalLabel(group.total)
+                  formatNamingSectorGroupTotalLabel(group.total, exploreLayout)
                 : undefined
               }
               expanded={expandedNamingGroups.has(group.id)}
