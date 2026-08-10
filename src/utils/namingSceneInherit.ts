@@ -197,7 +197,12 @@ export function resolveNamingPopup(
     catalogVideo ||
     scene?.previewVideoUrl?.trim() ||
     undefined;
-  const image = popup.image?.trim() || catalogImage || undefined;
+  // Host thumbnail when no NO image/video — Explore-style hero; no empty shell.
+  const image =
+    popup.image?.trim() ||
+    catalogImage ||
+    (!videoUrl ? scene?.thumbnail?.trim() : undefined) ||
+    undefined;
 
   const next: PopupContent = {
     ...popup,

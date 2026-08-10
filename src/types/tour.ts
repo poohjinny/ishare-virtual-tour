@@ -108,7 +108,7 @@ export interface NamingOpportunityRecord {
   body?: string;
   /** Optional panel video; omit to inherit host scene previewVideoUrl. */
   videoUrl?: string;
-  /** Optional panel image. */
+  /** Optional panel image; omit to inherit host scene thumbnail when no video. */
   image?: string;
   /**
    * Discoverability — omit / undefined = public.

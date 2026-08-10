@@ -37,6 +37,10 @@ import {
   findHotspotInTour,
   resolveModel3dNamingTargetView,
 } from '../utils/findTourHotspot';
+import {
+  resolveHotspotHostScene,
+  resolveNamingPopup,
+} from '../utils/namingSceneInherit';
 import { resolveTourSceneModelUrl } from '../utils/resolveTourModelUrl';
 import { resolveSceneHotspots } from '../utils/resolveSceneHotspots';
 import { VIEWER_MARKER_AUDIENCE } from '../utils/sceneVisibility';
@@ -1123,9 +1127,22 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
             );
           };
 
+          const resolveInfoPopup = (): PopupContent | undefined => {
+            const tour = tourRef.current;
+            const hostScene = resolveHotspotHostScene(
+              tour,
+              hs,
+              tour.scenes[currentSceneIdRef.current],
+            );
+            return resolveNamingPopup(tour, hs, hostScene) ?? hs.popup;
+          };
+
           if (hs.type === 'info' && hs.popup) {
             hotspotPanelActionsRef.current.set(hs.id, {
-              open: () => openInfoPanel(hs.popup!),
+              open: () => {
+                const popup = resolveInfoPopup();
+                if (popup) openInfoPanel(popup);
+              },
               isOpen: () => panelOpen,
             });
           }
@@ -1164,7 +1181,8 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
             }
 
             if (hs.type === 'info' && hs.popup) {
-              openInfoPanel(hs.popup);
+              const popup = resolveInfoPopup();
+              if (popup) openInfoPanel(popup);
             }
           });
 
