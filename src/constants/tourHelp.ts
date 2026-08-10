@@ -42,6 +42,19 @@ export interface TourHelpFaqItem {
   answer: string;
 }
 
+const TOUR_HELP_FAQ_ASK_GUIDE: TourHelpFaqItem = {
+  id: 'ask-guide',
+  question: `How do I use ${VIRTUAL_TOUR_GUIDE_NAME}?`,
+  answer: `Tap Ask Tour Guide in the bottom-right corner to ask about this facility and your current location.`,
+};
+
+const TOUR_HELP_FAQ_ASK_GUIDE_PRIVACY: TourHelpFaqItem = {
+  id: 'ask-guide-privacy',
+  question: `What happens to my ${VIRTUAL_TOUR_GUIDE_NAME} questions?`,
+  answer:
+    'Questions are sent to our Tour Guide service so it can answer about this tour and your current location. Please don’t share personal or health information in chat.',
+};
+
 const TOUR_HELP_FAQ_PLAY_TOUR: TourHelpFaqItem = {
   id: 'play-tour',
   question: 'What is Play tour?',
@@ -69,11 +82,8 @@ export const TOUR_HELP_FAQ: TourHelpFaqItem[] = [
     answer:
       'Naming opportunities are sponsorship or recognition options tied to spaces in the facility. Look for heart markers in the scene or the Naming tab in Explore tour.',
   },
-  {
-    id: 'ask-guide',
-    question: `How do I use ${VIRTUAL_TOUR_GUIDE_NAME}?`,
-    answer: `Tap Ask Tour Guide in the bottom-right corner to ask about this facility and your current location.`,
-  },
+  TOUR_HELP_FAQ_ASK_GUIDE,
+  TOUR_HELP_FAQ_ASK_GUIDE_PRIVACY,
   TOUR_HELP_FAQ_PLAY_TOUR,
   TOUR_HELP_FAQ_IMMERSIVE,
   {
@@ -103,11 +113,8 @@ export const TOUR_HELP_FAQ_3D: TourHelpFaqItem[] = [
     answer:
       'Naming opportunities are sponsorship or recognition options tied to spaces in the facility. Look for heart markers on the model or the Naming tab in Explore tour.',
   },
-  {
-    id: 'ask-guide',
-    question: `How do I use ${VIRTUAL_TOUR_GUIDE_NAME}?`,
-    answer: `Tap Ask Tour Guide in the bottom-right corner to ask about this facility and your current location.`,
-  },
+  TOUR_HELP_FAQ_ASK_GUIDE,
+  TOUR_HELP_FAQ_ASK_GUIDE_PRIVACY,
   TOUR_HELP_FAQ_PLAY_TOUR,
   TOUR_HELP_FAQ_IMMERSIVE,
   {
@@ -182,7 +189,9 @@ export function tourHelpFaq(
   const showPlayTour = options?.showPlayTour ?? true;
   const showImmersiveAmbience = options?.showImmersiveAmbience ?? true;
   return items.filter((item) => {
-    if (item.id === 'ask-guide') return showAskGuide;
+    if (item.id === 'ask-guide' || item.id === 'ask-guide-privacy') {
+      return showAskGuide;
+    }
     if (item.id === 'play-tour') return showPlayTour;
     if (item.id === 'immersive-ambience') return showImmersiveAmbience;
     return true;

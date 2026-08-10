@@ -65,3 +65,10 @@ export function isAskGuideEnabled(
 /** Shown in Tour Guide body lead when `?guideMock=1` (scripted replies). */
 export const VIRTUAL_TOUR_GUIDE_PREVIEW_NOTICE =
   'Demo preview — responses are scripted for now. Live AI assistance is coming in a future update.';
+
+/**
+ * Always-on fine print under the Tour Guide composer — data handling, not a
+ * legal policy page. Keep short; Help FAQ can expand slightly.
+ */
+export const VIRTUAL_TOUR_GUIDE_PRIVACY_NOTICE =
+  'Questions go to our Tour Guide service to answer about this tour. Please don’t share personal or health information.';

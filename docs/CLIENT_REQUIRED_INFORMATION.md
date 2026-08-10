@@ -169,10 +169,10 @@ one anchored panel in the panorama.
 
 | Status      | Donor sees                    |
 | ----------- | ----------------------------- |
-| On sale     | Express your interest         |
-| Reserved    | Speak with our team           |
+| On sale     | Express interest              |
+| Reserved    | Speak with the team           |
 | Coming soon | Notify me                     |
-| Sold        | Support our mission (website) |
+| Sold        | Support the mission (website) |
 
 **Client must confirm:** Prices and availability are **approved for public
 display** before launch.
@@ -224,13 +224,14 @@ Optional ambient background music during the tour.
 
 ## 10. Approvals & legal
 
-| Item                                                     | Required before launch |
-| -------------------------------------------------------- | ---------------------- |
-| Written approval of all public copy                      | Yes                    |
-| Written approval of naming prices and statuses           | Yes                    |
-| Image / video / music rights                             | Yes                    |
-| Privacy — contact email published in app                 | Acknowledge            |
-| Accessibility review (if client requires WCAG statement) | As per contract        |
+| Item                                                     | Required before launch                                               |
+| -------------------------------------------------------- | -------------------------------------------------------------------- |
+| Written approval of all public copy                      | Yes                                                                  |
+| Written approval of naming prices and statuses           | Yes                                                                  |
+| Image / video / music rights                             | Yes                                                                  |
+| Privacy — contact email published in app                 | Acknowledge                                                          |
+| Privacy / data brief shared when Tour Guide is enabled   | Yes — [CLIENT_PRIVACY_DATA_BRIEF.md](./CLIENT_PRIVACY_DATA_BRIEF.md) |
+| Accessibility review (if client requires WCAG statement) | As per contract                                                      |
 
 ---
 

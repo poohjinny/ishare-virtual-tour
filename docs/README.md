@@ -15,6 +15,7 @@ Project documentation for the iShare virtual tour platform.
 | **Viewer isolation (pano vs 3D)**  | [CODING_GUIDELINES.md § Viewer-type isolation](./CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d) |
 | **Dev panel & local authoring**    | [DEV_PANEL.md](./DEV_PANEL.md)                                                                                   |
 | **New client — what to ask**       | [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md)                                               |
+| **Client privacy / data brief**    | [CLIENT_PRIVACY_DATA_BRIEF.md](./CLIENT_PRIVACY_DATA_BRIEF.md)                                                   |
 | **3D handoff — what to deliver**   | [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)                                                         |
 | **Mobile chrome**                  | [MOBILE.md](./MOBILE.md)                                                                                         |
 | **Tour Guide / Ask Guide**         | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md), [DEPLOY.md](./DEPLOY.md)                                               |
@@ -41,6 +42,7 @@ Project documentation for the iShare virtual tour platform.
 | [MOBILE.md](./MOBILE.md)                                           | React chrome layout on phone — breakpoints, QA                          |
 | [GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md)             | Giftabulator Give Now CTA wiring                                        |
 | [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client intake — full tour onboarding checklist (sales)                  |
+| [CLIENT_PRIVACY_DATA_BRIEF.md](./CLIENT_PRIVACY_DATA_BRIEF.md)     | Client-facing — cookies, local storage, Tour Guide, analytics           |
 | [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)           | 3D handoff — panoramas, GLTF models, spatial package (architect → dev)  |
 | [CURSOR_GLOBAL_RULES.md](./CURSOR_GLOBAL_RULES.md)                 | Cursor agent rules snapshot (optional)                                  |
 
