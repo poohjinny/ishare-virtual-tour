@@ -10,7 +10,7 @@ export const GIFTABULATOR_PRODUCT = {
   ...GIFTABULATOR,
   ctaLabel: 'See tax-efficient giving',
   ctaDescription: platformBrandAriaLabel(GIFTABULATOR),
-  ariaLabel: `See your tax-efficient giving with ${platformBrandMarkedName(GIFTABULATOR)}`,
+  ariaLabel: `See tax-efficient giving with ${platformBrandMarkedName(GIFTABULATOR)}`,
 } as const;
 
 export function giftabulatorCtaButtonPlainLabel(): string {

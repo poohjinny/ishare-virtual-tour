@@ -86,7 +86,7 @@ function actionCtas(
     if (cta.kind === 'website') return false;
     // Catalog Email is already in the contact info block.
     if (cta.kind === 'contact' && cta.id === 'contact:client') return false;
-    // Keep naming “Express your interest” (prefilled subject/body) even when
+    // Keep naming “Express interest” (prefilled subject/body) even when
     // the org email is already listed above.
     if (
       cta.kind === 'contact' &&

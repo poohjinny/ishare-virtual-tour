@@ -10,8 +10,8 @@ CTAs (primary + secondary when Giftabulator applies):
 
 | JSON `status`      | Label        | Primary CTA                           | Secondary CTA     |
 | ------------------ | ------------ | ------------------------------------- | ----------------- |
-| `open` _(default)_ | Open         | **Express your interest** → `mailto:` | **GIFTABULATOR®** |
-| `reserved`         | Reserved     | **Speak with our team** → `mailto:`   | **GIFTABULATOR®** |
+| `open` _(default)_ | Open         | **Express interest** → `mailto:`    | **GIFTABULATOR®** |
+| `reserved`         | Reserved     | **Speak with the team** → `mailto:` | **GIFTABULATOR®** |
 | `soon`             | Coming soon  | **Notify me** → `mailto:`             | **GIFTABULATOR®** |
 | `sold`             | Sold / Named | Donor credit + mission CTA            | optional GT       |
 
@@ -23,7 +23,7 @@ Omit `status` in tour JSON → treated as `open`.
 ## Giftabulator® CTA
 
 Secondary footer button — brand label **GIFTABULATOR®**, tooltip description
-_See your tax-efficient giving_. Links to the client’s Giftabulator give-now
+_See tax-efficient giving_. Links to the client’s Giftabulator give-now
 page with `calc=` prefill from NO price. URL rules:
 [GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md).
 
