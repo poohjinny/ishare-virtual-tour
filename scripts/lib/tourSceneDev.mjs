@@ -864,6 +864,7 @@ export async function saveUploadedSceneThumbnailWebp({
   mkdirSync(dirname(filePath), { recursive: true });
   await sharp(fileBuffer).webp({ quality: 85 }).toFile(filePath);
   syncAssetToPublic(root, filePath, webPath);
+  await writeOgJpegSibling(filePath, root, webPath);
   return webPath;
 }
 
@@ -886,6 +887,7 @@ export async function saveUploadedHotspotPreviewWebp({
   mkdirSync(dirname(filePath), { recursive: true });
   await sharp(fileBuffer).webp({ quality: 85 }).toFile(filePath);
   syncAssetToPublic(root, filePath, webPath);
+  await writeOgJpegSibling(filePath, root, webPath);
   return webPath;
 }
 
@@ -933,6 +935,18 @@ function syncAssetToPublic(root, assetsFilePath, webPath) {
   const publicPath = join(root, 'public', 'assets', relative);
   mkdirSync(dirname(publicPath), { recursive: true });
   copyFileSync(assetsFilePath, publicPath);
+}
+
+/** JPG sibling next to a WebP asset for social og:image. */
+async function writeOgJpegSibling(webpFilePath, root, webPath, quality = 80) {
+  if (!/\.webp$/i.test(webpFilePath)) return;
+  const jpgFilePath = webpFilePath.replace(/\.webp$/i, '.jpg');
+  await sharp(webpFilePath)
+    .jpeg({ quality, mozjpeg: true })
+    .toFile(jpgFilePath);
+  if (root && webPath) {
+    syncAssetToPublic(root, jpgFilePath, webPath.replace(/\.webp$/i, '.jpg'));
+  }
 }
 
 export function assertPanoramaUploadFileName(fileName) {
@@ -2793,6 +2807,19 @@ function syncThumbnailToPublic(root, thumbnailFilePath, thumbnailWebPath) {
   const publicPath = join(root, 'public', 'assets', relative);
   mkdirSync(dirname(publicPath), { recursive: true });
   copyFileSync(thumbnailFilePath, publicPath);
+
+  const jpgFilePath = thumbnailFilePath.replace(/\.webp$/i, '.jpg');
+  const jpgWebPath = thumbnailWebPath.replace(/\.webp$/i, '.jpg');
+  if (jpgFilePath !== thumbnailFilePath && existsSync(jpgFilePath)) {
+    const jpgPublic = join(
+      root,
+      'public',
+      'assets',
+      jpgWebPath.replace(/^\/assets\//, ''),
+    );
+    mkdirSync(dirname(jpgPublic), { recursive: true });
+    copyFileSync(jpgFilePath, jpgPublic);
+  }
 }
 
 export function updateSceneDefaultView(tour, sceneId, view) {

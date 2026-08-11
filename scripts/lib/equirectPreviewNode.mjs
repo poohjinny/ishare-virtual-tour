@@ -163,6 +163,15 @@ export async function renderEquirectPreviewToFile(
   await sharp(pixels, { raw: { width, height, channels: 4 } })
     .webp({ quality, effort: 4 })
     .toFile(outputPath);
+
+  // Static JPG sibling for social og:image (crawlers prefer JPEG over WebP).
+  const jpgPath = outputPath.replace(/\.webp$/i, '.jpg');
+  if (jpgPath !== outputPath) {
+    const jpegQuality = options.jpegQuality ?? Math.min(quality, 85);
+    await sharp(pixels, { raw: { width, height, channels: 4 } })
+      .jpeg({ quality: jpegQuality, mozjpeg: true })
+      .toFile(jpgPath);
+  }
 }
 
 export function resolveThumbnailWebPath(panoramaWebPath, sceneId) {

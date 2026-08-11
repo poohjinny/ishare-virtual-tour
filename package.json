@@ -8,6 +8,7 @@
     "generate-thumbnails": "node scripts/generate-scene-thumbnails.mjs && node scripts/generate-naming-thumbnails.mjs",
     "generate-scene-thumbnails": "node scripts/generate-scene-thumbnails.mjs",
     "generate-naming-thumbnails": "node scripts/generate-naming-thumbnails.mjs",
+    "backfill-og-jpg": "node scripts/backfill-og-jpg.mjs",
     "dev": "npm run sync-assets && vite",
     "build": "npm run sync-assets && tsgo -b && vite build",
     "build:ghpages": "npm run sync-assets && tsgo -b && vite build --mode ghpages",

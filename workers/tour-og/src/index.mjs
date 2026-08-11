@@ -1,15 +1,15 @@
 /**
  * Bot / social-crawler Open Graph edge for tour.ishare.ca.
  *
- * - Known crawlers → 200 HTML with tour/scene/naming og:* tags (no JS).
- * - Everyone else → proxy to GitHub Pages origin; rewrite SPA deep-link 404 → 200.
+ * - Known crawler UAs → 200 HTML with tour/scene/naming og:* (no JS).
+ * - Everyone else → proxy GitHub Pages; deep-link 404 → SPA shell 200.
+ * - og:image points at static *.jpg sibling of WebP thumbnails (build-time).
  *
- * Origin fetches use resolveOverride so subrequests do not re-enter this Worker
- * (fetching https://tour.ishare.ca/... from the Worker would loop otherwise).
+ * Origin fetches use resolveOverride so subrequests do not re-enter this Worker.
  */
 
 const BOT_UA =
-  /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|KakaoTalk|Kakaotalk|kakaotalk-scrap|Daum|Yeti|Linespider|LineBot|BitlyBot|OpenGraph|Preview\/|Snapchat|PetalBot/i;
+  /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp\/|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|kakaotalk-scrap|Linespider|LineBot|BitlyBot|Snapchat|PetalBot/i;
 
 const DESC_MAX = 220;
 
@@ -22,6 +22,10 @@ export default {
     ).replace(/\/$/, '');
     const url = new URL(request.url);
 
+    if (url.pathname.startsWith('/__og/')) {
+      return new Response('Gone', { status: 410 });
+    }
+
     if (isAssetOrApiPath(url.pathname)) {
       return proxyToOrigin(request, env);
     }
@@ -29,9 +33,7 @@ export default {
     if (shouldServeOpenGraph(request, url.pathname)) {
       try {
         const html = await buildBotHtml(url, publicOrigin, env);
-        if (html) {
-          return openGraphResponse(html, request);
-        }
+        if (html) return openGraphResponse(html);
       } catch (error) {
         console.error('tour-og bot html failed', error);
       }
@@ -42,20 +44,10 @@ export default {
 };
 
 function shouldServeOpenGraph(request, pathname) {
-  const ua = request.headers.get('user-agent') || '';
-  if (BOT_UA.test(ua)) return true;
-
-  // Some validators omit Sec-Fetch-* and send a generic UA. Prefer OG HTML for
-  // tour deep links when this does not look like a normal browser navigation.
   if (!isTourDeepLink(pathname)) return false;
   if (request.method !== 'GET' && request.method !== 'HEAD') return false;
-  const dest = request.headers.get('sec-fetch-dest');
-  const mode = request.headers.get('sec-fetch-mode');
-  if (dest || mode) return false;
-  if (/Mozilla\/5\.0.*\b(Chrome|Firefox|Safari|Edg)\//i.test(ua) && !/bot/i.test(ua)) {
-    return false;
-  }
-  return true;
+  const ua = request.headers.get('user-agent') || '';
+  return BOT_UA.test(ua);
 }
 
 function isTourDeepLink(pathname) {
@@ -64,42 +56,18 @@ function isTourDeepLink(pathname) {
   return /^t_[a-z0-9]+$/i.test(parts[0]) || /^[a-z0-9-]+$/i.test(parts[0]);
 }
 
-/** Facebook sends Range + is picky about chunked HTML without Content-Length. */
-function openGraphResponse(html, request) {
+/** Full 200 HTML only — never honor Range (Facebook 206 truncates meta). */
+function openGraphResponse(html) {
   const bytes = new TextEncoder().encode(html);
-  const headers = {
-    'content-type': 'text/html; charset=utf-8',
-    'cache-control': 'public, max-age=60',
-    'x-ishare-og': 'bot',
-    'accept-ranges': 'bytes',
-    // Ask Cloudflare not to rewrite HTML (email obfuscation / rocket loader).
-    'disable-features': 'email_obfuscation,rocket_loader',
-  };
-
-  const range = request.headers.get('range');
-  const match = range ? /bytes=(\d+)-(\d+)?/i.exec(range) : null;
-  if (match) {
-    const start = Number(match[1]);
-    const end =
-      match[2] != null ? Number(match[2]) : Math.max(bytes.byteLength - 1, 0);
-    const safeStart = Math.min(Math.max(0, start), bytes.byteLength);
-    const safeEnd = Math.min(Math.max(safeStart, end), bytes.byteLength - 1);
-    const sliced = bytes.subarray(safeStart, safeEnd + 1);
-    return new Response(sliced, {
-      status: 206,
-      headers: {
-        ...headers,
-        'content-length': String(sliced.byteLength),
-        'content-range': `bytes ${safeStart}-${safeEnd}/${bytes.byteLength}`,
-      },
-    });
-  }
-
   return new Response(bytes, {
     status: 200,
     headers: {
-      ...headers,
+      'content-type': 'text/html; charset=utf-8',
       'content-length': String(bytes.byteLength),
+      'cache-control': 'private, no-store',
+      'x-ishare-og': 'bot',
+      'accept-ranges': 'none',
+      'disable-features': 'email_obfuscation,rocket_loader',
     },
   });
 }
@@ -138,6 +106,7 @@ async function proxyToOrigin(request, env) {
 }
 
 async function proxySpa(request, env) {
+  const url = new URL(request.url);
   const response = await proxyToOrigin(request, env);
   if (response.status !== 404) return response;
 
@@ -146,11 +115,20 @@ async function proxySpa(request, env) {
     headers: { accept: 'text/html' },
     cf: { resolveOverride: resolveOverride(env) },
   });
-  if (!fallback.ok) return response;
 
-  const headers = new Headers(fallback.headers);
-  headers.set('x-ishare-spa-fallback', '1');
-  return new Response(fallback.body, { status: 200, headers });
+  if (fallback.ok) {
+    const headers = new Headers(fallback.headers);
+    headers.set('x-ishare-spa-fallback', '1');
+    return new Response(fallback.body, { status: 200, headers });
+  }
+
+  if (isTourDeepLink(url.pathname) && response.body) {
+    const headers = new Headers(response.headers);
+    headers.set('x-ishare-spa-fallback', '1');
+    return new Response(response.body, { status: 200, headers });
+  }
+
+  return response;
 }
 
 async function buildBotHtml(url, origin, env) {
@@ -163,9 +141,7 @@ async function buildBotHtml(url, origin, env) {
   }
 
   const tour = await fetchOriginJson(`/tours/${tourId}.json`, env);
-  if (!tour?.id || !tour.scenes) {
-    return null;
-  }
+  if (!tour?.id || !tour.scenes) return null;
 
   const sceneId =
     parts[1] && tour.scenes[parts[1]] ? parts[1] : tour.firstScene;
@@ -308,6 +284,28 @@ function abs(origin, path, fallback) {
   return `${origin}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
 }
 
+/** Meta-only: WebP share assets use the static JPG sibling on CDN. */
+function ogShareImage(origin, imageUrl) {
+  if (!imageUrl) return imageUrl;
+  try {
+    const parsed = new URL(imageUrl, origin);
+    if (parsed.origin !== new URL(origin).origin) return imageUrl;
+    if (!parsed.pathname.startsWith('/assets/')) return imageUrl;
+    if (!/\.webp$/i.test(parsed.pathname)) return imageUrl;
+    return `${origin}${parsed.pathname.replace(/\.webp$/i, '.jpg')}`;
+  } catch {
+    return imageUrl;
+  }
+}
+
+function imageTypeForUrl(imageUrl) {
+  if (/\.jpe?g$/i.test(imageUrl)) return 'image/jpeg';
+  if (/\.png$/i.test(imageUrl)) return 'image/png';
+  if (/\.webp$/i.test(imageUrl)) return 'image/webp';
+  if (/\.gif$/i.test(imageUrl)) return 'image/gif';
+  return '';
+}
+
 function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
   const tourTitle = tour.title?.trim() || tour.id;
   const scene = tour.scenes[sceneId];
@@ -322,7 +320,10 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
       authored ?
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to look around in 360°.`,
-    image: abs(origin, scene?.thumbnail, abs(origin, logo)),
+    image: ogShareImage(
+      origin,
+      abs(origin, scene?.thumbnail, abs(origin, logo)),
+    ),
     url: `${origin}${url.pathname}${url.search}`,
   };
 }
@@ -342,10 +343,12 @@ function buildNamingMeta(
   const authored =
     plainText(naming.body || '') || plainText(catalogEntry?.summary || '');
   const intro = `${naming.name} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
-  const image =
+  const image = ogShareImage(
+    origin,
     abs(origin, naming.image) ||
-    abs(origin, tour.scenes[hostSceneId]?.thumbnail) ||
-    abs(origin, logo);
+      abs(origin, tour.scenes[hostSceneId]?.thumbnail) ||
+      abs(origin, logo),
+  );
   return {
     title: `${naming.name} — ${tourTitle}`,
     description:
@@ -370,6 +373,11 @@ function renderOgHtml(meta, siteName) {
   const image = escapeAttr(meta.image);
   const pageUrl = escapeAttr(meta.url);
   const site = escapeAttr(siteName);
+  const imageType = imageTypeForUrl(meta.image);
+  const imageTypeTag =
+    imageType ?
+      `\n    <meta property="og:image:type" content="${imageType}" />`
+    : '';
 
   return `<!doctype html>
 <html lang="en">
@@ -381,7 +389,7 @@ function renderOgHtml(meta, siteName) {
     <meta property="og:site_name" content="${site}" />
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${image}" />
+    <meta property="og:image" content="${image}" />${imageTypeTag}
     <meta property="og:url" content="${pageUrl}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />

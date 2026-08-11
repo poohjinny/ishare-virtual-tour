@@ -1,11 +1,17 @@
 # Tour Open Graph edge — Cloudflare Worker
 
 Serves **crawler-friendly Open Graph HTML** for `tour.ishare.ca` deep links
-(Facebook, Slack, LinkedIn, iMessage, etc.). Humans still get the SPA.
+(Facebook, X, LinkedIn, Kakao, WhatsApp, etc.). Humans still get the SPA.
 
-This is the supported path for share-card previews. The build only publishes
-tour JSON (`dist/tours/*.json`); the Worker builds `og:*` HTML per request
-(including `?no=` naming). No per-scene HTML files.
+Contract (keep it boring):
+
+- **Bot UA** → `200` HTML with `og:*` / `twitter:*` from `/tours/{id}.json`
+  (including `?no=` naming).
+- **`og:image`** → static CDN file. WebP thumbnails use a sibling **`.jpg`**
+  written at bake/upload time (not edge-transcoded).
+- **Everyone else** → proxy GitHub Pages; deep-link `404.html` → `200`.
+
+No per-scene HTML files, no `/__og/*` image proxy, no Images/KV transform.
 
 ## What it does
 
@@ -61,12 +67,18 @@ has `/tours/*.json`.
 ## Smoke (production)
 
 1. Deploy a build that includes `dist/tours/` (`postbuild` →
-   `publish-tour-json`).
+   `publish-tour-json`) and sibling `*.jpg` thumbnails under `assets/`.
 2. Deploy this Worker and attach the `tour.ishare.ca/*` route.
 3. Facebook [Sharing Debugger](https://developers.facebook.com/tools/debug/) →
    Scrape Again on a scene or naming URL.
-4. Expect **200**, tour/scene (or naming) title, and a **thumbnail** (not the
-   iShare logo), unless no image exists.
+4. Expect **200**, tour/scene (or naming) title, and a **`.jpg` thumbnail**
+   (not the iShare logo), unless no image exists.
+
+Backfill missing share JPGs:
+
+```bash
+node scripts/backfill-og-jpg.mjs
+```
 
 Naming share:
 
