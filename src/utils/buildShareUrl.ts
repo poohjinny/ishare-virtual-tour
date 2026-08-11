@@ -1,5 +1,10 @@
 import { loadTour, tryLoadTour } from '../data/loadTour';
 import {
+  namingOpportunityStatusDisplayLabel,
+  namingOpportunityStatusShowsBadge,
+} from '../data/namingOpportunityStatus';
+import type { NamingOpportunityStatus } from '../types/tour';
+import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
   toNamingOpportunitySearchValue,
@@ -130,6 +135,31 @@ function buildAbsoluteTourUrl(relative: string): string {
 export interface ShareMessage {
   title: string;
   text: string;
+  /**
+   * Authored / catalog blurb only (no share intro). Used for OS share and
+   * chat intents so we can structure name / status / price separately.
+   */
+  detailText?: string | null;
+  /** Facility name — used for richer email compose. */
+  tourTitle?: string;
+  /** Current place title — used for richer email compose. */
+  sceneTitle?: string;
+  /** Naming opportunity name when sharing an NO. */
+  namingOpportunityName?: string | null;
+  /** Optional display price when sharing an NO (e.g. `$25K`). */
+  priceLabel?: string | null;
+  /** Naming status for Share preview badge (same as NO panel). */
+  status?: NamingOpportunityStatus | null;
+  statusLabel?: string | null;
+  statusModifier?: string | null;
+}
+
+export interface BuildShareMessageOptions {
+  /** Naming opportunity display price. */
+  priceLabel?: string | null;
+  status?: NamingOpportunityStatus | null;
+  statusLabel?: string | null;
+  statusModifier?: string | null;
 }
 
 /**
@@ -137,29 +167,157 @@ export interface ShareMessage {
  * client product line (`{Client} Virtual Tour`).
  *
  * Prefer a real {@link description} (catalog summary, scene copy, naming body).
- * The template strings are fallbacks only when no authored copy exists.
+ * Always includes a short invitation line so previews are not title-only.
  */
 export function buildShareMessage(
   tourTitle: string,
   sceneTitle: string,
   namingOpportunityName?: string | null,
   description?: string | null,
+  options?: BuildShareMessageOptions,
 ): ShareMessage {
   const authored = description?.trim() || '';
+  const naming = namingOpportunityName?.trim() || null;
+  const priceLabel = options?.priceLabel?.trim() || '';
+  const status = options?.status ?? null;
+  const statusLabel = options?.statusLabel?.trim() || null;
+  const statusModifier = options?.statusModifier?.trim() || null;
 
-  if (namingOpportunityName) {
+  if (naming) {
+    const intro = `${naming} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
     return {
-      title: `${namingOpportunityName} — ${tourTitle}`,
+      title: `${naming} — ${tourTitle}`,
       text:
-        authored ||
-        `Explore the ${namingOpportunityName} naming opportunity at ${sceneTitle} in ${tourTitle}.`,
+        authored ?
+          `${intro} ${authored}`
+        : `${intro} Open the link to learn more and look around.`,
+      detailText: authored || null,
+      tourTitle,
+      sceneTitle,
+      namingOpportunityName: naming,
+      priceLabel: priceLabel || null,
+      status,
+      statusLabel,
+      statusModifier,
     };
   }
 
+  const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
   return {
     title: `${sceneTitle} — ${tourTitle}`,
-    text: authored || `Explore ${sceneTitle} in ${tourTitle}.`,
+    text:
+      authored ?
+        `${intro} ${authored}`
+      : `${intro} Open the link to look around in 360°.`,
+    detailText: authored || null,
+    tourTitle,
+    sceneTitle,
+    namingOpportunityName: null,
+    priceLabel: null,
+    status: null,
+    statusLabel: null,
+    statusModifier: null,
   };
+}
+
+/** Status label for share copy — hides Open (same as UI badges). */
+function resolveShareStatusLabel(message: ShareMessage): string | null {
+  const statusOrModifier =
+    message.status ?? message.statusModifier ?? undefined;
+  if (!namingOpportunityStatusShowsBadge(statusOrModifier)) return null;
+
+  const explicit = message.statusLabel?.trim();
+  if (explicit) return explicit;
+  if (message.status) {
+    return namingOpportunityStatusDisplayLabel(message.status);
+  }
+  return null;
+}
+
+/**
+ * Conversational body for OS share / chat apps.
+ * Reads like a message someone would send — not a metadata dump.
+ * URL is passed separately via {@link ShareData.url} (or appended by the caller).
+ */
+export function buildNativeShareText(message: ShareMessage): string {
+  const naming = message.namingOpportunityName?.trim();
+  const tour = message.tourTitle?.trim();
+  const scene = message.sceneTitle?.trim();
+  const price = message.priceLabel?.trim();
+  const status = resolveShareStatusLabel(message);
+  const detail = message.detailText?.trim() || '';
+
+  const metaParen = (() => {
+    const bits = [status, price].filter(Boolean);
+    return bits.length ? ` (${bits.join(' · ')})` : '';
+  })();
+
+  let lead: string;
+  if (naming && tour && scene) {
+    lead = `I'd love to share this naming opportunity from the ${tour} virtual tour: ${naming} in ${scene}${metaParen}.`;
+  } else if (naming && tour) {
+    lead = `I'd love to share this naming opportunity from the ${tour} virtual tour: ${naming}${metaParen}.`;
+  } else if (naming) {
+    lead = `I'd love to share this naming opportunity: ${naming}${metaParen}.`;
+  } else if (scene && tour) {
+    lead = `I'd love to share this stop from the ${tour} virtual tour: ${scene}.`;
+  } else if (scene) {
+    lead = `I'd love to share this stop from a virtual tour: ${scene}.`;
+  } else {
+    lead = `I'd love to share this from a virtual tour: ${message.title}.`;
+  }
+
+  const parts = [lead];
+  if (detail) parts.push('', detail);
+  parts.push(
+    '',
+    naming ?
+      'Open the link to learn more and look around.'
+    : 'Open the link to look around in 360°.',
+  );
+  return parts.join('\n');
+}
+
+/** Web Share API payload — richer than bare OG title/description. */
+export function buildNativeShareData(
+  shareUrl: string,
+  message: ShareMessage,
+): ShareData {
+  return {
+    title: buildShareEmailSubject(message),
+    text: buildNativeShareText(message),
+    url: shareUrl,
+  };
+}
+
+/** Email subject — invitation-style, not the compact OG card title. */
+export function buildShareEmailSubject(message: ShareMessage): string {
+  const tour = message.tourTitle?.trim();
+  const scene = message.sceneTitle?.trim();
+  const naming = message.namingOpportunityName?.trim();
+  const price = message.priceLabel?.trim();
+  const status = resolveShareStatusLabel(message);
+
+  if (naming && tour) {
+    const meta = [status, price].filter(Boolean).join(', ');
+    return meta ?
+        `Naming opportunity: ${naming} (${meta}) at ${tour}`
+      : `Naming opportunity: ${naming} at ${tour}`;
+  }
+  if (scene && tour) {
+    return `Explore ${scene} in ${tour}`;
+  }
+  return message.title;
+}
+
+/**
+ * Email body — short greeting, conversational share copy, then link.
+ */
+export function buildShareEmailBody(
+  shareUrl: string,
+  message: ShareMessage,
+): string {
+  return ['Hi,', '', buildNativeShareText(message), '', shareUrl].join('\n');
 }
 
 function encodeMailtoQueryValue(value: string): string {
@@ -171,8 +329,8 @@ export function buildShareMailtoUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
-  const subject = encodeMailtoQueryValue(message.title);
-  const body = encodeMailtoQueryValue(`${message.text}\n\n${shareUrl}`);
+  const subject = encodeMailtoQueryValue(buildShareEmailSubject(message));
+  const body = encodeMailtoQueryValue(buildShareEmailBody(shareUrl, message));
   return `mailto:?subject=${subject}&body=${body}`;
 }
 
@@ -184,8 +342,8 @@ export function buildShareGmailComposeUrl(
   const params = new URLSearchParams({
     view: 'cm',
     fs: '1',
-    su: message.title,
-    body: `${message.text}\n\n${shareUrl}`,
+    su: buildShareEmailSubject(message),
+    body: buildShareEmailBody(shareUrl, message),
   });
   return `https://mail.google.com/mail/?${params.toString()}`;
 }
@@ -205,7 +363,9 @@ export function buildShareWhatsAppUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
-  const params = new URLSearchParams({ text: `${message.text}\n${shareUrl}` });
+  const params = new URLSearchParams({
+    text: `${buildNativeShareText(message)}\n${shareUrl}`,
+  });
   return `https://wa.me/?${params.toString()}`;
 }
 
@@ -218,7 +378,10 @@ export function buildShareXUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
-  const params = new URLSearchParams({ text: message.text, url: shareUrl });
+  const params = new URLSearchParams({
+    text: buildNativeShareText(message),
+    url: shareUrl,
+  });
   return `https://twitter.com/intent/tweet?${params.toString()}`;
 }
 

@@ -276,6 +276,7 @@ interface TourNavFloatProps {
 export interface TourNavDockActions {
   openExplore: () => void;
   openHelp: () => void;
+  openShare: () => void;
 }
 
 type PanelMode = 'explore' | 'help' | 'share' | null;
@@ -822,10 +823,18 @@ export function TourNavFloat({
       currentSceneTitle,
       activeNamingItem?.name,
       description,
+      {
+        priceLabel:
+          activeNamingItem ?
+            formatNamingItemDisplayPrice(activeNamingItem)
+          : null,
+        statusLabel: activeNamingItem?.statusLabel ?? null,
+        statusModifier: activeNamingItem?.statusModifier ?? null,
+      },
     );
   }, [
     activeNamingHotspotId,
-    activeNamingItem?.name,
+    activeNamingItem,
     currentSceneId,
     currentSceneTitle,
     exploreTour,
@@ -1329,16 +1338,31 @@ export function TourNavFloat({
     [captureExploreDirectoryScroll, embed, onDismissAnchoredPanels, panelStack],
   );
 
+  /** Open Share without dismissing anchored NO panels — keeps naming share context. */
+  const openShareDockPanel = useCallback(() => {
+    if (embed) return;
+    setPanelMode((current) => {
+      if (current === 'share') return current;
+      if (current === 'explore') {
+        captureExploreDirectoryScroll();
+      }
+      if (current) panelStack?.closePanel(current);
+      panelStack?.openPanel('share');
+      return 'share';
+    });
+  }, [captureExploreDirectoryScroll, embed, panelStack]);
+
   useEffect(() => {
     if (!dockActionsRef) return;
     dockActionsRef.current = {
       openExplore: () => openDockPanel('explore'),
       openHelp: () => openDockPanel('help'),
+      openShare: openShareDockPanel,
     };
     return () => {
       dockActionsRef.current = null;
     };
-  }, [dockActionsRef, openDockPanel]);
+  }, [dockActionsRef, openDockPanel, openShareDockPanel]);
 
   /**
    * Open Explore to the place-detail view for a scene — used by the breadcrumb

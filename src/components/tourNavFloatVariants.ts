@@ -497,11 +497,11 @@ export const tourNavPanelSlotVariants = cva(
           'max-[480px]:[&_.tour-glass-panel]:w-[var(--tour-chrome-dock-panel-width)]',
         ),
         help: cn(
-          '[&_.tour-glass-panel]:w-[min(26.25rem,calc(100vw-3rem))]',
+          '[&_.tour-glass-panel]:w-[min(var(--tour-chrome-simple-panel-width),calc(100vw-3rem))]',
           'max-[480px]:[&_.tour-glass-panel]:w-[var(--tour-chrome-dock-panel-width)]',
         ),
         share: cn(
-          '[&_.tour-glass-panel]:w-[min(26.25rem,calc(100vw-3rem))]',
+          '[&_.tour-glass-panel]:w-[min(var(--tour-chrome-simple-panel-width),calc(100vw-3rem))]',
           'max-[480px]:[&_.tour-glass-panel]:w-[var(--tour-chrome-dock-panel-width)]',
         ),
       },

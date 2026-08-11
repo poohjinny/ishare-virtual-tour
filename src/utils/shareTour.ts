@@ -1,39 +1,63 @@
 import {
   TOUR_SHARE_COPIED_LABEL,
   TOUR_SHARE_COPY_FAILED,
-  canUseNativeShare,
+  shouldPreferNativeShare,
 } from '../constants/tourShare';
-import type { ShareMessage } from './buildShareUrl';
+import { buildNativeShareData, type ShareMessage } from './buildShareUrl';
 import { copyToClipboard } from './clipboard';
 import { setIshareTooltipLabel } from './ishareTooltipDom';
 
-export type ShareTourResult = 'shared' | 'copied' | 'failed' | 'cancelled';
+export type ShareTourResult =
+  | 'shared'
+  | 'copied'
+  | 'failed'
+  | 'cancelled'
+  | 'opened-panel';
 
 export interface ShareTourOptions {
   shareUrl: string;
   message: ShareMessage;
   /** When set, try native share before copying. */
   preferNative?: boolean;
+  /**
+   * Desktop fallback — open the in-app Share panel (Email / apps) instead of
+   * the weak OS share sheet.
+   */
+  onOpenSharePanel?: () => void;
 }
 
+/**
+ * Mobile: OS share sheet. Desktop: in-app Share panel when provided, else copy.
+ */
 export async function shareTourView({
   shareUrl,
   message,
   preferNative = false,
+  onOpenSharePanel,
 }: ShareTourOptions): Promise<ShareTourResult> {
-  if (preferNative && canUseNativeShare()) {
+  if (preferNative && shouldPreferNativeShare()) {
     try {
-      await navigator.share({
-        title: message.title,
-        text: message.text,
-        url: shareUrl,
-      });
+      const data = buildNativeShareData(shareUrl, message);
+      if (
+        typeof navigator.canShare === 'function' &&
+        !navigator.canShare(data)
+      ) {
+        // Some targets reject structured ShareData — fall back to text+url blob.
+        await navigator.share({ text: `${data.text}\n${shareUrl}` });
+      } else {
+        await navigator.share(data);
+      }
       return 'shared';
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return 'cancelled';
       }
     }
+  }
+
+  if (preferNative && onOpenSharePanel && !shouldPreferNativeShare()) {
+    onOpenSharePanel();
+    return 'opened-panel';
   }
 
   const copied = await copyToClipboard(shareUrl);

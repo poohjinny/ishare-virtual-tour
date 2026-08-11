@@ -2,12 +2,13 @@ import { ISHARE_VIRTUAL_TOUR_NAME } from '../constants/branding';
 import { TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD } from '../constants/tourDirectory';
 import { resolveTourPublicOrigin } from '../constants/tourOrigin';
 import { findCatalogTour, findCatalogTourById } from '../data/tourCatalog';
-import type { Tour } from '../types/tour';
+import type { NamingOpportunityStatus, Tour } from '../types/tour';
 import { withBaseUrl } from './assetUrl';
 import { buildAbsoluteShareUrl, buildShareMessage } from './buildShareUrl';
 import { getTourClientId } from './tourClientId';
 import { findHotspotInTour } from './findTourHotspot';
 import { stripInlineMarkdown } from './inlineMarkdown';
+import { formatNamingGalleryItemPrice } from './namingPrice';
 import { isDefaultNamingDescription } from './namingDescriptionPlaceholder';
 import {
   isNamingHotspot,
@@ -138,6 +139,53 @@ function resolveNamingShareBody(
   if (isDefaultNamingDescription(body, namingName, tour.title)) return null;
 
   return body;
+}
+
+function resolveNamingSharePriceLabel(
+  tour: Tour,
+  sceneId: string,
+  namingHotspotId: string | null | undefined,
+): string | undefined {
+  if (!namingHotspotId) return undefined;
+
+  const found = findHotspotInTour(tour, namingHotspotId);
+  if (!found?.hotspot || !isNamingHotspot(found.hotspot)) return undefined;
+  if (found.sceneId && found.sceneId !== sceneId) return undefined;
+
+  const hostScene = resolveHotspotHostScene(
+    tour,
+    found.hotspot,
+    tour.scenes[sceneId],
+  );
+  const popup = resolveNamingPopup(tour, found.hotspot, hostScene);
+  const naming = popup?.namingOpportunity;
+  if (!naming) return undefined;
+
+  const label = formatNamingGalleryItemPrice({
+    price: naming.price,
+    priceLabel: naming.priceLabel,
+  });
+  return label || undefined;
+}
+
+function resolveNamingShareStatus(
+  tour: Tour,
+  sceneId: string,
+  namingHotspotId: string | null | undefined,
+): NamingOpportunityStatus | undefined {
+  if (!namingHotspotId) return undefined;
+
+  const found = findHotspotInTour(tour, namingHotspotId);
+  if (!found?.hotspot || !isNamingHotspot(found.hotspot)) return undefined;
+  if (found.sceneId && found.sceneId !== sceneId) return undefined;
+
+  const hostScene = resolveHotspotHostScene(
+    tour,
+    found.hotspot,
+    tour.scenes[sceneId],
+  );
+  const popup = resolveNamingPopup(tour, found.hotspot, hostScene);
+  return popup?.namingOpportunity?.status;
 }
 
 /** Plain, length-capped copy for share cards and OG description. */
@@ -298,11 +346,18 @@ export function resolveTourSceneOpenGraph({
     sceneId,
     namingHotspotId,
   });
+  const priceLabel = resolveNamingSharePriceLabel(
+    tour,
+    sceneId,
+    namingHotspotId,
+  );
+  const status = resolveNamingShareStatus(tour, sceneId, namingHotspotId);
   const message = buildShareMessage(
     tourTitle,
     sceneTitle,
     namingName,
     description,
+    { priceLabel, status },
   );
   const imagePath = resolveSceneShareImagePath(
     tour,

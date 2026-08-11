@@ -21,6 +21,8 @@ interface ShareTourHeaderButtonProps {
   /** Short hover label — defaults to {@link ariaLabel}. */
   tooltipLabel?: string;
   preferNative?: boolean;
+  /** Desktop — open in-app Share panel instead of the OS sheet. */
+  onOpenSharePanel?: () => void;
 }
 
 export function ShareTourHeaderButton({
@@ -29,18 +31,24 @@ export function ShareTourHeaderButton({
   ariaLabel,
   tooltipLabel,
   preferNative = true,
+  onOpenSharePanel,
 }: ShareTourHeaderButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleClick = useCallback(async () => {
-    const result = await shareTourView({ shareUrl, message, preferNative });
+    const result = await shareTourView({
+      shareUrl,
+      message,
+      preferNative,
+      onOpenSharePanel,
+    });
     const nextLabel = resolveShareFeedbackLabel(result);
     if (!nextLabel) return;
 
     setFeedback(nextLabel);
     window.setTimeout(() => setFeedback(null), 2400);
-  }, [message, preferNative, shareUrl]);
+  }, [message, onOpenSharePanel, preferNative, shareUrl]);
 
   const idleTooltip = tooltipLabel ?? ariaLabel;
   const tooltip = feedback ?? idleTooltip;

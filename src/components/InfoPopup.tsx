@@ -23,6 +23,7 @@ import {
   buildShareMessage,
 } from '../utils/buildShareUrl';
 import { resolveShareDescription } from '../utils/tourOpenGraph';
+import { formatNamingGalleryItemPrice } from '../utils/namingPrice';
 import {
   resolveGlassPanelWidth,
   resolveNavPreviewHeroHeight,
@@ -56,6 +57,8 @@ interface InfoPopupProps {
   embed?: boolean;
   onClose: () => void;
   onVisitScene?: (sceneId: string) => void;
+  /** Desktop naming share — open in-app Share panel instead of OS sheet. */
+  onOpenSharePanel?: () => void;
 }
 
 export function InfoPopup({
@@ -66,6 +69,7 @@ export function InfoPopup({
   embed = false,
   onClose,
   onVisitScene,
+  onOpenSharePanel,
 }: InfoPopupProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [shown, setShown] = useState<PopupContent | null>(null);
@@ -148,16 +152,25 @@ export function InfoPopup({
     ],
   );
 
-  const shareMessage = useMemo(
-    () =>
-      buildShareMessage(
-        tour.title,
-        sceneTitle,
-        namingName,
-        resolveShareDescription({ tour, sceneId, namingHotspotId }),
-      ),
-    [namingHotspotId, namingName, sceneId, sceneTitle, tour],
-  );
+  const shareMessage = useMemo(() => {
+    const naming = shown?.namingOpportunity;
+    return buildShareMessage(
+      tour.title,
+      sceneTitle,
+      namingName,
+      resolveShareDescription({ tour, sceneId, namingHotspotId }),
+      {
+        priceLabel:
+          naming ?
+            formatNamingGalleryItemPrice({
+              price: naming.price,
+              priceLabel: naming.priceLabel,
+            })
+          : null,
+        status: naming?.status ?? null,
+      },
+    );
+  }, [namingHotspotId, namingName, sceneId, sceneTitle, shown, tour]);
 
   const panelWidth = useMemo(
     () => (shown ? resolveGlassPanelWidth(shown, tour) : undefined),
@@ -185,6 +198,7 @@ export function InfoPopup({
         message: shareMessage,
         ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
         tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
+        onOpenSharePanel,
       }
     : undefined;
 

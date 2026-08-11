@@ -1696,6 +1696,11 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
                   onViewerLoadError={handleViewerLoadError}
                   onViewerLoadRecovered={handleViewerLoadRecovered}
                   onNamingOpportunityBusyChange={setNamingOpportunityBusy}
+                  onOpenSharePanel={
+                    searchParams.embed ? undefined : (
+                      () => navDockActionsRef.current?.openShare()
+                    )
+                  }
                 />
               }
             </Suspense>
@@ -1857,6 +1862,11 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
           embed={searchParams.embed}
           onClose={closeInfoPopup}
           onVisitScene={handleNavigate}
+          onOpenSharePanel={
+            searchParams.embed ? undefined : (
+              () => navDockActionsRef.current?.openShare()
+            )
+          }
         />
       : null}
     </div>

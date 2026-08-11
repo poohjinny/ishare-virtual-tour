@@ -1,3 +1,5 @@
+import { TOUR_CHROME_MOBILE_MQ } from './tourChrome';
+
 export const TOUR_SHARE_PANEL_TITLE = 'Share';
 
 export const TOUR_SHARE_LEAD =
@@ -53,4 +55,14 @@ export function canUseNativeShare(): boolean {
   return (
     typeof navigator !== 'undefined' && typeof navigator.share === 'function'
   );
+}
+
+/**
+ * Use the OS share sheet only on phone chrome. Desktop sheets often drop
+ * title/body and feel like “copy URL only” — open the in-app Share panel there.
+ */
+export function shouldPreferNativeShare(): boolean {
+  if (!canUseNativeShare()) return false;
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia(TOUR_CHROME_MOBILE_MQ).matches;
 }

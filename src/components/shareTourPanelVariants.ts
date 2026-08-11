@@ -2,9 +2,7 @@ import { cva } from 'class-variance-authority';
 import { cn } from '../lib/cn';
 import { tourGlassPanelBodyLeadClassName } from './tourGlassPanelVariants';
 
-export const shareTourPanelRootClassName = cn(
-  'flex min-w-0 flex-col gap-3.5',
-);
+export const shareTourPanelRootClassName = cn('flex min-w-0 flex-col gap-3.5');
 
 export const shareTourPanelLeadClassName = cn(
   tourGlassPanelBodyLeadClassName,
@@ -43,8 +41,22 @@ export const shareTourPreviewHostClassName = cn(
   'text-[0.6875rem] font-medium uppercase tracking-[0.04em] text-muted',
 );
 
+/** Title + optional NO price — matches glass panel title-line layout. */
+export const shareTourPreviewTitleLineClassName = cn(
+  'flex min-w-0 items-start justify-between gap-2',
+);
+
 export const shareTourPreviewTitleClassName = cn(
-  'line-clamp-2 font-display text-sm font-semibold leading-[1.35] text-foreground',
+  'min-w-0 flex-1 line-clamp-2 font-display text-sm font-semibold leading-[1.35] text-foreground',
+);
+
+/** Status badge + price — mirrors glass panel title-line-trailing. */
+export const shareTourPreviewTitleTrailingClassName = cn(
+  'inline-flex shrink-0 items-center gap-2',
+);
+
+export const shareTourPreviewPriceClassName = cn(
+  'shrink-0 font-display text-sm font-semibold tabular-nums leading-[1.35] text-muted',
 );
 
 export const shareTourPreviewDescriptionClassName = cn(
@@ -81,12 +93,17 @@ export const shareTourPanelDividerLabelClassName = cn(
   'm-0 min-w-0 flex-[0_1_auto] font-display text-sm font-semibold leading-[1.3] text-muted',
 );
 
+/** Up to 6 channels per row (desktop Share panel width). */
+export const shareTourAppListClassName = cn(
+  'm-0 grid list-none grid-cols-6 gap-x-1 gap-y-3 p-0',
+);
+
 export const shareTourAppTileClassName = cn(
-  'group flex w-14 cursor-pointer flex-col items-center gap-1.5 border-none bg-transparent p-0 font-display text-muted no-underline transition-transform duration-150 hover:-translate-y-px focus-visible:outline-none',
+  'group flex w-full min-w-0 cursor-pointer flex-col items-center gap-1.5 border-none bg-transparent p-0 font-display text-muted no-underline transition-transform duration-150 hover:-translate-y-px focus-visible:outline-none',
 );
 
 export const shareTourAppLabelClassName = cn(
-  'max-w-full text-center text-xs font-semibold leading-[1.2] text-body',
+  'max-w-full truncate text-center text-[0.6875rem] font-semibold leading-[1.2] text-body',
 );
 
 export const shareTourAppIconVariants = cva(

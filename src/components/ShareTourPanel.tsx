@@ -17,6 +17,7 @@ import {
   TOUR_SHARE_WHATSAPP_LABEL,
   TOUR_SHARE_X_LABEL,
   canUseNativeShare,
+  shouldPreferNativeShare,
 } from '../constants/tourShare';
 import type { ShareMessage } from '../utils/buildShareUrl';
 import {
@@ -25,6 +26,7 @@ import {
   buildShareLinkedInUrl,
   buildShareWhatsAppUrl,
   buildShareXUrl,
+  buildNativeShareData,
   openShareAppLink,
   resolveShareLinkHost,
 } from '../utils/buildShareUrl';
@@ -32,6 +34,9 @@ import { copyToClipboard } from '../utils/clipboard';
 import { ShareIcon } from './icons/ShareIcon';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
+import { NamingStatusBadge } from './ui/NamingStatusBadge';
+import type { NamingStatusModifier } from './ui/Badge';
+import { namingOpportunityStatusShowsBadge } from '../data/namingOpportunityStatus';
 import {
   MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_22,
@@ -48,6 +53,7 @@ import { aiFabBubblePlaceDotClassName } from './ai/aiAssistantVariants';
 import {
   shareTourAppIconVariants,
   shareTourAppLabelClassName,
+  shareTourAppListClassName,
   shareTourAppTileClassName,
   shareTourCopyButtonVariants,
   shareTourPanelDividerClassName,
@@ -63,8 +69,11 @@ import {
   shareTourPreviewImageWrapClassName,
   shareTourPreviewLabelClassName,
   shareTourPreviewPlaceholderClassName,
+  shareTourPreviewPriceClassName,
   shareTourPreviewSectionClassName,
   shareTourPreviewTitleClassName,
+  shareTourPreviewTitleLineClassName,
+  shareTourPreviewTitleTrailingClassName,
   shareTourPanelUrlFieldClassName,
   shareTourPanelUrlInputClassName,
   shareTourPanelUrlRowClassName,
@@ -110,7 +119,7 @@ export function ShareTourPanel({
     id: string;
     label: string;
   } | null>(null);
-  const showNativeShare = canUseNativeShare();
+  const showNativeShare = shouldPreferNativeShare();
 
   const handleCopy = useCallback(async () => {
     const ok = await copyToClipboard(shareUrl);
@@ -122,17 +131,21 @@ export function ShareTourPanel({
     if (!canUseNativeShare()) return;
 
     try {
-      await navigator.share({
-        title: message.title,
-        text: message.text,
-        url: shareUrl,
-      });
+      const data = buildNativeShareData(shareUrl, message);
+      if (
+        typeof navigator.canShare === 'function' &&
+        !navigator.canShare(data)
+      ) {
+        await navigator.share({ text: `${data.text}\n${shareUrl}` });
+      } else {
+        await navigator.share(data);
+      }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return;
       }
     }
-  }, [message.text, message.title, shareUrl]);
+  }, [message, shareUrl]);
 
   const handleInstagramShare = useCallback(async () => {
     const ok = await copyToClipboard(shareUrl);
@@ -291,12 +304,9 @@ export function ShareTourPanel({
         />
       </div>
 
-      <ul
-        className='m-0 flex list-none flex-wrap gap-x-3.5 gap-y-3 p-0'
-        role='list'
-      >
+      <ul className={shareTourAppListClassName} role='list'>
         {shareChannels.map((channel) => (
-          <li key={channel.id}>
+          <li key={channel.id} className='min-w-0'>
             <ShareAppTile
               channel={channel}
               feedbackLabel={
@@ -322,6 +332,10 @@ function ShareLinkPreview({
   previewImageUrl?: string;
 }) {
   const linkHost = useMemo(() => resolveShareLinkHost(shareUrl), [shareUrl]);
+  const priceLabel = message.priceLabel?.trim() || '';
+  const showStatusBadge = namingOpportunityStatusShowsBadge(
+    message.status ?? message.statusModifier ?? undefined,
+  );
 
   return (
     <section
@@ -357,7 +371,27 @@ function ShareLinkPreview({
           {linkHost ?
             <p className={shareTourPreviewHostClassName}>{linkHost}</p>
           : null}
-          <p className={shareTourPreviewTitleClassName}>{message.title}</p>
+          <div className={shareTourPreviewTitleLineClassName}>
+            <p className={shareTourPreviewTitleClassName}>{message.title}</p>
+            {showStatusBadge || priceLabel ?
+              <div className={shareTourPreviewTitleTrailingClassName}>
+                {showStatusBadge ?
+                  <NamingStatusBadge
+                    status={message.status ?? undefined}
+                    statusModifier={
+                      (message.statusModifier as NamingStatusModifier | null) ??
+                      undefined
+                    }
+                    label={message.statusLabel ?? undefined}
+                    compact
+                  />
+                : null}
+                {priceLabel ?
+                  <p className={shareTourPreviewPriceClassName}>{priceLabel}</p>
+                : null}
+              </div>
+            : null}
+          </div>
           <p className={shareTourPreviewDescriptionClassName}>{message.text}</p>
         </div>
       </div>

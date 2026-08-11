@@ -60,6 +60,8 @@
      Scroll surface: Share/Help = glass body; Explore = inner scroller (pins). */
   --tour-chrome-top-panel-max-height: calc(100vh - var(--tour-chrome-inset-top) - var(--tour-chrome-inset-bottom) - var(--tour-chrome-ai-fab-size) - var(--tour-chrome-inset));
   --tour-explore-panel-width: 36.25rem;
+  /* Help / Share dock panels — narrower than Explore. */
+  --tour-chrome-simple-panel-width: 28rem;
   /* Phone dock panels — span between chrome safe insets (actions root is
      already right-inset; width = vw − left − right). */
   --tour-chrome-dock-panel-width: calc(100vw - var(--tour-chrome-inset-left) - var(--tour-chrome-inset-right));
