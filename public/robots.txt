@@ -1,0 +1,36 @@
+# Allow social link-preview crawlers (Facebook, Kakao, Slack, etc.).
+User-agent: *
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: meta-externalfetcher
+Allow: /
+
+User-agent: KakaoTalk
+Allow: /
+
+User-agent: kakaotalk-scrap
+Allow: /
+
+User-agent: Daum
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slackbot
+Allow: /
