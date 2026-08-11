@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { cn } from '../lib/cn';
 import {
   TOUR_SHARE_APPS_HEADING,
@@ -39,7 +33,6 @@ import {
   resolveShareLinkHost,
 } from '../utils/buildShareUrl';
 import { copyToClipboard } from '../utils/clipboard';
-import { ensureShareOgImage } from '../utils/ensureShareOgImage';
 import { ShareIcon } from './icons/ShareIcon';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
@@ -115,7 +108,7 @@ interface ShareAppChannel {
   href?: string;
   external?: boolean;
   onClick?: () => void;
-  /** Prefer over default `openShareAppLink` so share can warm OG first. */
+  /** Prefer over default `openShareAppLink` when a channel needs extra work. */
   openHref?: (href: string) => void | Promise<void>;
 }
 
@@ -132,12 +125,7 @@ export function ShareTourPanel({
   } | null>(null);
   const showNativeShare = shouldPreferNativeShare();
 
-  useEffect(() => {
-    void ensureShareOgImage(shareUrl);
-  }, [shareUrl]);
-
   const handleCopy = useCallback(async () => {
-    await ensureShareOgImage(shareUrl);
     const ok = await copyToClipboard(shareUrl);
     setCopyState(ok ? 'copied' : 'failed');
     window.setTimeout(() => setCopyState('idle'), 2400);
@@ -146,7 +134,6 @@ export function ShareTourPanel({
   const handleNativeShare = useCallback(async () => {
     if (!canUseNativeShare()) return;
 
-    await ensureShareOgImage(shareUrl);
     try {
       const data = buildNativeShareData(shareUrl, message);
       if (
@@ -165,7 +152,6 @@ export function ShareTourPanel({
   }, [message, shareUrl]);
 
   const handleInstagramShare = useCallback(async () => {
-    await ensureShareOgImage(shareUrl);
     const ok = await copyToClipboard(shareUrl);
     setChannelFeedback({
       id: 'instagram',
@@ -175,7 +161,6 @@ export function ShareTourPanel({
   }, [shareUrl]);
 
   const handleWhatsAppShare = useCallback(async () => {
-    await ensureShareOgImage(shareUrl);
     const text = buildShareWhatsAppClipboardText(shareUrl, message);
     const ok = await copyToClipboard(text);
     openShareAppLink(buildShareWhatsAppUrl(shareUrl, message));
@@ -185,14 +170,6 @@ export function ShareTourPanel({
     });
     window.setTimeout(() => setChannelFeedback(null), 4800);
   }, [message, shareUrl]);
-
-  const handleExternalChannelOpen = useCallback(
-    async (href: string) => {
-      await ensureShareOgImage(shareUrl);
-      openShareAppLink(href);
-    },
-    [shareUrl],
-  );
 
   const copyLabel =
     copyState === 'copied' ? TOUR_SHARE_COPIED_LABEL
@@ -225,7 +202,6 @@ export function ShareTourPanel({
         icon: <EmailBrandIcon />,
         href: buildShareGmailComposeUrl(shareUrl, message),
         external: true,
-        openHref: handleExternalChannelOpen,
       },
       {
         id: 'whatsapp',
@@ -249,7 +225,6 @@ export function ShareTourPanel({
         icon: <FacebookBrandIcon />,
         href: buildShareFacebookUrl(shareUrl),
         external: true,
-        openHref: handleExternalChannelOpen,
       },
       {
         id: 'x',
@@ -258,7 +233,6 @@ export function ShareTourPanel({
         icon: <XBrandIcon />,
         href: buildShareXUrl(shareUrl, message),
         external: true,
-        openHref: handleExternalChannelOpen,
       },
       {
         id: 'linkedin',
@@ -267,13 +241,11 @@ export function ShareTourPanel({
         icon: <LinkedInBrandIcon />,
         href: buildShareLinkedInUrl(shareUrl),
         external: true,
-        openHref: handleExternalChannelOpen,
       },
     );
 
     return channels;
   }, [
-    handleExternalChannelOpen,
     handleInstagramShare,
     handleNativeShare,
     handleWhatsAppShare,
