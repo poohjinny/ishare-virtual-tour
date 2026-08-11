@@ -1465,6 +1465,113 @@
     transition: transform 0.2s ease;
   }
 
+  /* Custom YouTube chrome (controls=0) — toggle + bottom-right fullscreen */
+  .tour-glass-panel__video-controls {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .tour-glass-panel__video-toggle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition:
+      color 0.2s ease,
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .tour-glass-panel__video-toggle:hover,
+  .tour-glass-panel__video-toggle:focus-visible {
+    color: #fff;
+    outline: none;
+  }
+
+  .tour-glass-panel__video-toggle:hover .tour-glass-panel__video-play-ring,
+  .tour-glass-panel__video-toggle:focus-visible .tour-glass-panel__video-play-ring {
+    fill: var(--ishare-primary);
+    stroke: var(--ishare-primary);
+  }
+
+  .tour-glass-panel__video-toggle:hover .tour-glass-panel__video-play-glyph,
+  .tour-glass-panel__video-toggle:focus-visible .tour-glass-panel__video-play-glyph {
+    fill: #fff;
+  }
+
+  .tour-glass-panel__video-toggle:hover .tour-glass-panel__video-play-icon,
+  .tour-glass-panel__video-toggle:focus-visible .tour-glass-panel__video-play-icon {
+    transform: scale(1.06);
+  }
+
+  /* Playing: hide center toggle until hover / focus-within */
+  .tour-glass-panel__video--playing:not(.tour-glass-panel__video--paused) .tour-glass-panel__video-toggle {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .tour-glass-panel__video--playing:not(.tour-glass-panel__video--paused):hover .tour-glass-panel__video-toggle,
+  .tour-glass-panel__video--playing:not(.tour-glass-panel__video--paused):focus-within .tour-glass-panel__video-toggle {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .tour-glass-panel__video--paused .tour-glass-panel__video-toggle {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tour-glass-panel__video-toggle {
+      transition: none;
+    }
+  }
+
+  .tour-glass-panel__video-fullscreen {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.52);
+    color: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .tour-glass-panel__video-fullscreen:hover,
+  .tour-glass-panel__video-fullscreen:focus-visible {
+    background: rgba(15, 23, 42, 0.68);
+    outline: none;
+  }
+
+  .tour-glass-panel__video-fs-icon {
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
   .tour-glass-panel__video-placeholder {
     width: 100%;
     height: 100%;
@@ -2429,6 +2536,14 @@
     align-items: center;
     gap: 0.25rem;
     overflow: visible;
+  }
+
+  /* Share overlay covers the hero — hide duplicate Share/Close FABs underneath.
+   * Use opacity (not visibility): `.material-symbols-rounded { visibility: visible }`
+   * after font-ready would punch through a parent visibility:hidden. */
+  .anchored-panel__hero[data-anchored-share-overlay-open] .anchored-panel__hero-actions {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .anchored-panel__header-btn {

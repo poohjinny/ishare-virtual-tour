@@ -157,18 +157,20 @@ export function popupVideoAutoplayUrl(sourceUrl: string): string {
   return `${sourceUrl}${joiner}autoplay=1&rel=0`;
 }
 
-/** YouTube embed with IFrame API postMessage — play/pause sync for bg ducking. */
+/**
+ * YouTube embed with IFrame API postMessage — play/pause for custom chrome +
+ * bg ducking. Native player chrome is off (`controls=0`); we own toggle + FS.
+ */
 export function popupVideoYoutubeEmbedUrl(embedUrl: string): string {
   const url = new URL(embedUrl);
   url.searchParams.set('autoplay', '1');
   url.searchParams.set('rel', '0');
   url.searchParams.set('enablejsapi', '1');
   url.searchParams.set('origin', window.location.origin);
-  // Native chrome: mute + progress + fullscreen (fs must be on for the button).
-  url.searchParams.set('controls', '1');
+  url.searchParams.set('controls', '0');
   url.searchParams.set('modestbranding', '1');
   url.searchParams.set('iv_load_policy', '3');
-  url.searchParams.set('fs', '1');
+  url.searchParams.set('fs', '0');
   url.searchParams.set('playsinline', '1');
   return url.toString();
 }
@@ -182,6 +184,15 @@ export function popupVideoSynthesiaEmbedUrl(embedUrl: string): string {
 }
 
 const YOUTUBE_ORIGIN = 'https://www.youtube.com';
+
+/** YT.PlayerState: ENDED=0 PLAYING=1 PAUSED=2 BUFFERING=3 CUED=5 */
+export function isYoutubeForegroundPlaying(state: number): boolean {
+  return state === 1 || state === 3;
+}
+
+export function isYoutubePausedOrEnded(state: number): boolean {
+  return state === 0 || state === 2 || state === 5;
+}
 
 function parseYoutubePlayerState(data: unknown): number | null {
   if (!data || typeof data !== 'object') return null;
@@ -206,13 +217,23 @@ function parseYoutubePlayerState(data: unknown): number | null {
   return null;
 }
 
-function isYoutubeForegroundPlaying(state: number): boolean {
-  return state === 1 || state === 3;
+export function postYoutubePlayerCommand(
+  iframe: HTMLIFrameElement,
+  func: 'playVideo' | 'pauseVideo',
+  args: unknown[] = [],
+): void {
+  iframe.contentWindow?.postMessage(
+    JSON.stringify({ event: 'command', func, args }),
+    YOUTUBE_ORIGIN,
+  );
 }
+
+export type YoutubePlayerStateListener = (state: number) => void;
 
 export function bindYoutubeIframeForegroundMedia(
   iframe: HTMLIFrameElement,
   mediaId: string,
+  onStateChange?: YoutubePlayerStateListener,
 ): () => void {
   let claimed = false;
 
@@ -243,6 +264,7 @@ export function bindYoutubeIframeForegroundMedia(
     if (state == null) return;
 
     setClaimed(isYoutubeForegroundPlaying(state));
+    onStateChange?.(state);
   };
 
   const requestListening = () => {
@@ -273,6 +295,154 @@ export function popupVideoPlayIconHtml(
     <circle class="tour-glass-panel__video-play-ring" cx="28" cy="28" r="26" stroke="currentColor" stroke-width="2.5" fill="transparent"/>
     <path class="tour-glass-panel__video-play-glyph" d="M23 18.5v19l14-9.5-14-9.5z" fill="currentColor"/>
   </svg>`;
+}
+
+export function popupVideoPauseIconHtml(
+  className = 'tour-glass-panel__video-play-icon',
+): string {
+  return `<svg class="${className}" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+    <circle class="tour-glass-panel__video-play-ring" cx="28" cy="28" r="26" stroke="currentColor" stroke-width="2.5" fill="transparent"/>
+    <path class="tour-glass-panel__video-play-glyph" d="M20 18h6v20h-6V18zm10 0h6v20h-6V18z" fill="currentColor"/>
+  </svg>`;
+}
+
+export function popupVideoFullscreenEnterIconHtml(
+  className = 'tour-glass-panel__video-fs-icon',
+): string {
+  return `<svg class="${className}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+export function popupVideoFullscreenExitIconHtml(
+  className = 'tour-glass-panel__video-fs-icon',
+): string {
+  return `<svg class="${className}" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+export function isPopupVideoShellFullscreen(shell: HTMLElement): boolean {
+  return document.fullscreenElement === shell;
+}
+
+export function togglePopupVideoFullscreen(shell: HTMLElement): void {
+  if (isPopupVideoShellFullscreen(shell)) {
+    void document.exitFullscreen?.().catch(() => undefined);
+    return;
+  }
+  void shell.requestFullscreen?.().catch(() => undefined);
+}
+
+export function syncPopupVideoPausedClass(
+  shell: HTMLElement,
+  paused: boolean,
+): void {
+  shell.classList.toggle('tour-glass-panel__video--paused', paused);
+}
+
+export function syncPopupVideoToggleButton(
+  toggle: HTMLButtonElement,
+  paused: boolean,
+): void {
+  toggle.setAttribute('aria-label', paused ? 'Play' : 'Pause');
+  toggle.dataset.paused = paused ? 'true' : 'false';
+  toggle.innerHTML =
+    paused ? popupVideoPlayIconHtml() : popupVideoPauseIconHtml();
+}
+
+export function syncPopupVideoFullscreenButton(
+  button: HTMLButtonElement,
+  shell: HTMLElement,
+): void {
+  const active = isPopupVideoShellFullscreen(shell);
+  button.setAttribute(
+    'aria-label',
+    active ? 'Exit full screen' : 'Full screen',
+  );
+  button.dataset.active = active ? 'true' : 'false';
+  button.innerHTML =
+    active ?
+      popupVideoFullscreenExitIconHtml()
+    : popupVideoFullscreenEnterIconHtml();
+}
+
+function buildYoutubeControlsHtml(): string {
+  return `<div class="tour-glass-panel__video-controls">
+    <button type="button" class="tour-glass-panel__video-toggle" aria-label="Pause" data-paused="false">${popupVideoPauseIconHtml()}</button>
+    <button type="button" class="tour-glass-panel__video-fullscreen" aria-label="Full screen" data-active="false">${popupVideoFullscreenEnterIconHtml()}</button>
+  </div>`;
+}
+
+/**
+ * Custom play/pause + fullscreen chrome over a controls=0 YouTube iframe.
+ * Also owns tour-media ducking via {@link bindYoutubeIframeForegroundMedia}.
+ */
+export function bindYoutubePopupVideoChrome(
+  shell: HTMLElement,
+  iframe: HTMLIFrameElement,
+  mediaId: string,
+): () => void {
+  shell.insertAdjacentHTML('beforeend', buildYoutubeControlsHtml());
+
+  const toggle = shell.querySelector('.tour-glass-panel__video-toggle');
+  const fullscreen = shell.querySelector('.tour-glass-panel__video-fullscreen');
+  if (
+    !(toggle instanceof HTMLButtonElement) ||
+    !(fullscreen instanceof HTMLButtonElement)
+  ) {
+    return bindYoutubeIframeForegroundMedia(iframe, mediaId);
+  }
+
+  let paused = false;
+
+  const applyPaused = (next: boolean) => {
+    if (paused === next) return;
+    paused = next;
+    syncPopupVideoPausedClass(shell, paused);
+    syncPopupVideoToggleButton(toggle, paused);
+  };
+
+  const onStateChange: YoutubePlayerStateListener = (state) => {
+    applyPaused(isYoutubePausedOrEnded(state));
+  };
+
+  const unbindMedia = bindYoutubeIframeForegroundMedia(
+    iframe,
+    mediaId,
+    onStateChange,
+  );
+
+  const onToggle = (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (paused) {
+      postYoutubePlayerCommand(iframe, 'playVideo');
+    } else {
+      postYoutubePlayerCommand(iframe, 'pauseVideo');
+    }
+  };
+
+  const onFullscreen = (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    togglePopupVideoFullscreen(shell);
+  };
+
+  const onFullscreenChange = () => {
+    syncPopupVideoFullscreenButton(fullscreen, shell);
+  };
+
+  toggle.addEventListener('pointerdown', onToggle);
+  fullscreen.addEventListener('pointerdown', onFullscreen);
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+
+  return () => {
+    toggle.removeEventListener('pointerdown', onToggle);
+    fullscreen.removeEventListener('pointerdown', onFullscreen);
+    document.removeEventListener('fullscreenchange', onFullscreenChange);
+    unbindMedia();
+  };
 }
 
 export function popupVideoSkeletonHtml(): string {
@@ -357,7 +527,7 @@ export function bindPopupVideoForegroundMedia(
   if (kind === 'youtube') {
     const iframe = shell.querySelector('iframe');
     if (iframe instanceof HTMLIFrameElement) {
-      return bindYoutubeIframeForegroundMedia(iframe, mediaId);
+      return bindYoutubePopupVideoChrome(shell, iframe, mediaId);
     }
     return () => releaseTourMedia(mediaId);
   }
@@ -400,7 +570,7 @@ export function mountPopupVideoPlayer(shell: HTMLElement): void {
       'allow',
       'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
     );
-    iframe.allowFullscreen = true;
+    iframe.allowFullscreen = false;
     iframe.referrerPolicy = 'strict-origin-when-cross-origin';
     shell.appendChild(iframe);
     bindPopupVideoForegroundMedia(shell, kind);

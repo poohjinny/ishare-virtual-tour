@@ -23,9 +23,13 @@ import {
 } from '../data/namingOpportunityStatus';
 import {
   bindYoutubeIframeForegroundMedia,
+  isPopupVideoShellFullscreen,
+  isYoutubePausedOrEnded,
   popupVideoSynthesiaEmbedUrl,
   popupVideoYoutubeEmbedUrl,
+  postYoutubePlayerCommand,
   resolvePopupVideo,
+  togglePopupVideoFullscreen,
 } from '../utils/popupVideo';
 import {
   bindHtmlVideoForegroundMedia,
@@ -236,6 +240,70 @@ export function PopupVideoPlayIcon() {
   );
 }
 
+function PopupVideoPauseIcon() {
+  return (
+    <svg
+      className='tour-glass-panel__video-play-icon'
+      viewBox='0 0 56 56'
+      fill='none'
+      aria-hidden='true'
+    >
+      <circle
+        className='tour-glass-panel__video-play-ring'
+        cx='28'
+        cy='28'
+        r='26'
+        stroke='currentColor'
+        strokeWidth='2.5'
+        fill='transparent'
+      />
+      <path
+        className='tour-glass-panel__video-play-glyph'
+        d='M20 18h6v20h-6V18zm10 0h6v20h-6V18z'
+        fill='currentColor'
+      />
+    </svg>
+  );
+}
+
+function PopupVideoFullscreenEnterIcon() {
+  return (
+    <svg
+      className='tour-glass-panel__video-fs-icon'
+      viewBox='0 0 24 24'
+      fill='none'
+      aria-hidden='true'
+    >
+      <path
+        d='M8 4H4v4M16 4h4v4M8 20H4v-4M16 20h4v-4'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      />
+    </svg>
+  );
+}
+
+function PopupVideoFullscreenExitIcon() {
+  return (
+    <svg
+      className='tour-glass-panel__video-fs-icon'
+      viewBox='0 0 24 24'
+      fill='none'
+      aria-hidden='true'
+    >
+      <path
+        d='M8 4v4H4M16 4v4h4M8 20v-4H4M16 20v-4h4'
+        stroke='currentColor'
+        strokeWidth='2'
+        strokeLinecap='round'
+        strokeLinejoin='round'
+      />
+    </svg>
+  );
+}
+
 export function PopupVideoEmbed({
   videoUrl,
   title,
@@ -247,7 +315,10 @@ export function PopupVideoEmbed({
 }) {
   const resolved = resolvePopupVideo(videoUrl, poster);
   const [playing, setPlaying] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const [thumbLoaded, setThumbLoaded] = useState(() => !resolved?.thumbnailUrl);
+  const shellRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const thumbRef = useRef<HTMLImageElement>(null);
@@ -275,7 +346,10 @@ export function PopupVideoEmbed({
     if (resolved.kind === 'youtube') {
       const iframe = iframeRef.current;
       if (!iframe) return;
-      return bindYoutubeIframeForegroundMedia(iframe, mediaId);
+      setPaused(false);
+      return bindYoutubeIframeForegroundMedia(iframe, mediaId, (state) => {
+        setPaused(isYoutubePausedOrEnded(state));
+      });
     }
 
     if (resolved.kind === 'embed') {
@@ -291,20 +365,83 @@ export function PopupVideoEmbed({
     return bindHtmlVideoForegroundMedia(video, mediaId);
   }, [playing, resolved]);
 
+  useLayoutEffect(() => {
+    if (!playing || resolved?.kind !== 'youtube') return;
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    const onFullscreenChange = () => {
+      setFullscreen(isPopupVideoShellFullscreen(shell));
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    onFullscreenChange();
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+    };
+  }, [playing, resolved?.kind]);
+
   if (!resolved) return null;
 
   if (playing) {
     return (
-      <div className='tour-glass-panel__video tour-glass-panel__video--playing'>
+      <div
+        ref={shellRef}
+        className={cn(
+          'tour-glass-panel__video tour-glass-panel__video--playing',
+          resolved.kind === 'youtube' &&
+            paused &&
+            'tour-glass-panel__video--paused',
+        )}
+      >
         {resolved.kind === 'youtube' ?
-          <iframe
-            ref={iframeRef}
-            src={popupVideoYoutubeEmbedUrl(resolved.sourceUrl)}
-            title={`${title} video`}
-            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
-            allowFullScreen
-            referrerPolicy='strict-origin-when-cross-origin'
-          />
+          <>
+            <iframe
+              ref={iframeRef}
+              src={popupVideoYoutubeEmbedUrl(resolved.sourceUrl)}
+              title={`${title} video`}
+              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+              referrerPolicy='strict-origin-when-cross-origin'
+            />
+            <div className='tour-glass-panel__video-controls'>
+              <button
+                type='button'
+                className='tour-glass-panel__video-toggle'
+                aria-label={paused ? 'Play' : 'Pause'}
+                data-paused={paused ? 'true' : 'false'}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const iframe = iframeRef.current;
+                  if (!iframe) return;
+                  postYoutubePlayerCommand(
+                    iframe,
+                    paused ? 'playVideo' : 'pauseVideo',
+                  );
+                }}
+              >
+                {paused ?
+                  <PopupVideoPlayIcon />
+                : <PopupVideoPauseIcon />}
+              </button>
+              <button
+                type='button'
+                className='tour-glass-panel__video-fullscreen'
+                aria-label={fullscreen ? 'Exit full screen' : 'Full screen'}
+                data-active={fullscreen ? 'true' : 'false'}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  const shell = shellRef.current;
+                  if (!shell) return;
+                  togglePopupVideoFullscreen(shell);
+                }}
+              >
+                {fullscreen ?
+                  <PopupVideoFullscreenExitIcon />
+                : <PopupVideoFullscreenEnterIcon />}
+              </button>
+            </div>
+          </>
         : resolved.kind === 'embed' ?
           <iframe
             ref={iframeRef}
@@ -431,9 +568,7 @@ export function PopupCtaButton({
   const isSecondary = cta.variant === 'secondary';
   const showIcon = shouldShowPopupCtaIcon(cta, isSecondary);
   const isMailto = isMailtoCtaUrl(resolved.url);
-  const layout =
-    sizeLayout ??
-    (showIcon ? 'full' : 'default');
+  const layout = sizeLayout ?? (showIcon ? 'full' : 'default');
 
   return (
     <a
