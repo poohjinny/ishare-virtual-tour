@@ -1,0 +1,14 @@
+name = "ishare-tour-og"
+main = "src/index.mjs"
+compatibility_date = "2024-11-01"
+workers_dev = true
+
+# Production: attach a route on the tour.ishare.ca zone, e.g.
+#   tour.ishare.ca/*
+# and set ORIGIN to the GitHub Pages origin (or leave default).
+# See workers/tour-og/README.md
+
+[vars]
+ORIGIN = "https://tour.ishare.ca"
+SITE_NAME = "iShare Virtual Tour"
+DEFAULT_IMAGE = "https://tour.ishare.ca/assets/brand/logo_ishare.png"

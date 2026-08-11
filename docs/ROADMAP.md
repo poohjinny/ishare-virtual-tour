@@ -243,7 +243,9 @@ until Admin app exists; then port endpoints and retire duplicate UI.
   ```
 - [x] **Share link OG meta** — `og:title`, `og:image` (+ description, url) per
   ```
-  tour/scene; client-side sync for share previews (see `useTourOpenGraph`)
+  tour/scene; client-side sync (`useTourOpenGraph`) for in-app; crawler
+  previews via Cloudflare Worker (`workers/tour-og/`) + published
+  `dist/tours/*.json`
   ```
 - [x] **Share panel link preview** — in-panel card (image, host, title,
   ```

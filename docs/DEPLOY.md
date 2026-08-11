@@ -10,12 +10,25 @@
 
 ## Production host
 
-| Item          | Value                                                     |
-| ------------- | --------------------------------------------------------- |
-| Viewer URL    | `https://tour.ishare.ca`                                  |
-| Embed pattern | `https://tour.ishare.ca/{tourId}/{sceneId}?embed=1`       |
-| Build         | `npm run build` (`base: /`, `.env.production`)            |
-| SPA fallback  | `dist/404.html` (copied from `index.html` in `postbuild`) |
+| Item               | Value                                                     |
+| ------------------ | --------------------------------------------------------- |
+| Viewer URL         | `https://tour.ishare.ca`                                  |
+| Embed pattern      | `https://tour.ishare.ca/{tourId}/{sceneId}?embed=1`       |
+| Build              | `npm run build` (`base: /`, `.env.production`)            |
+| SPA fallback       | `dist/404.html` (copied from `index.html` in `postbuild`) |
+| Tour JSON (public) | `dist/tours/*.json` — fetched by the Open Graph Worker    |
+
+### Share link previews (Open Graph)
+
+Social apps **do not run JavaScript**. Client-side `useTourOpenGraph` alone is
+not enough for Facebook / Slack / LinkedIn / iMessage cards.
+
+Use the **Cloudflare Worker** [`workers/tour-og/`](../workers/tour-og/): bots
+get per-URL `og:*` HTML (scene + `?no=` naming); humans still get the SPA.
+Requires `tour` DNS proxied through Cloudflare — setup in that README.
+
+After Worker + Pages deploy, re-scrape in Facebook Sharing Debugger. Expect a
+scene/naming thumbnail, not `assets/brand/logo_ishare.png`.
 
 ---
 
@@ -77,6 +90,13 @@ Worker** OpenAI proxy:
 
 Azure Functions in [`api/`](../api/) remain an optional alternative (same
 routes).
+
+## Share Open Graph Worker
+
+Crawler share-card previews require this Worker (GitHub Pages alone cannot
+inject per-URL `og:*`). Proxy `tour` through Cloudflare and deploy
+[`workers/tour-og/`](../workers/tour-og/) — setup in that README. Build
+publishes `dist/tours/*.json` for the Worker to read.
 
 ---
 

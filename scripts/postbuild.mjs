@@ -1,6 +1,6 @@
 import { copyFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const indexHtml = join(root, 'dist', 'index.html');
@@ -10,3 +10,7 @@ if (existsSync(indexHtml)) {
   copyFileSync(indexHtml, notFoundHtml);
   console.log('Copied dist/index.html → dist/404.html (SPA fallback)');
 }
+
+await import(
+  pathToFileURL(join(root, 'scripts', 'publish-tour-json.mjs')).href
+);
