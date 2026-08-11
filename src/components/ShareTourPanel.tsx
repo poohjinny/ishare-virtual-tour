@@ -1,22 +1,32 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
-import { cn } from '../lib/cn';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import {
   TOUR_SHARE_APPS_HEADING,
+  TOUR_SHARE_APP_OPEN_DELAY_MS,
   TOUR_SHARE_COPY_FAILED,
   TOUR_SHARE_COPY_LABEL,
   TOUR_SHARE_COPIED_LABEL,
   TOUR_SHARE_EMAIL_LABEL,
   TOUR_SHARE_FACEBOOK_LABEL,
   TOUR_SHARE_INSTAGRAM_ARIA,
+  TOUR_SHARE_INSTAGRAM_IDLE_TIP,
   TOUR_SHARE_INSTAGRAM_LABEL,
   TOUR_SHARE_LEAD_AFTER,
   TOUR_SHARE_LEAD_BEFORE,
+  TOUR_SHARE_LINKEDIN_IDLE_TIP,
   TOUR_SHARE_LINKEDIN_LABEL,
   TOUR_SHARE_NATIVE_LABEL,
+  TOUR_SHARE_PASTE_REPLACE_HINT,
   TOUR_SHARE_PREVIEW_LABEL,
   TOUR_SHARE_URL_LABEL,
+  TOUR_SHARE_WHATSAPP_IDLE_TIP,
   TOUR_SHARE_WHATSAPP_LABEL,
-  TOUR_SHARE_WHATSAPP_REPLACE_HINT,
   TOUR_SHARE_X_LABEL,
   canUseNativeShare,
   shouldPreferNativeShare,
@@ -26,7 +36,7 @@ import {
   buildShareFacebookUrl,
   buildShareGmailComposeUrl,
   buildShareLinkedInUrl,
-  buildShareWhatsAppClipboardText,
+  buildShareCaptionClipboardText,
   buildShareWhatsAppUrl,
   buildShareXUrl,
   buildNativeShareData,
@@ -97,6 +107,8 @@ interface ShareAppChannel {
   id: string;
   label: string;
   ariaLabel?: string;
+  /** Hover/idle tooltip — feedback tip overrides while active. */
+  idleTooltip?: string;
   iconVariant: ShareAppIconVariant;
   icon: ReactNode;
   href?: string;
@@ -118,7 +130,38 @@ export function ShareTourPanel({
     id: string;
     label: string;
   } | null>(null);
+  const openDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const showNativeShare = shouldPreferNativeShare();
+
+  const clearShareTimers = useCallback(() => {
+    if (openDelayTimerRef.current) {
+      window.clearTimeout(openDelayTimerRef.current);
+      openDelayTimerRef.current = null;
+    }
+    if (feedbackClearTimerRef.current) {
+      window.clearTimeout(feedbackClearTimerRef.current);
+      feedbackClearTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => clearShareTimers(), [clearShareTimers]);
+
+  const flashChannelTip = useCallback(
+    (id: string, label: string, clearAfterMs: number) => {
+      if (feedbackClearTimerRef.current) {
+        window.clearTimeout(feedbackClearTimerRef.current);
+      }
+      setChannelFeedback({ id, label });
+      feedbackClearTimerRef.current = window.setTimeout(() => {
+        feedbackClearTimerRef.current = null;
+        setChannelFeedback(null);
+      }, clearAfterMs);
+    },
+    [],
+  );
 
   const handleCopy = useCallback(async () => {
     const ok = await copyToClipboard(shareUrl);
@@ -147,24 +190,46 @@ export function ShareTourPanel({
   }, [message, shareUrl]);
 
   const handleInstagramShare = useCallback(async () => {
+    clearShareTimers();
     const ok = await copyToClipboard(shareUrl);
-    setChannelFeedback({
-      id: 'instagram',
-      label: ok ? TOUR_SHARE_COPIED_LABEL : TOUR_SHARE_COPY_FAILED,
-    });
-    window.setTimeout(() => setChannelFeedback(null), 2400);
-  }, [shareUrl]);
+    flashChannelTip(
+      'instagram',
+      ok ? TOUR_SHARE_COPIED_LABEL : TOUR_SHARE_COPY_FAILED,
+      2400,
+    );
+  }, [clearShareTimers, flashChannelTip, shareUrl]);
 
   const handleWhatsAppShare = useCallback(async () => {
-    const text = buildShareWhatsAppClipboardText(shareUrl, message);
+    clearShareTimers();
+    const text = buildShareCaptionClipboardText(shareUrl, message);
     const ok = await copyToClipboard(text);
-    openShareAppLink(buildShareWhatsAppUrl(shareUrl, message));
-    setChannelFeedback({
-      id: 'whatsapp',
-      label: ok ? TOUR_SHARE_WHATSAPP_REPLACE_HINT : TOUR_SHARE_COPY_FAILED,
-    });
-    window.setTimeout(() => setChannelFeedback(null), 4800);
-  }, [message, shareUrl]);
+    flashChannelTip(
+      'whatsapp',
+      ok ? TOUR_SHARE_PASTE_REPLACE_HINT : TOUR_SHARE_COPY_FAILED,
+      TOUR_SHARE_APP_OPEN_DELAY_MS + 2400,
+    );
+    if (!ok) return;
+    openDelayTimerRef.current = window.setTimeout(() => {
+      openDelayTimerRef.current = null;
+      openShareAppLink(buildShareWhatsAppUrl(shareUrl, message));
+    }, TOUR_SHARE_APP_OPEN_DELAY_MS);
+  }, [clearShareTimers, flashChannelTip, message, shareUrl]);
+
+  const handleLinkedInShare = useCallback(async () => {
+    clearShareTimers();
+    const text = buildShareCaptionClipboardText(shareUrl, message);
+    const ok = await copyToClipboard(text);
+    flashChannelTip(
+      'linkedin',
+      ok ? TOUR_SHARE_PASTE_REPLACE_HINT : TOUR_SHARE_COPY_FAILED,
+      TOUR_SHARE_APP_OPEN_DELAY_MS + 2400,
+    );
+    if (!ok) return;
+    openDelayTimerRef.current = window.setTimeout(() => {
+      openDelayTimerRef.current = null;
+      openShareAppLink(buildShareLinkedInUrl(shareUrl));
+    }, TOUR_SHARE_APP_OPEN_DELAY_MS);
+  }, [clearShareTimers, flashChannelTip, message, shareUrl]);
 
   const copyLabel =
     copyState === 'copied' ? TOUR_SHARE_COPIED_LABEL
@@ -201,6 +266,7 @@ export function ShareTourPanel({
       {
         id: 'whatsapp',
         label: TOUR_SHARE_WHATSAPP_LABEL,
+        idleTooltip: TOUR_SHARE_WHATSAPP_IDLE_TIP,
         iconVariant: 'whatsapp',
         icon: <WhatsAppBrandIcon />,
         onClick: () => void handleWhatsAppShare(),
@@ -209,6 +275,7 @@ export function ShareTourPanel({
         id: 'instagram',
         label: TOUR_SHARE_INSTAGRAM_LABEL,
         ariaLabel: TOUR_SHARE_INSTAGRAM_ARIA,
+        idleTooltip: TOUR_SHARE_INSTAGRAM_IDLE_TIP,
         iconVariant: 'instagram',
         icon: <InstagramBrandIcon />,
         onClick: () => void handleInstagramShare(),
@@ -232,16 +299,17 @@ export function ShareTourPanel({
       {
         id: 'linkedin',
         label: TOUR_SHARE_LINKEDIN_LABEL,
+        idleTooltip: TOUR_SHARE_LINKEDIN_IDLE_TIP,
         iconVariant: 'linkedin',
         icon: <LinkedInBrandIcon />,
-        href: buildShareLinkedInUrl(shareUrl),
-        external: true,
+        onClick: () => void handleLinkedInShare(),
       },
     );
 
     return channels;
   }, [
     handleInstagramShare,
+    handleLinkedInShare,
     handleNativeShare,
     handleWhatsAppShare,
     message,
@@ -389,8 +457,10 @@ function ShareAppTile({
   channel: ShareAppChannel;
   feedbackLabel?: string | null;
 }) {
-  const displayLabel = feedbackLabel ?? channel.label;
   const ariaLabel = channel.ariaLabel ?? channel.label;
+  const idleTip = channel.idleTooltip ?? channel.label;
+  const tooltipLabel = feedbackLabel ?? idleTip;
+  const showFeedbackTip = feedbackLabel !== null;
 
   const content = (
     <>
@@ -399,59 +469,62 @@ function ShareAppTile({
       >
         {channel.icon}
       </span>
-      <span
-        className={cn(
-          shareTourAppLabelClassName,
-          feedbackLabel && 'text-primary',
-        )}
-      >
-        {displayLabel}
-      </span>
+      <span className={shareTourAppLabelClassName}>{channel.label}</span>
     </>
   );
 
-  if (channel.href) {
-    const isMailto = channel.href.startsWith('mailto:');
+  const tile =
+    channel.href ?
+      (() => {
+        const isMailto = channel.href.startsWith('mailto:');
 
-    // Mailto: real navigation. Other share apps: button-only open so we don't
-    // double-fire (href + openShareAppLink), which can duplicate compose text
-    // in WhatsApp and make the unfurler fall back to Overview (`/t_…` only).
-    if (!isMailto) {
-      return (
-        <button
-          type='button'
-          className={shareTourAppTileClassName}
-          aria-label={ariaLabel}
-          onClick={() => {
-            const open = channel.openHref ?? openShareAppLink;
-            void open(channel.href!);
-          }}
-        >
-          {content}
-        </button>
-      );
-    }
+        // Mailto: real navigation. Other share apps: button-only open so we don't
+        // double-fire (href + openShareAppLink), which can duplicate compose text
+        // in WhatsApp and make the unfurler fall back to Overview (`/t_…` only).
+        if (!isMailto) {
+          return (
+            <button
+              type='button'
+              className={shareTourAppTileClassName}
+              aria-label={ariaLabel}
+              onClick={() => {
+                const open = channel.openHref ?? openShareAppLink;
+                void open(channel.href!);
+              }}
+            >
+              {content}
+            </button>
+          );
+        }
 
-    return (
-      <a
+        return (
+          <a
+            className={shareTourAppTileClassName}
+            href={channel.href}
+            aria-label={ariaLabel}
+          >
+            {content}
+          </a>
+        );
+      })()
+    : <button
+        type='button'
         className={shareTourAppTileClassName}
-        href={channel.href}
+        onClick={channel.onClick}
         aria-label={ariaLabel}
+        disabled={showFeedbackTip}
       >
         {content}
-      </a>
-    );
-  }
+      </button>;
 
   return (
-    <button
-      type='button'
-      className={shareTourAppTileClassName}
-      onClick={channel.onClick}
-      aria-label={ariaLabel}
-      disabled={feedbackLabel !== null}
+    <IconTooltip
+      label={tooltipLabel}
+      placement='top'
+      forceShow={showFeedbackTip}
+      className='block min-w-0 w-full'
     >
-      {content}
-    </button>
+      {tile}
+    </IconTooltip>
   );
 }

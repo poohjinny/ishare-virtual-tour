@@ -12,19 +12,23 @@ import { createPortal } from 'react-dom';
 import { cn } from '../lib/cn';
 import {
   TOUR_SHARE_APPS_HEADING,
+  TOUR_SHARE_APP_OPEN_DELAY_MS,
   TOUR_SHARE_COPY_FAILED,
   TOUR_SHARE_COPY_LABEL,
   TOUR_SHARE_COPIED_LABEL,
   TOUR_SHARE_EMAIL_LABEL,
   TOUR_SHARE_FACEBOOK_LABEL,
   TOUR_SHARE_INSTAGRAM_ARIA,
+  TOUR_SHARE_INSTAGRAM_IDLE_TIP,
   TOUR_SHARE_INSTAGRAM_LABEL,
   TOUR_SHARE_LEAD_AFTER,
   TOUR_SHARE_LEAD_BEFORE,
+  TOUR_SHARE_LINKEDIN_IDLE_TIP,
   TOUR_SHARE_LINKEDIN_LABEL,
   TOUR_SHARE_NATIVE_LABEL,
+  TOUR_SHARE_PASTE_REPLACE_HINT,
+  TOUR_SHARE_WHATSAPP_IDLE_TIP,
   TOUR_SHARE_WHATSAPP_LABEL,
-  TOUR_SHARE_WHATSAPP_REPLACE_HINT,
   TOUR_SHARE_X_LABEL,
   canUseNativeShare,
   shouldPreferNativeShare,
@@ -35,7 +39,7 @@ import {
   buildShareFacebookUrl,
   buildShareGmailComposeUrl,
   buildShareLinkedInUrl,
-  buildShareWhatsAppClipboardText,
+  buildShareCaptionClipboardText,
   buildShareWhatsAppUrl,
   buildShareXUrl,
   openShareAppLink,
@@ -51,6 +55,7 @@ import {
   XBrandIcon,
 } from './icons/ShareBrandIcons';
 import { MaterialSymbol } from './ui/MaterialSymbol';
+import { IconTooltip } from './ui/IconTooltip';
 import {
   MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_22,
@@ -112,6 +117,7 @@ type MenuChannel = {
   id: string;
   label: string;
   ariaLabel?: string;
+  idleTooltip?: string;
   iconVariant: ShareAppIconVariant;
   icon: ReactNode;
   href?: string;
@@ -150,6 +156,10 @@ export function AnchoredShareMenu({
     id: string;
     label: string;
   } | null>(null);
+  const openDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const showNativeShare = shouldPreferNativeShare();
 
   const reposition = useCallback(() => {
@@ -272,18 +282,38 @@ export function AnchoredShareMenu({
     return () => window.clearTimeout(timer);
   }, [open, onExited]);
 
+  const clearShareTimers = useCallback(() => {
+    if (openDelayTimerRef.current) {
+      window.clearTimeout(openDelayTimerRef.current);
+      openDelayTimerRef.current = null;
+    }
+    if (feedbackClearTimerRef.current) {
+      window.clearTimeout(feedbackClearTimerRef.current);
+      feedbackClearTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => clearShareTimers(), [clearShareTimers]);
+
   const flashFeedback = useCallback((id: string, label: string, ms = 2400) => {
+    if (feedbackClearTimerRef.current) {
+      window.clearTimeout(feedbackClearTimerRef.current);
+    }
     setChannelFeedback({ id, label });
-    window.setTimeout(() => setChannelFeedback(null), ms);
+    feedbackClearTimerRef.current = window.setTimeout(() => {
+      feedbackClearTimerRef.current = null;
+      setChannelFeedback(null);
+    }, ms);
   }, []);
 
   const handleCopy = useCallback(async () => {
+    clearShareTimers();
     const ok = await copyToClipboard(shareUrl);
     flashFeedback(
       'copy',
       ok ? TOUR_SHARE_COPIED_LABEL : TOUR_SHARE_COPY_FAILED,
     );
-  }, [flashFeedback, shareUrl]);
+  }, [clearShareTimers, flashFeedback, shareUrl]);
 
   const handleNativeShare = useCallback(async () => {
     if (!canUseNativeShare()) return;
@@ -306,29 +336,52 @@ export function AnchoredShareMenu({
   }, [message, onClose, shareUrl]);
 
   const handleInstagramShare = useCallback(async () => {
+    clearShareTimers();
     const ok = await copyToClipboard(shareUrl);
     flashFeedback(
       'instagram',
       ok ? TOUR_SHARE_COPIED_LABEL : TOUR_SHARE_COPY_FAILED,
     );
-  }, [flashFeedback, shareUrl]);
+  }, [clearShareTimers, flashFeedback, shareUrl]);
 
   const handleWhatsAppShare = useCallback(async () => {
-    const text = buildShareWhatsAppClipboardText(shareUrl, message);
+    clearShareTimers();
+    const text = buildShareCaptionClipboardText(shareUrl, message);
     const ok = await copyToClipboard(text);
-    openShareAppLink(buildShareWhatsAppUrl(shareUrl, message));
     flashFeedback(
       'whatsapp',
-      ok ? TOUR_SHARE_WHATSAPP_REPLACE_HINT : TOUR_SHARE_COPY_FAILED,
-      4800,
+      ok ? TOUR_SHARE_PASTE_REPLACE_HINT : TOUR_SHARE_COPY_FAILED,
+      TOUR_SHARE_APP_OPEN_DELAY_MS + 2400,
     );
-  }, [flashFeedback, message, shareUrl]);
+    if (!ok) return;
+    openDelayTimerRef.current = window.setTimeout(() => {
+      openDelayTimerRef.current = null;
+      openShareAppLink(buildShareWhatsAppUrl(shareUrl, message));
+    }, TOUR_SHARE_APP_OPEN_DELAY_MS);
+  }, [clearShareTimers, flashFeedback, message, shareUrl]);
+
+  const handleLinkedInShare = useCallback(async () => {
+    clearShareTimers();
+    const text = buildShareCaptionClipboardText(shareUrl, message);
+    const ok = await copyToClipboard(text);
+    flashFeedback(
+      'linkedin',
+      ok ? TOUR_SHARE_PASTE_REPLACE_HINT : TOUR_SHARE_COPY_FAILED,
+      TOUR_SHARE_APP_OPEN_DELAY_MS + 2400,
+    );
+    if (!ok) return;
+    openDelayTimerRef.current = window.setTimeout(() => {
+      openDelayTimerRef.current = null;
+      openShareAppLink(buildShareLinkedInUrl(shareUrl));
+    }, TOUR_SHARE_APP_OPEN_DELAY_MS);
+  }, [clearShareTimers, flashFeedback, message, shareUrl]);
 
   const channels = useMemo(() => {
     const list: MenuChannel[] = [
       {
         id: 'copy',
         label: TOUR_SHARE_COPY_LABEL,
+        idleTooltip: TOUR_SHARE_COPY_LABEL,
         iconVariant: 'copy',
         icon: (
           <MaterialSymbol
@@ -367,6 +420,7 @@ export function AnchoredShareMenu({
       {
         id: 'whatsapp',
         label: TOUR_SHARE_WHATSAPP_LABEL,
+        idleTooltip: TOUR_SHARE_WHATSAPP_IDLE_TIP,
         iconVariant: 'whatsapp',
         icon: <WhatsAppBrandIcon />,
         onClick: () => void handleWhatsAppShare(),
@@ -375,6 +429,7 @@ export function AnchoredShareMenu({
         id: 'instagram',
         label: TOUR_SHARE_INSTAGRAM_LABEL,
         ariaLabel: TOUR_SHARE_INSTAGRAM_ARIA,
+        idleTooltip: TOUR_SHARE_INSTAGRAM_IDLE_TIP,
         iconVariant: 'instagram',
         icon: <InstagramBrandIcon />,
         onClick: () => void handleInstagramShare(),
@@ -396,9 +451,10 @@ export function AnchoredShareMenu({
       {
         id: 'linkedin',
         label: TOUR_SHARE_LINKEDIN_LABEL,
+        idleTooltip: TOUR_SHARE_LINKEDIN_IDLE_TIP,
         iconVariant: 'linkedin',
         icon: <LinkedInBrandIcon />,
-        href: buildShareLinkedInUrl(shareUrl),
+        onClick: () => void handleLinkedInShare(),
       },
     );
 
@@ -406,6 +462,7 @@ export function AnchoredShareMenu({
   }, [
     handleCopy,
     handleInstagramShare,
+    handleLinkedInShare,
     handleNativeShare,
     handleWhatsAppShare,
     message,
@@ -466,9 +523,10 @@ export function AnchoredShareMenu({
           {channels.map((channel) => {
             const feedbackLabel =
               channelFeedback?.id === channel.id ? channelFeedback.label : null;
-            const displayLabel = feedbackLabel ?? channel.label;
-            const ariaLabel =
-              feedbackLabel ?? channel.ariaLabel ?? channel.label;
+            const idleTip = channel.idleTooltip ?? channel.label;
+            const tooltipLabel = feedbackLabel ?? idleTip;
+            const ariaLabel = channel.ariaLabel ?? channel.label;
+            const showFeedbackTip = feedbackLabel !== null;
             const icon = (
               <span
                 className={shareTourAppIconVariants({
@@ -480,35 +538,44 @@ export function AnchoredShareMenu({
               </span>
             );
 
-            if (channel.href) {
-              const isMailto = channel.href.startsWith('mailto:');
-              return (
-                <li
-                  key={channel.id}
-                  className={anchoredShareMenuItemClassName}
-                  role='none'
+            const tile =
+              channel.href ?
+                (() => {
+                  const isMailto = channel.href.startsWith('mailto:');
+                  return (
+                    <a
+                      role='menuitem'
+                      className={shareTourAppTileClassName}
+                      href={channel.href}
+                      target={isMailto ? undefined : '_blank'}
+                      rel={isMailto ? undefined : 'noopener noreferrer'}
+                      aria-label={ariaLabel}
+                      onClick={(event) => {
+                        if (isMailto) return;
+                        event.preventDefault();
+                        openShareAppLink(channel.href!);
+                      }}
+                    >
+                      {icon}
+                      <span className={anchoredShareMenuItemLabelClassName}>
+                        {channel.label}
+                      </span>
+                    </a>
+                  );
+                })()
+              : <button
+                  type='button'
+                  role='menuitem'
+                  className={shareTourAppTileClassName}
+                  aria-label={ariaLabel}
+                  onClick={channel.onClick}
+                  disabled={showFeedbackTip}
                 >
-                  <a
-                    role='menuitem'
-                    className={shareTourAppTileClassName}
-                    href={channel.href}
-                    target={isMailto ? undefined : '_blank'}
-                    rel={isMailto ? undefined : 'noopener noreferrer'}
-                    aria-label={ariaLabel}
-                    onClick={(event) => {
-                      if (isMailto) return;
-                      event.preventDefault();
-                      openShareAppLink(channel.href!);
-                    }}
-                  >
-                    {icon}
-                    <span className={anchoredShareMenuItemLabelClassName}>
-                      {displayLabel}
-                    </span>
-                  </a>
-                </li>
-              );
-            }
+                  {icon}
+                  <span className={anchoredShareMenuItemLabelClassName}>
+                    {channel.label}
+                  </span>
+                </button>;
 
             return (
               <li
@@ -516,18 +583,14 @@ export function AnchoredShareMenu({
                 className={anchoredShareMenuItemClassName}
                 role='none'
               >
-                <button
-                  type='button'
-                  role='menuitem'
-                  className={shareTourAppTileClassName}
-                  aria-label={ariaLabel}
-                  onClick={channel.onClick}
+                <IconTooltip
+                  label={tooltipLabel}
+                  placement='top'
+                  forceShow={showFeedbackTip}
+                  className='block min-w-0 w-full'
                 >
-                  {icon}
-                  <span className={anchoredShareMenuItemLabelClassName}>
-                    {displayLabel}
-                  </span>
-                </button>
+                  {tile}
+                </IconTooltip>
               </li>
             );
           })}

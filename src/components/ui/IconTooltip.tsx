@@ -24,6 +24,11 @@ interface IconTooltipProps {
   className?: string;
   /** When true, host stays mounted but hover/focus tooltips are off. */
   disabled?: boolean;
+  /**
+   * Keep the bubble open (e.g. after click feedback) even without hover —
+   * label updates still refresh via {@link refreshIshareTooltipIfActive}.
+   */
+  forceShow?: boolean;
   children: ReactNode;
 }
 
@@ -41,6 +46,7 @@ export function IconTooltip({
   placement = 'top',
   className,
   disabled = false,
+  forceShow = false,
   children,
 }: IconTooltipProps) {
   const hostRef = useRef<HTMLSpanElement>(null);
@@ -65,6 +71,14 @@ export function IconTooltip({
     if (disabled) close();
   }, [close, disabled]);
 
+  useEffect(() => {
+    if (disabled) return;
+    if (forceShow) {
+      open();
+      return;
+    }
+  }, [disabled, forceShow, open]);
+
   // Keep the visible bubble in sync when copy/feedback labels change mid-hover.
   useEffect(() => {
     const host = hostRef.current;
@@ -84,12 +98,18 @@ export function IconTooltip({
         if (disabled || !canUseHoverTooltips()) return;
         open();
       }}
-      onPointerLeave={close}
+      onPointerLeave={() => {
+        if (forceShow) return;
+        close();
+      }}
       onFocus={() => {
         if (disabled) return;
         open();
       }}
-      onBlur={close}
+      onBlur={() => {
+        if (forceShow) return;
+        close();
+      }}
     >
       {children as ReactElement}
     </span>

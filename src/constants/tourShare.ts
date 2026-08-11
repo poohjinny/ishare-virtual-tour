@@ -25,9 +25,27 @@ export const TOUR_SHARE_EMAIL_LABEL = 'Email';
 
 export const TOUR_SHARE_WHATSAPP_LABEL = 'WhatsApp';
 
-/** After opening WhatsApp — drafts append; replace with paste. */
-export const TOUR_SHARE_WHATSAPP_REPLACE_HINT =
-  'Copied — in WhatsApp press Ctrl+A, then Ctrl+V to replace the draft';
+/**
+ * After opening WhatsApp / LinkedIn — paste over an empty or appended draft.
+ * LinkedIn never prefills commentary; WhatsApp desktop often appends.
+ */
+export const TOUR_SHARE_PASTE_REPLACE_HINT =
+  'Copied! Give it a second — then press Ctrl+A and Ctrl+V to paste into the draft';
+
+/** @deprecated Prefer {@link TOUR_SHARE_PASTE_REPLACE_HINT} */
+export const TOUR_SHARE_WHATSAPP_REPLACE_HINT = TOUR_SHARE_PASTE_REPLACE_HINT;
+
+/** Pause so the paste hint tooltip is readable before the app/tab steals focus. */
+export const TOUR_SHARE_APP_OPEN_DELAY_MS = 2200;
+
+export const TOUR_SHARE_WHATSAPP_IDLE_TIP =
+  'We’ll copy the message and link for you, then open WhatsApp — if a draft looks off, paste with Ctrl+V';
+
+export const TOUR_SHARE_LINKEDIN_IDLE_TIP =
+  'We’ll copy the message and link for you, then open LinkedIn — paste into your post with Ctrl+V';
+
+export const TOUR_SHARE_INSTAGRAM_IDLE_TIP =
+  'We’ll copy the link so you can paste it wherever you share on Instagram';
 
 export const TOUR_SHARE_INSTAGRAM_LABEL = 'Instagram';
 

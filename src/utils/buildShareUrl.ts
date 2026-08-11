@@ -378,12 +378,20 @@ export function buildShareWhatsAppUrl(
   return `https://wa.me/?${params.toString()}`;
 }
 
+/** Caption then URL — clipboard for WhatsApp / LinkedIn paste-assist. */
+export function buildShareCaptionClipboardText(
+  shareUrl: string,
+  message: ShareMessage,
+): string {
+  return `${buildNativeShareText(message)}\n${shareUrl}`;
+}
+
 /** Same body as WhatsApp `text=` — for clipboard replace-over-draft. */
 export function buildShareWhatsAppClipboardText(
   shareUrl: string,
   message: ShareMessage,
 ): string {
-  return `${buildNativeShareText(message)}\n${shareUrl}`;
+  return buildShareCaptionClipboardText(shareUrl, message);
 }
 
 export function buildShareFacebookUrl(shareUrl: string): string {
