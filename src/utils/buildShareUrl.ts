@@ -360,16 +360,26 @@ export function openShareAppLink(url: string): void {
 }
 
 /**
- * WhatsApp compose: caption then deep link (same shape as other chat shares).
+ * WhatsApp compose: caption then deep link.
+ * Desktop/Web often **appends** onto an existing draft — callers should also
+ * copy this text and prompt Ctrl+A → Ctrl+V to replace.
  */
 export function buildShareWhatsAppUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
   const params = new URLSearchParams({
-    text: `${buildNativeShareText(message)}\n${shareUrl}`,
+    text: buildShareWhatsAppClipboardText(shareUrl, message),
   });
   return `https://wa.me/?${params.toString()}`;
+}
+
+/** Same body as WhatsApp `text=` — for clipboard replace-over-draft. */
+export function buildShareWhatsAppClipboardText(
+  shareUrl: string,
+  message: ShareMessage,
+): string {
+  return `${buildNativeShareText(message)}\n${shareUrl}`;
 }
 
 export function buildShareFacebookUrl(shareUrl: string): string {

@@ -21,6 +21,7 @@ import {
   TOUR_SHARE_PREVIEW_LABEL,
   TOUR_SHARE_URL_LABEL,
   TOUR_SHARE_WHATSAPP_LABEL,
+  TOUR_SHARE_WHATSAPP_REPLACE_HINT,
   TOUR_SHARE_X_LABEL,
   canUseNativeShare,
   shouldPreferNativeShare,
@@ -30,6 +31,7 @@ import {
   buildShareFacebookUrl,
   buildShareGmailComposeUrl,
   buildShareLinkedInUrl,
+  buildShareWhatsAppClipboardText,
   buildShareWhatsAppUrl,
   buildShareXUrl,
   buildNativeShareData,
@@ -172,6 +174,18 @@ export function ShareTourPanel({
     window.setTimeout(() => setChannelFeedback(null), 2400);
   }, [shareUrl]);
 
+  const handleWhatsAppShare = useCallback(async () => {
+    await ensureShareOgImage(shareUrl);
+    const text = buildShareWhatsAppClipboardText(shareUrl, message);
+    const ok = await copyToClipboard(text);
+    openShareAppLink(buildShareWhatsAppUrl(shareUrl, message));
+    setChannelFeedback({
+      id: 'whatsapp',
+      label: ok ? TOUR_SHARE_WHATSAPP_REPLACE_HINT : TOUR_SHARE_COPY_FAILED,
+    });
+    window.setTimeout(() => setChannelFeedback(null), 4800);
+  }, [message, shareUrl]);
+
   const handleExternalChannelOpen = useCallback(
     async (href: string) => {
       await ensureShareOgImage(shareUrl);
@@ -218,9 +232,7 @@ export function ShareTourPanel({
         label: TOUR_SHARE_WHATSAPP_LABEL,
         iconVariant: 'whatsapp',
         icon: <WhatsAppBrandIcon />,
-        href: buildShareWhatsAppUrl(shareUrl, message),
-        external: true,
-        openHref: handleExternalChannelOpen,
+        onClick: () => void handleWhatsAppShare(),
       },
       {
         id: 'instagram',
@@ -264,6 +276,7 @@ export function ShareTourPanel({
     handleExternalChannelOpen,
     handleInstagramShare,
     handleNativeShare,
+    handleWhatsAppShare,
     message,
     shareUrl,
     showNativeShare,

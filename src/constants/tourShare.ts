@@ -18,6 +18,10 @@ export const TOUR_SHARE_EMAIL_LABEL = 'Email';
 
 export const TOUR_SHARE_WHATSAPP_LABEL = 'WhatsApp';
 
+/** After opening WhatsApp — drafts append; replace with paste. */
+export const TOUR_SHARE_WHATSAPP_REPLACE_HINT =
+  'Copied — in WhatsApp press Ctrl+A, then Ctrl+V to replace the draft';
+
 export const TOUR_SHARE_INSTAGRAM_LABEL = 'Instagram';
 
 export const TOUR_SHARE_FACEBOOK_LABEL = 'Facebook';
