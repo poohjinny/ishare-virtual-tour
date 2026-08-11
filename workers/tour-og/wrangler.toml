@@ -3,11 +3,13 @@ main = "src/index.mjs"
 compatibility_date = "2024-11-01"
 workers_dev = true
 
+# Zone route (not Workers custom domain): custom domain + GitHub Pages cannot
+# share Host/`fetch` without 522 or "Site not found". Route + orange CNAME works.
 routes = [
   { pattern = "tour.ishare.ca/*", zone_name = "ishare.ca" }
 ]
 
-# Production: tour.ishare.ca must be Cloudflare-proxied (orange cloud).
+# Production: tour CNAME → poohjinny.github.io, proxied (orange cloud).
 # See workers/tour-og/README.md
 
 [vars]
@@ -16,3 +18,8 @@ ORIGIN = "https://tour.ishare.ca"
 ORIGIN_RESOLVE_OVERRIDE = "poohjinny.github.io"
 SITE_NAME = "iShare Virtual Tour"
 DEFAULT_IMAGE = "https://tour.ishare.ca/assets/brand/logo_ishare.png"
+OG_JPEG_QUALITY = "82"
+
+# Live WebP→JPEG for Facebook og:image (no R2 storage).
+[images]
+binding = "IMAGES"

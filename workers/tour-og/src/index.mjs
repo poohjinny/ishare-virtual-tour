@@ -3,15 +3,23 @@
  *
  * - Known crawler UAs → 200 HTML with tour/scene/naming og:* (no JS).
  * - Everyone else → proxy GitHub Pages; deep-link 404 → SPA shell 200.
- * - og:image → scene/naming WebP on origin `/assets/.../*.webp` (no R2 bake).
+ * - og:image → /og/jpg/{tour}/{scene}.jpg — on-the-fly WebP→JPEG via Images
+ *   (no R2). Facebook requires JPEG/PNG/GIF for reliable previews.
  *
- * Origin fetches use resolveOverride so subrequests do not re-enter this Worker.
+ * Origin fetches keep Host `tour.ishare.ca` but `resolveOverride` to
+ * GitHub Pages so subrequests do not re-enter this Worker.
  */
 
 const BOT_UA =
-  /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp\/|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|kakaotalk-scrap|Linespider|LineBot|BitlyBot|Snapchat|PetalBot/i;
+  /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|meta-externalfetcher|meta-webindexer|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp\/|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|kakaotalk-scrap|Linespider|LineBot|BitlyBot|Snapchat|PetalBot/i;
+
+/** Broader Meta/social preview signal (covers odd Debugger / fetcher UAs). */
+const META_OR_PREVIEW_UA =
+  /facebook|facebot|meta-external|meta-webindexer|whatsapp|telegram|discordbot|linkedinbot|slackbot|twitterbot|kakaotalk|pinterest|embedly|iframely|preview|crawl|bot|spider|slurp/i;
 
 const DESC_MAX = 220;
+const OG_WIDTH = 1200;
+const OG_HEIGHT = 630;
 const TOUR_ID_RE = /^t_[a-z0-9]+$/i;
 const SCENE_ID_RE = /^s_[a-z0-9]+$/i;
 const SLUG_RE = /^[a-z0-9-]+$/i;
@@ -69,6 +77,19 @@ export default {
       return robotsResponse();
     }
 
+    const jpgMatch = url.pathname.match(
+      /^\/og\/jpg\/([^/]+)\/([^/]+)\.jpe?g$/i,
+    );
+    if (jpgMatch) {
+      return handleOgJpegGet(
+        request,
+        env,
+        publicOrigin,
+        jpgMatch[1],
+        jpgMatch[2],
+      );
+    }
+
     if (isAssetOrApiPath(url.pathname)) {
       return proxyToOrigin(request, env);
     }
@@ -76,10 +97,26 @@ export default {
     if (shouldServeOpenGraph(request, url.pathname)) {
       try {
         const html = await buildBotHtml(url, publicOrigin, env);
-        if (html) return openGraphResponse(html);
+        if (html) return openGraphResponse(html, request.method);
       } catch (error) {
         console.error('tour-og bot html failed', error);
       }
+      // Never fall through to GitHub 404 for crawlers — Facebook Debugger
+      // treats origin 404 + SPA shell as a hard failure ("Explore virtual tours").
+      return openGraphResponse(
+        renderOgHtml(
+          {
+            title: 'iShare Virtual Tour',
+            description: 'Open this virtual tour link to look around in 360°.',
+            image:
+              env.DEFAULT_IMAGE ||
+              `${publicOrigin}/assets/brand/logo_ishare.png`,
+            url: `${publicOrigin}${url.pathname}${url.search}`,
+          },
+          env.SITE_NAME || 'iShare Virtual Tour',
+        ),
+        request.method,
+      );
     }
 
     return proxySpa(request, env);
@@ -98,7 +135,29 @@ function shouldServeOpenGraph(request, pathname) {
   if (!isTourDeepLink(pathname)) return false;
   if (request.method !== 'GET' && request.method !== 'HEAD') return false;
   const ua = request.headers.get('user-agent') || '';
-  return BOT_UA.test(ua);
+  if (BOT_UA.test(ua) || META_OR_PREVIEW_UA.test(ua)) return true;
+  // Empty UA / non-browser fetches → OG (Facebook Debugger must not see GH 404).
+  if (!ua.trim()) return true;
+  if (!looksLikeBrowserDocument(request)) return true;
+  return false;
+}
+
+/** Real browser document navigations keep the SPA; scrapers get OG HTML. */
+function looksLikeBrowserDocument(request) {
+  const ua = request.headers.get('user-agent') || '';
+  if (!/Mozilla\/\d/i.test(ua)) return false;
+  if (META_OR_PREVIEW_UA.test(ua)) return false;
+  const mode = (request.headers.get('sec-fetch-mode') || '').toLowerCase();
+  const dest = (request.headers.get('sec-fetch-dest') || '').toLowerCase();
+  if (mode === 'navigate' && (dest === 'document' || dest === '')) return true;
+  // Some browsers omit one of the Sec-Fetch headers; site still set ⇒ browser-ish.
+  if (
+    request.headers.get('sec-fetch-site') &&
+    /Chrome|Chromium|Firefox|Safari|Edg\//i.test(ua)
+  ) {
+    return true;
+  }
+  return false;
 }
 
 function isTourDeepLink(pathname) {
@@ -121,19 +180,24 @@ function sanitizeNo(value) {
   return trimmed;
 }
 
-/**
- * Full 200 HTML only — never honor Range (Facebook 206 truncates meta).
- * Use FixedLengthStream so Cloudflare keeps Content-Length (not chunked).
- */
-function openGraphResponse(html) {
+function openGraphResponse(html, method = 'GET') {
   const bytes = new TextEncoder().encode(html);
-  return fixedLengthResponse(bytes, {
+  const headers = {
     'content-type': 'text/html; charset=utf-8',
     'cache-control': 'private, no-store',
     'x-ishare-og': 'bot',
     'accept-ranges': 'none',
     'disable-features': 'email_obfuscation,rocket_loader',
-  });
+    // Workers strip body on HEAD and often drop Content-Length too; without
+    // CL/chunked/close, keep-alive clients hang (Facebook Debugger → timeout/404).
+    connection: 'close',
+    'content-length': String(bytes.byteLength),
+  };
+  if (String(method || 'GET').toUpperCase() === 'HEAD') {
+    // Empty body; CL still announces GET entity length when the runtime keeps it.
+    return new Response(null, { status: 200, headers });
+  }
+  return fixedLengthResponse(bytes, headers);
 }
 
 function fixedLengthResponse(bytes, extraHeaders = {}) {
@@ -144,15 +208,13 @@ function fixedLengthResponse(bytes, extraHeaders = {}) {
   writer.close();
   return new Response(readable, {
     status: 200,
-    headers: {
-      ...extraHeaders,
-      'content-length': String(length),
-    },
+    headers: { ...extraHeaders, 'content-length': String(length) },
   });
 }
 
 function isAssetOrApiPath(pathname) {
   if (pathname === '/robots.txt') return false;
+  if (pathname.startsWith('/og/')) return false;
   return (
     pathname.startsWith('/assets/') ||
     pathname.startsWith('/tours/') ||
@@ -174,12 +236,29 @@ function publicOriginFromEnv(env) {
   );
 }
 
+function originRequestHeaders(request) {
+  const headers = new Headers();
+  for (const name of [
+    'accept',
+    'accept-encoding',
+    'accept-language',
+    'if-none-match',
+    'if-modified-since',
+    'range',
+    'user-agent',
+  ]) {
+    const value = request.headers.get(name);
+    if (value) headers.set(name, value);
+  }
+  return headers;
+}
+
 async function proxyToOrigin(request, env) {
   const url = new URL(request.url);
   const target = new URL(url.pathname + url.search, publicOriginFromEnv(env));
   return fetch(target.toString(), {
     method: request.method,
-    headers: request.headers,
+    headers: originRequestHeaders(request),
     redirect: 'manual',
     cf: { resolveOverride: resolveOverride(env) },
   });
@@ -208,7 +287,142 @@ async function proxySpa(request, env) {
     return new Response(response.body, { status: 200, headers });
   }
 
+  if (isTourDeepLink(url.pathname)) {
+    return new Response('<!doctype html><title>iShare</title>', {
+      status: 200,
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'x-ishare-spa-fallback': 'empty',
+      },
+    });
+  }
+
   return response;
+}
+
+function ogJpgPublicUrl(origin, tourId, sceneId, no) {
+  const base = `${origin}/og/jpg/${tourId}/${sceneId}.jpg`;
+  return no ? `${base}?no=${encodeURIComponent(no)}` : base;
+}
+
+/**
+ * On-the-fly WebP → JPEG for Facebook (no R2). Edge cache via Cache-Control.
+ */
+async function handleOgJpegGet(request, env, publicOrigin, tourId, sceneId) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+  if (!isSafeTourId(tourId) || !isSafeSceneId(sceneId)) {
+    return new Response('Not found', { status: 404 });
+  }
+  const no = sanitizeNo(new URL(request.url).searchParams.get('no'));
+
+  try {
+    const sourcePath = await resolveOgSourcePath(env, tourId, sceneId, no);
+    if (!sourcePath) {
+      return new Response('Not found', {
+        status: 404,
+        headers: { 'cache-control': 'no-store' },
+      });
+    }
+    const jpegBytes = await bakeJpegFromOrigin(env, sourcePath);
+    if (!jpegBytes) {
+      return new Response('Bake failed', {
+        status: 502,
+        headers: { 'cache-control': 'no-store' },
+      });
+    }
+    if (request.method === 'HEAD') {
+      return new Response(null, {
+        status: 200,
+        headers: {
+          'content-type': 'image/jpeg',
+          'content-length': String(jpegBytes.byteLength),
+          'cache-control': 'public, max-age=86400',
+          'x-ishare-og-jpeg': 'live',
+        },
+      });
+    }
+    return fixedLengthResponse(jpegBytes, {
+      'content-type': 'image/jpeg',
+      'cache-control': 'public, max-age=86400',
+      'x-ishare-og-jpeg': 'live',
+    });
+  } catch (error) {
+    console.error('tour-og jpg get failed', error);
+    return new Response('Bake failed', {
+      status: 502,
+      headers: { 'cache-control': 'no-store' },
+    });
+  }
+}
+
+async function resolveOgSourcePath(env, tourId, sceneId, no) {
+  const tour = await fetchOriginJson(`/tours/${tourId}.json`, env);
+  if (!tour?.scenes?.[sceneId]) return null;
+
+  if (no) {
+    const naming = resolveNaming(tour, sceneId, no);
+    const namingImage = naming?.image?.trim();
+    if (namingImage && isSafeAssetPath(namingImage)) {
+      return namingImage.startsWith('/') ? namingImage : `/${namingImage}`;
+    }
+    const hostId =
+      naming?.sceneId && tour.scenes[naming.sceneId] ? naming.sceneId : sceneId;
+    const thumb = tour.scenes[hostId]?.thumbnail?.trim();
+    if (thumb && isSafeAssetPath(thumb)) {
+      return thumb.startsWith('/') ? thumb : `/${thumb}`;
+    }
+    return null;
+  }
+
+  const thumb = tour.scenes[sceneId]?.thumbnail?.trim();
+  if (thumb && isSafeAssetPath(thumb)) {
+    return thumb.startsWith('/') ? thumb : `/${thumb}`;
+  }
+  return null;
+}
+
+function isSafeAssetPath(path) {
+  if (!path || /^https?:\/\//i.test(path)) return false;
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  if (!normalized.startsWith('/assets/')) return false;
+  if (normalized.includes('..')) return false;
+  return true;
+}
+
+async function bakeJpegFromOrigin(env, assetPath) {
+  if (!env.IMAGES) return null;
+
+  const href = new URL(assetPath, publicOriginFromEnv(env)).toString();
+  const source = await fetch(href, {
+    cf: { resolveOverride: resolveOverride(env) },
+  });
+  if (!source.ok || !source.body) return null;
+
+  const quality = Number(env.OG_JPEG_QUALITY) || 82;
+  const transformOnce = async (body) => {
+    const out = await env.IMAGES.input(body)
+      .transform({ width: OG_WIDTH, height: OG_HEIGHT, fit: 'cover' })
+      .output({ format: 'image/jpeg', quality });
+    return new Uint8Array(await out.response().arrayBuffer());
+  };
+
+  try {
+    return await transformOnce(source.body);
+  } catch (error) {
+    console.error('tour-og transform retry', error);
+    const retry = await fetch(href, {
+      cf: { resolveOverride: resolveOverride(env) },
+    });
+    if (!retry.ok || !retry.body) return null;
+    try {
+      return await transformOnce(retry.body);
+    } catch (retryError) {
+      console.error('tour-og transform failed', retryError);
+      return null;
+    }
+  }
 }
 
 async function buildBotHtml(url, origin, env) {
@@ -239,7 +453,16 @@ async function buildBotHtml(url, origin, env) {
 
   const meta =
     naming ?
-      buildNamingMeta(tour, sceneId, naming, catalogEntry, logo, origin, url)
+      buildNamingMeta(
+        tour,
+        sceneId,
+        naming,
+        catalogEntry,
+        logo,
+        origin,
+        url,
+        no,
+      )
     : buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url);
 
   return renderOgHtml(meta, env.SITE_NAME || 'iShare Virtual Tour');
@@ -330,7 +553,6 @@ function resolveNaming(tour, sceneId, searchValue) {
 }
 
 function kebab(value) {
-  // Match client `slugifyHotspotName` (apostrophes stripped, not hyphenated).
   return String(value || '')
     .trim()
     .toLowerCase()
@@ -373,13 +595,17 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
     plainText(catalogEntry?.summary || '');
   const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
   const thumb = scene?.thumbnail?.trim() || '';
+  const image =
+    thumb ? ogJpgPublicUrl(origin, tour.id, sceneId, '') : abs(origin, logo);
   return {
-    title: `${sceneTitle} — ${tourTitle}`,
+    title: `${sceneTitle} | ${tourTitle}`,
     description:
       authored ?
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to look around in 360°.`,
-    image: thumb ? abs(origin, thumb) : abs(origin, logo),
+    image,
+    imageWidth: thumb ? OG_WIDTH : undefined,
+    imageHeight: thumb ? OG_HEIGHT : undefined,
     url: `${origin}${url.pathname}${url.search}`,
   };
 }
@@ -392,25 +618,66 @@ function buildNamingMeta(
   logo,
   origin,
   url,
+  no,
 ) {
   const tourTitle = tour.title?.trim() || tour.id;
   const hostSceneId = naming.sceneId || sceneId;
   const sceneTitle = tour.scenes[hostSceneId]?.title?.trim() || hostSceneId;
-  const authored =
-    plainText(naming.body || '') || plainText(catalogEntry?.summary || '');
+  // Naming OG stays in NO context — do not fall back to catalog tour summary.
+  const authored = plainText(naming.body || '');
+  const priceText = formatNamingPriceForOg(naming);
   const intro = `${naming.name} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
-  const namingImage = naming.image?.trim() || '';
-  const thumb = tour.scenes[hostSceneId]?.thumbnail?.trim() || '';
-  const sourcePath = namingImage || thumb;
+  const priceLine = priceText ? `Asking ${priceText}.` : '';
+  const hasImage =
+    Boolean(naming.image?.trim()) ||
+    Boolean(tour.scenes[hostSceneId]?.thumbnail);
+  const image =
+    hasImage ?
+      ogJpgPublicUrl(origin, tour.id, hostSceneId, no)
+    : abs(origin, logo);
+
+  let description = intro;
+  if (priceLine) description = `${description} ${priceLine}`;
+  if (authored) description = `${description} ${authored}`;
+  else if (!priceLine) {
+    description = `${intro} Open the link to learn more and look around.`;
+  }
+
   return {
-    title: `${naming.name} — ${tourTitle}`,
-    description:
-      authored ?
-        plainText(`${intro} ${authored}`)
-      : `${intro} Open the link to learn more and look around.`,
-    image: sourcePath ? abs(origin, sourcePath) : abs(origin, logo),
+    title:
+      priceText ?
+        `${naming.name} · ${priceText} | ${tourTitle}`
+      : `${naming.name} | ${tourTitle}`,
+    description: plainText(description),
+    image,
+    imageWidth: hasImage ? OG_WIDTH : undefined,
+    imageHeight: hasImage ? OG_HEIGHT : undefined,
     url: `${origin}${url.pathname}${url.search}`,
   };
+}
+
+function formatNamingPriceForOg(naming) {
+  const label = String(naming?.priceLabel || '').trim();
+  if (label) return label;
+  const amount = Math.round(Number(naming?.price));
+  if (!Number.isFinite(amount) || amount <= 0) return '';
+  if (amount >= 1_000_000) {
+    const millions = amount / 1_000_000;
+    const formatted =
+      millions % 1 === 0 ?
+        String(millions)
+      : String(Number(millions.toFixed(1)));
+    return `$${formatted}M`;
+  }
+  if (amount >= 1_000) {
+    const thousands = amount / 1_000;
+    const formatted =
+      thousands % 1 === 0 ?
+        String(thousands)
+      : String(Number(thousands.toFixed(1)));
+    return `$${formatted}K`;
+  }
+  return `$${amount.toLocaleString('en-US')}`;
 }
 
 function imageTypeForUrl(imageUrl) {
@@ -439,6 +706,10 @@ function renderOgHtml(meta, siteName) {
     imageType ?
       `\n    <meta property="og:image:type" content="${imageType}" />`
     : '';
+  const imageSizeTags =
+    meta.imageWidth && meta.imageHeight ?
+      `\n    <meta property="og:image:width" content="${meta.imageWidth}" />\n    <meta property="og:image:height" content="${meta.imageHeight}" />`
+    : '';
 
   return `<!doctype html>
 <html lang="en">
@@ -450,7 +721,7 @@ function renderOgHtml(meta, siteName) {
     <meta property="og:site_name" content="${site}" />
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${image}" />${imageTypeTag}
+    <meta property="og:image" content="${image}" />${imageTypeTag}${imageSizeTags}
     <meta property="og:url" content="${pageUrl}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />

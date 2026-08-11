@@ -6,17 +6,24 @@ Serves **crawler-friendly Open Graph HTML** for `tour.ishare.ca` deep links
 Contract:
 
 - **Bot UA** → `200` HTML with `og:*` / `twitter:*` from `/tours/{id}.json`
-  (including `?no=` naming).
-- **`og:image`** → origin WebP thumbnail / naming preview under `/assets/…`
-  (no R2 JPEG bake, no `/og/jpg` proxy).
+  (including `?no=` naming). Includes `meta-externalfetcher` (Facebook).
+- **`og:image`** → `https://tour.ishare.ca/og/jpg/{tourId}/{sceneId}.jpg`
+  (optional `?no=`). JPEG is produced **on the fly** from scene/naming WebP via
+  the Workers **Images** binding (1200×630). No R2 storage. Facebook requires
+  JPEG/PNG/GIF for reliable previews; raw WebP often fails.
 - **Everyone else** → proxy GitHub Pages; deep-link `404.html` → `200`.
+- **Topology** → orange-cloud CNAME `tour` → `poohjinny.github.io` plus Worker
+  route `tour.ishare.ca/*`. Do **not** use Workers custom domain for this
+  hostname: same-URL `fetch` re-enters the Worker (522) and GitHub Pages rejects
+  `github.io` fetches without Host `tour.ishare.ca`.
 
 ## What it does
 
-| Client                 | Behavior                                                                              |
-| ---------------------- | ------------------------------------------------------------------------------------- |
-| Social bots (UA match) | `200` HTML; `og:image` = scene/naming WebP on CDN                                     |
-| Everyone else          | Proxy to GitHub Pages origin; deep-link `404.html` rewritten to `200`                 |
+| Client                 | Behavior                                                              |
+| ---------------------- | --------------------------------------------------------------------- |
+| Social bots (UA match) | `200` HTML; `og:image` = `/og/jpg/...` JPEG (Images live transform)   |
+| `GET /og/jpg/...`      | WebP→JPEG 1200×630 (no R2); Cache-Control for edge cache              |
+| Everyone else          | Proxy to GitHub Pages origin; deep-link `404.html` rewritten to `200` |
 
 ## One-time setup
 
@@ -38,6 +45,8 @@ npm run deploy
 4. Confirm `[vars].ORIGIN` in `wrangler.toml` points at the viewer origin
    (`https://tour.ishare.ca` is fine when the Worker is the edge in front of
    Pages).
+5. Images binding (`[images] binding = "IMAGES"`) must be available on the
+   account — used only for live JPEG transforms.
 
 ## Local
 
@@ -57,13 +66,19 @@ curl -sA "facebookexternalhit/1.1" "http://127.0.0.1:8787/t_l01wnq8eh6/s_h310pim
 2. Deploy this Worker and attach `tour.ishare.ca/*`.
 3. **Disable Cloudflare Managed robots.txt** (Dashboard → zone `ishare.ca` → AI
    Crawl Control / robots.txt managed feature).
-4. Facebook / Kakao scrapers → expect **200**, scene title, and
-   `og:image` pointing at `/assets/…/thumbnails/….webp`.
+4. Facebook / Kakao scrapers → expect **200**, scene title, and `og:image`
+   pointing at `/og/jpg/…/*.jpg` (not WebP).
 
 ```bash
 curl -sA "facebookexternalhit/1.1" \
   "https://tour.ishare.ca/t_…/s_…" | grep og:image
+curl -sI "https://tour.ishare.ca/og/jpg/t_…/s_….jpg"
 ```
+
+After deploy, use Meta
+[Sharing Debugger](https://developers.facebook.com/tools/debug/) → **Scrape
+Again** (often twice) to clear a prior **404** cache from when the Worker was
+missing.
 
 Naming share:
 
