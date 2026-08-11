@@ -30,14 +30,7 @@ export default {
       try {
         const html = await buildBotHtml(url, publicOrigin, env);
         if (html) {
-          return new Response(html, {
-            status: 200,
-            headers: {
-              'content-type': 'text/html; charset=utf-8',
-              'cache-control': 'public, max-age=300',
-              'x-ishare-og': 'bot',
-            },
-          });
+          return openGraphResponse(html, request);
         }
       } catch (error) {
         console.error('tour-og bot html failed', error);
@@ -69,6 +62,46 @@ function isTourDeepLink(pathname) {
   const parts = pathname.split('/').filter(Boolean);
   if (parts.length === 0) return false;
   return /^t_[a-z0-9]+$/i.test(parts[0]) || /^[a-z0-9-]+$/i.test(parts[0]);
+}
+
+/** Facebook sends Range + is picky about chunked HTML without Content-Length. */
+function openGraphResponse(html, request) {
+  const bytes = new TextEncoder().encode(html);
+  const headers = {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'public, max-age=60',
+    'x-ishare-og': 'bot',
+    'accept-ranges': 'bytes',
+    // Ask Cloudflare not to rewrite HTML (email obfuscation / rocket loader).
+    'disable-features': 'email_obfuscation,rocket_loader',
+  };
+
+  const range = request.headers.get('range');
+  const match = range ? /bytes=(\d+)-(\d+)?/i.exec(range) : null;
+  if (match) {
+    const start = Number(match[1]);
+    const end =
+      match[2] != null ? Number(match[2]) : Math.max(bytes.byteLength - 1, 0);
+    const safeStart = Math.min(Math.max(0, start), bytes.byteLength);
+    const safeEnd = Math.min(Math.max(safeStart, end), bytes.byteLength - 1);
+    const sliced = bytes.subarray(safeStart, safeEnd + 1);
+    return new Response(sliced, {
+      status: 206,
+      headers: {
+        ...headers,
+        'content-length': String(sliced.byteLength),
+        'content-range': `bytes ${safeStart}-${safeEnd}/${bytes.byteLength}`,
+      },
+    });
+  }
+
+  return new Response(bytes, {
+    status: 200,
+    headers: {
+      ...headers,
+      'content-length': String(bytes.byteLength),
+    },
+  });
 }
 
 function isAssetOrApiPath(pathname) {
