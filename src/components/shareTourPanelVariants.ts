@@ -4,10 +4,7 @@ import { tourGlassPanelBodyLeadClassName } from './tourGlassPanelVariants';
 
 export const shareTourPanelRootClassName = cn('flex min-w-0 flex-col gap-3.5');
 
-export const shareTourPanelLeadClassName = cn(
-  tourGlassPanelBodyLeadClassName,
-  '[&_strong]:font-semibold [&_strong]:text-foreground',
-);
+export const shareTourPanelLeadClassName = cn(tourGlassPanelBodyLeadClassName);
 
 export const shareTourPanelUrlFieldClassName = cn('block min-w-0');
 
@@ -38,25 +35,11 @@ export const shareTourPreviewBodyClassName = cn(
 );
 
 export const shareTourPreviewHostClassName = cn(
-  'text-[0.6875rem] font-medium uppercase tracking-[0.04em] text-muted',
-);
-
-/** Title + optional NO price — matches glass panel title-line layout. */
-export const shareTourPreviewTitleLineClassName = cn(
-  'flex min-w-0 items-start justify-between gap-2',
+  'text-[0.625rem] font-medium uppercase tracking-[0.03em] text-muted',
 );
 
 export const shareTourPreviewTitleClassName = cn(
-  'min-w-0 flex-1 line-clamp-2 font-display text-sm font-semibold leading-[1.35] text-foreground',
-);
-
-/** Status badge + price — mirrors glass panel title-line-trailing. */
-export const shareTourPreviewTitleTrailingClassName = cn(
-  'inline-flex shrink-0 items-center gap-2',
-);
-
-export const shareTourPreviewPriceClassName = cn(
-  'shrink-0 font-display text-sm font-semibold tabular-nums leading-[1.35] text-muted',
+  'min-w-0 line-clamp-2 font-display text-[0.8125rem] font-semibold leading-[1.35] text-foreground',
 );
 
 export const shareTourPreviewDescriptionClassName = cn(
@@ -64,11 +47,11 @@ export const shareTourPreviewDescriptionClassName = cn(
 );
 
 export const shareTourPanelUrlRowClassName = cn(
-  'flex min-w-0 items-center gap-1.5 rounded-full border border-[color:var(--ishare-border)] bg-white/72 py-1 pr-1 pl-3.5 transition-[border-color,box-shadow] duration-150 focus-within:border-primary-light focus-within:shadow-[inset_0_0_0_3px_rgba(var(--ishare-primary-rgb),0.12)]',
+  'flex min-w-0 items-center gap-1.5 rounded-full border border-[color:var(--ishare-border)] bg-white/72 py-1 pr-1 pl-3.5',
 );
 
 export const shareTourPanelUrlInputClassName = cn(
-  'min-w-0 flex-1 border-none bg-transparent py-2 font-display text-sm text-body focus:outline-none',
+  'min-w-0 flex-1 cursor-text border-none bg-transparent py-2 font-display text-sm text-body outline-none focus:outline-none',
 );
 
 export const shareTourCopyButtonVariants = cva(
@@ -119,6 +102,7 @@ export const shareTourAppIconVariants = cva(
         facebook: 'bg-[#1877f2]',
         x: 'bg-[#0f1419]',
         linkedin: 'bg-[#0a66c2]',
+        copy: 'bg-primary',
       },
     },
   },

@@ -23,6 +23,8 @@ export interface TourOpenGraphMeta {
   description?: string;
   imageUrl?: string;
   pageUrl?: string;
+  /** Short place or NO name for in-app Share lead (`Share · {label}`). */
+  contextLabel?: string;
 }
 
 /** Soft cap for share / OG description (messengers truncate around here). */
@@ -369,6 +371,7 @@ export function resolveTourSceneOpenGraph({
   return {
     title: message.title,
     description: message.text,
+    contextLabel: namingName?.trim() || sceneTitle,
     imageUrl: imagePath ? toAbsoluteTourAssetUrl(imagePath) : undefined,
     pageUrl: buildAbsoluteShareUrl({
       tourId: tour.id,

@@ -9,6 +9,7 @@ import { cn } from '../../lib/cn';
 import {
   ensureIshareTooltipDelegation,
   hideIshareTooltip,
+  refreshIshareTooltipIfActive,
   showIshareTooltip,
 } from '../../utils/ishareTooltipRuntime';
 import {
@@ -63,6 +64,13 @@ export function IconTooltip({
   useEffect(() => {
     if (disabled) close();
   }, [close, disabled]);
+
+  // Keep the visible bubble in sync when copy/feedback labels change mid-hover.
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host || disabled) return;
+    refreshIshareTooltipIfActive(host, label, placement);
+  }, [disabled, label, placement]);
 
   return (
     <span

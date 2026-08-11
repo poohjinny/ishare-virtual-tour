@@ -34,7 +34,9 @@ interface GlassPanelHeaderActionsProps {
     message: Parameters<typeof ShareTourHeaderButton>[0]['message'];
     ariaLabel: string;
     tooltipLabel?: string;
-    onOpenSharePanel?: () => void;
+    onOpenAnchoredShareMenu?: Parameters<
+      typeof ShareTourHeaderButton
+    >[0]['onOpenAnchoredShareMenu'];
   };
 }
 
@@ -52,7 +54,7 @@ export function GlassPanelHeaderActions({
           message={share.message}
           ariaLabel={share.ariaLabel}
           tooltipLabel={share.tooltipLabel}
-          onOpenSharePanel={share.onOpenSharePanel}
+          onOpenAnchoredShareMenu={share.onOpenAnchoredShareMenu}
         />
       )}
       {headerCtas.map((cta, index) => (

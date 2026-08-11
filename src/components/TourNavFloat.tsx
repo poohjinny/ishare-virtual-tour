@@ -144,6 +144,7 @@ import {
 } from './tourGlassPanelVariants';
 import { cn } from '../lib/cn';
 import { ShareIcon } from './icons/ShareIcon';
+import { ANCHORED_SHARE_MENU_ATTR } from './anchoredShareMenuVariants';
 import {
   tourNavActionsDockVariants,
   tourNavActionsRootClassName,
@@ -277,6 +278,8 @@ export interface TourNavDockActions {
   openExplore: () => void;
   openHelp: () => void;
   openShare: () => void;
+  /** Close any open dock panel, then run `action` after the exit animation. */
+  closeDockThen: (action: () => void) => void;
 }
 
 type PanelMode = 'explore' | 'help' | 'share' | null;
@@ -492,7 +495,7 @@ export function TourNavFloat({
   const exploreSearchRef = useRef<HTMLInputElement>(null);
   const targetPanelRef = useRef<DisplayPanel>(null);
   /** Scene / NO navigation deferred until Explore finish exiting. */
-  const pendingAfterExploreExitRef = useRef<(() => void) | null>(null);
+  const pendingAfterDockExitRef = useRef<(() => void) | null>(null);
 
   const breadcrumbItems = useMemo(() => {
     const items = buildBreadcrumbItems(
@@ -802,13 +805,8 @@ export function TourNavFloat({
 
   const shareUrl = useMemo(
     () =>
-      buildAbsoluteShareUrl({
-        tourId,
-        sceneId: currentSceneId,
-        firstSceneId,
-        namingHotspotId: activeNamingHotspotId,
-      }),
-    [activeNamingHotspotId, currentSceneId, firstSceneId, tourId],
+      buildAbsoluteShareUrl({ tourId, sceneId: currentSceneId, firstSceneId }),
+    [currentSceneId, firstSceneId, tourId],
   );
 
   const shareMessage = useMemo(() => {
@@ -816,25 +814,14 @@ export function TourNavFloat({
     const description = resolveShareDescription({
       tour: exploreTour,
       sceneId: currentSceneId,
-      namingHotspotId: activeNamingHotspotId,
     });
     return buildShareMessage(
       shareTourTitle,
       currentSceneTitle,
-      activeNamingItem?.name,
+      null,
       description,
-      {
-        priceLabel:
-          activeNamingItem ?
-            formatNamingItemDisplayPrice(activeNamingItem)
-          : null,
-        statusLabel: activeNamingItem?.statusLabel ?? null,
-        statusModifier: activeNamingItem?.statusModifier ?? null,
-      },
     );
   }, [
-    activeNamingHotspotId,
-    activeNamingItem,
     currentSceneId,
     currentSceneTitle,
     exploreTour,
@@ -843,16 +830,10 @@ export function TourNavFloat({
   ]);
 
   const sharePreviewImageUrl = useMemo(
-    () =>
-      resolveSceneShareImageUrl(
-        exploreTour,
-        currentSceneId,
-        clientLogo,
-        activeNamingHotspotId,
-      ),
-    [activeNamingHotspotId, clientLogo, currentSceneId, exploreTour],
+    () => resolveSceneShareImageUrl(exploreTour, currentSceneId, clientLogo),
+    [clientLogo, currentSceneId, exploreTour],
   );
-  const shareContextLabel = activeNamingItem?.name ?? currentSceneTitle;
+  const shareContextLabel = currentSceneTitle;
 
   const namingPriceBounds = useMemo(
     () => computeNamingPriceBounds(namingItems),
@@ -1280,20 +1261,22 @@ export function TourNavFloat({
   }, [closeExploreSearch, panelStack]);
 
   /**
-   * Close Explore (if open), then run `action` after the exit animation so the
-   * panorama doesn't start moving under a still-visible panel.
+   * Close any dock panel (Explore / Help / Share), then run `action` after the
+   * exit animation so the panorama doesn't start moving under chrome.
    */
-  const closeExploreThen = useCallback(
+  const closeDockThen = useCallback(
     (action: () => void) => {
-      const exploreOpen = panelMode === 'explore' || displayPanel === 'explore';
-      if (!exploreOpen) {
-        pendingAfterExploreExitRef.current = null;
+      const dockOpen = panelMode !== null || displayPanel !== null;
+      if (!dockOpen) {
+        pendingAfterDockExitRef.current = null;
         action();
         return;
       }
 
-      captureExploreDirectoryScroll();
-      pendingAfterExploreExitRef.current = action;
+      if (panelMode === 'explore' || displayPanel === 'explore') {
+        captureExploreDirectoryScroll();
+      }
+      pendingAfterDockExitRef.current = action;
       closePanel();
     },
     [captureExploreDirectoryScroll, closePanel, displayPanel, panelMode],
@@ -1338,7 +1321,7 @@ export function TourNavFloat({
     [captureExploreDirectoryScroll, embed, onDismissAnchoredPanels, panelStack],
   );
 
-  /** Open Share without dismissing anchored NO panels — keeps naming share context. */
+  /** Open Share dock for the current scene (does not dismiss anchored NO panels). */
   const openShareDockPanel = useCallback(() => {
     if (embed) return;
     setPanelMode((current) => {
@@ -1358,11 +1341,12 @@ export function TourNavFloat({
       openExplore: () => openDockPanel('explore'),
       openHelp: () => openDockPanel('help'),
       openShare: openShareDockPanel,
+      closeDockThen,
     };
     return () => {
       dockActionsRef.current = null;
     };
-  }, [dockActionsRef, openDockPanel, openShareDockPanel]);
+  }, [closeDockThen, dockActionsRef, openDockPanel, openShareDockPanel]);
 
   /**
    * Open Explore to the place-detail view for a scene — used by the breadcrumb
@@ -1569,7 +1553,8 @@ export function TourNavFloat({
         target instanceof Element &&
         (target.closest(tourExploreRefineMenuSelector) ||
           target.closest(tourBreadcrumbSelector) ||
-          target.closest(tourBreadcrumbSiblingMenuSelector))
+          target.closest(tourBreadcrumbSiblingMenuSelector) ||
+          target.closest(`[${ANCHORED_SHARE_MENU_ATTR}]`))
       ) {
         return;
       }
@@ -1599,18 +1584,21 @@ export function TourNavFloat({
     // flips would flash the directory list during the exit animation.
     if (displayPanel === 'explore') return;
 
-    const pending = pendingAfterExploreExitRef.current;
-    if (pending) {
-      pendingAfterExploreExitRef.current = null;
-      pending();
-    }
-
     closeExploreSearch();
     setExploreSceneDetailExiting(false);
     setExploreSceneDetailId(null);
     setExploreNamingDetailExiting(false);
     setExploreNamingDetail(null);
   }, [closeExploreSearch, displayPanel]);
+
+  useEffect(() => {
+    if (displayPanel !== null) return;
+
+    const pending = pendingAfterDockExitRef.current;
+    if (!pending) return;
+    pendingAfterDockExitRef.current = null;
+    pending();
+  }, [displayPanel]);
 
   useEffect(() => {
     if (!isExploreSearchActive) return;
@@ -1626,7 +1614,7 @@ export function TourNavFloat({
     setNamingHereHotspotId(null);
 
     const shouldRecenter = sceneId === currentSceneId;
-    closeExploreThen(() => {
+    closeDockThen(() => {
       if (shouldRecenter) {
         onRecenterCurrentScene?.();
       } else {
@@ -1640,7 +1628,7 @@ export function TourNavFloat({
   const handleBreadcrumbNavigate = useCallback(
     (sceneId: string) => {
       const shouldRecenter = sceneId === currentSceneId;
-      closeExploreThen(() => {
+      closeDockThen(() => {
         if (shouldRecenter) {
           onRecenterCurrentScene?.();
         } else {
@@ -1649,7 +1637,7 @@ export function TourNavFloat({
       });
     },
     [
-      closeExploreThen,
+      closeDockThen,
       currentSceneId,
       onBreadcrumbNavigate,
       onRecenterCurrentScene,
@@ -1663,7 +1651,7 @@ export function TourNavFloat({
     const shouldRecenter = sceneId === currentSceneId;
     // Keep detail mounted while Explore exits; detail resets when displayPanel
     // leaves 'explore'. Scene change waits until the panel is gone.
-    closeExploreThen(() => {
+    closeDockThen(() => {
       if (shouldRecenter) {
         onRecenterCurrentScene?.();
       } else {
@@ -1671,7 +1659,7 @@ export function TourNavFloat({
       }
     });
   }, [
-    closeExploreThen,
+    closeDockThen,
     currentSceneId,
     exploreSceneDetailId,
     onRecenterCurrentScene,
@@ -1688,23 +1676,18 @@ export function TourNavFloat({
       pendingNamingHereRef.current = null;
     }
 
-    closeExploreThen(() => {
+    closeDockThen(() => {
       onVisitNamingPlace(sceneId, hotspotId);
     });
-  }, [
-    closeExploreThen,
-    currentSceneId,
-    exploreNamingDetail,
-    onVisitNamingPlace,
-  ]);
+  }, [closeDockThen, currentSceneId, exploreNamingDetail, onVisitNamingPlace]);
 
   const handleExploreSceneDetailAsk = useCallback(() => {
     if (!exploreSceneDetailId || !onAskAboutScene) return;
     const sceneId = exploreSceneDetailId;
-    closeExploreThen(() => {
+    closeDockThen(() => {
       onAskAboutScene(sceneId);
     });
-  }, [closeExploreThen, exploreSceneDetailId, onAskAboutScene]);
+  }, [closeDockThen, exploreSceneDetailId, onAskAboutScene]);
 
   const handleExploreNamingDetailAsk = useCallback(() => {
     if (!exploreNamingDetail || !onAskAboutNaming) return;
@@ -1712,11 +1695,11 @@ export function TourNavFloat({
     const namingName =
       exploreNamingDetailView?.hotspot.popup?.title?.trim() ||
       exploreNamingDetailView?.hotspot.label?.trim();
-    closeExploreThen(() => {
+    closeDockThen(() => {
       onAskAboutNaming(sceneId, namingName);
     });
   }, [
-    closeExploreThen,
+    closeDockThen,
     exploreNamingDetail,
     exploreNamingDetailView,
     onAskAboutNaming,
@@ -1799,7 +1782,7 @@ export function TourNavFloat({
       pendingNamingHereRef.current = null;
     }
 
-    closeExploreThen(() => {
+    closeDockThen(() => {
       onVisitNamingPlace(sceneId, hotspotId);
     });
   };

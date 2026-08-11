@@ -9,7 +9,8 @@ import {
   TOUR_SHARE_FACEBOOK_LABEL,
   TOUR_SHARE_INSTAGRAM_ARIA,
   TOUR_SHARE_INSTAGRAM_LABEL,
-  TOUR_SHARE_LEAD,
+  TOUR_SHARE_LEAD_AFTER,
+  TOUR_SHARE_LEAD_BEFORE,
   TOUR_SHARE_LINKEDIN_LABEL,
   TOUR_SHARE_NATIVE_LABEL,
   TOUR_SHARE_PREVIEW_LABEL,
@@ -36,9 +37,6 @@ import { copyToClipboard } from '../utils/clipboard';
 import { ShareIcon } from './icons/ShareIcon';
 import { IconTooltip } from './ui/IconTooltip';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import { NamingStatusBadge } from './ui/NamingStatusBadge';
-import type { NamingStatusModifier } from './ui/Badge';
-import { namingOpportunityStatusShowsBadge } from '../data/namingOpportunityStatus';
 import {
   MATERIAL_SYMBOL_SIZE_16,
   MATERIAL_SYMBOL_SIZE_22,
@@ -51,7 +49,6 @@ import {
   WhatsAppBrandIcon,
   XBrandIcon,
 } from './icons/ShareBrandIcons';
-import { aiFabBubblePlaceDotClassName } from './ai/aiAssistantVariants';
 import {
   shareTourAppIconVariants,
   shareTourAppLabelClassName,
@@ -71,11 +68,8 @@ import {
   shareTourPreviewImageWrapClassName,
   shareTourPreviewLabelClassName,
   shareTourPreviewPlaceholderClassName,
-  shareTourPreviewPriceClassName,
   shareTourPreviewSectionClassName,
   shareTourPreviewTitleClassName,
-  shareTourPreviewTitleLineClassName,
-  shareTourPreviewTitleTrailingClassName,
   shareTourPanelUrlFieldClassName,
   shareTourPanelUrlInputClassName,
   shareTourPanelUrlRowClassName,
@@ -118,6 +112,7 @@ export function ShareTourPanel({
   message,
   previewImageUrl,
 }: ShareTourPanelProps) {
+  void contextLabel;
   const [copyState, setCopyState] = useState<CopyState>('idle');
   const [channelFeedback, setChannelFeedback] = useState<{
     id: string;
@@ -257,12 +252,7 @@ export function ShareTourPanel({
   return (
     <div className={shareTourPanelRootClassName}>
       <p className={shareTourPanelLeadClassName}>
-        {TOUR_SHARE_LEAD}:{' '}
-        <strong className='inline-flex items-center gap-1 align-middle leading-relaxed whitespace-nowrap'>
-          <span className={aiFabBubblePlaceDotClassName} aria-hidden='true' />
-          {contextLabel}
-        </strong>
-        .
+        {TOUR_SHARE_LEAD_BEFORE} {TOUR_SHARE_LEAD_AFTER}
       </p>
 
       <ShareLinkPreview
@@ -346,11 +336,9 @@ function ShareLinkPreview({
   message: ShareMessage;
   previewImageUrl?: string;
 }) {
-  const linkHost = useMemo(() => resolveShareLinkHost(shareUrl), [shareUrl]);
-  const priceLabel = message.priceLabel?.trim() || '';
-  const showStatusBadge = namingOpportunityStatusShowsBadge(
-    message.status ?? message.statusModifier ?? undefined,
-  );
+  const tourTitle = message.tourTitle?.trim() || '';
+  const previewTitle = message.sceneTitle?.trim() || message.title;
+  const eyebrow = tourTitle || resolveShareLinkHost(shareUrl) || '';
 
   return (
     <section
@@ -383,30 +371,10 @@ function ShareLinkPreview({
           }
         </div>
         <div className={shareTourPreviewBodyClassName}>
-          {linkHost ?
-            <p className={shareTourPreviewHostClassName}>{linkHost}</p>
+          {eyebrow ?
+            <p className={shareTourPreviewHostClassName}>{eyebrow}</p>
           : null}
-          <div className={shareTourPreviewTitleLineClassName}>
-            <p className={shareTourPreviewTitleClassName}>{message.title}</p>
-            {showStatusBadge || priceLabel ?
-              <div className={shareTourPreviewTitleTrailingClassName}>
-                {showStatusBadge ?
-                  <NamingStatusBadge
-                    status={message.status ?? undefined}
-                    statusModifier={
-                      (message.statusModifier as NamingStatusModifier | null) ??
-                      undefined
-                    }
-                    label={message.statusLabel ?? undefined}
-                    compact
-                  />
-                : null}
-                {priceLabel ?
-                  <p className={shareTourPreviewPriceClassName}>{priceLabel}</p>
-                : null}
-              </div>
-            : null}
-          </div>
+          <p className={shareTourPreviewTitleClassName}>{previewTitle}</p>
           <p className={shareTourPreviewDescriptionClassName}>{message.text}</p>
         </div>
       </div>

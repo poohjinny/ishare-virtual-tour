@@ -2,8 +2,15 @@ import { TOUR_CHROME_MOBILE_MQ } from './tourChrome';
 
 export const TOUR_SHARE_PANEL_TITLE = 'Share';
 
-export const TOUR_SHARE_LEAD =
-  'Send a link to this view. Anyone with the link opens the same tour location';
+/** Lead start — forms “Share with friends…” with {@link TOUR_SHARE_LEAD_AFTER}. */
+export const TOUR_SHARE_LEAD_BEFORE = 'Share';
+
+/** Warm invite after “Share ” (anchored + dock). */
+export const TOUR_SHARE_LEAD_AFTER =
+  'with friends, family, and the people you love — experience it together. This place is full of joy and opportunity.';
+
+/** @deprecated Prefer {@link TOUR_SHARE_LEAD_BEFORE} + {@link TOUR_SHARE_LEAD_AFTER}. */
+export const TOUR_SHARE_LEAD = TOUR_SHARE_LEAD_BEFORE;
 
 export const TOUR_SHARE_COPY_LABEL = 'Copy link';
 

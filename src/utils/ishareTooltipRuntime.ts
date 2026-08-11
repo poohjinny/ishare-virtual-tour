@@ -183,15 +183,27 @@ export function hideIshareTooltip(anchor?: HTMLElement | null): void {
 }
 
 /** Refresh the open bubble when an active host’s label changes. */
-export function refreshIshareTooltipIfActive(anchor: HTMLElement): void {
+export function refreshIshareTooltipIfActive(
+  anchor: HTMLElement,
+  labelOverride?: string,
+  placementOverride?: IshareTooltipPlacement,
+): void {
   if (activeAnchor !== anchor || !bubble) return;
-  const label = (anchor.getAttribute('data-ishare-tooltip') ?? '').trim();
+  const label = (
+    labelOverride ??
+    anchor.getAttribute('data-ishare-tooltip') ??
+    ''
+  ).trim();
   if (!label) {
     hideIshareTooltip(anchor);
     return;
   }
   bubble.textContent = label;
-  activePlacement = readPlacement(anchor);
+  if (placementOverride) {
+    activePlacement = placementOverride;
+  } else if (anchor.hasAttribute('data-ishare-tooltip-placement')) {
+    activePlacement = readPlacement(anchor);
+  }
   reposition();
 }
 

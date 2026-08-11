@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
+import type { AnchoredShareMenuPayload } from './AnchoredShareMenu';
 import {
   TOUR_SHARE_COPIED_LABEL,
   TOUR_SHARE_COPY_FAILED,
+  shouldPreferNativeShare,
 } from '../constants/tourShare';
 import type { ShareMessage } from '../utils/buildShareUrl';
 import { shareTourView, type ShareTourResult } from '../utils/shareTour';
@@ -21,8 +23,8 @@ interface ShareTourHeaderButtonProps {
   /** Short hover label — defaults to {@link ariaLabel}. */
   tooltipLabel?: string;
   preferNative?: boolean;
-  /** Desktop — open in-app Share panel instead of the OS sheet. */
-  onOpenSharePanel?: () => void;
+  /** Desktop — open the anchored mini Share menu (panel target). */
+  onOpenAnchoredShareMenu?: (payload: AnchoredShareMenuPayload) => void;
 }
 
 export function ShareTourHeaderButton({
@@ -31,24 +33,37 @@ export function ShareTourHeaderButton({
   ariaLabel,
   tooltipLabel,
   preferNative = true,
-  onOpenSharePanel,
+  onOpenAnchoredShareMenu,
 }: ShareTourHeaderButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const handleClick = useCallback(async () => {
-    const result = await shareTourView({
-      shareUrl,
-      message,
-      preferNative,
-      onOpenSharePanel,
-    });
+    if (
+      preferNative &&
+      !shouldPreferNativeShare() &&
+      onOpenAnchoredShareMenu &&
+      buttonRef.current
+    ) {
+      onOpenAnchoredShareMenu({
+        shareUrl,
+        message,
+        contextLabel:
+          message.namingOpportunityName?.trim() ||
+          message.sceneTitle?.trim() ||
+          message.title,
+        anchorEl: buttonRef.current,
+      });
+      return;
+    }
+
+    const result = await shareTourView({ shareUrl, message, preferNative });
     const nextLabel = resolveShareFeedbackLabel(result);
     if (!nextLabel) return;
 
     setFeedback(nextLabel);
     window.setTimeout(() => setFeedback(null), 2400);
-  }, [message, onOpenSharePanel, preferNative, shareUrl]);
+  }, [message, onOpenAnchoredShareMenu, preferNative, shareUrl]);
 
   const idleTooltip = tooltipLabel ?? ariaLabel;
   const tooltip = feedback ?? idleTooltip;

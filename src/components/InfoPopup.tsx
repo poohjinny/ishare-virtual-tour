@@ -14,6 +14,7 @@ import {
   stripNamingOpportunitySuffix,
 } from '../data/namingOpportunityStatus';
 import { popupCtaSizeClassName } from '../utils/popupCtaLayout';
+import type { AnchoredShareMenuPayload } from './AnchoredShareMenu';
 import {
   TOUR_SHARE_OPPORTUNITY_ARIA,
   TOUR_SHARE_OPPORTUNITY_LABEL,
@@ -57,8 +58,8 @@ interface InfoPopupProps {
   embed?: boolean;
   onClose: () => void;
   onVisitScene?: (sceneId: string) => void;
-  /** Desktop naming share — open in-app Share panel instead of OS sheet. */
-  onOpenSharePanel?: () => void;
+  /** Desktop naming share — open the anchored mini Share menu. */
+  onOpenAnchoredShareMenu?: (payload: AnchoredShareMenuPayload) => void;
 }
 
 export function InfoPopup({
@@ -69,7 +70,7 @@ export function InfoPopup({
   embed = false,
   onClose,
   onVisitScene,
-  onOpenSharePanel,
+  onOpenAnchoredShareMenu,
 }: InfoPopupProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [shown, setShown] = useState<PopupContent | null>(null);
@@ -198,7 +199,7 @@ export function InfoPopup({
         message: shareMessage,
         ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
         tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
-        onOpenSharePanel,
+        onOpenAnchoredShareMenu,
       }
     : undefined;
 

@@ -44,8 +44,10 @@ import {
   TOUR_SHARE_LOCATION_LABEL,
   TOUR_SHARE_OPPORTUNITY_ARIA,
   TOUR_SHARE_OPPORTUNITY_LABEL,
+  shouldPreferNativeShare,
 } from '../constants/tourShare';
 import { applyShareButtonFeedback, shareTourView } from '../utils/shareTour';
+import type { AnchoredShareMenuPayload } from '../components/AnchoredShareMenu';
 import { mountPopupVideoPlayer } from '../utils/popupVideo';
 import { releaseAllTourMedia } from '../utils/tourMediaCoordinator';
 import type { ClickCoords } from '../utils/devHotspotLogger';
@@ -233,10 +235,10 @@ interface PanoramaViewerProps {
   /** True while a naming-opportunity go (animate / navigate / open panel) is in flight. */
   onNamingOpportunityBusyChange?: (busy: boolean) => void;
   /**
-   * Desktop share from in-scene panels — open the Share dock instead of the OS
-   * sheet (mobile still uses native share).
+   * Desktop share from in-scene panels — open the anchored mini Share menu
+   * (mobile still uses native share via {@link shareTourView}).
    */
-  onOpenSharePanel?: () => void;
+  onOpenAnchoredShareMenu?: (payload: AnchoredShareMenuPayload) => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -299,7 +301,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       onViewerLoadError,
       onViewerLoadRecovered,
       onNamingOpportunityBusyChange,
-      onOpenSharePanel,
+      onOpenAnchoredShareMenu,
     },
     ref,
   ) {
@@ -358,7 +360,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
     const onActiveInfoHotspotChangeRef = useLatestRef(
       onActiveInfoHotspotChange,
     );
-    const onOpenSharePanelRef = useLatestRef(onOpenSharePanel);
+    const onOpenAnchoredShareMenuRef = useLatestRef(onOpenAnchoredShareMenu);
     const onDismissModalPopupsRef = useLatestRef(onDismissModalPopups);
     const onAnchoredPanelVisibilityChangeRef = useLatestRef(
       onAnchoredPanelVisibilityChange,
@@ -1754,18 +1756,31 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
               title: openGraph.title,
               text: openGraph.description ?? '',
             };
+            const contextLabel =
+              openGraph.contextLabel?.trim() ||
+              tour.scenes[navTarget.sceneId]?.title?.trim() ||
+              openGraph.title;
 
-            void shareTourView({
+            if (shouldPreferNativeShare()) {
+              void shareTourView({
+                shareUrl,
+                message,
+                preferNative: true,
+              }).then((result) => {
+                applyShareButtonFeedback(
+                  shareButton,
+                  result,
+                  TOUR_SHARE_LOCATION_LABEL,
+                );
+              });
+              return;
+            }
+
+            onOpenAnchoredShareMenuRef.current?.({
               shareUrl,
               message,
-              preferNative: true,
-              onOpenSharePanel: onOpenSharePanelRef.current ?? undefined,
-            }).then((result) => {
-              applyShareButtonFeedback(
-                shareButton,
-                result,
-                TOUR_SHARE_LOCATION_LABEL,
-              );
+              contextLabel,
+              anchorEl: shareButton,
             });
             return;
           }
@@ -1812,21 +1827,34 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
               title: openGraph.title,
               text: openGraph.description ?? '',
             };
+            const contextLabel =
+              openGraph.contextLabel?.trim() ||
+              tour.scenes[sceneId]?.title?.trim() ||
+              openGraph.title;
 
-            void shareTourView({
+            if (shouldPreferNativeShare()) {
+              void shareTourView({
+                shareUrl,
+                message,
+                preferNative: true,
+              }).then((result) => {
+                applyShareButtonFeedback(
+                  infoShareButton,
+                  result,
+                  namingHotspotId ?
+                    TOUR_SHARE_OPPORTUNITY_LABEL
+                  : TOUR_SHARE_LOCATION_LABEL,
+                  namingHotspotId ? TOUR_SHARE_OPPORTUNITY_ARIA : undefined,
+                );
+              });
+              return;
+            }
+
+            onOpenAnchoredShareMenuRef.current?.({
               shareUrl,
               message,
-              preferNative: true,
-              onOpenSharePanel: onOpenSharePanelRef.current ?? undefined,
-            }).then((result) => {
-              applyShareButtonFeedback(
-                infoShareButton,
-                result,
-                namingHotspotId ?
-                  TOUR_SHARE_OPPORTUNITY_LABEL
-                : TOUR_SHARE_LOCATION_LABEL,
-                namingHotspotId ? TOUR_SHARE_OPPORTUNITY_ARIA : undefined,
-              );
+              contextLabel,
+              anchorEl: infoShareButton,
             });
             return;
           }

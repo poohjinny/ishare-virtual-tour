@@ -39,8 +39,15 @@ import {
   TourLoadSplash,
   getTourLoadSplashFadeMs,
 } from '../components/TourLoadSplash';
-import { TourNavFloat } from '../components/TourNavFloat';
-import type { TourNavDockActions } from '../components/TourNavFloat';
+import {
+  TourNavFloat,
+  type TourNavDockActions,
+} from '../components/TourNavFloat';
+import {
+  AnchoredShareMenu,
+  type AnchoredShareMenuPayload,
+} from '../components/AnchoredShareMenu';
+import { ANCHORED_SHARE_MENU_ATTR } from '../components/anchoredShareMenuVariants';
 import { TourViewerControlsToggleFab } from '../components/TourViewerControlsToggleFab';
 import { EnterVrButton } from '../components/EnterVrButton';
 import { TourFirstVisitHint } from '../components/TourFirstVisitHint';
@@ -142,6 +149,7 @@ const PanoramaViewer = lazy(() =>
 );
 const ThreeDViewer = lazy(() => import('../viewer-3d/ThreeDViewer'));
 import { resetLandingTransitionState } from '../viewer-shared/landingTransitionState';
+import { HOTSPOT_ENTER_DELAY_MS } from '../viewer-shared/hotspotEnterAnimation';
 import { resolveTourSceneOpenGraph } from '../utils/tourOpenGraph';
 
 /** Fallback if transitionend does not fire (e.g. reduced motion). */
@@ -679,6 +687,10 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     targetSceneId: string;
     title: string;
   } | null>(null);
+  const [anchoredShare, setAnchoredShare] = useState<{
+    payload: AnchoredShareMenuPayload;
+    open: boolean;
+  } | null>(null);
   const [namingOpportunityBusy, setNamingOpportunityBusy] = useState(false);
   const [chromeDockOpen, setChromeDockOpen] = useState(false);
   const [devClickCoords, setDevClickCoords] = useState<ClickCoords | null>(
@@ -698,6 +710,14 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
   );
   const [splashRevealReady, setSplashRevealReady] = useState(false);
   const [splashOverlayFade, setSplashOverlayFade] = useState(false);
+  /**
+   * `?no=` panel open — after landing camera + hotspot enter delay, not full
+   * splash curtain unmount (~4.2s), so the panel tracks hotspot stamp-in.
+   */
+  const [namingDeepLinkReady, setNamingDeepLinkReady] = useState(false);
+  const namingDeepLinkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const hideBarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideSplashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasInitiallyLoadedRef = useRef(false);
@@ -711,6 +731,7 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     setSplashPhase('active');
     setSplashRevealReady(false);
     setSplashOverlayFade(false);
+    setNamingDeepLinkReady(false);
     resetLandingTransitionState();
     if (!searchParams.loadErrorTest) {
       setViewerLoadError(null);
@@ -723,6 +744,10 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
       clearTimeout(hideSplashTimerRef.current);
       hideSplashTimerRef.current = null;
     }
+    if (namingDeepLinkTimerRef.current) {
+      clearTimeout(namingDeepLinkTimerRef.current);
+      namingDeepLinkTimerRef.current = null;
+    }
   }, [route.tourId, searchParams.loadErrorTest, searchParams.skipLanding]);
 
   const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
@@ -734,6 +759,18 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
       dev: searchParams.dev,
       firstVisitHint: searchParams.firstVisitHint,
     });
+
+  const handleInitialTourReveal = useCallback(() => {
+    onInitialTourReveal?.();
+    if (namingDeepLinkTimerRef.current) {
+      clearTimeout(namingDeepLinkTimerRef.current);
+    }
+    namingDeepLinkTimerRef.current = setTimeout(() => {
+      namingDeepLinkTimerRef.current = null;
+      setNamingDeepLinkReady(true);
+    }, HOTSPOT_ENTER_DELAY_MS);
+  }, [onInitialTourReveal]);
+
   const [viewerLoadError, setViewerLoadError] =
     useState<ViewerLoadErrorInfo | null>(null);
 
@@ -848,7 +885,7 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     tour: bootstrapTour,
     currentSceneId,
     isTransitioning,
-    splashDone: splashPhase === 'done',
+    splashDone: namingDeepLinkReady,
     audience: sceneAudience,
     viewerRef,
     pendingNamingSelectionRef,
@@ -1143,6 +1180,51 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     [assistant.noteNavPreviewOpened, showAskGuide],
   );
 
+  const anchoredShareOpenGestureRef = useRef<HTMLElement | null>(null);
+
+  const openAnchoredShareMenu = useCallback(
+    (payload: AnchoredShareMenuPayload) => {
+      setAnchoredShare((prev) => {
+        if (prev?.open && prev.payload.anchorEl === payload.anchorEl) {
+          // Same pointer/click opening the menu twice (duplicate listeners /
+          // pointerdown+click) — keep open; only a later gesture toggles shut.
+          if (anchoredShareOpenGestureRef.current === payload.anchorEl) {
+            return prev;
+          }
+          return { payload: prev.payload, open: false };
+        }
+
+        anchoredShareOpenGestureRef.current = payload.anchorEl;
+        const clearOpenGesture = () => {
+          if (anchoredShareOpenGestureRef.current === payload.anchorEl) {
+            anchoredShareOpenGestureRef.current = null;
+          }
+          window.removeEventListener('pointerup', clearOpenGesture, true);
+          window.removeEventListener('pointercancel', clearOpenGesture, true);
+        };
+        window.addEventListener('pointerup', clearOpenGesture, true);
+        window.addEventListener('pointercancel', clearOpenGesture, true);
+
+        return { payload, open: true };
+      });
+    },
+    [],
+  );
+
+  const closeAnchoredShareMenu = useCallback(() => {
+    anchoredShareOpenGestureRef.current = null;
+    setAnchoredShare((prev) => (prev ? { ...prev, open: false } : null));
+  }, []);
+
+  const handleAnchoredShareExited = useCallback(() => {
+    setAnchoredShare((prev) => (prev?.open ? prev : null));
+  }, []);
+
+  useEffect(() => {
+    anchoredShareOpenGestureRef.current = null;
+    setAnchoredShare(null);
+  }, [currentSceneId]);
+
   const handleRecenterToDefaultView = useCallback(() => {
     viewerRef.current?.recenterToDefaultView();
   }, []);
@@ -1184,6 +1266,9 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
       ) {
         return;
       }
+      // Mini Share menu portals to document.body — closing it must not dismiss
+      // the nav/info panel that owned the Share control.
+      if (target.closest(`[${ANCHORED_SHARE_MENU_ATTR}]`)) return;
 
       viewerRef.current?.closeAnchoredPanels();
     };
@@ -1273,38 +1358,62 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
 
   const handleNavigate = useCallback(
     async (sceneId: string, targetView?: ViewPosition) => {
-      pauseForManualNav();
-      const pendingNaming = pendingNamingSelectionRef.current;
-      const navigatingToPendingNaming =
-        pendingNaming !== null && pendingNaming.sceneId === sceneId;
-
-      if (!navigatingToPendingNaming) {
-        pendingNamingSelectionRef.current = null;
-        setActiveNamingHotspotId(null);
-        viewerRef.current?.clearActiveInfoHotspot();
-      }
-
       const scene = bootstrapTour.scenes[sceneId];
-      if (!scene || sceneId === currentSceneId) return;
+      if (!scene || sceneId === currentSceneId) {
+        // Same-scene / missing — still clear mute + naming when callers used
+        // navigate as “leave this NO”, but don't run dock-exit choreography.
+        pauseForManualNav();
+        const pendingNaming = pendingNamingSelectionRef.current;
+        const navigatingToPendingNaming =
+          pendingNaming !== null && pendingNaming.sceneId === sceneId;
+        if (!navigatingToPendingNaming) {
+          pendingNamingSelectionRef.current = null;
+          setActiveNamingHotspotId(null);
+          viewerRef.current?.clearActiveInfoHotspot();
+        }
+        return;
+      }
       if (!isSceneRoutable(scene, sceneAudience)) return;
 
-      if (!navigatingToPendingNaming) {
-        syncSceneToUrl(sceneId, { clearNamingOpportunity: true });
-      }
+      const run = async () => {
+        pauseForManualNav();
+        const pendingNaming = pendingNamingSelectionRef.current;
+        const navigatingToPendingNaming =
+          pendingNaming !== null && pendingNaming.sceneId === sceneId;
 
-      await viewerRef.current?.navigateToScene(
-        sceneId,
-        targetView ?? scene.defaultView,
-      );
-
-      const xrSession = panoramaXrSessionRef.current;
-      if (xrSession && tour) {
-        try {
-          await xrSession.setTourScene(tour, sceneId);
-        } catch {
-          // Keep flat viewer navigation even if XR texture reload fails.
+        if (!navigatingToPendingNaming) {
+          pendingNamingSelectionRef.current = null;
+          setActiveNamingHotspotId(null);
+          viewerRef.current?.clearActiveInfoHotspot();
         }
+
+        if (!navigatingToPendingNaming) {
+          syncSceneToUrl(sceneId, { clearNamingOpportunity: true });
+        }
+
+        await viewerRef.current?.navigateToScene(
+          sceneId,
+          targetView ?? scene.defaultView,
+        );
+
+        const xrSession = panoramaXrSessionRef.current;
+        if (xrSession && tour) {
+          try {
+            await xrSession.setTourScene(tour, sceneId);
+          } catch {
+            // Keep flat viewer navigation even if XR texture reload fails.
+          }
+        }
+      };
+
+      const closeDockThen = navDockActionsRef.current?.closeDockThen;
+      if (closeDockThen) {
+        closeDockThen(() => {
+          void run();
+        });
+        return;
       }
+      await run();
     },
     [
       bootstrapTour.scenes,
@@ -1441,29 +1550,48 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     async (sceneId: string) => {
       if (sceneId === currentSceneId) return;
 
-      pauseForManualNav();
-      pendingNamingSelectionRef.current = null;
-      setActiveNamingHotspotId(null);
-      viewerRef.current?.clearActiveInfoHotspot();
+      const run = async () => {
+        pauseForManualNav();
+        pendingNamingSelectionRef.current = null;
+        setActiveNamingHotspotId(null);
+        viewerRef.current?.clearActiveInfoHotspot();
 
-      syncSceneToUrl(sceneId, { clearNamingOpportunity: true });
+        syncSceneToUrl(sceneId, { clearNamingOpportunity: true });
 
-      const scene = bootstrapTour.scenes[sceneId];
-      if (!scene) return;
+        const scene = bootstrapTour.scenes[sceneId];
+        if (!scene) return;
 
-      await viewerRef.current?.navigateToScene(sceneId, scene.defaultView);
+        await viewerRef.current?.navigateToScene(sceneId, scene.defaultView);
+      };
+
+      // TourNavFloat already closeDockThen-wraps breadcrumb picks; keep a
+      // safety wrap for any other callers.
+      const closeDockThen = navDockActionsRef.current?.closeDockThen;
+      if (closeDockThen) {
+        closeDockThen(() => {
+          void run();
+        });
+        return;
+      }
+      await run();
     },
     [bootstrapTour.scenes, currentSceneId, pauseForManualNav, syncSceneToUrl],
   );
 
   const handleHistoryBack = useCallback(() => {
-    pauseForManualNav();
-    goBack();
+    const run = () => {
+      pauseForManualNav();
+      goBack();
+    };
+    navDockActionsRef.current?.closeDockThen(run) ?? run();
   }, [goBack, pauseForManualNav]);
 
   const handleHistoryForward = useCallback(() => {
-    pauseForManualNav();
-    goForward();
+    const run = () => {
+      pauseForManualNav();
+      goForward();
+    };
+    navDockActionsRef.current?.closeDockThen(run) ?? run();
   }, [goForward, pauseForManualNav]);
 
   const handleTransitionStart = useCallback(() => {
@@ -1641,7 +1769,7 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
                   onLoadProgress={handleLoadProgress}
                   onLoadComplete={handleLoadComplete}
                   onLandingStart={handleLandingStart}
-                  onInitialTourReveal={onInitialTourReveal}
+                  onInitialTourReveal={handleInitialTourReveal}
                   onViewerLoadError={handleViewerLoadError}
                   onViewerLoadRecovered={handleViewerLoadRecovered}
                   onXrPresentingChange={handleXrPresentingChange}
@@ -1691,15 +1819,13 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
                   onLoadProgress={handleLoadProgress}
                   onLoadComplete={handleLoadComplete}
                   onLandingStart={handleLandingStart}
-                  onInitialTourReveal={onInitialTourReveal}
+                  onInitialTourReveal={handleInitialTourReveal}
                   onFirstPanoramaInteract={onFirstPanoramaInteract}
                   onViewerLoadError={handleViewerLoadError}
                   onViewerLoadRecovered={handleViewerLoadRecovered}
                   onNamingOpportunityBusyChange={setNamingOpportunityBusy}
-                  onOpenSharePanel={
-                    searchParams.embed ? undefined : (
-                      () => navDockActionsRef.current?.openShare()
-                    )
+                  onOpenAnchoredShareMenu={
+                    searchParams.embed ? undefined : openAnchoredShareMenu
                   }
                 />
               }
@@ -1862,11 +1988,18 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
           embed={searchParams.embed}
           onClose={closeInfoPopup}
           onVisitScene={handleNavigate}
-          onOpenSharePanel={
-            searchParams.embed ? undefined : (
-              () => navDockActionsRef.current?.openShare()
-            )
+          onOpenAnchoredShareMenu={
+            searchParams.embed ? undefined : openAnchoredShareMenu
           }
+        />
+      : null}
+
+      {anchoredShare ?
+        <AnchoredShareMenu
+          {...anchoredShare.payload}
+          open={anchoredShare.open}
+          onClose={closeAnchoredShareMenu}
+          onExited={handleAnchoredShareExited}
         />
       : null}
     </div>

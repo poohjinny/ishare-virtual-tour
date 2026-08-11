@@ -185,8 +185,12 @@ export function buildShareMessage(
 
   if (naming) {
     const intro = `${naming} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
+    const title =
+      priceLabel ?
+        `${naming} · ${priceLabel} | ${tourTitle}`
+      : `${naming} | ${tourTitle}`;
     return {
-      title: `${naming} — ${tourTitle}`,
+      title,
       text:
         authored ?
           `${intro} ${authored}`
@@ -204,7 +208,7 @@ export function buildShareMessage(
 
   const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
   return {
-    title: `${sceneTitle} — ${tourTitle}`,
+    title: `${sceneTitle} | ${tourTitle}`,
     text:
       authored ?
         `${intro} ${authored}`

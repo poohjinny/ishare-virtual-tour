@@ -185,7 +185,7 @@ export const TOUR_BREADCRUMB_SIBLING_MENU_ATTR =
 export const tourBreadcrumbSiblingMenuSelector = `[${TOUR_BREADCRUMB_SIBLING_MENU_ATTR}]`;
 
 export const tourNavBreadcrumbSiblingMenuClassName = cn(
-  'ishare-scrollbar fixed z-[var(--tour-chrome-menu-z-index)] m-0 flex max-h-[min(15rem,40vh)] w-max min-w-[10rem] flex-col gap-0',
+  'ishare-scrollbar fixed z-[var(--tour-chrome-menu-z-index)] m-0 flex max-h-[min(18rem,48vh)] w-max min-w-[10rem] flex-col gap-0',
   'max-w-[min(15rem,calc(100vw-2rem))] list-none overflow-x-clip overflow-y-auto overscroll-contain rounded-lg origin-top',
   'border border-[color:var(--ishare-border)] bg-white/92 p-1 shadow-[var(--ishare-glass-dock-shadow)]',
 );
