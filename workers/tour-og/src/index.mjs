@@ -2,29 +2,33 @@
  * Bot / social-crawler Open Graph edge for tour.ishare.ca.
  *
  * - Known crawlers → 200 HTML with tour/scene/naming og:* tags (no JS).
- * - Everyone else → proxy to ORIGIN; rewrite SPA deep-link 404 → 200.
+ * - Everyone else → proxy to GitHub Pages origin; rewrite SPA deep-link 404 → 200.
  *
- * Requires Cloudflare proxy on tour.ishare.ca (see README).
- * Build must publish /tours/{tourId}.json (postbuild publish-tour-json).
+ * Origin fetches use resolveOverride so subrequests do not re-enter this Worker
+ * (fetching https://tour.ishare.ca/... from the Worker would loop otherwise).
  */
 
 const BOT_UA =
-  /facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|meta-externalagent/i;
+  /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|KakaoTalk|Kakaotalk|kakaotalk-scrap|Daum|Yeti|Linespider|LineBot|BitlyBot|OpenGraph|Preview\/|Snapchat|PetalBot/i;
 
 const DESC_MAX = 220;
 
 export default {
   async fetch(request, env) {
-    const origin = (env.ORIGIN || 'https://tour.ishare.ca').replace(/\/$/, '');
+    const publicOrigin = (
+      env.PUBLIC_ORIGIN ||
+      env.ORIGIN ||
+      'https://tour.ishare.ca'
+    ).replace(/\/$/, '');
     const url = new URL(request.url);
 
     if (isAssetOrApiPath(url.pathname)) {
-      return proxyToOrigin(request, origin);
+      return proxyToOrigin(request, env);
     }
 
-    if (BOT_UA.test(request.headers.get('user-agent') || '')) {
+    if (shouldServeOpenGraph(request, url.pathname)) {
       try {
-        const html = await buildBotHtml(url, origin, env);
+        const html = await buildBotHtml(url, publicOrigin, env);
         if (html) {
           return new Response(html, {
             status: 200,
@@ -40,9 +44,32 @@ export default {
       }
     }
 
-    return proxySpa(request, origin);
+    return proxySpa(request, env);
   },
 };
+
+function shouldServeOpenGraph(request, pathname) {
+  const ua = request.headers.get('user-agent') || '';
+  if (BOT_UA.test(ua)) return true;
+
+  // Some validators omit Sec-Fetch-* and send a generic UA. Prefer OG HTML for
+  // tour deep links when this does not look like a normal browser navigation.
+  if (!isTourDeepLink(pathname)) return false;
+  if (request.method !== 'GET' && request.method !== 'HEAD') return false;
+  const dest = request.headers.get('sec-fetch-dest');
+  const mode = request.headers.get('sec-fetch-mode');
+  if (dest || mode) return false;
+  if (/Mozilla\/5\.0.*\b(Chrome|Firefox|Safari|Edg)\//i.test(ua) && !/bot/i.test(ua)) {
+    return false;
+  }
+  return true;
+}
+
+function isTourDeepLink(pathname) {
+  const parts = pathname.split('/').filter(Boolean);
+  if (parts.length === 0) return false;
+  return /^t_[a-z0-9]+$/i.test(parts[0]) || /^[a-z0-9-]+$/i.test(parts[0]);
+}
 
 function isAssetOrApiPath(pathname) {
   return (
@@ -55,23 +82,36 @@ function isAssetOrApiPath(pathname) {
   );
 }
 
-async function proxyToOrigin(request, origin) {
+function resolveOverride(env) {
+  return env.ORIGIN_RESOLVE_OVERRIDE || 'poohjinny.github.io';
+}
+
+function publicOrigin(env) {
+  return (env.PUBLIC_ORIGIN || env.ORIGIN || 'https://tour.ishare.ca').replace(
+    /\/$/,
+    '',
+  );
+}
+
+async function proxyToOrigin(request, env) {
   const url = new URL(request.url);
-  const target = new URL(url.pathname + url.search, origin);
-  return fetch(target, {
+  const target = new URL(url.pathname + url.search, publicOrigin(env));
+  return fetch(target.toString(), {
     method: request.method,
     headers: request.headers,
     redirect: 'manual',
+    cf: { resolveOverride: resolveOverride(env) },
   });
 }
 
-async function proxySpa(request, origin) {
-  const response = await proxyToOrigin(request, origin);
+async function proxySpa(request, env) {
+  const response = await proxyToOrigin(request, env);
   if (response.status !== 404) return response;
 
-  // GitHub Pages SPA fallback uses 404.html — rewrite status for humans.
-  const fallback = await fetch(new URL('/404.html', origin), {
+  const fallbackUrl = new URL('/404.html', publicOrigin(env));
+  const fallback = await fetch(fallbackUrl.toString(), {
     headers: { accept: 'text/html' },
+    cf: { resolveOverride: resolveOverride(env) },
   });
   if (!fallback.ok) return response;
 
@@ -89,9 +129,8 @@ async function buildBotHtml(url, origin, env) {
     return null;
   }
 
-  const tour = await fetchJson(`${origin}/tours/${tourId}.json`);
+  const tour = await fetchOriginJson(`/tours/${tourId}.json`, env);
   if (!tour?.id || !tour.scenes) {
-    // Legacy alias paths are not published as JSON filenames — skip.
     return null;
   }
 
@@ -101,7 +140,7 @@ async function buildBotHtml(url, origin, env) {
 
   const no = url.searchParams.get('no')?.trim() || '';
   const naming = no ? resolveNaming(tour, sceneId, no) : null;
-  const catalog = await fetchJson(`${origin}/tours/catalog.json`).catch(
+  const catalog = await fetchOriginJson('/tours/catalog.json', env).catch(
     () => null,
   );
   const catalogEntry = findCatalogTour(catalog, tour.id);
@@ -119,10 +158,15 @@ async function buildBotHtml(url, origin, env) {
   return renderOgHtml(meta, env.SITE_NAME || 'iShare Virtual Tour');
 }
 
-async function fetchJson(href) {
+async function fetchOriginJson(path, env) {
+  const href = new URL(path, publicOrigin(env)).toString();
   const response = await fetch(href, {
     headers: { accept: 'application/json' },
-    cf: { cacheTtl: 300, cacheEverything: true },
+    cf: {
+      cacheTtl: 300,
+      cacheEverything: true,
+      resolveOverride: resolveOverride(env),
+    },
   });
   if (!response.ok) return null;
   return response.json();
@@ -178,7 +222,6 @@ function resolveNaming(tour, sceneId, searchValue) {
     }
   }
 
-  // Search all scenes if not on this scene's pin list.
   for (const [sid, sc] of Object.entries(tour.scenes ?? {})) {
     for (const hotspot of sc.hotspots ?? []) {
       if (!hotspot?.namingId) continue;

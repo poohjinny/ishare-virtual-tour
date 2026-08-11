@@ -11,6 +11,8 @@ routes = [
 # See workers/tour-og/README.md
 
 [vars]
+PUBLIC_ORIGIN = "https://tour.ishare.ca"
 ORIGIN = "https://tour.ishare.ca"
+ORIGIN_RESOLVE_OVERRIDE = "poohjinny.github.io"
 SITE_NAME = "iShare Virtual Tour"
 DEFAULT_IMAGE = "https://tour.ishare.ca/assets/brand/logo_ishare.png"
