@@ -750,18 +750,6 @@ export function TourNavFloat({
     ),
   );
 
-  const activeNamingItem = useMemo(() => {
-    if (!activeNamingHotspotId) return null;
-
-    return (
-      namingItems.find(
-        (item) =>
-          item.hotspotId === activeNamingHotspotId &&
-          item.sceneId === currentSceneId,
-      ) ?? null
-    );
-  }, [activeNamingHotspotId, currentSceneId, namingItems]);
-
   // Keep Explore naming "You are here" in sync with an open panel.
   useEffect(() => {
     if (!activeNamingHotspotId) return;
