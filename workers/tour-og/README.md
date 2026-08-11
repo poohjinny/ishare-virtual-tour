@@ -69,15 +69,19 @@ has `/tours/*.json`.
 1. Deploy a build that includes `dist/tours/` (`postbuild` →
    `publish-tour-json`) and sibling `*.jpg` thumbnails under `assets/`.
 2. Deploy this Worker and attach the `tour.ishare.ca/*` route.
-3. Facebook [Sharing Debugger](https://developers.facebook.com/tools/debug/) →
+3. **Disable Cloudflare Managed robots.txt** (Dashboard → zone `ishare.ca` →
+   AI Crawl Control / robots.txt managed feature). Otherwise Cloudflare
+   rewrites `/robots.txt` after the Worker and social scrapers may fail.
+4. Facebook [Sharing Debugger](https://developers.facebook.com/tools/debug/) →
    Scrape Again on a scene or naming URL.
-4. Expect **200**, tour/scene (or naming) title, and a **`.jpg` thumbnail**
-   (not the iShare logo), unless no image exists.
+5. Expect **200**, tour/scene (or naming) title, and a **`.jpg` thumbnail**
+   (~1200×630, not the iShare logo), unless no image exists.
 
 Backfill missing share JPGs:
 
 ```bash
 node scripts/backfill-og-jpg.mjs
+node scripts/backfill-og-jpg.mjs --force   # regenerate at 1200×630
 ```
 
 Naming share:
