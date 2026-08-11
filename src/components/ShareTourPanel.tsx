@@ -21,6 +21,7 @@ import {
   TOUR_SHARE_PREVIEW_LABEL,
   TOUR_SHARE_URL_LABEL,
   TOUR_SHARE_WHATSAPP_LABEL,
+  TOUR_SHARE_WHATSAPP_COPIED_HINT,
   TOUR_SHARE_X_LABEL,
   canUseNativeShare,
   shouldPreferNativeShare,
@@ -30,6 +31,7 @@ import {
   buildShareFacebookUrl,
   buildShareGmailComposeUrl,
   buildShareLinkedInUrl,
+  buildShareWhatsAppClipboardText,
   buildShareWhatsAppUrl,
   buildShareXUrl,
   buildNativeShareData,
@@ -172,6 +174,24 @@ export function ShareTourPanel({
     window.setTimeout(() => setChannelFeedback(null), 2400);
   }, [shareUrl]);
 
+  /**
+   * WhatsApp Desktop/Web appends `?text=` onto an existing compose draft.
+   * That buries a prior Overview URL first → wrong OG. Copy the full caption
+   * and open send without prefill; user pastes into a cleared field.
+   */
+  const handleWhatsAppShare = useCallback(async () => {
+    await ensureShareOgImage(shareUrl);
+    const ok = await copyToClipboard(
+      buildShareWhatsAppClipboardText(shareUrl, message),
+    );
+    openShareAppLink(buildShareWhatsAppUrl());
+    setChannelFeedback({
+      id: 'whatsapp',
+      label: ok ? TOUR_SHARE_WHATSAPP_COPIED_HINT : TOUR_SHARE_COPY_FAILED,
+    });
+    window.setTimeout(() => setChannelFeedback(null), 3600);
+  }, [message, shareUrl]);
+
   const handleExternalChannelOpen = useCallback(
     async (href: string) => {
       await ensureShareOgImage(shareUrl);
@@ -218,9 +238,7 @@ export function ShareTourPanel({
         label: TOUR_SHARE_WHATSAPP_LABEL,
         iconVariant: 'whatsapp',
         icon: <WhatsAppBrandIcon />,
-        href: buildShareWhatsAppUrl(shareUrl, message),
-        external: true,
-        openHref: handleExternalChannelOpen,
+        onClick: () => void handleWhatsAppShare(),
       },
       {
         id: 'instagram',
@@ -264,6 +282,7 @@ export function ShareTourPanel({
     handleExternalChannelOpen,
     handleInstagramShare,
     handleNativeShare,
+    handleWhatsAppShare,
     message,
     shareUrl,
     showNativeShare,

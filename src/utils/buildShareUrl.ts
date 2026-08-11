@@ -360,17 +360,20 @@ export function openShareAppLink(url: string): void {
 }
 
 /**
- * WhatsApp compose text. Put the deep link **first** on its own line so the
- * unfurler grabs the full scene URL (not a truncated `/t_…` → Overview OG).
+ * WhatsApp send entry (no `text=`). Prefilling appends onto an existing draft on
+ * WhatsApp Desktop/Web, so a prior Overview URL stays first and OG falls back.
+ * Copy {@link buildShareWhatsAppClipboardText} then open this URL instead.
  */
-export function buildShareWhatsAppUrl(
+export function buildShareWhatsAppUrl(): string {
+  return 'https://api.whatsapp.com/send';
+}
+
+/** Full caption + deep link for clipboard paste into WhatsApp. */
+export function buildShareWhatsAppClipboardText(
   shareUrl: string,
   message: ShareMessage,
 ): string {
-  const params = new URLSearchParams({
-    text: `${shareUrl}\n\n${buildNativeShareText(message)}`,
-  });
-  return `https://api.whatsapp.com/send?${params.toString()}`;
+  return `${shareUrl}\n\n${buildNativeShareText(message)}`;
 }
 
 export function buildShareFacebookUrl(shareUrl: string): string {
