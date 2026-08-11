@@ -360,24 +360,16 @@ export function openShareAppLink(url: string): void {
 }
 
 /**
- * WhatsApp send with **only** the deep link as `text=`.
- * Full captions are copied by the share panel — WhatsApp Desktop/Web appends
- * `?text=` onto existing drafts, so a long caption reuses a prior Overview URL
- * for OG; a lone scene URL keeps the unfurl target correct when drafts are empty
- * or after the user clears.
+ * WhatsApp compose: caption then deep link (same shape as other chat shares).
  */
-export function buildShareWhatsAppUrl(shareUrl: string): string {
-  return `https://api.whatsapp.com/send?${new URLSearchParams({
-    text: shareUrl,
-  }).toString()}`;
-}
-
-/** Full caption + deep link for clipboard paste into WhatsApp. */
-export function buildShareWhatsAppClipboardText(
+export function buildShareWhatsAppUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
-  return `${shareUrl}\n\n${buildNativeShareText(message)}`;
+  const params = new URLSearchParams({
+    text: `${buildNativeShareText(message)}\n${shareUrl}`,
+  });
+  return `https://wa.me/?${params.toString()}`;
 }
 
 export function buildShareFacebookUrl(shareUrl: string): string {

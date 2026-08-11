@@ -21,7 +21,6 @@ import {
   TOUR_SHARE_PREVIEW_LABEL,
   TOUR_SHARE_URL_LABEL,
   TOUR_SHARE_WHATSAPP_LABEL,
-  TOUR_SHARE_WHATSAPP_COPIED_HINT,
   TOUR_SHARE_X_LABEL,
   canUseNativeShare,
   shouldPreferNativeShare,
@@ -31,7 +30,6 @@ import {
   buildShareFacebookUrl,
   buildShareGmailComposeUrl,
   buildShareLinkedInUrl,
-  buildShareWhatsAppClipboardText,
   buildShareWhatsAppUrl,
   buildShareXUrl,
   buildNativeShareData,
@@ -174,24 +172,6 @@ export function ShareTourPanel({
     window.setTimeout(() => setChannelFeedback(null), 2400);
   }, [shareUrl]);
 
-  /**
-   * Prefill only the scene URL (WhatsApp requires `text=` or a phone number —
-   * bare `/send` shows “This link is incorrect”). Full caption goes to clipboard
-   * so Desktop draft-append does not stick a long prior Overview message in front.
-   */
-  const handleWhatsAppShare = useCallback(async () => {
-    await ensureShareOgImage(shareUrl);
-    const ok = await copyToClipboard(
-      buildShareWhatsAppClipboardText(shareUrl, message),
-    );
-    openShareAppLink(buildShareWhatsAppUrl(shareUrl));
-    setChannelFeedback({
-      id: 'whatsapp',
-      label: ok ? TOUR_SHARE_WHATSAPP_COPIED_HINT : TOUR_SHARE_COPY_FAILED,
-    });
-    window.setTimeout(() => setChannelFeedback(null), 3600);
-  }, [message, shareUrl]);
-
   const handleExternalChannelOpen = useCallback(
     async (href: string) => {
       await ensureShareOgImage(shareUrl);
@@ -238,7 +218,9 @@ export function ShareTourPanel({
         label: TOUR_SHARE_WHATSAPP_LABEL,
         iconVariant: 'whatsapp',
         icon: <WhatsAppBrandIcon />,
-        onClick: () => void handleWhatsAppShare(),
+        href: buildShareWhatsAppUrl(shareUrl, message),
+        external: true,
+        openHref: handleExternalChannelOpen,
       },
       {
         id: 'instagram',
@@ -282,7 +264,6 @@ export function ShareTourPanel({
     handleExternalChannelOpen,
     handleInstagramShare,
     handleNativeShare,
-    handleWhatsAppShare,
     message,
     shareUrl,
     showNativeShare,
