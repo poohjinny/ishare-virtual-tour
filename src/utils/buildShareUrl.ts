@@ -360,12 +360,16 @@ export function openShareAppLink(url: string): void {
 }
 
 /**
- * WhatsApp send entry (no `text=`). Prefilling appends onto an existing draft on
- * WhatsApp Desktop/Web, so a prior Overview URL stays first and OG falls back.
- * Copy {@link buildShareWhatsAppClipboardText} then open this URL instead.
+ * WhatsApp send with **only** the deep link as `text=`.
+ * Full captions are copied by the share panel — WhatsApp Desktop/Web appends
+ * `?text=` onto existing drafts, so a long caption reuses a prior Overview URL
+ * for OG; a lone scene URL keeps the unfurl target correct when drafts are empty
+ * or after the user clears.
  */
-export function buildShareWhatsAppUrl(): string {
-  return 'https://api.whatsapp.com/send';
+export function buildShareWhatsAppUrl(shareUrl: string): string {
+  return `https://api.whatsapp.com/send?${new URLSearchParams({
+    text: shareUrl,
+  }).toString()}`;
 }
 
 /** Full caption + deep link for clipboard paste into WhatsApp. */

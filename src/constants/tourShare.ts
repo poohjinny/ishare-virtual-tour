@@ -20,7 +20,7 @@ export const TOUR_SHARE_WHATSAPP_LABEL = 'WhatsApp';
 
 /** Shown after WhatsApp tile — draft-append cannot safely carry a full caption. */
 export const TOUR_SHARE_WHATSAPP_COPIED_HINT =
-  'Message copied — clear WhatsApp draft, then paste';
+  'Link ready — paste full message if you want the caption';
 
 export const TOUR_SHARE_INSTAGRAM_LABEL = 'Instagram';
 

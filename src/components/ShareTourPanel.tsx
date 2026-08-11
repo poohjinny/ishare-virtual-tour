@@ -175,16 +175,16 @@ export function ShareTourPanel({
   }, [shareUrl]);
 
   /**
-   * WhatsApp Desktop/Web appends `?text=` onto an existing compose draft.
-   * That buries a prior Overview URL first → wrong OG. Copy the full caption
-   * and open send without prefill; user pastes into a cleared field.
+   * Prefill only the scene URL (WhatsApp requires `text=` or a phone number —
+   * bare `/send` shows “This link is incorrect”). Full caption goes to clipboard
+   * so Desktop draft-append does not stick a long prior Overview message in front.
    */
   const handleWhatsAppShare = useCallback(async () => {
     await ensureShareOgImage(shareUrl);
     const ok = await copyToClipboard(
       buildShareWhatsAppClipboardText(shareUrl, message),
     );
-    openShareAppLink(buildShareWhatsAppUrl());
+    openShareAppLink(buildShareWhatsAppUrl(shareUrl));
     setChannelFeedback({
       id: 'whatsapp',
       label: ok ? TOUR_SHARE_WHATSAPP_COPIED_HINT : TOUR_SHARE_COPY_FAILED,
