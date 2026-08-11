@@ -3,7 +3,8 @@
  *
  * - Known crawler UAs → 200 HTML with tour/scene/naming og:* (no JS).
  * - Everyone else → proxy GitHub Pages; deep-link 404 → SPA shell 200.
- * - og:image points at static *.jpg sibling of WebP thumbnails (build-time).
+ * - og:image → /__og/jpg/{tourId}/{sceneId}.jpg (R2 bake-on-miss via Images).
+ * - Share warm: POST /__og/ensure { tourId, sceneId, no? }.
  *
  * Origin fetches use resolveOverride so subrequests do not re-enter this Worker.
  */
@@ -12,6 +13,12 @@ const BOT_UA =
   /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp\/|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|kakaotalk-scrap|Linespider|LineBot|BitlyBot|Snapchat|PetalBot/i;
 
 const DESC_MAX = 220;
+const OG_WIDTH = 1200;
+const OG_HEIGHT = 630;
+const TOUR_ID_RE = /^t_[a-z0-9]+$/i;
+const SCENE_ID_RE = /^s_[a-z0-9]+$/i;
+const SLUG_RE = /^[a-z0-9-]+$/i;
+const NO_RE = /^[a-z0-9][a-z0-9_-]{0,120}$/i;
 
 /** Served by the Worker so Cloudflare Managed robots.txt does not replace it. */
 const ROBOTS_TXT = `# Allow social link-preview crawlers (Facebook, Kakao, Slack, etc.).
@@ -53,7 +60,7 @@ Allow: /
 `;
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const publicOrigin = (
       env.PUBLIC_ORIGIN ||
       env.ORIGIN ||
@@ -65,8 +72,27 @@ export default {
       return robotsResponse();
     }
 
-    if (url.pathname.startsWith('/__og/')) {
-      return new Response('Gone', { status: 410 });
+    // Public JPEG path (prefer /og/jpg — __og kept as alias for old shares).
+    if (url.pathname === '/og/ensure' || url.pathname === '/__og/ensure') {
+      return handleEnsure(request, env, publicOrigin, ctx);
+    }
+
+    const jpgMatch = url.pathname.match(
+      /^\/(?:__)?og\/jpg\/([^/]+)\/([^/]+)\.jpe?g$/i,
+    );
+    if (jpgMatch) {
+      return handleOgJpegGet(
+        request,
+        env,
+        publicOrigin,
+        jpgMatch[1],
+        jpgMatch[2],
+        ctx,
+      );
+    }
+
+    if (url.pathname.startsWith('/__og/') || url.pathname.startsWith('/og/')) {
+      return new Response('Not found', { status: 404 });
     }
 
     if (isAssetOrApiPath(url.pathname)) {
@@ -75,7 +101,7 @@ export default {
 
     if (shouldServeOpenGraph(request, url.pathname)) {
       try {
-        const html = await buildBotHtml(url, publicOrigin, env);
+        const html = await buildBotHtml(url, publicOrigin, env, ctx);
         if (html) return openGraphResponse(html);
       } catch (error) {
         console.error('tour-og bot html failed', error);
@@ -104,7 +130,21 @@ function shouldServeOpenGraph(request, pathname) {
 function isTourDeepLink(pathname) {
   const parts = pathname.split('/').filter(Boolean);
   if (parts.length === 0) return false;
-  return /^t_[a-z0-9]+$/i.test(parts[0]) || /^[a-z0-9-]+$/i.test(parts[0]);
+  return TOUR_ID_RE.test(parts[0]) || SLUG_RE.test(parts[0]);
+}
+
+function isSafeTourId(value) {
+  return TOUR_ID_RE.test(value) || SLUG_RE.test(value);
+}
+
+function isSafeSceneId(value) {
+  return SCENE_ID_RE.test(value) || SLUG_RE.test(value);
+}
+
+function sanitizeNo(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed || !NO_RE.test(trimmed)) return '';
+  return trimmed;
 }
 
 /**
@@ -130,15 +170,14 @@ function fixedLengthResponse(bytes, extraHeaders = {}) {
   writer.close();
   return new Response(readable, {
     status: 200,
-    headers: {
-      ...extraHeaders,
-      'content-length': String(length),
-    },
+    headers: { ...extraHeaders, 'content-length': String(length) },
   });
 }
 
 function isAssetOrApiPath(pathname) {
   if (pathname === '/robots.txt') return false;
+  if (pathname.startsWith('/__og/') || pathname.startsWith('/og/'))
+    return false;
   return (
     pathname.startsWith('/assets/') ||
     pathname.startsWith('/tours/') ||
@@ -153,7 +192,7 @@ function resolveOverride(env) {
   return env.ORIGIN_RESOLVE_OVERRIDE || 'poohjinny.github.io';
 }
 
-function publicOrigin(env) {
+function publicOriginFromEnv(env) {
   return (env.PUBLIC_ORIGIN || env.ORIGIN || 'https://tour.ishare.ca').replace(
     /\/$/,
     '',
@@ -162,7 +201,7 @@ function publicOrigin(env) {
 
 async function proxyToOrigin(request, env) {
   const url = new URL(request.url);
-  const target = new URL(url.pathname + url.search, publicOrigin(env));
+  const target = new URL(url.pathname + url.search, publicOriginFromEnv(env));
   return fetch(target.toString(), {
     method: request.method,
     headers: request.headers,
@@ -176,7 +215,7 @@ async function proxySpa(request, env) {
   const response = await proxyToOrigin(request, env);
   if (response.status !== 404) return response;
 
-  const fallbackUrl = new URL('/404.html', publicOrigin(env));
+  const fallbackUrl = new URL('/404.html', publicOriginFromEnv(env));
   const fallback = await fetch(fallbackUrl.toString(), {
     headers: { accept: 'text/html' },
     cf: { resolveOverride: resolveOverride(env) },
@@ -197,23 +236,280 @@ async function proxySpa(request, env) {
   return response;
 }
 
-async function buildBotHtml(url, origin, env) {
+async function handleEnsure(request, env, publicOrigin, ctx) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: ensureCorsHeaders(request),
+    });
+  }
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: 'invalid_json' }, 400, request);
+  }
+
+  const tourId = String(body?.tourId || '').trim();
+  const sceneId = String(body?.sceneId || '').trim();
+  const no = sanitizeNo(body?.no);
+  if (!isSafeTourId(tourId) || !isSafeSceneId(sceneId)) {
+    return jsonResponse({ error: 'invalid_ids' }, 400, request);
+  }
+
+  const url = ogJpgPublicUrl(publicOrigin, tourId, sceneId, no);
+  const bake = ensureOgJpeg(env, publicOrigin, tourId, sceneId, no);
+
+  // Client may disconnect after a short wait — finish put via waitUntil.
+  if (ctx?.waitUntil) {
+    ctx.waitUntil(
+      bake.catch((error) => {
+        console.error('tour-og ensure background failed', error);
+      }),
+    );
+  }
+
+  try {
+    const result = await Promise.race([
+      bake,
+      sleep(2500).then(() => ({ ok: true, url, pending: true })),
+    ]);
+    if (!result.ok) {
+      return jsonResponse(
+        { error: result.error || 'bake_failed' },
+        result.status || 502,
+        request,
+      );
+    }
+    return jsonResponse(
+      { url: result.url || url, pending: Boolean(result.pending) },
+      200,
+      request,
+    );
+  } catch (error) {
+    console.error('tour-og ensure failed', error);
+    return jsonResponse({ error: 'bake_failed' }, 502, request);
+  }
+}
+
+async function handleOgJpegGet(
+  request,
+  env,
+  publicOrigin,
+  tourId,
+  sceneId,
+  ctx,
+) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+  if (!isSafeTourId(tourId) || !isSafeSceneId(sceneId)) {
+    return new Response('Not found', { status: 404 });
+  }
+  const url = new URL(request.url);
+  const no = sanitizeNo(url.searchParams.get('no'));
+
+  try {
+    const result = await ensureOgJpeg(env, publicOrigin, tourId, sceneId, no);
+    if (!result.ok || !result.bytes) {
+      // Keep failed image responses uncached so crawlers retry after bake.
+      return new Response('Not found', {
+        status: result.status || 404,
+        headers: { 'cache-control': 'no-store' },
+      });
+    }
+    if (request.method === 'HEAD') {
+      return new Response(null, {
+        status: 200,
+        headers: {
+          'content-type': 'image/jpeg',
+          'content-length': String(result.bytes.byteLength),
+          'cache-control': 'public, max-age=31536000, immutable',
+          'x-ishare-og-jpeg': result.source || 'r2',
+        },
+      });
+    }
+    return fixedLengthResponse(result.bytes, {
+      'content-type': 'image/jpeg',
+      'cache-control': 'public, max-age=31536000, immutable',
+      'x-ishare-og-jpeg': result.source || 'r2',
+    });
+  } catch (error) {
+    console.error('tour-og jpg get failed', error);
+    if (ctx?.waitUntil) {
+      ctx.waitUntil(
+        ensureOgJpeg(env, publicOrigin, tourId, sceneId, no).catch((err) => {
+          console.error('tour-og jpg background bake failed', err);
+        }),
+      );
+    }
+    return new Response('Bake failed', {
+      status: 502,
+      headers: { 'cache-control': 'no-store' },
+    });
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function ensureCorsHeaders(request) {
+  const origin = request.headers.get('origin') || '';
+  const allowed =
+    origin === 'https://tour.ishare.ca' ||
+    origin.endsWith('.pages.dev') ||
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+  const headers = {
+    'access-control-allow-methods': 'POST, OPTIONS',
+    'access-control-allow-headers': 'content-type',
+    'access-control-max-age': '86400',
+  };
+  if (allowed) headers['access-control-allow-origin'] = origin;
+  return headers;
+}
+
+function jsonResponse(payload, status, request) {
+  const body = JSON.stringify(payload);
+  const headers = {
+    'content-type': 'application/json; charset=utf-8',
+    ...ensureCorsHeaders(request),
+  };
+  return new Response(body, { status, headers });
+}
+
+function r2ObjectKey(tourId, sceneId, no) {
+  const suffix = no ? `__${no}` : '';
+  return `og/${tourId}/${sceneId}${suffix}.jpg`;
+}
+
+function ogJpgPublicUrl(origin, tourId, sceneId, no) {
+  const base = `${origin}/og/jpg/${tourId}/${sceneId}.jpg`;
+  return no ? `${base}?no=${encodeURIComponent(no)}` : base;
+}
+
+/**
+ * R2 hit → bytes. Miss → origin WebP → Images JPEG 1200x630 → put R2.
+ */
+async function ensureOgJpeg(env, publicOrigin, tourId, sceneId, no) {
+  if (!env.OG_JPEG) {
+    return { ok: false, status: 503, error: 'r2_unavailable' };
+  }
+
+  const key = r2ObjectKey(tourId, sceneId, no);
+  const url = ogJpgPublicUrl(publicOrigin, tourId, sceneId, no);
+
+  const hit = await env.OG_JPEG.get(key);
+  if (hit) {
+    const bytes = new Uint8Array(await hit.arrayBuffer());
+    return { ok: true, url, bytes, source: 'r2' };
+  }
+
+  const sourcePath = await resolveOgSourcePath(env, tourId, sceneId, no);
+  if (!sourcePath) {
+    return { ok: false, status: 404, error: 'source_missing' };
+  }
+
+  const jpegBytes = await bakeJpegFromOrigin(env, sourcePath);
+  if (!jpegBytes) {
+    return { ok: false, status: 502, error: 'transform_failed' };
+  }
+
+  await env.OG_JPEG.put(key, jpegBytes, {
+    httpMetadata: { contentType: 'image/jpeg' },
+  });
+
+  return { ok: true, url, bytes: jpegBytes, source: 'baked' };
+}
+
+async function resolveOgSourcePath(env, tourId, sceneId, no) {
+  const tour = await fetchOriginJson(`/tours/${tourId}.json`, env);
+  if (!tour?.scenes?.[sceneId]) return null;
+
+  if (no) {
+    const naming = resolveNaming(tour, sceneId, no);
+    const namingImage = naming?.image?.trim();
+    if (namingImage && isSafeAssetPath(namingImage)) {
+      return namingImage.startsWith('/') ? namingImage : `/${namingImage}`;
+    }
+    const hostId =
+      naming?.sceneId && tour.scenes[naming.sceneId] ? naming.sceneId : sceneId;
+    const thumb = tour.scenes[hostId]?.thumbnail?.trim();
+    if (thumb && isSafeAssetPath(thumb)) {
+      return thumb.startsWith('/') ? thumb : `/${thumb}`;
+    }
+    return null;
+  }
+
+  const thumb = tour.scenes[sceneId]?.thumbnail?.trim();
+  if (thumb && isSafeAssetPath(thumb)) {
+    return thumb.startsWith('/') ? thumb : `/${thumb}`;
+  }
+  return null;
+}
+
+function isSafeAssetPath(path) {
+  if (!path || /^https?:\/\//i.test(path)) return false;
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  if (!normalized.startsWith('/assets/')) return false;
+  if (normalized.includes('..')) return false;
+  return true;
+}
+
+async function bakeJpegFromOrigin(env, assetPath) {
+  if (!env.IMAGES) return null;
+
+  const href = new URL(assetPath, publicOriginFromEnv(env)).toString();
+  const source = await fetch(href, {
+    cf: { resolveOverride: resolveOverride(env) },
+  });
+  if (!source.ok || !source.body) return null;
+
+  const quality = Number(env.OG_JPEG_QUALITY) || 82;
+  const transformOnce = async (body) => {
+    const out = await env.IMAGES.input(body)
+      .transform({ width: OG_WIDTH, height: OG_HEIGHT, fit: 'cover' })
+      .output({ format: 'image/jpeg', quality });
+    const response = out.response();
+    return new Uint8Array(await response.arrayBuffer());
+  };
+
+  try {
+    return await transformOnce(source.body);
+  } catch (error) {
+    console.error('tour-og transform retry', error);
+    const retry = await fetch(href, {
+      cf: { resolveOverride: resolveOverride(env) },
+    });
+    if (!retry.ok || !retry.body) return null;
+    try {
+      return await transformOnce(retry.body);
+    } catch (retryError) {
+      console.error('tour-og transform failed', retryError);
+      return null;
+    }
+  }
+}
+
+async function buildBotHtml(url, origin, env, ctx) {
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts.length === 0) return null;
 
   const tourId = parts[0];
-  if (!/^t_[a-z0-9]+$/i.test(tourId) && !/^[a-z0-9-]+$/i.test(tourId)) {
-    return null;
-  }
+  if (!isSafeTourId(tourId)) return null;
 
   const tour = await fetchOriginJson(`/tours/${tourId}.json`, env);
   if (!tour?.id || !tour.scenes) return null;
 
   const sceneId =
     parts[1] && tour.scenes[parts[1]] ? parts[1] : tour.firstScene;
-  if (!sceneId || !tour.scenes[sceneId]) return null;
+  if (!sceneId || !tour.scenes[sceneId] || !isSafeSceneId(sceneId)) return null;
 
-  const no = url.searchParams.get('no')?.trim() || '';
+  const no = sanitizeNo(url.searchParams.get('no'));
   const naming = no ? resolveNaming(tour, sceneId, no) : null;
   const catalog = await fetchOriginJson('/tours/catalog.json', env).catch(
     () => null,
@@ -225,16 +521,37 @@ async function buildBotHtml(url, origin, env) {
     env.DEFAULT_IMAGE ||
     `${origin}/assets/brand/logo_ishare.png`;
 
+  const hostSceneId =
+    naming?.sceneId && tour.scenes[naming.sceneId] ? naming.sceneId : sceneId;
+
+  // Warm R2 while returning HTML so slow image fetches (FB) still see a hit.
+  if (ctx?.waitUntil) {
+    ctx.waitUntil(
+      ensureOgJpeg(env, origin, tour.id, hostSceneId, no).catch((error) => {
+        console.error('tour-og bot warm failed', error);
+      }),
+    );
+  }
+
   const meta =
     naming ?
-      buildNamingMeta(tour, sceneId, naming, catalogEntry, logo, origin, url)
+      buildNamingMeta(
+        tour,
+        sceneId,
+        naming,
+        catalogEntry,
+        logo,
+        origin,
+        url,
+        no,
+      )
     : buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url);
 
   return renderOgHtml(meta, env.SITE_NAME || 'iShare Virtual Tour');
 }
 
 async function fetchOriginJson(path, env) {
-  const href = new URL(path, publicOrigin(env)).toString();
+  const href = new URL(path, publicOriginFromEnv(env)).toString();
   const response = await fetch(href, {
     headers: { accept: 'application/json' },
     cf: {
@@ -350,28 +667,6 @@ function abs(origin, path, fallback) {
   return `${origin}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
 }
 
-/** Meta-only: WebP share assets use the static JPG sibling on CDN. */
-function ogShareImage(origin, imageUrl) {
-  if (!imageUrl) return imageUrl;
-  try {
-    const parsed = new URL(imageUrl, origin);
-    if (parsed.origin !== new URL(origin).origin) return imageUrl;
-    if (!parsed.pathname.startsWith('/assets/')) return imageUrl;
-    if (!/\.webp$/i.test(parsed.pathname)) return imageUrl;
-    return `${origin}${parsed.pathname.replace(/\.webp$/i, '.jpg')}`;
-  } catch {
-    return imageUrl;
-  }
-}
-
-function imageTypeForUrl(imageUrl) {
-  if (/\.jpe?g$/i.test(imageUrl)) return 'image/jpeg';
-  if (/\.png$/i.test(imageUrl)) return 'image/png';
-  if (/\.webp$/i.test(imageUrl)) return 'image/webp';
-  if (/\.gif$/i.test(imageUrl)) return 'image/gif';
-  return '';
-}
-
 function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
   const tourTitle = tour.title?.trim() || tour.id;
   const scene = tour.scenes[sceneId];
@@ -380,10 +675,10 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
     plainText(scene?.description || '') ||
     plainText(catalogEntry?.summary || '');
   const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
-  const image = ogShareImage(
-    origin,
-    abs(origin, scene?.thumbnail, abs(origin, logo)),
-  );
+  const image =
+    scene?.thumbnail ?
+      ogJpgPublicUrl(origin, tour.id, sceneId, '')
+    : abs(origin, logo);
   return {
     title: `${sceneTitle} — ${tourTitle}`,
     description:
@@ -391,7 +686,8 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to look around in 360°.`,
     image,
-    ...ogImageSizeMeta(image),
+    imageWidth: scene?.thumbnail ? OG_WIDTH : undefined,
+    imageHeight: scene?.thumbnail ? OG_HEIGHT : undefined,
     url: `${origin}${url.pathname}${url.search}`,
   };
 }
@@ -404,6 +700,7 @@ function buildNamingMeta(
   logo,
   origin,
   url,
+  no,
 ) {
   const tourTitle = tour.title?.trim() || tour.id;
   const hostSceneId = naming.sceneId || sceneId;
@@ -411,12 +708,13 @@ function buildNamingMeta(
   const authored =
     plainText(naming.body || '') || plainText(catalogEntry?.summary || '');
   const intro = `${naming.name} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
-  const image = ogShareImage(
-    origin,
-    abs(origin, naming.image) ||
-      abs(origin, tour.scenes[hostSceneId]?.thumbnail) ||
-      abs(origin, logo),
-  );
+  const hasImage =
+    Boolean(naming.image?.trim()) ||
+    Boolean(tour.scenes[hostSceneId]?.thumbnail);
+  const image =
+    hasImage ?
+      ogJpgPublicUrl(origin, tour.id, hostSceneId, no)
+    : abs(origin, logo);
   return {
     title: `${naming.name} — ${tourTitle}`,
     description:
@@ -424,14 +722,18 @@ function buildNamingMeta(
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to learn more and look around.`,
     image,
-    ...ogImageSizeMeta(image),
+    imageWidth: hasImage ? OG_WIDTH : undefined,
+    imageHeight: hasImage ? OG_HEIGHT : undefined,
     url: `${origin}${url.pathname}${url.search}`,
   };
 }
 
-function ogImageSizeMeta(imageUrl) {
-  if (!/\.jpe?g$/i.test(imageUrl || '')) return {};
-  return { imageWidth: 1200, imageHeight: 630 };
+function imageTypeForUrl(imageUrl) {
+  if (/\.jpe?g$/i.test(imageUrl)) return 'image/jpeg';
+  if (/\.png$/i.test(imageUrl)) return 'image/png';
+  if (/\.webp$/i.test(imageUrl)) return 'image/webp';
+  if (/\.gif$/i.test(imageUrl)) return 'image/gif';
+  return '';
 }
 
 function escapeAttr(value) {

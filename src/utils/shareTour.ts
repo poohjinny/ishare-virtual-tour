@@ -5,6 +5,7 @@ import {
 } from '../constants/tourShare';
 import { buildNativeShareData, type ShareMessage } from './buildShareUrl';
 import { copyToClipboard } from './clipboard';
+import { ensureShareOgImage } from './ensureShareOgImage';
 import { setIshareTooltipLabel } from './ishareTooltipDom';
 
 export type ShareTourResult =
@@ -35,6 +36,8 @@ export async function shareTourView({
   preferNative = false,
   onOpenSharePanel,
 }: ShareTourOptions): Promise<ShareTourResult> {
+  await ensureShareOgImage(shareUrl);
+
   if (preferNative && shouldPreferNativeShare()) {
     try {
       const data = buildNativeShareData(shareUrl, message);

@@ -16,3 +16,11 @@ ORIGIN = "https://tour.ishare.ca"
 ORIGIN_RESOLVE_OVERRIDE = "poohjinny.github.io"
 SITE_NAME = "iShare Virtual Tour"
 DEFAULT_IMAGE = "https://tour.ishare.ca/assets/brand/logo_ishare.png"
+OG_JPEG_QUALITY = "82"
+
+[images]
+binding = "IMAGES"
+
+[[r2_buckets]]
+binding = "OG_JPEG"
+bucket_name = "ishare-tour-og-jpeg"
