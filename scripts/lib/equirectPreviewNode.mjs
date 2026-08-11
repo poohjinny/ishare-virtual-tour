@@ -164,11 +164,14 @@ export async function renderEquirectPreviewToFile(
     .webp({ quality, effort: 4 })
     .toFile(outputPath);
 
-  // Static JPG sibling for social og:image (crawlers prefer JPEG over WebP).
+  // Static JPG sibling for social og:image (crawlers prefer JPEG; LinkedIn likes ~1200×630).
   const jpgPath = outputPath.replace(/\.webp$/i, '.jpg');
   if (jpgPath !== outputPath) {
+    const ogWidth = options.ogWidth ?? 1200;
+    const ogHeight = options.ogHeight ?? 630;
     const jpegQuality = options.jpegQuality ?? Math.min(quality, 85);
     await sharp(pixels, { raw: { width, height, channels: 4 } })
+      .resize(ogWidth, ogHeight, { fit: 'cover' })
       .jpeg({ quality: jpegQuality, mozjpeg: true })
       .toFile(jpgPath);
   }

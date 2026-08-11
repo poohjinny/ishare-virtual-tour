@@ -13,6 +13,45 @@ const BOT_UA =
 
 const DESC_MAX = 220;
 
+/** Served by the Worker so Cloudflare Managed robots.txt does not replace it. */
+const ROBOTS_TXT = `# Allow social link-preview crawlers (Facebook, Kakao, Slack, etc.).
+User-agent: *
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: meta-externalfetcher
+Allow: /
+
+User-agent: KakaoTalk
+Allow: /
+
+User-agent: kakaotalk-scrap
+Allow: /
+
+User-agent: Daum
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Slackbot
+Allow: /
+`;
+
 export default {
   async fetch(request, env) {
     const publicOrigin = (
@@ -21,6 +60,10 @@ export default {
       'https://tour.ishare.ca'
     ).replace(/\/$/, '');
     const url = new URL(request.url);
+
+    if (url.pathname === '/robots.txt') {
+      return robotsResponse();
+    }
 
     if (url.pathname.startsWith('/__og/')) {
       return new Response('Gone', { status: 410 });
@@ -43,6 +86,14 @@ export default {
   },
 };
 
+function robotsResponse() {
+  const bytes = new TextEncoder().encode(ROBOTS_TXT);
+  return fixedLengthResponse(bytes, {
+    'content-type': 'text/plain; charset=utf-8',
+    'cache-control': 'public, max-age=300',
+  });
+}
+
 function shouldServeOpenGraph(request, pathname) {
   if (!isTourDeepLink(pathname)) return false;
   if (request.method !== 'GET' && request.method !== 'HEAD') return false;
@@ -56,23 +107,38 @@ function isTourDeepLink(pathname) {
   return /^t_[a-z0-9]+$/i.test(parts[0]) || /^[a-z0-9-]+$/i.test(parts[0]);
 }
 
-/** Full 200 HTML only — never honor Range (Facebook 206 truncates meta). */
+/**
+ * Full 200 HTML only — never honor Range (Facebook 206 truncates meta).
+ * Use FixedLengthStream so Cloudflare keeps Content-Length (not chunked).
+ */
 function openGraphResponse(html) {
   const bytes = new TextEncoder().encode(html);
-  return new Response(bytes, {
+  return fixedLengthResponse(bytes, {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'private, no-store',
+    'x-ishare-og': 'bot',
+    'accept-ranges': 'none',
+    'disable-features': 'email_obfuscation,rocket_loader',
+  });
+}
+
+function fixedLengthResponse(bytes, extraHeaders = {}) {
+  const length = bytes.byteLength;
+  const { readable, writable } = new FixedLengthStream(length);
+  const writer = writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  return new Response(readable, {
     status: 200,
     headers: {
-      'content-type': 'text/html; charset=utf-8',
-      'content-length': String(bytes.byteLength),
-      'cache-control': 'private, no-store',
-      'x-ishare-og': 'bot',
-      'accept-ranges': 'none',
-      'disable-features': 'email_obfuscation,rocket_loader',
+      ...extraHeaders,
+      'content-length': String(length),
     },
   });
 }
 
 function isAssetOrApiPath(pathname) {
+  if (pathname === '/robots.txt') return false;
   return (
     pathname.startsWith('/assets/') ||
     pathname.startsWith('/tours/') ||
@@ -314,16 +380,18 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
     plainText(scene?.description || '') ||
     plainText(catalogEntry?.summary || '');
   const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
+  const image = ogShareImage(
+    origin,
+    abs(origin, scene?.thumbnail, abs(origin, logo)),
+  );
   return {
     title: `${sceneTitle} — ${tourTitle}`,
     description:
       authored ?
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to look around in 360°.`,
-    image: ogShareImage(
-      origin,
-      abs(origin, scene?.thumbnail, abs(origin, logo)),
-    ),
+    image,
+    ...ogImageSizeMeta(image),
     url: `${origin}${url.pathname}${url.search}`,
   };
 }
@@ -356,8 +424,14 @@ function buildNamingMeta(
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to learn more and look around.`,
     image,
+    ...ogImageSizeMeta(image),
     url: `${origin}${url.pathname}${url.search}`,
   };
+}
+
+function ogImageSizeMeta(imageUrl) {
+  if (!/\.jpe?g$/i.test(imageUrl || '')) return {};
+  return { imageWidth: 1200, imageHeight: 630 };
 }
 
 function escapeAttr(value) {
@@ -378,6 +452,10 @@ function renderOgHtml(meta, siteName) {
     imageType ?
       `\n    <meta property="og:image:type" content="${imageType}" />`
     : '';
+  const imageSizeTags =
+    meta.imageWidth && meta.imageHeight ?
+      `\n    <meta property="og:image:width" content="${meta.imageWidth}" />\n    <meta property="og:image:height" content="${meta.imageHeight}" />`
+    : '';
 
   return `<!doctype html>
 <html lang="en">
@@ -389,7 +467,7 @@ function renderOgHtml(meta, siteName) {
     <meta property="og:site_name" content="${site}" />
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${image}" />${imageTypeTag}
+    <meta property="og:image" content="${image}" />${imageTypeTag}${imageSizeTags}
     <meta property="og:url" content="${pageUrl}" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />

@@ -937,11 +937,12 @@ function syncAssetToPublic(root, assetsFilePath, webPath) {
   copyFileSync(assetsFilePath, publicPath);
 }
 
-/** JPG sibling next to a WebP asset for social og:image. */
+/** JPG sibling next to a WebP asset for social og:image (~1200×630). */
 async function writeOgJpegSibling(webpFilePath, root, webPath, quality = 80) {
   if (!/\.webp$/i.test(webpFilePath)) return;
   const jpgFilePath = webpFilePath.replace(/\.webp$/i, '.jpg');
   await sharp(webpFilePath)
+    .resize(1200, 630, { fit: 'cover' })
     .jpeg({ quality, mozjpeg: true })
     .toFile(jpgFilePath);
   if (root && webPath) {

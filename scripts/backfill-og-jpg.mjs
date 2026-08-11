@@ -30,6 +30,9 @@ const dryRun = args.includes('--dry-run');
 const dirFlag = args.indexOf('--dir');
 const dirFilter = dirFlag >= 0 ? args[dirFlag + 1] : '';
 const JPEG_QUALITY = Number(process.env.OG_JPEG_QUALITY ?? 80);
+const OG_WIDTH = Number(process.env.OG_JPEG_WIDTH ?? 1200);
+const OG_HEIGHT = Number(process.env.OG_JPEG_HEIGHT ?? 630);
+const force = args.includes('--force');
 
 const FOLDER_NAMES = new Set(['thumbnails', 'previews']);
 
@@ -74,13 +77,13 @@ async function main() {
   let skipped = 0;
 
   console.log(
-    `Backfilling OG JPG siblings${dryRun ? ' (dry-run)' : ''}… (${files.length} webp)`,
+    `Backfilling OG JPG siblings${dryRun ? ' (dry-run)' : ''}${force ? ' (force)' : ''}… (${files.length} webp)`,
   );
 
   for (const webpPath of files) {
     const jpgPath = webpPath.replace(/\.webp$/i, '.jpg');
     const rel = relative(assetsRoot, webpPath).replace(/\\/g, '/');
-    if (existsSync(jpgPath)) {
+    if (!force && existsSync(jpgPath)) {
       skipped += 1;
       continue;
     }
@@ -90,12 +93,13 @@ async function main() {
       continue;
     }
     await sharp(webpPath)
+      .resize(OG_WIDTH, OG_HEIGHT, { fit: 'cover' })
       .jpeg({ quality: JPEG_QUALITY, mozjpeg: true })
       .toFile(jpgPath);
     if (existsSync(publicAssetsRoot)) {
       syncJpgToPublic(jpgPath);
     }
-    console.log(`[ok] ${rel} → ${rel.replace(/\.webp$/i, '.jpg')}`);
+    console.log(`[ok] ${rel} → ${rel.replace(/\.webp$/i, '.jpg')} (${OG_WIDTH}x${OG_HEIGHT})`);
     written += 1;
   }
 
