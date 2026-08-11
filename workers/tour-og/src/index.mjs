@@ -524,8 +524,11 @@ async function buildBotHtml(url, origin, env, ctx) {
   const hostSceneId =
     naming?.sceneId && tour.scenes[naming.sceneId] ? naming.sceneId : sceneId;
 
-  // Warm R2 while returning HTML so slow image fetches (FB) still see a hit.
-  if (ctx?.waitUntil) {
+  const includeImage = isOgImageEnabled(env);
+  const imageMode = ogImageMode(env);
+
+  // R2 warm only when og:image points at baked JPEG.
+  if (includeImage && imageMode === 'r2' && ctx?.waitUntil) {
     ctx.waitUntil(
       ensureOgJpeg(env, origin, tour.id, hostSceneId, no).catch((error) => {
         console.error('tour-og bot warm failed', error);
@@ -544,10 +547,29 @@ async function buildBotHtml(url, origin, env, ctx) {
         origin,
         url,
         no,
+        imageMode,
       )
-    : buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url);
+    : buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url, imageMode);
 
-  return renderOgHtml(meta, env.SITE_NAME || 'iShare Virtual Tour');
+  return renderOgHtml(
+    meta,
+    env.SITE_NAME || 'iShare Virtual Tour',
+    includeImage,
+  );
+}
+
+function isOgImageEnabled(env) {
+  const raw = String(env.OG_INCLUDE_IMAGE ?? '1')
+    .trim()
+    .toLowerCase();
+  return raw !== '0' && raw !== 'false' && raw !== 'off' && raw !== 'no';
+}
+
+function ogImageMode(env) {
+  const raw = String(env.OG_IMAGE_MODE || 'r2')
+    .trim()
+    .toLowerCase();
+  return raw === 'webp' ? 'webp' : 'r2';
 }
 
 async function fetchOriginJson(path, env) {
@@ -635,9 +657,11 @@ function resolveNaming(tour, sceneId, searchValue) {
 }
 
 function kebab(value) {
+  // Match client `slugifyHotspotName` (apostrophes stripped, not hyphenated).
   return String(value || '')
     .trim()
     .toLowerCase()
+    .replace(/['']/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
@@ -667,7 +691,15 @@ function abs(origin, path, fallback) {
   return `${origin}${trimmed.startsWith('/') ? trimmed : `/${trimmed}`}`;
 }
 
-function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
+function buildSceneMeta(
+  tour,
+  sceneId,
+  catalogEntry,
+  logo,
+  origin,
+  url,
+  imageMode = 'r2',
+) {
   const tourTitle = tour.title?.trim() || tour.id;
   const scene = tour.scenes[sceneId];
   const sceneTitle = scene?.title?.trim() || sceneId;
@@ -675,10 +707,14 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
     plainText(scene?.description || '') ||
     plainText(catalogEntry?.summary || '');
   const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
+  const thumb = scene?.thumbnail?.trim() || '';
   const image =
-    scene?.thumbnail ?
-      ogJpgPublicUrl(origin, tour.id, sceneId, '')
+    thumb ?
+      imageMode === 'webp' ?
+        abs(origin, thumb)
+      : ogJpgPublicUrl(origin, tour.id, sceneId, '')
     : abs(origin, logo);
+  const sized = Boolean(thumb) && imageMode === 'r2';
   return {
     title: `${sceneTitle} — ${tourTitle}`,
     description:
@@ -686,8 +722,8 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to look around in 360°.`,
     image,
-    imageWidth: scene?.thumbnail ? OG_WIDTH : undefined,
-    imageHeight: scene?.thumbnail ? OG_HEIGHT : undefined,
+    imageWidth: sized ? OG_WIDTH : undefined,
+    imageHeight: sized ? OG_HEIGHT : undefined,
     url: `${origin}${url.pathname}${url.search}`,
   };
 }
@@ -701,6 +737,7 @@ function buildNamingMeta(
   origin,
   url,
   no,
+  imageMode = 'r2',
 ) {
   const tourTitle = tour.title?.trim() || tour.id;
   const hostSceneId = naming.sceneId || sceneId;
@@ -708,13 +745,16 @@ function buildNamingMeta(
   const authored =
     plainText(naming.body || '') || plainText(catalogEntry?.summary || '');
   const intro = `${naming.name} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
-  const hasImage =
-    Boolean(naming.image?.trim()) ||
-    Boolean(tour.scenes[hostSceneId]?.thumbnail);
+  const namingImage = naming.image?.trim() || '';
+  const thumb = tour.scenes[hostSceneId]?.thumbnail?.trim() || '';
+  const sourcePath = namingImage || thumb;
   const image =
-    hasImage ?
-      ogJpgPublicUrl(origin, tour.id, hostSceneId, no)
+    sourcePath ?
+      imageMode === 'webp' ?
+        abs(origin, sourcePath)
+      : ogJpgPublicUrl(origin, tour.id, hostSceneId, no)
     : abs(origin, logo);
+  const sized = Boolean(sourcePath) && imageMode === 'r2';
   return {
     title: `${naming.name} — ${tourTitle}`,
     description:
@@ -722,8 +762,8 @@ function buildNamingMeta(
         plainText(`${intro} ${authored}`)
       : `${intro} Open the link to learn more and look around.`,
     image,
-    imageWidth: hasImage ? OG_WIDTH : undefined,
-    imageHeight: hasImage ? OG_HEIGHT : undefined,
+    imageWidth: sized ? OG_WIDTH : undefined,
+    imageHeight: sized ? OG_HEIGHT : undefined,
     url: `${origin}${url.pathname}${url.search}`,
   };
 }
@@ -743,21 +783,31 @@ function escapeAttr(value) {
     .replace(/</g, '&lt;');
 }
 
-function renderOgHtml(meta, siteName) {
+function renderOgHtml(meta, siteName, includeImage = true) {
   const title = escapeAttr(meta.title);
   const description = escapeAttr(meta.description);
-  const image = escapeAttr(meta.image);
   const pageUrl = escapeAttr(meta.url);
   const site = escapeAttr(siteName);
-  const imageType = imageTypeForUrl(meta.image);
-  const imageTypeTag =
-    imageType ?
-      `\n    <meta property="og:image:type" content="${imageType}" />`
-    : '';
-  const imageSizeTags =
-    meta.imageWidth && meta.imageHeight ?
-      `\n    <meta property="og:image:width" content="${meta.imageWidth}" />\n    <meta property="og:image:height" content="${meta.imageHeight}" />`
-    : '';
+
+  let imageTags = '';
+  let twitterImageTag = '';
+  const twitterCard =
+    includeImage && meta.image ? 'summary_large_image' : 'summary';
+
+  if (includeImage && meta.image) {
+    const image = escapeAttr(meta.image);
+    const imageType = imageTypeForUrl(meta.image);
+    const imageTypeTag =
+      imageType ?
+        `\n    <meta property="og:image:type" content="${imageType}" />`
+      : '';
+    const imageSizeTags =
+      meta.imageWidth && meta.imageHeight ?
+        `\n    <meta property="og:image:width" content="${meta.imageWidth}" />\n    <meta property="og:image:height" content="${meta.imageHeight}" />`
+      : '';
+    imageTags = `\n    <meta property="og:image" content="${image}" />${imageTypeTag}${imageSizeTags}`;
+    twitterImageTag = `\n    <meta name="twitter:image" content="${image}" />`;
+  }
 
   return `<!doctype html>
 <html lang="en">
@@ -768,13 +818,11 @@ function renderOgHtml(meta, siteName) {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="${site}" />
     <meta property="og:title" content="${title}" />
-    <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${image}" />${imageTypeTag}${imageSizeTags}
+    <meta property="og:description" content="${description}" />${imageTags}
     <meta property="og:url" content="${pageUrl}" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="${twitterCard}" />
     <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:image" content="${image}" />
+    <meta name="twitter:description" content="${description}" />${twitterImageTag}
     <link rel="canonical" href="${pageUrl}" />
   </head>
   <body>

@@ -359,14 +359,18 @@ export function openShareAppLink(url: string): void {
   link.remove();
 }
 
+/**
+ * WhatsApp compose text. Put the deep link **first** on its own line so the
+ * unfurler grabs the full scene URL (not a truncated `/t_…` → Overview OG).
+ */
 export function buildShareWhatsAppUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
   const params = new URLSearchParams({
-    text: `${buildNativeShareText(message)}\n${shareUrl}`,
+    text: `${shareUrl}\n\n${buildNativeShareText(message)}`,
   });
-  return `https://wa.me/?${params.toString()}`;
+  return `https://api.whatsapp.com/send?${params.toString()}`;
 }
 
 export function buildShareFacebookUrl(shareUrl: string): string {

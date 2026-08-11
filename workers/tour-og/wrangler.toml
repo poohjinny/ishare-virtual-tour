@@ -17,6 +17,9 @@ ORIGIN_RESOLVE_OVERRIDE = "poohjinny.github.io"
 SITE_NAME = "iShare Virtual Tour"
 DEFAULT_IMAGE = "https://tour.ishare.ca/assets/brand/logo_ishare.png"
 OG_JPEG_QUALITY = "82"
+# OG images on: "webp" = origin thumbnail/preview; "r2" = /og/jpg bake.
+OG_INCLUDE_IMAGE = "1"
+OG_IMAGE_MODE = "webp"
 
 [images]
 binding = "IMAGES"

@@ -460,23 +460,30 @@ function ShareAppTile({
   if (channel.href) {
     const isMailto = channel.href.startsWith('mailto:');
 
+    // Mailto: real navigation. Other share apps: button-only open so we don't
+    // double-fire (href + openShareAppLink), which can duplicate compose text
+    // in WhatsApp and make the unfurler fall back to Overview (`/t_…` only).
+    if (!isMailto) {
+      return (
+        <button
+          type='button'
+          className={shareTourAppTileClassName}
+          aria-label={ariaLabel}
+          onClick={() => {
+            const open = channel.openHref ?? openShareAppLink;
+            void open(channel.href!);
+          }}
+        >
+          {content}
+        </button>
+      );
+    }
+
     return (
       <a
         className={shareTourAppTileClassName}
         href={channel.href}
         aria-label={ariaLabel}
-        onClick={
-          isMailto ? undefined : (
-            (event) => {
-              event.preventDefault();
-              const open = channel.openHref ?? openShareAppLink;
-              void open(channel.href!);
-            }
-          )
-        }
-        {...(channel.external ?
-          { target: '_blank', rel: 'noopener noreferrer' }
-        : {})}
       >
         {content}
       </a>
