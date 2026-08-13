@@ -1,5 +1,6 @@
 import { findCatalogClient } from '../data/tourCatalog';
 import type { Tour, TourBranding } from '../types/tour';
+import { isKnownFaviconPath } from './knownFaviconAssets';
 import { getTourClientId } from './tourClientId';
 import {
   conventionalClientFaviconIcoPath,
@@ -30,7 +31,7 @@ export function clientBrandFaviconIcoPath(clientId: string): string {
   return conventionalClientFaviconIcoPath(clientId);
 }
 
-/** Client-root favicon paths — catalog entry first, then conventional png/ico. */
+/** Client-root favicon paths — catalog entry first, then existing png/ico. */
 export function clientBrandFaviconCandidates(
   clientId: string,
   catalogFavicon?: string | null,
@@ -38,8 +39,12 @@ export function clientBrandFaviconCandidates(
   const paths: string[] = [];
   const catalog = catalogFavicon?.trim();
   if (catalog) paths.push(catalog);
-  paths.push(clientBrandFaviconPath(clientId));
-  paths.push(clientBrandFaviconIcoPath(clientId));
+  for (const path of [
+    clientBrandFaviconPath(clientId),
+    clientBrandFaviconIcoPath(clientId),
+  ]) {
+    if (isKnownFaviconPath(path)) paths.push(path);
+  }
   return [...new Set(paths)];
 }
 
@@ -49,7 +54,7 @@ export function tourBrandFaviconCandidates(
   return [
     conventionalTourFaviconPngPath(tour),
     conventionalTourFaviconIcoPath(tour),
-  ];
+  ].filter(isKnownFaviconPath);
 }
 
 function mergeBrandingFields(

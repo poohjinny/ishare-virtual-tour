@@ -1,5 +1,6 @@
 import type { Tour } from '../types/tour';
 import { appendCacheBust, withBaseUrl } from './assetUrl';
+import { isKnownFaviconPath } from './knownFaviconAssets';
 import { getTourClientId } from './tourClientId';
 import {
   clientBrandFaviconCandidates,
@@ -34,19 +35,14 @@ async function faviconPathExists(path: string): Promise<boolean> {
   }
 }
 
-/** Tour-level `favicon.png|ico` only when the tour has its own brand files. */
-function shouldProbeTourFavicon(tour: Tour): boolean {
-  return Boolean(tour.branding?.favicon || tour.branding?.logo);
-}
-
-/** Resolve tab icon URL — explicit, tour png/ico, client png/ico, logo, then platform default. */
+/** Resolve tab icon URL — explicit, existing tour/client png|ico, logo, then platform default. */
 export async function resolveClientFavicon(tour: Tour): Promise<string> {
   const branding = resolveTourBranding(tour);
   const clientId = getTourClientId(tour);
   const seen = new Set<string>();
   const candidates = [
     branding?.favicon?.trim(),
-    ...(shouldProbeTourFavicon(tour) ? tourBrandFaviconCandidates(tour) : []),
+    ...tourBrandFaviconCandidates(tour),
     ...clientBrandFaviconCandidates(clientId),
     branding?.logo,
     DEFAULT_FAVICON,
@@ -56,6 +52,7 @@ export async function resolveClientFavicon(tour: Tour): Promise<string> {
     const path = candidate?.trim();
     if (!path || seen.has(path)) continue;
     seen.add(path);
+    if (path === DEFAULT_FAVICON || isKnownFaviconPath(path)) return path;
     if (await faviconPathExists(path)) return path;
   }
 

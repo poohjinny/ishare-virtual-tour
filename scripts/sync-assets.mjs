@@ -1,4 +1,12 @@
-import { copyFileSync, cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import {
+  copyFileSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,3 +35,33 @@ if (existsSync(faviconSrc)) {
 }
 
 console.log('Synced assets/ → public/assets/');
+
+function collectKnownFaviconPaths(assetsRoot) {
+  const paths = [];
+  for (const entry of readdirSync(assetsRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory() || entry.name === 'brand') continue;
+    const clientId = entry.name;
+    const clientDir = join(assetsRoot, clientId);
+    for (const ext of ['png', 'ico']) {
+      if (existsSync(join(clientDir, `favicon.${ext}`))) {
+        paths.push(`/assets/${clientId}/favicon.${ext}`);
+      }
+    }
+    for (const tourEntry of readdirSync(clientDir, { withFileTypes: true })) {
+      if (!tourEntry.isDirectory()) continue;
+      for (const ext of ['png', 'ico']) {
+        if (existsSync(join(clientDir, tourEntry.name, `favicon.${ext}`))) {
+          paths.push(`/assets/${clientId}/${tourEntry.name}/favicon.${ext}`);
+        }
+      }
+    }
+  }
+  return paths.sort();
+}
+
+const knownFaviconFile = join(root, 'src', 'data', 'knownFaviconPaths.json');
+writeFileSync(
+  knownFaviconFile,
+  `${JSON.stringify(collectKnownFaviconPaths(src), null, 2)}\n`,
+);
+console.log('Wrote src/data/knownFaviconPaths.json');
