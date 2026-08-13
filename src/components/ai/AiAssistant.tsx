@@ -29,7 +29,7 @@ const PANEL_REVEAL_MS = 70;
 const PANEL_EXIT_MS = 150;
 const PANEL_ENTER_MS = 170;
 /** How long the proximity bubble stays before fading out on its own. */
-const FAB_BUBBLE_MS = 10_000;
+const FAB_BUBBLE_MS = 5_000;
 
 type AssistantState = ReturnType<typeof useTourAssistant>;
 
@@ -204,11 +204,7 @@ export function AiAssistant({
     if (currentSceneId) {
       seenBubbleKeysRef.current.add(`scene:${currentSceneId}`);
     }
-    const hotspotId = namingHotspotId?.trim();
-    if (hotspotId) {
-      seenBubbleKeysRef.current.add(`naming:${hotspotId}`);
-    }
-  }, [currentSceneId, guideUiTest, namingHotspotId]);
+  }, [currentSceneId, guideUiTest]);
 
   // Top-right dock chrome overlaps the FAB bubble rail — clear while open.
   useEffect(() => {
@@ -291,12 +287,8 @@ export function AiAssistant({
     if (!fabShown || isOpen || chromeDockOpen) return;
 
     const key = `naming:${hotspotId}`;
-    if (seenBubbleKeysRef.current.has(key)) return;
-
     const name = namingName?.trim() || undefined;
     const timer = window.setTimeout(() => {
-      if (seenBubbleKeysRef.current.has(key)) return;
-      seenBubbleKeysRef.current.add(key);
       startTransition(() => {
         setFabBubble({
           key,
@@ -337,12 +329,8 @@ export function AiAssistant({
     if (!fabShown || isOpen || chromeDockOpen) return;
 
     const key = `nav-preview:${hotspotId}`;
-    if (seenBubbleKeysRef.current.has(key)) return;
-
     const place = navPreviewTitle?.trim() || 'that spot';
     const timer = window.setTimeout(() => {
-      if (seenBubbleKeysRef.current.has(key)) return;
-      seenBubbleKeysRef.current.add(key);
       startTransition(() => {
         setFabBubble({
           key,
