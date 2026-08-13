@@ -52,6 +52,48 @@ function listNamingOpportunityLinks(tour: Tour): NamingOpportunityLink[] {
   return items;
 }
 
+/** True when this scene can host the naming pin for URL purposes. */
+export function sceneHostsNamingHotspot(
+  tour: Tour,
+  sceneId: string,
+  hotspotId: string,
+): boolean {
+  const scene = tour.scenes[sceneId];
+  if (!scene) return false;
+  if (scene.hotspots?.some((hotspot) => hotspot.id === hotspotId)) {
+    return true;
+  }
+  return (tour.hotspots ?? []).some((hotspot) => {
+    if (hotspot.id !== hotspotId || !isNamingHotspot(hotspot)) return false;
+    // model3d tour-level pin: visible from any viewpoint unless it names a host.
+    if (!hotspot.sceneId?.trim()) return true;
+    return hotspot.sceneId === sceneId;
+  });
+}
+
+/**
+ * Scene to put in a naming share / OG URL.
+ * Prefer the caller's scene when it actually hosts the pin; otherwise the
+ * placement scene. Avoids falling back to `firstScene` (Overview).
+ */
+export function resolveNamingShareSceneId(
+  tour: Tour,
+  sceneId: string | null | undefined,
+  namingHotspotId?: string | null,
+): string {
+  const requested = sceneId?.trim() || '';
+  if (!namingHotspotId?.trim()) {
+    return requested && tour.scenes[requested] ? requested : tour.firstScene;
+  }
+  if (requested && sceneHostsNamingHotspot(tour, requested, namingHotspotId)) {
+    return requested;
+  }
+  return (
+    findNamingHotspotInTour(tour, namingHotspotId)?.sceneId ??
+    (requested && tour.scenes[requested] ? requested : tour.firstScene)
+  );
+}
+
 /** Serialize a naming-opportunity hotspot for `?no=` (`no_*`). */
 export function toNamingOpportunitySearchValue(
   tour: Tour,

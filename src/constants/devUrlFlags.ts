@@ -16,10 +16,7 @@ export interface DevUrlFlagToggle {
   /** Human-readable checkbox title. */
   label: string;
   hint: string;
-  isOn: (
-    params: AppSearchParams,
-    ctx?: DevUrlFlagToggleContext,
-  ) => boolean;
+  isOn: (params: AppSearchParams, ctx?: DevUrlFlagToggleContext) => boolean;
   urlPatch: (
     enabled: boolean,
   ) => Partial<Record<PreservedSearchKey, string | null>>;
@@ -65,7 +62,7 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
   {
     key: 'firstVisitHint',
     label: 'First-visit hint',
-    hint: 'Show first-visit coach pill (ignores seen flag)',
+    hint: 'Show look-around coach pill in embed/dev',
     isOn: (params) => params.firstVisitHint,
     urlPatch: (enabled) => ({ firstVisitHint: enabled ? '1' : null }),
   },

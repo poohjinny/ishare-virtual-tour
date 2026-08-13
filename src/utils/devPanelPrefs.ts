@@ -411,6 +411,70 @@ export function useDevPanelPrefs(): DevPanelPrefs {
   );
 }
 
+/** Primitive slices — avoid re-rendering subscribers that don't use the field. */
+export function useDevPanelTheme(): DevPanelTheme {
+  return useSyncExternalStore(
+    subscribeDevPanelPrefs,
+    () => getDevPanelPrefs().theme,
+    () => getDevPanelPrefs().theme,
+  );
+}
+
+export function useDevPanelLayout(): DevPanelLayout {
+  return useSyncExternalStore(
+    subscribeDevPanelPrefs,
+    () => getDevPanelPrefs().layout,
+    () => getDevPanelPrefs().layout,
+  );
+}
+
+export function useDevPanelOpen(): boolean {
+  return useSyncExternalStore(
+    subscribeDevPanelPrefs,
+    () => getDevPanelPrefs().panelOpen,
+    () => getDevPanelPrefs().panelOpen,
+  );
+}
+
+export function useDevPanelDeviceMode(): boolean {
+  return useSyncExternalStore(
+    subscribeDevPanelPrefs,
+    () => getDevPanelPrefs().deviceMode,
+    () => getDevPanelPrefs().deviceMode,
+  );
+}
+
+let devicePreviewFlagsCache = {
+  deviceMode: false,
+  deviceEmbed: false,
+};
+
+function getDevicePreviewFlagsSnapshot(): {
+  deviceMode: boolean;
+  deviceEmbed: boolean;
+} {
+  const { deviceMode, deviceEmbed } = getDevPanelPrefs();
+  if (
+    devicePreviewFlagsCache.deviceMode === deviceMode &&
+    devicePreviewFlagsCache.deviceEmbed === deviceEmbed
+  ) {
+    return devicePreviewFlagsCache;
+  }
+  devicePreviewFlagsCache = { deviceMode, deviceEmbed };
+  return devicePreviewFlagsCache;
+}
+
+export function useDevPanelDevicePreviewFlags(): {
+  deviceMode: boolean;
+  deviceEmbed: boolean;
+} {
+  return useSyncExternalStore(
+    subscribeDevPanelPrefs,
+    getDevicePreviewFlagsSnapshot,
+    getDevicePreviewFlagsSnapshot,
+  );
+}
+
 export function useDevDevicePreviewReloadNonce(): number {
   return useSyncExternalStore(
     subscribeDevPanelPrefs,

@@ -10,6 +10,7 @@ import {
 } from './buildShareUrl';
 import { getTourClientId } from './tourClientId';
 import { findHotspotInTour } from './findTourHotspot';
+import { resolveNamingShareSceneId } from './namingOpportunityUrl';
 import { formatNamingGalleryItemPrice } from './namingPrice';
 import { isDefaultNamingDescription } from './namingDescriptionPlaceholder';
 import {
@@ -304,28 +305,33 @@ export function buildCurrentViewSharePayload(
   namingHotspotId?: string | null,
   options?: { tourTitle?: string | null },
 ): CurrentViewSharePayload {
-  const tourTitle = options?.tourTitle?.trim() || tour.title;
-  const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
-  const namingName = resolveNamingOpportunityName(
+  const shareSceneId = resolveNamingShareSceneId(
     tour,
     sceneId,
+    namingHotspotId,
+  );
+  const tourTitle = options?.tourTitle?.trim() || tour.title;
+  const sceneTitle = tour.scenes[shareSceneId]?.title ?? shareSceneId;
+  const namingName = resolveNamingOpportunityName(
+    tour,
+    shareSceneId,
     namingHotspotId,
   );
   const description = resolveShareDescription({
     tour,
-    sceneId,
+    sceneId: shareSceneId,
     namingHotspotId,
   });
   const priceLabel = resolveNamingSharePriceLabel(
     tour,
-    sceneId,
+    shareSceneId,
     namingHotspotId,
   );
-  const status = resolveNamingShareStatus(tour, sceneId, namingHotspotId);
+  const status = resolveNamingShareStatus(tour, shareSceneId, namingHotspotId);
   return {
     shareUrl: buildAbsoluteShareUrl({
       tourId: tour.id,
-      sceneId,
+      sceneId: shareSceneId,
       firstSceneId: tour.firstScene,
       namingHotspotId,
     }),
@@ -355,12 +361,20 @@ export function resolveTourSceneOpenGraph({
   namingHotspotId?: string | null;
   logoPath?: string | null;
 }): TourOpenGraphMeta {
-  const payload = buildCurrentViewSharePayload(tour, sceneId, namingHotspotId, {
-    tourTitle,
-  });
-  const imagePath = resolveSceneShareImagePath(
+  const shareSceneId = resolveNamingShareSceneId(
     tour,
     sceneId,
+    namingHotspotId,
+  );
+  const payload = buildCurrentViewSharePayload(
+    tour,
+    shareSceneId,
+    namingHotspotId,
+    { tourTitle },
+  );
+  const imagePath = resolveSceneShareImagePath(
+    tour,
+    shareSceneId,
     logoPath,
     namingHotspotId,
   );

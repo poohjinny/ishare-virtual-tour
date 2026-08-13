@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { TOUR_FIRST_VISIT_HINT_REVEAL_DELAY_MS } from '../constants/tourFirstVisitHint';
+import { useCallback, useRef, useState } from 'react';
 import {
   readFirstVisitHintSeen,
   writeFirstVisitHintSeen,
@@ -12,6 +11,7 @@ interface UseTourFirstVisitHintOptions {
   firstVisitHint: boolean;
 }
 
+/** First-visit look-around hint — once per device, dismiss on drag/tap. */
 export function useTourFirstVisitHint({
   embed,
   dev,
@@ -23,45 +23,24 @@ export function useTourFirstVisitHint({
 
   const [visible, setVisible] = useState(false);
   const dismissedRef = useRef(false);
-  const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const clearRevealTimer = useCallback(() => {
-    if (revealTimerRef.current) {
-      clearTimeout(revealTimerRef.current);
-      revealTimerRef.current = null;
-    }
-  }, []);
 
   const dismiss = useCallback(() => {
     if (dismissedRef.current) return;
     dismissedRef.current = true;
-    clearRevealTimer();
     setVisible(false);
     if (!forceShow) {
       writeFirstVisitHintSeen();
     }
-  }, [clearRevealTimer, forceShow]);
+  }, [forceShow]);
 
   const onInitialTourReveal = useCallback(() => {
     if (!enabled || dismissedRef.current) return;
-
-    clearRevealTimer();
-    revealTimerRef.current = setTimeout(() => {
-      if (dismissedRef.current) return;
-      setVisible(true);
-    }, TOUR_FIRST_VISIT_HINT_REVEAL_DELAY_MS);
-  }, [clearRevealTimer, enabled]);
+    setVisible(true);
+  }, [enabled]);
 
   const onFirstPanoramaInteract = useCallback(() => {
     dismiss();
   }, [dismiss]);
-
-  useEffect(
-    () => () => {
-      clearRevealTimer();
-    },
-    [clearRevealTimer],
-  );
 
   return {
     hintVisible: visible,

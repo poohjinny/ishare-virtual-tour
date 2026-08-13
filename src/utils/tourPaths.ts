@@ -8,6 +8,8 @@ import {
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   resolveNamingOpportunityFromSearch,
+  resolveNamingShareSceneId,
+  sceneHostsNamingHotspot,
   toNamingOpportunitySearchValue,
 } from './namingOpportunityUrl';
 import { canonicalizeTourPathId } from './legacyTourPathAliases.mjs';
@@ -15,6 +17,8 @@ import { canonicalizeTourPathId } from './legacyTourPathAliases.mjs';
 export {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   resolveNamingOpportunityFromSearch,
+  resolveNamingShareSceneId,
+  sceneHostsNamingHotspot,
   toNamingOpportunitySearchValue,
 };
 

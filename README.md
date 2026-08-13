@@ -53,13 +53,13 @@ the canonical `/{tourId}/{sceneId}` form.
 
 ## Query flags
 
-| Parameter       | Example             | Description                                                   |
-| --------------- | ------------------- | ------------------------------------------------------------- |
-| `embed`         | `?embed=1`          | Minimal chrome for iShare iframe embed                        |
-| `dev`           | `?dev=1`            | Dev panel — authoring, URL flags, embed QA                    |
-| `no`            | `?no=no_vdqq3f4hfw` | Open a naming-opportunity panel (`no_*` id; survives refresh) |
-| `notFoundTest`  | `?notFoundTest=1`   | Force tour not-found (404) screen                             |
-| `loadErrorTest` | `?loadErrorTest=1`  | Force viewer load-error overlay (panorama + 3D)               |
+| Parameter       | Example             | Description                                             |
+| --------------- | ------------------- | ------------------------------------------------------- |
+| `embed`         | `?embed=1`          | Minimal chrome for iShare iframe embed                  |
+| `dev`           | `?dev=1`            | Dev panel — authoring, URL flags, embed QA              |
+| `no`            | `?no=no_vdqq3f4hfw` | Deep link — open a naming-opportunity panel (`no_*` id) |
+| `notFoundTest`  | `?notFoundTest=1`   | Force tour not-found (404) screen                       |
+| `loadErrorTest` | `?loadErrorTest=1`  | Force viewer load-error overlay (panorama + 3D)         |
 
 **Examples:**
 
@@ -67,7 +67,7 @@ the canonical `/{tourId}/{sceneId}` form.
 - Embed: `http://localhost:5173/?embed=1`
 - Direct tour link: `http://localhost:5173/t_8kx3m2p9qa/s_ktujv5s3bg`
 - Naming opportunity deep link:
-  `http://localhost:5173/t_l01wnq8eh6/s_vddzraqi1q?no=no_vdqq3f4hfw`
+  `http://localhost:5173/t_l01wnq8eh6/s_hfiucp83au?no=no_vdqq3f4hfw`
 
 Full flag list: [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md),
 [docs/DEV_PANEL.md](docs/DEV_PANEL.md).

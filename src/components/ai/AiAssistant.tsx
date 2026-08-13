@@ -1,4 +1,11 @@
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Suspense,
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { ChatGuideCtaKind, TourClient } from '../../types/tour';
 import type { useTourAssistant } from '../../hooks/useTourAssistant';
 import {
@@ -7,6 +14,7 @@ import {
   getGuideFabOverviewBubble,
   getGuideFabSceneBubble,
 } from '../../services/mockAssistant';
+import { ANCHORED_PANEL_ENTER_MS } from '../../viewer-shared/anchoredPanelLayout';
 import { AiAssistantFab } from './AiAssistantFab';
 import { AiChatPanelFallback } from './AiChatPanelFallback';
 import { AiChatPanelLazy, preloadAiChatPanel } from './aiChatPanelLazy';
@@ -22,10 +30,6 @@ const PANEL_EXIT_MS = 150;
 const PANEL_ENTER_MS = 170;
 /** How long the proximity bubble stays before fading out on its own. */
 const FAB_BUBBLE_MS = 10_000;
-/** After landing / scene change settles — so the bubble isn’t fighting the transition. */
-const FAB_BUBBLE_SCENE_DELAY_MS = 1_400;
-/** After a naming panel is visible — let the NO settle, then nudge. */
-const FAB_BUBBLE_NAMING_DELAY_MS = 900;
 
 type AssistantState = ReturnType<typeof useTourAssistant>;
 
@@ -43,6 +47,8 @@ interface AiAssistantProps {
   /** Open nav destination preview — FAB nudge like naming. */
   navPreviewHotspotId?: string | null;
   navPreviewTitle?: string | null;
+  /** Anchored NO / nav preview panel is in the viewer (enter may still be running). */
+  anchoredPanelOpen?: boolean;
   /** Top-right Explore/Help/Share dock — suppress FAB bubble while open. */
   chromeDockOpen?: boolean;
   /** Play Tour slideshow — close proximity bubbles; parent closes the panel. */
@@ -74,6 +80,7 @@ export function AiAssistant({
   namingName = null,
   navPreviewHotspotId = null,
   navPreviewTitle = null,
+  anchoredPanelOpen = false,
   chromeDockOpen = false,
   playTourActive = false,
   client,
@@ -228,32 +235,30 @@ export function AiAssistant({
 
     const key = `scene:${currentSceneId}`;
     if (seenBubbleKeysRef.current.has(key)) return;
+    seenBubbleKeysRef.current.add(key);
 
     const isOverview = Boolean(firstSceneId) && currentSceneId === firstSceneId;
     const tour = tourTitle?.trim();
     const place = locationTitle?.trim() || 'this spot';
 
-    const timer = window.setTimeout(() => {
-      if (seenBubbleKeysRef.current.has(key)) return;
-      seenBubbleKeysRef.current.add(key);
-
-      if (isOverview) {
+    if (isOverview) {
+      startTransition(() => {
         setFabBubble({
           key,
           text: getGuideFabOverviewBubble(tour || undefined),
           emphasis: tour ? 'place' : undefined,
         });
-        return;
-      }
+      });
+      return;
+    }
 
+    startTransition(() => {
       setFabBubble({
         key,
         text: getGuideFabSceneBubble(place),
         emphasis: 'place',
       });
-    }, FAB_BUBBLE_SCENE_DELAY_MS);
-
-    return () => window.clearTimeout(timer);
+    });
   }, [
     chromeDockOpen,
     currentSceneId,
@@ -269,7 +274,7 @@ export function AiAssistant({
     tourTitle,
   ]);
 
-  // Naming opportunity opened — warmer nudge; wins over a place bubble.
+  // Naming opportunity opened — after panel enter, not on the click frame.
   useEffect(() => {
     if (guideUiTest) return;
     const hotspotId = namingHotspotId?.trim() || '';
@@ -281,6 +286,7 @@ export function AiAssistant({
       skipInitialNamingRef.current = false;
       return;
     }
+    if (!anchoredPanelOpen) return;
     if (playTourActive) return;
     if (!fabShown || isOpen || chromeDockOpen) return;
 
@@ -291,15 +297,18 @@ export function AiAssistant({
     const timer = window.setTimeout(() => {
       if (seenBubbleKeysRef.current.has(key)) return;
       seenBubbleKeysRef.current.add(key);
-      setFabBubble({
-        key,
-        text: getGuideFabNamingBubble(name),
-        emphasis: 'naming',
+      startTransition(() => {
+        setFabBubble({
+          key,
+          text: getGuideFabNamingBubble(name),
+          emphasis: 'naming',
+        });
       });
-    }, FAB_BUBBLE_NAMING_DELAY_MS);
+    }, ANCHORED_PANEL_ENTER_MS);
 
     return () => window.clearTimeout(timer);
   }, [
+    anchoredPanelOpen,
     chromeDockOpen,
     fabShown,
     guideUiTest,
@@ -323,6 +332,7 @@ export function AiAssistant({
     }
     // Naming panel wins if both somehow open.
     if (namingHotspotId?.trim()) return;
+    if (!anchoredPanelOpen) return;
     if (playTourActive) return;
     if (!fabShown || isOpen || chromeDockOpen) return;
 
@@ -333,15 +343,18 @@ export function AiAssistant({
     const timer = window.setTimeout(() => {
       if (seenBubbleKeysRef.current.has(key)) return;
       seenBubbleKeysRef.current.add(key);
-      setFabBubble({
-        key,
-        text: getGuideFabNavPreviewBubble(place),
-        emphasis: 'place',
+      startTransition(() => {
+        setFabBubble({
+          key,
+          text: getGuideFabNavPreviewBubble(place),
+          emphasis: 'place',
+        });
       });
-    }, FAB_BUBBLE_NAMING_DELAY_MS);
+    }, ANCHORED_PANEL_ENTER_MS);
 
     return () => window.clearTimeout(timer);
   }, [
+    anchoredPanelOpen,
     chromeDockOpen,
     fabShown,
     guideUiTest,

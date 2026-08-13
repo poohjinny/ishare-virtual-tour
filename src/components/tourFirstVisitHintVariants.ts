@@ -9,9 +9,9 @@ export const tourFirstVisitHintRootClassName = cn(
 );
 
 export const tourFirstVisitHintPillClassName = cn(
-  'inline-flex items-center gap-3 rounded-full border border-white/15',
-  'bg-[var(--ishare-glass-dark-overlay)] text-base font-normal tracking-[0.01em] text-white/70',
-  'px-6 py-3',
+  'inline-flex items-center gap-2 rounded-full border border-white/15',
+  'bg-[var(--ishare-first-visit-hint-overlay)] text-sm font-normal tracking-[0.01em] text-white/80',
+  'px-4 py-2',
   'shadow-[0_16px_40px_rgba(15,23,42,0.45),0_6px_16px_rgba(15,23,42,0.28)]',
   'transition-opacity duration-[280ms] ease-out',
 );
@@ -25,12 +25,12 @@ export const tourFirstVisitHintSegmentClassName = cn(
 );
 
 export const tourFirstVisitHintSeparatorClassName = cn(
-  'text-white/55 select-none',
+  'text-white/65 select-none',
 );
 
 export const tourFirstVisitHintIconClassName = cn(
   materialSymbolLayoutClassName,
-  'text-white/50',
+  'text-white/60',
 );
 
 export const tourFirstVisitHintPillVisibleClassName = 'opacity-100';

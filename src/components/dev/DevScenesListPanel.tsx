@@ -16,6 +16,7 @@ import {
   type DevCatalogTourVisibility,
 } from '../../constants/devPanel';
 import type { Scene, Tour, ViewPosition } from '../../types/tour';
+import { useDevTourView } from '../../utils/devTourBridge';
 import {
   DEV_SCENE_TITLE_STORAGE_KEY,
   formatViewPosition,
@@ -122,12 +123,10 @@ import {
   writeSessionValue,
 } from './devViewPanelHelpers';
 
-
 type DevScenesListPanelProps = {
   tour: Tour;
   onTourMutated?: (options?: DevTourMutateOptions) => Promise<void>;
   scene: DevSceneRef;
-  view: ViewPosition | null;
   captureSceneThumbnail?: () => Promise<Blob | null>;
   getCurrentView?: () => ViewPosition | null;
   isModel3dTour: boolean;
@@ -138,12 +137,12 @@ export function DevScenesListPanel({
   tour,
   onTourMutated,
   scene,
-  view,
   captureSceneThumbnail,
   getCurrentView,
   isModel3dTour,
   onRequestSceneTab,
 }: DevScenesListPanelProps) {
+  const view = useDevTourView();
   const [sceneStatus, setSceneStatus] = useState<ActionStatus>('idle');
   const [sceneError, setSceneError] = useState<string | null>(null);
   const [editingSceneId, setEditingSceneId] = useState<string | null>(null);
@@ -345,7 +344,6 @@ export function DevScenesListPanel({
           sceneSlug,
         )
     : '';
-
 
   const mintCreateSceneId = useCallback(() => {
     setPendingSceneId(
@@ -633,7 +631,6 @@ export function DevScenesListPanel({
     }, 2500);
     return () => window.clearTimeout(t);
   }, [sceneManageStatus, sceneStatus]);
-
 
   const renderSceneManageItem = (
     entry: Scene,
@@ -1213,335 +1210,340 @@ export function DevScenesListPanel({
       ensureCloseIndex={0}
       ensureCloseKey={sceneAddCloseKey}
     >
-    <>
-      <DevPanelSection
-        title='Add scene'
-        description={
-          isModel3dTour ?
-            'Create a new viewpoint on the shared 3D model.'
-          : 'Upload a new panorama and add it to this tour.'
-        }
-      >
-        <DevPanelFormGroup>
-          <label className={devViewPanelFieldClassName}>
-            <span className={devViewPanelFieldLabelClassName}>Title</span>
-            <input
-              className={devViewPanelInputClassName}
-              type='text'
-              value={sceneTitle}
-              onChange={(e) => setSceneTitle(e.target.value)}
-              placeholder='e.g. Main Entrance'
-              spellCheck={false}
-              autoComplete='off'
-            />
-            {!isModel3dTour ?
-              <p className={devViewPanelSectionHintClassName}>
-                Scene id is opaque and stays fixed if you rename later.
-              </p>
-            : <p className={devViewPanelSectionHintClassName}>
-                Orbit the model first — current camera is saved as{' '}
-                <code>defaultView</code> on create.
-              </p>
-            }
-          </label>
-
-          <label className={devViewPanelFieldClassName}>
-            <span className={devViewPanelFieldLabelClassName}>
-              {isModel3dTour ?
-                'Card thumbnail (optional — auto-captures from view)'
-              : 'Panorama file'}
-            </span>
-            <DevPanelFileField
-              file={scenePanoramaFile}
-              preview={<DevPanoramaFilePreview file={scenePanoramaFile} />}
-              onClearPreview={() => setScenePanoramaFile(null)}
-              showClear={Boolean(scenePanoramaFile)}
-            >
-              <DevPanelFileInput
-                accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
-                file={scenePanoramaFile}
-                onChange={setScenePanoramaFile}
-              />
-            </DevPanelFileField>
-            {isModel3dTour ?
-              <p className={devViewPanelSectionHintClassName}>
-                Optional upload; otherwise captures from the current 3D view.
-              </p>
-            : <p className={devViewPanelSectionHintClassName}>
-                Converts to webp under this tour&apos;s panoramas folder.
-              </p>
-            }
-          </label>
-
-          <label className={devViewPanelFieldClassName}>
-            <span className={devViewPanelFieldLabelClassName}>
-              Description (optional)
-            </span>
-            <DevPanelDescriptionTextarea
-              value={sceneDescription}
-              onChange={(e) => setSceneDescription(e.target.value)}
-              spellCheck={true}
-            />
-          </label>
-
-          {!isModel3dTour ?
-            <label className={devViewPanelToggleLabelMultilineClassName}>
+      <>
+        <DevPanelSection
+          title='Add scene'
+          description={
+            isModel3dTour ?
+              'Create a new viewpoint on the shared 3D model.'
+            : 'Upload a new panorama and add it to this tour.'
+          }
+        >
+          <DevPanelFormGroup>
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>Title</span>
               <input
-                type='checkbox'
-                className={devViewPanelToggleInputClassName}
-                checked={sceneCreatePlaceOverview}
-                onChange={(e) =>
-                  setSceneCreatePlaceOverview(e.currentTarget.checked)
-                }
+                className={devViewPanelInputClassName}
+                type='text'
+                value={sceneTitle}
+                onChange={(e) => setSceneTitle(e.target.value)}
+                placeholder='e.g. Main Entrance'
+                spellCheck={false}
+                autoComplete='off'
               />
-              <span className={devViewPanelFormCheckboxFieldClassName}>
-                <span className={devViewPanelToggleNameClassName}>
-                  Create place overview hotspot
-                </span>
-                <span className={devViewPanelToggleHintClassName}>
-                  Off by default. Overview pins are never auto-created on edit —
-                  use this checkbox or Manage → Overview later.
-                </span>
-              </span>
-            </label>
-          : null}
-
-          {!isModel3dTour ?
-            <>
-              <label className={devViewPanelFieldClassName}>
-                <span className={devViewPanelFieldLabelClassName}>
-                  Preview video URL (hero, optional)
-                </span>
-                <input
-                  className={devViewPanelInputClassName}
-                  type='url'
-                  value={scenePreviewVideoUrl}
-                  onChange={(e) => setScenePreviewVideoUrl(e.target.value)}
-                  placeholder='https://share.synthesia.io/… or hosted mp4'
-                  spellCheck={false}
-                  autoComplete='off'
-                />
+              {!isModel3dTour ?
                 <p className={devViewPanelSectionHintClassName}>
-                  Synthesia — Explore scene detail and nav preview hero for
-                  links to this scene.
+                  Scene id is opaque and stays fixed if you rename later.
                 </p>
-              </label>
-              <label className={devViewPanelFieldClassName}>
-                <span className={devViewPanelFieldLabelClassName}>
-                  Body video URL (optional)
-                </span>
-                <input
-                  className={devViewPanelInputClassName}
-                  type='url'
-                  value={sceneVideoUrl}
-                  onChange={(e) => setSceneVideoUrl(e.target.value)}
-                  placeholder='https://youtube.com/…'
-                  spellCheck={false}
-                  autoComplete='off'
-                />
-                <p className={devViewPanelSectionHintClassName}>
-                  YouTube — shown in Explore scene detail and nav preview body
-                  below the description.
+              : <p className={devViewPanelSectionHintClassName}>
+                  Orbit the model first — current camera is saved as{' '}
+                  <code>defaultView</code> on create.
                 </p>
-              </label>
-            </>
-          : null}
-
-          {sceneSlug ?
-            <p className={devViewPanelSlugPreviewClassName}>
-              stable id <code>{sceneSlug}</code> ·{' '}
-              <code>
-                {isModel3dTour ?
-                  buildDefaultSceneThumbnailRelativePath(sceneSlug)
-                : buildDefaultPanoramaRelativePath(sceneSlug)}
-              </code>
-              {view ?
-                <> · defaultView {formatViewPosition(view)}</>
-              : isModel3dTour ?
-                ' · orbit the model to set defaultView before creating'
-              : ' · defaultView 0, 0, 17'}
-            </p>
-          : null}
-          {scenePanoramaAutoPath ?
-            <p className={devViewPanelSectionHintClassName}>
-              {isModel3dTour ?
-                <>
-                  card image path <code>{scenePanoramaAutoPath}</code>
-                </>
-              : <>
-                  saves to <code>{scenePanoramaAutoPath}</code>
-                </>
               }
+            </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                {isModel3dTour ?
+                  'Card thumbnail (optional — auto-captures from view)'
+                : 'Panorama file'}
+              </span>
+              <DevPanelFileField
+                file={scenePanoramaFile}
+                preview={<DevPanoramaFilePreview file={scenePanoramaFile} />}
+                onClearPreview={() => setScenePanoramaFile(null)}
+                showClear={Boolean(scenePanoramaFile)}
+              >
+                <DevPanelFileInput
+                  accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
+                  file={scenePanoramaFile}
+                  onChange={setScenePanoramaFile}
+                />
+              </DevPanelFileField>
+              {isModel3dTour ?
+                <p className={devViewPanelSectionHintClassName}>
+                  Optional upload; otherwise captures from the current 3D view.
+                </p>
+              : <p className={devViewPanelSectionHintClassName}>
+                  Converts to webp under this tour&apos;s panoramas folder.
+                </p>
+              }
+            </label>
+
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Description (optional)
+              </span>
+              <DevPanelDescriptionTextarea
+                value={sceneDescription}
+                onChange={(e) => setSceneDescription(e.target.value)}
+                spellCheck={true}
+              />
+            </label>
+
+            {!isModel3dTour ?
+              <label className={devViewPanelToggleLabelMultilineClassName}>
+                <input
+                  type='checkbox'
+                  className={devViewPanelToggleInputClassName}
+                  checked={sceneCreatePlaceOverview}
+                  onChange={(e) =>
+                    setSceneCreatePlaceOverview(e.currentTarget.checked)
+                  }
+                />
+                <span className={devViewPanelFormCheckboxFieldClassName}>
+                  <span className={devViewPanelToggleNameClassName}>
+                    Create place overview hotspot
+                  </span>
+                  <span className={devViewPanelToggleHintClassName}>
+                    Off by default. Overview pins are never auto-created on edit
+                    — use this checkbox or Manage → Overview later.
+                  </span>
+                </span>
+              </label>
+            : null}
+
+            {!isModel3dTour ?
+              <>
+                <label className={devViewPanelFieldClassName}>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Preview video URL (hero, optional)
+                  </span>
+                  <input
+                    className={devViewPanelInputClassName}
+                    type='url'
+                    value={scenePreviewVideoUrl}
+                    onChange={(e) => setScenePreviewVideoUrl(e.target.value)}
+                    placeholder='https://share.synthesia.io/… or hosted mp4'
+                    spellCheck={false}
+                    autoComplete='off'
+                  />
+                  <p className={devViewPanelSectionHintClassName}>
+                    Synthesia — Explore scene detail and nav preview hero for
+                    links to this scene.
+                  </p>
+                </label>
+                <label className={devViewPanelFieldClassName}>
+                  <span className={devViewPanelFieldLabelClassName}>
+                    Body video URL (optional)
+                  </span>
+                  <input
+                    className={devViewPanelInputClassName}
+                    type='url'
+                    value={sceneVideoUrl}
+                    onChange={(e) => setSceneVideoUrl(e.target.value)}
+                    placeholder='https://youtube.com/…'
+                    spellCheck={false}
+                    autoComplete='off'
+                  />
+                  <p className={devViewPanelSectionHintClassName}>
+                    YouTube — shown in Explore scene detail and nav preview body
+                    below the description.
+                  </p>
+                </label>
+              </>
+            : null}
+
+            {sceneSlug ?
+              <p className={devViewPanelSlugPreviewClassName}>
+                stable id <code>{sceneSlug}</code> ·{' '}
+                <code>
+                  {isModel3dTour ?
+                    buildDefaultSceneThumbnailRelativePath(sceneSlug)
+                  : buildDefaultPanoramaRelativePath(sceneSlug)}
+                </code>
+                {view ?
+                  <> · defaultView {formatViewPosition(view)}</>
+                : isModel3dTour ?
+                  ' · orbit the model to set defaultView before creating'
+                : ' · defaultView 0, 0, 17'}
+              </p>
+            : null}
+            {scenePanoramaAutoPath ?
+              <p className={devViewPanelSectionHintClassName}>
+                {isModel3dTour ?
+                  <>
+                    card image path <code>{scenePanoramaAutoPath}</code>
+                  </>
+                : <>
+                    saves to <code>{scenePanoramaAutoPath}</code>
+                  </>
+                }
+              </p>
+            : null}
+
+            {sceneError ?
+              <p className={devViewPanelSectionHintClassName}>{sceneError}</p>
+            : null}
+
+            <div className={devViewPanelActionsClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'secondary' })}
+                onClick={() => {
+                  setSceneTitle('');
+                  setSceneDescription('');
+                  setSceneCreatePlaceOverview(false);
+                  setScenePreviewVideoUrl('');
+                  setSceneVideoUrl('');
+                  setScenePanoramaFile(null);
+                  setSceneError(null);
+                  setSceneStatus('idle');
+                  mintCreateSceneId();
+                  setSceneAddCloseKey((key) => key + 1);
+                }}
+                disabled={sceneStatus === 'working'}
+              >
+                Cancel
+              </button>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'primary' })}
+                onClick={() => void createScene()}
+                disabled={!canCreateScene || sceneStatus === 'working'}
+              >
+                {sceneStatus === 'working' ?
+                  'Creating…'
+                : sceneStatus === 'done' ?
+                  'Created!'
+                : 'Create scene'}
+              </button>
+            </div>
+          </DevPanelFormGroup>
+        </DevPanelSection>
+
+        <DevPanelSection
+          title='Manage scenes'
+          description='Groups follow nav hierarchy. Drag to change Explore tour list order only — not floor links. First badge marks the start scene.'
+        >
+          {tourScenes.length === 0 ?
+            <p className={devViewPanelSectionHintClassName}>
+              No scenes on this tour yet.
+            </p>
+          : sceneManageGroupingActive ?
+            <DevPanelFormGroup className='pb-0'>
+              {firstManageScene ?
+                <ul className={devViewPanelManageListClassName}>
+                  {renderSceneManageItem(firstManageScene, {
+                    peerIds: [firstManageScene.id],
+                    peerKey: `first:${firstManageScene.id}`,
+                    allowReorder: false,
+                    showGroupSecondary: false,
+                  })}
+                </ul>
+              : null}
+              <DevPanelSectionAccordion
+                persistKey='tab:scenes:groups'
+                variant='nested'
+              >
+                {sceneManageGroups.map((group, groupIndex) => {
+                  const peerIds = group.scenes.map((item) => item.id);
+                  const canReorderGroup = group.id !== SCENE_GROUP_OTHER_ID;
+                  const isGroupDropTarget =
+                    sceneOrderDropTarget?.kind === 'group' &&
+                    sceneOrderDropTarget.groupId === group.id;
+                  const isGroupDragging =
+                    sceneOrderDrag?.kind === 'group' &&
+                    sceneOrderDrag.groupId === group.id;
+                  return (
+                    <DevPanelSection
+                      key={group.id}
+                      className={cn(
+                        isGroupDropTarget &&
+                          devViewPanelReorderDropTargetClassName,
+                        isGroupDragging && 'opacity-55',
+                      )}
+                      title={`${group.title} (${group.scenes.length})`}
+                      onDragOver={(event) => {
+                        const payload = readSceneOrderDragPayload(event);
+                        if (!payload || payload.kind !== 'group') return;
+                        event.preventDefault();
+                        event.dataTransfer.dropEffect = 'move';
+                        setSceneOrderDropTarget({
+                          kind: 'group',
+                          groupId: group.id,
+                        });
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        const payload = readSceneOrderDragPayload(event);
+                        clearSceneOrderDrag();
+                        if (
+                          !payload ||
+                          payload.kind !== 'group' ||
+                          payload.groupId === group.id
+                        ) {
+                          return;
+                        }
+                        void relocateTourSceneGroup(
+                          payload.groupId,
+                          groupIndex,
+                        );
+                      }}
+                      headerLeading={
+                        canReorderGroup ?
+                          <DevPanelReorderHandle
+                            disabled={sceneManageStatus === 'working'}
+                            label={`Reorder ${group.title} group`}
+                            onDragStart={(event) => {
+                              const payload = {
+                                kind: 'group' as const,
+                                groupId: group.id,
+                              };
+                              event.dataTransfer.setData(
+                                'text/plain',
+                                JSON.stringify(payload),
+                              );
+                              event.dataTransfer.effectAllowed = 'move';
+                              setSceneOrderDrag(payload);
+                            }}
+                            onDragEnd={clearSceneOrderDrag}
+                          />
+                        : undefined
+                      }
+                    >
+                      {group.scenes.length > 0 ?
+                        <DevPanelFormGroup>
+                          <ul className={devViewPanelManageListClassName}>
+                            {group.scenes.map((entry) =>
+                              renderSceneManageItem(entry, {
+                                peerIds,
+                                peerKey: `group:${group.id}`,
+                                allowReorder: group.scenes.length > 1,
+                                showGroupSecondary: false,
+                              }),
+                            )}
+                          </ul>
+                        </DevPanelFormGroup>
+                      : <p className={devViewPanelSectionHintClassName}>
+                          No scenes in this group.
+                        </p>
+                      }
+                    </DevPanelSection>
+                  );
+                })}
+              </DevPanelSectionAccordion>
+            </DevPanelFormGroup>
+          : <DevPanelFormGroup>
+              <ul className={devViewPanelManageListClassName}>
+                {tourScenes.map((entry) =>
+                  renderSceneManageItem(entry, {
+                    peerIds: tourScenes.map((item) => item.id),
+                    peerKey: 'flat',
+                    allowReorder: true,
+                    showGroupSecondary: true,
+                  }),
+                )}
+              </ul>
+            </DevPanelFormGroup>
+          }
+          {sceneManageError ?
+            <p className={devViewPanelSectionHintClassName}>
+              {sceneManageError}
             </p>
           : null}
-
-          {sceneError ?
-            <p className={devViewPanelSectionHintClassName}>{sceneError}</p>
-          : null}
-
-          <div className={devViewPanelActionsClassName}>
-            <button
-              type='button'
-              className={devViewPanelBtnVariants({ tone: 'secondary' })}
-              onClick={() => {
-                setSceneTitle('');
-                setSceneDescription('');
-                setSceneCreatePlaceOverview(false);
-                setScenePreviewVideoUrl('');
-                setSceneVideoUrl('');
-                setScenePanoramaFile(null);
-                setSceneError(null);
-                setSceneStatus('idle');
-                mintCreateSceneId();
-                setSceneAddCloseKey((key) => key + 1);
-              }}
-              disabled={sceneStatus === 'working'}
-            >
-              Cancel
-            </button>
-            <button
-              type='button'
-              className={devViewPanelBtnVariants({ tone: 'primary' })}
-              onClick={() => void createScene()}
-              disabled={!canCreateScene || sceneStatus === 'working'}
-            >
-              {sceneStatus === 'working' ?
-                'Creating…'
-              : sceneStatus === 'done' ?
-                'Created!'
-              : 'Create scene'}
-            </button>
-          </div>
-        </DevPanelFormGroup>
-      </DevPanelSection>
-
-      <DevPanelSection
-        title='Manage scenes'
-        description='Groups follow nav hierarchy. Drag to change Explore tour list order only — not floor links. First badge marks the start scene.'
-      >
-        {tourScenes.length === 0 ?
-          <p className={devViewPanelSectionHintClassName}>
-            No scenes on this tour yet.
-          </p>
-        : sceneManageGroupingActive ?
-          <DevPanelFormGroup className='pb-0'>
-            {firstManageScene ?
-              <ul className={devViewPanelManageListClassName}>
-                {renderSceneManageItem(firstManageScene, {
-                  peerIds: [firstManageScene.id],
-                  peerKey: `first:${firstManageScene.id}`,
-                  allowReorder: false,
-                  showGroupSecondary: false,
-                })}
-              </ul>
-            : null}
-            <DevPanelSectionAccordion
-              persistKey='tab:scenes:groups'
-              variant='nested'
-            >
-              {sceneManageGroups.map((group, groupIndex) => {
-                const peerIds = group.scenes.map((item) => item.id);
-                const canReorderGroup = group.id !== SCENE_GROUP_OTHER_ID;
-                const isGroupDropTarget =
-                  sceneOrderDropTarget?.kind === 'group' &&
-                  sceneOrderDropTarget.groupId === group.id;
-                const isGroupDragging =
-                  sceneOrderDrag?.kind === 'group' &&
-                  sceneOrderDrag.groupId === group.id;
-                return (
-                  <DevPanelSection
-                    key={group.id}
-                    className={cn(
-                      isGroupDropTarget &&
-                        devViewPanelReorderDropTargetClassName,
-                      isGroupDragging && 'opacity-55',
-                    )}
-                    title={`${group.title} (${group.scenes.length})`}
-                    onDragOver={(event) => {
-                      const payload = readSceneOrderDragPayload(event);
-                      if (!payload || payload.kind !== 'group') return;
-                      event.preventDefault();
-                      event.dataTransfer.dropEffect = 'move';
-                      setSceneOrderDropTarget({
-                        kind: 'group',
-                        groupId: group.id,
-                      });
-                    }}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      const payload = readSceneOrderDragPayload(event);
-                      clearSceneOrderDrag();
-                      if (
-                        !payload ||
-                        payload.kind !== 'group' ||
-                        payload.groupId === group.id
-                      ) {
-                        return;
-                      }
-                      void relocateTourSceneGroup(payload.groupId, groupIndex);
-                    }}
-                    headerLeading={
-                      canReorderGroup ?
-                        <DevPanelReorderHandle
-                          disabled={sceneManageStatus === 'working'}
-                          label={`Reorder ${group.title} group`}
-                          onDragStart={(event) => {
-                            const payload = {
-                              kind: 'group' as const,
-                              groupId: group.id,
-                            };
-                            event.dataTransfer.setData(
-                              'text/plain',
-                              JSON.stringify(payload),
-                            );
-                            event.dataTransfer.effectAllowed = 'move';
-                            setSceneOrderDrag(payload);
-                          }}
-                          onDragEnd={clearSceneOrderDrag}
-                        />
-                      : undefined
-                    }
-                  >
-                    {group.scenes.length > 0 ?
-                      <DevPanelFormGroup>
-                        <ul className={devViewPanelManageListClassName}>
-                          {group.scenes.map((entry) =>
-                            renderSceneManageItem(entry, {
-                              peerIds,
-                              peerKey: `group:${group.id}`,
-                              allowReorder: group.scenes.length > 1,
-                              showGroupSecondary: false,
-                            }),
-                          )}
-                        </ul>
-                      </DevPanelFormGroup>
-                    : <p className={devViewPanelSectionHintClassName}>
-                        No scenes in this group.
-                      </p>
-                    }
-                  </DevPanelSection>
-                );
-              })}
-            </DevPanelSectionAccordion>
-          </DevPanelFormGroup>
-        : <DevPanelFormGroup>
-            <ul className={devViewPanelManageListClassName}>
-              {tourScenes.map((entry) =>
-                renderSceneManageItem(entry, {
-                  peerIds: tourScenes.map((item) => item.id),
-                  peerKey: 'flat',
-                  allowReorder: true,
-                  showGroupSecondary: true,
-                }),
-              )}
-            </ul>
-          </DevPanelFormGroup>
-        }
-        {sceneManageError ?
-          <p className={devViewPanelSectionHintClassName}>{sceneManageError}</p>
-        : null}
-      </DevPanelSection>
-    </>
+        </DevPanelSection>
+      </>
     </DevPanelSectionAccordion>
   );
 }

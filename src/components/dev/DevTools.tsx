@@ -17,7 +17,10 @@ import { DEV_SHELL_TOUR_ID } from '../../constants/devPanel';
 import {
   getDevPanelPrefs,
   setDevPanelOpen,
-  useDevPanelPrefs,
+  useDevPanelDeviceMode,
+  useDevPanelLayout,
+  useDevPanelOpen,
+  useDevPanelTheme,
 } from '../../utils/devPanelPrefs';
 import type { Tour } from '../../types/tour';
 import {
@@ -76,7 +79,7 @@ type DevToolsHostProps = { presentationRootRef: RefObject<HTMLElement | null> };
 export function DevToolsHost({ presentationRootRef }: DevToolsHostProps) {
   const bridge = useDevTourBridge();
   const localPanelStack = useTourPanelStack();
-  const { deviceMode } = useDevPanelPrefs();
+  const deviceMode = useDevPanelDeviceMode();
   const shell = useMemo(
     () => buildShellBridge(localPanelStack),
     [localPanelStack],
@@ -102,8 +105,6 @@ function DevTools({
   scene,
   currentSceneId,
   sceneOptions,
-  view,
-  clickCoords,
   captureSceneThumbnail,
   getCurrentView,
   animateToView,
@@ -119,7 +120,9 @@ function DevTools({
 }: DevTourBridgeSnapshot & {
   presentationRootRef: RefObject<HTMLElement | null>;
 }) {
-  const { layout, theme, panelOpen } = useDevPanelPrefs();
+  const layout = useDevPanelLayout();
+  const theme = useDevPanelTheme();
+  const panelOpen = useDevPanelOpen();
   const [layoutEnter, setLayoutEnter] = useState(false);
   const [pushRailReady, setPushRailReady] = useState(
     () => layout === 'push' && panelOpen,
@@ -127,6 +130,8 @@ function DevTools({
   const prevLayoutRef = useRef(layout);
   const skipLayoutEnterRef = useRef(true);
   const bootPushRailRef = useRef(true);
+  const syncLayoutSizeRef = useRef(syncLayoutSize);
+  syncLayoutSizeRef.current = syncLayoutSize;
   /** Push rail waits for panel motion so underpaint does not flash mid-fade. */
   const pushRailOpen = layout === 'push' && panelOpen && pushRailReady;
 
@@ -165,8 +170,8 @@ function DevTools({
       pushRailOpen ? DEV_TOOLS_DRAWER_WIDTH : '0px',
     );
     void root.offsetWidth;
-    syncLayoutSize();
-  }, [presentationRootRef, pushRailOpen, syncLayoutSize]);
+    syncLayoutSizeRef.current();
+  }, [presentationRootRef, pushRailOpen]);
 
   useEffect(() => {
     return () => {
@@ -257,8 +262,6 @@ function DevTools({
           scene={scene}
           currentSceneId={currentSceneId}
           sceneOptions={sceneOptions}
-          view={view}
-          clickCoords={clickCoords}
           captureSceneThumbnail={captureSceneThumbnail}
           getCurrentView={getCurrentView}
           animateToView={animateToView}

@@ -1,13 +1,12 @@
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from 'react';
-import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { subscribeDevCatalogSnapshot } from '../../data/devCatalogSnapshot';
 import {
@@ -27,7 +26,6 @@ import {
   resolveSceneId,
 } from '../../utils/tourPaths';
 import { getTourClientId } from '../../utils/tourClientId';
-import { withBaseUrl } from '../../utils/assetUrl';
 import { useFallbackImageSrc } from '../../hooks/useFallbackImageSrc';
 import {
   clientBrandFaviconCandidates,
@@ -38,17 +36,11 @@ import {
   DEV_PANEL_TABS,
   DEV_PANEL_PRIMARY_TABS,
   DEV_SHELL_TOUR_ID,
-  type DevPanelLayout,
   type DevPanelTab,
-  type DevPanelTheme,
 } from '../../constants/devPanel';
-import {
-  setDevPanelLayout,
-  setDevPanelTheme,
-  useDevPanelPrefs,
-} from '../../utils/devPanelPrefs';
+import { useDevPanelLayout, useDevPanelTheme } from '../../utils/devPanelPrefs';
 import type { Tour, ViewPosition } from '../../types/tour';
-import type { ClickCoords, DevSceneRef } from '../../utils/devHotspotLogger';
+import type { DevSceneRef } from '../../utils/devHotspotLogger';
 import type { DevHotspotMovePosition } from '../../utils/devTourBridge';
 import {
   devFetchCatalogClients,
@@ -57,54 +49,30 @@ import {
   type DevCatalogClient,
   type DevTourMutateOptions,
 } from '../../utils/devTourApi';
-import { MaterialSymbol } from '../ui/MaterialSymbol';
-import {
-  MATERIAL_SYMBOL_SIZE_18,
-  materialSymbolLayoutClassName,
-} from '../ui/materialSymbolClasses';
 import { cn } from '../../lib/cn';
 import {
   devViewPanelBodyClassName,
   devViewPanelRootFloatingClassName,
   devViewPanelRootVariants,
   devViewPanelTabLeadClassName,
-  devViewPanelHeaderIconBtnActiveClassName,
-  devViewPanelHeaderIconBtnClassName,
-  devViewPanelHeaderPopoversClassName,
-  devViewPanelThemeMenuClassName,
-  devViewPanelPopoverCloseBtnClassName,
-  devViewPanelSettingsGroupClassName,
-  devViewPanelSettingsGroupLabelClassName,
-  devViewPanelSettingsRadioListClassName,
-  devViewPanelSettingsRadioMarkCheckedClassName,
-  devViewPanelSettingsRadioMarkClassName,
-  devViewPanelSettingsRadioOptionActiveClassName,
-  devViewPanelSettingsRadioOptionClassName,
   devViewPanelStickyHeaderVariants,
-  devViewPanelStickyTourLogoClassName,
-  devViewPanelStickyTourLogoWrapClassName,
   devViewPanelPrimaryTabsVariants,
   devViewPanelTabPanelClassName,
   devViewPanelTabVariants,
-  devViewPanelTourSwitchAnchorClassName,
-  devViewPanelTourSwitchChevronClassName,
-  devViewPanelTourSwitchMenuClassName,
-  devViewPanelTourSwitchGroupClassName,
-  devViewPanelTourSwitchGroupHeadingClassName,
-  devViewPanelTourSwitchMenuItemActiveClassName,
-  devViewPanelTourSwitchMenuItemClassName,
-  devViewPanelTourSwitchActionItemClassName,
-  devViewPanelTourSwitchMenuRuleClassName,
-  devViewPanelTourSwitchTriggerClassName,
-  devViewPanelTourSwitcherClassName,
 } from './devViewPanelVariants';
 import { DevPanelSectionPersistProvider } from './DevPanelSectionPersist';
 import { DevClientPanel } from './DevClientPanel';
-import { DevPanelDebugMenu } from './DevPanelDebugMenu';
+import { DevPanelHeaderChrome } from './DevPanelHeaderChrome';
 import { DevSceneTabPanel } from './DevSceneTabPanel';
 import { DevScenesListPanel } from './DevScenesListPanel';
 import { DevNamingCatalogPanel } from './DevNamingCatalogPanel';
 import { DevToursCatalogPanel } from './DevToursCatalogPanel';
+
+const MemoDevSceneTabPanel = memo(DevSceneTabPanel);
+const MemoDevScenesListPanel = memo(DevScenesListPanel);
+const MemoDevNamingCatalogPanel = memo(DevNamingCatalogPanel);
+const MemoDevToursCatalogPanel = memo(DevToursCatalogPanel);
+const MemoDevClientPanel = memo(DevClientPanel);
 
 export interface DevSceneOption {
   id: string;
@@ -118,8 +86,6 @@ interface DevViewPanelProps {
   scene: DevSceneRef;
   currentSceneId: string;
   sceneOptions: DevSceneOption[];
-  view: ViewPosition | null;
-  clickCoords: ClickCoords | null;
   captureSceneThumbnail?: () => Promise<Blob | null>;
   getCurrentView?: () => ViewPosition | null;
   /** Restore the pre-hover camera after Manage list hover preview. */
@@ -147,15 +113,13 @@ interface DevViewPanelProps {
   panelOpen?: boolean;
 }
 
-export function DevViewPanel({
+function DevViewPanelInner({
   id,
   tour,
   onTourMutated,
   scene,
   currentSceneId,
   sceneOptions,
-  view,
-  clickCoords,
   captureSceneThumbnail,
   getCurrentView,
   animateToView,
@@ -214,86 +178,10 @@ export function DevViewPanel({
   const [deletedNamingId, setDeletedNamingId] = useState<string | null>(null);
   const [deletedNamingHotspotKey, setDeletedNamingHotspotKey] = useState(0);
   const [panelTab, setPanelTab] = useState<DevPanelTab>('scene');
-  const { theme: devPanelTheme, layout: devPanelLayout } = useDevPanelPrefs();
-  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
-  const [debugMenuOpen, setDebugMenuOpen] = useState(false);
-  const headerPopoversRef = useRef<HTMLDivElement>(null);
-  const settingsMenuRef = useRef<HTMLDivElement>(null);
-  const debugMenuRef = useRef<HTMLDivElement>(null);
-  const [headerPopoverMenuStyle, setHeaderPopoverMenuStyle] =
-    useState<CSSProperties>({});
-  const [tourSwitchOpen, setTourSwitchOpen] = useState(false);
-  const [tourSwitchMenuStyle, setTourSwitchMenuStyle] = useState<CSSProperties>(
-    {},
-  );
-  const tourSwitchRef = useRef<HTMLDivElement>(null);
-  const tourSwitchTriggerRef = useRef<HTMLButtonElement>(null);
-  const tourSwitchMenuRef = useRef<HTMLUListElement>(null);
+  const devPanelTheme = useDevPanelTheme();
+  const devPanelLayout = useDevPanelLayout();
   const panelBodyRef = useRef<HTMLDivElement>(null);
   const panelScrollTopRequestRef = useRef(false);
-
-  const applyDevPanelTheme = useCallback((theme: DevPanelTheme) => {
-    setDevPanelTheme(theme);
-  }, []);
-
-  const applyDevPanelLayout = useCallback((layout: DevPanelLayout) => {
-    setDevPanelLayout(layout);
-  }, []);
-
-  const closeHeaderPopovers = useCallback(() => {
-    setSettingsMenuOpen(false);
-    setDebugMenuOpen(false);
-  }, []);
-
-  useEffect(() => {
-    if (!settingsMenuOpen && !debugMenuOpen) return;
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target;
-      if (!(target instanceof Node)) return;
-      if (headerPopoversRef.current?.contains(target)) return;
-      if (settingsMenuRef.current?.contains(target)) return;
-      if (debugMenuRef.current?.contains(target)) return;
-      closeHeaderPopovers();
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      closeHeaderPopovers();
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  }, [closeHeaderPopovers, settingsMenuOpen, debugMenuOpen]);
-
-  useLayoutEffect(() => {
-    if (!settingsMenuOpen && !debugMenuOpen) return;
-
-    const updatePosition = () => {
-      const anchor = headerPopoversRef.current;
-      if (!anchor) return;
-      const rect = anchor.getBoundingClientRect();
-      setHeaderPopoverMenuStyle({
-        top: rect.bottom + 6,
-        right: Math.max(8, window.innerWidth - rect.right),
-      });
-    };
-
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
-    };
-  }, [settingsMenuOpen, debugMenuOpen]);
-
-  useEffect(() => {
-    if (panelOpen) return;
-    closeHeaderPopovers();
-    setTourSwitchOpen(false);
-  }, [panelOpen, closeHeaderPopovers]);
 
   const currentClientId = useMemo(() => {
     if (tour.id === DEV_SHELL_TOUR_ID || !tour.firstScene) return '';
@@ -363,53 +251,6 @@ export function DevViewPanel({
     if (!isDevShellTour) return;
     setManageClientId('');
   }, [isDevShellTour]);
-
-  useEffect(() => {
-    if (!tourSwitchOpen) return;
-
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (tourSwitchRef.current?.contains(target)) return;
-      if (tourSwitchMenuRef.current?.contains(target)) return;
-      setTourSwitchOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.stopImmediatePropagation();
-      event.stopPropagation();
-      setTourSwitchOpen(false);
-    };
-
-    document.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('keydown', onKeyDown, true);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDown, true);
-    };
-  }, [tourSwitchOpen]);
-
-  useLayoutEffect(() => {
-    if (!tourSwitchOpen) return;
-
-    const updatePosition = () => {
-      const trigger = tourSwitchTriggerRef.current;
-      if (!trigger) return;
-      const rect = trigger.getBoundingClientRect();
-      setTourSwitchMenuStyle({
-        top: rect.bottom + 4,
-        left: rect.left,
-        minWidth: rect.width,
-      });
-    };
-
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
-    };
-  }, [tourSwitchOpen]);
 
   const handleSwitchTour = useCallback(
     (nextTourId: string) => {
@@ -501,6 +342,23 @@ export function DevViewPanel({
     setPanelTab('scene');
   }, []);
 
+  const clearNamingCatalogEdit = useCallback(() => {
+    setNamingCatalogClearKey((key) => key + 1);
+  }, []);
+
+  const handleNamingHotspotDeleted = useCallback((namingId: string) => {
+    setDeletedNamingId(namingId);
+    setDeletedNamingHotspotKey((key) => key + 1);
+  }, []);
+
+  const clearHotspotInteraction = useCallback(() => {
+    setHotspotInteractionClearKey((key) => key + 1);
+  }, []);
+
+  const refreshCatalogSnapshot = useCallback(async () => {
+    await refreshDevCatalogSnapshot();
+  }, []);
+
   return (
     <DevPanelSectionPersistProvider>
       <div
@@ -514,347 +372,20 @@ export function DevViewPanel({
         )}
       >
         <div className={devViewPanelStickyHeaderVariants({ tab: panelTab })}>
-          <div className={devViewPanelTourSwitcherClassName}>
-            {stickyTourIcon ?
-              <div className={devViewPanelStickyTourLogoWrapClassName}>
-                <img
-                  className={devViewPanelStickyTourLogoClassName}
-                  src={withBaseUrl(stickyTourIcon)}
-                  alt={stickyTourBranding?.logoAlt ?? tour.title}
-                  onError={onStickyTourIconError}
-                />
-              </div>
-            : null}
-            <div
-              ref={tourSwitchRef}
-              className={devViewPanelTourSwitchAnchorClassName}
-            >
-              <button
-                ref={tourSwitchTriggerRef}
-                type='button'
-                className={devViewPanelTourSwitchTriggerClassName}
-                aria-label='Switch tour'
-                aria-haspopup='listbox'
-                aria-expanded={tourSwitchOpen}
-                onClick={() => setTourSwitchOpen((open) => !open)}
-              >
-                <span className='min-w-0 truncate'>{stickyTourName}</span>
-                <svg
-                  className={devViewPanelTourSwitchChevronClassName}
-                  viewBox='0 0 20 20'
-                  fill='currentColor'
-                  aria-hidden='true'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-              </button>
-
-              {tourSwitchOpen && typeof document !== 'undefined' ?
-                createPortal(
-                  <ul
-                    ref={tourSwitchMenuRef}
-                    style={tourSwitchMenuStyle}
-                    className={devViewPanelTourSwitchMenuClassName}
-                    data-dev-theme={devPanelTheme}
-                    role='listbox'
-                    aria-label='Switch tour'
-                    onPointerDown={(event) => event.stopPropagation()}
-                  >
-                    <li role='presentation' className='flex flex-col gap-0.5'>
-                      <button
-                        type='button'
-                        role='option'
-                        aria-selected={false}
-                        className={devViewPanelTourSwitchActionItemClassName}
-                        onClick={() => {
-                          setTourSwitchOpen(false);
-                          openIntroGallery();
-                        }}
-                      >
-                        <MaterialSymbol
-                          name='grid_view'
-                          filled
-                          sizePx={MATERIAL_SYMBOL_SIZE_18}
-                          className={materialSymbolLayoutClassName}
-                        />
-                        Intro gallery
-                      </button>
-                    </li>
-                    {tourGroups.length > 0 ?
-                      <li
-                        role='separator'
-                        className={devViewPanelTourSwitchMenuRuleClassName}
-                      />
-                    : null}
-                    {tourGroups.map((group) => (
-                      <li
-                        key={group.clientId}
-                        role='presentation'
-                        className={devViewPanelTourSwitchGroupClassName}
-                      >
-                        <p
-                          className={
-                            devViewPanelTourSwitchGroupHeadingClassName
-                          }
-                        >
-                          {group.clientName}
-                        </p>
-                        <ul
-                          role='group'
-                          aria-label={group.clientName}
-                          className='flex flex-col gap-0.5 pl-1'
-                        >
-                          {group.tours.map((option) => {
-                            const isActive = option.id === currentTourId;
-                            return (
-                              <li key={option.id}>
-                                <button
-                                  type='button'
-                                  role='option'
-                                  aria-selected={isActive}
-                                  className={cn(
-                                    devViewPanelTourSwitchMenuItemClassName,
-                                    isActive &&
-                                      devViewPanelTourSwitchMenuItemActiveClassName,
-                                  )}
-                                  onClick={() => {
-                                    handleSwitchTour(option.id);
-                                    setTourSwitchOpen(false);
-                                  }}
-                                >
-                                  {option.facilityTitle}
-                                </button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </li>
-                    ))}
-                  </ul>,
-                  document.body,
-                )
-              : null}
-            </div>
-            <div
-              ref={headerPopoversRef}
-              className={devViewPanelHeaderPopoversClassName}
-            >
-              <button
-                type='button'
-                className={cn(
-                  devViewPanelHeaderIconBtnClassName,
-                  debugMenuOpen && devViewPanelHeaderIconBtnActiveClassName,
-                )}
-                aria-label='Debug'
-                aria-haspopup='dialog'
-                aria-expanded={debugMenuOpen}
-                title='Debug'
-                onClick={() => {
-                  setSettingsMenuOpen(false);
-                  setDebugMenuOpen((open) => !open);
-                }}
-              >
-                <MaterialSymbol
-                  name='bug_report'
-                  filled
-                  sizePx={MATERIAL_SYMBOL_SIZE_18}
-                  className={materialSymbolLayoutClassName}
-                />
-              </button>
-              <button
-                type='button'
-                className={cn(
-                  devViewPanelHeaderIconBtnClassName,
-                  settingsMenuOpen && devViewPanelHeaderIconBtnActiveClassName,
-                )}
-                aria-label='Dev panel settings'
-                aria-haspopup='menu'
-                aria-expanded={settingsMenuOpen}
-                title='Settings'
-                onClick={() => {
-                  setDebugMenuOpen(false);
-                  setSettingsMenuOpen((open) => !open);
-                }}
-              >
-                <MaterialSymbol
-                  name='settings'
-                  filled
-                  sizePx={MATERIAL_SYMBOL_SIZE_18}
-                  className={materialSymbolLayoutClassName}
-                />
-              </button>
-              {onClose ?
-                <button
-                  type='button'
-                  className={devViewPanelHeaderIconBtnClassName}
-                  onClick={onClose}
-                  aria-label='Close dev panel (`)'
-                  title='Close dev panel (`)'
-                >
-                  <MaterialSymbol
-                    name='close'
-                    filled
-                    sizePx={MATERIAL_SYMBOL_SIZE_18}
-                    className={materialSymbolLayoutClassName}
-                  />
-                </button>
-              : null}
-              {debugMenuOpen && typeof document !== 'undefined' ?
-                createPortal(
-                  <DevPanelDebugMenu
-                    menuRef={debugMenuRef}
-                    style={headerPopoverMenuStyle}
-                    theme={devPanelTheme}
-                    tourId={tour.id}
-                    isModel3dTour={isModel3dTour}
-                    onClose={closeHeaderPopovers}
-                  />,
-                  document.body,
-                )
-              : null}
-              {settingsMenuOpen && typeof document !== 'undefined' ?
-                createPortal(
-                  <div
-                    ref={settingsMenuRef}
-                    style={headerPopoverMenuStyle}
-                    className={devViewPanelThemeMenuClassName}
-                    data-dev-theme={devPanelTheme}
-                    role='menu'
-                    aria-label='Dev panel settings'
-                  >
-                    <button
-                      type='button'
-                      className={devViewPanelPopoverCloseBtnClassName}
-                      aria-label='Close settings'
-                      title='Close'
-                      onClick={closeHeaderPopovers}
-                    >
-                      <MaterialSymbol
-                        name='close'
-                        filled
-                        sizePx={MATERIAL_SYMBOL_SIZE_18}
-                        className={materialSymbolLayoutClassName}
-                      />
-                    </button>
-                    <div
-                      className={devViewPanelSettingsGroupClassName}
-                      role='radiogroup'
-                      aria-label='Theme'
-                    >
-                      <p className={devViewPanelSettingsGroupLabelClassName}>
-                        Theme
-                      </p>
-                      <ul className={devViewPanelSettingsRadioListClassName}>
-                        {(
-                          [
-                            { id: 'light', label: 'Light', icon: 'light_mode' },
-                            { id: 'dark', label: 'Dark', icon: 'dark_mode' },
-                          ] as const
-                        ).map((option) => {
-                          const checked = devPanelTheme === option.id;
-                          return (
-                            <li key={option.id}>
-                              <button
-                                type='button'
-                                role='menuitemradio'
-                                aria-checked={checked}
-                                className={cn(
-                                  devViewPanelSettingsRadioOptionClassName,
-                                  checked &&
-                                    devViewPanelSettingsRadioOptionActiveClassName,
-                                )}
-                                onClick={() => applyDevPanelTheme(option.id)}
-                              >
-                                <span
-                                  className={cn(
-                                    devViewPanelSettingsRadioMarkClassName,
-                                    checked &&
-                                      devViewPanelSettingsRadioMarkCheckedClassName,
-                                  )}
-                                  aria-hidden='true'
-                                />
-                                <MaterialSymbol
-                                  name={option.icon}
-                                  filled
-                                  sizePx={MATERIAL_SYMBOL_SIZE_18}
-                                  className={materialSymbolLayoutClassName}
-                                />
-                                {option.label}
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                    <div
-                      className={devViewPanelSettingsGroupClassName}
-                      role='radiogroup'
-                      aria-label='Panel layout'
-                    >
-                      <p className={devViewPanelSettingsGroupLabelClassName}>
-                        Panel
-                      </p>
-                      <ul className={devViewPanelSettingsRadioListClassName}>
-                        {(
-                          [
-                            {
-                              id: 'floating',
-                              label: 'Floating',
-                              icon: 'select_window',
-                            },
-                            {
-                              id: 'overlay',
-                              label: 'Overlay',
-                              icon: 'picture_in_picture',
-                            },
-                            { id: 'push', label: 'Push', icon: 'view_sidebar' },
-                          ] as const
-                        ).map((option) => {
-                          const checked = devPanelLayout === option.id;
-                          return (
-                            <li key={option.id}>
-                              <button
-                                type='button'
-                                role='menuitemradio'
-                                aria-checked={checked}
-                                className={cn(
-                                  devViewPanelSettingsRadioOptionClassName,
-                                  checked &&
-                                    devViewPanelSettingsRadioOptionActiveClassName,
-                                )}
-                                onClick={() => applyDevPanelLayout(option.id)}
-                              >
-                                <span
-                                  className={cn(
-                                    devViewPanelSettingsRadioMarkClassName,
-                                    checked &&
-                                      devViewPanelSettingsRadioMarkCheckedClassName,
-                                  )}
-                                  aria-hidden='true'
-                                />
-                                <MaterialSymbol
-                                  name={option.icon}
-                                  filled
-                                  sizePx={MATERIAL_SYMBOL_SIZE_18}
-                                  className={materialSymbolLayoutClassName}
-                                />
-                                {option.label}
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  </div>,
-                  document.body,
-                )
-              : null}
-            </div>
-          </div>
+          <DevPanelHeaderChrome
+            tourLogoSrc={stickyTourIcon}
+            tourLogoAlt={stickyTourBranding?.logoAlt ?? tour.title}
+            onTourLogoError={onStickyTourIconError}
+            stickyTourName={stickyTourName}
+            tourGroups={tourGroups}
+            currentTourId={currentTourId}
+            tourId={tour.id}
+            isModel3dTour={isModel3dTour}
+            panelOpen={panelOpen}
+            onClose={onClose}
+            onSwitchTour={handleSwitchTour}
+            onOpenIntroGallery={openIntroGallery}
+          />
 
           <div
             className={devViewPanelPrimaryTabsVariants({ tab: panelTab })}
@@ -893,13 +424,11 @@ export function DevViewPanel({
             className={devViewPanelTabPanelClassName}
             hidden={panelTab !== 'scene'}
           >
-            <DevSceneTabPanel
+            <MemoDevSceneTabPanel
               tour={tour}
               onTourMutated={onTourMutated}
               scene={scene}
               sceneOptions={sceneOptions}
-              view={view}
-              clickCoords={clickCoords}
               captureSceneThumbnail={captureSceneThumbnail}
               getCurrentView={getCurrentView}
               animateToView={animateToView}
@@ -912,13 +441,8 @@ export function DevViewPanel({
               onSelectedNamingIdChange={setSelectedNamingId}
               onOpenCreateNaming={openCreateNamingTab}
               onRequestSceneTab={requestSceneTab}
-              onClearNamingCatalogEdit={() =>
-                setNamingCatalogClearKey((key) => key + 1)
-              }
-              onNamingHotspotDeleted={(namingId) => {
-                setDeletedNamingId(namingId);
-                setDeletedNamingHotspotKey((key) => key + 1);
-              }}
+              onClearNamingCatalogEdit={clearNamingCatalogEdit}
+              onNamingHotspotDeleted={handleNamingHotspotDeleted}
               hotspotInteractionClearKey={hotspotInteractionClearKey}
             />
           </div>
@@ -929,15 +453,13 @@ export function DevViewPanel({
               aria-labelledby='dev-panel-tab-client'
               className={devViewPanelTabPanelClassName}
             >
-              <DevClientPanel
+              <MemoDevClientPanel
                 catalogClients={catalogClients}
                 catalogTick={catalogTick}
                 currentClientId={currentClientId}
                 manageClientId={manageClientId}
                 onManageClientIdChange={setManageClientId}
-                onCatalogRefresh={async () => {
-                  await refreshDevCatalogSnapshot();
-                }}
+                onCatalogRefresh={refreshCatalogSnapshot}
                 onClientDeleted={handleClientDeleted}
               />
             </div>
@@ -949,11 +471,10 @@ export function DevViewPanel({
             className={devViewPanelTabPanelClassName}
             hidden={panelTab !== 'scenes'}
           >
-            <DevScenesListPanel
+            <MemoDevScenesListPanel
               tour={tour}
               onTourMutated={onTourMutated}
               scene={scene}
-              view={view}
               captureSceneThumbnail={captureSceneThumbnail}
               getCurrentView={getCurrentView}
               isModel3dTour={isModel3dTour}
@@ -967,7 +488,7 @@ export function DevViewPanel({
             className={devViewPanelTabPanelClassName}
             hidden={panelTab !== 'naming'}
           >
-            <DevNamingCatalogPanel
+            <MemoDevNamingCatalogPanel
               tour={tour}
               onTourMutated={onTourMutated}
               scene={scene}
@@ -979,9 +500,7 @@ export function DevViewPanel({
               ensureOpenKey={namingAddEnsureKey}
               catalogClearKey={namingCatalogClearKey}
               onSelectNamingId={setSelectedNamingId}
-              onClearHotspotInteraction={() =>
-                setHotspotInteractionClearKey((key) => key + 1)
-              }
+              onClearHotspotInteraction={clearHotspotInteraction}
               deletedNamingId={deletedNamingId}
               deletedNamingHotspotKey={deletedNamingHotspotKey}
             />
@@ -993,10 +512,9 @@ export function DevViewPanel({
             className={devViewPanelTabPanelClassName}
             hidden={panelTab !== 'tour'}
           >
-            <DevToursCatalogPanel
+            <MemoDevToursCatalogPanel
               tour={tour}
               onTourMutated={onTourMutated}
-              view={view}
               catalogTick={catalogTick}
               catalogClients={catalogClients}
               currentSceneId={currentSceneId}
@@ -1008,3 +526,5 @@ export function DevViewPanel({
     </DevPanelSectionPersistProvider>
   );
 }
+
+export const DevViewPanel = memo(DevViewPanelInner);

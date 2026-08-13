@@ -35,7 +35,7 @@ export interface AppSearchParams {
   skipLanding: boolean;
   /** Hold splash longer for loader UX testing. */
   splashHold: boolean;
-  /** Force first-visit coach pill (dev QA — overrides embed/dev off). */
+  /** Force look-around coach pill in embed/dev. */
   firstVisitHint: boolean;
   /**
    * Tour Guide visibility override — `?askGuide=1|0`.

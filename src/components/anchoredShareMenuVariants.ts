@@ -42,7 +42,7 @@ export const anchoredShareMenuLeadClassName = cn(
 );
 
 export const anchoredShareMenuHeroLeadClassName = cn(
-  'm-0 mb-3 w-full pe-0 text-center font-body text-sm leading-[1.5] text-white/80',
+  'm-0 mb-3 w-full pe-0 text-center font-body text-sm leading-[1.5] text-white',
 );
 
 /** Transparent chrome close — pinned to menu top-right (matches hero-actions inset). */
@@ -72,12 +72,20 @@ export const anchoredShareMenuGridClassName = cn(
   'm-0 mx-auto grid list-none grid-cols-4 justify-items-center gap-x-1 gap-y-2.5 p-0',
 );
 
+/** Hero overlay — 4 equal slots per row; a short last row stays centered. */
 export const anchoredShareMenuHeroGridClassName = cn(
-  'm-0 grid w-full list-none grid-cols-4 justify-items-center gap-x-1 gap-y-2.5 p-0',
+  '[--anchored-share-hero-gap-x:0.5rem] [--anchored-share-hero-gap-y:1rem] [--anchored-share-hero-item:4rem]',
+  'm-0 mx-auto flex w-full list-none flex-wrap justify-center',
+  'max-w-[calc(4*var(--anchored-share-hero-item)+3*var(--anchored-share-hero-gap-x))]',
+  'gap-x-[var(--anchored-share-hero-gap-x)] gap-y-[var(--anchored-share-hero-gap-y)] p-0',
 );
 
 export const anchoredShareMenuItemClassName = cn(
   'flex min-w-0 w-full justify-center',
+);
+
+export const anchoredShareMenuHeroItemClassName = cn(
+  'flex w-[var(--anchored-share-hero-item)] shrink-0 justify-center',
 );
 
 export const anchoredShareMenuItemLabelClassName = cn(

@@ -7,7 +7,7 @@ import {
   TOUR_FIRST_VISIT_HINT_TAP_VERB,
 } from '../constants/tourFirstVisitHint';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import { MATERIAL_SYMBOL_SIZE_20 } from './ui/materialSymbolClasses';
+import { MATERIAL_SYMBOL_SIZE_18 } from './ui/materialSymbolClasses';
 import {
   TOUR_FIRST_VISIT_HINT_FADE_MS,
   tourFirstVisitHintIconClassName,
@@ -68,7 +68,7 @@ export function TourFirstVisitHint({ visible }: TourFirstVisitHintProps) {
         <span className={tourFirstVisitHintSegmentClassName}>
           <MaterialSymbol
             name='open_with'
-            sizePx={MATERIAL_SYMBOL_SIZE_20}
+            sizePx={MATERIAL_SYMBOL_SIZE_18}
             className={tourFirstVisitHintIconClassName}
           />
           <span className={tourFirstVisitHintVerbClassName}>
@@ -89,7 +89,7 @@ export function TourFirstVisitHint({ visible }: TourFirstVisitHintProps) {
           {TOUR_FIRST_VISIT_HINT_TAP_REST}
           <MaterialSymbol
             name='touch_app'
-            sizePx={MATERIAL_SYMBOL_SIZE_20}
+            sizePx={MATERIAL_SYMBOL_SIZE_18}
             className={tourFirstVisitHintIconClassName}
           />
         </span>

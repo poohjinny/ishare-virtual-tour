@@ -7,6 +7,7 @@ import type { NamingOpportunityStatus } from '../types/tour';
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
+  resolveNamingShareSceneId,
   toNamingOpportunitySearchValue,
 } from './tourPaths';
 import { resolveTourPublicOrigin } from '../constants/tourOrigin';
@@ -28,9 +29,14 @@ export function buildSharePath({
   namingHotspotId,
 }: BuildShareUrlOptions): string {
   const tour = loadTour(tourId);
+  const shareSceneId = resolveNamingShareSceneId(
+    tour,
+    sceneId,
+    namingHotspotId,
+  );
   return buildTourLocation(
     tourId,
-    sceneId,
+    shareSceneId,
     firstSceneId,
     new URLSearchParams(),
     {

@@ -624,6 +624,7 @@
     --ishare-glass-card-border: rgba(15, 23, 42, 0.12);
     /* Dark chrome pills over panorama (hero title, first-visit hint) */
     --ishare-glass-dark-overlay: rgba(15, 23, 42, 0.68);
+    --ishare-first-visit-hint-overlay: rgba(15, 23, 42, 0.82);
     /* Modal dim behind info popup */
     --ishare-glass-scrim: rgba(15, 23, 42, 0.55);
     --ishare-glass-body-text: color-mix(in srgb,

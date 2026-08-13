@@ -6,12 +6,15 @@ import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
   resolveNamingOpportunityFromSearch,
+  sceneHostsNamingHotspot,
   toNamingOpportunitySearchValue,
 } from '../utils/tourPaths';
 
 interface UseNamingOpportunityUrlSyncOptions {
   tour: Tour;
   currentSceneId: string;
+  /** Scene already in the address bar — keep this when only patching `?no=`. */
+  urlSceneId?: string | null;
   isTransitioning: boolean;
   splashDone: boolean;
   /** `?dev=1` — required for internal naming deep links. */
@@ -27,6 +30,7 @@ interface UseNamingOpportunityUrlSyncOptions {
 export function useNamingOpportunityUrlSync({
   tour,
   currentSceneId,
+  urlSceneId = null,
   isTransitioning,
   splashDone,
   audience = {},
@@ -39,8 +43,11 @@ export function useNamingOpportunityUrlSync({
   const [searchParams] = useSearchParams();
   const lastAppliedNoRef = useRef<string | null>(null);
 
+  const pathSceneId =
+    urlSceneId && tour.scenes[urlSceneId] ? urlSceneId : currentSceneId;
+
   const syncNamingOpportunityToUrl = useCallback(
-    (hotspotId: string | null, sceneId: string = currentSceneId) => {
+    (hotspotId: string | null, sceneId: string = pathSceneId) => {
       const searchValue =
         hotspotId ? toNamingOpportunitySearchValue(tour, hotspotId) : null;
       lastAppliedNoRef.current = searchValue;
@@ -60,10 +67,10 @@ export function useNamingOpportunityUrlSync({
       navigate(target, { replace: true });
     },
     [
-      currentSceneId,
       location.pathname,
       location.search,
       navigate,
+      pathSceneId,
       searchParams,
       tour.firstScene,
       tour.id,
@@ -74,6 +81,27 @@ export function useNamingOpportunityUrlSync({
     lastAppliedNoRef.current = null;
     syncNamingOpportunityToUrl(null);
   }, [syncNamingOpportunityToUrl]);
+
+  /**
+   * `?no=` is inbound only (share / OG / paste). In-app open must not write it —
+   * drop it when the open hotspot no longer matches the deep link.
+   */
+  const reconcileNamingOpportunityUrl = useCallback(
+    (hotspotId: string | null) => {
+      const current = searchParams.get(NAMING_OPPORTUNITY_SEARCH_KEY);
+      if (!current) return;
+      if (hotspotId) {
+        const resolved = resolveNamingOpportunityFromSearch(
+          tour,
+          current,
+          audience,
+        );
+        if (resolved?.hotspotId === hotspotId) return;
+      }
+      clearNamingOpportunityFromUrl();
+    },
+    [audience, clearNamingOpportunityFromUrl, searchParams, tour],
+  );
 
   const openNamingOpportunity = useCallback(
     (sceneId: string, hotspotId: string) => {
@@ -89,16 +117,12 @@ export function useNamingOpportunityUrlSync({
       }
 
       setActiveNamingHotspotId(hotspotId);
-      lastAppliedNoRef.current = toNamingOpportunitySearchValue(
-        tour,
-        hotspotId,
-      );
-      syncNamingOpportunityToUrl(hotspotId, sceneId);
+      reconcileNamingOpportunityUrl(hotspotId);
     },
     [
       pendingNamingSelectionRef,
+      reconcileNamingOpportunityUrl,
       setActiveNamingHotspotId,
-      syncNamingOpportunityToUrl,
       viewerRef,
     ],
   );
@@ -147,12 +171,19 @@ export function useNamingOpportunityUrlSync({
       setActiveNamingHotspotId(null);
       return;
     }
-    syncNamingOpportunityToUrl(hotspotId, sceneId);
+    // Keep the address-bar scene when it actually hosts this pin. Catalog
+    // `sceneId` (firstScene fallback / stale placement) was rewriting the path.
+    const keepUrlScene =
+      Boolean(pathSceneId) &&
+      (pathSceneId === sceneId ||
+        sceneHostsNamingHotspot(tour, pathSceneId, hotspotId));
+    syncNamingOpportunityToUrl(hotspotId, keepUrlScene ? pathSceneId : sceneId);
   }, [
     audience,
     clearNamingOpportunityFromUrl,
     isTransitioning,
     noSearchValue,
+    pathSceneId,
     pendingNamingSelectionRef,
     setActiveNamingHotspotId,
     splashDone,
@@ -163,7 +194,7 @@ export function useNamingOpportunityUrlSync({
 
   return {
     openNamingOpportunity,
-    syncNamingOpportunityToUrl,
+    reconcileNamingOpportunityUrl,
     clearNamingOpportunityFromUrl,
   };
 }

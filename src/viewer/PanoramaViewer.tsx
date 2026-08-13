@@ -23,6 +23,7 @@ import type {
 import { isWorldPosition } from '../types/tour';
 import { buildNavPreview, navPreviewCanNavigate } from '../utils/navPreview';
 import { isNamingHotspot } from '../utils/namingSceneInherit';
+import { resolveNamingShareSceneId } from '../utils/namingOpportunityUrl';
 import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 import {
   buildVirtualTourNodePatch,
@@ -407,12 +408,14 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
       onNamingOpportunityBusyChangeRef.current?.(false);
     };
 
-    const beginNamingOpportunityGo = () => {
+    const beginNamingOpportunityGo = (notifyUi = true) => {
       if (namingOpportunityBusyRef.current || transitioningRef.current) {
         return false;
       }
       namingOpportunityBusyRef.current = true;
-      onNamingOpportunityBusyChangeRef.current?.(true);
+      // Same-scene snug/pre-frame: ref-only. React busy re-renders Explore
+      // mid-camera-move and hitches the nudge (nav panels don't do this).
+      if (notifyUi) onNamingOpportunityBusyChangeRef.current?.(true);
       return true;
     };
 
@@ -1650,14 +1653,15 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
             return true;
           }
 
-          if (!beginNamingOpportunityGo()) return false;
+          if (!beginNamingOpportunityGo(false)) return false;
           void animateViewerToView(viewer, framedView).finally(
             releaseNamingOpportunityBusy,
           );
           return true;
         }
 
-        if (!beginNamingOpportunityGo()) return false;
+        const sameScene = virtualTour.getCurrentNode()?.id === sceneId;
+        if (!beginNamingOpportunityGo(!sameScene)) return false;
 
         const pending: PendingNamingInfoTarget = { sceneId, hotspotId };
         pendingNamingInfoHotspotRef.current = pending;
@@ -1671,7 +1675,7 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
           schedulePendingNamingInfoOpenRef.current();
         };
 
-        if (virtualTour.getCurrentNode()?.id === sceneId) {
+        if (sameScene) {
           if (
             isNamingHotspotInViewport(viewer, markers, hotspotId, targetView)
           ) {
@@ -1806,9 +1810,13 @@ export const PanoramaViewer = forwardRef<TourViewerHandle, PanoramaViewerProps>(
 
             const hotspotId = panel.getAttribute('data-info-panel-for');
             const tour = tourRef.current;
-            const sceneId = virtualTour.getCurrentNode()?.id ?? tour.firstScene;
             const namingHotspotId =
               panel.hasAttribute('data-info-panel-naming') ? hotspotId : null;
+            const sceneId = resolveNamingShareSceneId(
+              tour,
+              virtualTour.getCurrentNode()?.id,
+              namingHotspotId,
+            );
             const openGraph = resolveTourSceneOpenGraph({
               tour,
               tourTitle: tour.title,

@@ -11,7 +11,10 @@ import {
   type DevUrlFlagToggle,
   type DevUrlFlagToggleContext,
 } from '../../constants/devUrlFlags';
-import { DEV_SHELL_TOUR_ID, type DevPanelTheme } from '../../constants/devPanel';
+import {
+  DEV_SHELL_TOUR_ID,
+  type DevPanelTheme,
+} from '../../constants/devPanel';
 import { tryLoadTour } from '../../data/loadTour';
 import { useAppSearchParams } from '../../hooks/useAppSearchParams';
 import { cn } from '../../lib/cn';
@@ -34,7 +37,7 @@ import {
   bumpDevDevicePreviewReload,
   setDevPanelDeviceMode,
   setDevPanelEmbedPreviewMode,
-  useDevPanelPrefs,
+  useDevPanelDevicePreviewFlags,
 } from '../../utils/devPanelPrefs';
 import { MaterialSymbol } from '../ui/MaterialSymbol';
 import {
@@ -130,7 +133,7 @@ export function DevPanelDebugMenu({
   const navigate = useNavigate();
   const location = useLocation();
   const appSearchParams = useAppSearchParams();
-  const { deviceMode, deviceEmbed } = useDevPanelPrefs();
+  const { deviceMode, deviceEmbed } = useDevPanelDevicePreviewFlags();
   const deviceModeEnabled = deviceMode && !deviceEmbed;
   const embedModeEnabled = deviceMode && deviceEmbed;
   const hasRealTour = Boolean(tourId) && tourId !== DEV_SHELL_TOUR_ID;

@@ -14,7 +14,7 @@ import {
 } from '../../constants/devDevicePresets';
 import { cn } from '../../lib/cn';
 import { iframeAlreadyShowsSrc } from '../../utils/devDeviceFrameSync';
-import { useDevPanelPrefs } from '../../utils/devPanelPrefs';
+import { useDevPanelTheme } from '../../utils/devPanelPrefs';
 import { DevDeviceBrowserChrome } from './DevDeviceBrowserChrome';
 import {
   devDevicePreviewBezelClassName,
@@ -71,7 +71,7 @@ export function DevViewportPreviewShell({
   scaleLabelRef,
   toolbar,
 }: DevViewportPreviewShellProps) {
-  const { theme } = useDevPanelPrefs();
+  const theme = useDevPanelTheme();
   const hostRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);

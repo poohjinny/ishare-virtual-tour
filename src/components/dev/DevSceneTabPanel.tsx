@@ -32,12 +32,13 @@ import type {
 import { isWorldPosition } from '../../types/tour';
 import { resolveHotspotNamingRecord } from '../../utils/namingSceneInherit';
 import { resolveNamingVisibility } from '../../utils/namingVisibility';
-import {
-  resolveTourSceneOrder,
-} from '../../utils/sceneOrder';
+import { resolveTourSceneOrder } from '../../utils/sceneOrder';
 import { sceneIdsWithTitleCollisions } from '../../viewer-shared/sceneDepth';
-import type { ClickCoords } from '../../utils/devHotspotLogger';
-import type { DevHotspotMovePosition } from '../../utils/devTourBridge';
+import {
+  useDevTourClickCoords,
+  useDevTourView,
+  type DevHotspotMovePosition,
+} from '../../utils/devTourBridge';
 import {
   DEV_NAV_NAME_STORAGE_KEY,
   formatCoords,
@@ -205,19 +206,13 @@ function sortSceneHotspotsForManage(
   });
 }
 
-
-type DevSceneOption = {
-  id: string;
-  title: string;
-};
+type DevSceneOption = { id: string; title: string };
 
 type DevSceneTabPanelProps = {
   tour: Tour;
   onTourMutated?: (options?: DevTourMutateOptions) => Promise<void>;
   scene: DevSceneRef;
   sceneOptions: DevSceneOption[];
-  view: ViewPosition | null;
-  clickCoords: ClickCoords | null;
   captureSceneThumbnail?: () => Promise<Blob | null>;
   getCurrentView?: () => ViewPosition | null;
   animateToView?: (view: ViewPosition) => Promise<void> | void;
@@ -245,8 +240,6 @@ export function DevSceneTabPanel({
   onTourMutated,
   scene,
   sceneOptions,
-  view,
-  clickCoords,
   captureSceneThumbnail,
   getCurrentView,
   animateToView,
@@ -263,6 +256,8 @@ export function DevSceneTabPanel({
   onNamingHotspotDeleted,
   hotspotInteractionClearKey,
 }: DevSceneTabPanelProps) {
+  const view = useDevTourView();
+  const clickCoords = useDevTourClickCoords();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isModel3dTour = tour.viewerType === 'model3d';
@@ -428,7 +423,6 @@ export function DevSceneTabPanel({
     [managedHotspots],
   );
 
-
   const canWriteTour = Boolean(scene.tourId && view);
   const trimmedNavName = navName.trim();
   const trimmedInfoName = infoName.trim();
@@ -529,7 +523,6 @@ export function DevSceneTabPanel({
     setEditingHotspotId(null);
     setMovingHotspotId(null);
   }, [hotspotInteractionClearKey]);
-
 
   useEffect(() => {
     // Scene-scoped hotspot drafts only — do not wipe Naming catalog / other tabs.
@@ -1277,7 +1270,6 @@ export function DevSceneTabPanel({
     replacePanoramaStatus,
   ]);
 
-
   return (
     <DevPanelSectionAccordion
       persistKey='tab:scene-v2'
@@ -1286,122 +1278,114 @@ export function DevSceneTabPanel({
       ensureCloseKey={hotspotAddCloseKey}
       onOpenIndicesChange={onSceneAccordionOpenIndicesChange}
     >
-                <DevPanelSection
-                  title={isModel3dTour ? 'Viewpoint' : 'Panorama'}
-                  description={
-                    isModel3dTour ?
-                      'Camera pose for this scene — landing view and card thumbnail.'
-                    : 'Set the landing view and thumbnail, or replace the scene image.'
-                  }
-                >
-                  <DevPanelFormGroup
-                    title='Landing view'
-                    hint={
-                      <p className={devViewPanelSectionHintClassName}>
-                        {isModel3dTour ?
-                          <>
-                            Orbit, pan, and zoom — saves{' '}
-                            <code>defaultView</code> and bakes{' '}
-                            <code>thumbnail</code> from the current 3D view.{' '}
-                            <code>zoom</code> is orbit distance (lower = closer;
-                            unlike PSV zoom level).
-                          </>
-                        : <>
-                            Pan the scene — saves <code>defaultView</code> +
-                            bakes <code>thumbnail</code>
-                          </>
-                        }
-                      </p>
-                    }
-                  >
-                    <p className={devViewPanelCoordsClassName}>
-                      {view ? formatViewPosition(view) : '—'}
-                    </p>
+      <DevPanelSection
+        title={isModel3dTour ? 'Viewpoint' : 'Panorama'}
+        description={
+          isModel3dTour ?
+            'Camera pose for this scene — landing view and card thumbnail.'
+          : 'Set the landing view and thumbnail, or replace the scene image.'
+        }
+      >
+        <DevPanelFormGroup
+          title='Landing view'
+          hint={
+            <p className={devViewPanelSectionHintClassName}>
+              {isModel3dTour ?
+                <>
+                  Orbit, pan, and zoom — saves <code>defaultView</code> and
+                  bakes <code>thumbnail</code> from the current 3D view.{' '}
+                  <code>zoom</code> is orbit distance (lower = closer; unlike
+                  PSV zoom level).
+                </>
+              : <>
+                  Pan the scene — saves <code>defaultView</code> + bakes{' '}
+                  <code>thumbnail</code>
+                </>
+              }
+            </p>
+          }
+        >
+          <p className={devViewPanelCoordsClassName}>
+            {view ? formatViewPosition(view) : '—'}
+          </p>
 
-                    {landingError ?
-                      <p className={devViewPanelSectionHintClassName}>
-                        {landingError}
-                      </p>
-                    : null}
+          {landingError ?
+            <p className={devViewPanelSectionHintClassName}>{landingError}</p>
+          : null}
 
-                    <div className={devViewPanelActionsClassName}>
-                      <button
-                        type='button'
-                        className={devViewPanelBtnVariants({ tone: 'primary' })}
-                        onClick={() => void applyDefaultView()}
-                        disabled={!canWriteTour || landingStatus === 'working'}
-                      >
-                        {landingStatus === 'working' ?
-                          'Saving…'
-                        : landingStatus === 'done' ?
-                          'Saved!'
-                        : 'Apply defaultView'}
-                      </button>
-                    </div>
-                  </DevPanelFormGroup>
+          <div className={devViewPanelActionsClassName}>
+            <button
+              type='button'
+              className={devViewPanelBtnVariants({ tone: 'primary' })}
+              onClick={() => void applyDefaultView()}
+              disabled={!canWriteTour || landingStatus === 'working'}
+            >
+              {landingStatus === 'working' ?
+                'Saving…'
+              : landingStatus === 'done' ?
+                'Saved!'
+              : 'Apply defaultView'}
+            </button>
+          </div>
+        </DevPanelFormGroup>
 
-                  {!isModel3dTour ?
-                    <DevPanelFormGroup
-                      title='Replace panorama'
-                      hint={
-                        <p className={devViewPanelSectionHintClassName}>
-                          Overwrites <code>{scene.id}.webp</code> for this scene
-                          and rebakes the thumbnail.
-                        </p>
-                      }
-                    >
-                      <label className={devViewPanelFieldClassName}>
-                        <span className={devViewPanelFieldLabelClassName}>
-                          Panorama file
-                        </span>
-                        <DevPanelFileField
-                          file={replacePanoramaFile}
-                          preview={
-                            replacePanoramaFile ?
-                              <DevPanoramaFilePreview
-                                file={replacePanoramaFile}
-                              />
-                            : null
-                          }
-                          onClearPreview={() => setReplacePanoramaFile(null)}
-                          showClear={Boolean(replacePanoramaFile)}
-                        >
-                          <DevPanelFileInput
-                            accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
-                            file={replacePanoramaFile}
-                            onChange={setReplacePanoramaFile}
-                          />
-                        </DevPanelFileField>
-                      </label>
+        {!isModel3dTour ?
+          <DevPanelFormGroup
+            title='Replace panorama'
+            hint={
+              <p className={devViewPanelSectionHintClassName}>
+                Overwrites <code>{scene.id}.webp</code> for this scene and
+                rebakes the thumbnail.
+              </p>
+            }
+          >
+            <label className={devViewPanelFieldClassName}>
+              <span className={devViewPanelFieldLabelClassName}>
+                Panorama file
+              </span>
+              <DevPanelFileField
+                file={replacePanoramaFile}
+                preview={
+                  replacePanoramaFile ?
+                    <DevPanoramaFilePreview file={replacePanoramaFile} />
+                  : null
+                }
+                onClearPreview={() => setReplacePanoramaFile(null)}
+                showClear={Boolean(replacePanoramaFile)}
+              >
+                <DevPanelFileInput
+                  accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp'
+                  file={replacePanoramaFile}
+                  onChange={setReplacePanoramaFile}
+                />
+              </DevPanelFileField>
+            </label>
 
-                      {replacePanoramaError ?
-                        <p className={devViewPanelSectionHintClassName}>
-                          {replacePanoramaError}
-                        </p>
-                      : null}
+            {replacePanoramaError ?
+              <p className={devViewPanelSectionHintClassName}>
+                {replacePanoramaError}
+              </p>
+            : null}
 
-                      <div className={devViewPanelActionsClassName}>
-                        <button
-                          type='button'
-                          className={devViewPanelBtnVariants({
-                            tone: 'primary',
-                          })}
-                          onClick={() => void replacePanorama()}
-                          disabled={
-                            !canReplacePanorama ||
-                            replacePanoramaStatus === 'working'
-                          }
-                        >
-                          {replacePanoramaStatus === 'working' ?
-                            'Replacing…'
-                          : replacePanoramaStatus === 'done' ?
-                            'Replaced!'
-                          : 'Replace panorama'}
-                        </button>
-                      </div>
-                    </DevPanelFormGroup>
-                  : null}
-                </DevPanelSection>
+            <div className={devViewPanelActionsClassName}>
+              <button
+                type='button'
+                className={devViewPanelBtnVariants({ tone: 'primary' })}
+                onClick={() => void replacePanorama()}
+                disabled={
+                  !canReplacePanorama || replacePanoramaStatus === 'working'
+                }
+              >
+                {replacePanoramaStatus === 'working' ?
+                  'Replacing…'
+                : replacePanoramaStatus === 'done' ?
+                  'Replaced!'
+                : 'Replace panorama'}
+              </button>
+            </div>
+          </DevPanelFormGroup>
+        : null}
+      </DevPanelSection>
       <>
         <DevPanelSection
           title='Add hotspot'

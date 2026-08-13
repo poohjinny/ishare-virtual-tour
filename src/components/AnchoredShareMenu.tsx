@@ -75,6 +75,7 @@ import {
   anchoredShareMenuDropdownClassName,
   anchoredShareMenuGridClassName,
   anchoredShareMenuHeroGridClassName,
+  anchoredShareMenuHeroItemClassName,
   anchoredShareMenuHeroLeadClassName,
   anchoredShareMenuHeroOverlayClassName,
   anchoredShareMenuInClassName,
@@ -580,7 +581,11 @@ export function AnchoredShareMenu({
             return (
               <li
                 key={channel.id}
-                className={anchoredShareMenuItemClassName}
+                className={
+                  heroOverlay ?
+                    anchoredShareMenuHeroItemClassName
+                  : anchoredShareMenuItemClassName
+                }
                 role='none'
               >
                 <IconTooltip
