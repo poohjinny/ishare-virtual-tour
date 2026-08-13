@@ -5,7 +5,7 @@
  */
 
 import { useSyncExternalStore } from 'react';
-import type { DevSceneOption } from '../components/DevViewPanel';
+import type { DevSceneOption } from '../components/dev/DevViewPanel';
 import type { TourPanelStack } from '../hooks/useTourPanelStack';
 import type { Tour, ViewPosition, WorldPosition } from '../types/tour';
 import type { ClickCoords, DevSceneRef } from './devHotspotLogger';

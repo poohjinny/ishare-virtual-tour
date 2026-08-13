@@ -15,7 +15,7 @@ import {
   MATERIAL_SYMBOL_SIZE_18,
 } from './ui/materialSymbolClasses';
 import { MaterialSymbol } from './ui/MaterialSymbol';
-import { ExploreSceneInfoButton } from './ExploreSceneInfoButton';
+import { ExploreSceneInfoButton } from './explore/ExploreSceneInfoButton';
 import { IconTooltip } from './ui/IconTooltip';
 import { tourBreadcrumbNearbyPlacesTooltip } from '../constants/tourDirectory';
 import {

@@ -2,9 +2,10 @@ import { useState } from 'react';
 import type { ChatGuideLink } from '../../types/tour';
 import { TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD } from '../../constants/tourDirectory';
 import { namingOpportunityStatusShowsBadge } from '../../data/namingOpportunityStatus';
+import { useFallbackImageSrc } from '../../hooks/useFallbackImageSrc';
 import { GUIDE_LINK_PREVIEW_COUNT } from '../../utils/guideSceneLinks';
 import { cn } from '../../lib/cn';
-import { ExploreCurrentHereLabel } from '../ExploreCurrentHereLabel';
+import { ExploreCurrentHereLabel } from '../explore/ExploreCurrentHereLabel';
 import { NamingStatusBadge } from '../ui/NamingStatusBadge';
 import { MATERIAL_SYMBOL_SIZE_12 } from '../ui/materialSymbolClasses';
 import { tourNavLocationGalleryStatusBadgeVariants } from '../tourNavFloatVariants';
@@ -45,6 +46,37 @@ function linkKey(link: ChatGuideLink): string {
   return link.kind === 'naming' ?
       `naming:${link.namingId ?? link.hotspotId}`
     : `scene:${link.sceneId}`;
+}
+
+function GuideLinkThumb({
+  thumbnail,
+  thumbnailFallback,
+  zoomable,
+}: {
+  thumbnail?: string;
+  thumbnailFallback?: string;
+  zoomable: boolean;
+}) {
+  const { src, onError } = useFallbackImageSrc([thumbnail, thumbnailFallback]);
+  if (!src) {
+    return (
+      <span className={aiSceneLinkCardMediaClassName} aria-hidden='true' />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt=''
+      className={cn(
+        aiSceneLinkCardMediaClassName,
+        zoomable && aiSceneLinkCardMediaZoomableClassName,
+      )}
+      loading='lazy'
+      decoding='async'
+      onError={onError}
+    />
+  );
 }
 
 function cardLabel(link: ChatGuideLink, currentSceneId?: string): string {
@@ -119,22 +151,11 @@ function GuideLinkCard({
         }}
       >
         <span className={aiSceneLinkCardMediaWrapClassName}>
-          {link.thumbnail ?
-            <img
-              src={link.thumbnail}
-              alt=''
-              className={cn(
-                aiSceneLinkCardMediaClassName,
-                canActivate && aiSceneLinkCardMediaZoomableClassName,
-              )}
-              loading='lazy'
-              decoding='async'
-            />
-          : <span
-              className={aiSceneLinkCardMediaClassName}
-              aria-hidden='true'
-            />
-          }
+          <GuideLinkThumb
+            thumbnail={link.thumbnail}
+            thumbnailFallback={link.thumbnailFallback}
+            zoomable={Boolean(canActivate)}
+          />
           {isCurrent ?
             <ExploreCurrentHereLabel
               className={aiSceneLinkCardHereChipClassName}

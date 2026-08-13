@@ -20,13 +20,10 @@ import { AiAssistant } from '../components/ai/AiAssistant';
 import { isAskGuideEnabled } from '../constants/branding';
 import { ClientIntroPicker } from '../components/ClientIntroPicker';
 import { DEV_NOT_FOUND_SAMPLE_TOUR_ID } from '../constants/devUrlFlags';
-import { DevToolsHost } from '../components/DevTools';
-import { DevDevicePreviewFrame } from '../components/DevDevicePreviewFrame';
-import { DevEmbedPreviewFrame } from '../components/DevEmbedPreviewFrame';
 import {
   devToolsPresentationRootClassName,
   devToolsTourStageClassName,
-} from '../components/devViewPanelVariants';
+} from '../components/dev/devViewPanelVariants';
 import {
   bumpDevDevicePreviewReload,
   useDevPanelPrefs,
@@ -35,10 +32,7 @@ import { InfoPopup } from '../components/InfoPopup';
 import { LoadProgressBar } from '../components/LoadProgressBar';
 import { ViewerLoadError } from '../components/ViewerLoadError';
 import { TourNotFound } from '../components/TourNotFound';
-import {
-  TourLoadSplash,
-  getTourLoadSplashFadeMs,
-} from '../components/TourLoadSplash';
+import { TourLoadSplash } from '../components/TourLoadSplash';
 import {
   TourNavFloat,
   type TourNavDockActions,
@@ -55,9 +49,11 @@ import { PanoramaXrSession } from '../viewer-xr/PanoramaXrSession';
 import { usePlayTour } from '../hooks/usePlayTour';
 import {
   loadTour,
+  loadTourAsync,
   listPublicTourIds,
   listTourIds,
   tryLoadTour,
+  usesApiTourRepository,
   DEFAULT_TOUR_ID,
 } from '../data/loadTour';
 import { getTourWebsite, resolveTourClient } from '../utils/resolveTourClient';
@@ -89,6 +85,7 @@ import {
   toggleImmersiveBackgroundPlayback,
 } from '../viewer-shared/immersiveBackgroundPlayback';
 import { useTourFirstVisitHint } from '../hooks/useTourFirstVisitHint';
+import { useTourSplashLoad } from '../hooks/useTourSplashLoad';
 import { useTourEmbedMessaging } from '../hooks/useTourEmbedMessaging';
 import { useTourFullscreen } from '../hooks/useTourFullscreen';
 import type {
@@ -121,6 +118,7 @@ import {
   buildTourLocation,
   needsClientIntroPick,
   isRootPathWithoutTour,
+  legacySearchRedirectPath,
   NAMING_OPPORTUNITY_SEARCH_KEY,
   resolveNamingOpportunityFromSearch,
 } from '../utils/tourPaths';
@@ -148,14 +146,20 @@ const PanoramaViewer = lazy(() =>
   })),
 );
 const ThreeDViewer = lazy(() => import('../viewer-3d/ThreeDViewer'));
-import { resetLandingTransitionState } from '../viewer-shared/landingTransitionState';
-import { HOTSPOT_ENTER_DELAY_MS } from '../viewer-shared/hotspotEnterAnimation';
+const DevToolsHost = lazy(() =>
+  import('../components/dev/DevTools').then((m) => ({ default: m.DevToolsHost })),
+);
+const DevDevicePreviewFrame = lazy(() =>
+  import('../components/dev/DevDevicePreviewFrame').then((m) => ({
+    default: m.DevDevicePreviewFrame,
+  })),
+);
+const DevEmbedPreviewFrame = lazy(() =>
+  import('../components/dev/DevEmbedPreviewFrame').then((m) => ({
+    default: m.DevEmbedPreviewFrame,
+  })),
+);
 import { resolveTourSceneOpenGraph } from '../utils/tourOpenGraph';
-
-/** Fallback if transitionend does not fire (e.g. reduced motion). */
-const SPLASH_UNMOUNT_FALLBACK_PADDING_MS = 150;
-/** Extra splash hold for loader UX testing — only when `?splashHold=1` */
-const DEV_SPLASH_HOLD_MS = 2000;
 
 /** Preview-mode bridge when no live TourExperience panel stack is sticky yet. */
 const DEV_PREVIEW_PANEL_STACK_NOOP: TourPanelStack = {
@@ -203,6 +207,16 @@ export function TourPage() {
       tourOrScene,
     ],
   );
+
+  useEffect(() => {
+    const legacyPath = legacySearchRedirectPath(
+      location.pathname,
+      urlSearchParams,
+    );
+    if (legacyPath && legacyPath !== location.pathname + location.search) {
+      navigate(legacyPath, { replace: true });
+    }
+  }, [location.pathname, location.search, navigate, urlSearchParams]);
 
   useEffect(() => {
     if (showClientIntro || !isRootPathWithoutTour(location.pathname)) {
@@ -472,25 +486,27 @@ export function TourPage() {
   if (!searchParams.dev) return main;
 
   return (
-    <div
-      ref={presentationRootRef}
-      data-dev-theme={devPanelTheme}
-      className={devToolsPresentationRootClassName}
-    >
-      <div className={devToolsTourStageClassName}>
-        {showDevicePreview ?
-          // Unmount live viewer while previewing — avoids dual PSV/WebGL +
-          // resize thrash. Dev bridge stays sticky from the last publish.
-          deviceEmbed ?
-            <DevEmbedPreviewFrame />
-          : <DevDevicePreviewFrame />
-        : <div className='h-full min-h-0 w-full [&>*]:h-full [&>*]:min-h-0 [&>*]:w-full'>
-            {main}
-          </div>
-        }
+    <Suspense fallback={main}>
+      <div
+        ref={presentationRootRef}
+        data-dev-theme={devPanelTheme}
+        className={devToolsPresentationRootClassName}
+      >
+        <div className={devToolsTourStageClassName}>
+          {showDevicePreview ?
+            // Unmount live viewer while previewing — avoids dual PSV/WebGL +
+            // resize thrash. Dev bridge stays sticky from the last publish.
+            deviceEmbed ?
+              <DevEmbedPreviewFrame />
+            : <DevDevicePreviewFrame />
+          : <div className='h-full min-h-0 w-full [&>*]:h-full [&>*]:min-h-0 [&>*]:w-full'>
+              {main}
+            </div>
+          }
+        </div>
+        <DevToolsHost presentationRootRef={presentationRootRef} />
       </div>
-      <DevToolsHost presentationRootRef={presentationRootRef} />
-    </div>
+    </Suspense>
   );
 }
 
@@ -512,13 +528,35 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     [sceneParam, tourId, tourOrScene],
   );
 
-  const staticTour = useMemo(() => {
+  const jsonTour = useMemo(() => {
+    if (usesApiTourRepository()) return null;
     try {
       return loadTour(route.tourId);
     } catch {
       return null;
     }
   }, [route.tourId]);
+  const [apiTour, setApiTour] = useState<Tour | null>(null);
+
+  useEffect(() => {
+    if (!usesApiTourRepository()) {
+      setApiTour(null);
+      return;
+    }
+    let cancelled = false;
+    void loadTourAsync(route.tourId)
+      .then((nextTour) => {
+        if (!cancelled) setApiTour(nextTour);
+      })
+      .catch(() => {
+        if (!cancelled) setApiTour(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [route.tourId]);
+
+  const staticTour = usesApiTourRepository() ? apiTour : jsonTour;
   const [devTourSnapshot, setDevTourSnapshot] = useState<Tour | null>(null);
   const [devThumbnailVersion, setDevThumbnailVersion] = useState(0);
   const [devTourBootstrapStatus, setDevTourBootstrapStatus] = useState<
@@ -703,52 +741,8 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     ((position: DevHotspotMovePosition) => Promise<void>) | null
   >(null);
   const [devViewCoords, setDevViewCoords] = useState<ViewPosition | null>(null);
-  const [loadProgress, setLoadProgress] = useState(0);
-  const [loadBarVisible, setLoadBarVisible] = useState(true);
-  const [splashPhase, setSplashPhase] = useState<'active' | 'exit' | 'done'>(
-    'active',
-  );
-  const [splashRevealReady, setSplashRevealReady] = useState(false);
-  const [splashOverlayFade, setSplashOverlayFade] = useState(false);
-  /**
-   * `?no=` panel open — after landing camera + hotspot enter delay, not full
-   * splash curtain unmount (~4.2s), so the panel tracks hotspot stamp-in.
-   */
-  const [namingDeepLinkReady, setNamingDeepLinkReady] = useState(false);
-  const namingDeepLinkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-  const hideBarTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hideSplashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasInitiallyLoadedRef = useRef(false);
-  const pendingLoadsRef = useRef(0);
-
-  useEffect(() => {
-    hasInitiallyLoadedRef.current = false;
-    pendingLoadsRef.current = 0;
-    setLoadProgress(0);
-    setLoadBarVisible(true);
-    setSplashPhase('active');
-    setSplashRevealReady(false);
-    setSplashOverlayFade(false);
-    setNamingDeepLinkReady(false);
-    resetLandingTransitionState();
-    if (!searchParams.loadErrorTest) {
-      setViewerLoadError(null);
-    }
-    if (hideBarTimerRef.current) {
-      clearTimeout(hideBarTimerRef.current);
-      hideBarTimerRef.current = null;
-    }
-    if (hideSplashTimerRef.current) {
-      clearTimeout(hideSplashTimerRef.current);
-      hideSplashTimerRef.current = null;
-    }
-    if (namingDeepLinkTimerRef.current) {
-      clearTimeout(namingDeepLinkTimerRef.current);
-      namingDeepLinkTimerRef.current = null;
-    }
-  }, [route.tourId, searchParams.loadErrorTest, searchParams.skipLanding]);
+  const [viewerLoadError, setViewerLoadError] =
+    useState<ViewerLoadErrorInfo | null>(null);
 
   const { controlsVisible, toggleControlsVisible } = useViewerControlsVisible();
   const viewerControlsVisible = searchParams.embed ? true : controlsVisible;
@@ -760,95 +754,33 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
       firstVisitHint: searchParams.firstVisitHint,
     });
 
-  const handleInitialTourReveal = useCallback(() => {
-    onInitialTourReveal?.();
-    if (namingDeepLinkTimerRef.current) {
-      clearTimeout(namingDeepLinkTimerRef.current);
-    }
-    namingDeepLinkTimerRef.current = setTimeout(() => {
-      namingDeepLinkTimerRef.current = null;
-      setNamingDeepLinkReady(true);
-    }, HOTSPOT_ENTER_DELAY_MS);
-  }, [onInitialTourReveal]);
-
-  const [viewerLoadError, setViewerLoadError] =
-    useState<ViewerLoadErrorInfo | null>(null);
-
-  const handleLoadStart = useCallback(() => {
-    pendingLoadsRef.current += 1;
-    if (hideBarTimerRef.current) {
-      clearTimeout(hideBarTimerRef.current);
-      hideBarTimerRef.current = null;
-    }
-    setLoadBarVisible(true);
-    setLoadProgress(0);
-    setDevViewCoords(null);
-  }, []);
-
-  const handleLoadProgress = useCallback((progress: number) => {
-    setLoadBarVisible(true);
-    setLoadProgress(progress);
-  }, []);
-
-  const handleLandingStart = useCallback(() => {
-    setSplashOverlayFade(true);
-  }, []);
-
-  const handleSplashExitComplete = useCallback(() => {
-    if (hideSplashTimerRef.current) {
-      clearTimeout(hideSplashTimerRef.current);
-      hideSplashTimerRef.current = null;
-    }
-    setSplashPhase('done');
-  }, []);
-
-  const handleLoadComplete = useCallback(() => {
-    pendingLoadsRef.current = Math.max(0, pendingLoadsRef.current - 1);
-    if (pendingLoadsRef.current > 0) return;
-
-    const splashUnmountFallbackMs =
-      getTourLoadSplashFadeMs(searchParams.embed) +
-      SPLASH_UNMOUNT_FALLBACK_PADDING_MS;
-
-    const finishSplash = () => {
-      setSplashPhase('exit');
-      setSplashRevealReady(true);
-      hideSplashTimerRef.current = setTimeout(() => {
-        setSplashPhase((phase) => (phase === 'exit' ? 'done' : phase));
-      }, splashUnmountFallbackMs);
-
-      if (searchParams.skipLanding) {
-        requestAnimationFrame(() => setSplashOverlayFade(true));
+  const {
+    loadProgress,
+    loadBarVisible,
+    splashPhase,
+    splashRevealReady,
+    splashOverlayFade,
+    namingDeepLinkReady,
+    handleLoadStart,
+    handleLoadProgress,
+    handleLoadComplete,
+    handleLandingStart,
+    handleSplashExitComplete,
+    handleInitialTourReveal,
+  } = useTourSplashLoad({
+    tourId: route.tourId,
+    embed: searchParams.embed,
+    skipLanding: searchParams.skipLanding,
+    splashHold: searchParams.splashHold,
+    loadErrorTest: searchParams.loadErrorTest,
+    onTourReset: () => {
+      if (!searchParams.loadErrorTest) {
+        setViewerLoadError(null);
       }
-    };
-
-    if (hasInitiallyLoadedRef.current) {
-      setLoadProgress(100);
-      hideBarTimerRef.current = setTimeout(() => {
-        setLoadBarVisible(false);
-      }, 280);
-      return;
-    }
-
-    hasInitiallyLoadedRef.current = true;
-    setLoadProgress(100);
-    setLoadBarVisible(false);
-
-    if (hideSplashTimerRef.current) {
-      clearTimeout(hideSplashTimerRef.current);
-    }
-
-    if (searchParams.splashHold) {
-      hideSplashTimerRef.current = setTimeout(finishSplash, DEV_SPLASH_HOLD_MS);
-    } else {
-      finishSplash();
-    }
-  }, [
-    searchParams.embed,
-    searchParams.skipLanding,
-    searchParams.splashHold,
-    bootstrapTour.viewerType,
-  ]);
+    },
+    onInitialTourReveal,
+    onLoadStart: () => setDevViewCoords(null),
+  });
 
   const {
     currentSceneId,
@@ -1721,6 +1653,39 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
     tourPageClassName = 'app tour-page h-full min-h-0';
   }
 
+  const sharedViewerProps = {
+    tour: viewerTour,
+    initialSceneId: initialScene,
+    controlsVisible: viewerControlsVisible,
+    devMode: searchParams.dev,
+    skipLanding: searchParams.skipLanding,
+    splashDone: splashRevealReady,
+    immersiveBackgroundController,
+    immersiveNavbarAvailable: Boolean(bootstrapTour.immersiveBackground),
+    playTourEnabled,
+    playTourPhase,
+    onPlayTourToggle: togglePlayTour,
+    disabled: isTransitioning,
+    onSceneChange: handleSceneChange,
+    onInfoHotspot: setActivePopup,
+    onActiveInfoHotspotChange: handleActiveInfoHotspotChange,
+    onAnchoredPanelVisibilityChange: handleAnchoredPanelVisibilityChange,
+    onNavigateToScene: handleNavigate,
+    onTransitionStart: handleTransitionStart,
+    onTransitionEnd: handleTransitionEnd,
+    onDevClick: searchParams.dev ? setDevClickCoords : undefined,
+    devHotspotMoveId: searchParams.dev ? devHotspotMoveId : null,
+    onDevHotspotMoved: searchParams.dev ? handleDevHotspotMoved : undefined,
+    onDevViewUpdate: searchParams.dev ? setDevViewCoords : undefined,
+    onLoadStart: handleLoadStart,
+    onLoadProgress: handleLoadProgress,
+    onLoadComplete: handleLoadComplete,
+    onLandingStart: handleLandingStart,
+    onInitialTourReveal: handleInitialTourReveal,
+    onViewerLoadError: handleViewerLoadError,
+    onViewerLoadRecovered: handleViewerLoadRecovered,
+  };
+
   return (
     <div ref={tourRootRef} className={tourPageClassName}>
       <div ref={viewerAreaRef} className='viewer-area viewer-area--fullscreen'>
@@ -1731,98 +1696,24 @@ function TourExperience({ presentationRootRef }: TourExperienceProps) {
                 <ThreeDViewer
                   key={tour.id}
                   ref={viewerRef}
-                  tour={viewerTour}
-                  initialSceneId={initialScene}
-                  devMode={searchParams.dev}
+                  {...sharedViewerProps}
                   fullscreenActive={viewerFullscreen}
                   onFullscreenToggle={toggleViewerFullscreen}
-                  controlsVisible={viewerControlsVisible}
-                  immersiveNavbarAvailable={Boolean(
-                    bootstrapTour.immersiveBackground,
-                  )}
-                  playTourEnabled={playTourEnabled}
-                  playTourPhase={playTourPhase}
-                  onPlayTourToggle={togglePlayTour}
-                  skipLanding={searchParams.skipLanding}
-                  splashDone={splashRevealReady}
-                  immersiveBackgroundController={immersiveBackgroundController}
-                  disabled={isTransitioning}
-                  onSceneChange={handleSceneChange}
-                  onInfoHotspot={setActivePopup}
-                  onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
-                  onAnchoredPanelVisibilityChange={
-                    handleAnchoredPanelVisibilityChange
-                  }
-                  onNavigateToScene={handleNavigate}
-                  onTransitionStart={handleTransitionStart}
-                  onTransitionEnd={handleTransitionEnd}
-                  onDevClick={searchParams.dev ? setDevClickCoords : undefined}
                   devHotspotPlacementCapture={devHotspotPlacementCapture}
-                  devHotspotMoveId={searchParams.dev ? devHotspotMoveId : null}
-                  onDevHotspotMoved={
-                    searchParams.dev ? handleDevHotspotMoved : undefined
-                  }
-                  onDevViewUpdate={
-                    searchParams.dev ? setDevViewCoords : undefined
-                  }
-                  onLoadStart={handleLoadStart}
-                  onLoadProgress={handleLoadProgress}
-                  onLoadComplete={handleLoadComplete}
-                  onLandingStart={handleLandingStart}
-                  onInitialTourReveal={handleInitialTourReveal}
-                  onViewerLoadError={handleViewerLoadError}
-                  onViewerLoadRecovered={handleViewerLoadRecovered}
                   onXrPresentingChange={handleXrPresentingChange}
                 />
               : <PanoramaViewer
                   key={tour.id}
                   ref={viewerRef}
-                  tour={viewerTour}
-                  initialSceneId={initialScene}
+                  {...sharedViewerProps}
                   fullscreenRootRef={fullscreenRootRef}
-                  controlsVisible={viewerControlsVisible}
-                  devMode={searchParams.dev}
-                  skipLanding={searchParams.skipLanding}
                   landingTargetView={landingTargetView}
                   landingNamingHotspotId={landingNamingHotspotId}
-                  splashDone={splashRevealReady}
-                  immersiveBackgroundController={immersiveBackgroundController}
-                  immersiveNavbarAvailable={Boolean(
-                    bootstrapTour.immersiveBackground,
-                  )}
-                  playTourEnabled={playTourEnabled}
-                  playTourPhase={playTourPhase}
-                  onPlayTourToggle={togglePlayTour}
                   activeNamingHotspotId={activeNamingHotspotId}
                   embed={searchParams.embed}
-                  disabled={isTransitioning}
-                  onSceneChange={handleSceneChange}
-                  onInfoHotspot={setActivePopup}
-                  onActiveInfoHotspotChange={handleActiveInfoHotspotChange}
                   onDismissModalPopups={handleDismissModalPopups}
-                  onAnchoredPanelVisibilityChange={
-                    handleAnchoredPanelVisibilityChange
-                  }
                   onNavPreviewChange={handleNavPreviewChange}
-                  onNavigateToScene={handleNavigate}
-                  onTransitionStart={handleTransitionStart}
-                  onTransitionEnd={handleTransitionEnd}
-                  onDevClick={searchParams.dev ? setDevClickCoords : undefined}
-                  devHotspotMoveId={searchParams.dev ? devHotspotMoveId : null}
-                  onDevHotspotMoved={
-                    searchParams.dev ? handleDevHotspotMoved : undefined
-                  }
-                  onDevViewUpdate={
-                    searchParams.dev ? setDevViewCoords : undefined
-                  }
-                  onLoadStart={handleLoadStart}
-                  onLoadProgress={handleLoadProgress}
-                  onLoadComplete={handleLoadComplete}
-                  onLandingStart={handleLandingStart}
-                  onInitialTourReveal={handleInitialTourReveal}
                   onFirstPanoramaInteract={onFirstPanoramaInteract}
-                  onViewerLoadError={handleViewerLoadError}
-                  onViewerLoadRecovered={handleViewerLoadRecovered}
                   onNamingOpportunityBusyChange={setNamingOpportunityBusy}
                   onOpenAnchoredShareMenu={
                     searchParams.embed ? undefined : openAnchoredShareMenu
