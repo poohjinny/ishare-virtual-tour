@@ -17,7 +17,7 @@ import {
   SHOW_NAV_PREVIEW_NAMING_TOTAL,
 } from './namingPrice';
 import { resolveNavHotspotLabel } from './navHotspotLabel';
-import { resolveNamingDonorCredit } from './namingDonor';
+import { resolveNamingDonorCredit } from './namingDonor.mjs';
 import {
   resolveHotspotNamingRecord,
   resolveNamingPopup,

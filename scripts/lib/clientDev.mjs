@@ -1,6 +1,7 @@
 import { mkdirSync, existsSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { slugifyHotspotName } from './tourSceneDev.mjs';
+import { slugifyHotspotName } from '../../src/utils/slugifyHotspotName.mjs';
+import { tryClientIdFromWebsite } from '../../src/utils/clientId.mjs';
 import {
   normalizePrimaryColor,
   saveClientBrandAssets,
@@ -22,19 +23,6 @@ function assertSlug(value, label) {
     throw new Error(`${label} must contain letters or numbers`);
   }
   return slug;
-}
-
-/** Hostname without www / TLD — same rule as `src/utils/clientId.ts`. */
-function clientIdFromWebsite(websiteUrl) {
-  const trimmed = String(websiteUrl || '').trim();
-  if (!trimmed) return '';
-  const href = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
-  try {
-    const hostname = new URL(href).hostname.toLowerCase().replace(/^www\./, '');
-    return hostname.replace(/\.(ca|com|org|net|co\.uk|io)$/i, '');
-  } catch {
-    return '';
-  }
 }
 
 function assertGoogleFontSourceUrl(url) {
@@ -77,7 +65,7 @@ export async function createClient({
   }
 
   const resolvedClientId =
-    String(rawClientId || '').trim() || clientIdFromWebsite(websiteUrl);
+    String(rawClientId || '').trim() || tryClientIdFromWebsite(websiteUrl);
   if (!resolvedClientId) {
     throw new Error('clientId or websiteUrl is required');
   }

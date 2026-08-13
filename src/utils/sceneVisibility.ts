@@ -1,5 +1,10 @@
 import type { Hotspot, Scene, Tour } from '../types/tour';
 import {
+  assertCatalogVisibility,
+  resolveCatalogVisibility,
+  type CatalogVisibility,
+} from './catalogVisibilityCore.mjs';
+import {
   isNamingHotspot,
   resolveHotspotNamingRecord,
 } from './namingSceneInherit';
@@ -10,7 +15,7 @@ import {
 } from './namingVisibility';
 
 /** Same tiers as catalog tours — omit / undefined = public. */
-export type SceneVisibility = 'public' | 'unlisted' | 'internal';
+export type SceneVisibility = CatalogVisibility;
 
 export type SceneVisibilityAudience = {
   /** `?dev=1` (or equivalent authoring context). */
@@ -32,9 +37,19 @@ export const AUTHORING_SCENE_AUDIENCE: SceneVisibilityAudience = { dev: true };
 export function resolveSceneVisibility(
   scene: Pick<Scene, 'visibility'> | null | undefined,
 ): SceneVisibility {
-  const value = scene?.visibility;
-  if (value === 'unlisted' || value === 'internal') return value;
-  return 'public';
+  return resolveCatalogVisibility(scene);
+}
+
+export function isScenePublic(
+  scene: Pick<Scene, 'visibility'> | null | undefined,
+): boolean {
+  return resolveSceneVisibility(scene) === 'public';
+}
+
+export function assertSceneVisibility(
+  visibility?: string | null,
+): SceneVisibility | undefined {
+  return assertCatalogVisibility(visibility);
 }
 
 /**

@@ -1,11 +1,16 @@
 import type { Hotspot, Tour } from '../types/tour';
 import {
+  assertCatalogVisibility,
+  resolveCatalogVisibility,
+  type CatalogVisibility,
+} from './catalogVisibilityCore.mjs';
+import {
   isNamingHotspot,
   resolveHotspotNamingRecord,
 } from './namingSceneInherit';
 
 /** Same tiers as scenes / catalog tours — omit / undefined = public. */
-export type NamingVisibility = 'public' | 'unlisted' | 'internal';
+export type NamingVisibility = CatalogVisibility;
 
 export type NamingVisibilityAudience = {
   /** `?dev=1` (or equivalent authoring context). */
@@ -18,10 +23,13 @@ export type NamingVisibilityAudience = {
 export function resolveNamingVisibility(
   record: object | null | undefined,
 ): NamingVisibility {
-  if (!record || typeof record !== 'object') return 'public';
-  const value = (record as { visibility?: unknown }).visibility;
-  if (value === 'unlisted' || value === 'internal') return value;
-  return 'public';
+  return resolveCatalogVisibility(record);
+}
+
+export function assertNamingVisibility(
+  visibility?: string | null,
+): NamingVisibility | undefined {
+  return assertCatalogVisibility(visibility);
 }
 
 /** Explore naming lists + panorama naming markers — public only. */

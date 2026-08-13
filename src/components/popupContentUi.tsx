@@ -46,7 +46,7 @@ import { formatNamingPriceDisplay } from '../utils/namingPrice';
 import {
   NAMING_DONOR_CREDIT_PREFIX,
   resolveNamingDonorPresentation,
-} from '../utils/namingDonor';
+} from '../utils/namingDonor.mjs';
 import { applyCtaTextOverflowTitle } from '../utils/glassPanelCtaOverflow';
 import { PopupCtaIcon } from './glassPanelCtaIcons';
 import {

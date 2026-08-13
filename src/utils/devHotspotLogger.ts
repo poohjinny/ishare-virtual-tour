@@ -60,15 +60,7 @@ export const DEV_NAV_NAME_STORAGE_KEY = 'ishare-dev-nav-name';
 export const DEV_NO_NAME_STORAGE_KEY = 'ishare-dev-no-name';
 export const DEV_SCENE_TITLE_STORAGE_KEY = 'ishare-dev-scene-title';
 
-/** "Parking Lot" → `parking-lot` (matches tour scene / hotspot id convention). */
-export function slugifyHotspotName(name: string): string {
-  return name
-    .trim()
-    .toLowerCase()
-    .replace(/['']/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
+export { slugifyHotspotName } from './slugifyHotspotName.mjs';
 
 /** Append `-2`, `-3`, … when `baseId` is already used in the scene. */
 export function resolveUniqueHotspotId(

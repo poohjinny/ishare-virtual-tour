@@ -3,8 +3,9 @@
  * Canonical value is the catalog id (`no_*`) only.
  */
 
-/** Keep in sync with `OPAQUE_NAMING_ID_PREFIX` in `opaqueId.ts`. */
-export const OPAQUE_NAMING_ID_PREFIX = 'no_';
+import { OPAQUE_NAMING_ID_PREFIX } from './opaqueId.mjs';
+
+export { OPAQUE_NAMING_ID_PREFIX };
 
 export function isOpaqueNamingSearchValue(value) {
   return /^no_[a-z0-9]+$/i.test(String(value || '').trim());

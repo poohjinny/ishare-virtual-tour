@@ -64,14 +64,13 @@ import {
 } from '../viewer-shared/navPreviewNamingAccordion';
 import { animateNavPreviewTotal } from '../viewer-shared/navPreviewTotalCount';
 import {
-  destroyNavPreviewMiniViewer,
   dismissNavPreviewHero,
   isNavPreviewMiniViewerEnabled,
   mountNavPreviewImageHero,
-  mountNavPreviewMiniViewer,
+  mountNavPreviewStillHero,
   mountNavPreviewVideoHero,
   prepareNavPreviewHeroLayout,
-} from '../viewer-shared/navPreviewMiniViewer';
+} from '../viewer-shared/navPreviewHero';
 import type { ClickCoords } from '../utils/devHotspotLogger';
 import {
   hasLandingTransitionPlayed,
@@ -884,14 +883,12 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
           let panelOpen = false;
           let panelEl: HTMLElement | null = null;
           let panelUnbind: (() => void) | null = null;
-          const navPreviewHeroId = `3d-nav-${hs.id}`;
 
           const closeThisPanel = () => {
             panelUnbind?.();
             panelUnbind = null;
 
             if (!panelEl) {
-              destroyNavPreviewMiniViewer(navPreviewHeroId);
               panelOpen = false;
               if (activePanelHotspotIdRef.current === hs.id) {
                 activePanelHotspotIdRef.current = null;
@@ -922,11 +919,9 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
               article.classList.remove('tour-glass-panel--anchored-enter');
               article.classList.add('tour-glass-panel--anchored-exit');
               window.setTimeout(() => {
-                destroyNavPreviewMiniViewer(navPreviewHeroId);
                 closingEl.remove();
               }, PANEL_EXIT_MS);
             } else {
-              destroyNavPreviewMiniViewer(navPreviewHeroId);
               closingEl.remove();
             }
             onActiveInfoHotspotChangeRef.current?.(null);
@@ -1116,7 +1111,10 @@ const ThreeDViewer = forwardRef<TourViewerHandle, ThreeDViewerProps>(
                 if (preview.videoUrl?.trim()) {
                   mountNavPreviewVideoHero(el);
                 } else if (isNavPreviewMiniViewerEnabled()) {
-                  mountNavPreviewMiniViewer(navPreviewHeroId, el, preview);
+                  mountNavPreviewStillHero(
+                    el,
+                    preview.image ?? preview.panorama,
+                  );
                 } else {
                   dismissNavPreviewHero(el);
                 }

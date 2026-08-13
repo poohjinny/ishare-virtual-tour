@@ -1,47 +1,12 @@
 import type { TourDirectoryNamingItem } from './tourDirectory';
 import { formatOgPriceAbbrev } from './ogShareCopy.mjs';
+import {
+  normalizeNamingPriceStorage,
+  parseNamingPrice,
+  parseNamingPriceInput,
+} from './namingPriceParse.mjs';
 
-/** Parse dev input or legacy JSON strings into a rounded numeric amount. */
-export function parseNamingPriceInput(
-  value: string | number | null | undefined,
-): number | null {
-  if (value == null || value === '') return null;
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? Math.round(value) : null;
-  }
-
-  const trimmed = String(value).trim();
-  // Allow authoring shorthand: "15M", "$1.5m", "525K".
-  const abbrev = trimmed.match(/^\$?\s*([\d.,]+)\s*([MmKk])\s*$/);
-  if (abbrev) {
-    const amount = Number.parseFloat(abbrev[1].replace(/,/g, ''));
-    if (!Number.isFinite(amount)) return null;
-    const mult = abbrev[2].toLowerCase() === 'm' ? 1_000_000 : 1_000;
-    return Math.round(amount * mult);
-  }
-
-  const cleaned = trimmed.replace(/[^0-9.]/g, '');
-  if (!cleaned) return null;
-
-  const parsed = Number.parseFloat(cleaned);
-  return Number.isFinite(parsed) ? Math.round(parsed) : null;
-}
-
-/** Persist a rounded numeric amount — throws when missing or invalid. */
-export function normalizeNamingPriceStorage(
-  value: string | number | null | undefined,
-): number {
-  const amount = parseNamingPriceInput(value);
-  if (amount == null) {
-    throw new Error('Price is required');
-  }
-  return amount;
-}
-
-/** Return the price as-is if finite, otherwise null. */
-export function parseNamingPrice(price: number): number | null {
-  return Number.isFinite(price) ? Math.round(price) : null;
-}
+export { normalizeNamingPriceStorage, parseNamingPrice, parseNamingPriceInput };
 
 export function formatNamingPriceAmount(amount: number): string {
   return `$${new Intl.NumberFormat('en-US', {

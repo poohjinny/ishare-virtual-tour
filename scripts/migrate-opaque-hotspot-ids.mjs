@@ -65,8 +65,8 @@ function assetPathFromWeb(webPath) {
 function retargetPreviewPath(webPath, oldId, newId) {
   const value = String(webPath || '').trim();
   if (!value) return '';
-  const from = `/pin-previews/${oldId}.webp`;
-  const to = `/pin-previews/${newId}.webp`;
+  const from = `/hotspot-thumbs/${oldId}.webp`;
+  const to = `/hotspot-thumbs/${newId}.webp`;
   return value.includes(from) ? value.replaceAll(from, to) : value;
 }
 

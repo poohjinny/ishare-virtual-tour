@@ -20,7 +20,7 @@ import {
 import {
   mountNavPreviewImageHero,
   mountNavPreviewVideoHero,
-} from '../viewer-shared/navPreviewMiniViewer';
+} from '../viewer-shared/navPreviewHero';
 import { setActiveInfoHotspot } from './infoHotspotActive';
 import { enableGlassPanelTextSelection } from './glassPanelTextSelection';
 import { bindGlassPanelCtaOverflowTitles } from '../utils/glassPanelCtaOverflow';

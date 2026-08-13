@@ -81,7 +81,7 @@ import { getUiScale } from '../utils/uiScale';
 import {
   NAMING_DONOR_CREDIT_PREFIX,
   resolveNamingDonorPresentation,
-} from '../utils/namingDonor';
+} from '../utils/namingDonor.mjs';
 import {
   ANCHORED_PANEL_GAP_PX,
   NAV_HOTSPOT_HALF_HEIGHT_FALLBACK_PX,
@@ -529,9 +529,7 @@ export function buildPopupCtaButtonHtml(
     showIcon ?
       glassPanelCtaIconHtml(resolvePopupCtaIconKind(cta), GLASS_PANEL.ctaIcon)
     : '';
-  const sizeLayout =
-    options?.sizeLayout ??
-    (showIcon ? 'full' : 'default');
+  const sizeLayout = options?.sizeLayout ?? (showIcon ? 'full' : 'default');
   const className = `${GLASS_PANEL.cta}${isSecondary ? ' tour-glass-panel__cta--secondary' : ''} ${popupCtaSizeClassName(sizeLayout)}`;
   const isMailto = isMailtoCtaUrl(resolved.url);
   const targetAttrs =
