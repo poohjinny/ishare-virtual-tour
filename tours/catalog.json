@@ -28,7 +28,6 @@
           "category": "Healthcare",
           "name": "Ken Sargent House",
           "visibility": "public",
-          "featured": true,
           "summary": "Ken Sargent House is a home-away-from-home for families supporting loved ones at the Grande Prairie Regional Hospital. Explore welcoming shared spaces, quiet rooms, and outdoor areas designed for comfort, rest, and connection during a healthcare journey."
         }
       ]
@@ -60,8 +59,7 @@
           "id": "t_8kx3m2p9qa",
           "category": "Healthcare",
           "name": "Cancer Research",
-          "visibility": "unlisted",
-          "featured": true
+          "visibility": "unlisted"
         }
       ]
     },
@@ -88,8 +86,7 @@
           "id": "t_r7v4n1c0wd",
           "category": "Culture",
           "name": "Holodomor Museum",
-          "visibility": "unlisted",
-          "featured": false
+          "visibility": "unlisted"
         }
       ]
     },
@@ -114,8 +111,7 @@
           "id": "t_9zs0j4a7xt",
           "category": "Healthcare",
           "name": "Queensway Carleton Hospital",
-          "visibility": "public",
-          "featured": true
+          "visibility": "public"
         }
       ]
     },
@@ -128,29 +124,25 @@
           "id": "t_ctx4e6rkty",
           "category": "Demo",
           "name": "3D Walkthrough Demo",
-          "visibility": "unlisted",
-          "featured": false
+          "visibility": "unlisted"
         },
         {
           "id": "t_fhvnghlrky",
           "category": "Demo",
           "name": "QCH Unreal (SketchUp)",
-          "visibility": "unlisted",
-          "featured": false
+          "visibility": "unlisted"
         },
         {
           "id": "t_oyryn1va9b",
           "category": "Demo",
           "name": "Cozy Room",
-          "visibility": "unlisted",
-          "featured": false
+          "visibility": "unlisted"
         },
         {
           "id": "t_ciqe1etmpq",
           "category": "Demo",
           "name": "London Skyscraper",
-          "visibility": "unlisted",
-          "featured": false
+          "visibility": "unlisted"
         }
       ],
       "branding": {
@@ -160,14 +152,13 @@
     },
     {
       "id": "cihe",
-      "name": "Canadian Institute for Historical Education",
+      "name": "Canadian Institute for Historical Education",
       "tours": [
         {
           "id": "t_jmkyywxkfx",
           "category": "Education",
           "name": "Banting and Best Laboratory",
           "visibility": "unlisted",
-          "featured": false,
           "summary": "Step into the Banting and Best Laboratory, where Frederick Banting and Charles Best began the 1921 experiments that led to insulin. Explore this landmark University of Toronto workspace and the Canadian story of a discovery that has saved millions of lives worldwide."
         }
       ],
@@ -175,7 +166,7 @@
       "email": "allanbwilliams@gmail.com",
       "address": "82 Laird Drive, Suite 130, Toronto, ontario, M4G 3V1",
       "branding": {
-        "logoAlt": "Canadian Institute for Historical Education",
+        "logoAlt": "Canadian Institute for Historical Education",
         "primaryColor": "#74112e"
       }
     }

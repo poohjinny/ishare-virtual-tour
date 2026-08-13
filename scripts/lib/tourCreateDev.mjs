@@ -117,10 +117,9 @@ function buildCatalogTourEntry({
   tourTitle,
   category,
   visibility,
-  featured = false,
   tourSummary,
 }) {
-  const entry = { id: tourId, category, name: tourTitle, visibility, featured };
+  const entry = { id: tourId, category, name: tourTitle, visibility };
   const summary = normalizeCatalogTourSummary(tourSummary);
   if (summary) {
     entry.summary = summary;
@@ -136,7 +135,6 @@ function registerTourInCatalog({
   tourSummary,
   category,
   visibility,
-  featured = false,
 }) {
   const client = catalog.clients?.find((entry) => entry.id === clientId);
   if (!client) {
@@ -154,7 +152,6 @@ function registerTourInCatalog({
       tourTitle,
       category,
       visibility,
-      featured,
       tourSummary,
     }),
   );
@@ -199,7 +196,6 @@ export async function createTour({
   logoAlt,
   defaultView,
   visibility = 'unlisted',
-  featured = false,
   askGuideEnabled = false,
   brandingMode = 'client',
   transitionEffect,
@@ -259,7 +255,6 @@ export async function createTour({
     tourSummary,
     category: category.trim(),
     visibility,
-    featured,
   });
 
   const tourStub = { id: tourId, clientId };

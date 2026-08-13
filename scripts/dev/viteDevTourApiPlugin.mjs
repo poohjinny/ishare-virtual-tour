@@ -656,7 +656,6 @@ function validateCreateTourPayload(body) {
     logoAlt,
     defaultView,
     visibility,
-    featured,
     askGuideEnabled,
     brandingMode,
     transitionEffect,
@@ -768,7 +767,6 @@ function validateCreateTourPayload(body) {
     logoAlt: typeof logoAlt === 'string' ? logoAlt : undefined,
     defaultView,
     visibility: visibility?.trim() || 'unlisted',
-    featured: featured === true,
     askGuideEnabled: askGuideEnabled === true,
     brandingMode: brandingMode === 'custom' ? 'custom' : 'client',
     transitionEffect:
@@ -953,7 +951,6 @@ function validateUpdateTourPayload(body) {
     logoFileBase64,
     faviconFileBase64,
     visibility,
-    featured,
     askGuideEnabled,
     brandingMode,
     clientDisplayName,
@@ -1050,7 +1047,6 @@ function validateUpdateTourPayload(body) {
       'Favicon file',
     ),
     visibility: normalizedVisibility,
-    featured: typeof featured === 'boolean' ? featured : undefined,
     askGuideEnabled:
       typeof askGuideEnabled === 'boolean' ? askGuideEnabled : undefined,
     brandingMode: brandingMode === 'custom' ? 'custom' : 'client',

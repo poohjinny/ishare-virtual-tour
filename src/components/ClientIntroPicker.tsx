@@ -12,7 +12,6 @@ import {
 } from '../constants/clientIntro';
 import type { TourCategory } from '../constants/tourCategories';
 import {
-  isFeaturedGalleryMode,
   listCatalogTours,
   listTourCategories,
   sortCatalogToursForGallery,
@@ -80,7 +79,6 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
 
   const allTours = useMemo(() => listCatalogTours(), [catalogTick]);
   const filterCategories = useMemo(() => listTourCategories(), [catalogTick]);
-  const featuredOnly = isFeaturedGalleryMode(searchParams);
 
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
 
@@ -114,10 +112,8 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
       categoryFilter === 'all' ? allTours : (
         allTours.filter((entry) => entry.category === categoryFilter)
       );
-    const filtered =
-      featuredOnly ? scoped.filter((entry) => entry.featured) : scoped;
-    return sortCatalogToursForGallery(filtered);
-  }, [allTours, categoryFilter, featuredOnly]);
+    return sortCatalogToursForGallery(scoped);
+  }, [allTours, categoryFilter]);
 
   useTourOpenGraph(
     useMemo(
@@ -206,9 +202,7 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
             {CLIENT_INTRO_TITLE}
           </h2>
           <p className='m-0 font-body text-md leading-[1.55] text-muted'>
-            {featuredOnly ?
-              'Featured virtual tours from our partner organizations.'
-            : CLIENT_INTRO_LEAD}
+            {CLIENT_INTRO_LEAD}
           </p>
         </div>
 
@@ -254,11 +248,7 @@ export function ClientIntroPicker({ searchParams }: ClientIntroPickerProps) {
                   ))}
                 </ul>
               : <p className='m-0 pt-3 pb-1 text-center text-md leading-[1.55] text-muted'>
-                  {featuredOnly ?
-                    categoryFilter === 'all' ?
-                      'No featured tours yet.'
-                    : 'No featured tours in this category yet.'
-                  : categoryFilter === 'all' ?
+                  {categoryFilter === 'all' ?
                     'No tours available yet.'
                   : 'No tours in this category yet.'}
                 </p>

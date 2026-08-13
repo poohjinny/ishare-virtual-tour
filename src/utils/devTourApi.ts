@@ -344,7 +344,6 @@ export interface DevCatalogClient {
 
 export interface DevTourCatalogMeta {
   visibility: 'public' | 'unlisted' | 'internal';
-  featured: boolean;
   summary: string;
   clientBranding: TourBranding | null;
 }
@@ -360,7 +359,6 @@ export interface DevUpdateTourPayload {
   logoFile?: File | null;
   faviconFile?: File | null;
   visibility?: 'public' | 'unlisted' | 'internal';
-  featured?: boolean;
   /** Persist Tour Guide on this tour (`true` set / `false` clear). */
   askGuideEnabled?: boolean;
   fontFamily?: string;
@@ -454,7 +452,6 @@ export interface DevCreateTourPayload {
   logoAlt?: string;
   defaultView?: ViewPosition;
   visibility?: 'public' | 'unlisted' | 'internal';
-  featured?: boolean;
   /** When true, write `askGuideEnabled` on the new tour JSON. */
   askGuideEnabled?: boolean;
   transitionEffect?: 'fade' | 'black';

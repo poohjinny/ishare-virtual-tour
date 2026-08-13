@@ -10,7 +10,6 @@ export interface PublishedTourCatalogMeta {
   category: TourCategory;
   tourName: string;
   visibility: CatalogTourVisibility;
-  featured: boolean;
 }
 
 /** Immutable published payload the viewer consumes (static JSON today, API in Phase 2). */

@@ -633,11 +633,6 @@ export const tourNavLocationGalleryHeroBadgeGroupClassName = cn(
 /** Solid chips on gallery hero previews — bg at ~70% so photo shows through. */
 export const tourNavLocationGalleryHeroBadgeClassName = cn('font-normal');
 
-export const tourNavLocationGalleryFeaturedBadgeClassName = cn(
-  tourNavLocationGalleryHeroBadgeClassName,
-  'gap-0.5 bg-gold/70 text-white',
-);
-
 export const tourNavLocationGalleryStatusBadgeVariants = cva(
   cn(tourNavLocationGalleryHeroBadgeClassName, 'text-white'),
   {

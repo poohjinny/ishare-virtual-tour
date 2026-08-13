@@ -29,7 +29,6 @@ function updateCatalogTourEntry({
   tourSummary,
   category,
   visibility,
-  featured,
 }) {
   const client = catalog.clients?.find((entry) => entry.id === clientId);
   if (!client) return;
@@ -50,9 +49,7 @@ function updateCatalogTourEntry({
   if (visibility) {
     entry.visibility = visibility;
   }
-  if (typeof featured === 'boolean') {
-    entry.featured = featured;
-  }
+  delete entry.featured;
 }
 
 const CATALOG_VISIBILITIES = new Set(['public', 'unlisted', 'internal']);
@@ -69,7 +66,6 @@ export function findCatalogTourEntry(toursDir, clientId, tourId) {
 
   return {
     visibility: entry.visibility ?? 'public',
-    featured: entry.featured ?? false,
     summary: entry.summary ?? '',
     clientBranding: hydrateCatalogClientBranding(client),
   };
@@ -276,7 +272,6 @@ export async function updateTour({
   faviconFileBuffer,
   brandingMode,
   visibility,
-  featured,
   clientDisplayName,
   clientEmail,
   clientPhone,
@@ -422,7 +417,6 @@ export async function updateTour({
     tourSummary,
     category: nextCategory,
     visibility: nextVisibility,
-    featured: typeof featured === 'boolean' ? featured : undefined,
   });
   writeCatalogJsonOrThrow(toursDir, catalog);
 

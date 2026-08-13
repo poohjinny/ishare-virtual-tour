@@ -17,7 +17,6 @@ export interface CatalogTourEntry {
   /** Short marketing blurb for gallery cards, share previews, and listings. */
   summary?: string;
   visibility?: CatalogTourVisibility;
-  featured?: boolean;
 }
 
 /** Client record in catalog.json — contact lives here, not on individual tours. */
@@ -117,7 +116,6 @@ export interface CatalogTourListItem {
   category: TourCategory;
   tourName: string;
   visibility: CatalogTourVisibility;
-  featured: boolean;
 }
 
 function flattenCatalogTours(
@@ -136,7 +134,6 @@ function flattenCatalogTours(
         category: tour.category,
         tourName: tour.name,
         visibility: resolveCatalogTourVisibility(tour),
-        featured: tour.featured ?? false,
       })),
   );
 }
@@ -146,20 +143,11 @@ export function listCatalogTours(): CatalogTourListItem[] {
   return flattenCatalogTours(new Set(['public']));
 }
 
-export function isFeaturedGalleryMode(searchParams: URLSearchParams): boolean {
-  return searchParams.get('featured') === '1';
-}
-
-/** Featured tours first, then alphabetical by display name. */
+/** Alphabetical by display name. */
 export function sortCatalogToursForGallery(
   tours: CatalogTourListItem[],
 ): CatalogTourListItem[] {
-  return [...tours].sort((a, b) => {
-    if (a.featured !== b.featured) {
-      return a.featured ? -1 : 1;
-    }
-    return a.tourName.localeCompare(b.tourName);
-  });
+  return [...tours].sort((a, b) => a.tourName.localeCompare(b.tourName));
 }
 
 /** Tours reachable via direct URL / embed (`public` + `unlisted`). */

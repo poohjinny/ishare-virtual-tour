@@ -40,7 +40,6 @@ const catalogByTourId = new Map<string, PublishedTourCatalogMeta>(
       category: entry.category,
       tourName: entry.tourName,
       visibility: entry.visibility,
-      featured: entry.featured,
     },
   ]),
 );

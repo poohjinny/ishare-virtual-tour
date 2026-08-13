@@ -13,19 +13,11 @@ import {
   tourNavLocationGalleryCardHeroImageClassName,
   tourNavLocationGalleryCardHeroSkeletonClassName,
   tourNavLocationGalleryCenterCtaClassName,
-  tourNavLocationGalleryFeaturedBadgeClassName,
   tourNavLocationGalleryHeroBadgeGroupClassName,
   tourNavLocationGalleryHeroCtaOverlayClassName,
 } from './tourNavFloatVariants';
 import { ExploreGalleryCtaArrowIcon } from './icons/ExploreGalleryCtaArrowIcon';
 import { TourCategoryBadge } from './TourCategoryBadge';
-import { Badge } from './ui/Badge';
-import { BADGE_CLASS } from './ui/badgeClasses';
-import { MaterialSymbol } from './ui/MaterialSymbol';
-import {
-  materialSymbolBadgeClassName,
-  MATERIAL_SYMBOL_SIZE_16,
-} from './ui/materialSymbolClasses';
 
 interface ClientIntroGalleryCardProps {
   entry: CatalogTourListItem;
@@ -49,7 +41,7 @@ export function ClientIntroGalleryCard({
     onLoad: onPreviewLoad,
   } = usePreviewHeroReveal(previewSrc);
   const logo = resolveTourBranding(tour)?.logo;
-  const ariaLabel = `${entry.tourName}, ${entry.clientName}${entry.featured ? ', featured' : ''}. ${CLIENT_INTRO_CTA}.`;
+  const ariaLabel = `${entry.tourName}, ${entry.clientName}. ${CLIENT_INTRO_CTA}.`;
 
   return (
     <li className='m-0 flex min-h-0 list-none p-0'>
@@ -117,22 +109,6 @@ export function ClientIntroGalleryCard({
             </span>
           : null}
           <span className={tourNavLocationGalleryHeroBadgeGroupClassName}>
-            {entry.featured ?
-              <Badge
-                variant='fill'
-                size='sm'
-                tone='primary'
-                className={tourNavLocationGalleryFeaturedBadgeClassName}
-              >
-                <MaterialSymbol
-                  name='star'
-                  className={cn(BADGE_CLASS.icon, materialSymbolBadgeClassName)}
-                  sizePx={MATERIAL_SYMBOL_SIZE_16}
-                  filled
-                />
-                Featured
-              </Badge>
-            : null}
             <TourCategoryBadge category={entry.category} />
           </span>
         </span>
