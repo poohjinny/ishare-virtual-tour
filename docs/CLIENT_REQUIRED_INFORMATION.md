@@ -79,7 +79,6 @@ multiple tours (e.g. hospital + inpatient wing campaign).
 | Tour category            | Yes         | Healthcare                        | From platform list (see below)                  |
 | Product display name     | Optional    | `{Client} Virtual Tour`           | Defaults from organization name                 |
 | Public visibility        | Yes         | `public` / `unlisted` / `private` | See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)        |
-| Featured on iShare intro | Optional    | yes / no                          | Portfolio gallery only                          |
 | Enable Tour Guide        | Optional    | yes / no                          | Per-tour Ask Tour Guide FAB (`askGuideEnabled`) |
 | Target go-live date      | Recommended |                                   |                                                 |
 | Primary audience         | Recommended | Major donors, board, public       | Shapes copy tone                                |

@@ -192,7 +192,7 @@ Run on a **real phone** after changes:
 | PSV navbar / host   | `src/styles/psv-layer.css`, `src/viewer/syncPsvNavbarDesktopControls.ts` |
 | Glass panels        | `src/styles/glass-panels-layer.css`                                      |
 | AI panel            | `src/components/ai/aiAssistantVariants.ts`, `AiChatPanel.tsx`            |
-| Dev overlay         | `src/components/DevTools.tsx`, `devViewPanelVariants.ts`                 |
+| Dev overlay         | `src/components/dev/DevTools.tsx`, `devViewPanelVariants.ts`             |
 | Minimap             | `src/components/FloorPlanMinimap.tsx`                                    |
 | Viewport meta       | `index.html`                                                             |
 
@@ -200,11 +200,11 @@ Run on a **real phone** after changes:
 
 ## Related
 
-| Doc                                | Relevance             |
-| ---------------------------------- | --------------------- |
-| [ROADMAP.md](./ROADMAP.md)         | Sprint B tasks        |
-| [PERFORMANCE.md](./PERFORMANCE.md) | Bytes, preload        |
-| [STYLING.md](./STYLING.md)         | Variants + CSS layers |
+| Doc                                | Relevance                                 |
+| ---------------------------------- | ----------------------------------------- |
+| [ROADMAP.md](./ROADMAP.md)         | Sprint B delivered; remaining polish here |
+| [PERFORMANCE.md](./PERFORMANCE.md) | Bytes, preload                            |
+| [STYLING.md](./STYLING.md)         | Variants + CSS layers                     |
 
 ---
 

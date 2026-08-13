@@ -51,11 +51,19 @@ popups, Guide, embed.
 
 ## Demo tour — Ken Sargent House
 
-Original proof used three scenes (`overview` → `main-entrance` → `reception`).
-The tour has since grown (naming opportunities, more scenes). Live content:
-`tours/t_l01wnq8eh6.json`, [catalog](../tours/catalog.json).
+Live content: `tours/t_l01wnq8eh6.json`, [catalog](../tours/catalog.json).
+Scene ids are opaque (`s_*`); titles are what visitors see.
 
-**Why start at overview (original demo):**
+| Scene          | Id             | Role in the original pitch                         |
+| -------------- | -------------- | -------------------------------------------------- |
+| Overview       | `s_dtv27wfrbi` | First scene — aerial / outdoor context             |
+| Main Entrance  | `s_zlz39v1fjz` | Ground-level arrival (`targetView` faces the door) |
+| Reception      | `s_vddzraqi1q` | Welcome desk                                       |
+
+The tour has since grown (naming opportunities, more places). The three-scene
+path above is still the stakeholder story.
+
+**Why start at Overview:**
 
 1. Spatial context — facility layout in seconds
 2. Navigation story — intentional routing via hotspot or Explore
@@ -66,25 +74,26 @@ The tour has since grown (naming opportunities, more scenes). Live content:
 
 ## 3-minute stakeholder demo script
 
-1. **Overview loads** — Explore shows locations; overview highlighted
+1. **Overview loads** (`s_dtv27wfrbi`) — Explore shows locations; Overview
+   highlighted
 2. **Info hotspot** — facility intro popup (branded UI)
-3. **Nav or Explore** — transition to Main Entrance (zoom + fade)
+3. **Nav or Explore** — transition to Main Entrance (`s_zlz39v1fjz`, zoom + fade)
 4. **Entrance** — view faces the door (`targetView`)
-5. **Reception** — nav or Explore; lands at welcome desk
+5. **Reception** (`s_vddzraqi1q`) — nav or Explore; lands at welcome desk
 6. **Back** — history returns to previous scene
 7. **Guide** — ask a scene-relevant FAQ
 8. **Closing** — "Scene views are designed in JSON; SeekBeak cannot do this with
    config alone."
 
 For multi-tour platform demo, start at `/` (client intro) then enter Ken Sargent
-House. Embed demo: `/{tourId}/{firstScene}?embed=1` — see
+House. Embed demo: `/t_l01wnq8eh6/s_dtv27wfrbi?embed=1` — see
 [PRODUCT_SPEC.md](./PRODUCT_SPEC.md).
 
 ---
 
 ## Related documents
 
-| Document                             | Topic                                 |
-| ------------------------------------ | ------------------------------------- |
-| [ROADMAP.md](./ROADMAP.md)           | Backlog, Phase 1–3, sprint checklists |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) | URL, embed, catalog, schemas          |
+| Document                             | Topic                          |
+| ------------------------------------ | ------------------------------ |
+| [ROADMAP.md](./ROADMAP.md)           | Backlog, Phase 2–3             |
+| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) | URL, embed, catalog, schemas   |

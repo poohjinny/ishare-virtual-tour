@@ -1,3 +1,16 @@
+# Archived — Cursor global rules snapshot
+
+**Do not update this file.** Live sources of truth:
+
+- `.cursor/rules/` (especially `viewer-type-isolation.mdc`)
+- [CODING_GUIDELINES.md](../CODING_GUIDELINES.md)
+- User rules in Cursor settings
+
+Kept only as a historical snapshot of coding / safety / git / communication
+habits.
+
+---
+
 ## How to code
 
 - Smallest correct diff; no drive-by refactors. Match the file you are editing.
@@ -16,7 +29,7 @@
 - **Viewer-type isolation:** panorama (`viewer/`, PSV) vs model3d (`viewer-3d/`)
   — shared contracts OK; do not silently restyle the other type (hotspot size,
   backgrounds, gradients). See `.cursor/rules/viewer-type-isolation.mdc` and
-  [CODING_GUIDELINES.md](./CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).
+  [CODING_GUIDELINES.md](../CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).
 
 ## Safety
 

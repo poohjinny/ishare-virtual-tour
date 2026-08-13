@@ -110,8 +110,7 @@ Engineering notes: [CODING_GUIDELINES.md](./CODING_GUIDELINES.md).
 - `categories[]` — display order on client intro.
 - `clients[]` — each with `id`, `name`, `tours[]`, contact, optional `branding`
   (color / fonts / `logoAlt`; conventional logo & favicon paths omitted).
-- Per tour: `id`, `category`, `name`, optional `visibility`, `featured`,
-  `summary`.
+- Per tour: `id`, `category`, `name`, optional `visibility`, `summary`.
 
 ---
 
@@ -150,14 +149,11 @@ Example:
   "id": "t_l01wnq8eh6",
   "category": "Healthcare",
   "name": "Ken Sargent House",
-  "visibility": "public",
-  "featured": true
+  "visibility": "public"
 }
 ```
 
 - **`visibility`** — defaults to `public` when omitted.
-- **`featured`** — optional; curated marketing. Intro can filter with
-  `?featured=1` (`isFeaturedGalleryMode`).
 
 **Implementation:** `listCatalogTours()` → intro (`public` only);
 `listRoutableCatalogTours()` → routing (`public` + `unlisted`); `internal`
@@ -167,16 +163,15 @@ excluded from `isKnownTourId` until dev gating exists.
 
 ## URL query contract
 
-| Param                      | Values              | Role                                                                                        |
-| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
-| `embed`                    | `1`                 | Client delivery — skip intro; trim Share/Help FABs; lighter splash; `postMessage` to parent |
-| `intro`                    | `1` / `0` / omitted | Tri-state override for intro at `/` only                                                    |
-| `no`                       | `no_*` catalog id   | Open naming-opportunity panel                                                               |
-| `askGuide`                 | `1`                 | Force Tour Guide on (QA)                                                                    |
-| `guideMock`                | `1`                 | Scripted Guide replies (no OpenAI); alias `askGuideMock`                                    |
-| `featured`                 | `1`                 | Intro gallery featured-only filter                                                          |
-| `dev`                      | `1`                 | Dev panel — not for production links                                                        |
-| `guideUiTest` / `chatTest` | `1`                 | Guide UI fixtures — not for production                                                      |
+| Param         | Values              | Role                                                                                        |
+| ------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| `embed`       | `1`                 | Client delivery — skip intro; trim Share/Help FABs; lighter splash; `postMessage` to parent |
+| `intro`       | `1` / `0` / omitted | Tri-state override for intro at `/` only                                                    |
+| `no`          | `no_*` catalog id   | Open naming-opportunity panel                                                               |
+| `askGuide`    | `1`                 | Force Tour Guide on (QA)                                                                    |
+| `guideMock`   | `1`                 | Scripted Guide replies (no OpenAI)                                                          |
+| `dev`         | `1`                 | Dev panel — not for production links                                                        |
+| `guideUiTest` | `1`                 | Guide UI fixtures — not for production                                                      |
 
 **Path vs query:** Tour and scene identity live in the path
 (`/{tourId}/{sceneId}`). Product flags (`embed`, `no`, Guide flags) stay in the
@@ -201,11 +196,11 @@ Do not rely on `?intro=0` for embeds — use `embed=1` and a tour path.
 
 ## Related documents
 
-| Document                                   | Topic                                      |
-| ------------------------------------------ | ------------------------------------------ |
-| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) | SeekBeak context, demo script              |
-| [ROADMAP.md](./ROADMAP.md)                 | Backlog, phasing, success criteria for v1+ |
-| [EMBED.md](./EMBED.md)                     | iframe embed URL, chrome, postMessage      |
-| [TECH_STACK.md](./TECH_STACK.md)           | Libraries, build, deploy                   |
-| [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)   | Platform vs client naming in UI            |
-| [PERFORMANCE.md](./PERFORMANCE.md)         | Performance playbook (tuning guide)        |
+| Document                                   | Topic                                 |
+| ------------------------------------------ | ------------------------------------- |
+| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) | SeekBeak context, demo script         |
+| [ROADMAP.md](./ROADMAP.md)                 | Backlog, phasing (Phase 2+)           |
+| [EMBED.md](./EMBED.md)                     | iframe embed URL, chrome, postMessage |
+| [TECH_STACK.md](./TECH_STACK.md)           | Why this stack; deploy → DEPLOY.md    |
+| [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)   | Platform vs client naming in UI       |
+| [PERFORMANCE.md](./PERFORMANCE.md)         | Performance playbook (tuning guide)   |

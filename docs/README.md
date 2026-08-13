@@ -24,7 +24,7 @@ Project documentation for the iShare virtual tour platform.
 
 | Document                                                           | Description                                                             |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| [ROADMAP.md](./ROADMAP.md)                                         | Backlog and phasing — Phase 0–3 (**Phase 1 complete**)                  |
+| [ROADMAP.md](./ROADMAP.md)                                         | What to build next — Phase 2–3 (**Phase 1 complete**)                   |
 | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | Product contracts — routing, embed, catalog, JSON schemas, UI layout    |
 | [EMBED.md](./EMBED.md)                                             | Embed mode — iframe URL, chrome, postMessage, QA                        |
 | [DEPLOY.md](./DEPLOY.md)                                           | Production deploy — `tour.ishare.ca`, DNS, GitHub Pages, Tour Guide API |
@@ -33,7 +33,7 @@ Project documentation for the iShare virtual tour platform.
 | [DEV_PANEL.md](./DEV_PANEL.md)                                     | Dev panel (`?dev=1`) — Scene/Scenes/Namings/Tours/Clients/Debug         |
 | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                               | Git commit/push guidelines — one task per commit                        |
 | [STYLING.md](./STYLING.md)                                         | Tailwind + custom CSS; **rem-first** responsive units                   |
-| [TECH_STACK.md](./TECH_STACK.md)                                   | Technology choices (PSV + Three.js), Tour Guide, dependencies           |
+| [TECH_STACK.md](./TECH_STACK.md)                                   | Why this stack (PSV + Three.js, Workers, not Next.js)                   |
 | [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md)                     | Scene transition UX, zoom semantics, tuning                             |
 | [COMPONENTS.md](./COMPONENTS.md)                                   | Shared UI components — React and HTML marker popups                     |
 | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)                           | Naming hierarchy — platform vs client tour vs Tour Guide                |
@@ -44,7 +44,7 @@ Project documentation for the iShare virtual tour platform.
 | [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client intake — full tour onboarding checklist (sales)                  |
 | [CLIENT_PRIVACY_DATA_BRIEF.md](./CLIENT_PRIVACY_DATA_BRIEF.md)     | Client-facing — cookies, local storage, Tour Guide, analytics           |
 | [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)           | 3D handoff — panoramas, GLTF models, spatial package (architect → dev)  |
-| [CURSOR_GLOBAL_RULES.md](./CURSOR_GLOBAL_RULES.md)                 | Cursor agent rules snapshot (optional)                                  |
+| [archive/CURSOR_GLOBAL_RULES.md](./archive/CURSOR_GLOBAL_RULES.md) | Archived Cursor rules snapshot — live SoT is `.cursor/rules/`           |
 
 ## Quick links
 

@@ -10,24 +10,37 @@ triggers tuning, work **top-down P0 → P5** below — do not duplicate tasks he
 
 ---
 
-## Current baseline (Mar 2026)
+## Current baseline (Aug 2026)
 
-Measured from a production `npm run build` and Ken Sargent House assets.
+Measured from `npm run build` (Vite 6) after vendor `manualChunks` + lazy
+`DevTools` / `PanoramaViewer` / `ThreeDViewer`. Gzip is per-file (concatenating
+chunks is slightly less efficient than one bundle).
 
-| Area               | Size                                                      | Notes                                             |
-| ------------------ | --------------------------------------------------------- | ------------------------------------------------- |
-| **JS bundle**      | ~1,033 KB min (~**287 KB gzip**)                          | Single chunk; Vite warns above 500 KB             |
-| **CSS**            | ~115 KB min (~**18 KB gzip**)                             | Shared glass panels, nav, hotspots                |
-| **Dependencies**   | PSV core + markers + virtual-tour, React 19, React Router | No extra UI/chart libraries                       |
-| **Panorama files** | ~0.5–5.5 MB/scene @ **8192w**; Ken ~**51 MB**             | Encode defaults ≤8192w / q90; MB varies by detail |
-| **Tour JSON**      | Bundled inline                                            | Negligible vs JS and images                       |
+| Area                 | Size                                                          | Notes                                                                                 |
+| -------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **First-load JS**    | ~**1.79 MB** min / ~**494 KB gzip**                           | `index` + `react-vendor` + `psv` + `three` + `PanoramaViewer` (typical panorama tour) |
+| **`index`**          | 698 KB min / **192 KB gzip**                                  | TourPage + Explore chrome; Vite still warns (>500 KB)                                 |
+| **`react-vendor`**   | 232 KB / **74 KB gzip**                                       | React 19 + react-dom + react-router                                                   |
+| **`psv`**            | 175 KB / **50 KB gzip**                                       | `@photo-sphere-viewer/*` — lazy with `PanoramaViewer`                                 |
+| **`three`**          | 627 KB / **161 KB gzip**                                      | One copy (`dedupe`); PSV + model3d share it. Vite warns.                              |
+| **`PanoramaViewer`** | 53 KB / **17 KB gzip**                                        | `React.lazy`                                                                          |
+| **`ThreeDViewer`**   | 51 KB / **18 KB gzip**                                        | `React.lazy` — not on panorama first load                                             |
+| **`DevTools`**       | 149 KB / **38 KB gzip**                                       | `React.lazy` — only with `?dev=1`                                                     |
+| **`AiChatPanel`**    | 38 KB / **14 KB gzip**                                        | Already lazy when Guide opens                                                         |
+| **CSS**              | 335 KB min / **47 KB gzip** (+ PSV 13 / 3)                    | Tailwind + glass / hotspot / nav layers                                               |
+| **Panorama files**   | Ken **42** / **75.7 MB** (max 5.77); QCH **49** / **60.6 MB** | Encode ≤8192w / q90; outdoor Ken scenes dominate                                      |
+| **Demo GLBs**        | ~**55 MB** (London 32 + Unreal 17 + Cozy 7)                   | Unlisted `ishare-demos` — still synced; unlisted URLs stay routable                   |
+| **Tour JSON**        | Eager `import.meta.glob` of `tours/*.json`                    | Fine at ~9 tours; async load is Phase 2                                               |
 
 **Runtime:** WebGL 360° viewer (Photo Sphere Viewer) — GPU use during drag/zoom
-is expected. React UI (FABs, panels, AI shell) is comparatively light.
+is expected. React UI (FABs, panels, Guide shell) is comparatively light.
 
 **Preload today:** None in the background. The start scene loads for landing;
 other panoramas load only when navigating (`ensureScenePreloaded` inside
 `navigateToScene`).
+
+`sync-assets` copies **all** of `assets/` (including unlisted demos). Do not
+filter to `visibility: public` — unlisted tours are still direct-linkable.
 
 Re-measure after major changes; update this table when gzip or panorama sizes
 shift meaningfully.
@@ -61,7 +74,7 @@ not a task list.
 | **Compress exports**    | Fix encode settings (≤8192w, WebP q90 via `panoramaEncode.mjs`) — **not** a uniform MB budget. Expect ~0.5–1.5 MB indoors, several MB for outdoor/foliage at the same settings. |
 | **Resolution tiers**    | Optional mobile/downlink-aware URLs (e.g. 4K desktop, 2K mobile) via tour JSON or loader.                                                                                       |
 | **CDN / cache headers** | Long-cache `public/assets/`; align with iShare embed origin — [ROADMAP Phase 2](./ROADMAP.md#accessibility--performance-ongoing).                                               |
-| **Thumbnail previews**  | Explore location cards use baked `scene.thumbnail`; naming hotspot cards may still runtime-crop at the NO view — [ROADMAP Sprint A](./ROADMAP.md#sprint-a--embed--demo-safety). |
+| **Thumbnail previews**  | Explore location cards use baked `scene-thumbs/`; naming pin cards use `hotspot-thumbs/` — [ROADMAP Sprint A](./ROADMAP.md#sprint-a--embed--demo-safety).                       |
 
 **Touch:** `assets/{clientId}/{tourId}/panoramas/`, `tours/*.json` (`panorama`,
 `thumbnail`), deploy/CDN config.
@@ -85,24 +98,26 @@ not a task list.
 
 | Technique           | Guidance                                                                                   |
 | ------------------- | ------------------------------------------------------------------------------------------ |
-| **Code-split PSV**  | Lazy-load viewer + plugins on tour mount (`React.lazy` + dynamic `import()`).              |
-| **Lazy-load Guide** | Defer `AiAssistant` until panel open or idle — bigger win when live LLM SDK lands.         |
-| **Manual chunks**   | Vite `manualChunks` for `photo-sphere-viewer` vs `react-vendor`.                           |
+| **Code-split PSV**  | **Shipped** — `React.lazy` `PanoramaViewer` / `ThreeDViewer`.                              |
+| **Lazy Dev panel**  | **Shipped** — `DevToolsHost` + device/embed preview frames only when `?dev=1`.             |
+| **Manual chunks**   | **Shipped** — `psv` / `react-vendor` / `three` in [`vite.config.ts`](../vite.config.ts).   |
+| **Lazy-load Guide** | Defer `AiAssistant` FAB shell until open or idle — `AiChatPanel` is already lazy.          |
 | **Per-tour JSON**   | Dynamic `import()` per tour when catalog grows — [`loadTour.ts`](../src/data/loadTour.ts). |
 
 **Touch:** [`src/pages/TourPage.tsx`](../src/pages/TourPage.tsx),
-[`vite.config.ts`](../vite.config.ts).
+[`vite.config.ts`](../vite.config.ts). Do not raise `chunkSizeWarningLimit` just
+to silence `three` / `index` — those sizes are real.
 
 ---
 
 ### P3 — Runtime & rendering
 
-| Technique              | Guidance                                                                                                                                                                                                                                                                                                                                         |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices.                                                                                                                                                                                                         |
-| **Hotspot marker GPU** | Hotspot pills are solid white + alpha (no `backdrop-filter`) to skip a per-frame blur pass — see [Findings log](#findings-log). Chrome animations pause when the tab is hidden or the pointer leaves the browser; main PSV and nav preview mini viewer pause render when the window loses focus (`tourPerfPause.ts`, `navPreviewMiniViewer.ts`). |
-| **Marker DOM churn**   | Minimize HTML marker add/remove on scene change; profile 10+ hotspots.                                                                                                                                                                                                                                                                           |
-| **Panel measure host** | Cache off-screen NO/nav height per `(popup hash, width)` if repeat opens are hot.                                                                                                                                                                                                                                                                |
+| Technique              | Guidance                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices.                                                                                                                                                                                                                                                                                                              |
+| **Hotspot marker GPU** | Hotspot pills are solid white + alpha (no `backdrop-filter`) to skip a per-frame blur pass — see [Findings log](#findings-log). Chrome animations pause when the tab is hidden or the pointer leaves the browser; main PSV and nav preview mini viewer pause render when the window loses focus (`tourPerfPause.ts`, `navPreviewMiniViewer.ts`). model3d nav preview uses still/image hero (`navPreviewHero.ts`) so the 3D chunk does not import PSV. |
+| **Marker DOM churn**   | Minimize HTML marker add/remove on scene change; profile 10+ hotspots.                                                                                                                                                                                                                                                                                                                                                                                |
+| **Panel measure host** | Cache off-screen NO/nav height per `(popup hash, width)` if repeat opens are hot.                                                                                                                                                                                                                                                                                                                                                                     |
 
 ---
 
@@ -152,6 +167,23 @@ Optional: `vite-plugin-visualizer` for chunk composition (temporary).
 ---
 
 ## Findings log
+
+### Aug 2026 — Vendor chunks + lazy Dev panel
+
+**Symptom:** Production `index` was a single ~1.6 MB-class chunk (Vite warn).
+Mar 2026 baseline (~1.0 MB / 287 KB gzip, one file) was stale.
+
+**Shipped:**
+
+| Change                                           | Where                                                               |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
+| `manualChunks`: `psv` / `react-vendor` / `three` | [`vite.config.ts`](../vite.config.ts) — keep one `three` (`dedupe`) |
+| Lazy `DevToolsHost` + device/embed frames        | [`TourPage.tsx`](../src/pages/TourPage.tsx) — production first-load |
+
+**Result:** Panorama first-load ~**494 KB gzip** across five JS files. `?dev=1`
+adds DevTools (~38 KB gzip). `three` (~161 KB gzip) still loads with PSV — do
+not split a second Three.js copy. `sync-assets` visibility filter **not**
+applied: unlisted tours remain routable.
 
 ### Jul 2026 — Ken landing stutter (panorama decode contention)
 
@@ -251,4 +283,4 @@ viewer with a static preview; move markers into the WebGL scene (`imageLayer` /
 | Nav preview mini PSV   | [`src/viewer-shared/navPreviewMiniViewer.ts`](../src/viewer-shared/navPreviewMiniViewer.ts)                               |
 | Tour asset paths       | [`src/data/loadTour.ts`](../src/data/loadTour.ts)                                                                         |
 | Build config           | [`vite.config.ts`](../vite.config.ts)                                                                                     |
-| Panorama files         | `assets/{clientId}/{tourId}/panoramas/` → `public/assets/` via sync script                                                 |
+| Panorama files         | `assets/{clientId}/{tourId}/panoramas/` → `public/assets/` via sync script                                                |

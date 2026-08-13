@@ -1,340 +1,81 @@
 # iShare Virtual Tour — Roadmap
 
-> **Single source of truth** for what to build next — Phase 1 checklists through
-> long-term platform work.  
-> Product contracts (URL, catalog, schemas):
-> [PRODUCT_SPEC.md](./PRODUCT_SPEC.md).  
-> Project context and demo narrative:
+> **What to build next.** Product contracts:
+> [PRODUCT_SPEC.md](./PRODUCT_SPEC.md). Demo narrative:
 > [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 ---
 
 ## Overview
 
-Phase 0 proved in-house navigation, transitions, hotspot UX, naming
-opportunities, multi-client branding, and scene-aware AI over the SeekBeak
-embed. **Phase 1** ships an iframe-ready **Production v1** on iShare. Later
-phases turn the static JSON prototype into a **scalable product** integrated
-with Giftabulator®, Power Donor Platform, and a central content API.
+| Phase | Name                         | Status      |
+| ----- | ---------------------------- | ----------- |
+| **0** | Proof / stakeholder demo     | ✅ Complete |
+| **1** | Production v1 — iShare embed | ✅ Complete |
+| **2** | Platform integration         | Planned     |
+| **3** | Scale — 3D parity, analytics | Planned     |
 
-| Phase | Name                            | Status      |
-| ----- | ------------------------------- | ----------- |
-| **0** | Proof / stakeholder demo        | ✅ Complete |
-| **1** | Production v1 — iShare embed    | ✅ Complete |
-| **2** | Platform integration            | Planned     |
-| **3** | Scale — VR/XR, analytics, depth | Planned     |
-
-Work **top-down** within each phase. **Checklists live here only.** When work
-feels slow on device, apply [PERFORMANCE.md](./PERFORMANCE.md) (playbook, not a
+Work **top-down** within the open phase. **Checklists live here only.** When
+embed/mobile feels slow, use [PERFORMANCE.md](./PERFORMANCE.md) (playbook, not a
 second task list).
 
 ---
 
 ## Phase 0 — Proof demo ✅
 
-Delivered scope (reference only — do not reopen unless regressing):
-
-- Vite + React + TS, PSV virtual tour + markers
-- Nav / info / nav-preview hotspots, TourNavFloat, breadcrumb + history
-- Zoom + fade transitions, landing animation, InfoPopup, NO panels
-- Mock AI assistant, client intro + multi-tour catalog
-- Immersive bg, share tour, naming directory
-- Embed / dev URL params, panorama error UI, WebP workflow
-- Catalog `visibility` filter (`public` on `/`, routable `public` + `unlisted`)
-- Floor-plan minimap (later removed from product)
-
-Demo script and SeekBeak context: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
+Vite + React + PSV, nav/info hotspots, Explore + breadcrumb, zoom+fade,
+InfoPopup / naming panels, mock Guide, multi-tour catalog, embed/dev flags.
+Narrative: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
 ---
 
 ## Phase 1 — Production v1 (ishare embed) ✅
 
-**Goal:** Ship an iframe-ready **Production v1** on `tour.ishare.ca` with
-`?embed=1` chrome trim + `postMessage`. Parent-site iframe `src` swaps happen
-per tour during [Client rollout](#client-rollout-until-cms-exists) (not a Phase
-1 blocker).
+Shipped on `tour.ishare.ca`: `?embed=1` + `postMessage`, Tour not found, baked
+`scene-thumbs` / `hotspot-thumbs`, `?dev=1` authoring, mobile chrome M0+M1, Tour
+Guide live Worker, Play Tour, place overview, share/OG (`workers/tour-og`), 3D
+prototype (`tours/t_ctx4e6rkty.json`), XR v1 panorama, catalog visibility,
+GitHub Pages deploy.
 
-### Success criteria
-
-- [x] Complete tour navigation without confusion (scene panel, history,
-  ```
-  transitions)
-  ```
-- [x] Naming directory and `?no=` deep links work
-- [x] Scene-aware Tour Guide answers FAQs (mock + production live Worker)
-- [x] `npm run dev` and `npm run build` succeed
-- [x] Embed mode ready for iShare iframe (`?embed=1` chrome trim +
-  ```
-  `postMessage`)
-  ```
-- [x] Invalid tour id shows dedicated “Tour not found” (no silent default
-  ```
-  fallback)
-  ```
-- [x] Deployed to production host — CI + `tour.ishare.ca` DNS; see
-  ```
-  [DEPLOY.md](./DEPLOY.md)
-  ```
+Parent iframe `src` cutover is per-tour during
+[Client rollout](#client-rollout-until-cms-exists) (not a Phase 1 blocker).
 
 ### Sprint A — Embed & demo safety
 
-- [x] `?embed=1` **chrome trim** — reduce FAB dock (hide Share/Help/Controls;
-  ```
-  keep Explore); PSV control pill always on; lighter splash for iframe
-  ```
-- [x] **Unknown tour URL** — dedicated “Tour not found” view
-- [x] **Explore scene thumbnails** — baked `scene.thumbnail` previews for
-  ```
-  location gallery/list cards (`npm run generate-thumbnails`). Naming
-  gallery cards still use a lightweight runtime crop at the hotspot view
-  when no per-NO thumb exists. See
-  [assets/README.md](../assets/README.md#scene-thumbnails-defaultview) and
-  [PERFORMANCE P0 — thumbnails](./PERFORMANCE.md#p0--panorama-assets-highest-impact).
-  ```
+Delivered: embed chrome trim, unknown-tour view, baked scene thumbs. Naming pin
+cards use `hotspot-thumbs/` (not runtime crop). See
+[assets/README.md](../assets/README.md).
 
 ### Sprint B — Orientation & content sync
 
-- [x] **Hotspot coordinate fine-tuning** — `?dev=1` dev panel: click-to-place,
-  ```
-  move, nav/info/NO create & edit, `targetView` / `instant` /
-  `preview.image`
-  ```
-- ~~**Floor plan coverage**~~ — **Cancelled / removed.** Full Ken Sargent `map`
-  ```
-  pin coverage and the floor-plan minimap UI were dropped from the product
-  (viewer + Dev + schema). Do not restore without a new product decision.
-  ```
-- [x] **Mobile layout pass** — React UI chrome on phone: FAB dock vs Guide FAB,
-  ```
-  safe-area, panel sizing. **M0+M1 shipped** (chrome tiers, overflow dock,
-  safe-area). Remaining polish: [MOBILE.md](./MOBILE.md) P1–P3.
-  ```
-- [x] **Scene transition feedback** — load progress bar on scene navigation (dim
-  ```
-  overlay not needed; sufficient on slow panoramas)
-  ```
+Delivered: `?dev=1` click-to-place, mobile M0+M1, scene-nav progress bar.
+Remaining polish: [MOBILE.md](./MOBILE.md) P1–P3. Floor-plan minimap cancelled —
+do not restore without a new product decision.
 
 ### Sprint B½ — Dev panel authoring (`?dev=1`)
 
-Local JSON authoring in the Vite dev server — **precursor to Phase 2 Admin
-CMS**. The panel writes `tours/*.json`, `tours/catalog.json`, and
-`assets/{clientId}/{tourId}/` without redeploy. Admin will reuse the same
-schemas and API shapes; viewer stays iframe-only.
+Local JSON authoring is the precursor to Phase 2 Admin CMS. Usage:
+[DEV_PANEL.md](./DEV_PANEL.md). Admin will iframe this viewer — do not embed PSV
+in the admin bundle.
 
-**Evolution:** `DevViewPanel` → `apps/admin` (Next.js) + authenticated dev API.
-Do not embed PSV in admin — preview via iframe to this viewer.
-
-#### Delivered — dev panel v1
-
-**Tour & catalog**
-
-- [x] Create tour (new client or existing) — first scene, logo/favicon, branding
-- [x] Update tour — title, category, website, primary color, logo/favicon alt
-- [x] Catalog visibility (`public` / `unlisted` / `internal`) and featured flag
-- [x] Delete tour — JSON, catalog entry, asset folder (danger zone)
-- [x] Live catalog snapshot — intro gallery updates without page reload
-- [x] Dev tour cache — create/edit/delete reflects in viewer without reload
-- [x] Bootstrap unknown tour in dev mode (`devFetchTour` when not in static
-  ```
-  repo)
-  ```
-
-**Scenes**
-
-- [x] Create scene — panorama upload, title, description, defaultView
-- [x] Update scene — title, description, firstScene, visibility / Explore order
-- [x] Delete scene (non-`firstScene`)
-- [x] Duplicate scene — optional child places + naming modes (keep / duplicate /
-  ```
-  clear)
-  ```
-- [x] Apply landing view (`defaultView` + thumbnail)
-- [x] Replace panorama
-
-**Hotspots**
-
-- [x] Create nav / naming (NO) / general info hotspots — click-to-place
-- [x] Move hotspot — reposition from panorama click
-- [x] Edit nav — label, target scene, `targetView` sync from landing, `instant`,
-  ```
-  `preview.image`
-  ```
-- [x] Create nav — `instant`, `preview.image`; `targetView` from target
-  ```
-  `defaultView`
-  ```
-- [x] Edit naming — title, price, status, body
-- [x] Edit info — title, body, display, video URL, image
-- [x] Delete hotspot
-
-**Viewer integration**
-
-- [x] General info hotspots — full badge label “Information”, nav-style pill +
-  ```
-  info icon
-  ```
-- [x] DevTools FAB — collapsible panel shell
-- [x] Dev URL flags — preserved across in-app navigation
-
-#### Backlog — dev panel → Admin CMS
-
-Maps to [Admin MVP pages](#7--admin-mvp-pages) below. Keep building in dev panel
-until Admin app exists; then port endpoints and retire duplicate UI.
-
-**Tour settings** (`/tours/[tourId]`)
-
-- [x] Organization — name, email, phone(s), fax, address
-- [x] Branding — `fontFamily`, `fontSourceUrl` (Google Fonts)
-- [x] Product copy — `productFullName`
-- [x] Enable Ask Tour Guide — `askGuideEnabled` on create/edit
-- [x] Scene transitions — `defaultTransition` (fade/black, speed)
-- [x] Immersive background — audio / playlist / manifest / volume
-
-**Scenes & assets**
-
-- [x] Scene thumbnail (per scene) — dev panel **Apply defaultView (L)** and
-  ```
-  **Replace panorama** bake `scene.thumbnail` via dev API; Explore cards
-  consume baked paths. No separate thumbnail upload — landing view / panorama
-  replace is the source of truth. Bulk offline: `npm run generate-thumbnails`
-  (see [assets/README.md](../assets/README.md#scene-thumbnails-defaultview)).
-  ```
-- ~~Bulk thumbnail regen~~ — **Cancelled.** Whole-tour button in dev panel not
-  ```
-  planned; use per-scene bake or CLI `npm run generate-thumbnails`.
-  ```
-- ~~Bulk floor-plan pin placement~~ — **Cancelled** with floor-plan minimap
-  ```
-  removal
-  ```
-
-**Hotspots & naming**
+**Still open (carry into Admin):**
 
 - [ ] Info popup advanced — `cta` / `ctas`, `sponsor`, `width`, `videoPoster`
-- [x] Naming — title, price, status, body, video, image in dev panel
 - [ ] Hotspot drag on panorama (Phase 3 admin; dev uses click-to-place)
-
-**Platform**
-
 - [ ] Auth + multi-user (Admin only)
 - [ ] Draft vs publish separation (Admin + API)
-- [x] Client CRUD — Client tab Manage + Create (contact, branding, tours list);
-  ```
-  tour create uses existing-client picker only
-  ```
 - [ ] Asset browser — list/replace/delete beyond single-file upload
-
-**Docs & QA**
-
-- [ ] Dev API reference in `docs/` (endpoint list mirrors
-  ```
-  `viteDevTourApiPlugin`)
-  ```
+- [ ] Dev API reference in `docs/` (mirrors `viteDevTourApiPlugin`)
 - [ ] Smoke-test checklist for new tours (`t_9zs0j4a7xt`, `t_l01wnq8eh6`)
 
-### Sprint C — Discovery & share polish
+### Sprint C / Tour chrome / Tour Guide / 3D / Platform exit
 
-- [x] **First-visit hint** — one-time “drag to look around · tap hotspots” coach
-  ```
-  mark or prominent Help entry
-  ```
-- [x] **Share link OG meta** — `og:title`, `og:image` (+ description, url) per
-  ```
-  tour/scene; client-side sync (`useTourOpenGraph`) for in-app; crawler
-  previews via Cloudflare Worker (`workers/tour-og/`) + published
-  `dist/tours/*.json`
-  ```
-- [x] **Share panel link preview** — in-panel card (image, host, title,
-  ```
-  description) aligned with OG meta before copy / Share via; scene thumbnail or
-  client logo
-  ```
-- [x] **Share via Email** — Gmail web compose (reliable in browsers where
-  ```
-  `mailto:` handlers are blocked)
-  ```
+Delivered: first-visit hint, OG + share panel, Play Tour, place overview, scene
+duplicate, Guide live Worker + per-tour `askGuideEnabled`, `TourViewerHandle` +
+`ThreeDViewer`, catalog visibility, iframe `postMessage`, deploy pipeline.
 
-### Tour chrome (recent)
-
-- [x] **Play Tour** — navbar guided walkthrough + Help tips when a sequence
-  ```
-  exists
-  ```
-- [x] **Place overview / soft-lead** — overview pins, suppress flags, Explore
-  ```
-  place lead copy
-  ```
-- [x] **Dev scene duplicate** — duplicate hub (+ optional child places) with
-  ```
-  naming keep / duplicate / clear
-  ```
-
-### Tour Guide (Ask Guide)
-
-Scene-aware assistant over assembled tour + catalog context
-(`assembleTourContext`). Early live LLM is shipped (Cloudflare Worker); platform
-DB-backed chat remains under [Live AI assistant](#live-ai-assistant).
-
-**Delivered**
-
-- [x] Mock assistant — scene/tour copy, namings, suggested question chips
-  ```
-  (`?guideMock=1` or when live unavailable)
-  ```
-- [x] Guide FAB + chat panel (`AiAssistant`, `AiChatPanel`) — FAB label
-  ```
-  **Ask Tour Guide**; idle ring ↔ speaking orb morph
-  ```
-- [x] CSS orb avatar (`GuideAvatar`) — shared mark, no per-tour guide image
-- [x] Voice input (mic) + read aloud + copy on replies
-- [x] Production live path — Cloudflare Worker + `VITE_ASK_GUIDE_API_URL` on
-  ```
-  `tour.ishare.ca`
-  ```
-- [x] Per-tour `askGuideEnabled` (Dev Tours create/edit); global
-  ```
-  `SHOW_ASK_GUIDE` stays off; QA `?askGuide=1`
-  ```
-- [x] Help ↔ Guide chrome — how-to replies → Open Help + Explore tour; Help
-  ```
-  panel → Explore / Ask Tour Guide links
-  ```
-- [x] Nav-preview Guide nudge + proximity / overview welcome FAB bubbles
-
-**Backlog**
-
-- _(none for Phase 1 Tour Guide UI)_ — server-assembled context /
-  `POST /v1/tour/chat` → [Live AI assistant](#live-ai-assistant)
-
-### 3D viewer prototype
-
-- [x] `TourViewerHandle` abstraction — renderer-agnostic interface for
-  ```
-  TourPage ↔ viewer communication (`src/viewer-shared/viewerHandle.ts`)
-  ```
-- [x] `ThreeDViewer` — GLTF loader + OrbitControls + render loop
-  ```
-  (`src/viewer-3d/ThreeDViewer.tsx`, lazy-loaded)
-  ```
-- [x] `tour.viewerType` discriminator — `'panorama' | 'model3d'` on Tour type
-- [x] `scene.model` field — GLTF/GLB URL per scene
-- [x] `HotspotPosition` 3D extension — `WorldPosition { x, y, z }` union
-- [x] Demo tour (`tours/3d-demo.json`) — Sponza atrium test scene
-- [x] Catalog integration — Demo category badge, placeholder thumbnail
-
-### Platform (Phase 1 exit)
-
-- [x] Catalog `visibility` + intro gallery filter
-- [x] **iShare iframe integration** — viewer `postMessage` contract
-  ```
-  (`tour:ready` / `tour:scene` / `tour:resize`); Embed mode host harness +
-  Debug → embed. Parent `src` cutover → Client rollout (per tour).
-  ```
-- [x] **Deploy pipeline** — production `npm run build`, GitHub Actions, `CNAME`,
-  ```
-  `staticwebapp.config.json`, [DEPLOY.md](./DEPLOY.md). `tour.ishare.ca` DNS +
-  GitHub Pages custom domain live.
-  ```
+3D demo: `tours/t_ctx4e6rkty.json` (Sponza). Remaining 3D gaps:
+[3D model tours](#3d-model-tours-production).
 
 ---
 
@@ -425,7 +166,7 @@ Core tables: `clients`, `tours`, `assets`, `publish_log`, admin `users` / roles.
 | ---------------------------------- | -------------------------------------------------- | -------------------------------------------- |
 | `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                           |
 | `/`                                | dashboard — clients, tours, draft/published status | partial — create tour, catalog visibility    |
-| `/clients/[clientId]`              | tour list, visibility, featured                    | partial — featured/visibility on tour update |
+| `/clients/[clientId]`              | tour list, visibility                              | partial — visibility on tour update          |
 | `/tours/[tourId]`                  | tour settings — branding, org                      | partial — tour tab, org, fonts               |
 | `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                     |
 | `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move                 |
@@ -553,9 +294,8 @@ Scene views, hotspot clicks, popup opens, Giftabulator CTA clicks.
 Onboard new clients / tours:
 
 - `assets/{clientId}/` — panoramas, brand
-- `tours/{tourId}.json` — tour config
-- Register tour JSON in `src/services/jsonTourRepository.ts` and
-  `tours/catalog.json`
+- `tours/{tourId}.json` — tour config (`import.meta.glob` picks it up)
+- `tours/catalog.json` — client + tour entry
 - **Parent embed cutover (per tour)** — on ishare.ca (or client site), set
   iframe `src` to `https://tour.ishare.ca/{tourId}/{sceneId}?embed=1` when that
   tour goes live. See [EMBED.md](./EMBED.md) /
@@ -579,32 +319,18 @@ live pricing updates become urgent.
 
 ### VR / XR support
 
-Immersive viewing on supported headsets via **WebXR** (session API) +
-**Three.js** (engine). Same tour JSON, panoramas, hotspots, and naming — no
-duplicate content per format. Native OpenXR / visionOS apps stay out of scope.
+Immersive viewing on supported headsets via **WebXR** + **Three.js**. Same tour
+JSON — no duplicate content per format. Native OpenXR / visionOS apps stay out
+of scope.
 
-**v1 decisions (locked):**
-
-| Topic             | Choice                                                                     |
-| ----------------- | -------------------------------------------------------------------------- |
-| Session           | WebXR `immersive-vr`                                                       |
-| Engine            | Three.js (`WebGLRenderer.xr`)                                              |
-| Headset / browser | Meta Quest Browser first; PC VR browsers nice-to-have                      |
-| Mode              | Seated look-around (no teleport / room-scale walk)                         |
-| Content order     | **Panorama** equirect sphere MVP first, then **model3d** on `ThreeDViewer` |
-| Flat UI           | Keep Photo Sphere Viewer; XR is a parallel seated path (PSV has no WebXR)  |
-
-**Ship checklist:**
-
-- [x] Enter/Exit VR for panorama tours (Quest Browser / WebXR-capable)
-- [x] Hide flat Explore / Dev / Ask Guide chrome while XR session is active
-- [x] Nav hotspot select via controller ray in XR
-- [x] Reuse shared WebXR session helper on `ThreeDViewer`
-- [x] Embed / iframe: hide Enter VR (WebXR permission / top-level)
+**v1 (shipped):** `immersive-vr`, seated look-around, Quest Browser first,
+panorama equirect sphere then model3d on `ThreeDViewer`, hide flat chrome while
+XR is active, hide Enter VR in embed.
 
 ### 3D model tours (production)
 
-Prototype shipped in Phase 1. Production-readiness requires:
+Prototype shipped in Phase 1 (`t_ctx4e6rkty` and other `ishare-demos` tours).
+Production-readiness still needs:
 
 - [ ] 3D hotspot rendering — raycasting + world-position markers
 - [ ] Anchored panels in 3D — CSS2DRenderer or HTML overlay
@@ -635,7 +361,7 @@ Prototype shipped in Phase 1. Production-readiness requires:
 | Risk                             | Mitigation                                                                                                         |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Hotspot coordinates off          | `?dev=1` dev panel — click logger + CRUD                                                                           |
-| overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                             |
+| Overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                             |
 | Tour Guide live gaps             | Worker key / URL health; richer `assembleTourContext`; keep global ON off — enable per tour                        |
 | Large panorama load on mobile    | [PERFORMANCE P0](./PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./PERFORMANCE.md#p1--preload-strategy) |
 | React UI overlap on phone        | [MOBILE.md](./MOBILE.md) — layout pass M1–M2                                                                       |
@@ -649,12 +375,13 @@ Prototype shipped in Phase 1. Production-readiness requires:
 | ------------------------------------------------------------------ | --------------------------------------------------- |
 | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | URL contract, catalog visibility, schemas           |
 | [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)                         | SeekBeak context, stakeholder demo script           |
-| [TECH_STACK.md](./TECH_STACK.md)                                   | Stack; note DB/API when added                       |
+| [TECH_STACK.md](./TECH_STACK.md)                                   | Why this stack                                      |
 | [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)                     | Engineering conventions                             |
 | [DEV_PANEL.md](./DEV_PANEL.md)                                     | Dev panel usage (`?dev=1`)                          |
 | [EMBED.md](./EMBED.md)                                             | Embed mode (`?embed=1`) — iframe & postMessage      |
+| [DEPLOY.md](./DEPLOY.md)                                           | `tour.ishare.ca`                                    |
 | [PERFORMANCE.md](./PERFORMANCE.md)                                 | Performance playbook (how to tune; not a task list) |
-| [MOBILE.md](./MOBILE.md)                                           | React UI layout on phone; PSV reference-only        |
+| [MOBILE.md](./MOBILE.md)                                           | React UI layout on phone                            |
 | [assets/README.md](../assets/README.md)                            | Per-client asset layout                             |
 | [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client intake checklist (sales)                     |
 | [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)           | 3D architect → engineering handoff                  |
@@ -663,25 +390,7 @@ Prototype shipped in Phase 1. Production-readiness requires:
 
 ## Changelog
 
-| Date       | Note                                                                                                                                                                                         |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-01 | Docs sweep — Phase 1 complete; remove minimap; Tour Guide live; Dev panel tabs; naming status `open`/`soon`; intake/architect cleanup                                                        |
-| 2026-08-01 | Docs: floor-plan minimap removed from product (viewer + Dev + schema); fix leftover “CRUD remains” wording                                                                                   |
-| 2026-08-01 | Phase 1 → ✅ Complete; parent iframe `src` cutover moved to Client rollout (per-tour launch)                                                                                                 |
-| 2026-08-01 | Cancel bulk thumbnail regen in Dev panel (CLI / per-scene bake remain)                                                                                                                       |
-| 2026-08-01 | Cancel Floor plan coverage (+ bulk pin editor); floor-plan feature later fully removed                                                                                                       |
-| 2026-08-01 | Phase 1 sync — Tour Guide live + per-tour enable + Help chrome CTAs; Play Tour / place overview / scene duplicate delivered; drop mock-only framing (knowledge JSON already removed earlier) |
-| 2026-07-03 | 3D viewer prototype — ThreeDViewer, TourViewerHandle, lazy-load, demo tour + catalog                                                                                                         |
-| 2026-08-04 | VR/XR v1 — WebXR + Three.js seated panorama first; Quest Browser; model3d WebXR next                                                                                                         |
-| 2026-07-03 | Share panel link preview + Gmail web compose for Share via Email                                                                                                                             |
-| 2026-07-03 | Share link OG meta — per tour/scene Open Graph + Twitter Card tags                                                                                                                           |
-| 2026-07-03 | AI guide section (Phase 1 mock) — move voice-input backlog out of Sprint C                                                                                                                   |
-| 2026-07-03 | Drop visit-progress; thumbnail auto-bake note; trim naming backlog (priceLabel, name sync)                                                                                                   |
-| 2026-07-03 | Phase 1 sprint checkoffs — deploy, mobile M0+M1, client CRUD, embed postMessage                                                                                                              |
-| 2026-06-25 | MOBILE.md — React UI layout spec; PSV reference-only; links from ROADMAP/PERFORMANCE                                                                                                         |
-| 2026-06-11 | Dev panel — organization + Google Fonts branding on tour update                                                                                                                              |
-| 2026-06-11 | Dev panel v1 — full tour/scene/hotspot/floor-plan/knowledge CRUD; Admin migration table                                                                                                      |
-| 2026-06-11 | Scene transition feedback done — progress bar only (no dim overlay)                                                                                                                          |
-| 2026-06-11 | Phase 2 platform architecture (sections 1–9) + Sprint 2A checklist                                                                                                                           |
-| 2026-06-11 | Initial roadmap — VR/XR, database, mobile themes                                                                                                                                             |
-| 2026-06-11 | PERFORMANCE.md → playbook (no checkboxes); ROADMAP = sole task list                                                                                                                          |
+| Date       | Note                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------- |
+| 2026-08-13 | Collapse Phase 0–1 checklists; 3D demo id `t_ctx4e6rkty`; archive CURSOR_GLOBAL_RULES |
+| 2026-08-01 | Phase 1 → ✅ Complete; parent iframe `src` cutover → Client rollout                   |

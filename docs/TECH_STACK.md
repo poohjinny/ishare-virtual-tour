@@ -1,345 +1,157 @@
-# Technology Stack
+# Technology stack
 
-## Overview
+Why this repo is a Vite SPA with Photo Sphere Viewer + Three.js, not Next.js.
+**Repo layout:** [CODING_GUIDELINES.md](./CODING_GUIDELINES.md). **Deploy:**
+[DEPLOY.md](./DEPLOY.md). **Embed:** [EMBED.md](./EMBED.md).
 
-| Layer       | Technology                                 | Version                                  |
-| ----------- | ------------------------------------------ | ---------------------------------------- |
-| Runtime     | React                                      | ^19                                      |
-| Language    | TypeScript                                 | ~5.7                                     |
-| Build tool  | Vite                                       | ^6                                       |
-| 360 viewer  | Photo Sphere Viewer (PSV)                  | ^5.11                                    |
-| PSV plugins | markers-plugin, virtual-tour-plugin        | ^5.11                                    |
-| 3D viewer   | Three.js (GLTF walkthrough)                | ^0.170                                   |
-| Styling     | CSS + design tokens                        | —                                        |
-| AI (MVP)    | Tour Guide — mock + live Cloudflare Worker | per-tour `askGuideEnabled`               |
-| Deployment  | Static SPA                                 | Vercel / Netlify / Azure Static Web Apps |
+## Current versions
 
-## Why This Stack
+From `package.json` (keep this table in sync when bumping):
+
+| Layer      | Technology                            | Version          |
+| ---------- | ------------------------------------- | ---------------- |
+| Runtime    | React                                 | ^19              |
+| Language   | TypeScript                            | ~5.7             |
+| Build      | Vite                                  | ^6               |
+| 360 viewer | Photo Sphere Viewer + markers + VT    | ^5.11            |
+| 3D viewer  | Three.js (GLTF walkthrough)           | ^0.179           |
+| Styling    | Tailwind 4 + `@theme` tokens + CVA    | ^4               |
+| AI         | Tour Guide — mock + Cloudflare Worker | per-tour         |
+| OG / share | `workers/tour-og` (JPEG for FB/LI)    | Wrangler         |
+| Hosting    | Static SPA on GitHub Pages            | `tour.ishare.ca` |
+
+## Why this stack
 
 ### Vite + React + TypeScript (not Next.js)
 
-The virtual tour is a **client-side 360 viewer** embedded in the iShare website
-via iframe. It does not require:
-
-- Server-side rendering (SSR)
-- SEO landing pages (handled by iShare)
-- API routes in the same repo (MVP)
-
-Vite provides fast dev feedback and a simple static build suitable for iframe
-embed. Next.js can be added later if a marketing site or admin backend is
-needed.
+The tour is a **client-side WebGL viewer** in an iframe. It does not need SSR,
+SEO landing pages (iShare owns those), or API routes in the same app. Vite gives
+fast HMR and a static `dist/` for Pages. Admin/CMS, if it comes, is a **separate
+Next.js app** that previews this viewer in an iframe — see
+[ROADMAP Phase 2](./ROADMAP.md#phase-2--platform-integration).
 
 ### Photo Sphere Viewer (not raw Three.js for panoramas)
 
-PSV is a **specialised 360° panorama library** built on WebGL/Three.js
-internally. For panorama tours it provides:
+PSV is a specialised 360° library (WebGL/Three.js underneath): equirect mapping,
+drag/zoom, HTML markers at yaw/pitch, multi-scene virtual tour, fade +
+`animate()`. Rebuilding that from Three.js would be weeks of infrastructure
+before product work.
 
-- Equirectangular texture mapping
-- Touch/mouse drag and zoom controls
-- HTML marker anchoring (yaw/pitch)
-- Multi-scene virtual tour with fade transitions
-- Mature plugin ecosystem (markers, virtual tour)
+### Three.js (model3d walkthrough)
 
-Building the same from raw Three.js would require implementing sphere geometry,
-camera constraints, marker projection, and scene management — estimated 2–4
-weeks of infrastructure work before feature development.
+`ThreeDViewer` (`src/viewer-3d/`, `React.lazy`) loads GLTF/GLB when
+`tour.viewerType === 'model3d'`. Three.js is already a PSV transitive
+dependency; it is a direct dep so both viewers share one copy (`vite.config`
+`dedupe: ['three']`). Both implement `TourViewerHandle`
+(`src/viewer-shared/viewerHandle.ts`). **Do not silently restyle one viewer
+while fixing the other** —
+[viewer-type isolation](./CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).
 
-### Three.js (3D model walkthrough)
+### Tour Guide + OG crawlers
 
-For tours that use **GLTF/GLB 3D models** instead of equirectangular panoramas,
-a dedicated `ThreeDViewer` renders the scene with Three.js directly. This viewer
-is lazy-loaded (`React.lazy`) and only included in the bundle when a `model3d`
-tour is accessed — panorama-only deploys pay zero bundle cost.
-
-Three.js is already a transitive dependency of PSV, so adding it as a direct
-dependency does not introduce a new library to the build graph.
-
-Both viewer implementations conform to the shared `TourViewerHandle` interface
-(`src/viewer-shared/viewerHandle.ts`), allowing `TourPage` to remain agnostic to
-the rendering engine.
-
-### Mock AI + live Ask Guide
-
-The scene-aware assistant assembles context from tour JSON + catalog
-(`assembleTourContext`) — scene copy, namings, and suggested chips. Mock replies
-still power demos without keys (`?guideMock=1`).
-
-**Live path:**
-
-- DEV: Vite `/__dev/api/ask-guide/*` + `OPENAI_API_KEY` in `.env.local`
-- Production (preferred): Cloudflare Worker
-  [`workers/ask-guide/`](../workers/ask-guide/) → `POST /api/tour/chat`. Client
-  `VITE_ASK_GUIDE_API_URL=https://….workers.dev/api`
-- Optional: Azure Functions in [`api/`](../api/) (same contract)
-- **Per-tour on:** `tour.askGuideEnabled` (Dev Tours form). Global
-  `SHOW_ASK_GUIDE` stays off; force with `?askGuide=1`.
-
-Later (platform DB): server may assemble context instead of the browser — same
-chat UI, different API base.
+- **Guide:** `assembleTourContext` from tour JSON + catalog. Mock:
+  `?guideMock=1`. Live: `workers/ask-guide/` → `VITE_ASK_GUIDE_API_URL`.
+  Optional Azure Functions in `api/` (same contract). Per-tour:
+  `askGuideEnabled`; global `SHOW_ASK_GUIDE` stays off; QA `?askGuide=1`.
+- **Share / Facebook:** humans see SPA meta (WebP scene-thumbs). Crawlers hit
+  `workers/tour-og` for HTML + JPEG (`/og/jpg/…`). Copy is shared via
+  `src/utils/ogShareCopy.mjs`. Donor normalize/credit:
+  `src/utils/namingDonor.mjs` (scripts re-export).
 
 ---
 
-## Library Comparison (Decision Record)
+## Library comparison (decision record)
 
-### Pannellum vs Photo Sphere Viewer vs Three.js
+| Criterion         | Pannellum    | Photo Sphere Viewer     | Three.js (direct, 360)   |
+| ----------------- | ------------ | ----------------------- | ------------------------ |
+| Setup speed       | Fastest      | Moderate                | Slowest                  |
+| Bundle size       | ~50 KB       | Larger (core + plugins) | Largest                  |
+| Scene transitions | Fade only    | Fade + animate + VT     | Fully custom             |
+| Hotspot UX        | CSS tooltips | HTML markers plugin     | Manual raycast + project |
+| TypeScript        | Community    | Official                | Full                     |
+| Long-term 3D / XR | Limited      | Extensible              | Maximum                  |
 
-| Criterion             | Pannellum                         | Photo Sphere Viewer          | Three.js (direct)              |
-| --------------------- | --------------------------------- | ---------------------------- | ------------------------------ |
-| Setup speed           | Fastest                           | Moderate                     | Slowest                        |
-| Bundle size           | ~50 KB                            | Larger (core + plugins)      | Largest                        |
-| Scene transitions     | Fade only (+ manual zoom wrapper) | Fade + animate API + plugins | Fully custom                   |
-| Hotspot / marker UX   | CSS + `createTooltipFunc`         | HTML markers plugin          | Manual raycasting + projection |
-| TypeScript            | Community types                   | Official TS support          | Full                           |
-| MVP demo impact       | Good                              | **Best**                     | Over-engineered                |
-| Long-term 3D features | Limited                           | Extensible                   | Maximum                        |
+**Decision:** PSV for **panorama** tours; Three.js `ThreeDViewer` for **GLTF**
+tours. Not Next.js for the embed viewer.
 
-**Decision:** Photo Sphere Viewer for **panorama tours** — best balance of demo
-quality (transitions, markers) and development speed. Three.js for **3D model
-tours** — first-person GLTF/GLB walkthroughs where equirectangular projection
-does not apply. Both coexist via `TourViewerHandle` abstraction and `React.lazy`
-code-splitting.
+### PSV plugins
 
-### Why Not Next.js
-
-| Need          | Next.js benefit    | MVP approach       |
-| ------------- | ------------------ | ------------------ |
-| 360 rendering | None (client-only) | Vite SPA           |
-| iShare embed  | None               | Static `iframe`    |
-| Tour admin    | Future             | JSON files for now |
-| SEO           | iShare handles     | Not required       |
+| Plugin                | Role                                        |
+| --------------------- | ------------------------------------------- |
+| `core`                | Panorama, zoom, fullscreen, `animate()`     |
+| `markers-plugin`      | HTML hotspots (nav + info + naming)         |
+| `virtual-tour-plugin` | Multi-node scenes, `setCurrentNode()`, fade |
 
 ---
 
-## Dependencies
+## Data flow
 
-### Production
+```
+tours/{tourId}.json + catalog.json
+        │  infer conventional assets (tourAssetResolve.mjs)
+        ▼
+TourPage  (viewerType)
+        ├─ panorama → PanoramaViewer (PSV)     lazy
+        ├─ model3d  → ThreeDViewer (Three.js)  lazy
+        └─ chrome   → TourNavFloat, InfoPopup, Ask Guide
 
-```json
-{
-  "@photo-sphere-viewer/core": "^5.11.0",
-  "@photo-sphere-viewer/markers-plugin": "^5.11.0",
-  "@photo-sphere-viewer/virtual-tour-plugin": "^5.11.0",
-  "three": "^0.170.0",
-  "react": "^19.0.0",
-  "react-dom": "^19.0.0"
-}
+Crawlers  →  workers/tour-og  (OG HTML + JPEG)
+Guide chat →  workers/ask-guide  or mock
 ```
 
-### Development
+`useTourState` owns `currentSceneId` + history. URL sync: `useTourRouteSync` +
+`tourPaths.ts`. Load: `loadTour` → `normalizeTourAssets` (sync JSON default;
+`VITE_TOUR_API_URL` is not wired on `TourPage` yet).
 
-```json
-{
-  "@types/react": "^19.0.0",
-  "@types/react-dom": "^19.0.0",
-  "@types/three": "^0.170.0",
-  "@vitejs/plugin-react": "^4.3.4",
-  "typescript": "~5.7.2",
-  "vite": "^6.0.0"
-}
-```
-
-### PSV Plugin Responsibilities
-
-| Plugin                | Role in this project                                    |
-| --------------------- | ------------------------------------------------------- |
-| `core`                | Panorama render, zoom, fullscreen, `animate()`          |
-| `markers-plugin`      | Custom HTML hotspots (nav + info)                       |
-| `virtual-tour-plugin` | Multi-node scenes, `setCurrentNode()`, fade transitions |
-
-### Three.js Viewer Responsibilities
-
-| Module            | Role in this project                                         |
-| ----------------- | ------------------------------------------------------------ |
-| `ThreeDViewer`    | GLTF/GLB scene loader, OrbitControls, render loop            |
-| `GLTFLoader`      | Loads `.gltf` / `.glb` models from tour `scene.model` URL    |
-| `OrbitControls`   | First-person camera with mouse/touch drag                    |
-| `viewerHandle.ts` | Shared `TourViewerHandle` interface (PSV + Three.js conform) |
-
-`ThreeDViewer` lives in `src/viewer-3d/` and is loaded via `React.lazy()` only
-when `tour.viewerType === 'model3d'`. Panorama-only builds never download the
-Three.js viewer chunk.
+Styling: `@theme` tokens in `globals.css`, layer CSS (`hotspot-layer`,
+`psv-layer`, `viewer-3d-layer`), React via Tailwind + `cva`. See
+[STYLING.md](./STYLING.md).
 
 ---
 
-## Project Structure
+## URL query flags
 
-```
-ishare-virtual-tour/
-├── assets/                    # Source media (see assets/README.md)
-│   ├── {clientId}/{tourId}/   # panoramas, scene-thumbs, pin-previews, brand
-│   └── brand/                 # Platform logos
-├── public/assets/             # Auto-synced from assets/ (/assets/...)
-├── tours/
-│   ├── t_l01wnq8eh6.json      # Tour definition (scenes, hotspots)
-│   └── catalog.json           # Clients, tour ids, categories
-├── docs/                      # Project documentation
-├── src/
-│   ├── main.tsx
-│   ├── App.tsx
-│   ├── types/tour.ts
-│   ├── data/loadTour.ts
-│   ├── viewer/
-│   │   ├── PanoramaViewer.tsx   # PSV instance + plugins
-│   │   └── transition.ts        # VT setCurrentNode wrapper (see SCENE_TRANSITIONS.md)
-│   ├── viewer-shared/
-│   │   ├── viewerHandle.ts      # TourViewerHandle — shared viewer interface
-│   │   ├── buildMarkers.ts      # Hotspot HTML → marker config
-│   │   └── anchoredPanelLayout.ts
-│   ├── components/
-│   │   ├── SceneNav.tsx
-│   │   ├── TourHeader.tsx
-│   │   ├── InfoPopup.tsx
-│   │   ├── LoadingOverlay.tsx
-│   │   └── ai/                  # AI assistant UI
-│   ├── hooks/
-│   │   ├── useTourState.ts
-│   │   ├── useEmbedMode.ts
-│   │   └── useTourAssistant.ts
-│   ├── services/
-│   │   └── mockAssistant.ts
-│   ├── styles/
-│   │   ├── globals.css          # @theme + layer imports
-│   │   ├── components-layer.css # badge, accordion, skeleton shells
-│   │   ├── glass-panels-layer.css
-│   │   ├── hotspot-layer.css    # Shared hotspot pill chrome
-│   │   └── psv-layer.css        # PSV navbar + marker host
-│   ├── viewer-3d/
-│   │   └── ThreeDViewer.tsx   # Three.js GLTF walkthrough (lazy-loaded)
-│   ├── viewer-xr/
-│   │   ├── PanoramaXrSession.ts # Seated WebXR equirect + nav rays
-│   │   └── webxrSession.ts      # Shared enter/exit immersive-vr
-│   └── utils/
-│       ├── devHotspotLogger.ts
-│       ├── urlParams.ts
-│       └── psvZoom.ts
-├── index.html
-├── package.json
-└── vite.config.ts
-```
+Parsed in `useAppSearchParams()`. Preserved across in-app nav:
+`PRESERVED_SEARCH_KEYS` in `src/utils/tourPaths.ts`. Product contract:
+[PRODUCT_SPEC.md](./PRODUCT_SPEC.md). QA toggles:
+[DEV_PANEL.md](./DEV_PANEL.md).
+
+| Param                   | Purpose                               |
+| ----------------------- | ------------------------------------- |
+| `?embed=1`              | Embed chrome — [EMBED.md](./EMBED.md) |
+| `?intro=1` / `?intro=0` | Force / skip intro gallery at `/`     |
+| `?dev=1`                | Dev panel                             |
+| `?no=no_*`              | Open naming opportunity               |
+| `?askGuide=1`           | Force Tour Guide on                   |
+| `?guideMock=1`          | Scripted Guide replies                |
+| `?guideUiTest=1`        | Guide UI fixtures                     |
+| `?notFoundTest=1`       | Force 404                             |
+| `?loadErrorTest=1`      | Force viewer load-error overlay       |
+| `?disableNavPreview=1`  | Disable nav-preview mini viewer       |
+| `?skipLanding=1`        | Skip landing zoom                     |
+| `?splashHold=1`         | Hold splash longer                    |
+
+**Legacy (redirect once):** kebab / client-id path segments (SPA + tour-og via
+`legacyTourPathAliases.mjs`); `?tour=` / `?scene=`; QA aliases `chatTest` →
+`guideUiTest`, `askGuideMock` → `guideMock`, `panoramaErrorTest` →
+`loadErrorTest`.
 
 ---
 
-## Data Flow
+## Deploy (pointer)
 
-```
-tours/{tourId}.json
-        │
-        ├─► TourPage checks tour.viewerType
-        │     ├─ 'panorama' (default) → PanoramaViewer (PSV nodes + markers)
-        │     └─ 'model3d'            → ThreeDViewer   (GLTF + OrbitControls)
-        ├─► SceneNav (scene list)
-        └─► transition.ts → virtualTour.setCurrentNode (panorama only)
-
-assembleTourContext(tour, sceneId)
-        │
-        └─► mockAssistant.ts ◄── useTourAssistant ◄── currentSceneId
-
-useTourState
-        │
-        ├─► currentSceneId → SceneNav, LocationBadge
-        ├─► history stack → Back button
-        └─► isTransitioning → disable nav during animation
-
-TourViewerHandle (src/viewer-shared/viewerHandle.ts)
-        │
-        ├─► PanoramaViewer implements via useImperativeHandle
-        └─► ThreeDViewer   implements via useImperativeHandle
-```
-
----
-
-## Styling
-
-- **Design tokens:** `src/styles/globals.css` `@theme` — iShare brand colours
-  (runtime override via `clientTheme.ts`)
-- **Layer CSS:** `components-layer.css`, `glass-panels-layer.css`,
-  `hotspot-layer.css` — shared HTML hotspot pill chrome; `psv-layer.css` — PSV
-  navbar + marker host
-- **React UI:** Tailwind utilities + `cn()` + `cva()` (`*Variants.ts`)
-
-See [STYLING.md](./STYLING.md) for migration conventions.
-
----
-
-## Deployment
-
-### Build
+Production host is **`https://tour.ishare.ca`** (GitHub Pages + custom domain +
+Cloudflare Workers for OG and Ask Guide). Do not treat Vercel/Netlify as the
+primary path. Full steps: [DEPLOY.md](./DEPLOY.md).
 
 ```bash
-npm run build   # outputs to dist/
+npm run build   # sync-assets + typecheck + vite → dist/
 ```
-
-### Hosting options
-
-- **Production:** `https://tour.ishare.ca` — see [DEPLOY.md](./DEPLOY.md)
-- Vercel / Netlify — zero-config static deploy
-- Azure Static Web Apps — `public/staticwebapp.config.json` included
-- Any static file server + CDN
-
-### iShare embed
-
-See [EMBED.md](./EMBED.md) for URL format, `postMessage`, and QA.
-
-```html
-<iframe
-  src="https://tour.ishare.ca/{tourId}/{firstScene}?embed=1"
-  title="Virtual Tour"
-  allow="fullscreen"
-  loading="lazy"
-  style="width:100%; height:min(80vh, 720px); border:0;"
-></iframe>
-```
-
-### URL routing
-
-Tour and scene use **path segments**, not query strings:
-
-```
-/{tourId}/{sceneId}
-```
-
-Example: `/t_l01wnq8eh6/s_dtv27wfrbi`
-
-Root `/` with multiple catalog tours shows the **client intro picker**.
-Single-tour deploys redirect to that tour automatically. Override with
-`?intro=1|0` (see below).
-
-### URL parameters (query flags)
-
-Parsed in [`useAppSearchParams()`](../src/hooks/useAppSearchParams.ts).
-Preserved across in-app navigation — see `PRESERVED_SEARCH_KEYS` in
-[`tourPaths.ts`](../src/utils/tourPaths.ts).
-
-| Param              | Purpose                                                                                            |
-| ------------------ | -------------------------------------------------------------------------------------------------- |
-| `?embed=1`         | Embed mode — see [EMBED.md](./EMBED.md)                                                            |
-| `?intro=1`         | Force client intro gallery at `/` (non-embed; incl. single-tour QA)                                |
-| `?intro=0`         | Skip client intro at `/` — load default tour directly                                              |
-| `?dev=1`           | Dev panel — authoring, tour switch, URL flags ([DEV_PANEL.md](./DEV_PANEL.md))                     |
-| `?chatTest=1`      | AI chat scroll test messages (toggle in dev panel)                                                 |
-| `?notFoundTest=1`  | Force tour not-found / 404 screen (toggle in dev panel)                                            |
-| `?loadErrorTest=1` | Force viewer load-error overlay — panorama + 3D (toggle in dev panel; legacy: `panoramaErrorTest`) |
-| `?navPreview=0`    | Disable nav-preview mini viewer (default: on; toggle in dev panel)                                 |
-| `?skipLanding=1`   | Skip landing zoom animation (toggle in dev panel)                                                  |
-| `?splashHold=1`    | Hold load splash longer for loader UX testing (toggle in dev panel)                                |
-
-Combine flags as needed, e.g. `?embed=1&skipLanding=1`. With `?dev=1`, the dev
-panel includes **Switch tour** (multi-tour) and **URL flags** checkboxes.
-
-**Legacy (redirect only):** `?tour=` and `?scene=` are accepted once and
-rewritten to `/{tourId}/{sceneId}`; they are not kept in the URL after redirect.
 
 ---
 
-## Future Stack Additions
+## What’s next (stack)
 
-| Feature              | Suggested addition                                      |
-| -------------------- | ------------------------------------------------------- |
-| LLM assistant        | Vercel serverless or iShare API + Azure OpenAI          |
-| Analytics            | postMessage to iShare parent                            |
-| Admin editor         | Separate Next.js app or iShare backend                  |
-| Viewport zones       | Extend tour JSON + `viewer.getPosition()`               |
-| Thumbnails           | `assets/{clientId}/{tourId}/scene-thumbs/`              |
-| 3D hotspots          | Raycasting + world-position markers in ThreeDViewer     |
-| VR / XR              | WebXR + Three.js: seated panorama sphere, then model3d  |
-| 3D scene transitions | Multi-room GLTF + camera path animation in ThreeDViewer |
+Monorepo viewer + Next admin + public API + Postgres —
+[ROADMAP Phase 2](./ROADMAP.md#phase-2--platform-integration). Do not move the
+embed viewer into Next for SSR.

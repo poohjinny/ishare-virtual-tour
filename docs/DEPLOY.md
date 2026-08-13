@@ -197,8 +197,8 @@ Local QA without DNS: Dev → **Debug** → **Viewport** → **Embed mode**.
 
 ## Related docs
 
-| Doc                              | Topic                             |
-| -------------------------------- | --------------------------------- |
-| [EMBED.md](./EMBED.md)           | Embed contract, `postMessage`, QA |
-| [TECH_STACK.md](./TECH_STACK.md) | Stack overview                    |
-| [ROADMAP.md](./ROADMAP.md)       | Phase 1 exit criteria             |
+| Doc                              | Topic                                |
+| -------------------------------- | ------------------------------------ |
+| [EMBED.md](./EMBED.md)           | Embed contract, `postMessage`, QA    |
+| [TECH_STACK.md](./TECH_STACK.md) | Stack overview                       |
+| [ROADMAP.md](./ROADMAP.md)       | Phase 2+ backlog; Phase 1 is shipped |

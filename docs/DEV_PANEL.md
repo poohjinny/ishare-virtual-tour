@@ -31,7 +31,7 @@ Authoring touches two catalog layers plus per-tour JSON:
 | Layer          | Source                                     | What it holds                                                                                                              |
 | -------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | **Client**     | `tours/catalog.json` → `clients[]`         | Display name, website, contact, **shared branding** (logo, favicon, primary color, fonts)                                  |
-| **Tour entry** | `tours/catalog.json` → `clients[].tours[]` | Tour id, display name, category, `visibility`, `featured`, optional `summary`                                              |
+| **Tour entry** | `tours/catalog.json` → `clients[].tours[]` | Tour id, display name, category, `visibility`, optional `summary`                                                          |
 | **Tour body**  | `tours/{tourId}.json`                      | Scenes, hotspots, naming catalog, transitions, immersive bg, optional **tour-only** `branding`, optional `askGuideEnabled` |
 
 **Branding resolution** (runtime): `catalog.clients[].branding` is the default;
@@ -43,13 +43,13 @@ uses `brandingMode: 'client' | 'custom'` to choose where uploads are saved.
 
 **Asset paths**
 
-| Branding mode   | Logo / favicon path                                          |
-| --------------- | ------------------------------------------------------------ |
-| Client (shared) | `assets/{clientId}/brand/logo.png`, `…/favicon.png`          |
-| Tour (custom)   | `assets/{clientId}/{tourId}/brand/logo.png`, `…/favicon.png` |
+| Branding mode   | Logo / favicon path                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| Client (shared) | Logo: `assets/{clientId}/brand/logo.png`. Favicon: `assets/{clientId}/favicon.png\|ico` (not under `brand/`) |
+| Tour (custom)   | Logo: `assets/{clientId}/{tourId}/brand/logo.png`. Favicon: `assets/{clientId}/{tourId}/favicon.png\|ico`    |
 
 Panoramas and scene thumbs stay under `assets/{clientId}/{tourId}/panoramas/`
-and `…/scene-thumbs/`. Pin-card bakes go under `…/pin-previews/` (`h_*`).
+and `…/scene-thumbs/`. Pin-card bakes go under `…/hotspot-thumbs/` (`h_*`).
 
 **Code:** `src/utils/resolveTourBranding.ts`, `scripts/lib/tourBrandDev.mjs`,
 `scripts/lib/tourCatalogDev.mjs`
@@ -79,8 +79,10 @@ and `…/scene-thumbs/`. Pin-card bakes go under `…/pin-previews/` (`h_*`).
 
 Sticky **Intro** opens the tour picker at `/?intro=1` (not a Debug flag card).
 
-**Code:** `src/constants/devPanel.ts`, `src/components/DevTools.tsx`,
-`src/components/DevViewPanel.tsx`
+**Code:** `src/constants/devPanel.ts`, `src/components/dev/DevTools.tsx`,
+`src/components/dev/DevViewPanel.tsx` (shell; tab bodies: `DevSceneTabPanel`,
+`DevScenesListPanel`, `DevNamingCatalogPanel`, `DevToursCatalogPanel`,
+`DevClientPanel`)
 
 ---
 
@@ -208,9 +210,9 @@ there is no custom kebab id field.
 
 Filter by client. Per tour: open, copy public link, edit, delete.
 
-Edit includes basics (title, category, summary, visibility, featured), **Enable
-Ask Tour Guide** (`askGuideEnabled`), experience (transitions / immersive),
-branding mode, and a **Danger zone** (deletes tour JSON, catalog entry, assets).
+Edit includes basics (title, category, summary, visibility), **Enable Ask Tour
+Guide** (`askGuideEnabled`), experience (transitions / immersive), branding
+mode, and a **Danger zone** (deletes tour JSON, catalog entry, assets).
 
 Shared client contact / branding: **Clients** tab.
 
@@ -271,11 +273,11 @@ checkbox — see below.
 
 Separate group for guide / chat fixtures:
 
-| Flag          | Effect                                                                                       |
-| ------------- | -------------------------------------------------------------------------------------------- |
-| `askGuide`    | Show Tour Guide FAB + panel (overrides missing `askGuideEnabled`)                            |
-| `guideMock`   | Chat with scripted mock replies — no OpenAI (alias: `askGuideMock`)                          |
-| `guideUiTest` | Frozen UI preview — scroll + thinking fixtures; also turns on `askGuide` (alias: `chatTest`) |
+| Flag          | Effect                                                                   |
+| ------------- | ------------------------------------------------------------------------ |
+| `askGuide`    | Show Tour Guide FAB + panel (overrides missing `askGuideEnabled`)        |
+| `guideMock`   | Chat with scripted mock replies — no OpenAI                              |
+| `guideUiTest` | Frozen UI preview — scroll + thinking fixtures; also turns on `askGuide` |
 
 Product default: guide shows when `tour.askGuideEnabled === true`. Use
 `?askGuide=1` for QA without enabling the tour flag.
@@ -307,7 +309,7 @@ Typical message sequence:
 
 Full `postMessage` contract: [EMBED.md](./EMBED.md).
 
-**Code:** `src/components/DevEmbedPreviewFrame.tsx`,
+**Code:** `src/components/dev/DevEmbedPreviewFrame.tsx`,
 `src/hooks/useTourEmbedMessaging.ts`
 
 ---
@@ -331,7 +333,7 @@ preserving query flags (`dev`, `embed`, etc.).
 | Scene / hotspot / naming catalog           | `tours/{id}.json` (scene graph + `namingOpportunities`)           |
 | Scene duplicate                            | `tours/{id}.json` (+ optional cloned naming assets)               |
 | Panorama / scene thumb                     | `assets/{clientId}/{tourId}/panoramas/`, `…/scene-thumbs/`        |
-| Naming pin preview                         | `assets/{clientId}/{tourId}/pin-previews/{hotspotId}.webp`        |
+| Naming pin thumb                           | `assets/{clientId}/{tourId}/hotspot-thumbs/{hotspotId}.webp`      |
 
 The viewer refreshes from an in-memory dev cache after mutations — no manual
 page reload. API routes live under `/__dev/api` (Vite plugin

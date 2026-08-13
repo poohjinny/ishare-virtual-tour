@@ -66,11 +66,11 @@ Opens the tour in embed chrome with the naming panel focused (same as non-embed
 
 ### What not to put in production embed URLs
 
-| Param                         | Why                                       |
-| ----------------------------- | ----------------------------------------- |
-| `dev=1`                       | Dev panel — local authoring only          |
-| `chatTest`, `notFoundTest`, … | QA flags — [DEV_PANEL.md](./DEV_PANEL.md) |
-| `intro=0`                     | Legacy; use `embed=1` + path              |
+| Param                            | Why                                       |
+| -------------------------------- | ----------------------------------------- |
+| `dev=1`                          | Dev panel — local authoring only          |
+| `guideUiTest`, `notFoundTest`, … | QA flags — [DEV_PANEL.md](./DEV_PANEL.md) |
+| `intro=0`                        | Legacy; use `embed=1` + path              |
 
 ---
 
@@ -293,10 +293,10 @@ Strips `dev` and other internal flags. Used by dev panel **Copy URL**.
 
 ## Related documents
 
-| Document                                                           | Topic                                     |
-| ------------------------------------------------------------------ | ----------------------------------------- |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | URL contract, catalog visibility          |
-| [DEV_PANEL.md](./DEV_PANEL.md)                                     | Embed mode — Copy URL/HTML + Messages log |
-| [TECH_STACK.md](./TECH_STACK.md)                                   | Hosting, static deploy                    |
-| [ROADMAP.md](./ROADMAP.md)                                         | Phase 1 embed success criteria            |
-| [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client launch / IT intake                 |
+| Document                                                           | Topic                                      |
+| ------------------------------------------------------------------ | ------------------------------------------ |
+| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | URL contract, catalog visibility           |
+| [DEV_PANEL.md](./DEV_PANEL.md)                                     | Embed mode — Copy URL/HTML + Messages log  |
+| [TECH_STACK.md](./TECH_STACK.md)                                   | Hosting, static deploy                     |
+| [ROADMAP.md](./ROADMAP.md)                                         | Phase 2+ backlog; Phase 1 embed is shipped |
+| [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client launch / IT intake                  |

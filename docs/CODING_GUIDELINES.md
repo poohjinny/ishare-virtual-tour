@@ -15,7 +15,7 @@ linked specs.
 | **Naming opportunity CTAs**    | [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md)   | NO popups, status, Giftabulator footer                   |
 | **Giftabulator give-now URLs** | [GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md) | `calc` prefill, preset, bounded scaling                  |
 | **Product / copy names**       | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)               | Tab title, Help, Guide, splash                           |
-| **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                       | PSV, Vite, iframe embed                                  |
+| **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                       | Why Vite/PSV/Three; deploy → DEPLOY.md                   |
 | **Performance playbook**       | [PERFORMANCE.md](./PERFORMANCE.md)                     | When embed/mobile feels slow (no task list)              |
 | **Mobile React UI layout**     | [MOBILE.md](./MOBILE.md)                               | Phone chrome, collisions, safe-area                      |
 | **Client assets**              | [`assets/README.md`](../assets/README.md)              | Panoramas, logos, new client                             |
@@ -126,6 +126,8 @@ ishare-virtual-tour/
 ├── public/              Static output + synced assets
 ├── src/
 │   ├── components/      React UI + feature CSS
+│   │   ├── dev/         Dev panel (`?dev=1`)
+│   │   ├── explore/     Explore dock + directory
 │   │   └── ui/          Shared primitives (Badge, Accordion, …)
 │   ├── constants/       Copy strings, tour UX labels
 │   ├── data/            Tour load, naming status, platform contact
@@ -140,15 +142,15 @@ ishare-virtual-tour/
 └── docs/
 ```
 
-| Layer            | Responsibility                                                   |
-| ---------------- | ---------------------------------------------------------------- |
-| `types/tour.ts`  | Shapes only — no runtime logic                                   |
-| `data/`          | Load, normalize, naming opportunity rules                        |
-| `viewer/`        | PSV-only: markers, camera, transitions                           |
-| `viewer-shared/` | Shared contract, hotspot HTML, panel layout, scene graph helpers |
-| `viewer-3d/`     | Three.js GLTF viewer (lazy-loaded for `model3d`)                 |
-| `components/`    | React trees + colocated feature CSS                              |
-| `utils/`         | Stateless helpers shared across layers                           |
+| Layer            | Responsibility                                                                                                                                                                                                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `types/tour.ts`  | Shapes only — no runtime logic                                                                                                                                                                                                                                                                   |
+| `data/`          | Load, normalize, naming opportunity rules                                                                                                                                                                                                                                                        |
+| `viewer/`        | PSV-only: markers, camera, transitions                                                                                                                                                                                                                                                           |
+| `viewer-shared/` | Shared contract, hotspot HTML, panel layout, scene graph helpers                                                                                                                                                                                                                                 |
+| `viewer-3d/`     | Three.js GLTF viewer (lazy-loaded for `model3d`)                                                                                                                                                                                                                                                 |
+| `components/`    | React trees + colocated feature CSS. Explore → `explore/`; Dev panel → `dev/`                                                                                                                                                                                                                    |
+| `utils/`         | Stateless helpers shared across layers. Cross-runtime SoT is `*.mjs` + `.d.mts` (`ogShareCopy`, `tourAssetResolve`, `namingDonor`, `legacyTourPathAliases`, `opaqueId`, `clientId`, `slugifyHotspotName`, `namingPriceParse`, `catalogVisibilityCore`); `scripts/lib` re-exports — no twin copy. |
 
 ---
 
@@ -223,9 +225,10 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 - Preload → `setCurrentNode()` — [`transition.ts`](../src/viewer/transition.ts)
 - URL sync — `useTourRouteSync` + [`tourPaths.ts`](../src/utils/tourPaths.ts)
 - Paths: `/`, `/{sceneId}`, `/{tourId}`, `/{tourId}/{sceneId}`
-- Preserved query: `embed`, `dev`, `chatTest`, `notFoundTest`, `loadErrorTest`,
-  `navPreview`
-- Legacy `?tour=` / `?scene=` → path redirect
+- Preserved query: `embed`, `dev`, `guideUiTest`, `notFoundTest`,
+  `loadErrorTest`, `disableNavPreview`, …
+- Legacy `?tour=` / `?scene=` → path redirect; old QA aliases (`chatTest`,
+  `askGuideMock`, `panoramaErrorTest`) rewrite once to the canonical keys
 
 ### Fullscreen
 
