@@ -13,23 +13,30 @@ const FAVICON_SELECTOR = 'link[rel="icon"][data-client-favicon]';
 /** Ignore stale async resolves after cleanup / newer apply. */
 let faviconApplyToken = 0;
 
-/** Browser decode probe — HEAD/CORS miss valid icons that `<link rel="icon">` can show. */
-function faviconPathExists(path: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (typeof Image === 'undefined') {
-      resolve(false);
-      return;
-    }
-    const img = new Image();
-    const finish = (ok: boolean) => {
-      img.onload = null;
-      img.onerror = null;
-      resolve(ok);
-    };
-    img.onload = () => finish(img.naturalWidth > 0);
-    img.onerror = () => finish(false);
-    img.src = withBaseUrl(path);
-  });
+/**
+ * Same-origin existence check. Avoid `Image()` — missing conventional paths
+ * would log a console 404 even when the next candidate works.
+ */
+async function faviconPathExists(path: string): Promise<boolean> {
+  const url = withBaseUrl(path);
+  try {
+    const head = await fetch(url, { method: 'HEAD', cache: 'force-cache' });
+    if (head.ok) return true;
+    if (head.status === 404) return false;
+  } catch {
+    // Some hosts reject HEAD — fall through to GET.
+  }
+  try {
+    const get = await fetch(url, { method: 'GET', cache: 'force-cache' });
+    return get.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Tour-level `favicon.png|ico` only when the tour has its own brand files. */
+function shouldProbeTourFavicon(tour: Tour): boolean {
+  return Boolean(tour.branding?.favicon || tour.branding?.logo);
 }
 
 /** Resolve tab icon URL — explicit, tour png/ico, client png/ico, logo, then platform default. */
@@ -39,7 +46,7 @@ export async function resolveClientFavicon(tour: Tour): Promise<string> {
   const seen = new Set<string>();
   const candidates = [
     branding?.favicon?.trim(),
-    ...tourBrandFaviconCandidates(tour),
+    ...(shouldProbeTourFavicon(tour) ? tourBrandFaviconCandidates(tour) : []),
     ...clientBrandFaviconCandidates(clientId),
     branding?.logo,
     DEFAULT_FAVICON,
