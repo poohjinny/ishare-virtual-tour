@@ -3,6 +3,7 @@ dist
 .tmp
 *.local
 .DS_Store
+.wrangler
 
 # Azure Functions local secrets
 api/local.settings.json

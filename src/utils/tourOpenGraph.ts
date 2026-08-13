@@ -74,6 +74,7 @@ function removeManagedMeta(): void {
 
 /** Write Open Graph + Twitter Card tags for the active tour view. */
 export function applyDocumentOpenGraph(meta: TourOpenGraphMeta): () => void {
+  const previousTitle = document.title;
   document.title = meta.title;
 
   upsertMeta('property', 'og:type', 'website');
@@ -88,7 +89,10 @@ export function applyDocumentOpenGraph(meta: TourOpenGraphMeta): () => void {
   upsertMeta('name', 'twitter:description', meta.description);
   upsertMeta('name', 'twitter:image', meta.imageUrl);
 
-  return removeManagedMeta;
+  return () => {
+    removeManagedMeta();
+    document.title = previousTitle;
+  };
 }
 
 export function toAbsoluteTourAssetUrl(path: string): string {

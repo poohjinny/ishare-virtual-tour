@@ -9,8 +9,8 @@ Contract:
   (including `?no=` naming). Includes `meta-externalfetcher` (Facebook).
 - **`og:image`** → `https://tour.ishare.ca/og/jpg/{tourId}/{sceneId}.jpg`
   (optional `?no=`). JPEG is produced **on the fly** from scene/naming WebP via
-  the Workers **Images** binding (1200×630). No R2 storage. Facebook requires
-  JPEG/PNG/GIF for reliable previews; raw WebP often fails.
+  the Workers **Images** binding (1200×630). Facebook requires JPEG/PNG/GIF
+  for reliable previews; raw WebP often fails.
 - **Everyone else** → proxy GitHub Pages; deep-link `404.html` → `200`.
 - **Topology** → orange-cloud CNAME `tour` → `poohjinny.github.io` plus Worker
   route `tour.ishare.ca/*`. Do **not** use Workers custom domain for this
@@ -22,7 +22,7 @@ Contract:
 | Client                 | Behavior                                                              |
 | ---------------------- | --------------------------------------------------------------------- |
 | Social bots (UA match) | `200` HTML; `og:image` = `/og/jpg/...` JPEG (Images live transform)   |
-| `GET /og/jpg/...`      | WebP→JPEG 1200×630 (no R2); Cache-Control for edge cache              |
+| `GET /og/jpg/...`      | WebP→JPEG 1200×630 (Images live transform)                            |
 | Everyone else          | Proxy to GitHub Pages origin; deep-link `404.html` rewritten to `200` |
 
 ## One-time setup

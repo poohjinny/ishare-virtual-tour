@@ -3,11 +3,14 @@
  *
  * - Known crawler UAs → 200 HTML with tour/scene/naming og:* (no JS).
  * - Everyone else → proxy GitHub Pages; deep-link 404 → SPA shell 200.
- * - og:image → /og/jpg/{tour}/{scene}.jpg — on-the-fly WebP→JPEG via Images
- *   (no R2). Facebook requires JPEG/PNG/GIF for reliable previews.
+ * - og:image → /og/jpg/{tour}/{scene}.jpg — live WebP→JPEG via Images
+ *   (1200×630). Facebook requires JPEG/PNG/GIF; raw WebP often fails.
  *
  * Origin fetches keep Host `tour.ishare.ca` but `resolveOverride` to
  * GitHub Pages so subrequests do not re-enter this Worker.
+ *
+ * Title/description rules: keep in sync with
+ * `src/utils/buildShareMessage` + `resolveShareDescription`.
  */
 
 const BOT_UA =
@@ -66,11 +69,7 @@ Allow: /
 
 export default {
   async fetch(request, env) {
-    const publicOrigin = (
-      env.PUBLIC_ORIGIN ||
-      env.ORIGIN ||
-      'https://tour.ishare.ca'
-    ).replace(/\/$/, '');
+    const publicOrigin = publicOriginFromEnv(env);
     const url = new URL(request.url);
 
     if (url.pathname === '/robots.txt') {
@@ -230,7 +229,7 @@ function resolveOverride(env) {
 }
 
 function publicOriginFromEnv(env) {
-  return (env.PUBLIC_ORIGIN || env.ORIGIN || 'https://tour.ishare.ca').replace(
+  return (env.ORIGIN || env.PUBLIC_ORIGIN || 'https://tour.ishare.ca').replace(
     /\/$/,
     '',
   );
@@ -305,9 +304,7 @@ function ogJpgPublicUrl(origin, tourId, sceneId, no) {
   return no ? `${base}?no=${encodeURIComponent(no)}` : base;
 }
 
-/**
- * On-the-fly WebP → JPEG for Facebook (no R2). Edge cache via Cache-Control.
- */
+/** Live WebP → JPEG for Facebook. Cache-Control is a hint; transform is on miss. */
 async function handleOgJpegGet(request, env, publicOrigin, tourId, sceneId) {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response('Method not allowed', { status: 405 });
@@ -325,9 +322,9 @@ async function handleOgJpegGet(request, env, publicOrigin, tourId, sceneId) {
         headers: { 'cache-control': 'no-store' },
       });
     }
-    const jpegBytes = await bakeJpegFromOrigin(env, sourcePath);
+    const jpegBytes = await transformJpegFromOrigin(env, sourcePath);
     if (!jpegBytes) {
-      return new Response('Bake failed', {
+      return new Response('Transform failed', {
         status: 502,
         headers: { 'cache-control': 'no-store' },
       });
@@ -339,18 +336,18 @@ async function handleOgJpegGet(request, env, publicOrigin, tourId, sceneId) {
           'content-type': 'image/jpeg',
           'content-length': String(jpegBytes.byteLength),
           'cache-control': 'public, max-age=86400',
-          'x-ishare-og-jpeg': 'live',
+          'x-ishare-og-jpeg': 'images',
         },
       });
     }
     return fixedLengthResponse(jpegBytes, {
       'content-type': 'image/jpeg',
       'cache-control': 'public, max-age=86400',
-      'x-ishare-og-jpeg': 'live',
+      'x-ishare-og-jpeg': 'images',
     });
   } catch (error) {
     console.error('tour-og jpg get failed', error);
-    return new Response('Bake failed', {
+    return new Response('Transform failed', {
       status: 502,
       headers: { 'cache-control': 'no-store' },
     });
@@ -391,7 +388,7 @@ function isSafeAssetPath(path) {
   return true;
 }
 
-async function bakeJpegFromOrigin(env, assetPath) {
+async function transformJpegFromOrigin(env, assetPath) {
   if (!env.IMAGES) return null;
 
   const href = new URL(assetPath, publicOriginFromEnv(env)).toString();
@@ -561,22 +558,121 @@ function kebab(value) {
     .replace(/^-+|-+$/g, '');
 }
 
-function plainText(text, maxChars = DESC_MAX) {
+/** Keep in sync with `TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD`. */
+const EMPTY_PLACE_LEAD = 'Step inside and look around this space.';
+
+/** Keep in sync with `defaultSceneDescription`. */
+function defaultSceneDescription(tourTitle, sceneTitle) {
+  const tour = String(tourTitle || '').trim() || 'this facility';
+  const scene = String(sceneTitle || '').trim() || 'this area';
+  return `Explore ${scene} as part of the ${tour} virtual tour.`;
+}
+
+function isDefaultSceneDescription(description, tourTitle, sceneTitle) {
+  const trimmed = String(description || '').trim();
+  if (!trimmed) return false;
+  return trimmed === defaultSceneDescription(tourTitle, sceneTitle);
+}
+
+/** Keep in sync with `defaultNamingDescription`. */
+function defaultNamingDescription(opportunityTitle, tourTitle) {
+  const title = String(opportunityTitle || '').trim() || 'This space';
+  const tour = String(tourTitle || '').trim() || 'this place';
+  return `${title} is available to name. Contribute to support the people who rely on ${tour}.`;
+}
+
+function isDefaultNamingDescription(description, opportunityTitle, tourTitle) {
+  const trimmed = String(description || '').trim();
+  if (!trimmed) return false;
+  return trimmed === defaultNamingDescription(opportunityTitle, tourTitle);
+}
+
+function lastCompleteSentenceEnd(text) {
+  const pattern = /[.!?…]["'”’)]*(?=\s|$)/gu;
+  let last = -1;
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    last = match.index + match[0].length;
+  }
+  return last;
+}
+
+/**
+ * Plain, length-capped copy — keep in sync with `formatShareDescriptionPlain`
+ * (sentence-aware, no ellipsis).
+ */
+function formatShareDescriptionPlain(text, maxChars = DESC_MAX) {
   const plain = String(text || '')
     .replace(/!\[[^\]]*]\([^)]*\)/g, '')
     .replace(/\[([^\]]*)]\([^)]*\)/g, '$1')
-    .replace(/[*_`#>/\\-]+/g, ' ')
+    .replace(/[*_`#]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
   if (!plain) return '';
   if (plain.length <= maxChars) return plain;
-  const within = plain.slice(0, maxChars);
-  const lastSpace = within.lastIndexOf(' ');
+
+  const withinBudget = plain.slice(0, maxChars);
+  const lastSentenceEnd = lastCompleteSentenceEnd(withinBudget);
+  if (lastSentenceEnd > Math.floor(maxChars * 0.4)) {
+    return withinBudget.slice(0, lastSentenceEnd).trimEnd();
+  }
+
+  const lastSpace = withinBudget.lastIndexOf(' ');
   const clipped =
     lastSpace > Math.floor(maxChars * 0.6) ?
-      within.slice(0, lastSpace)
-    : within;
-  return `${clipped.replace(/[,;:.–—-]+$/u, '').trimEnd()}…`;
+      withinBudget.slice(0, lastSpace)
+    : withinBudget;
+  return clipped.replace(/[,;:–—-]+$/u, '').trimEnd();
+}
+
+function firstSceneNamingBody(tour, sceneId) {
+  const tourTitle = tour.title?.trim() || tour.id;
+  const scene = tour.scenes?.[sceneId];
+  const hotspots = [...(scene?.hotspots ?? []), ...(tour.hotspots ?? [])];
+
+  for (const hotspot of hotspots) {
+    if (!hotspot?.namingId && hotspot?.type !== 'naming') continue;
+    if (hotspot.sceneId && hotspot.sceneId !== sceneId) continue;
+
+    const record =
+      tour.namingOpportunities?.[hotspot.namingId] ||
+      hotspot.namingOpportunity ||
+      null;
+    const name = (record?.name || hotspot.title || '').trim();
+    const body = String(record?.body || hotspot.popup?.body || '').trim();
+    if (!body) continue;
+    if (isDefaultNamingDescription(body, name, tourTitle)) continue;
+    return body;
+  }
+  return '';
+}
+
+/**
+ * Same priority as SPA `resolveShareDescription` (scene, no `?no=`):
+ * place lead → first real naming body → catalog summary.
+ */
+function resolveSceneShareDescription(tour, sceneId, catalogEntry) {
+  const tourTitle = tour.title?.trim() || tour.id;
+  const scene = tour.scenes?.[sceneId];
+  const sceneTitle = scene?.title?.trim() || sceneId;
+  const description = scene?.description?.trim() || '';
+
+  if (
+    description &&
+    description !== EMPTY_PLACE_LEAD &&
+    !isDefaultSceneDescription(description, tourTitle, sceneTitle)
+  ) {
+    return formatShareDescriptionPlain(description);
+  }
+
+  const namingBody = firstSceneNamingBody(tour, sceneId);
+  if (namingBody) return formatShareDescriptionPlain(namingBody);
+
+  const summary = catalogEntry?.summary?.trim() || '';
+  if (summary && summary !== EMPTY_PLACE_LEAD) {
+    return formatShareDescriptionPlain(summary);
+  }
+  return '';
 }
 
 function abs(origin, path, fallback) {
@@ -590,9 +686,7 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
   const tourTitle = tour.title?.trim() || tour.id;
   const scene = tour.scenes[sceneId];
   const sceneTitle = scene?.title?.trim() || sceneId;
-  const authored =
-    plainText(scene?.description || '') ||
-    plainText(catalogEntry?.summary || '');
+  const authored = resolveSceneShareDescription(tour, sceneId, catalogEntry);
   const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
   const thumb = scene?.thumbnail?.trim() || '';
   const image =
@@ -601,7 +695,7 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
     title: `${sceneTitle} | ${tourTitle}`,
     description:
       authored ?
-        plainText(`${intro} ${authored}`)
+        formatShareDescriptionPlain(`${intro} ${authored}`)
       : `${intro} Open the link to look around in 360°.`,
     image,
     imageWidth: thumb ? OG_WIDTH : undefined,
@@ -620,14 +714,18 @@ function buildNamingMeta(
   url,
   no,
 ) {
+  void catalogEntry;
   const tourTitle = tour.title?.trim() || tour.id;
   const hostSceneId = naming.sceneId || sceneId;
   const sceneTitle = tour.scenes[hostSceneId]?.title?.trim() || hostSceneId;
-  // Naming OG stays in NO context — do not fall back to catalog tour summary.
-  const authored = plainText(naming.body || '');
+  const namingBody = String(naming.body || '').trim();
+  const authored =
+    namingBody &&
+    !isDefaultNamingDescription(namingBody, naming.name, tourTitle) ?
+      formatShareDescriptionPlain(namingBody)
+    : '';
   const priceText = formatNamingPriceForOg(naming);
   const intro = `${naming.name} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
-  const priceLine = priceText ? `Asking ${priceText}.` : '';
   const hasImage =
     Boolean(naming.image?.trim()) ||
     Boolean(tour.scenes[hostSceneId]?.thumbnail);
@@ -636,19 +734,15 @@ function buildNamingMeta(
       ogJpgPublicUrl(origin, tour.id, hostSceneId, no)
     : abs(origin, logo);
 
-  let description = intro;
-  if (priceLine) description = `${description} ${priceLine}`;
-  if (authored) description = `${description} ${authored}`;
-  else if (!priceLine) {
-    description = `${intro} Open the link to learn more and look around.`;
-  }
-
   return {
     title:
       priceText ?
         `${naming.name} · ${priceText} | ${tourTitle}`
       : `${naming.name} | ${tourTitle}`,
-    description: plainText(description),
+    description:
+      authored ?
+        formatShareDescriptionPlain(`${intro} ${authored}`)
+      : `${intro} Open the link to learn more and look around.`,
     image,
     imageWidth: hasImage ? OG_WIDTH : undefined,
     imageHeight: hasImage ? OG_HEIGHT : undefined,
@@ -656,6 +750,7 @@ function buildNamingMeta(
   };
 }
 
+/** Keep in sync with `formatNamingGalleryItemPrice`. */
 function formatNamingPriceForOg(naming) {
   const label = String(naming?.priceLabel || '').trim();
   if (label) return label;
@@ -683,7 +778,6 @@ function formatNamingPriceForOg(naming) {
 function imageTypeForUrl(imageUrl) {
   if (/\.jpe?g$/i.test(imageUrl)) return 'image/jpeg';
   if (/\.png$/i.test(imageUrl)) return 'image/png';
-  if (/\.webp$/i.test(imageUrl)) return 'image/webp';
   if (/\.gif$/i.test(imageUrl)) return 'image/gif';
   return '';
 }
