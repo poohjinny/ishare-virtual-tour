@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { stripConventionalCatalogBranding } from '../../src/utils/tourAssetResolve.mjs';
 
 export function readCatalogJson(toursDir) {
   const catalogPath = join(toursDir, 'catalog.json');
@@ -18,6 +19,7 @@ export function tryReadCatalogJson(toursDir) {
 }
 
 export function writeCatalogJson(toursDir, catalog) {
+  stripConventionalCatalogBranding(catalog);
   const catalogPath = join(toursDir, 'catalog.json');
   writeFileSync(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`, 'utf8');
 }

@@ -11,8 +11,6 @@
       "id": "s_hpajghgqrv",
       "title": "Overall",
       "description": "Classic Sponza architecture test scene — open atrium with arches and columns.",
-      "panorama": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_hpajghgqrv.webp",
-      "thumbnail": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_hpajghgqrv.webp",
       "defaultView": {
         "yaw": -88.9,
         "pitch": -7.8,
@@ -29,8 +27,6 @@
       "id": "s_xihtcolrwu",
       "title": "1st Floor",
       "description": "Ground-level walk through the Sponza colonnade — arches, columns, and the open atrium floor.",
-      "panorama": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_xihtcolrwu.webp",
-      "thumbnail": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_xihtcolrwu.webp",
       "defaultView": {
         "yaw": -90.7,
         "pitch": -0.6,
@@ -47,8 +43,6 @@
       "id": "s_kanukh723s",
       "title": "2nd Floor",
       "description": "Upper gallery walkway overlooking the atrium — same model, elevated viewpoint.",
-      "panorama": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_kanukh723s.webp",
-      "thumbnail": "/assets/ishare-demos/t_ctx4e6rkty/thumbnails/s_kanukh723s.webp",
       "defaultView": {
         "yaw": -92,
         "pitch": -6,
@@ -64,21 +58,17 @@
   },
   "hotspots": [
     {
-      "id": "info-naming-opportunity-2",
+      "id": "h_v1p651z85c",
       "type": "info",
       "position": {
         "x": -11.33,
         "y": 1.98,
         "z": -0.28
       },
+      "namingId": "no_usze08342k",
       "popup": {
         "display": "anchored",
         "title": "Naming Opportunity",
-        "namingOpportunity": {
-          "name": "Naming Opportunity Naming Opportunity",
-          "price": 75000,
-          "status": "open"
-        },
         "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments.\n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together.",
         "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
       },
@@ -92,27 +82,20 @@
           "y": 1.58,
           "z": -0.27
         }
-      },
-      "preview": {
-        "image": "/assets/ishare-demos/t_ctx4e6rkty/previews/info-naming-opportunity-2.webp"
       }
     },
     {
-      "id": "info-test",
+      "id": "h_fug5ybz0mq",
       "type": "info",
       "position": {
         "x": 2.44,
         "y": 1.29,
         "z": 1.56
       },
+      "namingId": "no_s7mvw1ktv1",
       "popup": {
         "display": "anchored",
         "title": "Naming Opportunity - 3",
-        "namingOpportunity": {
-          "name": "Naming Opportunity - 3 Naming Opportunity",
-          "price": 10000,
-          "status": "reserved"
-        },
         "body": "test is a naming opportunity at 3D Walkthrough Demo. Recognition details, donor benefits, and placement copy will be confirmed with the foundation team."
       },
       "sceneId": "s_hpajghgqrv",
@@ -125,27 +108,20 @@
           "y": 1.26,
           "z": -0.01
         }
-      },
-      "preview": {
-        "image": "/assets/ishare-demos/t_ctx4e6rkty/previews/info-test.webp"
       }
     },
     {
-      "id": "info-naming-opportunity-2-2",
+      "id": "h_k1z4zpwai4",
       "type": "info",
       "position": {
         "x": -11.39,
         "y": 5.09,
         "z": -0.31
       },
+      "namingId": "no_winyzawbk5",
       "popup": {
         "display": "anchored",
         "title": "Naming Opportunity - 2",
-        "namingOpportunity": {
-          "name": "Naming Opportunity - 2 Naming Opportunity",
-          "price": 25000,
-          "status": "closed"
-        },
         "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments.",
         "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
       },
@@ -159,13 +135,10 @@
           "z": -0.31
         }
       },
-      "preview": {
-        "image": "/assets/ishare-demos/t_ctx4e6rkty/previews/info-naming-opportunity-2-2.webp"
-      },
       "sceneId": "s_kanukh723s"
     },
     {
-      "id": "nav-to-1st-floor",
+      "id": "h_xr6za83jfc",
       "type": "nav",
       "position": {
         "x": -9.4,
@@ -185,7 +158,7 @@
       }
     },
     {
-      "id": "nav-to-2nd-floor",
+      "id": "h_pyd29bbr59",
       "type": "nav",
       "position": {
         "x": 7.2,
@@ -195,6 +168,26 @@
       "targetScene": "s_kanukh723s"
     }
   ],
+  "namingOpportunities": {
+    "no_usze08342k": {
+      "id": "no_usze08342k",
+      "name": "Naming Opportunity",
+      "price": 75000,
+      "status": "open"
+    },
+    "no_s7mvw1ktv1": {
+      "id": "no_s7mvw1ktv1",
+      "name": "Naming Opportunity - 3",
+      "price": 10000,
+      "status": "reserved"
+    },
+    "no_winyzawbk5": {
+      "id": "no_winyzawbk5",
+      "name": "Naming Opportunity - 2",
+      "price": 25000,
+      "status": "closed"
+    }
+  },
   "defaultTransition": {
     "speed": "500ms",
     "effect": "fade"

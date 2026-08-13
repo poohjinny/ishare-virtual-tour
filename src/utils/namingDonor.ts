@@ -79,10 +79,13 @@ export function normalizeNamingDonor(
   const kind = kindRaw as NamingDonorKind;
 
   const next: NamingDonor = { name, kind };
+  const logo =
+    donor?.logo === true ? true
+    : typeof donor?.logo === 'string' ? donor.logo.trim() || null
+    : null;
 
   if (kind === 'organization') {
     const website = sanitizeDonorWebsite(donor?.website);
-    const logo = donor?.logo?.trim() || null;
     if (website) next.website = website;
     if (logo) next.logo = logo;
     return next;
@@ -92,7 +95,6 @@ export function normalizeNamingDonor(
   if (affiliation) {
     next.affiliation = affiliation;
     const website = sanitizeDonorWebsite(donor?.website);
-    const logo = donor?.logo?.trim() || null;
     if (website) next.website = website;
     if (logo) next.logo = logo;
   }
@@ -126,7 +128,7 @@ export function resolveNamingDonorPresentation(
     affiliation,
     credit,
     website: donor.website ?? null,
-    logo: donor.logo ?? null,
+    logo: typeof donor.logo === 'string' ? donor.logo : null,
   };
 }
 

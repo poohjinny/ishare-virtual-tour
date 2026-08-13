@@ -133,7 +133,6 @@
     "s_hfiucp83au": {
       "id": "s_hfiucp83au",
       "title": "Kitchen",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_hfiucp83au.webp",
       "defaultView": {
         "yaw": 126.9,
         "pitch": -9.2,
@@ -141,7 +140,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-reception",
+          "id": "h_5ws1f3y3bq",
           "type": "nav",
           "label": "Reception",
           "position": {
@@ -151,7 +150,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-entrance-to-the-base-level",
+          "id": "h_jud6crv5qd",
           "type": "nav",
           "position": {
             "yaw": 304.9,
@@ -160,7 +159,7 @@
           "targetScene": "s_xl88jb8utx"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_6aqz0xd8li",
           "type": "nav",
           "position": {
             "yaw": 167.5,
@@ -169,7 +168,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "info-kitchen",
+          "id": "h_elw8cjn2sv",
           "type": "info",
           "position": {
             "yaw": 130.4,
@@ -179,13 +178,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/cc45c26c-fda8-45f7-a6ae-96d7a7c8bc10"
           },
-          "namingId": "no_vdqq3f4hfw",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-kitchen.webp"
-          }
+          "namingId": "no_vdqq3f4hfw"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_nbehpwlobu",
           "type": "nav",
           "position": {
             "yaw": 235,
@@ -194,7 +190,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-pantry",
+          "id": "h_npwiiwx1yj",
           "type": "nav",
           "position": {
             "yaw": 93.3,
@@ -203,7 +199,7 @@
           "targetScene": "s_ps029p4kzn"
         },
         {
-          "id": "nav-to-family-patient-communal-space",
+          "id": "h_m9jzq928a0",
           "type": "nav",
           "position": {
             "yaw": 196.5,
@@ -212,7 +208,7 @@
           "targetScene": "s_jfn7k06rhj"
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_xohc4cstvn",
           "type": "nav",
           "position": {
             "yaw": 219.9,
@@ -221,7 +217,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-main-floor-corridor",
+          "id": "h_pt25c9of6t",
           "type": "nav",
           "position": {
             "yaw": 154.9,
@@ -230,7 +226,7 @@
           "targetScene": "s_rmf30ndp5j"
         },
         {
-          "id": "nav-to-main-entrance-2",
+          "id": "h_jm4hsnq30l",
           "type": "nav",
           "position": {
             "yaw": 202.4,
@@ -239,7 +235,6 @@
           "targetScene": "s_h310pim38b"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_hfiucp83au.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=GQP2udP-HiA",
       "visibility": "unlisted"
     },
@@ -247,7 +242,6 @@
       "id": "s_xl88jb8utx",
       "title": "Basement Entrance",
       "description": "Approach the base-level entrance of Ken Sargent House from the landscaped grounds. This lower entry provides access to guest spaces on the building's foundation level.",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_xl88jb8utx.webp",
       "defaultView": {
         "yaw": 77.5,
         "pitch": -1.7,
@@ -255,7 +249,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-main-floor",
+          "id": "h_85clrdna9k",
           "type": "nav",
           "position": {
             "yaw": 122.3,
@@ -266,7 +260,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_f7b95ypyuv",
           "type": "nav",
           "position": {
             "yaw": 74.2,
@@ -275,7 +269,7 @@
           "targetScene": "s_t3it0l8bsk"
         },
         {
-          "id": "nav-to-covered-porch",
+          "id": "h_l53eugj00w",
           "type": "nav",
           "position": {
             "yaw": 109.8,
@@ -284,7 +278,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_lnqb7bs35j",
           "type": "nav",
           "position": {
             "yaw": 86.3,
@@ -293,7 +287,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-kitchen",
+          "id": "h_oe0sppj33j",
           "type": "nav",
           "position": {
             "yaw": 52.4,
@@ -302,7 +296,7 @@
           "targetScene": "s_hfiucp83au"
         },
         {
-          "id": "nav-to-gazebo",
+          "id": "h_d25d9myaq1",
           "type": "nav",
           "position": {
             "yaw": 27.9,
@@ -311,14 +305,12 @@
           "targetScene": "s_c13b4lgg8f"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_xl88jb8utx.webp",
       "visibility": "unlisted",
       "suppressPlaceOverview": true
     },
     "s_dehwdo8kx1": {
       "id": "s_dehwdo8kx1",
       "title": "Commual Space",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_dehwdo8kx1.webp",
       "defaultView": {
         "yaw": 107.5,
         "pitch": -9.6,
@@ -326,7 +318,7 @@
       },
       "hotspots": [
         {
-          "id": "info-comfort-corner",
+          "id": "h_10abld36xj",
           "type": "info",
           "position": {
             "yaw": 100.2,
@@ -336,13 +328,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/510e41aa-d14b-4bc7-8b13-54c8517fac66"
           },
-          "namingId": "no_4q7bxizw9o",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-comfort-corner.webp"
-          }
+          "namingId": "no_4q7bxizw9o"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_ijb7odh55x",
           "type": "nav",
           "position": {
             "yaw": 105.1,
@@ -353,7 +342,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-playroom",
+          "id": "h_vlcqk5xrr2",
           "type": "nav",
           "position": {
             "yaw": 82.9,
@@ -362,7 +351,7 @@
           "targetScene": "s_91jpwd8ota"
         },
         {
-          "id": "nav-to-corridor",
+          "id": "h_w3jar86xee",
           "type": "nav",
           "position": {
             "yaw": 104.7,
@@ -371,7 +360,6 @@
           "targetScene": "s_rmf30ndp5j"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_dehwdo8kx1.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=oj27sZn2ETw",
       "suppressPlaceOverview": true
     },
@@ -379,7 +367,6 @@
       "id": "s_zlz39v1fjz",
       "title": "Main Entrance",
       "description": "Arrive at the ground-level main entrance of Ken Sargent House. Glass doors open directly into the reception lobby, with an accessible ramp and railings on the left side of the front stairs. Illuminated welcome signage helps visitors find their way, whether arriving during the day or in the evening.",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_zlz39v1fjz.webp",
       "defaultView": {
         "yaw": 100,
         "pitch": 4.3,
@@ -387,7 +374,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-reception",
+          "id": "h_lgdg4hv6bq",
           "type": "nav",
           "label": "Reception",
           "position": {
@@ -397,7 +384,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_pai1ef5854",
           "type": "nav",
           "position": {
             "yaw": 35.1,
@@ -408,7 +395,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-parking-space",
+          "id": "h_qgrnf2uvco",
           "type": "nav",
           "position": {
             "yaw": 234.1,
@@ -417,13 +404,11 @@
           "targetScene": "s_yz800wucno"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_zlz39v1fjz.webp",
       "suppressPlaceOverview": true
     },
     "s_vddzraqi1q": {
       "id": "s_vddzraqi1q",
       "title": "Reception",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_vddzraqi1q.webp",
       "defaultView": {
         "yaw": 90,
         "pitch": -0.8,
@@ -431,7 +416,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-back-entrance",
+          "id": "h_yx3ib0jzzv",
           "type": "nav",
           "position": {
             "yaw": 35.3,
@@ -440,7 +425,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "info-reception",
+          "id": "h_zneqksdvco",
           "type": "info",
           "position": {
             "yaw": 91.1,
@@ -454,13 +439,10 @@
             },
             "title": "Reception Area"
           },
-          "namingId": "no_iv5uzns09e",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-reception.webp"
-          }
+          "namingId": "no_iv5uzns09e"
         },
         {
-          "id": "nav-to-kitchen",
+          "id": "h_eot38d9gb0",
           "type": "nav",
           "label": "Kitchen",
           "position": {
@@ -470,7 +452,7 @@
           "targetScene": "s_hfiucp83au"
         },
         {
-          "id": "nav-to-main-floor-stairwell",
+          "id": "h_zk3uz9t6rp",
           "type": "nav",
           "position": {
             "yaw": 8.6,
@@ -479,7 +461,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-family-patient-communal-space",
+          "id": "h_omveokaar9",
           "type": "nav",
           "position": {
             "yaw": 238.3,
@@ -488,7 +470,7 @@
           "targetScene": "s_jfn7k06rhj"
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_djq4cngrqb",
           "type": "nav",
           "position": {
             "yaw": 257.4,
@@ -497,7 +479,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-main-floor-corridor",
+          "id": "h_6do1vulded",
           "type": "nav",
           "position": {
             "yaw": 323.4,
@@ -506,7 +488,7 @@
           "targetScene": "s_rmf30ndp5j"
         },
         {
-          "id": "nav-to-covered-porch",
+          "id": "h_riqh7e5ikv",
           "type": "nav",
           "position": {
             "yaw": 236.5,
@@ -515,7 +497,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_1wtt320j97",
           "type": "nav",
           "position": {
             "yaw": 175.8,
@@ -524,7 +506,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-elevator-door",
+          "id": "h_2anrxjtdxx",
           "type": "nav",
           "position": {
             "yaw": 342.6,
@@ -533,7 +515,7 @@
           "targetScene": "s_sw7dxt8z3g"
         },
         {
-          "id": "info-place",
+          "id": "h_r3ey1omkex",
           "type": "info",
           "role": "placeOverview",
           "position": {
@@ -548,7 +530,7 @@
           "placeOverviewManual": true
         },
         {
-          "id": "nav-to-donor-wall",
+          "id": "h_03bvqcisoy",
           "type": "nav",
           "position": {
             "yaw": 314.5,
@@ -557,14 +539,12 @@
           "targetScene": "s_f24tksel8t"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_vddzraqi1q.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=sUe_TSb4Ffo"
     },
     "s_dtv27wfrbi": {
       "id": "s_dtv27wfrbi",
       "title": "Overview",
       "description": "You are looking at Ken Sargent House from the outside — a welcoming home-away-from-home for families near the hospital. From this overview you can enter the Main Floor, continue upstairs, or explore the lower level as you tour the house.",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_dtv27wfrbi.webp",
       "defaultView": {
         "yaw": 80.8,
         "pitch": -12.8,
@@ -572,7 +552,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-main-floor",
+          "id": "h_i8usxcz4t6",
           "type": "nav",
           "position": {
             "yaw": 65.9,
@@ -581,7 +561,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_p41xrwip11",
           "type": "nav",
           "position": {
             "yaw": 48.1,
@@ -590,7 +570,7 @@
           "targetScene": "s_t3it0l8bsk"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_wsz7nitc4k",
           "type": "nav",
           "position": {
             "yaw": 92.5,
@@ -600,14 +580,12 @@
         }
       ],
       "previewVideoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI",
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_dtv27wfrbi.webp",
       "suppressPlaceOverview": true
     },
     "s_h310pim38b": {
       "id": "s_h310pim38b",
       "title": "Main Floor",
       "description": "The Main Floor is the welcoming heart of Ken Sargent House — where families first settle in after arriving from the hospital nearby.\n\nReception greets guests at the door, with the kitchen and dining area close at hand for shared meals and quiet coffee. A family and patient communal space offers room to gather, while guest suites and everyday comforts are just steps away.\n\nFrom here you can step out to the covered porch, return to the main entrance, or continue upstairs and down to the lower level as you explore the house.",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_h310pim38b.webp",
       "defaultView": {
         "yaw": 83.3,
         "pitch": -48.2,
@@ -615,7 +593,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-second-floor",
+          "id": "h_c10f0rh8ve",
           "type": "nav",
           "position": {
             "yaw": 84,
@@ -624,7 +602,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-overview",
+          "id": "h_yz0j4uoykd",
           "type": "nav",
           "position": {
             "yaw": 6.9,
@@ -635,7 +613,7 @@
           "navVariant": "hub"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_jdfu1lv30n",
           "type": "nav",
           "position": {
             "yaw": 100.5,
@@ -644,7 +622,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "nav-to-entrance-to-the-base-level",
+          "id": "h_c8s7bn1mny",
           "type": "nav",
           "position": {
             "yaw": 24,
@@ -653,7 +631,7 @@
           "targetScene": "s_xl88jb8utx"
         },
         {
-          "id": "nav-to-covered-porch",
+          "id": "h_i8uq5ddr53",
           "type": "nav",
           "position": {
             "yaw": 23.2,
@@ -662,7 +640,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_54yeqqsbth",
           "type": "nav",
           "position": {
             "yaw": 39.8,
@@ -671,7 +649,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-kitchen",
+          "id": "h_79pwy39qnt",
           "type": "nav",
           "position": {
             "yaw": 54.5,
@@ -680,7 +658,7 @@
           "targetScene": "s_hfiucp83au"
         },
         {
-          "id": "nav-to-reception",
+          "id": "h_8awu61p50l",
           "type": "nav",
           "position": {
             "yaw": 74.4,
@@ -689,7 +667,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-family-patient-communal-space",
+          "id": "h_a26edbdwug",
           "type": "nav",
           "position": {
             "yaw": 47.6,
@@ -698,7 +676,7 @@
           "targetScene": "s_jfn7k06rhj"
         },
         {
-          "id": "nav-to-accessible-larger-suites",
+          "id": "h_m6l3b339go",
           "type": "nav",
           "position": {
             "yaw": 107.4,
@@ -707,7 +685,7 @@
           "targetScene": "s_0vzggtgj1g"
         },
         {
-          "id": "nav-to-accessible-larger-suites-2",
+          "id": "h_vnyz05ejv5",
           "type": "nav",
           "position": {
             "yaw": 104.7,
@@ -716,7 +694,7 @@
           "targetScene": "s_0vzggtgj1g"
         },
         {
-          "id": "nav-to-suite-a",
+          "id": "h_h6jcc3atrg",
           "type": "nav",
           "position": {
             "yaw": 107.6,
@@ -725,7 +703,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-suite-a-2",
+          "id": "h_xqko17a6y3",
           "type": "nav",
           "position": {
             "yaw": 72.5,
@@ -734,7 +712,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-suite-a-3",
+          "id": "h_01okfut3qq",
           "type": "nav",
           "position": {
             "yaw": 78.9,
@@ -743,7 +721,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-comfort-corner",
+          "id": "h_s035ipgj1c",
           "type": "nav",
           "position": {
             "yaw": 100.2,
@@ -752,7 +730,7 @@
           "targetScene": "s_dehwdo8kx1"
         },
         {
-          "id": "nav-to-gazebo",
+          "id": "h_arikj5watk",
           "type": "nav",
           "position": {
             "yaw": 94.2,
@@ -761,7 +739,7 @@
           "targetScene": "s_c13b4lgg8f"
         },
         {
-          "id": "nav-to-pantry",
+          "id": "h_do3z41xfcg",
           "type": "nav",
           "position": {
             "yaw": 59.5,
@@ -770,7 +748,7 @@
           "targetScene": "s_ps029p4kzn"
         },
         {
-          "id": "nav-to-playroom",
+          "id": "h_pi60ucy623",
           "type": "nav",
           "position": {
             "yaw": 106.1,
@@ -779,7 +757,7 @@
           "targetScene": "s_91jpwd8ota"
         },
         {
-          "id": "nav-to-main-floor-corridor",
+          "id": "h_thk4sxcu9h",
           "type": "nav",
           "position": {
             "yaw": 91.2,
@@ -788,7 +766,7 @@
           "targetScene": "s_rmf30ndp5j"
         },
         {
-          "id": "nav-to-suite-a-4",
+          "id": "h_lvn4hi3i23",
           "type": "nav",
           "position": {
             "yaw": 84.5,
@@ -797,7 +775,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-suite-a-5",
+          "id": "h_hupj7pmduo",
           "type": "nav",
           "position": {
             "yaw": 87.8,
@@ -806,7 +784,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-suite-a-6",
+          "id": "h_c57wcilknh",
           "type": "nav",
           "position": {
             "yaw": 91.1,
@@ -815,7 +793,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-suite-a-7",
+          "id": "h_qofpctlgwo",
           "type": "nav",
           "position": {
             "yaw": 108.7,
@@ -824,7 +802,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-suite-a-8",
+          "id": "h_h4qyqx6c64",
           "type": "nav",
           "position": {
             "yaw": 102.5,
@@ -833,7 +811,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-second-floor-2",
+          "id": "h_fcegxo34z3",
           "type": "nav",
           "position": {
             "yaw": 91,
@@ -842,7 +820,7 @@
           "targetScene": "s_ca8beuikkq"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_i5map20vt2",
           "type": "nav",
           "position": {
             "yaw": 97,
@@ -851,7 +829,7 @@
           "targetScene": "s_t3it0l8bsk"
         },
         {
-          "id": "nav-to-parking-space",
+          "id": "h_f1cr7fk2hi",
           "type": "nav",
           "position": {
             "yaw": 143.8,
@@ -860,7 +838,7 @@
           "targetScene": "s_yz800wucno"
         },
         {
-          "id": "nav-to-welcome-walk",
+          "id": "h_205r2a43b7",
           "type": "nav",
           "position": {
             "yaw": 14.7,
@@ -869,7 +847,7 @@
           "targetScene": "s_dm33cannkj"
         },
         {
-          "id": "nav-to-elevator-door",
+          "id": "h_g1wkfv6c1r",
           "type": "nav",
           "position": {
             "yaw": 75.3,
@@ -878,7 +856,7 @@
           "targetScene": "s_sw7dxt8z3g"
         },
         {
-          "id": "nav-to-donor-wall",
+          "id": "h_ovnvpn4uyk",
           "type": "nav",
           "position": {
             "yaw": 68.5,
@@ -887,7 +865,7 @@
           "targetScene": "s_f24tksel8t"
         },
         {
-          "id": "nav-to-house-administration-hub",
+          "id": "h_cyop65bj3w",
           "type": "nav",
           "position": {
             "yaw": 56.2,
@@ -896,7 +874,7 @@
           "targetScene": "s_4epcuat8yv"
         },
         {
-          "id": "nav-to-main-level-storage-room",
+          "id": "h_m1lvge8vgc",
           "type": "nav",
           "position": {
             "yaw": 64.7,
@@ -905,7 +883,6 @@
           "targetScene": "s_lc9a2b99af"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_h310pim38b.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI",
       "suppressPlaceOverview": true
     },
@@ -913,7 +890,6 @@
       "id": "s_ca8beuikkq",
       "title": "Second Floor",
       "description": "The Second Floor is designed for rest, privacy, and quieter moments away from the busier ground level.\n\nGuest suites line the corridor, with a social space for informal conversation and a quiet room when someone needs stillness. A comfort corner and fitness room give families small ways to recharge between hospital visits.\n\nThis level keeps overnight stays feeling personal and calm — a soft landing for parents, partners, and caregivers who need space to breathe.",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_ca8beuikkq.webp",
       "defaultView": {
         "yaw": 80.7,
         "pitch": -45,
@@ -921,7 +897,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-overview",
+          "id": "h_flh28jnmz2",
           "type": "nav",
           "position": {
             "yaw": 17.7,
@@ -932,7 +908,7 @@
           "navVariant": "hub"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_zw5nl1j1gz",
           "type": "nav",
           "position": {
             "yaw": 72.4,
@@ -941,7 +917,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-comfort-corner",
+          "id": "h_8a7btlnl4i",
           "type": "nav",
           "position": {
             "yaw": 104.5,
@@ -950,7 +926,7 @@
           "targetScene": "s_tcr44j461u"
         },
         {
-          "id": "nav-to-social-space",
+          "id": "h_odfiivm36g",
           "type": "nav",
           "position": {
             "yaw": 57.7,
@@ -959,7 +935,7 @@
           "targetScene": "s_c77nixtvmw"
         },
         {
-          "id": "nav-to-quite-space",
+          "id": "h_m0pu32ngzd",
           "type": "nav",
           "position": {
             "yaw": 47.1,
@@ -968,7 +944,7 @@
           "targetScene": "s_leoc61fw42"
         },
         {
-          "id": "nav-to-suite-b",
+          "id": "h_65n8m1zu19",
           "type": "nav",
           "position": {
             "yaw": 73.3,
@@ -977,7 +953,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-suite-b-2",
+          "id": "h_lkcvnzvwgg",
           "type": "nav",
           "position": {
             "yaw": 99.4,
@@ -986,7 +962,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-accessible-larger-suites",
+          "id": "h_224mmg3u8w",
           "type": "nav",
           "position": {
             "yaw": 110.7,
@@ -995,7 +971,7 @@
           "targetScene": "s_0g101b6iul"
         },
         {
-          "id": "nav-to-suite-b-3",
+          "id": "h_vd6hpc9d0a",
           "type": "nav",
           "position": {
             "yaw": 80.9,
@@ -1004,7 +980,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-fitness-room",
+          "id": "h_9p4bfv8z1s",
           "type": "nav",
           "position": {
             "yaw": 111.5,
@@ -1013,7 +989,7 @@
           "targetScene": "s_hxsjmv1tio"
         },
         {
-          "id": "nav-to-corridor",
+          "id": "h_i2i5iu36p2",
           "type": "nav",
           "position": {
             "yaw": 83.4,
@@ -1022,7 +998,7 @@
           "targetScene": "s_9kkz24dle7"
         },
         {
-          "id": "nav-to-suite-b-4",
+          "id": "h_eenjzadyvz",
           "type": "nav",
           "position": {
             "yaw": 88.1,
@@ -1031,7 +1007,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-suite-b-5",
+          "id": "h_hotxixo2ai",
           "type": "nav",
           "position": {
             "yaw": 92.9,
@@ -1040,7 +1016,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-suite-b-6",
+          "id": "h_kru3u982xn",
           "type": "nav",
           "position": {
             "yaw": 96.7,
@@ -1049,7 +1025,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-accessible-larger-suites-2",
+          "id": "h_ls6oydw4a8",
           "type": "nav",
           "position": {
             "yaw": 111.9,
@@ -1058,7 +1034,7 @@
           "targetScene": "s_0g101b6iul"
         },
         {
-          "id": "nav-to-suite-b-7",
+          "id": "h_l3r07bfxod",
           "type": "nav",
           "position": {
             "yaw": 112.9,
@@ -1067,7 +1043,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-suite-b-8",
+          "id": "h_79cpdoq6lb",
           "type": "nav",
           "position": {
             "yaw": 113.5,
@@ -1076,7 +1052,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-main-floor-3",
+          "id": "h_y2t9b9msf5",
           "type": "nav",
           "position": {
             "yaw": 93.5,
@@ -1085,7 +1061,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-suite-b-9",
+          "id": "h_9k1p091i8f",
           "type": "nav",
           "position": {
             "yaw": 60.2,
@@ -1094,7 +1070,6 @@
           "targetScene": "s_q5obngkupu"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_ca8beuikkq.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI",
       "suppressPlaceOverview": true
     },
@@ -1102,7 +1077,6 @@
       "id": "s_t3it0l8bsk",
       "title": "Basement",
       "description": "The Basement supports the daily running of Ken Sargent House so guest floors can stay focused on comfort and care.\n\nLaundry, linen, housekeeping, and staff spaces sit alongside practical rooms for home essentials and building operations. Corridors connect these work areas while still offering a clear path back up to the Main Floor.\n\nIt is the house behind the house — the foundation that keeps hospitality running smoothly for every family who stays here.",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_t3it0l8bsk.webp",
       "defaultView": {
         "yaw": 121.4,
         "pitch": -64.6,
@@ -1110,7 +1084,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-main-floor",
+          "id": "h_gmahz8jugw",
           "type": "nav",
           "position": {
             "yaw": 48.2,
@@ -1119,7 +1093,7 @@
           "targetScene": "s_xl88jb8utx"
         },
         {
-          "id": "nav-to-overview",
+          "id": "h_p220x4wa68",
           "type": "nav",
           "position": {
             "yaw": 11.5,
@@ -1130,7 +1104,7 @@
           "navVariant": "hub"
         },
         {
-          "id": "nav-to-laundry",
+          "id": "h_tt6o6u19rx",
           "type": "nav",
           "position": {
             "yaw": 98.2,
@@ -1139,7 +1113,7 @@
           "targetScene": "s_pvcsd2t0w2"
         },
         {
-          "id": "nav-to-staff-room",
+          "id": "h_xcq2mhilau",
           "type": "nav",
           "position": {
             "yaw": 67.4,
@@ -1149,7 +1123,7 @@
           "instant": true
         },
         {
-          "id": "nav-to-basement-corridor",
+          "id": "h_vm3gwwpz8i",
           "type": "nav",
           "position": {
             "yaw": 130.8,
@@ -1159,7 +1133,7 @@
           "instant": true
         },
         {
-          "id": "nav-to-main-floor-2",
+          "id": "h_0mv8ig2ifx",
           "type": "nav",
           "position": {
             "yaw": 166.4,
@@ -1168,7 +1142,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-custodian-room",
+          "id": "h_jatxqjflmo",
           "type": "nav",
           "position": {
             "yaw": 107.5,
@@ -1177,7 +1151,7 @@
           "targetScene": "s_eb2hcp3nla"
         },
         {
-          "id": "nav-to-linen-room",
+          "id": "h_yah7mo1jf8",
           "type": "nav",
           "position": {
             "yaw": 107.2,
@@ -1186,7 +1160,7 @@
           "targetScene": "s_6e38qm2jc1"
         },
         {
-          "id": "nav-to-home-essentials-room",
+          "id": "h_amag6g1slc",
           "type": "nav",
           "position": {
             "yaw": 93.5,
@@ -1195,7 +1169,7 @@
           "targetScene": "s_osxxeptx4f"
         },
         {
-          "id": "nav-to-crawl-space",
+          "id": "h_c46487ufcg",
           "type": "nav",
           "position": {
             "yaw": 128.8,
@@ -1204,7 +1178,7 @@
           "targetScene": "s_0j9sgtokj2"
         },
         {
-          "id": "nav-to-housekeeping-centre",
+          "id": "h_jfjlochrql",
           "type": "nav",
           "position": {
             "yaw": 118,
@@ -1213,7 +1187,7 @@
           "targetScene": "s_6bewbri9s0"
         },
         {
-          "id": "nav-to-operation-hub",
+          "id": "h_mggancjwui",
           "type": "nav",
           "position": {
             "yaw": 176.6,
@@ -1222,14 +1196,12 @@
           "targetScene": "s_be8euh4oit"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_t3it0l8bsk.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=t7q_jt3xDmI",
       "suppressPlaceOverview": true
     },
     "s_e5k3wjy72q": {
       "id": "s_e5k3wjy72q",
       "title": "Covered Porch",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_e5k3wjy72q.webp",
       "defaultView": {
         "yaw": 254.8,
         "pitch": -9.7,
@@ -1237,7 +1209,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-main-floor",
+          "id": "h_1il13d4zjm",
           "type": "nav",
           "position": {
             "yaw": 191.3,
@@ -1248,7 +1220,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-entrance-to-the-base-level",
+          "id": "h_3olchf6yuu",
           "type": "nav",
           "position": {
             "yaw": 348.8,
@@ -1258,7 +1230,7 @@
           "instant": true
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_o7l7q04t1y",
           "type": "nav",
           "position": {
             "yaw": 17,
@@ -1267,7 +1239,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-main-floor-stairwell",
+          "id": "h_ultuq7pgnf",
           "type": "nav",
           "position": {
             "yaw": 92.2,
@@ -1276,7 +1248,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-reception",
+          "id": "h_uxr5v0jc08",
           "type": "nav",
           "position": {
             "yaw": 110.4,
@@ -1285,7 +1257,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_vp22jtpvyz",
           "type": "nav",
           "position": {
             "yaw": 99.4,
@@ -1294,7 +1266,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "info-covered-porch",
+          "id": "h_p20we5hztk",
           "type": "info",
           "position": {
             "yaw": 259.7,
@@ -1303,20 +1275,15 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_yohppm1k3q",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-covered-porch.webp"
-          }
+          "namingId": "no_yohppm1k3q"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_e5k3wjy72q.webp",
       "suppressPlaceOverview": true,
       "description": "Ken Sargent house is designed to blend comfort with modern elegance, and its covered porch is no exception. Extending seamlessly from the home's main living space, the covered porch serves as a perfect transition between indoors and outdoors.\n\nBuilt with high-quality wood or composite materials, the porch is both stylish and durable, capable of withstanding various weather conditions. Large glass doors often lead to this space, allowing natural light to flood the interior while providing easy access to fresh air.\n\nA signature feature of the Ken Sargent covered porch is its thoughtful design, incorporating subtle lighting and an inviting atmosphere. Whether used for relaxing mornings with a cup of coffee, sunset gatherings with friends, or peaceful moments under the stars, this porch enhances the overall experience of the home.\n\nDesigned with both aesthetics and functionality in mind, the covered porch is a place where architecture and nature come together, creating a serene and inviting retreat."
     },
     "s_3fh5x3humm": {
       "id": "s_3fh5x3humm",
       "title": "Dining Area",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_3fh5x3humm.webp",
       "defaultView": {
         "yaw": 337.8,
         "pitch": -17.5,
@@ -1324,7 +1291,7 @@
       },
       "hotspots": [
         {
-          "id": "info-dining-area",
+          "id": "h_dammbvda7c",
           "type": "info",
           "position": {
             "yaw": 348,
@@ -1334,13 +1301,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/0f9ccf86-f6fb-4739-8c03-6e0aa8abff08"
           },
-          "namingId": "no_2roymsyadr",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-dining-area.webp"
-          }
+          "namingId": "no_2roymsyadr"
         },
         {
-          "id": "nav-to-kitchen",
+          "id": "h_41cwp9n5dp",
           "type": "nav",
           "position": {
             "yaw": 90,
@@ -1349,7 +1313,7 @@
           "targetScene": "s_hfiucp83au"
         },
         {
-          "id": "nav-to-main-floor-corridor",
+          "id": "h_rz5v6xeqz8",
           "type": "nav",
           "position": {
             "yaw": 123.5,
@@ -1358,7 +1322,7 @@
           "targetScene": "s_rmf30ndp5j"
         },
         {
-          "id": "nav-to-reception",
+          "id": "h_6i1ydsg6ym",
           "type": "nav",
           "position": {
             "yaw": 167.7,
@@ -1367,7 +1331,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-main-floor-stairwell",
+          "id": "h_8b3oa4smon",
           "type": "nav",
           "position": {
             "yaw": 143.3,
@@ -1376,7 +1340,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-family-patient-communal-space",
+          "id": "h_vzv8yrz1mb",
           "type": "nav",
           "position": {
             "yaw": 172.9,
@@ -1385,7 +1349,7 @@
           "targetScene": "s_jfn7k06rhj"
         },
         {
-          "id": "nav-to-covered-porch",
+          "id": "h_rp4bp3o51f",
           "type": "nav",
           "position": {
             "yaw": 260,
@@ -1394,7 +1358,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_7h6z7065u1",
           "type": "nav",
           "position": {
             "yaw": 152.6,
@@ -1403,7 +1367,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "nav-to-pantry",
+          "id": "h_wxnz8fs6q3",
           "type": "nav",
           "position": {
             "yaw": 65.8,
@@ -1412,7 +1376,7 @@
           "targetScene": "s_ps029p4kzn"
         },
         {
-          "id": "nav-to-main-entrance-2",
+          "id": "h_csc2hgcvsa",
           "type": "nav",
           "position": {
             "yaw": 197.7,
@@ -1421,7 +1385,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-elevator-door",
+          "id": "h_km0m0gpczb",
           "type": "nav",
           "position": {
             "yaw": 134.7,
@@ -1430,14 +1394,12 @@
           "targetScene": "s_sw7dxt8z3g"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_3fh5x3humm.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=EG-JDOqPc80",
       "suppressPlaceOverview": true
     },
     "s_jfn7k06rhj": {
       "id": "s_jfn7k06rhj",
       "title": "Families & Patients Communal Space",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_jfn7k06rhj.webp",
       "defaultView": {
         "yaw": 18.5,
         "pitch": -0.3,
@@ -1445,7 +1407,7 @@
       },
       "hotspots": [
         {
-          "id": "info-family-patient-communal-space",
+          "id": "h_e84rrlvf7x",
           "type": "info",
           "position": {
             "yaw": 19.9,
@@ -1455,13 +1417,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/9227b641-562a-49f2-b1cf-19eac55ec6d6"
           },
-          "namingId": "no_6k2x96yalr",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-family-patient-communal-space.webp"
-          }
+          "namingId": "no_6k2x96yalr"
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_3xvseknmk5",
           "type": "nav",
           "position": {
             "yaw": 101,
@@ -1470,7 +1429,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-covered-porch",
+          "id": "h_8xqsk1jcmh",
           "type": "nav",
           "position": {
             "yaw": 70.4,
@@ -1479,7 +1438,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-kitchen",
+          "id": "h_odqt40ym4t",
           "type": "nav",
           "position": {
             "yaw": 156.9,
@@ -1488,7 +1447,7 @@
           "targetScene": "s_hfiucp83au"
         },
         {
-          "id": "nav-to-main-floor-corridor",
+          "id": "h_nc7f22fu99",
           "type": "nav",
           "position": {
             "yaw": 196.7,
@@ -1497,7 +1456,7 @@
           "targetScene": "s_rmf30ndp5j"
         },
         {
-          "id": "nav-to-main-floor-stairwell",
+          "id": "h_pb8p63eg2l",
           "type": "nav",
           "position": {
             "yaw": 231.1,
@@ -1506,7 +1465,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_h2vcz27gli",
           "type": "nav",
           "position": {
             "yaw": 247.4,
@@ -1515,7 +1474,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "nav-to-reception",
+          "id": "h_9ctho60mud",
           "type": "nav",
           "position": {
             "yaw": 272,
@@ -1524,7 +1483,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_9460wzdr8a",
           "type": "nav",
           "position": {
             "yaw": 328.5,
@@ -1533,7 +1492,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-elevator-door",
+          "id": "h_zwb4fcrosh",
           "type": "nav",
           "position": {
             "yaw": 217.3,
@@ -1542,7 +1501,6 @@
           "targetScene": "s_sw7dxt8z3g"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_jfn7k06rhj.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=b3bH7Q499Xg",
       "visibility": "unlisted",
       "suppressPlaceOverview": true
@@ -1550,7 +1508,6 @@
     "s_x6w0tq0sa5": {
       "id": "s_x6w0tq0sa5",
       "title": "Stairwell",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_x6w0tq0sa5.webp",
       "defaultView": {
         "yaw": 69.9,
         "pitch": -0.7,
@@ -1558,7 +1515,7 @@
       },
       "hotspots": [
         {
-          "id": "info-main-floor-stairwell",
+          "id": "h_6ddv52irvg",
           "type": "info",
           "position": {
             "yaw": 74.1,
@@ -1568,13 +1525,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8431074c-e271-4083-be66-189dd064148f"
           },
-          "namingId": "no_4lng3uiyfs",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-main-floor-stairwell.webp"
-          }
+          "namingId": "no_4lng3uiyfs"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_xdnxxopsvs",
           "type": "nav",
           "position": {
             "yaw": 106.5,
@@ -1583,7 +1537,7 @@
           "targetScene": "s_ca8beuikkq"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_0o4005dhn7",
           "type": "nav",
           "position": {
             "yaw": 248.1,
@@ -1594,7 +1548,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_qgn8kku0d5",
           "type": "nav",
           "position": {
             "yaw": 223,
@@ -1603,13 +1557,11 @@
           "targetScene": "s_t3it0l8bsk"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_x6w0tq0sa5.webp",
       "suppressPlaceOverview": true
     },
     "s_0vzggtgj1g": {
       "id": "s_0vzggtgj1g",
       "title": "Suite A2",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_0vzggtgj1g.webp",
       "defaultView": {
         "yaw": 95,
         "pitch": 2,
@@ -1617,7 +1569,7 @@
       },
       "hotspots": [
         {
-          "id": "info-accessible-larger-suites",
+          "id": "h_e4wtk92efy",
           "type": "info",
           "position": {
             "yaw": 95,
@@ -1627,13 +1579,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788"
           },
-          "namingId": "no_qslvzqne8a",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-accessible-larger-suites.webp"
-          }
+          "namingId": "no_qslvzqne8a"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_72svwvxdhf",
           "type": "nav",
           "position": {
             "yaw": 5.6,
@@ -1644,7 +1593,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-wash-room",
+          "id": "h_5qkebaazat",
           "type": "nav",
           "position": {
             "yaw": 13.8,
@@ -1654,14 +1603,12 @@
           "instant": true
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_0vzggtgj1g.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=HBrWJTrkXQc",
       "suppressPlaceOverview": true
     },
     "s_sb851xh639": {
       "id": "s_sb851xh639",
       "title": "Suite A",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_sb851xh639.webp",
       "defaultView": {
         "yaw": 109.5,
         "pitch": -14.8,
@@ -1669,7 +1616,7 @@
       },
       "hotspots": [
         {
-          "id": "info-suite-a",
+          "id": "h_xbsw4k7exj",
           "type": "info",
           "position": {
             "yaw": 105.9,
@@ -1679,13 +1626,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/28feffbb-caed-43f8-bfa1-ac8addf0c1c3"
           },
-          "namingId": "no_geeclddv9n",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-suite-a.webp"
-          }
+          "namingId": "no_geeclddv9n"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_66dtfmo10y",
           "type": "nav",
           "position": {
             "yaw": 38,
@@ -1696,14 +1640,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_sb851xh639.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=w5wxALUMipE",
       "suppressPlaceOverview": true
     },
     "s_c13b4lgg8f": {
       "id": "s_c13b4lgg8f",
       "title": "Gazebo",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_c13b4lgg8f.webp",
       "defaultView": {
         "yaw": 86.3,
         "pitch": 4.4,
@@ -1711,7 +1653,7 @@
       },
       "hotspots": [
         {
-          "id": "info-gazebo",
+          "id": "h_fkb1efn62x",
           "type": "info",
           "position": {
             "yaw": 88.9,
@@ -1721,13 +1663,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/b650328c-722e-4a11-93b0-69110088a77a"
           },
-          "namingId": "no_4uzx2f0hs7",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-gazebo.webp"
-          }
+          "namingId": "no_4uzx2f0hs7"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_70yd5ojivs",
           "type": "nav",
           "position": {
             "yaw": 244.9,
@@ -1738,14 +1677,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_c13b4lgg8f.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=CV_NmMg2hxw",
       "suppressPlaceOverview": true
     },
     "s_ps029p4kzn": {
       "id": "s_ps029p4kzn",
       "title": "Pantry",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_ps029p4kzn.webp",
       "defaultView": {
         "yaw": 66.4,
         "pitch": -1.8,
@@ -1753,7 +1690,7 @@
       },
       "hotspots": [
         {
-          "id": "info-pantry",
+          "id": "h_jc6xb84y4a",
           "type": "info",
           "position": {
             "yaw": 97.6,
@@ -1763,13 +1700,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8c273fc2-9b00-4c9a-9869-02e4c60c9a82"
           },
-          "namingId": "no_7m5xquxs2v",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-pantry.webp"
-          }
+          "namingId": "no_7m5xquxs2v"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_ns77xjus54",
           "type": "nav",
           "position": {
             "yaw": 73.7,
@@ -1780,14 +1714,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_ps029p4kzn.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=LMVaFVHcF4U",
       "suppressPlaceOverview": true
     },
     "s_91jpwd8ota": {
       "id": "s_91jpwd8ota",
       "title": "Playroom",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_91jpwd8ota.webp",
       "defaultView": {
         "yaw": 83.1,
         "pitch": -10.9,
@@ -1795,7 +1727,7 @@
       },
       "hotspots": [
         {
-          "id": "info-playroom",
+          "id": "h_ibs5lf6d8o",
           "type": "info",
           "position": {
             "yaw": 82.9,
@@ -1805,13 +1737,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/6219e1bf-98ed-45c4-837e-d0e1ced62cbe"
           },
-          "namingId": "no_0eace8xncd",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-playroom.webp"
-          }
+          "namingId": "no_0eace8xncd"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_79ry2emjpm",
           "type": "nav",
           "position": {
             "yaw": 318.8,
@@ -1822,7 +1751,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-comfort-corner",
+          "id": "h_5o56ikvg96",
           "type": "nav",
           "position": {
             "yaw": 339.4,
@@ -1831,14 +1760,12 @@
           "targetScene": "s_dehwdo8kx1"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_91jpwd8ota.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=WHKuzresqMI",
       "suppressPlaceOverview": true
     },
     "s_rmf30ndp5j": {
       "id": "s_rmf30ndp5j",
       "title": "Corridor",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_rmf30ndp5j.webp",
       "defaultView": {
         "yaw": 91.9,
         "pitch": 5.7,
@@ -1846,7 +1773,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-playroom",
+          "id": "h_bzdc756y29",
           "type": "nav",
           "position": {
             "yaw": 97.8,
@@ -1855,7 +1782,7 @@
           "targetScene": "s_91jpwd8ota"
         },
         {
-          "id": "nav-to-comfort-corner",
+          "id": "h_imt0xf4g6f",
           "type": "nav",
           "position": {
             "yaw": 91.6,
@@ -1864,7 +1791,7 @@
           "targetScene": "s_dehwdo8kx1"
         },
         {
-          "id": "nav-to-accessible-larger-suites",
+          "id": "h_bnckmuyvc7",
           "type": "nav",
           "position": {
             "yaw": 181.2,
@@ -1873,7 +1800,7 @@
           "targetScene": "s_0vzggtgj1g"
         },
         {
-          "id": "nav-to-suite-a",
+          "id": "h_zprr6cdqv0",
           "type": "nav",
           "position": {
             "yaw": 10.6,
@@ -1882,7 +1809,7 @@
           "targetScene": "s_sb851xh639"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_ey2o0dt2sz",
           "type": "nav",
           "position": {
             "yaw": 275,
@@ -1893,7 +1820,7 @@
           "navVariant": "back"
         },
         {
-          "id": "info-corridor",
+          "id": "h_600omobo4c",
           "type": "info",
           "position": {
             "yaw": 93.3,
@@ -1902,19 +1829,14 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_0s9nr1ie12",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-corridor.webp"
-          }
+          "namingId": "no_0s9nr1ie12"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_rmf30ndp5j.webp",
       "suppressPlaceOverview": true
     },
     "s_y9dmsf7zmk": {
       "id": "s_y9dmsf7zmk",
       "title": "Staff Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_y9dmsf7zmk.webp",
       "defaultView": {
         "yaw": 141.3,
         "pitch": 0,
@@ -1922,7 +1844,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-laundry",
+          "id": "h_woqwms2o7y",
           "type": "nav",
           "position": {
             "yaw": 89.8,
@@ -1931,7 +1853,7 @@
           "targetScene": "s_pvcsd2t0w2"
         },
         {
-          "id": "nav-to-entrance-to-the-base-level",
+          "id": "h_o87xmnt8rc",
           "type": "nav",
           "position": {
             "yaw": 201.3,
@@ -1941,13 +1863,11 @@
           "instant": true,
           "navVariant": "back"
         }
-      ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_y9dmsf7zmk.webp"
+      ]
     },
     "s_pvcsd2t0w2": {
       "id": "s_pvcsd2t0w2",
       "title": "Laundry Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_pvcsd2t0w2.webp",
       "defaultView": {
         "yaw": 73.4,
         "pitch": -2.6,
@@ -1955,7 +1875,7 @@
       },
       "hotspots": [
         {
-          "id": "info-laundry",
+          "id": "h_oznndiu9a9",
           "type": "info",
           "position": {
             "yaw": 78.4,
@@ -1965,13 +1885,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8841a848-6936-469d-8992-8d0447f2d42d"
           },
-          "namingId": "no_2e79wndqcc",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-laundry.webp"
-          }
+          "namingId": "no_2e79wndqcc"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_i2mxy6o9q1",
           "type": "nav",
           "position": {
             "yaw": 297.6,
@@ -1982,7 +1899,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-linen-room",
+          "id": "h_m72msqmp1o",
           "type": "nav",
           "position": {
             "yaw": 320.4,
@@ -1991,14 +1908,12 @@
           "targetScene": "s_6e38qm2jc1"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_pvcsd2t0w2.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=pdQt9Wrtrzk",
       "suppressPlaceOverview": true
     },
     "s_fb3dsuusxy": {
       "id": "s_fb3dsuusxy",
       "title": "Corridor",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_fb3dsuusxy.webp",
       "defaultView": {
         "yaw": 44.8,
         "pitch": -14.3,
@@ -2006,7 +1921,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-laundry",
+          "id": "h_w3wb963630",
           "type": "nav",
           "position": {
             "yaw": 84.8,
@@ -2015,7 +1930,7 @@
           "targetScene": "s_pvcsd2t0w2"
         },
         {
-          "id": "nav-to-reception",
+          "id": "h_zd40bn96gt",
           "type": "nav",
           "position": {
             "yaw": 288.9,
@@ -2024,7 +1939,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-staff-room",
+          "id": "h_nuo277hhli",
           "type": "nav",
           "position": {
             "yaw": 12.7,
@@ -2034,7 +1949,7 @@
           "instant": true
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_eki2hqgq04",
           "type": "nav",
           "position": {
             "yaw": 358.2,
@@ -2045,7 +1960,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-linen-room",
+          "id": "h_gb072yto1t",
           "type": "nav",
           "position": {
             "yaw": 75.1,
@@ -2054,7 +1969,7 @@
           "targetScene": "s_6e38qm2jc1"
         },
         {
-          "id": "nav-to-custodian-room",
+          "id": "h_0c6ahk4508",
           "type": "nav",
           "position": {
             "yaw": 34.9,
@@ -2063,7 +1978,7 @@
           "targetScene": "s_eb2hcp3nla"
         },
         {
-          "id": "nav-to-crawl-space",
+          "id": "h_olay3q3gey",
           "type": "nav",
           "position": {
             "yaw": 2.8,
@@ -2071,13 +1986,11 @@
           },
           "targetScene": "s_0j9sgtokj2"
         }
-      ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_fb3dsuusxy.webp"
+      ]
     },
     "s_c77nixtvmw": {
       "id": "s_c77nixtvmw",
       "title": "Social Space",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_c77nixtvmw.webp",
       "defaultView": {
         "yaw": 87.4,
         "pitch": -7.2,
@@ -2085,7 +1998,7 @@
       },
       "hotspots": [
         {
-          "id": "info-social-space",
+          "id": "h_xtqcqy4nb2",
           "type": "info",
           "position": {
             "yaw": 95.4,
@@ -2095,13 +2008,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/29ab5a30-8c4b-46a7-8e45-6ea7773f5e0f"
           },
-          "namingId": "no_42bkm6h2zd",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-social-space.webp"
-          }
+          "namingId": "no_42bkm6h2zd"
         },
         {
-          "id": "nav-to-quite-space",
+          "id": "h_h23ckizczt",
           "type": "nav",
           "position": {
             "yaw": 253.1,
@@ -2110,7 +2020,7 @@
           "targetScene": "s_leoc61fw42"
         },
         {
-          "id": "nav-to-stairwell",
+          "id": "h_4a79mze830",
           "type": "nav",
           "position": {
             "yaw": 55,
@@ -2119,7 +2029,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-corridor",
+          "id": "h_4x49j3499e",
           "type": "nav",
           "position": {
             "yaw": 354.4,
@@ -2128,7 +2038,7 @@
           "targetScene": "s_9kkz24dle7"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_mlyeh8gxxn",
           "type": "nav",
           "position": {
             "yaw": 349.5,
@@ -2139,14 +2049,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_c77nixtvmw.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=XkJvW64Fbjs",
       "suppressPlaceOverview": true
     },
     "s_leoc61fw42": {
       "id": "s_leoc61fw42",
       "title": "Quiet Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_leoc61fw42.webp",
       "defaultView": {
         "yaw": 144,
         "pitch": -19.9,
@@ -2154,7 +2062,7 @@
       },
       "hotspots": [
         {
-          "id": "info-quite-space",
+          "id": "h_nbnhuujjcw",
           "type": "info",
           "position": {
             "yaw": 144,
@@ -2164,13 +2072,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/4665eae4-a333-4968-b7a8-16a8fdd3318d"
           },
-          "namingId": "no_0ldb9bludk",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-quite-space.webp"
-          }
+          "namingId": "no_0ldb9bludk"
         },
         {
-          "id": "nav-to-social-space",
+          "id": "h_ecretmhetc",
           "type": "nav",
           "position": {
             "yaw": 82.4,
@@ -2179,7 +2084,7 @@
           "targetScene": "s_c77nixtvmw"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_7nmrpupsf5",
           "type": "nav",
           "position": {
             "yaw": 98.1,
@@ -2190,14 +2095,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_leoc61fw42.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=4MZR_lXT0j8",
       "suppressPlaceOverview": true
     },
     "s_q5obngkupu": {
       "id": "s_q5obngkupu",
       "title": "Suite B",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_q5obngkupu.webp",
       "defaultView": {
         "yaw": 48.3,
         "pitch": -15.9,
@@ -2205,7 +2108,7 @@
       },
       "hotspots": [
         {
-          "id": "info-suite-b",
+          "id": "h_xqgnc2bnjy",
           "type": "info",
           "position": {
             "yaw": 59.4,
@@ -2215,13 +2118,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/9775faff-a2ce-4620-9e5a-8cbe822b1efe"
           },
-          "namingId": "no_f95cxxxi4c",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-suite-b.webp"
-          }
+          "namingId": "no_f95cxxxi4c"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_hoc6d8pt2d",
           "type": "nav",
           "position": {
             "yaw": 138,
@@ -2232,14 +2132,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_q5obngkupu.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=nTW58_IByFo",
       "suppressPlaceOverview": true
     },
     "s_tcr44j461u": {
       "id": "s_tcr44j461u",
       "title": "Communal Space",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_tcr44j461u.webp",
       "defaultView": {
         "yaw": 17.1,
         "pitch": -13.3,
@@ -2247,7 +2145,7 @@
       },
       "hotspots": [
         {
-          "id": "info-second-floor-comfort-corner",
+          "id": "h_agk6xu0qrp",
           "type": "info",
           "position": {
             "yaw": 39.8,
@@ -2257,13 +2155,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/f1fc94b3-9b5c-4c8c-843f-173c1459bd1e"
           },
-          "namingId": "no_tfkzkw1ex1",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-second-floor-comfort-corner.webp"
-          }
+          "namingId": "no_tfkzkw1ex1"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_v68tvp3eln",
           "type": "nav",
           "position": {
             "yaw": 190.5,
@@ -2272,7 +2167,7 @@
           "targetScene": "s_9kkz24dle7"
         },
         {
-          "id": "nav-to-fitness-room",
+          "id": "h_zp9ce9s82s",
           "type": "nav",
           "position": {
             "yaw": 132.8,
@@ -2281,7 +2176,7 @@
           "targetScene": "s_hxsjmv1tio"
         },
         {
-          "id": "nav-to-second-floor-2",
+          "id": "h_e8yv6hfza9",
           "type": "nav",
           "position": {
             "yaw": 178.3,
@@ -2292,14 +2187,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_tcr44j461u.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=rCLOmd-uFoI",
       "suppressPlaceOverview": true
     },
     "s_hxsjmv1tio": {
       "id": "s_hxsjmv1tio",
       "title": "Fitness Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_hxsjmv1tio.webp",
       "defaultView": {
         "yaw": 81.5,
         "pitch": -8,
@@ -2307,7 +2200,7 @@
       },
       "hotspots": [
         {
-          "id": "info-fitness-room",
+          "id": "h_98jb6idfvi",
           "type": "info",
           "position": {
             "yaw": 80.4,
@@ -2317,13 +2210,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/be369002-6a25-4ef4-bf60-310e11612a99"
           },
-          "namingId": "no_29qjjy8422",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-fitness-room.webp"
-          }
+          "namingId": "no_29qjjy8422"
         },
         {
-          "id": "nav-to-comfort-corner",
+          "id": "h_aowfe2ompo",
           "type": "nav",
           "position": {
             "yaw": 38.5,
@@ -2332,7 +2222,7 @@
           "targetScene": "s_tcr44j461u"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_qs917frz1w",
           "type": "nav",
           "position": {
             "yaw": 30.4,
@@ -2343,14 +2233,12 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_hxsjmv1tio.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=tYPS-OTKohg",
       "suppressPlaceOverview": true
     },
     "s_9kkz24dle7": {
       "id": "s_9kkz24dle7",
       "title": "Corridor",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_9kkz24dle7.webp",
       "defaultView": {
         "yaw": 88.5,
         "pitch": -3,
@@ -2358,7 +2246,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-suite-b",
+          "id": "h_o4xzzds7kw",
           "type": "nav",
           "position": {
             "yaw": 0.5,
@@ -2367,7 +2255,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-suite-b-2",
+          "id": "h_qvplkcs685",
           "type": "nav",
           "position": {
             "yaw": 180.3,
@@ -2376,7 +2264,7 @@
           "targetScene": "s_q5obngkupu"
         },
         {
-          "id": "nav-to-comfort-corner",
+          "id": "h_1oaa097m34",
           "type": "nav",
           "position": {
             "yaw": 87.4,
@@ -2385,7 +2273,7 @@
           "targetScene": "s_tcr44j461u"
         },
         {
-          "id": "nav-to-fitness-room",
+          "id": "h_4n35n905di",
           "type": "nav",
           "position": {
             "yaw": 90.8,
@@ -2394,7 +2282,7 @@
           "targetScene": "s_hxsjmv1tio"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_id4bx2hd6p",
           "type": "nav",
           "position": {
             "yaw": 266.3,
@@ -2405,7 +2293,7 @@
           "navVariant": "back"
         },
         {
-          "id": "nav-to-social-space",
+          "id": "h_vwxiqbx931",
           "type": "nav",
           "position": {
             "yaw": 258.3,
@@ -2414,7 +2302,7 @@
           "targetScene": "s_c77nixtvmw"
         },
         {
-          "id": "info-family-corridor",
+          "id": "h_hak5ewsfxe",
           "type": "info",
           "position": {
             "yaw": 88.4,
@@ -2423,19 +2311,14 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_iv4wwz1tpn",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-family-corridor.webp"
-          }
+          "namingId": "no_iv4wwz1tpn"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_9kkz24dle7.webp",
       "suppressPlaceOverview": true
     },
     "s_px8i95h8ei": {
       "id": "s_px8i95h8ei",
       "title": "Wash Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_px8i95h8ei.webp",
       "defaultView": {
         "yaw": 88.5,
         "pitch": -7.8,
@@ -2443,7 +2326,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-accessible-larger-suites",
+          "id": "h_0ygr3wj91r",
           "type": "nav",
           "position": {
             "yaw": 98,
@@ -2452,13 +2335,11 @@
           "targetScene": "s_0vzggtgj1g",
           "instant": true
         }
-      ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_px8i95h8ei.webp"
+      ]
     },
     "s_0g101b6iul": {
       "id": "s_0g101b6iul",
       "title": "Suite A3",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_0g101b6iul.webp",
       "defaultView": {
         "yaw": 106.6,
         "pitch": -20.3,
@@ -2466,7 +2347,7 @@
       },
       "hotspots": [
         {
-          "id": "info-suite-a3",
+          "id": "h_65j9tve6yd",
           "type": "info",
           "position": {
             "yaw": 106.6,
@@ -2476,13 +2357,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/938bd235-43d6-4385-ab39-82fba97cc788"
           },
-          "namingId": "no_u2odcp0f8q",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-suite-a3.webp"
-          }
+          "namingId": "no_u2odcp0f8q"
         },
         {
-          "id": "nav-to-second-floor",
+          "id": "h_w7dauw0ej6",
           "type": "nav",
           "position": {
             "yaw": 38,
@@ -2494,13 +2372,11 @@
         }
       ],
       "previewVideoUrl": "https://www.youtube.com/watch?v=HBrWJTrkXQc",
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_0g101b6iul.webp",
       "suppressPlaceOverview": true
     },
     "s_yz800wucno": {
       "id": "s_yz800wucno",
       "title": "Parking Space",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_yz800wucno.webp",
       "defaultView": {
         "yaw": 145.8,
         "pitch": -2,
@@ -2508,7 +2384,7 @@
       },
       "hotspots": [
         {
-          "id": "info-parking-space",
+          "id": "h_kr18jyhevf",
           "type": "info",
           "position": {
             "yaw": 144.3,
@@ -2517,13 +2393,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_8st1iyzvpi",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-parking-space.webp"
-          }
+          "namingId": "no_8st1iyzvpi"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_j493wrcuzd",
           "type": "nav",
           "position": {
             "yaw": 39.2,
@@ -2532,7 +2405,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_x2hsq1ynds",
           "type": "nav",
           "position": {
             "yaw": 9.2,
@@ -2543,13 +2416,11 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_yz800wucno.webp",
       "suppressPlaceOverview": true
     },
     "s_6bewbri9s0": {
       "id": "s_6bewbri9s0",
       "title": "Housekeeping Centre",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_6bewbri9s0.webp",
       "defaultView": {
         "yaw": 66.1,
         "pitch": -2.9,
@@ -2557,7 +2428,7 @@
       },
       "hotspots": [
         {
-          "id": "info-housekeeping-centre",
+          "id": "h_q3e3w7l89d",
           "type": "info",
           "position": {
             "yaw": 72.4,
@@ -2566,19 +2437,14 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_201r3riftw",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-housekeeping-centre.webp"
-          }
+          "namingId": "no_201r3riftw"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_6bewbri9s0.webp",
       "visibility": "unlisted"
     },
     "s_4epcuat8yv": {
       "id": "s_4epcuat8yv",
       "title": "House Administration Hub",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_4epcuat8yv.webp",
       "defaultView": {
         "yaw": 66.2,
         "pitch": -9.7,
@@ -2586,7 +2452,7 @@
       },
       "hotspots": [
         {
-          "id": "info-house-administration-hub",
+          "id": "h_sn4novubpg",
           "type": "info",
           "position": {
             "yaw": 71.8,
@@ -2596,13 +2462,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/4f5dedec-1fb9-459f-a732-88fe81d79587"
           },
-          "namingId": "no_ulg3poh16m",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-house-administration-hub.webp"
-          }
+          "namingId": "no_ulg3poh16m"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_qwzbpms3ho",
           "type": "nav",
           "position": {
             "yaw": 147.1,
@@ -2611,13 +2474,11 @@
           "targetScene": "s_h310pim38b"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_4epcuat8yv.webp",
       "suppressPlaceOverview": true
     },
     "s_dm33cannkj": {
       "id": "s_dm33cannkj",
       "title": "Welcome Walk",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_dm33cannkj.webp",
       "defaultView": {
         "yaw": 26.7,
         "pitch": -1.2,
@@ -2625,7 +2486,7 @@
       },
       "hotspots": [
         {
-          "id": "info-welcome-walk",
+          "id": "h_8nl4pdqhic",
           "type": "info",
           "position": {
             "yaw": 34,
@@ -2634,13 +2495,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_cxz5nh0a4w",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-welcome-walk.webp"
-          }
+          "namingId": "no_cxz5nh0a4w"
         },
         {
-          "id": "nav-to-covered-porch",
+          "id": "h_ptbx2hml8d",
           "type": "nav",
           "position": {
             "yaw": 72.9,
@@ -2649,7 +2507,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-covered-porch-2",
+          "id": "h_wb2wgbc011",
           "type": "nav",
           "position": {
             "yaw": 31.4,
@@ -2658,7 +2516,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_ryxftablcp",
           "type": "nav",
           "position": {
             "yaw": 86.3,
@@ -2667,7 +2525,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-overview",
+          "id": "h_k4iqsmlilp",
           "type": "nav",
           "position": {
             "yaw": 116.1,
@@ -2678,13 +2536,11 @@
           "navVariant": "hub"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_dm33cannkj.webp",
       "suppressPlaceOverview": true
     },
     "s_sw7dxt8z3g": {
       "id": "s_sw7dxt8z3g",
       "title": "Elevator Door",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_sw7dxt8z3g.webp",
       "defaultView": {
         "yaw": 70.9,
         "pitch": -4,
@@ -2692,7 +2548,7 @@
       },
       "hotspots": [
         {
-          "id": "info-elevator-door-panel",
+          "id": "h_ykas2bdea8",
           "type": "info",
           "position": {
             "yaw": 89.2,
@@ -2702,13 +2558,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/65b119dd-4256-4646-b077-f40ee3301ce4"
           },
-          "namingId": "no_enqqoiso2d",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-elevator-door-panel.webp"
-          }
+          "namingId": "no_enqqoiso2d"
         },
         {
-          "id": "nav-to-stairwell",
+          "id": "h_rndjf2c026",
           "type": "nav",
           "position": {
             "yaw": 132.9,
@@ -2717,7 +2570,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_tswr54b1sh",
           "type": "nav",
           "position": {
             "yaw": 164.5,
@@ -2726,7 +2579,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "nav-to-reception",
+          "id": "h_sekxjp2kgm",
           "type": "nav",
           "position": {
             "yaw": 196.7,
@@ -2735,7 +2588,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_kpw51bzofa",
           "type": "nav",
           "position": {
             "yaw": 235,
@@ -2744,7 +2597,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-corridor",
+          "id": "h_s2cwnjfg5a",
           "type": "nav",
           "position": {
             "yaw": 27.6,
@@ -2753,7 +2606,7 @@
           "targetScene": "s_rmf30ndp5j"
         },
         {
-          "id": "nav-to-kitchen",
+          "id": "h_t8xrfy4ii4",
           "type": "nav",
           "position": {
             "yaw": 327.7,
@@ -2762,7 +2615,7 @@
           "targetScene": "s_hfiucp83au"
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_ikt6x4uch5",
           "type": "nav",
           "position": {
             "yaw": 309.7,
@@ -2771,7 +2624,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-families-patients-communal-space",
+          "id": "h_74wlmujdvf",
           "type": "nav",
           "position": {
             "yaw": 268.9,
@@ -2780,13 +2633,11 @@
           "targetScene": "s_jfn7k06rhj"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_sw7dxt8z3g.webp",
       "suppressPlaceOverview": true
     },
     "s_f24tksel8t": {
       "id": "s_f24tksel8t",
       "title": "Donor Wall",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_f24tksel8t.webp",
       "defaultView": {
         "yaw": 76.4,
         "pitch": -2.9,
@@ -2794,7 +2645,7 @@
       },
       "hotspots": [
         {
-          "id": "info-donor-wall",
+          "id": "h_j7opmhus07",
           "type": "info",
           "position": {
             "yaw": 103,
@@ -2804,13 +2655,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/77123de7-e58b-4233-b466-6f5280dac24d"
           },
-          "namingId": "no_lwq3eoqpv4",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-donor-wall.webp"
-          }
+          "namingId": "no_lwq3eoqpv4"
         },
         {
-          "id": "nav-to-corridor",
+          "id": "h_hni69w407q",
           "type": "nav",
           "position": {
             "yaw": 149.4,
@@ -2819,7 +2667,7 @@
           "targetScene": "s_rmf30ndp5j"
         },
         {
-          "id": "nav-to-elevator-door",
+          "id": "h_idpdkte47u",
           "type": "nav",
           "position": {
             "yaw": 219.7,
@@ -2828,7 +2676,7 @@
           "targetScene": "s_sw7dxt8z3g"
         },
         {
-          "id": "nav-to-stairwell",
+          "id": "h_sfkm4nln7g",
           "type": "nav",
           "position": {
             "yaw": 231.2,
@@ -2837,7 +2685,7 @@
           "targetScene": "s_x6w0tq0sa5"
         },
         {
-          "id": "nav-to-main-entrance",
+          "id": "h_d1sv6bu2uf",
           "type": "nav",
           "position": {
             "yaw": 248.3,
@@ -2846,7 +2694,7 @@
           "targetScene": "s_zlz39v1fjz"
         },
         {
-          "id": "nav-to-reception",
+          "id": "h_gg3z9acn3w",
           "type": "nav",
           "position": {
             "yaw": 272,
@@ -2855,7 +2703,7 @@
           "targetScene": "s_vddzraqi1q"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_0543lfa9ai",
           "type": "nav",
           "position": {
             "yaw": 304.5,
@@ -2864,7 +2712,7 @@
           "targetScene": "s_h310pim38b"
         },
         {
-          "id": "nav-to-families-patients-communal-space",
+          "id": "h_d0s1msau9h",
           "type": "nav",
           "position": {
             "yaw": 335.6,
@@ -2873,7 +2721,7 @@
           "targetScene": "s_jfn7k06rhj"
         },
         {
-          "id": "nav-to-covered-porch",
+          "id": "h_hmifulp8rb",
           "type": "nav",
           "position": {
             "yaw": 358.3,
@@ -2882,7 +2730,7 @@
           "targetScene": "s_e5k3wjy72q"
         },
         {
-          "id": "nav-to-dining-area",
+          "id": "h_w8s3by9ndo",
           "type": "nav",
           "position": {
             "yaw": 15.5,
@@ -2891,7 +2739,7 @@
           "targetScene": "s_3fh5x3humm"
         },
         {
-          "id": "nav-to-kitchen",
+          "id": "h_4bebvzdmqi",
           "type": "nav",
           "position": {
             "yaw": 34.9,
@@ -2900,13 +2748,11 @@
           "targetScene": "s_hfiucp83au"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_f24tksel8t.webp",
       "suppressPlaceOverview": true
     },
     "s_0j9sgtokj2": {
       "id": "s_0j9sgtokj2",
       "title": "Crawl Space",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_0j9sgtokj2.webp",
       "defaultView": {
         "yaw": 14.6,
         "pitch": 0.1,
@@ -2914,7 +2760,7 @@
       },
       "hotspots": [
         {
-          "id": "info-crawl-space",
+          "id": "h_ap9adsu9za",
           "type": "info",
           "position": {
             "yaw": 7.1,
@@ -2924,13 +2770,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/8da31eb6-9664-41d0-9b42-cc1b131e4aaa"
           },
-          "namingId": "no_x5f8d2vk43",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-crawl-space.webp"
-          }
+          "namingId": "no_x5f8d2vk43"
         },
         {
-          "id": "nav-to-corridor",
+          "id": "h_jidzqlz7u8",
           "type": "nav",
           "position": {
             "yaw": 37.6,
@@ -2939,7 +2782,7 @@
           "targetScene": "s_fb3dsuusxy"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_odycronyh7",
           "type": "nav",
           "position": {
             "yaw": 272.5,
@@ -2950,13 +2793,11 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_0j9sgtokj2.webp",
       "suppressPlaceOverview": true
     },
     "s_6e38qm2jc1": {
       "id": "s_6e38qm2jc1",
       "title": "Linen Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_6e38qm2jc1.webp",
       "defaultView": {
         "yaw": 139.4,
         "pitch": -1.3,
@@ -2964,7 +2805,7 @@
       },
       "hotspots": [
         {
-          "id": "info-linen-room",
+          "id": "h_ea3lqa0vsl",
           "type": "info",
           "position": {
             "yaw": 133.3,
@@ -2974,13 +2815,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/bf5c4261-4ff4-4bfc-9e2c-d68071c6fd9d"
           },
-          "namingId": "no_edshzrdub5",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-linen-room.webp"
-          }
+          "namingId": "no_edshzrdub5"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_lug5xd3yt2",
           "type": "nav",
           "position": {
             "yaw": 337.9,
@@ -2991,13 +2829,11 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_6e38qm2jc1.webp",
       "suppressPlaceOverview": true
     },
     "s_eb2hcp3nla": {
       "id": "s_eb2hcp3nla",
       "title": "Custodian Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_eb2hcp3nla.webp",
       "defaultView": {
         "yaw": 139.4,
         "pitch": -1.3,
@@ -3005,7 +2841,7 @@
       },
       "hotspots": [
         {
-          "id": "info-custodian-room",
+          "id": "h_fosultc17y",
           "type": "info",
           "position": {
             "yaw": 133.3,
@@ -3014,13 +2850,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_b4sebwu5uv",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-custodian-room.webp"
-          }
+          "namingId": "no_b4sebwu5uv"
         },
         {
-          "id": "nav-to-basement",
+          "id": "h_in8l7c8fwp",
           "type": "nav",
           "position": {
             "yaw": 337.4,
@@ -3031,13 +2864,11 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_eb2hcp3nla.webp",
       "suppressPlaceOverview": true
     },
     "s_lc9a2b99af": {
       "id": "s_lc9a2b99af",
       "title": "Main Level Storage Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_lc9a2b99af.webp",
       "defaultView": {
         "yaw": 311.3,
         "pitch": -3.5,
@@ -3045,7 +2876,7 @@
       },
       "hotspots": [
         {
-          "id": "info-main-level-storage-room",
+          "id": "h_t4k05armjv",
           "type": "info",
           "position": {
             "yaw": 310.8,
@@ -3054,13 +2885,10 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_x3eqslki43",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-main-level-storage-room.webp"
-          }
+          "namingId": "no_x3eqslki43"
         },
         {
-          "id": "nav-to-main-floor",
+          "id": "h_gflu762sfj",
           "type": "nav",
           "position": {
             "yaw": 346.7,
@@ -3069,13 +2897,11 @@
           "targetScene": "s_h310pim38b"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_lc9a2b99af.webp",
       "suppressPlaceOverview": true
     },
     "s_osxxeptx4f": {
       "id": "s_osxxeptx4f",
       "title": "Home Essentials Room",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_osxxeptx4f.webp",
       "defaultView": {
         "yaw": 240.9,
         "pitch": -11.7,
@@ -3083,7 +2909,7 @@
       },
       "hotspots": [
         {
-          "id": "info-home-essentials-room",
+          "id": "h_cq5aexqp03",
           "type": "info",
           "position": {
             "yaw": 233.2,
@@ -3093,13 +2919,10 @@
             "display": "anchored",
             "videoUrl": "https://share.synthesia.io/embeds/videos/e638cb9a-e8a3-4c4b-98b8-4253b535a639"
           },
-          "namingId": "no_z7nyd4zmse",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-home-essentials-room.webp"
-          }
+          "namingId": "no_z7nyd4zmse"
         },
         {
-          "id": "nav-to-corridor",
+          "id": "h_2e29wh01bg",
           "type": "nav",
           "position": {
             "yaw": 87.4,
@@ -3110,13 +2933,11 @@
           "navVariant": "back"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_osxxeptx4f.webp",
       "suppressPlaceOverview": true
     },
     "s_be8euh4oit": {
       "id": "s_be8euh4oit",
       "title": "Operation Hub",
-      "panorama": "/assets/gphospitalfoundation/t_l01wnq8eh6/panoramas/s_be8euh4oit.webp",
       "defaultView": {
         "yaw": 66.3,
         "pitch": -11.7,
@@ -3124,7 +2945,7 @@
       },
       "hotspots": [
         {
-          "id": "info-operation-hub",
+          "id": "h_362vx1ql33",
           "type": "info",
           "position": {
             "yaw": 72.6,
@@ -3133,13 +2954,9 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_lqpoee5q46",
-          "preview": {
-            "image": "/assets/gphospitalfoundation/t_l01wnq8eh6/previews/info-operation-hub.webp"
-          }
+          "namingId": "no_lqpoee5q46"
         }
       ],
-      "thumbnail": "/assets/gphospitalfoundation/t_l01wnq8eh6/thumbnails/s_be8euh4oit.webp",
       "suppressPlaceOverview": true
     }
   },
@@ -3152,7 +2969,7 @@
         "name": "Birchcliff Energy",
         "kind": "organization",
         "website": "https://www.birchcliffenergy.com/",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-kitchen/donor-logo.png"
+        "logo": true
       },
       "body": "The Kitchen at the Ken Sargent House is the heart of our home, just as it is in many of your homes. \n\nIt’s more than just a place to cook - it’s a gathering spot where patients & their families can prepare meals together, creating a sense of normalcy and connection. \n\nThis communal space fosters togetherness, allowing families to share experiences, support one another, and build bonds. The kitchen also provides a cost-effective alternative to dining out, easing financial strain while offering emotional comfort through familiar, home-cooked meals. \n\nYour support ensures that this vital space remains a cornerstone of care and continues to nourish both bodies and hearts."
     },
@@ -3164,7 +2981,7 @@
       "donor": {
         "name": "Dynamudr®",
         "kind": "organization",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-comfort-corner/donor-logo.png"
+        "logo": true
       },
       "body": "Nestled on each floor of the Ken Sargent House is a small but meaningful communal space. Comfort Corner is designed to bring families together through shared experiences, much like the close-knit region of northwestern Alberta.\n\nThese shared areas provide emotional support, fostering a sense of belonging and connection, especially during tough times. Families can relax, share stories, and find strength in each other. It’s a space to create bonds that may transcend their stay, offering comfort and reassurance that they are never alone.\n\nYour support helps us maintain this area, ensuring that families can continue to find peace, community, and hope within our walls."
     },
@@ -3191,7 +3008,7 @@
         "name": "Birchcliff Energy",
         "kind": "organization",
         "website": "https://www.birchcliffenergy.com/",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-dining-area/donor-logo.png"
+        "logo": true
       },
       "body": "The dining area at the Ken Sargent House is for more than sharing a meal, it’s a space for connection and togetherness. It’s where families gather around the table, share stories, and support each other. \n\nAs the hub of the home, it provides more than just nourishment - it’s a place of comfort, where conversations are plenty and family and friends can visit, play games, and share in conversation.\n\nYour support helps us maintain this special space, ensuring that families have a place to eat, share, and build lasting memories during their time here."
     },
@@ -3229,7 +3046,7 @@
       "donor": {
         "name": "Gamehost Inc.",
         "kind": "organization",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-gazebo/donor-logo.png"
+        "logo": true
       },
       "body": "The Gazebo at the Ken Sargent House offers a peaceful retreat, set against the serene backdrop of Northwestern Alberta’s breathtaking natural beauty. \n\nSurrounded by the quiet tranquility of the outdoors, it’s a space where families can unwind, reflect, and find peace amidst the challenges they face. \n\nFor caregivers and families alike, this space provides the perfect opportunity to recharge, away from the clinical environment. \n\nWhether you’re sitting in the stillness of winter or enjoying the cool northern breeze, the Gazebo is a sanctuary that promotes healing and connection. \n\nYour support ensures that this tranquil retreat continues to serve families in need of respite."
     },
@@ -3240,7 +3057,7 @@
       "donor": {
         "name": "NuVista Energy Ltd.",
         "kind": "organization",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-pantry/donor-logo.png"
+        "logo": true
       },
       "body": "At the Ken Sargent House, our pantry is more than a place to store food - it’s a vital resource for families.\n\nThe pantry offers convenient access to dry goods and personal food storage, ensuring that families can focus on what matters most - being there for one another.\n\nIt also alleviates financial burdens by offering nutritious, cost-effective options that support the wellbeing of our families. Whether it’s the long winters or the unpredictable weather, the pantry helps families maintain healthy eating habits during challenging times. \n\nYour support allows us to continue offering this essential service, providing comfort and relief when it’s needed most."
     },
@@ -3252,7 +3069,7 @@
         "name": "CatWauk Compression",
         "kind": "organization",
         "website": "https://www.catwaukcompression.com/",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-playroom/donor-logo.png"
+        "logo": true
       },
       "body": "The Playroom at the Ken Sargent House offers a burst of joy and creativity for children, allowing them to engage in playful activities and foster growth, even in the midst of adversity. \n\nIn Northwestern Alberta, where winters are long and isolation can set in, the Playroom is a vital space where children can reduce stress, express themselves, and experience moments of happiness. \n\nThis safe and welcoming space encourages social interactions, while giving children a sense of normalcy and fun. \n\nYour support helps keep this haven alive, offering children and families a much-needed escape and the chance to create memories of joy, even in difficult times."
     },
@@ -3271,7 +3088,7 @@
         "name": "Victoria's Attic Support the Girls",
         "kind": "organization",
         "website": "https://victoriasattic.ca/",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-laundry/donor-logo.png"
+        "logo": true
       },
       "body": "The laundry room at the Ken Sargent House is more than just a convenience - it’s one less hurdle a family has to navigate.\n\nIt offers cost savings by eliminating the need for external laundry services and it ensures hygiene and comfort with clean clothes and bedding.\n\nThe laundry room, located in the basement of the home, is accessible by elevator and is free for families to use. \n\nYour support keeps this essential space running, providing comfort and care when families need it most."
     },
@@ -3284,7 +3101,7 @@
         "kind": "person",
         "affiliation": "MNP",
         "website": "https://www.mnp.ca/",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-social-space/donor-logo.png"
+        "logo": true
       },
       "body": "Welcome to the Social Space at the Ken Sargent House—a space designed to bring families together. Grab a friend and make yourselves a hot coffee or tea, relax in the comfort of this space that encourages connection, allowing families to share experiences, form supportive relationships, and find comfort in one another. It's a place where stress melts away, and emotional support thrives, as families understand and uplift each other.\n\nWhether you’re spending quality time with loved ones or engaging in house activities, the social space promotes well-being and reduces stress. \n\nThe social space is a place to build lasting relationships, and natural support systems to guide families through their journey and create bonds that extend far beyond one’s stay."
     },
@@ -3310,7 +3127,7 @@
       "donor": {
         "name": "Dynamudr®",
         "kind": "organization",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-second-floor-comfort-corner/donor-logo.png"
+        "logo": true
       },
       "body": "Nestled on each floor of the Ken Sargent House is a small but meaningful communal space. Comfort Corner is designed to bring families together through shared experiences, much like the close-knit region of northwestern Alberta.\n\nThese shared areas provide emotional support, fostering a sense of belonging and connection, especially during tough times. Families can relax, share stories, and find strength in each other. It’s a space to create bonds that may transcend their stay, offering comfort and reassurance that they are never alone.\n\nYour support helps us maintain this area, ensuring that families can continue to find peace, community, and hope within our walls."
     },
@@ -3323,7 +3140,7 @@
         "name": "TARA Energy Services",
         "kind": "organization",
         "website": "https://taraenergyservices.com/",
-        "logo": "/assets/gphospitalfoundation/t_l01wnq8eh6/naming/info-fitness-room/donor-logo.png"
+        "logo": true
       },
       "body": "The fitness room at the Ken Sargent House is more than just a place to work out - it’s a place where families can build strength, resilience, and hope in the face of adversity. \n\nWhether it’s the long northern winters or the endless light of summer, staying active is key to mental and physical wellbeing.Our fitness space helps families reduce stress, stay strong, and cope with the emotional strain of challenging times. For caregivers, it’s an essential outlet, offering a place to release tension and restore balance.\n\nYour support keeps this space active, enabling families to take care of themselves as they care for their loved ones."
     },

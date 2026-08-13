@@ -1498,7 +1498,7 @@ const DEV_MANAGE_LIST_ITEM_ID_LABEL: Record<
   client: 'Client id',
 };
 
-/** Manage-list id line — `Scene id: kitchen`, `Tour id: ken-sargent-house`, … */
+/** Manage-list id line — `Scene id: s_dtv27wfrbi`, `Tour id: t_l01wnq8eh6`, … */
 export function formatManageListItemId(
   category: DevManageListItemIdCategory,
   id: string,

@@ -53,7 +53,7 @@ popups, Guide, embed.
 
 Original proof used three scenes (`overview` → `main-entrance` → `reception`).
 The tour has since grown (naming opportunities, more scenes). Live content:
-`tours/ken-sargent-house.json`, [catalog](../tours/catalog.json).
+`tours/t_l01wnq8eh6.json`, [catalog](../tours/catalog.json).
 
 **Why start at overview (original demo):**
 

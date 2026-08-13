@@ -9,3 +9,20 @@ export function clientIdFromUrl(websiteUrl: string): string {
   const withoutTld = hostname.replace(/\.(ca|com|org|net|co\.uk|io)$/i, '');
   return withoutTld;
 }
+
+/** Same as {@link clientIdFromUrl}, but accepts bare hostnames and never throws. */
+export function tryClientIdFromWebsite(website?: string | null): string {
+  const trimmed = website?.trim() ?? '';
+  if (!trimmed) return '';
+  const candidates =
+    /^https?:\/\//i.test(trimmed) ? [trimmed] : [`https://${trimmed}`];
+  for (const candidate of candidates) {
+    try {
+      const id = clientIdFromUrl(candidate).trim().toLowerCase();
+      if (/^[a-z][a-z0-9_-]{1,63}$/.test(id)) return id;
+    } catch {
+      /* invalid URL */
+    }
+  }
+  return '';
+}

@@ -251,4 +251,4 @@ viewer with a static preview; move markers into the WebGL scene (`imageLayer` /
 | Nav preview mini PSV   | [`src/viewer-shared/navPreviewMiniViewer.ts`](../src/viewer-shared/navPreviewMiniViewer.ts)                               |
 | Tour asset paths       | [`src/data/loadTour.ts`](../src/data/loadTour.ts)                                                                         |
 | Build config           | [`vite.config.ts`](../vite.config.ts)                                                                                     |
-| Panorama files         | `assets/{clientId}/panoramas/` → `public/assets/` via sync script                                                         |
+| Panorama files         | `assets/{clientId}/{tourId}/panoramas/` → `public/assets/` via sync script                                                 |

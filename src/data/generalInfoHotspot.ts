@@ -1,14 +1,11 @@
 import type { Hotspot } from '../types/tour';
 import { isNamingHotspot } from '../utils/namingSceneInherit';
-import {
-  isPlaceOverviewHotspot,
-  PLACE_OVERVIEW_HOTSPOT_ID,
-} from '../utils/placeOverview';
+import { isPlaceOverviewHotspot } from '../utils/placeOverview';
 
 /** Panel / popup type badge — info icon + label row */
 export const GENERAL_INFO_BADGE_LABEL = 'Information';
 
-export { isPlaceOverviewHotspot, PLACE_OVERVIEW_HOTSPOT_ID };
+export { isPlaceOverviewHotspot };
 
 export function isGeneralInfoHotspot(hotspot: Hotspot): boolean {
   return hotspot.type === 'info' && !isNamingHotspot(hotspot);

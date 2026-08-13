@@ -1,19 +1,24 @@
 /**
  * Bake scene thumbnails from each scene's defaultView.
+ * Writes files only — tour JSON omits conventional thumbnail paths.
  *
  * Usage:
  *   npm run generate-thumbnails
- *   node scripts/generate-scene-thumbnails.mjs --tour ken-sargent-house
+ *   node scripts/generate-scene-thumbnails.mjs --tour t_l01wnq8eh6
  *   node scripts/generate-scene-thumbnails.mjs --dry-run
  */
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   renderEquirectPreviewToFile,
   resolveThumbnailFilePath,
-  resolveThumbnailWebPath,
 } from './lib/equirectPreviewNode.mjs';
+import {
+  conventionalThumbnailPath,
+  isModel3dTour,
+  resolveScenePanoramaPath,
+} from '../src/utils/tourAssetResolve.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const assetsRoot = join(root, 'assets');
@@ -50,22 +55,32 @@ async function processTour(tourFileName) {
     return { tourId, updated: 0, skipped: 0 };
   }
 
+  if (isModel3dTour(tour)) {
+    console.log(`[${tourId}] skip model3d (use Dev capture for scene thumbs)`);
+    return { tourId, updated: 0, skipped: 0 };
+  }
+
   let updated = 0;
   let skipped = 0;
 
   for (const [sceneId, scene] of Object.entries(tour.scenes ?? {})) {
-    if (!scene?.panorama || !scene?.defaultView) {
+    const panoramaWebPath = resolveScenePanoramaPath(
+      tour,
+      sceneId,
+      scene?.panorama,
+    );
+    if (!panoramaWebPath || !scene?.defaultView) {
       console.warn(`[${tourId}] skip ${sceneId}: missing panorama/defaultView`);
       skipped += 1;
       continue;
     }
 
-    const thumbnailWebPath = resolveThumbnailWebPath(scene.panorama, sceneId);
+    const thumbnailWebPath = conventionalThumbnailPath(tour, sceneId);
     const thumbnailFilePath = resolveThumbnailFilePath(
       assetsRoot,
       thumbnailWebPath,
     );
-    const panoramaFilePath = resolvePanoramaFilePath(scene.panorama);
+    const panoramaFilePath = resolvePanoramaFilePath(panoramaWebPath);
 
     if (dryRun) {
       console.log(`[dry-run] ${tourId}/${sceneId} → ${thumbnailWebPath}`);
@@ -81,13 +96,8 @@ async function processTour(tourFileName) {
       { width: THUMBNAIL_WIDTH, quality: THUMBNAIL_QUALITY },
     );
 
-    scene.thumbnail = thumbnailWebPath;
     updated += 1;
     console.log(`[${tourId}] ${sceneId} → ${thumbnailWebPath}`);
-  }
-
-  if (!dryRun && updated > 0) {
-    writeFileSync(tourPath, `${JSON.stringify(tour, null, 2)}\n`, 'utf8');
   }
 
   return { tourId, updated, skipped };

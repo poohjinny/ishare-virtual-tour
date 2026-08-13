@@ -1,6 +1,12 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { allocateOpaqueId, assertEntityId } from './opaqueId.mjs';
+import {
+  allocateOpaqueId,
+  assertClientId,
+  assertOpaqueSceneId,
+  assertOpaqueTourId,
+  OPAQUE_SCENE_ID_PREFIX,
+} from './opaqueId.mjs';
 import {
   bakeSceneThumbnail,
   buildSceneRecord,
@@ -17,15 +23,15 @@ import {
   applyImmersiveBackground,
 } from './tourUpdateDev.mjs';
 import { readCatalogJson, writeCatalogJson } from './tourCatalogDev.mjs';
+import {
+  hydrateCatalogClientBranding,
+  SCENE_THUMB_DIR,
+} from '../../src/utils/tourAssetResolve.mjs';
 
 const DEFAULT_TRANSITION = { speed: '500ms', effect: 'fade' };
 const DEFAULT_VIEW = { yaw: 0, pitch: 0, zoom: 17 };
 const DEFAULT_3D_VIEW = { yaw: 0, pitch: 0, zoom: 50 };
 const DEFAULT_PRIMARY_COLOR = '#007078';
-
-function assertClientId(value, label) {
-  return assertEntityId(value, label);
-}
 
 function buildTourRecord({
   tourId,
@@ -94,11 +100,8 @@ async function applyCreateTourBranding({
 
   const branding = { primaryColor: color };
   if (brandAssets.savedLogo) {
-    branding.logo = brandAssets.logoWebPath;
+    branding.logo = true;
     branding.logoAlt = resolvedLogoAlt;
-  }
-  if (brandAssets.savedFavicon) {
-    branding.favicon = brandAssets.faviconWebPath;
   }
 
   return { brandingMode: 'custom', branding };
@@ -170,7 +173,7 @@ export function listCatalogClients(toursDir) {
     fax: client.fax ?? '',
     faxLabel: client.faxLabel ?? '',
     address: client.address ?? '',
-    branding: client.branding ?? null,
+    branding: hydrateCatalogClientBranding(client),
     tourCount: client.tours?.length ?? 0,
   }));
 }
@@ -233,12 +236,12 @@ export async function createTour({
 
   const resolvedBrandingMode = brandingMode === 'custom' ? 'custom' : 'client';
 
-  const tourId = assertEntityId(rawTourId, 'Tour id');
-  const clientId = assertClientId(rawClientId, 'Client id');
+  const tourId = assertOpaqueTourId(rawTourId);
+  const clientId = assertClientId(rawClientId);
   const sceneId =
     rawFirstSceneId?.trim() ?
-      assertEntityId(rawFirstSceneId, 'First scene id')
-    : allocateOpaqueId('s_', []);
+      assertOpaqueSceneId(rawFirstSceneId, 'First scene id')
+    : allocateOpaqueId(OPAQUE_SCENE_ID_PREFIX, []);
   const tourTitleValue = tourTitle.trim();
   const sceneTitleValue = firstSceneTitle.trim();
 
@@ -267,7 +270,7 @@ export async function createTour({
     mkdirSync(join(assetsRoot, clientId, tourId, 'models'), {
       recursive: true,
     });
-    mkdirSync(join(assetsRoot, clientId, tourId, 'thumbnails'), {
+    mkdirSync(join(assetsRoot, clientId, tourId, SCENE_THUMB_DIR), {
       recursive: true,
     });
 
@@ -321,7 +324,7 @@ export async function createTour({
     mkdirSync(join(assetsRoot, clientId, tourId, 'panoramas'), {
       recursive: true,
     });
-    mkdirSync(join(assetsRoot, clientId, tourId, 'thumbnails'), {
+    mkdirSync(join(assetsRoot, clientId, tourId, SCENE_THUMB_DIR), {
       recursive: true,
     });
   }

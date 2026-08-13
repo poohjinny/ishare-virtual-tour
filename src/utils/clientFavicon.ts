@@ -5,6 +5,7 @@ import { tourAssetPath } from './tourAssetPath';
 import {
   clientBrandFaviconCandidates,
   resolveTourBranding,
+  tourBrandFaviconCandidates,
 } from './resolveTourBranding';
 
 const DEFAULT_FAVICON = '/favicon.ico';
@@ -32,12 +33,16 @@ async function faviconPathExists(path: string): Promise<boolean> {
 /** Resolve tab icon URL — explicit favicon, client-root png/ico, logo, then tour default. */
 export async function resolveClientFavicon(tour: Tour): Promise<string> {
   const branding = resolveTourBranding(tour);
-  if (branding?.favicon) {
+  if (typeof branding?.favicon === 'string' && branding.favicon.trim()) {
     return branding.favicon;
   }
 
   const clientId = getTourClientId(tour);
-  for (const path of clientBrandFaviconCandidates(clientId)) {
+  const candidates = [
+    ...tourBrandFaviconCandidates(tour),
+    ...clientBrandFaviconCandidates(clientId),
+  ];
+  for (const path of candidates) {
     if (await faviconPathExists(path)) {
       return path;
     }

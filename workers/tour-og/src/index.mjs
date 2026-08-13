@@ -10,6 +10,8 @@
  * GitHub Pages so subrequests do not re-enter this Worker.
  *
  * Title/description: `src/utils/ogShareCopy.mjs` (shared with the SPA).
+ * `?no=`: `src/utils/namingOpportunitySearch.mjs` (`no_*` only).
+ * Scene thumbs + client logo: `src/utils/tourAssetResolve.mjs` (inferred).
  */
 
 import {
@@ -20,6 +22,11 @@ import {
   isDefaultSceneDescription,
   pickAuthoredShareDescription,
 } from '../../../src/utils/ogShareCopy.mjs';
+import { namingSearchValueMatches } from '../../../src/utils/namingOpportunitySearch.mjs';
+import {
+  resolveClientLogoPath,
+  resolveSceneThumbnailPath,
+} from '../../../src/utils/tourAssetResolve.mjs';
 
 const BOT_UA =
   /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|meta-externalfetcher|meta-webindexer|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp\/|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|kakaotalk-scrap|Linespider|LineBot|BitlyBot|Snapchat|PetalBot/i;
@@ -33,7 +40,7 @@ const OG_HEIGHT = 630;
 const TOUR_ID_RE = /^t_[a-z0-9]+$/i;
 const SCENE_ID_RE = /^s_[a-z0-9]+$/i;
 const SLUG_RE = /^[a-z0-9-]+$/i;
-const NO_RE = /^[a-z0-9][a-z0-9_-]{0,120}$/i;
+const NO_RE = /^no_[a-z0-9]+$/i;
 
 /** Served by the Worker so Cloudflare Managed robots.txt does not replace it. */
 const ROBOTS_TXT = `# Allow social link-preview crawlers (Facebook, Kakao, Slack, etc.).
@@ -373,14 +380,22 @@ async function resolveOgSourcePath(env, tourId, sceneId, no) {
     }
     const hostId =
       naming?.sceneId && tour.scenes[naming.sceneId] ? naming.sceneId : sceneId;
-    const thumb = tour.scenes[hostId]?.thumbnail?.trim();
+    const thumb = resolveSceneThumbnailPath(
+      tour,
+      hostId,
+      tour.scenes[hostId]?.thumbnail,
+    );
     if (thumb && isSafeAssetPath(thumb)) {
       return thumb.startsWith('/') ? thumb : `/${thumb}`;
     }
     return null;
   }
 
-  const thumb = tour.scenes[sceneId]?.thumbnail?.trim();
+  const thumb = resolveSceneThumbnailPath(
+    tour,
+    sceneId,
+    tour.scenes[sceneId]?.thumbnail,
+  );
   if (thumb && isSafeAssetPath(thumb)) {
     return thumb.startsWith('/') ? thumb : `/${thumb}`;
   }
@@ -492,7 +507,7 @@ function findCatalogTour(catalog, tourId) {
       if (entry.id === tourId) {
         return {
           summary: entry.summary?.trim() || '',
-          logo: client.branding?.logo?.trim() || '',
+          logo: resolveClientLogoPath(client.id, client.branding?.logo) || '',
         };
       }
     }
@@ -504,65 +519,49 @@ function findClientLogo(catalog, clientId) {
   const client = (catalog?.clients ?? []).find(
     (entry) => entry.id === clientId,
   );
-  return client?.branding?.logo?.trim() || '';
+  return resolveClientLogoPath(client?.id, client?.branding?.logo) || '';
 }
 
 function resolveNaming(tour, sceneId, searchValue) {
-  const scene = tour.scenes?.[sceneId];
-  const hotspots = [...(tour.hotspots ?? []), ...(scene?.hotspots ?? [])];
-  const needle = searchValue.toLowerCase();
-
-  for (const hotspot of hotspots) {
-    if (!hotspot?.namingId && hotspot?.type !== 'naming') continue;
+  const matchHotspot = (hotspot, sid) => {
+    if (!hotspot?.namingId && hotspot?.type !== 'naming') return null;
+    if (
+      !namingSearchValueMatches(searchValue, { namingId: hotspot.namingId })
+    ) {
+      return null;
+    }
     const record =
       tour.namingOpportunities?.[hotspot.namingId] ||
       hotspot.namingOpportunity ||
       null;
     const name = (record?.name || hotspot.title || '').trim();
-    const slug = kebab(name);
-    if (
-      hotspot.id === searchValue ||
-      hotspot.namingId === searchValue ||
-      slug === needle ||
-      kebab(hotspot.id) === needle
-    ) {
-      return {
-        name: name || hotspot.namingId || hotspot.id,
-        image: record?.image || hotspot.popup?.image,
-        body: record?.body || hotspot.popup?.body,
-        priceLabel: record?.priceLabel,
-        price: record?.price,
-      };
-    }
+    return {
+      name: name || hotspot.namingId || hotspot.id,
+      image: record?.image || hotspot.popup?.image,
+      body: record?.body || hotspot.popup?.body,
+      priceLabel: record?.priceLabel,
+      price: record?.price,
+      sceneId: sid,
+    };
+  };
+
+  const scene = tour.scenes?.[sceneId];
+  for (const hotspot of [
+    ...(tour.hotspots ?? []),
+    ...(scene?.hotspots ?? []),
+  ]) {
+    const hit = matchHotspot(hotspot, sceneId);
+    if (hit) return hit;
   }
 
   for (const [sid, sc] of Object.entries(tour.scenes ?? {})) {
+    if (sid === sceneId) continue;
     for (const hotspot of sc.hotspots ?? []) {
-      if (!hotspot?.namingId) continue;
-      const record = tour.namingOpportunities?.[hotspot.namingId];
-      const name = (record?.name || '').trim();
-      if (kebab(name) === needle || hotspot.namingId === searchValue) {
-        return {
-          name: name || hotspot.namingId,
-          image: record?.image,
-          body: record?.body,
-          priceLabel: record?.priceLabel,
-          price: record?.price,
-          sceneId: sid,
-        };
-      }
+      const hit = matchHotspot(hotspot, sid);
+      if (hit) return hit;
     }
   }
   return null;
-}
-
-function kebab(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/['']/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 function firstSceneNamingBody(tour, sceneId) {
@@ -633,12 +632,9 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
   const scene = tour.scenes[sceneId];
   const sceneTitle = scene?.title?.trim() || sceneId;
   const authored = resolveWorkerShareDescription(tour, sceneId, catalogEntry);
-  const copy = buildOgShareCopy({
-    tourTitle,
-    sceneTitle,
-    authored,
-  });
-  const thumb = scene?.thumbnail?.trim() || '';
+  const copy = buildOgShareCopy({ tourTitle, sceneTitle, authored });
+  const thumb =
+    resolveSceneThumbnailPath(tour, sceneId, scene?.thumbnail) || '';
   const image =
     thumb ? ogJpgPublicUrl(origin, tour.id, sceneId, '') : abs(origin, logo);
   return {
@@ -683,7 +679,13 @@ function buildNamingMeta(
   });
   const hasImage =
     Boolean(naming.image?.trim()) ||
-    Boolean(tour.scenes[hostSceneId]?.thumbnail);
+    Boolean(
+      resolveSceneThumbnailPath(
+        tour,
+        hostSceneId,
+        tour.scenes[hostSceneId]?.thumbnail,
+      ),
+    );
   const image =
     hasImage ?
       ogJpgPublicUrl(origin, tour.id, hostSceneId, no)

@@ -29,7 +29,7 @@ export const NAMING_DONOR_KINDS = new Set(['person', 'organization']);
  *   kind: string,
  *   affiliation?: string,
  *   website?: string,
- *   logo?: string,
+ *   logo?: string | true,
  * } | null}
  */
 export function normalizeNamingDonor(donor, options = {}) {
@@ -50,12 +50,15 @@ export function normalizeNamingDonor(donor, options = {}) {
     throw new Error(`Invalid naming donor kind: ${kindRaw}`);
   }
 
-  /** @type {{ name: string, kind: string, affiliation?: string, website?: string, logo?: string }} */
+  /** @type {{ name: string, kind: string, affiliation?: string, website?: string, logo?: string | true }} */
   const next = { name, kind: kindRaw };
+  const logo =
+    donor.logo === true ? true
+    : typeof donor.logo === 'string' ? donor.logo.trim() || ''
+    : '';
 
   if (kindRaw === 'organization') {
     const website = sanitizeDonorWebsite(donor.website);
-    const logo = typeof donor.logo === 'string' ? donor.logo.trim() : '';
     if (website) next.website = website;
     if (logo) next.logo = logo;
     return next;
@@ -66,7 +69,6 @@ export function normalizeNamingDonor(donor, options = {}) {
   if (affiliation) {
     next.affiliation = affiliation;
     const website = sanitizeDonorWebsite(donor.website);
-    const logo = typeof donor.logo === 'string' ? donor.logo.trim() : '';
     if (website) next.website = website;
     if (logo) next.logo = logo;
   }

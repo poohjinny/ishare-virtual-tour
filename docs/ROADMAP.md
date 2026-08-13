@@ -230,10 +230,7 @@ until Admin app exists; then port endpoints and retire duplicate UI.
   ```
   `viteDevTourApiPlugin`)
   ```
-- [ ] Smoke-test checklist for new tours (queensway-carleton-hospital,
-  ```
-  ken-sargent-house)
-  ```
+- [ ] Smoke-test checklist for new tours (`t_9zs0j4a7xt`, `t_l01wnq8eh6`)
 
 ### Sprint C — Discovery & share polish
 

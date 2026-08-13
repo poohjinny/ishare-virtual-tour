@@ -8,7 +8,7 @@
   "firstScene": "s_onaext778x",
   "hotspots": [
     {
-      "id": "nav-to-workspace",
+      "id": "h_fzdb3usgxt",
       "type": "nav",
       "label": "Workspace",
       "position": {
@@ -29,7 +29,7 @@
       }
     },
     {
-      "id": "nav-to-bedroom",
+      "id": "h_pjchl8v1pg",
       "type": "nav",
       "label": "Bedroom",
       "position": {
@@ -40,7 +40,7 @@
       "targetScene": "s_cabfp6pifi"
     },
     {
-      "id": "nav-to-living-area",
+      "id": "h_kbz942agfy",
       "type": "nav",
       "position": {
         "x": 6,
@@ -50,10 +50,11 @@
       "targetScene": "s_onaext778x"
     },
     {
-      "id": "monitor-screen",
+      "id": "h_4qy4k26eg0",
       "type": "info",
       "label": "Monitor Station",
       "sceneId": "s_onaext778x",
+      "namingId": "no_2oeyj2hwui",
       "position": {
         "x": -0.95,
         "y": 10.58,
@@ -61,12 +62,7 @@
       },
       "popup": {
         "title": "Monitor Station",
-        "body": "A dual-screen workstation setup for productive remote work sessions.",
-        "namingOpportunity": {
-          "status": "open",
-          "name": "Monitor Station Naming Opportunity",
-          "price": 5000
-        }
+        "body": "A dual-screen workstation setup for productive remote work sessions."
       }
     }
   ],
@@ -75,8 +71,6 @@
       "id": "s_onaext778x",
       "title": "Living Area",
       "description": "A cozy seating area with a plush sofa and warm lighting.",
-      "panorama": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_onaext778x.webp",
-      "thumbnail": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_onaext778x.webp",
       "defaultView": {
         "yaw": -135.5,
         "pitch": -26.1,
@@ -93,8 +87,6 @@
       "id": "s_e83oo59bwl",
       "title": "Workspace",
       "description": "A compact workspace tucked into the corner — ideal for remote work.",
-      "panorama": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_e83oo59bwl.webp",
-      "thumbnail": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_e83oo59bwl.webp",
       "defaultView": {
         "yaw": -89.7,
         "pitch": -25.1,
@@ -111,8 +103,6 @@
       "id": "s_cabfp6pifi",
       "title": "Bedroom",
       "description": "A warm and inviting bedroom with a comfortable bed and soft lighting.",
-      "panorama": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_cabfp6pifi.webp",
-      "thumbnail": "/assets/ishare-demos/t_oyryn1va9b/thumbnails/s_cabfp6pifi.webp",
       "defaultView": {
         "yaw": 94,
         "pitch": -48.7,
@@ -124,6 +114,14 @@
         }
       },
       "hotspots": []
+    }
+  },
+  "namingOpportunities": {
+    "no_2oeyj2hwui": {
+      "id": "no_2oeyj2hwui",
+      "name": "Monitor Station",
+      "price": 5000,
+      "status": "open"
     }
   },
   "defaultTransition": {

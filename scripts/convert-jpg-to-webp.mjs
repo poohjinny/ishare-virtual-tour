@@ -4,7 +4,7 @@
  * (`scripts/lib/panoramaEncode.mjs`).
  *
  * Usage: node scripts/convert-jpg-to-webp.mjs <relative-path-from-assets> [...]
- * Example: node scripts/convert-jpg-to-webp.mjs gphospitalfoundation/ken-sargent-house/panoramas/overview.jpg
+ * Example: node scripts/convert-jpg-to-webp.mjs gphospitalfoundation/t_l01wnq8eh6/panoramas/s_dtv27wfrbi.jpg
  *
  * Env: WEBP_QUALITY / PANORAMA_WEBP_QUALITY, WEBP_MAX_WIDTH / PANORAMA_MAX_WIDTH
  */

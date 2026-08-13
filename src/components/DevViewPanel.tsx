@@ -39,6 +39,7 @@ import { copyToClipboard } from '../utils/clipboard';
 import { getTourClientId } from '../utils/tourClientId';
 import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import {
+  resolveClientLogoPath,
   resolveTourBranding,
   tourUsesCustomBranding,
 } from '../utils/resolveTourBranding';
@@ -126,7 +127,6 @@ import {
   formatViewPosition,
   isWorldClickCoords,
   logLandingView,
-  previewHotspotId,
   slugifyHotspotName,
   toViewPosition,
   type DevSceneRef,
@@ -192,7 +192,6 @@ import {
 import {
   findHotspotInTour,
   findNamingHotspotByNamingId,
-  listAllTourHotspotIds,
 } from '../utils/findTourHotspot';
 import { buildScenePlaceLeadFromNaming } from '../utils/resolveScenePlaceLead';
 import { isPlaceOverviewHotspot } from '../utils/placeOverview';
@@ -692,7 +691,6 @@ export function DevViewPanel({
   const [newTourClientId, setNewTourClientId] = useState('');
   const [newTourTitle, setNewTourTitle] = useState('');
   const [newTourSummary, setNewTourSummary] = useState('');
-  const [newTourIdInput, setNewTourIdInput] = useState('');
   const [newTourCategory, setNewTourCategory] =
     useState<TourCategory>('Healthcare');
   const [newTourVisibility, setNewTourVisibility] =
@@ -1226,27 +1224,6 @@ export function DevViewPanel({
     () => (trimmedNavName ? slugifyHotspotName(trimmedNavName) : ''),
     [trimmedNavName],
   );
-  const infoSlug = useMemo(
-    () => (trimmedInfoName ? slugifyHotspotName(trimmedInfoName) : ''),
-    [trimmedInfoName],
-  );
-  const existingHotspotIds = useMemo(
-    () =>
-      isModel3dTour ?
-        listAllTourHotspotIds(tour)
-      : managedHotspots.map((hotspot) => hotspot.id),
-    [isModel3dTour, managedHotspots, tour],
-  );
-  const navHotspotIdPreview = useMemo(
-    () =>
-      navSlug ? previewHotspotId(existingHotspotIds, `nav-to-${navSlug}`) : '',
-    [existingHotspotIds, navSlug],
-  );
-  const infoHotspotIdPreview = useMemo(
-    () =>
-      infoSlug ? previewHotspotId(existingHotspotIds, `info-${infoSlug}`) : '',
-    [existingHotspotIds, infoSlug],
-  );
   const trimmedSceneTitle = sceneTitle.trim();
   const sceneSlug = pendingSceneId;
   const tourCategoryOptions = useMemo(() => listTourCategories(), []);
@@ -1281,7 +1258,9 @@ export function DevViewPanel({
             visibility: resolveCatalogTourVisibility(entry),
             featured: entry.featured ?? false,
             logoPath:
-              branding?.logo?.trim() || client.branding?.logo?.trim() || '',
+              (typeof branding?.logo === 'string' && branding.logo.trim()) ||
+              resolveClientLogoPath(client.id, client.branding?.logo) ||
+              '',
           };
         }),
       )
@@ -1330,12 +1309,6 @@ export function DevViewPanel({
     }
     setTourManageClientFilter('all');
   }, [tourManageClientFilter, tourManageClientGroups]);
-  const newTourSlug = useMemo(() => {
-    const manual = newTourIdInput.trim();
-    if (!manual) return pendingTourId;
-    return slugifyHotspotName(manual) || pendingTourId;
-  }, [newTourIdInput, pendingTourId]);
-  const newFirstSceneSlug = pendingFirstSceneId;
 
   const canCreateNav = Boolean(scene.tourId && clickCoords && navTargetSceneId);
   const canCreateNaming = Boolean(
@@ -1356,8 +1329,8 @@ export function DevViewPanel({
   const canCreateNewTour = Boolean(
     trimmedNewTourTitle &&
     newFirstSceneTitle.trim() &&
-    newTourSlug &&
-    newFirstSceneSlug &&
+    pendingTourId &&
+    pendingFirstSceneId &&
     newTourPanoramaFile &&
     newTourClientId,
   );
@@ -1377,7 +1350,6 @@ export function DevViewPanel({
   const resetNewTourForm = useCallback((preferredClientId?: string) => {
     setNewTourTitle('');
     setNewTourSummary('');
-    setNewTourIdInput('');
     setNewTourCategory('Healthcare');
     setNewTourVisibility('unlisted');
     setNewTourFeatured(false);
@@ -2504,7 +2476,7 @@ export function DevViewPanel({
   }, [createTourClientWebsite]);
 
   const createNewTour = useCallback(async () => {
-    if (!canCreateNewTour || !newTourPanoramaFile || !newTourSlug) return;
+    if (!canCreateNewTour || !newTourPanoramaFile || !pendingTourId) return;
 
     setNewTourStatus('working');
     setNewTourError(null);
@@ -2512,12 +2484,12 @@ export function DevViewPanel({
     try {
       const result = await devCreateTour({
         clientId: newTourClientId,
-        tourId: newTourSlug,
-        tourTitle: trimmedNewTourTitle || newTourSlug,
+        tourId: pendingTourId,
+        tourTitle: trimmedNewTourTitle || pendingTourId,
         tourSummary: newTourSummary.trim() || undefined,
         category: newTourCategory,
         firstSceneTitle: newFirstSceneTitle.trim(),
-        firstSceneId: newFirstSceneSlug,
+        firstSceneId: pendingFirstSceneId,
         panoramaFile: newTourPanoramaFile,
         logoFile: newTourBrandingMode === 'custom' ? newTourLogoFile : null,
         faviconFile:
@@ -2588,7 +2560,8 @@ export function DevViewPanel({
     newTourImmersivePlaylistManifest,
     newTourImmersivePlaylistText,
     newTourImmersiveVolume,
-    newTourSlug,
+    pendingFirstSceneId,
+    pendingTourId,
     newTourSummary,
     newTourTransitionEffect,
     newTourTransitionSpeed,
@@ -2602,8 +2575,7 @@ export function DevViewPanel({
     async (hotspotId: string) => {
       if (!scene.tourId) return;
 
-      // Prefer the current scene's hotspot — place-overview pins share id
-      // `info-place` across scenes, so a global find hits the wrong scene.
+      // Prefer the current scene's hotspot when ids could collide.
       const onCurrentScene = managedHotspots.find(
         (entry) => entry.id === hotspotId,
       );
@@ -2770,7 +2742,9 @@ export function DevViewPanel({
       setCatalogEditDonorAffiliation(record.donor?.affiliation ?? '');
       setCatalogEditDonorWebsite(record.donor?.website ?? '');
       setCatalogEditDonorLogoFile(null);
-      setCatalogEditDonorLogoPath(record.donor?.logo ?? '');
+      setCatalogEditDonorLogoPath(
+        typeof record.donor?.logo === 'string' ? record.donor.logo : '',
+      );
       setCatalogEditClearDonorLogo(false);
     },
     [scene.id, tour],
@@ -2983,7 +2957,7 @@ export function DevViewPanel({
 
   const saveHotspotEdit = useCallback(async () => {
     if (!scene.tourId || !editingHotspotId) return;
-    // Prefer current-scene hotspot — place-overview shares id `info-place`.
+    // Prefer current-scene hotspot when ids could collide.
     const onCurrentScene = managedHotspots.find(
       (entry) => entry.id === editingHotspotId,
     );
@@ -4947,19 +4921,10 @@ export function DevViewPanel({
                     </button>
                   }
 
-                  {navHotspotIdPreview ?
-                    <p className={devViewPanelSlugPreviewClassName}>
-                      id <code>{navHotspotIdPreview}</code>
-                      {navHotspotIdPreview !== `nav-to-${navSlug}` ?
-                        <>
-                          {' '}
-                          · suffix added — name slug already used on this scene
-                        </>
-                      : null}{' '}
-                      · copies target <code>defaultView</code> on create and
-                      save
-                    </p>
-                  : null}
+                  <p className={devViewPanelSectionHintClassName}>
+                    Pin id is assigned on create · copies target{' '}
+                    <code>defaultView</code> on create and save
+                  </p>
 
                   <label className={devViewPanelFieldClassName}>
                     <span className={devViewPanelFieldLabelClassName}>
@@ -5265,17 +5230,9 @@ export function DevViewPanel({
                     </select>
                   </label>
 
-                  {infoHotspotIdPreview ?
-                    <p className={devViewPanelSlugPreviewClassName}>
-                      id <code>{infoHotspotIdPreview}</code>
-                      {infoHotspotIdPreview !== `info-${infoSlug}` ?
-                        <>
-                          {' '}
-                          · suffix added — name slug already used on this scene
-                        </>
-                      : null}
-                    </p>
-                  : null}
+                  <p className={devViewPanelSectionHintClassName}>
+                    Pin id is assigned on create
+                  </p>
 
                   <div className={devViewPanelActionsClassName}>
                     <button
@@ -5563,8 +5520,7 @@ export function DevViewPanel({
                                   tone: 'secondary',
                                 })}
                                 onClick={() => {
-                                  // Place-overview pins share id `info-place` —
-                                  // always use this manage row's scene.
+                                  // Overview pins: always use this manage row's scene.
                                   const hostSceneId =
                                     isPlaceOverviewHotspot(hotspot) ?
                                       scene.id
@@ -7709,41 +7665,20 @@ export function DevViewPanel({
                     </DevPanelFormSection>
 
                     <DevPanelFormSection title='Tour details' divided>
-                      <DevPanelFormRow>
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Tour title
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='text'
-                            value={newTourTitle}
-                            onChange={(e) => setNewTourTitle(e.target.value)}
-                            placeholder='e.g. Main Campus'
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                        </label>
-
-                        <label className={devViewPanelFieldClassName}>
-                          <span className={devViewPanelFieldLabelClassName}>
-                            Tour id (optional)
-                          </span>
-                          <input
-                            className={devViewPanelInputClassName}
-                            type='text'
-                            value={newTourIdInput}
-                            onChange={(e) => setNewTourIdInput(e.target.value)}
-                            placeholder={`Auto ${pendingTourId}`}
-                            spellCheck={false}
-                            autoComplete='off'
-                          />
-                          <p className={devViewPanelSectionHintClassName}>
-                            Leave empty for an opaque id. Only fill this to
-                            force a custom kebab id.
-                          </p>
-                        </label>
-                      </DevPanelFormRow>
+                      <label className={devViewPanelFieldClassName}>
+                        <span className={devViewPanelFieldLabelClassName}>
+                          Tour title
+                        </span>
+                        <input
+                          className={devViewPanelInputClassName}
+                          type='text'
+                          value={newTourTitle}
+                          onChange={(e) => setNewTourTitle(e.target.value)}
+                          placeholder='e.g. Main Campus'
+                          spellCheck={false}
+                          autoComplete='off'
+                        />
+                      </label>
 
                       <label className={devViewPanelFieldClassName}>
                         <span className={devViewPanelFieldLabelClassName}>
@@ -7926,13 +7861,13 @@ export function DevViewPanel({
                         </DevPanelFileField>
                       </label>
 
-                      {newTourSlug && newFirstSceneSlug ?
+                      {pendingTourId && pendingFirstSceneId ?
                         <p className={devViewPanelSlugPreviewClassName}>
-                          stable tour id <code>{newTourSlug}</code> · stable
-                          scene id <code>{newFirstSceneSlug}</code> ·{' '}
+                          opaque tour id <code>{pendingTourId}</code> · opaque
+                          scene id <code>{pendingFirstSceneId}</code> ·{' '}
                           <code>
-                            assets/{newTourClientId}/{newTourSlug}/panoramas/
-                            {newFirstSceneSlug}.webp
+                            assets/{newTourClientId}/{pendingTourId}/panoramas/
+                            {pendingFirstSceneId}.webp
                           </code>{' '}
                           · catalog <code>{newTourVisibility}</code>
                           {newTourFeatured ?

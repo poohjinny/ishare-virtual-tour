@@ -1,23 +1,36 @@
 import { findCatalogClient } from '../data/tourCatalog';
 import type { Tour, TourBranding } from '../types/tour';
 import { getTourClientId } from './tourClientId';
+import {
+  conventionalClientFaviconIcoPath,
+  conventionalClientFaviconPngPath,
+  conventionalClientLogoPath,
+  conventionalTourFaviconIcoPath,
+  conventionalTourFaviconPngPath,
+  hydrateCatalogClientBranding,
+  resolveClientLogoPath,
+  resolveTourLogoPath,
+} from './tourAssetResolve.mjs';
 
-export type BrandingFields = Partial<TourBranding>;
+export type BrandingFields = Omit<Partial<TourBranding>, 'logo'> & {
+  logo?: string;
+};
 
-/** Web paths for client-level brand assets (`/assets/{clientId}/brand/…`). */
+export { hydrateCatalogClientBranding, resolveClientLogoPath };
+
 export function clientBrandLogoPath(clientId: string): string {
-  return `/assets/${clientId}/brand/logo.png`;
+  return conventionalClientLogoPath(clientId);
 }
 
 export function clientBrandFaviconPath(clientId: string): string {
-  return `/assets/${clientId}/favicon.png`;
+  return conventionalClientFaviconPngPath(clientId);
 }
 
 export function clientBrandFaviconIcoPath(clientId: string): string {
-  return `/assets/${clientId}/favicon.ico`;
+  return conventionalClientFaviconIcoPath(clientId);
 }
 
-/** Client-root favicon paths — catalog entry first, then conventional png/ico locations. */
+/** Client-root favicon paths — catalog entry first, then conventional png/ico. */
 export function clientBrandFaviconCandidates(
   clientId: string,
   catalogFavicon?: string | null,
@@ -30,39 +43,64 @@ export function clientBrandFaviconCandidates(
   return [...new Set(paths)];
 }
 
+export function tourBrandFaviconCandidates(
+  tour: Pick<Tour, 'id' | 'clientId'>,
+): string[] {
+  return [
+    conventionalTourFaviconPngPath(tour),
+    conventionalTourFaviconIcoPath(tour),
+  ];
+}
+
 function mergeBrandingFields(
-  clientBranding: BrandingFields | undefined,
-  tourBranding: BrandingFields | undefined,
+  clientBranding: TourBranding | undefined,
+  tourBranding: TourBranding | undefined,
   fallbackLogoAlt: string,
 ): BrandingFields | undefined {
   if (!clientBranding && !tourBranding) {
     return undefined;
   }
 
+  const favicon =
+    typeof tourBranding?.favicon === 'string' ? tourBranding.favicon
+    : typeof clientBranding?.favicon === 'string' ? clientBranding.favicon
+    : undefined;
+
   return {
-    logo: tourBranding?.logo ?? clientBranding?.logo,
     logoAlt:
       tourBranding?.logoAlt ?? clientBranding?.logoAlt ?? fallbackLogoAlt,
     primaryColor: tourBranding?.primaryColor ?? clientBranding?.primaryColor,
     fontFamily: tourBranding?.fontFamily ?? clientBranding?.fontFamily,
     fontSourceUrl: tourBranding?.fontSourceUrl ?? clientBranding?.fontSourceUrl,
-    favicon: tourBranding?.favicon ?? clientBranding?.favicon,
+    ...(favicon ? { favicon } : {}),
   };
 }
 
 /**
  * Resolved branding for a tour — catalog client defaults with optional tour override.
+ * Conventional logo paths are inferred when JSON omits them.
  */
 export function resolveTourBranding(tour: Tour): BrandingFields | undefined {
   const clientId = getTourClientId(tour);
   const catalogClient = findCatalogClient(clientId);
   const fallbackLogoAlt = catalogClient?.name ?? tour.title;
 
-  return mergeBrandingFields(
+  const merged = mergeBrandingFields(
     catalogClient?.branding,
     tour.branding,
     fallbackLogoAlt,
   );
+
+  const tourLogo = resolveTourLogoPath(tour, tour.branding?.logo);
+  const clientLogo = resolveClientLogoPath(
+    clientId,
+    catalogClient?.branding?.logo,
+  );
+  const logo = tourLogo ?? clientLogo ?? undefined;
+
+  if (!merged && !logo) return undefined;
+
+  return { ...merged, ...(logo ? { logo } : {}) };
 }
 
 export function tourUsesCustomBranding(tour: Tour): boolean {

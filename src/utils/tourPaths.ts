@@ -6,19 +6,13 @@ import {
 } from '../data/loadTour';
 
 import {
-  NAMING_OPPORTUNITY_HOTSPOT_PREFIX,
   NAMING_OPPORTUNITY_SEARCH_KEY,
-  namingOpportunityNameToCamelCase,
-  namingOpportunityNameToKebabCase,
   resolveNamingOpportunityFromSearch,
   toNamingOpportunitySearchValue,
 } from './namingOpportunityUrl';
 
 export {
-  NAMING_OPPORTUNITY_HOTSPOT_PREFIX,
   NAMING_OPPORTUNITY_SEARCH_KEY,
-  namingOpportunityNameToCamelCase,
-  namingOpportunityNameToKebabCase,
   resolveNamingOpportunityFromSearch,
   toNamingOpportunitySearchValue,
 };
@@ -32,7 +26,7 @@ const LEGACY_TOUR_PATH_ALIASES: Record<string, string> = {
   'ken-sargent-house': 't_l01wnq8eh6',
   'cancer-research': 't_8kx3m2p9qa',
   'holodomor-museum': 't_r7v4n1c0wd',
-  'queensway-carleton-hospital': 't_2hf6y5b3ue',
+  'queensway-carleton-hospital': 't_9zs0j4a7xt',
   'queensway-carleton-general-hospital': 't_9zs0j4a7xt',
   // Older client-id-as-tour-segment paths
   gphospitalfoundation: 't_l01wnq8eh6',

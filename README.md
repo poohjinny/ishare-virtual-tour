@@ -49,21 +49,21 @@ canonical `/{tourId}/{sceneId}` form.
 
 ## Query flags
 
-| Parameter       | Example              | Description                                                                  |
-| --------------- | -------------------- | ---------------------------------------------------------------------------- |
-| `embed`         | `?embed=1`           | Minimal chrome for iShare iframe embed                                       |
-| `dev`           | `?dev=1`             | Click panorama to log yaw/pitch for hotspot tuning                           |
-| `no`            | `?no=reception-desk` | Open a naming-opportunity panel (kebab-case NO name; survives refresh)       |
-| `notFoundTest`  | `?notFoundTest=1`    | Force tour not-found (404) screen                                            |
-| `loadErrorTest` | `?loadErrorTest=1`   | Force viewer load-error overlay (panorama + 3D; legacy: `panoramaErrorTest`) |
+| Parameter       | Example             | Description                                                                  |
+| --------------- | ------------------- | ---------------------------------------------------------------------------- |
+| `embed`         | `?embed=1`          | Minimal chrome for iShare iframe embed                                       |
+| `dev`           | `?dev=1`            | Click panorama to log yaw/pitch for hotspot tuning                           |
+| `no`            | `?no=no_vdqq3f4hfw` | Open a naming-opportunity panel (`no_*` id; survives refresh)                |
+| `notFoundTest`  | `?notFoundTest=1`   | Force tour not-found (404) screen                                            |
+| `loadErrorTest` | `?loadErrorTest=1`  | Force viewer load-error overlay (panorama + 3D; legacy: `panoramaErrorTest`) |
 
 **Examples:**
 
-- Dev mode: `http://localhost:5173/ken-sargent-house/overview?dev=1`
+- Dev mode: `http://localhost:5173/t_l01wnq8eh6/s_dtv27wfrbi?dev=1`
 - Embed: `http://localhost:5173/?embed=1`
-- Direct tour link: `http://localhost:5173/cancer-research/reception`
+- Direct tour link: `http://localhost:5173/t_8kx3m2p9qa/s_ktujv5s3bg`
 - Naming opportunity deep link:
-  `http://localhost:5173/ken-sargent-house/reception?no=reception-desk`
+  `http://localhost:5173/t_l01wnq8eh6/s_vddzraqi1q?no=no_vdqq3f4hfw`
 
 ## iShare Embed
 
@@ -72,7 +72,7 @@ Production host: **`https://tour.ishare.ca`**. Deploy steps:
 
 ```html
 <iframe
-  src="https://tour.ishare.ca/ken-sargent-house/overview?embed=1"
+  src="https://tour.ishare.ca/t_l01wnq8eh6/s_dtv27wfrbi?embed=1"
   title="Ken Sargent House Virtual Tour"
   allow="fullscreen"
   loading="lazy"
@@ -117,7 +117,7 @@ This copies `assets/` → `public/assets/` (also runs automatically on `dev` and
 Open dev mode (works in Cursor Simple Browser too):
 
 ```
-http://localhost:5173/ken-sargent-house/overview?dev=1
+http://localhost:5173/t_l01wnq8eh6/s_dtv27wfrbi?dev=1
 ```
 
 | Goal                             | Action                                                                                         |

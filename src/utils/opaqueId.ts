@@ -27,4 +27,19 @@ export function allocateOpaqueId(
 
 export const OPAQUE_SCENE_ID_PREFIX = 's_';
 export const OPAQUE_TOUR_ID_PREFIX = 't_';
+/** Catalog naming id — also the canonical `?no=` search value. */
 export const OPAQUE_NAMING_ID_PREFIX = 'no_';
+/** Pin / nav hotspot id — not derived from the display title. */
+export const OPAQUE_HOTSPOT_ID_PREFIX = 'h_';
+
+export function isOpaqueHotspotId(value?: string | null): boolean {
+  return /^h_[a-z0-9]+$/i.test(String(value || '').trim());
+}
+
+export function isOpaqueTourId(value?: string | null): boolean {
+  return /^t_[a-z0-9]+$/i.test(String(value || '').trim());
+}
+
+export function isOpaqueSceneId(value?: string | null): boolean {
+  return /^s_[a-z0-9]+$/i.test(String(value || '').trim());
+}

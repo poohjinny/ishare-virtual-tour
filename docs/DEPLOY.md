@@ -63,7 +63,7 @@ On push to `main`:
 
    ```
    https://tour.ishare.ca/
-   https://tour.ishare.ca/med-surg-inpatient/entrance?embed=1
+   https://tour.ishare.ca/t_l01wnq8eh6/s_dtv27wfrbi?embed=1
    ```
 
 ### Legacy GitHub project demo
@@ -162,7 +162,7 @@ Replace SeekBeak (or staging) embeds on the parent site:
 
 ```html
 <iframe
-  src="https://tour.ishare.ca/med-surg-inpatient/entrance?embed=1"
+  src="https://tour.ishare.ca/t_l01wnq8eh6/s_dtv27wfrbi?embed=1"
   title="Virtual Tour"
   allow="fullscreen"
   loading="lazy"

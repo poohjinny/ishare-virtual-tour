@@ -3,7 +3,7 @@
  * settings from `scripts/lib/panoramaEncode.mjs`.
  *
  * Usage:
- *   node scripts/recompress-panorama-webp.mjs gphospitalfoundation/ken-sargent-house/panoramas
+ *   node scripts/recompress-panorama-webp.mjs gphospitalfoundation/t_l01wnq8eh6/panoramas
  *
  * Env:
  *   WEBP_QUALITY / PANORAMA_WEBP_QUALITY   default 90

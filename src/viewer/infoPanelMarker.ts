@@ -76,8 +76,7 @@ function clearInfoPanelPositionTrack(): void {
 
 /**
  * Resolve which panorama scene owns this hotspot instance.
- * Place-overview pins share id `info-place` across scenes — never use a bare
- * id lookup across Object.values(scenes).
+ * Prefer the requested scene before scanning other scenes for the same pin id.
  */
 function findSceneOwningHotspot(
   tour: Tour,

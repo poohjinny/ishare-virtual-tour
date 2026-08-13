@@ -15,7 +15,7 @@ export function findFramableInfoHotspotInTour(
   const naming = findNamingHotspotInTour(tour, hotspotId);
   if (naming) return naming;
 
-  // Place-overview pins share id `info-place` — prefer the requested scene.
+  // Prefer the requested scene before a global id lookup.
   const onPreferred = tour.scenes[fallbackSceneId]?.hotspots?.find(
     (entry) => entry.id === hotspotId,
   );

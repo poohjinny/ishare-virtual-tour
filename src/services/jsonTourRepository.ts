@@ -91,10 +91,11 @@ export function getCatalogTourPreviewSourceFromTour(
   tour: Tour,
 ): CatalogTourPreviewSource | null {
   const scene = tour.scenes[tour.firstScene];
-  if (!scene?.panorama) return null;
+  const image = scene?.thumbnail?.trim() || scene?.panorama?.trim();
+  if (!scene || !image) return null;
   return {
     thumbnail: scene.thumbnail,
-    panorama: scene.panorama,
+    panorama: image,
     view: scene.defaultView,
   };
 }

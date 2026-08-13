@@ -29,16 +29,16 @@ Confirm you have from sales / client intake:
 - [ ] **Navigation graph** — which scenes link to which
 - [ ] **Naming opportunity** anchors per scene (if any)
 - [ ] **Brand references** — photos, CAD, style direction
-- [ ] **`clientId`** and **`tourId`** slugs from engineering (or propose slugs —
-      see below)
+- [ ] **`clientId`**, **`tourId`**, and **`sceneId`s** from engineering (see
+      below)
 
-**Slug rules** (must match repo conventions):
+**Id rules** (must match repo conventions):
 
-| Slug       | Rule                                                          | Example                                 |
+| Id         | Rule                                                          | Example                                 |
 | ---------- | ------------------------------------------------------------- | --------------------------------------- |
 | `clientId` | Client website hostname **without** `www` and **without** TLD | `qchfoundation` from `qchfoundation.ca` |
-| `tourId`   | Lowercase kebab-case, stable forever in URLs                  | `med-surg-inpatient`                    |
-| `sceneId`  | Lowercase kebab-case from scene title                         | `reception-centre`                      |
+| `tourId`   | Opaque `t_*` issued by engineering — not the display title    | `t_l01wnq8eh6`                          |
+| `sceneId`  | Opaque `s_*` issued by engineering — not the scene title      | `s_dtv27wfrbi`                          |
 
 Paths: `assets/{clientId}/{tourId}/…` — [assets/README.md](../assets/README.md)
 
@@ -54,7 +54,7 @@ Deliver one folder per tour, matching the repo layout:
     ├── panoramas/           # REQUIRED — one {sceneId}.webp per scene
     ├── brand/               # If not already supplied by client intake
     │   └── logo.png         # Only if engineering asks you to include it
-    ├── thumbnails/          # OPTIONAL — we usually auto-generate
+    ├── scene-thumbs/        # OPTIONAL — we usually auto-generate
     └── delivery-notes.md    # REQUIRED — your readme (template below)
 ```
 
@@ -90,7 +90,7 @@ references `.webp` only. Re-export at lower quality if a file is still above
 panoramas/{sceneId}.webp
 ```
 
-`sceneId` must match the intake scene list exactly (kebab-case).
+`sceneId` must be the opaque `s_*` id engineering issued for that scene.
 
 **Export tips:** If your DCC tool does not export WebP directly, render to
 lossless PNG first, then convert once with consistent quality (e.g. Photoshop
@@ -138,10 +138,10 @@ Deliver a **nav map** engineering uses to place arrows.
 
 Spreadsheet or diagram with:
 
-| From scene       | To scene         | Label on arrow   | Notes                      |
-| ---------------- | ---------------- | ---------------- | -------------------------- |
-| overview         | reception-centre | Reception Centre | Door visible at yaw ~140°  |
-| reception-centre | overview         | Overview         | Instant back-link optional |
+| From scene   | To scene     | Label on arrow | Notes                      |
+| ------------ | ------------ | -------------- | -------------------------- |
+| s_dtv27wfrbi | s_vddzraqi1q | Reception      | Door visible at yaw ~140°  |
+| s_vddzraqi1q | s_dtv27wfrbi | Overview       | Instant back-link optional |
 
 Also mark:
 
@@ -200,21 +200,21 @@ Create this file at the tour root:
 
 ## Scenes
 
-| sceneId  | title    | panorama file | defaultView yaw | pitch | zoom | notes       |
-| -------- | -------- | ------------- | --------------- | ----- | ---- | ----------- |
-| overview | Overview | overview.webp | 100.5           | -62   | 15   | start scene |
+| sceneId      | title    | panorama file     | defaultView yaw | pitch | zoom | notes       |
+| ------------ | -------- | ----------------- | --------------- | ----- | ---- | ----------- |
+| s_dtv27wfrbi | Overview | s_dtv27wfrbi.webp | 100.5           | -62   | 15   | start scene |
 
 ## Navigation
 
-| from     | to               | label            | direction notes      |
-| -------- | ---------------- | ---------------- | -------------------- |
-| overview | reception-centre | Reception Centre | doorway at ~140° yaw |
+| from         | to           | label     | direction notes      |
+| ------------ | ------------ | --------- | -------------------- |
+| s_dtv27wfrbi | s_vddzraqi1q | Reception | doorway at ~140° yaw |
 
 ## Naming anchors
 
-| sceneId          | hotspot intent | visible in default view? |
-| ---------------- | -------------- | ------------------------ |
-| inpatient-suites | bed bay NO     | yes                      |
+| sceneId      | hotspot intent | visible in default view? |
+| ------------ | -------------- | ------------------------ |
+| s_vddzraqi1q | bed bay NO     | yes                      |
 
 ## Known issues / re-render list
 
@@ -303,7 +303,7 @@ whether a tour requires panoramas, 3D models, or both.
     ├── models/              # REQUIRED for model3d tours
     │   └── {sceneId}.glb    # One GLB per scene (or .gltf + assets)
     ├── panoramas/           # OPTIONAL — thumbnail or fallback
-    ├── thumbnails/          # Placeholder card image for catalog
+    ├── scene-thumbs/        # Placeholder card image for catalog
     └── delivery-notes.md
 ```
 
@@ -322,7 +322,7 @@ whether a tour requires panoramas, 3D models, or both.
 Version panoramas when re-rendering:
 
 ```text
-panoramas/overview.webp         # always replace in place
+panoramas/{sceneId}.webp        # always replace in place (`s_*`)
 delivery-notes.md               # add changelog row
 ```
 

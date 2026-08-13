@@ -20,7 +20,7 @@ not one global label everywhere.
 /  (client intro — no tour loaded yet)
    → iShare Virtual Tour          ← top layer; user is picking a client tour
 
-/ken-sargent-house/overview   (inside a client tour)
+/t_l01wnq8eh6/s_dtv27wfrbi   (inside a client tour)
    → {Client} Virtual Tour        ← client tour layer
    → tour.title for facility name where relevant (Ken Sargent House, etc.)
 

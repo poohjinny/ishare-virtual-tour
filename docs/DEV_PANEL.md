@@ -12,7 +12,7 @@
 2. Open a tour with dev mode:
 
    ```
-   http://localhost:5173/med-surg-inpatient/entrance?dev=1
+   http://localhost:5173/t_l01wnq8eh6/s_dtv27wfrbi?dev=1
    ```
 
 3. Open the panel:
@@ -35,8 +35,11 @@ Authoring touches two catalog layers plus per-tour JSON:
 | **Tour body**  | `tours/{tourId}.json`                      | Scenes, hotspots, naming catalog, transitions, immersive bg, optional **tour-only** `branding`, optional `askGuideEnabled` |
 
 **Branding resolution** (runtime): `catalog.clients[].branding` is the default;
-`tour.branding` overrides when present. Dev create/update uses
-`brandingMode: 'client' | 'custom'` to choose where uploads are saved.
+`tour.branding` overrides when present. Conventional logo/favicon paths are
+**omitted** in JSON (`/assets/{clientId}/brand/logo.png`, client/tour
+`favicon.png|ico`) and inferred at load. Tour-only logo uses `"logo": true`.
+Favicon is probed (png then ico), not a single inferred field. Dev create/update
+uses `brandingMode: 'client' | 'custom'` to choose where uploads are saved.
 
 **Asset paths**
 
@@ -46,7 +49,7 @@ Authoring touches two catalog layers plus per-tour JSON:
 | Tour (custom)   | `assets/{clientId}/{tourId}/brand/logo.png`, `…/favicon.png` |
 
 Panoramas and scene thumbs stay under `assets/{clientId}/{tourId}/panoramas/`
-and `…/thumbnails/`.
+and `…/scene-thumbs/`. Pin-card bakes go under `…/pin-previews/` (`h_*`).
 
 **Code:** `src/utils/resolveTourBranding.ts`, `scripts/lib/tourBrandDev.mjs`,
 `scripts/lib/tourCatalogDev.mjs`
@@ -129,12 +132,12 @@ on the **Namings** tab.
 2. Choose type: **Overview** | **Navigation** | **Naming** | **Info**
 3. Fill fields → **Create**.
 
-| Type           | Notes                                                                                 |
-| -------------- | ------------------------------------------------------------------------------------- |
-| **Overview**   | Place-overview pin (`info-place`) — one per scene; inherits scene title / description |
-| **Navigation** | Target scene; id auto-slugged from name                                               |
-| **Naming**     | Pick an existing catalog entry (create entries on **Namings** first)                  |
-| **Info**       | Title, body, display mode, optional media / visit-scene                               |
+| Type           | Notes                                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Overview**   | Place-overview pin (`role: placeOverview`, opaque `h_*`) — one per scene; inherits scene title / description |
+| **Navigation** | Target scene; opaque pin id assigned on create                                                               |
+| **Naming**     | Pick an existing catalog entry (create entries on **Namings** first)                                         |
+| **Info**       | Title, body, display mode, optional media / visit-scene                                                      |
 
 ---
 
@@ -192,7 +195,9 @@ Accordion: **Add tour** | **Manage tours**.
 ### Add tour
 
 Pick an **existing catalog client** (create clients on **Clients**), then tour
-details, experience, optional branding override, and first scene panorama.
+details, experience, optional branding override, and first scene panorama. Tour
+and first-scene ids are **opaque `t_*` / `s_*` only** — Dev allocates them;
+there is no custom kebab id field.
 
 | Field                     | Notes                                                     |
 | ------------------------- | --------------------------------------------------------- |
@@ -217,8 +222,9 @@ Accordion: **Add client** | **Manage clients**.
 
 #### Add client
 
-Create a **client without a tour** — name, id, website, contact, shared
-branding. Then add tours from Tours → Add.
+Create a **client without a tour** — name, optional id, website, contact, shared
+branding. Empty id uses the website hostname without TLD. Then add tours from
+Tours → Add.
 
 #### Manage clients
 
@@ -324,7 +330,8 @@ preserving query flags (`dev`, `embed`, etc.).
 | Client branding                            | `catalog.json` `clients[].branding`, `assets/{clientId}/brand/`   |
 | Scene / hotspot / naming catalog           | `tours/{id}.json` (scene graph + `namingOpportunities`)           |
 | Scene duplicate                            | `tours/{id}.json` (+ optional cloned naming assets)               |
-| Panorama / scene thumb                     | `assets/{clientId}/{tourId}/panoramas/`, `…/thumbnails/`          |
+| Panorama / scene thumb                     | `assets/{clientId}/{tourId}/panoramas/`, `…/scene-thumbs/`        |
+| Naming pin preview                         | `assets/{clientId}/{tourId}/pin-previews/{hotspotId}.webp`        |
 
 The viewer refreshes from an in-memory dev cache after mutations — no manual
 page reload. API routes live under `/__dev/api` (Vite plugin

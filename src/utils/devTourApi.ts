@@ -443,7 +443,7 @@ export interface DevCreateTourPayload {
   brandingMode?: DevTourBrandingMode;
   viewerType?: 'panorama' | 'model3d';
   firstSceneTitle: string;
-  /** Opaque or custom; when omitted the server allocates `s_…`. */
+  /** Opaque `s_*`; when omitted the server allocates one. */
   firstSceneId?: string;
   panoramaFile?: File;
   modelFile?: File;

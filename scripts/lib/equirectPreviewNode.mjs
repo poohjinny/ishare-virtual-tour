@@ -175,7 +175,7 @@ export function resolveThumbnailWebPath(panoramaWebPath, sceneId) {
     );
   }
   const prefix = normalized.slice(0, index);
-  return `${prefix}/thumbnails/${sceneId}.webp`;
+  return `${prefix}/scene-thumbs/${sceneId}.webp`;
 }
 
 export function resolveThumbnailFilePath(assetsRoot, thumbnailWebPath) {

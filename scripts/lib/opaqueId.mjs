@@ -34,9 +34,42 @@ export function allocateOpaqueId(prefix, taken, length = 10) {
 export const OPAQUE_SCENE_ID_PREFIX = 's_';
 export const OPAQUE_TOUR_ID_PREFIX = 't_';
 export const OPAQUE_NAMING_ID_PREFIX = 'no_';
+export const OPAQUE_HOTSPOT_ID_PREFIX = 'h_';
 
-/** Tour / scene ids: classic kebab slugs or opaque `t_` / `s_` tokens. */
-export function assertEntityId(value, label) {
+export function isOpaqueHotspotId(value) {
+  return /^h_[a-z0-9]+$/i.test(String(value || '').trim());
+}
+
+export function isOpaqueTourId(value) {
+  return /^t_[a-z0-9]+$/i.test(String(value || '').trim());
+}
+
+export function isOpaqueSceneId(value) {
+  return /^s_[a-z0-9]+$/i.test(String(value || '').trim());
+}
+
+export function assertOpaqueTourId(value, label = 'Tour id') {
+  const id = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (!isOpaqueTourId(id)) {
+    throw new Error(`${label} must be an opaque t_* id`);
+  }
+  return id;
+}
+
+export function assertOpaqueSceneId(value, label = 'Scene id') {
+  const id = String(value ?? '')
+    .trim()
+    .toLowerCase();
+  if (!isOpaqueSceneId(id)) {
+    throw new Error(`${label} must be an opaque s_* id`);
+  }
+  return id;
+}
+
+/** Client ids stay hostname slugs (`qchfoundation`, `ishare-demos`). */
+export function assertClientId(value, label = 'Client id') {
   const id = String(value ?? '')
     .trim()
     .toLowerCase();
@@ -46,4 +79,9 @@ export function assertEntityId(value, label) {
     );
   }
   return id;
+}
+
+/** @deprecated Use {@link assertClientId} or assertOpaqueTourId / assertOpaqueSceneId. */
+export function assertEntityId(value, label) {
+  return assertClientId(value, label);
 }

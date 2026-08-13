@@ -6,8 +6,10 @@ Serves **crawler-friendly Open Graph HTML** for `tour.ishare.ca` deep links
 Contract:
 
 - **Bot UA** → `200` HTML with `og:*` / `twitter:*` from `/tours/{id}.json`
-  (including `?no=` naming). Title/description come from shared
-  `src/utils/ogShareCopy.mjs` (same rules as in-app Share). Includes
+  (including `?no=` naming, `no_*` catalog id). Title/description come from
+  shared `src/utils/ogShareCopy.mjs` (same rules as in-app Share). Scene
+  thumbnails and client logo come from `src/utils/tourAssetResolve.mjs`
+  (conventional paths inferred when JSON omits them). Includes
   `meta-externalfetcher` (Facebook).
 - **`og:image`** → `https://tour.ishare.ca/og/jpg/{tourId}/{sceneId}.jpg`
   (optional `?no=`). JPEG is produced **on the fly** from scene/naming WebP via
@@ -85,7 +87,7 @@ missing.
 Naming share:
 
 ```text
-https://tour.ishare.ca/{tourId}/{sceneId}?no={kebab-name}
+https://tour.ishare.ca/{tourId}/{sceneId}?no={no_*}
 ```
 
 ## Ask Guide

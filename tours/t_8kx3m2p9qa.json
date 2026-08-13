@@ -13,7 +13,6 @@
       "id": "s_ktujv5s3bg",
       "title": "Overview",
       "description": "Begin your visit with an overview of the Cancer Research Society experience. This starting view introduces the virtual tour and the spaces where supporters can learn about naming opportunities that fund innovative cancer research across Canada.",
-      "panorama": "/assets/cancerresearchsociety/t_8kx3m2p9qa/panoramas/s_ktujv5s3bg.webp",
       "defaultView": {
         "yaw": 74.2,
         "pitch": -62.7,
@@ -21,7 +20,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-reception",
+          "id": "h_nf9tlbr52c",
           "type": "nav",
           "label": "Reception",
           "position": {
@@ -30,14 +29,12 @@
           },
           "targetScene": "s_btvq32fhf0"
         }
-      ],
-      "thumbnail": "/assets/cancerresearchsociety/t_8kx3m2p9qa/thumbnails/s_ktujv5s3bg.webp"
+      ]
     },
     "s_btvq32fhf0": {
       "id": "s_btvq32fhf0",
       "title": "Reception",
       "description": "Enter the reception area of the Cancer Research Society virtual tour. This welcome space is where visitors first connect with the Society's mission — and where naming opportunities help fund breakthrough research that improves prevention, detection, and treatment for patients across Canada.",
-      "panorama": "/assets/cancerresearchsociety/t_8kx3m2p9qa/panoramas/s_btvq32fhf0.webp",
       "defaultView": {
         "yaw": 85,
         "pitch": 11.5,
@@ -45,7 +42,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-back-overview",
+          "id": "h_kl0zdd8w0l",
           "type": "nav",
           "label": "Overview",
           "instant": true,
@@ -57,7 +54,7 @@
           "targetScene": "s_ktujv5s3bg"
         },
         {
-          "id": "info-reception",
+          "id": "h_h5z8vae8le",
           "type": "info",
           "position": {
             "yaw": 91.1,
@@ -69,8 +66,7 @@
           },
           "namingId": "no_kufzk8sp4w"
         }
-      ],
-      "thumbnail": "/assets/cancerresearchsociety/t_8kx3m2p9qa/thumbnails/s_btvq32fhf0.webp"
+      ]
     }
   },
   "namingOpportunities": {

@@ -19,10 +19,8 @@
       "phoneLabel": "Telephone",
       "address": "11205 – 110 Street, Grande Prairie, AB T8V 4B1",
       "branding": {
-        "logo": "/assets/gphospitalfoundation/brand/logo.png",
         "logoAlt": "Grande Prairie Regional Hospital Foundation",
-        "primaryColor": "#cb007c",
-        "favicon": "/assets/gphospitalfoundation/favicon.ico"
+        "primaryColor": "#cb007c"
       },
       "tours": [
         {
@@ -54,10 +52,8 @@
       "faxLabel": "Fax",
       "address": "625 President-Kennedy Avenue Suite 402, Montreal, QC H3A 3S5",
       "branding": {
-        "logo": "/assets/cancerresearchsociety/brand/logo.png",
         "logoAlt": "Cancer Research Society",
-        "primaryColor": "#e12827",
-        "favicon": "/assets/cancerresearchsociety/favicon.ico"
+        "primaryColor": "#e12827"
       },
       "tours": [
         {
@@ -82,12 +78,10 @@
       ],
       "address": "620 Spadina Avenue, 2nd Floor, Toronto, ON M5S 2H4",
       "branding": {
-        "logo": "/assets/holodomor/brand/logo.png",
         "logoAlt": "Holodomor Research and Education Consortium",
         "primaryColor": "#ffcc66",
         "fontFamily": "'Open Sans', Arial, sans-serif",
-        "fontSourceUrl": "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap",
-        "favicon": "/assets/holodomor/favicon.ico"
+        "fontSourceUrl": "https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap"
       },
       "tours": [
         {
@@ -112,10 +106,8 @@
       ],
       "address": "3045 Baseline Road, Ottawa, ON K2H 8P4",
       "branding": {
-        "logo": "/assets/qchfoundation/brand/logo.png",
         "logoAlt": "Queensway Carleton Hospital Foundation",
-        "primaryColor": "#007078",
-        "favicon": "/assets/qchfoundation/favicon.png"
+        "primaryColor": "#007078"
       },
       "tours": [
         {
@@ -162,10 +154,8 @@
         }
       ],
       "branding": {
-        "logo": "/assets/ishare-demos/brand/logo.png",
         "logoAlt": "iShare®",
-        "primaryColor": "#d89c21",
-        "favicon": "/assets/ishare-demos/favicon.ico"
+        "primaryColor": "#d89c21"
       }
     },
     {
@@ -185,10 +175,8 @@
       "email": "allanbwilliams@gmail.com",
       "address": "82 Laird Drive, Suite 130, Toronto, ontario, M4G 3V1",
       "branding": {
-        "logo": "/assets/cihe/brand/logo.png",
         "logoAlt": "Canadian Institute for Historical Education",
-        "primaryColor": "#74112e",
-        "favicon": "/assets/cihe/favicon.ico"
+        "primaryColor": "#74112e"
       }
     }
   ]

@@ -96,7 +96,7 @@ export async function navigateToScene(
   }
 
   const scene = tour.scenes[targetSceneId];
-  if (!scene) return false;
+  if (!scene?.panorama) return false;
 
   const view = targetView ?? scene.defaultView;
   const seamless = options?.seamless === true;

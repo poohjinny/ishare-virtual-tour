@@ -71,9 +71,11 @@ export interface NamingDonor {
   /**
    * Organization: donor logo.
    * Person: affiliation logo.
-   * Uploaded asset path shown in Info popup/panel.
+   * JSON: `true` = conventional `naming/{hotspotId}/donor-logo.png`;
+   * string = override URL/path; omit = no logo.
+   * After {@link normalizeTourAssets}, this is always a resolved URL string.
    */
-  logo?: string;
+  logo?: string | true;
 }
 
 /**
@@ -164,7 +166,11 @@ export interface Hotspot {
   instant?: boolean;
   /** Nav marker + default UX — discover (dot), back, or hub (firstScene). */
   navVariant?: NavHotspotVariant;
-  /** Optional static image override for nav preview card */
+  /**
+   * Optional preview card image. Naming pins omit the conventional
+   * `pin-previews/{hotspotId}.webp` path in JSON; filled at load. Nav pins only
+   * store this for a non-default override.
+   */
   preview?: { image?: string };
   /**
    * For `model3d` tour-level info / naming hotspots — viewpoint scene id.
@@ -173,7 +179,7 @@ export interface Hotspot {
   sceneId?: string;
   /**
    * Auto place-overview pin — inherits scene title/description at display time.
-   * Stable id is typically `info-place`.
+   * Id is opaque `h_*`; detect via `role`, not the pin id.
    */
   role?: 'placeOverview';
   /** Author moved this place-overview pin — stop syncing position to defaultView. */
@@ -244,11 +250,18 @@ export interface Scene {
   videoUrl?: string;
   /** Optional poster for hero `previewVideoUrl` when it is local mp4/webm. */
   videoPoster?: string;
-  /** Equirectangular panorama URL (panorama tours). */
-  panorama: string;
+  /**
+   * Equirectangular panorama URL (panorama tours).
+   * JSON omits the conventional `panoramas/{sceneId}.webp` path; filled at load.
+   * model3d tours omit this — cards use {@link thumbnail}.
+   */
+  panorama?: string;
   /** GLTF / GLB model URL (model3d tours). Optional per-scene override of {@link Tour.model}. */
   model?: string;
-  /** Baked rectilinear preview at defaultView — Explore location cards; from `npm run generate-thumbnails`. */
+  /**
+   * Baked rectilinear preview at defaultView — Explore / intro / catalog cards.
+   * JSON omits the conventional `scene-thumbs/{sceneId}.webp` path; filled at load.
+   */
   thumbnail?: string;
   defaultView: ViewPosition;
   /** Panorama / legacy 3D hotspots — `model3d` tours use {@link Tour.hotspots} instead. */
@@ -274,7 +287,11 @@ export interface TourClient {
 }
 
 export interface TourBranding {
-  logo?: string;
+  /**
+   * Client catalog: omit (inferred `/assets/{clientId}/brand/logo.png`).
+   * Tour override: `true` = conventional tour logo, string = custom URL.
+   */
+  logo?: string | true;
   logoAlt?: string;
   /** Client brand primary — e.g. "#cb007c" */
   primaryColor?: string;
@@ -350,7 +367,10 @@ export interface Tour {
    * Omitted / false keeps it hidden unless product default or `?askGuide=1`.
    */
   askGuideEnabled?: boolean;
-  /** Optional per-tour branding override — defaults to catalog client `branding`. */
+  /**
+   * Optional per-tour branding override — defaults to catalog client `branding`.
+   * Conventional logo/favicon paths are omitted; runtime infers them.
+   */
   branding?: TourBranding;
   /** Optional per-tour override — defaults to platform global playlist in `loadTour`. */
   immersiveBackground?: TourImmersiveBackground;
@@ -382,7 +402,7 @@ export interface ChatGuideLink {
   title: string;
   description?: string;
   thumbnail?: string;
-  /** `naming` only — catalog id (`no_*`) or legacy hotspot id. */
+  /** `naming` only — catalog id (`no_*`). */
   namingId?: string;
   /** `naming` only — pin id for opening the opportunity. */
   hotspotId?: string;

@@ -10,6 +10,7 @@ import {
   tryReadCatalogJson,
   writeCatalogJson,
 } from './tourCatalogDev.mjs';
+import { hydrateCatalogClientBranding } from '../../src/utils/tourAssetResolve.mjs';
 
 function writeCatalogJsonOrThrow(toursDir, catalog) {
   writeCatalogJson(toursDir, catalog);
@@ -70,7 +71,7 @@ export function findCatalogTourEntry(toursDir, clientId, tourId) {
     visibility: entry.visibility ?? 'public',
     featured: entry.featured ?? false,
     summary: entry.summary ?? '',
-    clientBranding: client.branding ?? null,
+    clientBranding: hydrateCatalogClientBranding(client),
   };
 }
 
@@ -383,14 +384,10 @@ export async function updateTour({
     });
 
     if (brandAssets.savedLogo) {
-      tour.branding.logo = brandAssets.logoWebPath;
+      tour.branding.logo = true;
       if (!tour.branding.logoAlt?.trim()) {
         tour.branding.logoAlt = nextLogoAlt || catalogClient.name || nextTitle;
       }
-    }
-
-    if (brandAssets.savedFavicon) {
-      tour.branding.favicon = brandAssets.faviconWebPath;
     }
 
     if (Object.keys(tour.branding).length === 0) {

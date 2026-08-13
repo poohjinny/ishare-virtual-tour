@@ -6,6 +6,7 @@ import {
 import { getDevCatalogSnapshot } from './devCatalogSnapshot';
 
 import type { ClientPhone, TourBranding } from '../types/tour';
+import { hydrateCatalogClientBranding } from '../utils/tourAssetResolve.mjs';
 
 export type CatalogTourVisibility = 'public' | 'unlisted' | 'internal';
 
@@ -31,7 +32,10 @@ export interface CatalogClient {
   fax?: string;
   faxLabel?: string;
   address?: string;
-  /** Shared client branding — tours inherit unless `tour.branding` overrides. */
+  /**
+   * Shared client branding — tours inherit unless `tour.branding` overrides.
+   * Conventional logo/favicon paths are omitted in JSON; runtime infers logo.
+   */
   branding?: TourBranding;
   tours: CatalogTourEntry[];
 }
@@ -43,8 +47,25 @@ interface TourCatalogFile {
 
 const catalog = catalogJson as TourCatalogFile;
 
+function withInferredClientBranding(client: CatalogClient): CatalogClient {
+  const branding = hydrateCatalogClientBranding(client) as TourBranding | null;
+  if (!branding) return client;
+  if (branding === client.branding) return client;
+  return { ...client, branding };
+}
+
+function withInferredCatalog(data: TourCatalogFile): TourCatalogFile {
+  let changed = false;
+  const clients = data.clients.map((client) => {
+    const next = withInferredClientBranding(client);
+    if (next !== client) changed = true;
+    return next;
+  });
+  return changed ? { ...data, clients } : data;
+}
+
 function getCatalogData(): TourCatalogFile {
-  return getDevCatalogSnapshot() ?? catalog;
+  return withInferredCatalog(getDevCatalogSnapshot() ?? catalog);
 }
 
 const ROUTABLE_VISIBILITIES: ReadonlySet<CatalogTourVisibility> = new Set([

@@ -26,7 +26,7 @@ export function buildVirtualTourNodes(
   return Object.values(tour.scenes).map((scene) => ({
     id: scene.id,
     name: scene.title,
-    panorama: scene.panorama,
+    panorama: scene.panorama ?? '',
     links: [],
     markers: markersForScene(tour, scene, audience),
   }));

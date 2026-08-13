@@ -108,7 +108,8 @@ Engineering notes: [CODING_GUIDELINES.md](./CODING_GUIDELINES.md).
 ### Catalog (`tours/catalog.json`)
 
 - `categories[]` — display order on client intro.
-- `clients[]` — each with `id`, `name`, `tours[]`.
+- `clients[]` — each with `id`, `name`, `tours[]`, contact, optional `branding`
+  (color / fonts / `logoAlt`; conventional logo & favicon paths omitted).
 - Per tour: `id`, `category`, `name`, optional `visibility`, `featured`,
   `summary`.
 
@@ -146,7 +147,7 @@ Example:
 
 ```json
 {
-  "id": "ken-sargent-house",
+  "id": "t_l01wnq8eh6",
   "category": "Healthcare",
   "name": "Ken Sargent House",
   "visibility": "public",
@@ -170,7 +171,7 @@ excluded from `isKnownTourId` until dev gating exists.
 | -------------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
 | `embed`                    | `1`                 | Client delivery — skip intro; trim Share/Help FABs; lighter splash; `postMessage` to parent |
 | `intro`                    | `1` / `0` / omitted | Tri-state override for intro at `/` only                                                    |
-| `no`                       | hotspot id          | Open naming-opportunity panel                                                               |
+| `no`                       | `no_*` catalog id   | Open naming-opportunity panel                                                               |
 | `askGuide`                 | `1`                 | Force Tour Guide on (QA)                                                                    |
 | `guideMock`                | `1`                 | Scripted Guide replies (no OpenAI); alias `askGuideMock`                                    |
 | `featured`                 | `1`                 | Intro gallery featured-only filter                                                          |

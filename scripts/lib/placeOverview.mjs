@@ -9,13 +9,12 @@
 
 import { isDefaultSceneDescription } from './devContentPlaceholders.mjs';
 import { isNamingUsableForPlaceLead } from './namingVisibility.mjs';
-
-export const PLACE_OVERVIEW_HOTSPOT_ID = 'info-place';
+import { allocateOpaqueId, OPAQUE_HOTSPOT_ID_PREFIX } from './opaqueId.mjs';
 
 export function isPlaceOverviewHotspot(hotspot) {
-  if (!hotspot || hotspot.type !== 'info') return false;
-  if (hotspot.role === 'placeOverview') return true;
-  return hotspot.id === PLACE_OVERVIEW_HOTSPOT_ID;
+  return Boolean(
+    hotspot && hotspot.type === 'info' && hotspot.role === 'placeOverview',
+  );
 }
 
 export function hasRealSceneDescription(tour, scene) {
@@ -93,13 +92,26 @@ function findPlaceOverviewHotspot(tour, scene) {
   return (scene.hotspots ?? []).find((entry) => isPlaceOverviewHotspot(entry));
 }
 
+function collectTourHotspotIds(tour) {
+  const ids = new Set();
+  for (const hotspot of tour.hotspots ?? []) {
+    if (hotspot?.id) ids.add(hotspot.id);
+  }
+  for (const scene of Object.values(tour.scenes ?? {})) {
+    for (const hotspot of scene.hotspots ?? []) {
+      if (hotspot?.id) ids.add(hotspot.id);
+    }
+  }
+  return ids;
+}
+
 function buildPlaceOverviewHotspot(tour, scene, position) {
   const title = scene.title?.trim() || 'Place';
   const body = resolvePlaceOverviewBody(tour, scene, title);
   const nextPosition = position ?? positionFromDefaultView(scene.defaultView);
   const defaultPos = positionFromDefaultView(scene.defaultView);
   const hotspot = {
-    id: PLACE_OVERVIEW_HOTSPOT_ID,
+    id: allocateOpaqueId(OPAQUE_HOTSPOT_ID_PREFIX, collectTourHotspotIds(tour)),
     type: 'info',
     role: 'placeOverview',
     position: nextPosition,
@@ -130,16 +142,6 @@ export function ensurePlaceOverviewHotspot(tour, scene, position) {
   const existing = findPlaceOverviewHotspot(tour, scene);
   if (existing) {
     throw new Error('This scene already has a place overview hotspot');
-  }
-
-  const clash = (scene.hotspots ?? []).some(
-    (entry) =>
-      entry.id === PLACE_OVERVIEW_HOTSPOT_ID && !isPlaceOverviewHotspot(entry),
-  );
-  if (clash) {
-    throw new Error(
-      `Hotspot id “${PLACE_OVERVIEW_HOTSPOT_ID}” is already used by a non-overview pin`,
-    );
   }
 
   delete scene.suppressPlaceOverview;
@@ -210,11 +212,6 @@ export function syncPlaceOverviewFromScene(tour, scene, options = {}) {
   if (!shouldHavePlaceOverview(tour, scene)) return false;
 
   if (!Array.isArray(scene.hotspots)) scene.hotspots = [];
-  const clash = scene.hotspots.some(
-    (entry) =>
-      entry.id === PLACE_OVERVIEW_HOTSPOT_ID && !isPlaceOverviewHotspot(entry),
-  );
-  if (clash) return false;
   scene.hotspots.push(buildPlaceOverviewHotspot(tour, scene));
   return true;
 }

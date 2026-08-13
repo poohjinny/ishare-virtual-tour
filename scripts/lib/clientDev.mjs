@@ -24,6 +24,19 @@ function assertSlug(value, label) {
   return slug;
 }
 
+/** Hostname without www / TLD — same rule as `src/utils/clientId.ts`. */
+function clientIdFromWebsite(websiteUrl) {
+  const trimmed = String(websiteUrl || '').trim();
+  if (!trimmed) return '';
+  const href = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  try {
+    const hostname = new URL(href).hostname.toLowerCase().replace(/^www\./, '');
+    return hostname.replace(/\.(ca|com|org|net|co\.uk|io)$/i, '');
+  } catch {
+    return '';
+  }
+}
+
 function assertGoogleFontSourceUrl(url) {
   const trimmed = url?.trim();
   if (!trimmed) return undefined;
@@ -63,7 +76,12 @@ export async function createClient({
     throw new Error('clientName is required');
   }
 
-  const clientId = assertSlug(rawClientId ?? clientName, 'Client id');
+  const resolvedClientId =
+    String(rawClientId || '').trim() || clientIdFromWebsite(websiteUrl);
+  if (!resolvedClientId) {
+    throw new Error('clientId or websiteUrl is required');
+  }
+  const clientId = assertSlug(resolvedClientId, 'Client id');
   const catalog = readCatalogJson(toursDir);
 
   if (findCatalogClientRecord(catalog, clientId)) {
@@ -91,7 +109,7 @@ export async function createClient({
       assertGoogleFontSourceUrl(fontSourceUrl)
     : undefined;
 
-  const brandAssets = await saveClientBrandAssets({
+  await saveClientBrandAssets({
     root,
     assetsRoot,
     clientId,
@@ -102,10 +120,6 @@ export async function createClient({
   const brandingPatch = {
     primaryColor: color,
     logoAlt,
-    ...(brandAssets.savedLogo ? { logo: brandAssets.logoWebPath } : {}),
-    ...(brandAssets.savedFavicon ?
-      { favicon: brandAssets.faviconWebPath }
-    : {}),
     ...(fontFamily !== undefined ? { fontFamily } : {}),
     ...(fontSourceUrl !== undefined ?
       { fontSourceUrl: normalizedFontSourceUrl ?? '' }
@@ -195,7 +209,7 @@ export async function updateClient({
       assertGoogleFontSourceUrl(fontSourceUrl)
     : undefined;
 
-  const brandAssets = await saveClientBrandAssets({
+  await saveClientBrandAssets({
     root,
     assetsRoot,
     clientId,
@@ -206,10 +220,6 @@ export async function updateClient({
   applyCatalogClientBranding(client, {
     ...(normalizedColor ? { primaryColor: normalizedColor } : {}),
     ...(nextLogoAlt ? { logoAlt: nextLogoAlt } : {}),
-    ...(brandAssets.savedLogo ? { logo: brandAssets.logoWebPath } : {}),
-    ...(brandAssets.savedFavicon ?
-      { favicon: brandAssets.faviconWebPath }
-    : {}),
     ...(fontFamily !== undefined ? { fontFamily } : {}),
     ...(fontSourceUrl !== undefined ?
       { fontSourceUrl: normalizedFontSourceUrl ?? '' }

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { findCatalogClient } from '../data/tourCatalog';
 import { slugifyHotspotName } from '../utils/devHotspotLogger';
+import { tryClientIdFromWebsite } from '../utils/clientId';
 import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
+import { resolveClientLogoPath } from '../utils/resolveTourBranding';
 import { phoneToTelHref } from '../utils/tourClientContact';
 import { DevBrandFaviconPreview } from './DevBrandFaviconPreview';
 import {
@@ -154,16 +156,16 @@ export function DevClientPanel({
   );
 
   const managedLogoPreviewUrl = useMemo(() => {
-    if (clientCreateOpen || logoFile) return null;
-    const path = selectedManageCatalogClient?.branding?.logo;
+    if (clientCreateOpen || logoFile || !selectedManageCatalogClient) {
+      return null;
+    }
+    const path = resolveClientLogoPath(
+      selectedManageCatalogClient.id,
+      selectedManageCatalogClient.branding?.logo,
+    );
     if (!path) return null;
     return withBaseUrl(appendCacheBust(path, catalogTick));
-  }, [
-    catalogTick,
-    clientCreateOpen,
-    logoFile,
-    selectedManageCatalogClient?.branding?.logo,
-  ]);
+  }, [catalogTick, clientCreateOpen, logoFile, selectedManageCatalogClient]);
 
   const managedFaviconPreviewAlt = useMemo(
     () =>
@@ -176,15 +178,13 @@ export function DevClientPanel({
     Boolean(editingClientId && manageClientId) &&
     !faviconFile;
 
-  const createClientSlug = useMemo(
-    () =>
-      createClientIdInput.trim() ? slugifyHotspotName(createClientIdInput) : '',
-    [createClientIdInput],
-  );
+  const createClientSlug = useMemo(() => {
+    const manual =
+      createClientIdInput.trim() ? slugifyHotspotName(createClientIdInput) : '';
+    return manual || tryClientIdFromWebsite(website);
+  }, [createClientIdInput, website]);
 
-  const canCreateClient = Boolean(
-    createClientName.trim() && createClientIdInput.trim() && createClientSlug,
-  );
+  const canCreateClient = Boolean(createClientName.trim() && createClientSlug);
 
   const canSaveClient = Boolean(manageClientId && clientName.trim());
 
@@ -802,16 +802,22 @@ export function DevClientPanel({
               </label>
               <label className={devViewPanelFieldClassName}>
                 <span className={devViewPanelFieldLabelClassName}>
-                  Client id
+                  Client id (optional)
                 </span>
                 <input
                   className={devViewPanelInputClassName}
                   type='text'
                   value={createClientIdInput}
                   onChange={(e) => setCreateClientIdInput(e.target.value)}
-                  placeholder='e.g. example-foundation'
+                  placeholder={
+                    tryClientIdFromWebsite(website) || 'e.g. qchfoundation'
+                  }
                   spellCheck={false}
                 />
+                <p className={devViewPanelSectionHintClassName}>
+                  Leave empty to use the website hostname without TLD
+                  (qchfoundation.ca → qchfoundation).
+                </p>
               </label>
             </DevPanelFormRow>
             {createClientSlug ?
@@ -920,7 +926,10 @@ export function DevClientPanel({
                     external: true,
                   });
                 }
-                const logoPath = client.branding?.logo?.trim();
+                const logoPath = resolveClientLogoPath(
+                  client.id,
+                  client.branding?.logo,
+                );
                 const logoUrl =
                   logoPath ?
                     withBaseUrl(appendCacheBust(logoPath, catalogTick))

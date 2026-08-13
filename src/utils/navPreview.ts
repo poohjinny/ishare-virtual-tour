@@ -119,7 +119,8 @@ export function buildNavPreview(
 
   const videoUrl = scene.previewVideoUrl?.trim() || undefined;
   const bodyVideoUrl = scene.videoUrl?.trim() || undefined;
-  const image = hotspot.preview?.image ?? scene.panorama ?? undefined;
+  const image =
+    hotspot.preview?.image ?? scene.thumbnail ?? scene.panorama ?? undefined;
   const canNavigate = navPreviewCanNavigate(hotspot, currentSceneId);
   const hotspotLabel = resolveNavHotspotLabel(hotspot, tour);
 

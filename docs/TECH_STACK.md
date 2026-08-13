@@ -166,11 +166,11 @@ Three.js viewer chunk.
 ```
 ishare-virtual-tour/
 ├── assets/                    # Source media (see assets/README.md)
-│   ├── panoramas/             # 360° equirectangular images
-│   └── brand/                 # Client logos
+│   ├── {clientId}/{tourId}/   # panoramas, scene-thumbs, pin-previews, brand
+│   └── brand/                 # Platform logos
 ├── public/assets/             # Auto-synced from assets/ (/assets/...)
 ├── tours/
-│   ├── ken-sargent.json       # Tour definition (scenes, hotspots)
+│   ├── t_l01wnq8eh6.json      # Tour definition (scenes, hotspots)
 │   └── catalog.json           # Clients, tour ids, categories
 ├── docs/                      # Project documentation
 ├── src/
@@ -298,7 +298,7 @@ Tour and scene use **path segments**, not query strings:
 /{tourId}/{sceneId}
 ```
 
-Example: `/ken-sargent-house/overview`
+Example: `/t_l01wnq8eh6/s_dtv27wfrbi`
 
 Root `/` with multiple catalog tours shows the **client intro picker**.
 Single-tour deploys redirect to that tour automatically. Override with
@@ -339,7 +339,7 @@ rewritten to `/{tourId}/{sceneId}`; they are not kept in the URL after redirect.
 | Analytics            | postMessage to iShare parent                            |
 | Admin editor         | Separate Next.js app or iShare backend                  |
 | Viewport zones       | Extend tour JSON + `viewer.getPosition()`               |
-| Thumbnails           | Generated assets in `public/assets/thumbs/`             |
+| Thumbnails           | `assets/{clientId}/{tourId}/scene-thumbs/`              |
 | 3D hotspots          | Raycasting + world-position markers in ThreeDViewer     |
 | VR / XR              | WebXR + Three.js: seated panorama sphere, then model3d  |
 | 3D scene transitions | Multi-room GLTF + camera path animation in ThreeDViewer |

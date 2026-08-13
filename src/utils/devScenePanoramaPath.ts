@@ -1,10 +1,17 @@
+import {
+  conventionalPanoramaPath,
+  conventionalSceneModelPath,
+  conventionalThumbnailPath,
+  conventionalTourModelPath,
+} from './tourAssetResolve.mjs';
+
 /** Dev — default panorama web path for a new scene on the current tour. */
 export function buildDefaultPanoramaWebPath(
   clientId: string,
   tourId: string,
   sceneId: string,
 ): string {
-  return `/assets/${clientId}/${tourId}/panoramas/${sceneId}.webp`;
+  return conventionalPanoramaPath({ id: tourId, clientId }, sceneId);
 }
 
 /** Shorter label for the dev panel preview. */
@@ -19,7 +26,7 @@ export function buildDefaultModelWebPath(
   sceneId: string,
   ext = 'glb',
 ): string {
-  return `/assets/${clientId}/${tourId}/models/${sceneId}.${ext}`;
+  return conventionalSceneModelPath({ id: tourId, clientId }, sceneId, ext);
 }
 
 /** Shorter label for the dev panel preview. */
@@ -34,7 +41,7 @@ export function buildDefaultModelRelativePath(
 export function buildDefaultSceneThumbnailRelativePath(
   sceneId: string,
 ): string {
-  return `thumbnails/${sceneId}.webp`;
+  return `scene-thumbs/${sceneId}.webp`;
 }
 
 /** Dev — default scene card thumbnail for model3d viewpoints. */
@@ -43,7 +50,7 @@ export function buildDefaultSceneThumbnailWebPath(
   tourId: string,
   sceneId: string,
 ): string {
-  return `/assets/${clientId}/${tourId}/thumbnails/${sceneId}.webp`;
+  return conventionalThumbnailPath({ id: tourId, clientId }, sceneId);
 }
 
 /** Dev — shared tour GLB web path (one model per model3d tour). */
@@ -52,7 +59,7 @@ export function buildDefaultTourModelWebPath(
   tourId: string,
   ext = 'glb',
 ): string {
-  return `/assets/${clientId}/${tourId}/models/${tourId}.${ext}`;
+  return conventionalTourModelPath({ id: tourId, clientId }, ext);
 }
 
 /** Shorter label for the dev panel preview. */

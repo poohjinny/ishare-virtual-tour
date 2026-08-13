@@ -13,7 +13,6 @@
       "id": "s_tdzbrbsa2y",
       "title": "Overview",
       "description": "You are looking at an overview of the Banting and Best Laboratory — the University of Toronto workspace tied to the early insulin experiments of 1921. From here you can enter the Frederick Banting Experimental Laboratory or the Charles Best Research Laboratory.\n\n(Temporary copy — replace when final content is ready.)",
-      "panorama": "/assets/cihe/t_jmkyywxkfx/panoramas/s_tdzbrbsa2y.webp",
       "defaultView": {
         "yaw": 149.5,
         "pitch": -14.1,
@@ -21,7 +20,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-lab-1",
+          "id": "h_zo7nii1y9i",
           "type": "nav",
           "position": {
             "yaw": 87,
@@ -30,7 +29,7 @@
           "targetScene": "s_pauuy0pinc"
         },
         {
-          "id": "nav-to-lab-2",
+          "id": "h_gnhf5etgmx",
           "type": "nav",
           "position": {
             "yaw": 183.7,
@@ -39,7 +38,7 @@
           "targetScene": "s_1vwi9rq59h"
         },
         {
-          "id": "info-overview",
+          "id": "h_48eu7h5ffo",
           "type": "info",
           "position": {
             "yaw": 118.8,
@@ -49,13 +48,10 @@
             "display": "anchored",
             "title": "Laboratory Overview"
           },
-          "namingId": "no_0l6wdoos8c",
-          "preview": {
-            "image": "/assets/cihe/t_jmkyywxkfx/previews/info-overview.webp"
-          }
+          "namingId": "no_0l6wdoos8c"
         },
         {
-          "id": "info-place",
+          "id": "h_0jc97cwuyy",
           "type": "info",
           "role": "placeOverview",
           "position": {
@@ -70,14 +66,12 @@
           "placeOverviewManual": true
         }
       ],
-      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_tdzbrbsa2y.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=NUxRY5ppXEc"
     },
     "s_pauuy0pinc": {
       "id": "s_pauuy0pinc",
       "title": "Frederick Banting Experimental Laboratory",
       "description": "Temporary: Frederick Banting experimental laboratory space — replace with final naming copy.",
-      "panorama": "/assets/cihe/t_jmkyywxkfx/panoramas/s_pauuy0pinc.webp",
       "defaultView": {
         "yaw": 107.5,
         "pitch": -14.5,
@@ -85,7 +79,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-overview",
+          "id": "h_xhxs4e9ddd",
           "type": "nav",
           "position": {
             "yaw": 280,
@@ -96,7 +90,7 @@
           "navVariant": "hub"
         },
         {
-          "id": "nav-to-lab-2",
+          "id": "h_7ts0ro1bkb",
           "type": "nav",
           "position": {
             "yaw": 200,
@@ -105,7 +99,7 @@
           "targetScene": "s_1vwi9rq59h"
         },
         {
-          "id": "info-lab-1",
+          "id": "h_e7907qozg9",
           "type": "info",
           "position": {
             "yaw": 107.5,
@@ -114,20 +108,15 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_cwwagvae0t",
-          "preview": {
-            "image": "/assets/cihe/t_jmkyywxkfx/previews/info-lab-1.webp"
-          }
+          "namingId": "no_cwwagvae0t"
         }
       ],
-      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_pauuy0pinc.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=NUxRY5ppXEc"
     },
     "s_1vwi9rq59h": {
       "id": "s_1vwi9rq59h",
       "title": "Charles Best Research Laboratory",
       "description": "Temporary: Charles Best research laboratory space — replace with final naming copy.",
-      "panorama": "/assets/cihe/t_jmkyywxkfx/panoramas/s_1vwi9rq59h.webp",
       "defaultView": {
         "yaw": 98.2,
         "pitch": -21.4,
@@ -135,7 +124,7 @@
       },
       "hotspots": [
         {
-          "id": "nav-to-overview",
+          "id": "h_6gjk4486aq",
           "type": "nav",
           "position": {
             "yaw": 280,
@@ -146,7 +135,7 @@
           "navVariant": "hub"
         },
         {
-          "id": "nav-to-lab-1",
+          "id": "h_h2qpcijzxa",
           "type": "nav",
           "position": {
             "yaw": 160,
@@ -155,7 +144,7 @@
           "targetScene": "s_pauuy0pinc"
         },
         {
-          "id": "info-lab-2",
+          "id": "h_a7q2g27zmv",
           "type": "info",
           "position": {
             "yaw": 98.2,
@@ -164,13 +153,9 @@
           "popup": {
             "display": "anchored"
           },
-          "namingId": "no_1f336mwy2x",
-          "preview": {
-            "image": "/assets/cihe/t_jmkyywxkfx/previews/info-lab-2.webp"
-          }
+          "namingId": "no_1f336mwy2x"
         }
       ],
-      "thumbnail": "/assets/cihe/t_jmkyywxkfx/thumbnails/s_1vwi9rq59h.webp",
       "previewVideoUrl": "https://www.youtube.com/watch?v=NUxRY5ppXEc"
     }
   },

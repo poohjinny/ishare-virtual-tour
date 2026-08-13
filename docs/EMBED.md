@@ -47,8 +47,8 @@ https://tour.ishare.ca/{tourId}/{firstScene}?embed=1
 Examples:
 
 ```
-https://tour.ishare.ca/med-surg-inpatient/entrance?embed=1
-https://tour.ishare.ca/ken-sargent-house/overview?embed=1
+https://tour.ishare.ca/t_9zs0j4a7xt/s_sxeq0eovm7?embed=1
+https://tour.ishare.ca/t_l01wnq8eh6/s_dtv27wfrbi?embed=1
 ```
 
 `embed` is preserved when the visitor navigates inside the tour (scene changes,
@@ -58,7 +58,7 @@ Explore picks, naming deep links). See `PRESERVED_SEARCH_KEYS` in
 ### Naming-opportunity deep link in embed
 
 ```
-https://tour.ishare.ca/{tourId}/{sceneId}?embed=1&no={hotspotId}
+https://tour.ishare.ca/{tourId}/{sceneId}?embed=1&no={no_*}
 ```
 
 Opens the tour in embed chrome with the naming panel focused (same as non-embed
@@ -80,7 +80,7 @@ Minimum:
 
 ```html
 <iframe
-  src="https://tour.ishare.ca/med-surg-inpatient/entrance?embed=1"
+  src="https://tour.ishare.ca/t_l01wnq8eh6/s_dtv27wfrbi?embed=1"
   title="Med/Surg Inpatient Virtual Tour"
   allow="fullscreen"
   loading="lazy"
@@ -163,8 +163,8 @@ with target `'*'`; origin checks belong on the parent.
 {
   "source": "ishare-virtual-tour",
   "type": "tour:ready",
-  "tourId": "med-surg-inpatient",
-  "sceneId": "entrance"
+  "tourId": "t_l01wnq8eh6",
+  "sceneId": "s_dtv27wfrbi"
 }
 ```
 
@@ -172,8 +172,8 @@ with target `'*'`; origin checks belong on the parent.
 {
   "source": "ishare-virtual-tour",
   "type": "tour:scene",
-  "tourId": "med-surg-inpatient",
-  "sceneId": "kitchen",
+  "tourId": "t_l01wnq8eh6",
+  "sceneId": "s_vddzraqi1q",
   "namingHotspotId": null
 }
 ```
@@ -182,7 +182,7 @@ with target `'*'`; origin checks belong on the parent.
 {
   "source": "ishare-virtual-tour",
   "type": "tour:resize",
-  "tourId": "med-surg-inpatient",
+  "tourId": "t_l01wnq8eh6",
   "height": 720
 }
 ```
@@ -250,7 +250,7 @@ test page:
   <body>
     <iframe
       id="tour"
-      src="http://localhost:5173/med-surg-inpatient/entrance?embed=1"
+      src="http://localhost:5173/t_l01wnq8eh6/s_dtv27wfrbi?embed=1"
       title="Virtual Tour"
       allow="fullscreen"
       width="100%"
@@ -280,11 +280,11 @@ Embed mode **Messages** should show entries when the tour runs in this iframe
 import { buildAbsoluteEmbedUrl } from '../src/utils/buildShareUrl';
 
 const url = buildAbsoluteEmbedUrl({
-  tourId: 'med-surg-inpatient',
-  sceneId: 'entrance',
-  firstSceneId: 'entrance',
+  tourId: 't_l01wnq8eh6',
+  sceneId: 's_dtv27wfrbi',
+  firstSceneId: 's_dtv27wfrbi',
 });
-// → https://…/med-surg-inpatient/entrance?embed=1
+// → https://…/t_l01wnq8eh6/s_dtv27wfrbi?embed=1
 ```
 
 Strips `dev` and other internal flags. Used by dev panel **Copy URL**.

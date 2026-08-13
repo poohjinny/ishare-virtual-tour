@@ -1,23 +1,26 @@
 /**
- * Bake naming-opportunity (NO) Explore previews from each pin's hotspot.position.
- * Writes hotspot.preview.image — same path model3d captures use.
+ * Bake naming-opportunity Explore previews from each pin's hotspot.position.
+ * Writes files only — tour JSON omits conventional preview paths.
  *
  * Usage:
  *   npm run generate-naming-thumbnails
- *   node scripts/generate-naming-thumbnails.mjs --tour ken-sargent-house
+ *   node scripts/generate-naming-thumbnails.mjs --tour t_l01wnq8eh6
  *   node scripts/generate-naming-thumbnails.mjs --dry-run
  */
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   renderEquirectPreviewToFile,
   resolveThumbnailFilePath,
 } from './lib/equirectPreviewNode.mjs';
+import { resolveNamingHotspotBakeView } from './lib/tourSceneDev.mjs';
 import {
-  buildDefaultHotspotPreviewWebPath,
-  resolveNamingHotspotBakeView,
-} from './lib/tourSceneDev.mjs';
+  conventionalPreviewPath,
+  isModel3dTour,
+  isNamingHotspot,
+  resolveScenePanoramaPath,
+} from '../src/utils/tourAssetResolve.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const assetsRoot = join(root, 'assets');
@@ -45,13 +48,6 @@ function resolvePanoramaFilePath(panoramaWebPath) {
   return join(assetsRoot, relative);
 }
 
-function isNamingHotspot(hotspot) {
-  return (
-    hotspot?.type === 'info' &&
-    Boolean(hotspot.namingId?.trim() || hotspot.popup?.namingOpportunity)
-  );
-}
-
 async function processTour(tourFileName) {
   const tourPath = join(toursDir, tourFileName);
   const tour = JSON.parse(readFileSync(tourPath, 'utf8'));
@@ -61,7 +57,7 @@ async function processTour(tourFileName) {
     return { tourId, updated: 0, skipped: 0 };
   }
 
-  if (tour.viewerType === 'model3d') {
+  if (isModel3dTour(tour)) {
     console.log(`[${tourId}] skip model3d (use Dev capture for NO previews)`);
     return { tourId, updated: 0, skipped: 0 };
   }
@@ -70,9 +66,12 @@ async function processTour(tourFileName) {
   let skipped = 0;
 
   for (const [sceneId, scene] of Object.entries(tour.scenes ?? {})) {
-    if (!scene?.panorama) {
-      continue;
-    }
+    const panoramaWebPath = resolveScenePanoramaPath(
+      tour,
+      sceneId,
+      scene?.panorama,
+    );
+    if (!panoramaWebPath) continue;
 
     for (const hotspot of scene.hotspots ?? []) {
       if (!isNamingHotspot(hotspot)) continue;
@@ -86,15 +85,12 @@ async function processTour(tourFileName) {
         continue;
       }
 
-      const previewWebPath = buildDefaultHotspotPreviewWebPath(
-        tour,
-        hotspot.id,
-      );
+      const previewWebPath = conventionalPreviewPath(tour, hotspot.id);
       const previewFilePath = resolveThumbnailFilePath(
         assetsRoot,
         previewWebPath,
       );
-      const panoramaFilePath = resolvePanoramaFilePath(scene.panorama);
+      const panoramaFilePath = resolvePanoramaFilePath(panoramaWebPath);
 
       if (dryRun) {
         console.log(
@@ -112,14 +108,9 @@ async function processTour(tourFileName) {
         { width: THUMBNAIL_WIDTH, quality: THUMBNAIL_QUALITY },
       );
 
-      hotspot.preview = { image: previewWebPath };
       updated += 1;
       console.log(`[${tourId}] ${hotspot.id} → ${previewWebPath}`);
     }
-  }
-
-  if (!dryRun && updated > 0) {
-    writeFileSync(tourPath, `${JSON.stringify(tour, null, 2)}\n`, 'utf8');
   }
 
   return { tourId, updated, skipped };

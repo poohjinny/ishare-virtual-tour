@@ -9,6 +9,18 @@ import { appendCacheBust, withBaseUrl } from '../utils/assetUrl';
 import { GLOBAL_IMMERSIVE_BACKGROUND } from '../constants/immersiveBackground';
 import { parseNamingPriceInput } from '../utils/namingPrice';
 import { normalizePlayTour } from '../utils/playTour';
+import {
+  resolveDonorLogoPath,
+  resolveHotspotPreviewPath,
+  resolveScenePanoramaPath,
+  resolveSceneThumbnailPath,
+  resolveTourLogoPath,
+} from '../utils/tourAssetResolve.mjs';
+
+function resolvePublicAssetUrl(path: string | null | undefined): string | undefined {
+  if (!path) return undefined;
+  return withBaseUrl(path);
+}
 
 function normalizePopupContent(popup: PopupContent): PopupContent {
   let next = popup;
@@ -20,7 +32,8 @@ function normalizePopupContent(popup: PopupContent): PopupContent {
   if (popup.namingOpportunity) {
     const price = parseNamingPriceInput(popup.namingOpportunity.price);
     const donorLogo = popup.namingOpportunity.donor?.logo;
-    const nextDonorLogo = donorLogo ? withBaseUrl(donorLogo) : undefined;
+    const nextDonorLogo =
+      typeof donorLogo === 'string' ? withBaseUrl(donorLogo) : undefined;
     const priceChanged =
       price != null && price !== popup.namingOpportunity.price;
     const logoChanged = Boolean(nextDonorLogo && nextDonorLogo !== donorLogo);
@@ -43,21 +56,21 @@ function normalizePopupContent(popup: PopupContent): PopupContent {
 }
 
 function normalizeNamingRecord(
+  tour: Tour,
   record: NamingOpportunityRecord,
 ): NamingOpportunityRecord {
   const price = parseNamingPriceInput(record.price);
-  const donorLogo = record.donor?.logo;
-  const nextDonorLogo = donorLogo ? withBaseUrl(donorLogo) : undefined;
+  const resolvedLogo = resolveDonorLogoPath(tour, record.id, record.donor?.logo);
+  const nextDonorLogo = resolvePublicAssetUrl(resolvedLogo);
   const image = record.image?.trim();
   const nextImage = image ? withBaseUrl(image) : undefined;
   const videoUrl = record.videoUrl?.trim();
-  // Absolute / external URLs stay as-is; relative paths get base.
   const nextVideoUrl =
     videoUrl && !/^https?:\/\//i.test(videoUrl) ?
       withBaseUrl(videoUrl)
     : videoUrl;
   const priceChanged = price != null && price !== record.price;
-  const logoChanged = Boolean(nextDonorLogo && nextDonorLogo !== donorLogo);
+  const logoChanged = Boolean(nextDonorLogo && nextDonorLogo !== record.donor?.logo);
   const imageChanged = Boolean(nextImage && nextImage !== record.image);
   const videoChanged = Boolean(
     nextVideoUrl && nextVideoUrl !== record.videoUrl,
@@ -78,10 +91,15 @@ function normalizeNamingRecord(
   };
 }
 
-function normalizeHotspot(hotspot: Hotspot): Hotspot {
+function normalizeHotspot(tour: Tour, hotspot: Hotspot): Hotspot {
+  const previewImage = resolveHotspotPreviewPath(
+    tour,
+    hotspot,
+    hotspot.preview?.image,
+  );
   const preview =
-    hotspot.preview?.image ?
-      { ...hotspot.preview, image: withBaseUrl(hotspot.preview.image) }
+    previewImage ?
+      { ...hotspot.preview, image: withBaseUrl(previewImage) }
     : hotspot.preview;
 
   const popup =
@@ -110,49 +128,63 @@ function normalizeImmersiveBackground(
   };
 }
 
-/** Resolve relative asset paths for runtime (JSON files and API snapshots). */
+/** Infer conventional asset URLs and prefix Vite `base` for runtime. */
 export function normalizeTourAssets(tour: Tour): Tour {
   const namingOpportunities =
     tour.namingOpportunities ?
       Object.fromEntries(
         Object.entries(tour.namingOpportunities).map(([id, record]) => [
           id,
-          normalizeNamingRecord(record),
+          normalizeNamingRecord(tour, record),
         ]),
       )
     : undefined;
 
   return withNormalizedPlayTour({
     ...tour,
-    ...(tour.hotspots ? { hotspots: tour.hotspots.map(normalizeHotspot) } : {}),
+    ...(tour.hotspots ?
+      { hotspots: tour.hotspots.map((hotspot) => normalizeHotspot(tour, hotspot)) }
+    : {}),
     ...(namingOpportunities ? { namingOpportunities } : {}),
-    branding:
-      tour.branding ?
-        {
+    branding: tour.branding ?
+      (() => {
+        const logo = resolveTourLogoPath(tour, tour.branding.logo);
+        const favicon =
+          typeof tour.branding.favicon === 'string' && tour.branding.favicon ?
+            withBaseUrl(tour.branding.favicon)
+          : undefined;
+        return {
           ...tour.branding,
-          ...(tour.branding.logo ?
-            { logo: withBaseUrl(tour.branding.logo) }
-          : {}),
-          ...(tour.branding.favicon ?
-            { favicon: withBaseUrl(tour.branding.favicon) }
-          : {}),
-        }
-      : undefined,
+          ...(logo ? { logo: withBaseUrl(logo) } : {}),
+          ...(favicon ? { favicon } : {}),
+        };
+      })()
+    : undefined,
     immersiveBackground: normalizeImmersiveBackground(
       tour.immersiveBackground ?? GLOBAL_IMMERSIVE_BACKGROUND,
     ),
     ...(tour.model ? { model: withBaseUrl(tour.model) } : {}),
     scenes: Object.fromEntries(
-      Object.entries(tour.scenes).map(([id, scene]) => [
-        id,
-        {
-          ...scene,
-          ...(scene.model ? { model: withBaseUrl(scene.model) } : {}),
-          panorama: withBaseUrl(scene.panorama),
-          thumbnail: scene.thumbnail ? withBaseUrl(scene.thumbnail) : undefined,
-          hotspots: scene.hotspots.map(normalizeHotspot),
-        },
-      ]),
+      Object.entries(tour.scenes).map(([id, scene]) => {
+        const panorama = resolvePublicAssetUrl(
+          resolveScenePanoramaPath(tour, id, scene.panorama),
+        );
+        const thumbnail = resolvePublicAssetUrl(
+          resolveSceneThumbnailPath(tour, id, scene.thumbnail),
+        );
+        return [
+          id,
+          {
+            ...scene,
+            ...(scene.model ? { model: withBaseUrl(scene.model) } : {}),
+            ...(panorama ? { panorama } : { panorama: undefined }),
+            ...(thumbnail ? { thumbnail } : {}),
+            hotspots: scene.hotspots.map((hotspot) =>
+              normalizeHotspot(tour, hotspot),
+            ),
+          },
+        ];
+      }),
     ),
   });
 }
@@ -168,6 +200,10 @@ function withNormalizedPlayTour(tour: Tour): Tour {
   return { ...tour, playTour };
 }
 
+function donorLogoUrl(logo: unknown): string {
+  return typeof logo === 'string' ? logo.trim() : '';
+}
+
 /** Bust scene media URLs after dev rebake/replace (same path, new file bytes). */
 export function bustSceneThumbnailUrls(
   tour: Tour,
@@ -179,10 +215,25 @@ export function bustSceneThumbnailUrls(
   const { bustPanorama = false } = options;
 
   const bustHotspot = (hotspot: Hotspot): Hotspot => {
-    const logo = hotspot.popup?.namingOpportunity?.donor?.logo?.trim();
-    if (!logo || !hotspot.popup?.namingOpportunity?.donor) return hotspot;
+    let next = hotspot;
+    const previewImage =
+      typeof hotspot.preview?.image === 'string' ?
+        hotspot.preview.image.trim()
+      : '';
+    if (previewImage) {
+      next = {
+        ...next,
+        preview: {
+          ...hotspot.preview,
+          image: appendCacheBust(previewImage, version),
+        },
+      };
+    }
+
+    const logo = donorLogoUrl(hotspot.popup?.namingOpportunity?.donor?.logo);
+    if (!logo || !hotspot.popup?.namingOpportunity?.donor) return next;
     return {
-      ...hotspot,
+      ...next,
       popup: {
         ...hotspot.popup,
         namingOpportunity: {
@@ -212,7 +263,7 @@ export function bustSceneThumbnailUrls(
     let changed = false;
     const next: NonNullable<Tour['namingOpportunities']> = {};
     for (const [id, record] of Object.entries(catalog)) {
-      const logo = record.donor?.logo?.trim();
+      const logo = donorLogoUrl(record.donor?.logo);
       if (!logo || !record.donor) {
         next[id] = record;
         continue;
@@ -240,9 +291,6 @@ export function bustSceneThumbnailUrls(
           scene.thumbnail ?
             appendCacheBust(scene.thumbnail, version)
           : undefined;
-        // Panorama busting forces a viewer node reload, so only apply it when a
-        // panorama was actually replaced — otherwise edits like defaultView would
-        // needlessly reload the scene and drop its hotspot markers.
         const bustedPanorama =
           bustPanorama && scene.panorama ?
             appendCacheBust(scene.panorama, version)

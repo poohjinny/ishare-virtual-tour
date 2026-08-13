@@ -248,7 +248,10 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 4. **Panoramas:** convert every JPG in `panoramas/` to WebP before commit; JSON
    paths use `.webp` —
    [`assets/README.md`](../assets/README.md#panoramas--jpg--webp-required)
-5. JSON paths `/assets/{clientId}/{tourId}/...` — `withBaseUrl()` at load
+5. Conventional media paths are inferred at load (`tourAssetResolve.mjs` +
+   `normalizeTourAssets`). Tour JSON and `catalog.json` omit conventional
+   `/assets/…` URLs; store overrides / `"logo": true` only. Client favicon is
+   probed (png then ico), not a single inferred field.
 
 Naming CTAs: [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) — do not
 hand-roll footer buttons in JSON unless overriding.
