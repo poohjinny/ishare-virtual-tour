@@ -29,7 +29,7 @@ export function isModel3dTour(tour) {
 /** Scene-card bake folder (`scene.thumbnail`). */
 export const SCENE_THUMB_DIR = 'scene-thumbs';
 /** Naming-pin bake folder (`hotspot.preview.image`). */
-export const PIN_PREVIEW_DIR = 'pin-previews';
+export const HOTSPOT_THUMB_DIR = 'hotspot-thumbs';
 
 export function conventionalPanoramaPath(tour, sceneId) {
   return tourAssetPath(tour, 'panoramas', `${sceneId}.webp`);
@@ -40,7 +40,7 @@ export function conventionalThumbnailPath(tour, sceneId) {
 }
 
 export function conventionalPreviewPath(tour, hotspotId) {
-  return tourAssetPath(tour, PIN_PREVIEW_DIR, `${hotspotId}.webp`);
+  return tourAssetPath(tour, HOTSPOT_THUMB_DIR, `${hotspotId}.webp`);
 }
 
 export function conventionalDonorLogoPath(tour, folderId) {
@@ -99,10 +99,7 @@ export function hydrateCatalogClientBranding(client) {
   if (!logo && !client.branding) return null;
   if (logo && client.branding?.logo === logo) return client.branding;
   if (!logo) return client.branding ?? null;
-  return {
-    ...client.branding,
-    logo,
-  };
+  return { ...client.branding, logo };
 }
 
 /** Tour-only logo: `true` / conventional path, string override, omit → inherit client. */

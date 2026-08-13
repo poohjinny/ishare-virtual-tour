@@ -13,7 +13,7 @@ export function tourAssetPath(
 export function isModel3dTour(tour?: { viewerType?: string | null }): boolean;
 
 export const SCENE_THUMB_DIR: 'scene-thumbs';
-export const PIN_PREVIEW_DIR: 'pin-previews';
+export const HOTSPOT_THUMB_DIR: 'hotspot-thumbs';
 
 export function conventionalPanoramaPath(
   tour: { id: string; clientId?: string | null },

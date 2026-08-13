@@ -15,11 +15,7 @@
         "yaw": -88.9,
         "pitch": -7.8,
         "zoom": 5.96,
-        "target": {
-          "x": -0.75,
-          "y": 4.16,
-          "z": -0.32
-        }
+        "target": { "x": -0.75, "y": 4.16, "z": -0.32 }
       },
       "hotspots": []
     },
@@ -31,11 +27,7 @@
         "yaw": -90.7,
         "pitch": -0.6,
         "zoom": 1.35,
-        "target": {
-          "x": 8.41,
-          "y": 1.58,
-          "z": -0.36
-        }
+        "target": { "x": 8.41, "y": 1.58, "z": -0.36 }
       },
       "hotspots": []
     },
@@ -47,11 +39,7 @@
         "yaw": -92,
         "pitch": -6,
         "zoom": 1.35,
-        "target": {
-          "x": -8.02,
-          "y": 5.3,
-          "z": -0.17
-        }
+        "target": { "x": -8.02, "y": 5.3, "z": -0.17 }
       },
       "hotspots": []
     }
@@ -60,11 +48,7 @@
     {
       "id": "h_v1p651z85c",
       "type": "info",
-      "position": {
-        "x": -11.33,
-        "y": 1.98,
-        "z": -0.28
-      },
+      "position": { "x": -11.33, "y": 1.98, "z": -0.28 },
       "namingId": "no_usze08342k",
       "popup": {
         "display": "anchored",
@@ -77,21 +61,13 @@
         "yaw": -90.1,
         "pitch": 0,
         "zoom": 1.35,
-        "target": {
-          "x": -9.39,
-          "y": 1.58,
-          "z": -0.27
-        }
+        "target": { "x": -9.39, "y": 1.58, "z": -0.27 }
       }
     },
     {
       "id": "h_fug5ybz0mq",
       "type": "info",
-      "position": {
-        "x": 2.44,
-        "y": 1.29,
-        "z": 1.56
-      },
+      "position": { "x": 2.44, "y": 1.29, "z": 1.56 },
       "namingId": "no_s7mvw1ktv1",
       "popup": {
         "display": "anchored",
@@ -103,21 +79,13 @@
         "yaw": 3.4,
         "pitch": -1,
         "zoom": 1.35,
-        "target": {
-          "x": 2.29,
-          "y": 1.26,
-          "z": -0.01
-        }
+        "target": { "x": 2.29, "y": 1.26, "z": -0.01 }
       }
     },
     {
       "id": "h_k1z4zpwai4",
       "type": "info",
-      "position": {
-        "x": -11.39,
-        "y": 5.09,
-        "z": -0.31
-      },
+      "position": { "x": -11.39, "y": 5.09, "z": -0.31 },
       "namingId": "no_winyzawbk5",
       "popup": {
         "display": "anchored",
@@ -129,42 +97,26 @@
         "yaw": -89.5,
         "pitch": -6.8,
         "zoom": 2.51,
-        "target": {
-          "x": -11.39,
-          "y": 5.09,
-          "z": -0.31
-        }
+        "target": { "x": -11.39, "y": 5.09, "z": -0.31 }
       },
       "sceneId": "s_kanukh723s"
     },
     {
       "id": "h_xr6za83jfc",
       "type": "nav",
-      "position": {
-        "x": -9.4,
-        "y": 1.1,
-        "z": -0.29
-      },
+      "position": { "x": -9.4, "y": 1.1, "z": -0.29 },
       "targetScene": "s_xihtcolrwu",
       "targetView": {
         "yaw": -90.7,
         "pitch": -0.6,
         "zoom": 1.35,
-        "target": {
-          "x": 8.41,
-          "y": 1.58,
-          "z": -0.36
-        }
+        "target": { "x": 8.41, "y": 1.58, "z": -0.36 }
       }
     },
     {
       "id": "h_pyd29bbr59",
       "type": "nav",
-      "position": {
-        "x": 7.2,
-        "y": 4.11,
-        "z": -0.29
-      },
+      "position": { "x": 7.2, "y": 4.11, "z": -0.29 },
       "targetScene": "s_kanukh723s"
     }
   ],
@@ -185,11 +137,8 @@
       "id": "no_winyzawbk5",
       "name": "Naming Opportunity - 2",
       "price": 25000,
-      "status": "closed"
+      "status": "sold"
     }
   },
-  "defaultTransition": {
-    "speed": "500ms",
-    "effect": "fade"
-  }
+  "defaultTransition": { "speed": "500ms", "effect": "fade" }
 }

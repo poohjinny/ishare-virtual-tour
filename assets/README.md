@@ -17,19 +17,19 @@ assets/
         ├── favicon.png|.ico # Tour tab icon override — probed
         ├── panoramas/       # Full 360° equirects, keyed by sceneId (`s_*`)
         ├── scene-thumbs/    # Scene-card bakes at defaultView, keyed by sceneId
-        ├── pin-previews/    # Pin-card bakes at pin position, keyed by hotspotId (`h_*`)
+        ├── hotspot-thumbs/  # Pin-card bakes at pin position, keyed by hotspotId (`h_*`)
         ├── naming/          # Donor logos per pin, keyed by hotspotId
         ├── brand/
         │   └── logo.png     # Tour logo override — `"logo": true` in tour JSON
         └── audio/           # Optional tour-specific audio
 ```
 
-| Folder          | Keyed by         | Purpose                                     | JSON field                                         |
-| --------------- | ---------------- | ------------------------------------------- | -------------------------------------------------- |
-| `panoramas/`    | `s_*` scene id   | Full 360° source for the viewer             | omit (inferred) / override `scene.panorama`        |
-| `scene-thumbs/` | `s_*` scene id   | Explore / intro / catalog **scene** card    | omit (inferred) / override `scene.thumbnail`       |
-| `pin-previews/` | `h_*` hotspot id | Explore **naming pin** card (pin yaw/pitch) | omit (inferred) / override `hotspot.preview.image` |
-| `naming/`       | `h_*` hotspot id | Donor logo for that pin                     | `"logo": true` / override string / omit            |
+| Folder            | Keyed by         | Purpose                                     | JSON field                                         |
+| ----------------- | ---------------- | ------------------------------------------- | -------------------------------------------------- |
+| `panoramas/`      | `s_*` scene id   | Full 360° source for the viewer             | omit (inferred) / override `scene.panorama`        |
+| `scene-thumbs/`   | `s_*` scene id   | Explore / intro / catalog **scene** card    | omit (inferred) / override `scene.thumbnail`       |
+| `hotspot-thumbs/` | `h_*` hotspot id | Explore **naming pin** card (pin yaw/pitch) | omit (inferred) / override `hotspot.preview.image` |
+| `naming/`         | `h_*` hotspot id | Donor logo for that pin                     | `"logo": true` / override string / omit            |
 
 Tour JSON and `catalog.json` store identity, not conventional `/assets/…` URLs.
 Load infers paths via `src/utils/tourAssetResolve.mjs`. Keep an explicit string
@@ -158,7 +158,7 @@ node scripts/generate-naming-thumbnails.mjs --dry-run
 THUMBNAIL_WIDTH=640 THUMBNAIL_QUALITY=85 npm run generate-naming-thumbnails
 ```
 
-Writes `assets/{clientId}/{tourId}/pin-previews/{hotspotId}.webp` (`h_*` pin
+Writes `assets/{clientId}/{tourId}/hotspot-thumbs/{hotspotId}.webp` (`h_*` pin
 id). Tour JSON omits the conventional path. Panorama Dev create/move of a naming
 pin rebakes automatically. model3d tours still use canvas capture uploads
 (script skips them). Without a baked file, Explore falls back to a small runtime
@@ -175,14 +175,14 @@ crop.
 
 ### Path examples (Ken Sargent House)
 
-| File type   | Location                                                               | JSON                                 |
-| ----------- | ---------------------------------------------------------------------- | ------------------------------------ |
-| Panorama    | `gphospitalfoundation/t_l01wnq8eh6/panoramas/s_dtv27wfrbi.webp`        | omit (inferred from `s_dtv27wfrbi`)  |
-| Scene thumb | `gphospitalfoundation/t_l01wnq8eh6/scene-thumbs/s_dtv27wfrbi.webp`     | omit                                 |
-| Pin preview | `gphospitalfoundation/t_l01wnq8eh6/pin-previews/h_elw8cjn2sv.webp`     | omit                                 |
-| Donor logo  | `gphospitalfoundation/t_l01wnq8eh6/naming/h_elw8cjn2sv/donor-logo.png` | `"logo": true`                       |
-| Tour logo   | `gphospitalfoundation/t_l01wnq8eh6/brand/logo.png`                     | explicit (branding, not scene-keyed) |
-| Favicon     | `gphospitalfoundation/t_l01wnq8eh6/favicon.ico`                        | auto                                 |
+| File type     | Location                                                               | JSON                                 |
+| ------------- | ---------------------------------------------------------------------- | ------------------------------------ |
+| Panorama      | `gphospitalfoundation/t_l01wnq8eh6/panoramas/s_dtv27wfrbi.webp`        | omit (inferred from `s_dtv27wfrbi`)  |
+| Scene thumb   | `gphospitalfoundation/t_l01wnq8eh6/scene-thumbs/s_dtv27wfrbi.webp`     | omit                                 |
+| Hotspot thumb | `gphospitalfoundation/t_l01wnq8eh6/hotspot-thumbs/h_elw8cjn2sv.webp`   | omit                                 |
+| Donor logo    | `gphospitalfoundation/t_l01wnq8eh6/naming/h_elw8cjn2sv/donor-logo.png` | `"logo": true`                       |
+| Tour logo     | `gphospitalfoundation/t_l01wnq8eh6/brand/logo.png`                     | explicit (branding, not scene-keyed) |
+| Favicon       | `gphospitalfoundation/t_l01wnq8eh6/favicon.ico`                        | auto                                 |
 
 Use `tourAssetPath()` in `src/utils/tourAssetPath.ts` when building paths in
 code.
