@@ -9,9 +9,17 @@
  * Origin fetches keep Host `tour.ishare.ca` but `resolveOverride` to
  * GitHub Pages so subrequests do not re-enter this Worker.
  *
- * Title/description rules: keep in sync with
- * `src/utils/buildShareMessage` + `resolveShareDescription`.
+ * Title/description: `src/utils/ogShareCopy.mjs` (shared with the SPA).
  */
+
+import {
+  EMPTY_PLACE_LEAD,
+  buildOgShareCopy,
+  formatOgNamingPrice,
+  isDefaultNamingDescription,
+  isDefaultSceneDescription,
+  pickAuthoredShareDescription,
+} from '../../../src/utils/ogShareCopy.mjs';
 
 const BOT_UA =
   /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|meta-externalfetcher|meta-webindexer|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp\/|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|kakaotalk-scrap|Linespider|LineBot|BitlyBot|Snapchat|PetalBot/i;
@@ -20,7 +28,6 @@ const BOT_UA =
 const META_OR_PREVIEW_UA =
   /facebook|facebot|meta-external|meta-webindexer|whatsapp|telegram|discordbot|linkedinbot|slackbot|twitterbot|kakaotalk|pinterest|embedly|iframely|preview|crawl|bot|spider|slurp/i;
 
-const DESC_MAX = 220;
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
 const TOUR_ID_RE = /^t_[a-z0-9]+$/i;
@@ -558,73 +565,6 @@ function kebab(value) {
     .replace(/^-+|-+$/g, '');
 }
 
-/** Keep in sync with `TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD`. */
-const EMPTY_PLACE_LEAD = 'Step inside and look around this space.';
-
-/** Keep in sync with `defaultSceneDescription`. */
-function defaultSceneDescription(tourTitle, sceneTitle) {
-  const tour = String(tourTitle || '').trim() || 'this facility';
-  const scene = String(sceneTitle || '').trim() || 'this area';
-  return `Explore ${scene} as part of the ${tour} virtual tour.`;
-}
-
-function isDefaultSceneDescription(description, tourTitle, sceneTitle) {
-  const trimmed = String(description || '').trim();
-  if (!trimmed) return false;
-  return trimmed === defaultSceneDescription(tourTitle, sceneTitle);
-}
-
-/** Keep in sync with `defaultNamingDescription`. */
-function defaultNamingDescription(opportunityTitle, tourTitle) {
-  const title = String(opportunityTitle || '').trim() || 'This space';
-  const tour = String(tourTitle || '').trim() || 'this place';
-  return `${title} is available to name. Contribute to support the people who rely on ${tour}.`;
-}
-
-function isDefaultNamingDescription(description, opportunityTitle, tourTitle) {
-  const trimmed = String(description || '').trim();
-  if (!trimmed) return false;
-  return trimmed === defaultNamingDescription(opportunityTitle, tourTitle);
-}
-
-function lastCompleteSentenceEnd(text) {
-  const pattern = /[.!?…]["'”’)]*(?=\s|$)/gu;
-  let last = -1;
-  let match;
-  while ((match = pattern.exec(text)) !== null) {
-    last = match.index + match[0].length;
-  }
-  return last;
-}
-
-/**
- * Plain, length-capped copy — keep in sync with `formatShareDescriptionPlain`
- * (sentence-aware, no ellipsis).
- */
-function formatShareDescriptionPlain(text, maxChars = DESC_MAX) {
-  const plain = String(text || '')
-    .replace(/!\[[^\]]*]\([^)]*\)/g, '')
-    .replace(/\[([^\]]*)]\([^)]*\)/g, '$1')
-    .replace(/[*_`#]+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (!plain) return '';
-  if (plain.length <= maxChars) return plain;
-
-  const withinBudget = plain.slice(0, maxChars);
-  const lastSentenceEnd = lastCompleteSentenceEnd(withinBudget);
-  if (lastSentenceEnd > Math.floor(maxChars * 0.4)) {
-    return withinBudget.slice(0, lastSentenceEnd).trimEnd();
-  }
-
-  const lastSpace = withinBudget.lastIndexOf(' ');
-  const clipped =
-    lastSpace > Math.floor(maxChars * 0.6) ?
-      withinBudget.slice(0, lastSpace)
-    : withinBudget;
-  return clipped.replace(/[,;:–—-]+$/u, '').trimEnd();
-}
-
 function firstSceneNamingBody(tour, sceneId) {
   const tourTitle = tour.title?.trim() || tour.id;
   const scene = tour.scenes?.[sceneId];
@@ -647,32 +587,38 @@ function firstSceneNamingBody(tour, sceneId) {
   return '';
 }
 
-/**
- * Same priority as SPA `resolveShareDescription` (scene, no `?no=`):
- * place lead → first real naming body → catalog summary.
- */
-function resolveSceneShareDescription(tour, sceneId, catalogEntry) {
+function resolveWorkerPlaceLead(tour, sceneId) {
   const tourTitle = tour.title?.trim() || tour.id;
   const scene = tour.scenes?.[sceneId];
   const sceneTitle = scene?.title?.trim() || sceneId;
   const description = scene?.description?.trim() || '';
-
   if (
     description &&
     description !== EMPTY_PLACE_LEAD &&
     !isDefaultSceneDescription(description, tourTitle, sceneTitle)
   ) {
-    return formatShareDescriptionPlain(description);
+    return description;
   }
+  return firstSceneNamingBody(tour, sceneId);
+}
 
-  const namingBody = firstSceneNamingBody(tour, sceneId);
-  if (namingBody) return formatShareDescriptionPlain(namingBody);
-
-  const summary = catalogEntry?.summary?.trim() || '';
-  if (summary && summary !== EMPTY_PLACE_LEAD) {
-    return formatShareDescriptionPlain(summary);
-  }
-  return '';
+function resolveWorkerShareDescription(
+  tour,
+  sceneId,
+  catalogEntry,
+  naming = null,
+) {
+  const tourTitle = tour.title?.trim() || tour.id;
+  const scene = tour.scenes?.[sceneId];
+  const sceneTitle = scene?.title?.trim() || sceneId;
+  return pickAuthoredShareDescription({
+    namingBody: naming?.body,
+    namingName: naming?.name,
+    tourTitle,
+    sceneTitle,
+    placeLead: resolveWorkerPlaceLead(tour, sceneId),
+    catalogSummary: catalogEntry?.summary,
+  });
 }
 
 function abs(origin, path, fallback) {
@@ -686,17 +632,18 @@ function buildSceneMeta(tour, sceneId, catalogEntry, logo, origin, url) {
   const tourTitle = tour.title?.trim() || tour.id;
   const scene = tour.scenes[sceneId];
   const sceneTitle = scene?.title?.trim() || sceneId;
-  const authored = resolveSceneShareDescription(tour, sceneId, catalogEntry);
-  const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
+  const authored = resolveWorkerShareDescription(tour, sceneId, catalogEntry);
+  const copy = buildOgShareCopy({
+    tourTitle,
+    sceneTitle,
+    authored,
+  });
   const thumb = scene?.thumbnail?.trim() || '';
   const image =
     thumb ? ogJpgPublicUrl(origin, tour.id, sceneId, '') : abs(origin, logo);
   return {
-    title: `${sceneTitle} | ${tourTitle}`,
-    description:
-      authored ?
-        formatShareDescriptionPlain(`${intro} ${authored}`)
-      : `${intro} Open the link to look around in 360°.`,
+    title: copy.title,
+    description: copy.description,
     image,
     imageWidth: thumb ? OG_WIDTH : undefined,
     imageHeight: thumb ? OG_HEIGHT : undefined,
@@ -714,18 +661,26 @@ function buildNamingMeta(
   url,
   no,
 ) {
-  void catalogEntry;
   const tourTitle = tour.title?.trim() || tour.id;
   const hostSceneId = naming.sceneId || sceneId;
   const sceneTitle = tour.scenes[hostSceneId]?.title?.trim() || hostSceneId;
-  const namingBody = String(naming.body || '').trim();
-  const authored =
-    namingBody &&
-    !isDefaultNamingDescription(namingBody, naming.name, tourTitle) ?
-      formatShareDescriptionPlain(namingBody)
-    : '';
-  const priceText = formatNamingPriceForOg(naming);
-  const intro = `${naming.name} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
+  const authored = resolveWorkerShareDescription(
+    tour,
+    hostSceneId,
+    catalogEntry,
+    naming,
+  );
+  const priceText = formatOgNamingPrice({
+    priceLabel: naming.priceLabel,
+    price: naming.price,
+  });
+  const copy = buildOgShareCopy({
+    tourTitle,
+    sceneTitle,
+    namingName: naming.name,
+    authored,
+    priceLabel: priceText,
+  });
   const hasImage =
     Boolean(naming.image?.trim()) ||
     Boolean(tour.scenes[hostSceneId]?.thumbnail);
@@ -735,44 +690,13 @@ function buildNamingMeta(
     : abs(origin, logo);
 
   return {
-    title:
-      priceText ?
-        `${naming.name} · ${priceText} | ${tourTitle}`
-      : `${naming.name} | ${tourTitle}`,
-    description:
-      authored ?
-        formatShareDescriptionPlain(`${intro} ${authored}`)
-      : `${intro} Open the link to learn more and look around.`,
+    title: copy.title,
+    description: copy.description,
     image,
     imageWidth: hasImage ? OG_WIDTH : undefined,
     imageHeight: hasImage ? OG_HEIGHT : undefined,
     url: `${origin}${url.pathname}${url.search}`,
   };
-}
-
-/** Keep in sync with `formatNamingGalleryItemPrice`. */
-function formatNamingPriceForOg(naming) {
-  const label = String(naming?.priceLabel || '').trim();
-  if (label) return label;
-  const amount = Math.round(Number(naming?.price));
-  if (!Number.isFinite(amount) || amount <= 0) return '';
-  if (amount >= 1_000_000) {
-    const millions = amount / 1_000_000;
-    const formatted =
-      millions % 1 === 0 ?
-        String(millions)
-      : String(Number(millions.toFixed(1)));
-    return `$${formatted}M`;
-  }
-  if (amount >= 1_000) {
-    const thousands = amount / 1_000;
-    const formatted =
-      thousands % 1 === 0 ?
-        String(thousands)
-      : String(Number(thousands.toFixed(1)));
-    return `$${formatted}K`;
-  }
-  return `$${amount.toLocaleString('en-US')}`;
 }
 
 function imageTypeForUrl(imageUrl) {

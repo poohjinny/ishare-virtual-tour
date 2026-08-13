@@ -1,5 +1,4 @@
 import { ISHARE_VIRTUAL_TOUR_NAME } from '../constants/branding';
-import { TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD } from '../constants/tourDirectory';
 import { resolveTourPublicOrigin } from '../constants/tourOrigin';
 import { findCatalogTour, findCatalogTourById } from '../data/tourCatalog';
 import type { NamingOpportunityStatus, Tour } from '../types/tour';
@@ -7,16 +6,18 @@ import { withBaseUrl } from './assetUrl';
 import { buildAbsoluteShareUrl, buildShareMessage } from './buildShareUrl';
 import { getTourClientId } from './tourClientId';
 import { findHotspotInTour } from './findTourHotspot';
-import { stripInlineMarkdown } from './inlineMarkdown';
 import { formatNamingGalleryItemPrice } from './namingPrice';
 import { isDefaultNamingDescription } from './namingDescriptionPlaceholder';
+import {
+  formatShareDescriptionPlain,
+  pickAuthoredShareDescription,
+} from './ogShareCopy.mjs';
 import {
   isNamingHotspot,
   resolveHotspotHostScene,
   resolveNamingPopup,
 } from './namingSceneInherit';
 import { resolveScenePlaceLead } from './resolveScenePlaceLead';
-import { isDefaultSceneDescription } from './sceneDescriptionPlaceholder';
 
 export interface TourOpenGraphMeta {
   title: string;
@@ -26,9 +27,6 @@ export interface TourOpenGraphMeta {
   /** Short place or NO name for in-app Share lead (`Share · {label}`). */
   contextLabel?: string;
 }
-
-/** Soft cap for share / OG description (messengers truncate around here). */
-const SHARE_DESCRIPTION_MAX_CHARS = 220;
 
 const MANAGED_ATTR = 'data-tour-open-graph';
 
@@ -194,36 +192,7 @@ function resolveNamingShareStatus(
   return popup?.namingOpportunity?.status;
 }
 
-/** Plain, length-capped copy for share cards and OG description. */
-export function formatShareDescriptionPlain(
-  text: string,
-  maxChars = SHARE_DESCRIPTION_MAX_CHARS,
-): string {
-  const plain = stripInlineMarkdown(text).replace(/\s+/g, ' ').trim();
-  if (!plain) return '';
-  if (plain.length <= maxChars) return plain;
-
-  const withinBudget = plain.slice(0, maxChars);
-  const lastSentenceEnd = (() => {
-    const pattern = /[.!?…]["'”’)]*(?=\s|$)/gu;
-    let last = -1;
-    let match: RegExpExecArray | null;
-    while ((match = pattern.exec(withinBudget)) !== null) {
-      last = match.index + match[0].length;
-    }
-    return last;
-  })();
-  if (lastSentenceEnd > Math.floor(maxChars * 0.4)) {
-    return withinBudget.slice(0, lastSentenceEnd).trimEnd();
-  }
-
-  const lastSpace = withinBudget.lastIndexOf(' ');
-  const clipped =
-    lastSpace > Math.floor(maxChars * 0.6) ?
-      withinBudget.slice(0, lastSpace)
-    : withinBudget;
-  return clipped.replace(/[,;:–—-]+$/u, '').trimEnd();
-}
+export { formatShareDescriptionPlain };
 
 /**
  * Prefer the same visitor copy Explore detail shows:
@@ -238,28 +207,20 @@ export function resolveShareDescription({
   sceneId: string;
   namingHotspotId?: string | null;
 }): string {
-  const namingBody = resolveNamingShareBody(tour, sceneId, namingHotspotId);
-  if (namingBody) return formatShareDescriptionPlain(namingBody);
-
   const scene = tour.scenes[sceneId];
-  if (scene) {
-    const placeLead = resolveScenePlaceLead(tour, scene).trim();
-    if (
-      placeLead &&
-      placeLead !== TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD &&
-      !isDefaultSceneDescription(placeLead, tour.title, scene.title)
-    ) {
-      return formatShareDescriptionPlain(placeLead);
-    }
-  }
-
   const summary =
     findCatalogTour(getTourClientId(tour), tour.id)?.summary?.trim() ||
     findCatalogTourById(tour.id)?.summary?.trim() ||
     '';
-  if (summary) return formatShareDescriptionPlain(summary);
 
-  return '';
+  return pickAuthoredShareDescription({
+    namingBody: resolveNamingShareBody(tour, sceneId, namingHotspotId),
+    namingName: resolveNamingOpportunityName(tour, sceneId, namingHotspotId),
+    tourTitle: tour.title,
+    sceneTitle: scene?.title,
+    placeLead: scene ? resolveScenePlaceLead(tour, scene) : '',
+    catalogSummary: summary,
+  });
 }
 
 function resolveNamingShareImagePath(

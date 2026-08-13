@@ -6,11 +6,13 @@ Serves **crawler-friendly Open Graph HTML** for `tour.ishare.ca` deep links
 Contract:
 
 - **Bot UA** → `200` HTML with `og:*` / `twitter:*` from `/tours/{id}.json`
-  (including `?no=` naming). Includes `meta-externalfetcher` (Facebook).
+  (including `?no=` naming). Title/description come from shared
+  `src/utils/ogShareCopy.mjs` (same rules as in-app Share). Includes
+  `meta-externalfetcher` (Facebook).
 - **`og:image`** → `https://tour.ishare.ca/og/jpg/{tourId}/{sceneId}.jpg`
   (optional `?no=`). JPEG is produced **on the fly** from scene/naming WebP via
-  the Workers **Images** binding (1200×630). Facebook requires JPEG/PNG/GIF
-  for reliable previews; raw WebP often fails.
+  the Workers **Images** binding (1200×630). Facebook requires JPEG/PNG/GIF for
+  reliable previews; raw WebP often fails.
 - **Everyone else** → proxy GitHub Pages; deep-link `404.html` → `200`.
 - **Topology** → orange-cloud CNAME `tour` → `poohjinny.github.io` plus Worker
   route `tour.ishare.ca/*`. Do **not** use Workers custom domain for this

@@ -10,6 +10,7 @@ import {
   toNamingOpportunitySearchValue,
 } from './tourPaths';
 import { resolveTourPublicOrigin } from '../constants/tourOrigin';
+import { buildOgShareCopy } from './ogShareCopy.mjs';
 import { getTourProductFullName } from './tourProductName';
 
 export interface BuildShareUrlOptions {
@@ -183,18 +184,18 @@ export function buildShareMessage(
   const statusLabel = options?.statusLabel?.trim() || null;
   const statusModifier = options?.statusModifier?.trim() || null;
 
+  const copy = buildOgShareCopy({
+    tourTitle,
+    sceneTitle,
+    namingName: naming,
+    authored,
+    priceLabel,
+  });
+
   if (naming) {
-    const intro = `${naming} is a naming opportunity at ${sceneTitle} in ${tourTitle}.`;
-    const title =
-      priceLabel ?
-        `${naming} · ${priceLabel} | ${tourTitle}`
-      : `${naming} | ${tourTitle}`;
     return {
-      title,
-      text:
-        authored ?
-          `${intro} ${authored}`
-        : `${intro} Open the link to learn more and look around.`,
+      title: copy.title,
+      text: copy.description,
       detailText: authored || null,
       tourTitle,
       sceneTitle,
@@ -206,13 +207,9 @@ export function buildShareMessage(
     };
   }
 
-  const intro = `Explore ${sceneTitle} in the ${tourTitle} virtual tour.`;
   return {
-    title: `${sceneTitle} | ${tourTitle}`,
-    text:
-      authored ?
-        `${intro} ${authored}`
-      : `${intro} Open the link to look around in 360°.`,
+    title: copy.title,
+    text: copy.description,
     detailText: authored || null,
     tourTitle,
     sceneTitle,

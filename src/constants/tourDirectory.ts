@@ -101,8 +101,7 @@ export const TOUR_DIRECTORY_SCENE_DETAIL_BACK = 'Back to places';
 export const TOUR_DIRECTORY_NAMING_DETAIL_BACK = 'Back to naming';
 
 /** Soft lead when a place has no scene description and no naming opportunities. */
-export const TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD =
-  'Step inside and look around this space.';
+export { EMPTY_PLACE_LEAD as TOUR_DIRECTORY_SCENE_EMPTY_PLACE_LEAD } from '../utils/ogShareCopy.mjs';
 
 /** Soft lead from an NO body when the place has no scene description (sentence-complete, no ellipsis). */
 export const TOUR_DIRECTORY_SCENE_NAMING_LEAD_MAX_CHARS = 480;
