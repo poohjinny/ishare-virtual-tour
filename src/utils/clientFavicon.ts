@@ -1,7 +1,6 @@
 import type { Tour } from '../types/tour';
 import { appendCacheBust, withBaseUrl } from './assetUrl';
 import { getTourClientId } from './tourClientId';
-import { tourAssetPath } from './tourAssetPath';
 import {
   clientBrandFaviconCandidates,
   resolveTourBranding,
@@ -14,45 +13,46 @@ const FAVICON_SELECTOR = 'link[rel="icon"][data-client-favicon]';
 /** Ignore stale async resolves after cleanup / newer apply. */
 let faviconApplyToken = 0;
 
-async function faviconPathExists(path: string): Promise<boolean> {
-  try {
-    const url = withBaseUrl(path);
-    const head = await fetch(url, { method: 'HEAD' });
-    if (head.ok) return true;
-    // Some hosts reject HEAD; fall back to a lightweight GET.
-    if (head.status === 405 || head.status === 501) {
-      const get = await fetch(url, { method: 'GET' });
-      return get.ok;
+/** Browser decode probe — HEAD/CORS miss valid icons that `<link rel="icon">` can show. */
+function faviconPathExists(path: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof Image === 'undefined') {
+      resolve(false);
+      return;
     }
-    return false;
-  } catch {
-    return false;
-  }
+    const img = new Image();
+    const finish = (ok: boolean) => {
+      img.onload = null;
+      img.onerror = null;
+      resolve(ok);
+    };
+    img.onload = () => finish(img.naturalWidth > 0);
+    img.onerror = () => finish(false);
+    img.src = withBaseUrl(path);
+  });
 }
 
-/** Resolve tab icon URL — explicit favicon, client-root png/ico, logo, then tour default. */
+/** Resolve tab icon URL — explicit, tour png/ico, client png/ico, logo, then platform default. */
 export async function resolveClientFavicon(tour: Tour): Promise<string> {
   const branding = resolveTourBranding(tour);
-  if (typeof branding?.favicon === 'string' && branding.favicon.trim()) {
-    return branding.favicon;
-  }
-
   const clientId = getTourClientId(tour);
+  const seen = new Set<string>();
   const candidates = [
+    branding?.favicon?.trim(),
     ...tourBrandFaviconCandidates(tour),
     ...clientBrandFaviconCandidates(clientId),
+    branding?.logo,
+    DEFAULT_FAVICON,
   ];
-  for (const path of candidates) {
-    if (await faviconPathExists(path)) {
-      return path;
-    }
+
+  for (const candidate of candidates) {
+    const path = candidate?.trim();
+    if (!path || seen.has(path)) continue;
+    seen.add(path);
+    if (await faviconPathExists(path)) return path;
   }
 
-  if (branding?.logo) {
-    return branding.logo;
-  }
-
-  return tourAssetPath(tour, 'favicon.ico');
+  return DEFAULT_FAVICON;
 }
 
 function iconTypeForHref(href: string): string | null {

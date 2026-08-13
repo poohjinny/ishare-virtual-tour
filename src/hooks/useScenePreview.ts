@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Scene, ViewPosition } from '../types/tour';
 import { EXPLORE_PREVIEW_WIDTH } from '../utils/equirectPreviewRender';
 import {
@@ -25,14 +25,20 @@ export function useScenePreview(
   options?: UseScenePreviewOptions,
 ) {
   const bakedThumbnail = usesBakedSceneThumbnail(scene, options);
+  const [skipBaked, setSkipBaked] = useState(false);
+  const useBaked = Boolean(bakedThumbnail && !skipBaked && scene.thumbnail);
   const [src, setSrc] = useState<string | null>(
-    enabled && bakedThumbnail ? (scene.thumbnail ?? null) : null,
+    enabled && useBaked ? (scene.thumbnail ?? null) : null,
   );
   const [failed, setFailed] = useState(false);
   const previewView = options?.view ?? scene.defaultView;
   const cacheKey = `${tourId}:${scene.id}${options?.cacheKeySuffix ? `:${options.cacheKeySuffix}` : ''}`;
   const loading =
-    enabled && !bakedThumbnail && scene.panorama && src === null && !failed;
+    enabled && !useBaked && Boolean(scene.panorama) && src === null && !failed;
+
+  useEffect(() => {
+    setSkipBaked(false);
+  }, [bakedThumbnail, scene.id, scene.thumbnail, tourId]);
 
   useEffect(() => {
     if (!enabled) {
@@ -41,7 +47,7 @@ export function useScenePreview(
       return;
     }
 
-    if (bakedThumbnail && scene.thumbnail) {
+    if (useBaked && scene.thumbnail) {
       setSrc(scene.thumbnail);
       setFailed(false);
       return;
@@ -92,7 +98,7 @@ export function useScenePreview(
       }
     };
   }, [
-    bakedThumbnail,
+    useBaked,
     cacheKey,
     enabled,
     previewView,
@@ -100,5 +106,16 @@ export function useScenePreview(
     scene.thumbnail,
   ]);
 
-  return { src, failed, loading };
+  const onError = useCallback(() => {
+    if (bakedThumbnail && !skipBaked && scene.panorama) {
+      setSkipBaked(true);
+      setSrc(null);
+      setFailed(false);
+      return;
+    }
+    setSrc(null);
+    setFailed(true);
+  }, [bakedThumbnail, scene.panorama, skipBaked]);
+
+  return { src, failed, loading, onError };
 }

@@ -168,7 +168,7 @@ export interface Hotspot {
   navVariant?: NavHotspotVariant;
   /**
    * Optional preview card image. Naming pins omit the conventional
-   * `pin-previews/{hotspotId}.webp` path in JSON; filled at load. Nav pins only
+   * `hotspot-thumbs/{hotspotId}.webp` path in JSON; filled at load. Nav pins only
    * store this for a non-default override.
    */
   preview?: { image?: string };
@@ -402,6 +402,8 @@ export interface ChatGuideLink {
   title: string;
   description?: string;
   thumbnail?: string;
+  /** Next image if `thumbnail` 404s (e.g. hotspot-thumb → scene-thumb). */
+  thumbnailFallback?: string;
   /** `naming` only — catalog id (`no_*`). */
   namingId?: string;
   /** `naming` only — pin id for opening the opportunity. */

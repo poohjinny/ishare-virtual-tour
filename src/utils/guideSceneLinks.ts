@@ -100,6 +100,21 @@ function sceneCardDescription(tour: Tour, sceneId: string): string | undefined {
   return guideCardDescription(resolveScenePlaceLead(tour, scene));
 }
 
+function guideCardThumbnails(
+  primary?: string | null,
+  fallback?: string | null,
+): Pick<ChatGuideLink, 'thumbnail' | 'thumbnailFallback'> {
+  const first = primary?.trim() || undefined;
+  const second = fallback?.trim() || undefined;
+  if (!first) {
+    return second ? { thumbnail: second } : {};
+  }
+  if (!second || second === first) {
+    return { thumbnail: first };
+  }
+  return { thumbnail: first, thumbnailFallback: second };
+}
+
 function buildSceneLink(
   tour: Tour,
   sceneId: string,
@@ -114,7 +129,7 @@ function buildSceneLink(
     sceneId,
     title: label?.trim() || scene.title?.trim() || sceneId,
     description: sceneCardDescription(tour, sceneId),
-    thumbnail: scene.thumbnail?.trim() || undefined,
+    ...guideCardThumbnails(scene.thumbnail),
   };
 }
 
@@ -164,11 +179,7 @@ function buildNamingLinkFromHotspot(
     hotspotId: hotspot.id,
     title,
     description,
-    thumbnail:
-      hotspot.preview?.image?.trim() ||
-      popup?.image?.trim() ||
-      scene.thumbnail?.trim() ||
-      undefined,
+    ...guideCardThumbnails(hotspot.preview?.image, scene.thumbnail),
     statusLabel,
     priceLabel: priceLabel || undefined,
     status: resolveNamingOpportunityStatus(naming.status),
