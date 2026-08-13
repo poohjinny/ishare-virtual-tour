@@ -42,7 +42,6 @@ export function buildSharePath({
       dev: null,
       notFoundTest: null,
       loadErrorTest: null,
-      panoramaErrorTest: null,
       intro: null,
       disableNavPreview: null,
       skipLanding: null,
@@ -51,8 +50,6 @@ export function buildSharePath({
       askGuide: null,
       guideMock: null,
       guideUiTest: null,
-      chatTest: null,
-      askGuideMock: null,
     },
   );
 }
@@ -79,7 +76,6 @@ export function buildEmbedPath({
       dev: null,
       notFoundTest: null,
       loadErrorTest: null,
-      panoramaErrorTest: null,
       intro: null,
       disableNavPreview: null,
       skipLanding: null,
@@ -88,8 +84,6 @@ export function buildEmbedPath({
       askGuide: null,
       guideMock: null,
       guideUiTest: null,
-      chatTest: null,
-      askGuideMock: null,
     },
   );
 }

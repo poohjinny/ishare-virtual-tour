@@ -3,7 +3,11 @@ import { resolveTourPublicOrigin } from '../constants/tourOrigin';
 import { findCatalogTour, findCatalogTourById } from '../data/tourCatalog';
 import type { NamingOpportunityStatus, Tour } from '../types/tour';
 import { withBaseUrl } from './assetUrl';
-import { buildAbsoluteShareUrl, buildShareMessage } from './buildShareUrl';
+import {
+  buildAbsoluteShareUrl,
+  buildShareMessage,
+  type ShareMessage,
+} from './buildShareUrl';
 import { getTourClientId } from './tourClientId';
 import { findHotspotInTour } from './findTourHotspot';
 import { formatNamingGalleryItemPrice } from './namingPrice';
@@ -284,6 +288,55 @@ export function resolveSceneShareImageUrl(
   return path ? withBaseUrl(path) : undefined;
 }
 
+export interface CurrentViewSharePayload {
+  shareUrl: string;
+  message: ShareMessage;
+  contextLabel: string;
+}
+
+/**
+ * Canonical share URL + copy for the current scene (optional naming pin).
+ * Used by InfoPopup, Explore Share, and document OG.
+ */
+export function buildCurrentViewSharePayload(
+  tour: Tour,
+  sceneId: string,
+  namingHotspotId?: string | null,
+  options?: { tourTitle?: string | null },
+): CurrentViewSharePayload {
+  const tourTitle = options?.tourTitle?.trim() || tour.title;
+  const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
+  const namingName = resolveNamingOpportunityName(
+    tour,
+    sceneId,
+    namingHotspotId,
+  );
+  const description = resolveShareDescription({
+    tour,
+    sceneId,
+    namingHotspotId,
+  });
+  const priceLabel = resolveNamingSharePriceLabel(
+    tour,
+    sceneId,
+    namingHotspotId,
+  );
+  const status = resolveNamingShareStatus(tour, sceneId, namingHotspotId);
+  return {
+    shareUrl: buildAbsoluteShareUrl({
+      tourId: tour.id,
+      sceneId,
+      firstSceneId: tour.firstScene,
+      namingHotspotId,
+    }),
+    message: buildShareMessage(tourTitle, sceneTitle, namingName, description, {
+      priceLabel,
+      status,
+    }),
+    contextLabel: namingName?.trim() || sceneTitle,
+  };
+}
+
 /**
  * Share-preview metadata aligned with {@link buildShareMessage}.
  * `tourTitle` must be the facility name (`tour.title`), not the client product name.
@@ -302,30 +355,9 @@ export function resolveTourSceneOpenGraph({
   namingHotspotId?: string | null;
   logoPath?: string | null;
 }): TourOpenGraphMeta {
-  const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
-  const namingName = resolveNamingOpportunityName(
-    tour,
-    sceneId,
-    namingHotspotId,
-  );
-  const description = resolveShareDescription({
-    tour,
-    sceneId,
-    namingHotspotId,
-  });
-  const priceLabel = resolveNamingSharePriceLabel(
-    tour,
-    sceneId,
-    namingHotspotId,
-  );
-  const status = resolveNamingShareStatus(tour, sceneId, namingHotspotId);
-  const message = buildShareMessage(
+  const payload = buildCurrentViewSharePayload(tour, sceneId, namingHotspotId, {
     tourTitle,
-    sceneTitle,
-    namingName,
-    description,
-    { priceLabel, status },
-  );
+  });
   const imagePath = resolveSceneShareImagePath(
     tour,
     sceneId,
@@ -334,15 +366,10 @@ export function resolveTourSceneOpenGraph({
   );
 
   return {
-    title: message.title,
-    description: message.text,
-    contextLabel: namingName?.trim() || sceneTitle,
+    title: payload.message.title,
+    description: payload.message.text,
+    contextLabel: payload.contextLabel,
     imageUrl: imagePath ? toAbsoluteTourAssetUrl(imagePath) : undefined,
-    pageUrl: buildAbsoluteShareUrl({
-      tourId: tour.id,
-      sceneId,
-      firstSceneId: tour.firstScene,
-      namingHotspotId,
-    }),
+    pageUrl: payload.shareUrl,
   };
 }

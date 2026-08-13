@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '../lib/cn';
 import type { AnchoredShareMenuPayload } from './AnchoredShareMenu';
-import {
-  TOUR_SHARE_COPIED_LABEL,
-  TOUR_SHARE_COPY_FAILED,
-  shouldPreferNativeShare,
-} from '../constants/tourShare';
+import { shouldPreferNativeShare } from '../constants/tourShare';
 import type { ShareMessage } from '../utils/buildShareUrl';
-import { shareTourView, type ShareTourResult } from '../utils/shareTour';
+import { shareTourResultLabel, shareTourView } from '../utils/shareTour';
 import { refreshIshareTooltipIfActive } from '../utils/ishareTooltipRuntime';
 import { ShareIcon } from './icons/ShareIcon';
 import {
@@ -58,7 +54,7 @@ export function ShareTourHeaderButton({
     }
 
     const result = await shareTourView({ shareUrl, message, preferNative });
-    const nextLabel = resolveShareFeedbackLabel(result);
+    const nextLabel = shareTourResultLabel(result);
     if (!nextLabel) return;
 
     setFeedback(nextLabel);
@@ -96,15 +92,4 @@ export function ShareTourHeaderButton({
       />
     </button>
   );
-}
-
-function resolveShareFeedbackLabel(result: ShareTourResult): string | null {
-  switch (result) {
-    case 'copied':
-      return TOUR_SHARE_COPIED_LABEL;
-    case 'failed':
-      return TOUR_SHARE_COPY_FAILED;
-    default:
-      return null;
-  }
 }

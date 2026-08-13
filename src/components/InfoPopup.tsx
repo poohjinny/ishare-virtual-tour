@@ -9,22 +9,14 @@ import {
   PopupCtasFooter,
   PopupVideoEmbed,
 } from './popupContentUi';
-import {
-  resolvePopupContentCtas,
-  stripNamingOpportunitySuffix,
-} from '../data/namingOpportunityStatus';
+import { resolvePopupContentCtas } from '../data/namingOpportunityStatus';
 import { popupCtaSizeClassName } from '../utils/popupCtaLayout';
 import type { AnchoredShareMenuPayload } from './AnchoredShareMenu';
 import {
   TOUR_SHARE_OPPORTUNITY_ARIA,
   TOUR_SHARE_OPPORTUNITY_LABEL,
 } from '../constants/tourShare';
-import {
-  buildAbsoluteShareUrl,
-  buildShareMessage,
-} from '../utils/buildShareUrl';
-import { resolveShareDescription } from '../utils/tourOpenGraph';
-import { formatNamingGalleryItemPrice } from '../utils/namingPrice';
+import { buildCurrentViewSharePayload } from '../utils/tourOpenGraph';
 import {
   resolveGlassPanelWidth,
   resolveNavPreviewHeroHeight,
@@ -129,49 +121,13 @@ export function InfoPopup({
 
   const hasFooterCtas = resolvedCtas.length > 0 || canVisitScene;
 
-  const sceneTitle = tour.scenes[sceneId]?.title ?? sceneId;
-  const namingName =
-    shown?.namingOpportunity ?
-      stripNamingOpportunitySuffix(shown.namingOpportunity.name)
-    : null;
-
-  const shareUrl = useMemo(
+  const sharePayload = useMemo(
     () =>
-      buildAbsoluteShareUrl({
-        tourId: tour.id,
-        sceneId,
-        firstSceneId: tour.firstScene,
-        namingHotspotId:
-          shown?.namingOpportunity && namingHotspotId ? namingHotspotId : null,
-      }),
-    [
-      namingHotspotId,
-      sceneId,
-      shown?.namingOpportunity,
-      tour.firstScene,
-      tour.id,
-    ],
+      shown?.namingOpportunity && namingHotspotId ?
+        buildCurrentViewSharePayload(tour, sceneId, namingHotspotId)
+      : null,
+    [namingHotspotId, sceneId, shown?.namingOpportunity, tour],
   );
-
-  const shareMessage = useMemo(() => {
-    const naming = shown?.namingOpportunity;
-    return buildShareMessage(
-      tour.title,
-      sceneTitle,
-      namingName,
-      resolveShareDescription({ tour, sceneId, namingHotspotId }),
-      {
-        priceLabel:
-          naming ?
-            formatNamingGalleryItemPrice({
-              price: naming.price,
-              priceLabel: naming.priceLabel,
-            })
-          : null,
-        status: naming?.status ?? null,
-      },
-    );
-  }, [namingHotspotId, namingName, sceneId, sceneTitle, shown, tour]);
 
   const panelWidth = useMemo(
     () => (shown ? resolveGlassPanelWidth(shown, tour) : undefined),
@@ -193,10 +149,10 @@ export function InfoPopup({
     : undefined;
 
   const shareActions =
-    showNamingShare ?
+    showNamingShare && sharePayload ?
       {
-        shareUrl,
-        message: shareMessage,
+        shareUrl: sharePayload.shareUrl,
+        message: sharePayload.message,
         ariaLabel: TOUR_SHARE_OPPORTUNITY_ARIA,
         tooltipLabel: TOUR_SHARE_OPPORTUNITY_LABEL,
         onOpenAnchoredShareMenu,

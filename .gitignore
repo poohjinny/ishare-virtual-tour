@@ -11,3 +11,6 @@ api/local.settings.json
 # Generated from assets/ via npm run sync-assets
 public/assets
 public/favicon.ico
+
+# Wrangler dry-run output
+workers/**/dist-dry

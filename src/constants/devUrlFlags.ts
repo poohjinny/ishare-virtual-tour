@@ -39,10 +39,7 @@ export const DEV_URL_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     label: 'Load-error overlay',
     hint: 'Force load-error overlay (panorama + 3D)',
     isOn: (params) => params.loadErrorTest,
-    urlPatch: (enabled) => ({
-      loadErrorTest: enabled ? '1' : null,
-      panoramaErrorTest: null,
-    }),
+    urlPatch: (enabled) => ({ loadErrorTest: enabled ? '1' : null }),
   },
   {
     key: 'disableNavPreview',
@@ -98,7 +95,6 @@ export const DEV_ASK_GUIDE_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     isOn: (params) => params.guideMock,
     urlPatch: (enabled) => ({
       guideMock: enabled ? '1' : null,
-      askGuideMock: null,
       // Surface must be on for mock chat to be reachable.
       ...(enabled ? { askGuide: '1' } : {}),
     }),
@@ -110,7 +106,6 @@ export const DEV_ASK_GUIDE_FLAG_TOGGLES: DevUrlFlagToggle[] = [
     isOn: (params) => params.guideUiTest,
     urlPatch: (enabled) => ({
       guideUiTest: enabled ? '1' : null,
-      chatTest: null,
       // Open the guide surface so the fixture panel is visible immediately.
       ...(enabled ? { askGuide: '1' } : {}),
     }),

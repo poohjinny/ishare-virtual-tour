@@ -22,12 +22,12 @@ export interface AppSearchParams {
   deviceTouch: boolean;
   /**
    * Ask Guide frozen UI fixtures (scroll + thinking).
-   * URL: `guideUiTest=1` (legacy alias: `chatTest=1`).
+   * URL: `guideUiTest=1`.
    */
   guideUiTest: boolean;
   /** Force tour not-found (404) screen — `?notFoundTest=1`. */
   notFoundTest: boolean;
-  /** Force viewer load-error overlay — `?loadErrorTest=1` (legacy: `panoramaErrorTest`). */
+  /** Force viewer load-error overlay — `?loadErrorTest=1`. */
   loadErrorTest: boolean;
   /** Disable nav preview mini PSV hero — `?disableNavPreview=1` (debug). */
   disableNavPreview: boolean;
@@ -44,7 +44,7 @@ export interface AppSearchParams {
   askGuide: boolean | null;
   /**
    * Force scripted Ask Guide replies (no OpenAI).
-   * URL: `guideMock=1` (legacy alias: `askGuideMock=1`).
+   * URL: `guideMock=1`.
    */
   guideMock: boolean;
 }
@@ -62,6 +62,7 @@ export function useAppSearchParams(): AppSearchParams {
       deviceTouch: searchParams.get('deviceTouch') === '1',
       guideUiTest:
         searchParams.get('guideUiTest') === '1' ||
+        // First paint before `legacySearchRedirectPath` rewrites `chatTest`.
         searchParams.get('chatTest') === '1',
       notFoundTest: searchParams.get('notFoundTest') === '1',
       loadErrorTest: isLoadErrorTestEnabled(searchParams),
@@ -72,6 +73,7 @@ export function useAppSearchParams(): AppSearchParams {
       askGuide: parseTriStateFlag(searchParams.get('askGuide')),
       guideMock:
         searchParams.get('guideMock') === '1' ||
+        // First paint before `legacySearchRedirectPath` rewrites `askGuideMock`.
         searchParams.get('askGuideMock') === '1',
     };
   }, [searchParams]);

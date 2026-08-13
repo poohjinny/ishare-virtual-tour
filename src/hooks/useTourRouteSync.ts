@@ -17,8 +17,7 @@ import type { TourViewerHandle } from '../viewer-shared/viewerHandle';
 import {
   NAMING_OPPORTUNITY_SEARCH_KEY,
   buildTourLocation,
-  legacyQueryRedirectPath,
-  legacyTourPathRedirect,
+  legacySearchRedirectPath,
   resolveTourRoute,
   toNamingOpportunitySearchValue,
 } from '../utils/tourPaths';
@@ -90,9 +89,10 @@ export function useTourRouteSync({
   );
 
   useEffect(() => {
-    const legacyPath =
-      legacyQueryRedirectPath(searchParams) ??
-      legacyTourPathRedirect(location.pathname, searchParams);
+    const legacyPath = legacySearchRedirectPath(
+      location.pathname,
+      searchParams,
+    );
     if (legacyPath && legacyPath !== location.pathname + location.search) {
       navigate(legacyPath, { replace: true });
     }

@@ -52,11 +52,15 @@ export type AskGuideReply = {
 let cachedLiveStatus: boolean | null = null;
 let liveStatusInflight: Promise<boolean> | null = null;
 
-/** Dev QA — `?guideMock=1` (legacy `askGuideMock`) forces scripted replies. */
+/** Dev QA — `?guideMock=1` forces scripted replies. */
 export function isAskGuideMockForced(): boolean {
   if (typeof window === 'undefined') return false;
   const params = new URLSearchParams(window.location.search);
-  return params.get('guideMock') === '1' || params.get('askGuideMock') === '1';
+  return (
+    params.get('guideMock') === '1' ||
+    // First paint before `legacySearchRedirectPath` rewrites `askGuideMock`.
+    params.get('askGuideMock') === '1'
+  );
 }
 
 /**

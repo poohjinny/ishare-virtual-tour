@@ -1,11 +1,7 @@
 import { useCallback, useState } from 'react';
 import { cn } from '../lib/cn';
-import {
-  TOUR_SHARE_COPIED_LABEL,
-  TOUR_SHARE_COPY_FAILED,
-} from '../constants/tourShare';
 import type { ShareMessage } from '../utils/buildShareUrl';
-import { shareTourView, type ShareTourResult } from '../utils/shareTour';
+import { shareTourResultLabel, shareTourView } from '../utils/shareTour';
 import { PopupCtaArrowIcon } from './popupContentUi';
 
 interface ShareTourButtonProps {
@@ -33,7 +29,7 @@ export function ShareTourButton({
   const handleClick = useCallback(async () => {
     const result = await shareTourView({ shareUrl, message, preferNative });
 
-    const nextLabel = resolveShareFeedbackLabel(result);
+    const nextLabel = shareTourResultLabel(result);
     if (!nextLabel) return;
 
     setFeedback(nextLabel);
@@ -60,15 +56,4 @@ export function ShareTourButton({
       {showArrow && !isSecondary && !feedback && <PopupCtaArrowIcon />}
     </button>
   );
-}
-
-function resolveShareFeedbackLabel(result: ShareTourResult): string | null {
-  switch (result) {
-    case 'copied':
-      return TOUR_SHARE_COPIED_LABEL;
-    case 'failed':
-      return TOUR_SHARE_COPY_FAILED;
-    default:
-      return null;
-  }
 }

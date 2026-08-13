@@ -10,6 +10,7 @@ import {
   resolveNamingOpportunityFromSearch,
   toNamingOpportunitySearchValue,
 } from './namingOpportunityUrl';
+import { canonicalizeTourPathId } from './legacyTourPathAliases.mjs';
 
 export {
   NAMING_OPPORTUNITY_SEARCH_KEY,
@@ -17,25 +18,9 @@ export {
   toNamingOpportunitySearchValue,
 };
 
-/**
- * Legacy URL segments → canonical opaque tour id.
- * Includes former kebab tour ids and older `/{clientId}/…` paths.
- */
-const LEGACY_TOUR_PATH_ALIASES: Record<string, string> = {
-  // Former kebab tour ids (pre opaque `t_*` migration)
-  'ken-sargent-house': 't_l01wnq8eh6',
-  'cancer-research': 't_8kx3m2p9qa',
-  'holodomor-museum': 't_r7v4n1c0wd',
-  'queensway-carleton-hospital': 't_9zs0j4a7xt',
-  'queensway-carleton-general-hospital': 't_9zs0j4a7xt',
-  // Older client-id-as-tour-segment paths
-  gphospitalfoundation: 't_l01wnq8eh6',
-  cancerresearchsociety: 't_8kx3m2p9qa',
-  holodomor: 't_r7v4n1c0wd',
-};
-
+/** Legacy kebab / client-id path segment → opaque `t_*`. */
 export function normalizeTourPathId(segment: string): string {
-  return LEGACY_TOUR_PATH_ALIASES[segment] ?? segment;
+  return canonicalizeTourPathId(segment);
 }
 
 export function isKnownTourId(id: string): boolean {
@@ -149,7 +134,6 @@ export const PRESERVED_SEARCH_KEYS = [
   'deviceTouch',
   'notFoundTest',
   'loadErrorTest',
-  'panoramaErrorTest',
   'disableNavPreview',
   'skipLanding',
   'splashHold',
@@ -157,12 +141,29 @@ export const PRESERVED_SEARCH_KEYS = [
   'askGuide',
   'guideMock',
   'guideUiTest',
-  /** @deprecated Prefer `guideUiTest`. */
-  'chatTest',
-  /** @deprecated Prefer `guideMock`. */
-  'askGuideMock',
   NAMING_OPPORTUNITY_SEARCH_KEY,
 ] as const;
+
+/** Old QA flags → canonical keys. Rewritten once, then dropped from the URL. */
+const DEPRECATED_QA_SEARCH_ALIASES = {
+  chatTest: 'guideUiTest',
+  askGuideMock: 'guideMock',
+  panoramaErrorTest: 'loadErrorTest',
+} as const;
+
+function rewriteDeprecatedQaSearchParams(
+  source: URLSearchParams,
+): URLSearchParams | null {
+  let rewritten = false;
+  const next = new URLSearchParams(source);
+  for (const [from, to] of Object.entries(DEPRECATED_QA_SEARCH_ALIASES)) {
+    if (next.get(from) !== '1') continue;
+    next.delete(from);
+    next.set(to, '1');
+    rewritten = true;
+  }
+  return rewritten ? next : null;
+}
 
 export type PreservedSearchKey = (typeof PRESERVED_SEARCH_KEYS)[number];
 
@@ -171,12 +172,13 @@ export function clonePreservedSearchParams(
   patch?: Partial<Record<PreservedSearchKey, string | null>>,
 ): URLSearchParams {
   const next = new URLSearchParams();
+  const canonical = rewriteDeprecatedQaSearchParams(source) ?? source;
   for (const key of PRESERVED_SEARCH_KEYS) {
     let value: string | null = null;
     if (patch && key in patch) {
       value = patch[key] ?? null;
     } else {
-      value = source.get(key);
+      value = canonical.get(key);
     }
     if (value) {
       next.set(key, value);
@@ -271,4 +273,28 @@ export function legacyQueryRedirectPath(
   const path = buildTourPath(resolvedTourId, sceneId, tour.firstScene);
   const flags = preserveSearchString(nextSearch);
   return path + flags;
+}
+
+/**
+ * One-shot URL cleanup: deprecated QA aliases, `?tour=`/`?scene=`, kebab tour
+ * path segments. Returns a location to `replace`, or null when already canonical.
+ */
+export function legacySearchRedirectPath(
+  pathname: string,
+  searchParams: URLSearchParams,
+): string | null {
+  const rewrittenSearch = rewriteDeprecatedQaSearchParams(searchParams);
+  const searchForRedirect = rewrittenSearch ?? searchParams;
+
+  const tourSceneRedirect = legacyQueryRedirectPath(searchForRedirect);
+  if (tourSceneRedirect) return tourSceneRedirect;
+
+  const pathRedirect = legacyTourPathRedirect(pathname, searchForRedirect);
+  if (pathRedirect) return pathRedirect;
+
+  if (!rewrittenSearch) return null;
+
+  const flags = rewrittenSearch.toString();
+  const normalized = pathname.replace(/\/+$/, '') || '/';
+  return flags ? `${normalized}?${flags}` : normalized;
 }

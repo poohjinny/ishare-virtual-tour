@@ -24,6 +24,10 @@ import {
 } from '../../../src/utils/ogShareCopy.mjs';
 import { namingSearchValueMatches } from '../../../src/utils/namingOpportunitySearch.mjs';
 import {
+  canonicalizeTourPathId,
+  isLegacyTourPathAlias,
+} from '../../../src/utils/legacyTourPathAliases.mjs';
+import {
   resolveClientLogoPath,
   resolveSceneThumbnailPath,
 } from '../../../src/utils/tourAssetResolve.mjs';
@@ -39,7 +43,6 @@ const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
 const TOUR_ID_RE = /^t_[a-z0-9]+$/i;
 const SCENE_ID_RE = /^s_[a-z0-9]+$/i;
-const SLUG_RE = /^[a-z0-9-]+$/i;
 const NO_RE = /^no_[a-z0-9]+$/i;
 
 /** Served by the Worker so Cloudflare Managed robots.txt does not replace it. */
@@ -176,15 +179,15 @@ function looksLikeBrowserDocument(request) {
 function isTourDeepLink(pathname) {
   const parts = pathname.split('/').filter(Boolean);
   if (parts.length === 0) return false;
-  return TOUR_ID_RE.test(parts[0]) || SLUG_RE.test(parts[0]);
+  return TOUR_ID_RE.test(parts[0]) || isLegacyTourPathAlias(parts[0]);
 }
 
-function isSafeTourId(value) {
-  return TOUR_ID_RE.test(value) || SLUG_RE.test(value);
+function isOpaqueTourId(value) {
+  return TOUR_ID_RE.test(value);
 }
 
 function isSafeSceneId(value) {
-  return SCENE_ID_RE.test(value) || SLUG_RE.test(value);
+  return SCENE_ID_RE.test(value);
 }
 
 function sanitizeNo(value) {
@@ -323,13 +326,19 @@ async function handleOgJpegGet(request, env, publicOrigin, tourId, sceneId) {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response('Method not allowed', { status: 405 });
   }
-  if (!isSafeTourId(tourId) || !isSafeSceneId(sceneId)) {
+  const canonicalTourId = canonicalizeTourPathId(tourId);
+  if (!isOpaqueTourId(canonicalTourId) || !isSafeSceneId(sceneId)) {
     return new Response('Not found', { status: 404 });
   }
   const no = sanitizeNo(new URL(request.url).searchParams.get('no'));
 
   try {
-    const sourcePath = await resolveOgSourcePath(env, tourId, sceneId, no);
+    const sourcePath = await resolveOgSourcePath(
+      env,
+      canonicalTourId,
+      sceneId,
+      no,
+    );
     if (!sourcePath) {
       return new Response('Not found', {
         status: 404,
@@ -448,8 +457,8 @@ async function buildBotHtml(url, origin, env) {
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts.length === 0) return null;
 
-  const tourId = parts[0];
-  if (!isSafeTourId(tourId)) return null;
+  const tourId = canonicalizeTourPathId(parts[0]);
+  if (!isOpaqueTourId(tourId)) return null;
 
   const tour = await fetchOriginJson(`/tours/${tourId}.json`, env);
   if (!tour?.id || !tour.scenes) return null;
@@ -524,19 +533,13 @@ function findClientLogo(catalog, clientId) {
 
 function resolveNaming(tour, sceneId, searchValue) {
   const matchHotspot = (hotspot, sid) => {
-    if (!hotspot?.namingId && hotspot?.type !== 'naming') return null;
-    if (
-      !namingSearchValueMatches(searchValue, { namingId: hotspot.namingId })
-    ) {
-      return null;
-    }
-    const record =
-      tour.namingOpportunities?.[hotspot.namingId] ||
-      hotspot.namingOpportunity ||
-      null;
-    const name = (record?.name || hotspot.title || '').trim();
+    const namingId = hotspot?.namingId?.trim();
+    if (!namingId) return null;
+    if (!namingSearchValueMatches(searchValue, { namingId })) return null;
+    const record = tour.namingOpportunities?.[namingId] || null;
+    const name = (record?.name || '').trim();
     return {
-      name: name || hotspot.namingId || hotspot.id,
+      name: name || namingId,
       image: record?.image || hotspot.popup?.image,
       body: record?.body || hotspot.popup?.body,
       priceLabel: record?.priceLabel,
@@ -570,14 +573,12 @@ function firstSceneNamingBody(tour, sceneId) {
   const hotspots = [...(scene?.hotspots ?? []), ...(tour.hotspots ?? [])];
 
   for (const hotspot of hotspots) {
-    if (!hotspot?.namingId && hotspot?.type !== 'naming') continue;
+    const namingId = hotspot?.namingId?.trim();
+    if (!namingId) continue;
     if (hotspot.sceneId && hotspot.sceneId !== sceneId) continue;
 
-    const record =
-      tour.namingOpportunities?.[hotspot.namingId] ||
-      hotspot.namingOpportunity ||
-      null;
-    const name = (record?.name || hotspot.title || '').trim();
+    const record = tour.namingOpportunities?.[namingId] || null;
+    const name = (record?.name || '').trim();
     const body = String(record?.body || hotspot.popup?.body || '').trim();
     if (!body) continue;
     if (isDefaultNamingDescription(body, name, tourTitle)) continue;

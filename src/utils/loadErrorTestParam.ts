@@ -4,6 +4,7 @@ export function isLoadErrorTestEnabled(
 ): boolean {
   return (
     params.get('loadErrorTest') === '1' ||
+    // First paint before `legacySearchRedirectPath` rewrites `panoramaErrorTest`.
     params.get('panoramaErrorTest') === '1'
   );
 }

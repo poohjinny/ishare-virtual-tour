@@ -11,6 +11,9 @@ Contract:
   thumbnails and client logo come from `src/utils/tourAssetResolve.mjs`
   (conventional paths inferred when JSON omits them). Includes
   `meta-externalfetcher` (Facebook).
+- **Path ids** → opaque `t_*` / `s_*`. Known kebab / client-id tour segments
+  (same map as the SPA: `legacyTourPathAliases.mjs`) canonicalize before JSON
+  fetch. Arbitrary slugs are not treated as tours.
 - **`og:image`** → `https://tour.ishare.ca/og/jpg/{tourId}/{sceneId}.jpg`
   (optional `?no=`). JPEG is produced **on the fly** from scene/naming WebP via
   the Workers **Images** binding (1200×630). Facebook requires JPEG/PNG/GIF for
