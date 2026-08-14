@@ -2,7 +2,10 @@ import { resolveNamingOpportunityPopupCtas } from '../data/namingOpportunityStat
 import { resolvePopupCta } from '../data/giftabulatorBrand';
 import type { ChatGuideCta, ChatGuideLink, Tour } from '../types/tour';
 import { assembleTourContext } from './assembleTourContext';
-import { listSceneInfoHotspots, findNamingHotspotInTour } from './findTourHotspot';
+import {
+  listSceneInfoHotspots,
+  findNamingHotspotInTour,
+} from './findTourHotspot';
 import {
   buildCurrentPlaceGuideLink,
   capGuideLinks,
@@ -15,6 +18,7 @@ import {
 import { resolveNamingPopup } from './namingSceneInherit';
 import { getTourWebsite, resolveTourClient } from './resolveTourClient';
 import { buildTourNamingDirectory } from './tourDirectory';
+import { isGmailComposeUrl } from './gmailCompose';
 
 const MAX_FOLLOW_UPS = 6;
 const MAX_GUIDE_CTAS = 3;
@@ -231,11 +235,8 @@ export function matchTourNamingIdsFromQuestion(
   const q = normalizePlaceMatchText(question);
   if (q.length < 3) return [];
 
-  const candidates: Array<{
-    namingId: string;
-    nameNorm: string;
-    len: number;
-  }> = [];
+  const candidates: Array<{ namingId: string; nameNorm: string; len: number }> =
+    [];
   for (const item of buildTourNamingDirectory(tour)) {
     const name = item.name?.trim();
     if (!name || name.length < 3) continue;
@@ -772,6 +773,7 @@ function namingCtasFromPopup(
 
     const isContact =
       url.startsWith('mailto:') ||
+      isGmailComposeUrl(url) ||
       /interest|contact|speak|notify|email/i.test(resolved.label);
     if (isContact && !contact && resolved.kind !== 'giftabulator') {
       contact = {

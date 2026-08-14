@@ -1,5 +1,9 @@
-import { findPrimaryPopupCta, orderPopupCtasForFooter } from '../data/namingOpportunityStatus';
+import {
+  findPrimaryPopupCta,
+  orderPopupCtasForFooter,
+} from '../data/namingOpportunityStatus';
 import type { PopupCta } from '../types/tour';
+import { isGmailComposeUrl } from './gmailCompose';
 
 export interface PopupCtaPlacement {
   primary: PopupCta | undefined;
@@ -17,14 +21,15 @@ export function partitionPopupCtasForPlacement(
 
   const primary = findPrimaryPopupCta(ordered);
 
-  return {
-    primary,
-    headerCtas: [],
-  };
+  return { primary, headerCtas: [] };
 }
 
 export function isMailtoCtaUrl(url: string): boolean {
   return url.trim().toLowerCase().startsWith('mailto:');
+}
+
+export function isMailComposeCtaUrl(url: string): boolean {
+  return isMailtoCtaUrl(url) || isGmailComposeUrl(url);
 }
 
 /** Open a CTA URL — mailto must not use target=_blank (opens a blank tab, looks dead). */

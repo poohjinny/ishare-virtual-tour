@@ -1,6 +1,6 @@
 import type { PopupCta } from '../types/tour';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
-import { isMailtoCtaUrl } from '../utils/popupCtaPlacement';
+import { isMailComposeCtaUrl } from '../utils/popupCtaPlacement';
 import { ShareTourHeaderButton } from './ShareTourHeaderButton';
 import { MaterialSymbol } from './ui/MaterialSymbol';
 import { MATERIAL_SYMBOL_SIZE_CHROME_HEADER } from './ui/materialSymbolClasses';
@@ -19,7 +19,7 @@ export function PopupCtaHeaderLink({ cta }: { cta: PopupCta }) {
       aria-label={resolved.ariaLabel}
     >
       <MaterialSymbol
-        name={isMailtoCtaUrl(resolved.url) ? 'mail' : 'open_in_new'}
+        name={isMailComposeCtaUrl(resolved.url) ? 'mail' : 'open_in_new'}
         className={HEADER_BTN_ICON_CLASS}
         sizePx={MATERIAL_SYMBOL_SIZE_CHROME_HEADER}
       />

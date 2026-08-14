@@ -1,5 +1,6 @@
 import type { PopupCta } from '../types/tour';
 import { resolvePopupCta } from '../data/giftabulatorBrand';
+import { isGmailComposeUrl } from './gmailCompose';
 
 export type PopupCtaIconKind =
   | 'arrow'
@@ -19,14 +20,15 @@ export function resolvePopupCtaIconKind(cta: PopupCta): PopupCtaIconKind {
 
   if (resolved.kind === 'giftabulator') return 'volunteer';
 
-  if (url.startsWith('mailto:')) {
+  if (url.startsWith('mailto:') || isGmailComposeUrl(cta.url)) {
     if (label.includes('notify')) return 'bell';
     return 'mail';
   }
 
   if (label.includes('support') || label.includes('mission')) return 'heart';
 
-  if (url.startsWith('http://') || url.startsWith('https://')) return 'external';
+  if (url.startsWith('http://') || url.startsWith('https://'))
+    return 'external';
 
   return 'arrow';
 }

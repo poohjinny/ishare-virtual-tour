@@ -6,8 +6,8 @@ import type {
   Tour,
 } from '../types/tour';
 import {
+  TOUR_CONTACT_US_EMAIL,
   TOUR_CONTACT_US_MAILTO,
-  buildTourNotifyMeMailto,
 } from '../constants/tourContact';
 import {
   giftabulatorCtaButtonPlainLabel,
@@ -16,6 +16,10 @@ import {
 import { getTourWebsite, resolveTourClient } from '../utils/resolveTourClient';
 import { buildGiftabulatorGiveNowUrl } from '../utils/giftabulatorGiveNowUrl';
 import type { PopupCtaIconKind } from '../utils/popupCtaIcon';
+import {
+  buildNamingInquiryComposeUrl,
+  buildNamingNotifyComposeUrl,
+} from '../utils/namingInterestEmail';
 
 export type NamingOpportunityContactIntent = 'inquiry' | 'simple' | 'notify';
 
@@ -286,18 +290,21 @@ export function namingOpportunityCtaEnabled(
   );
 }
 
-function encodeMailtoQueryValue(value: string): string {
-  // RFC 6068 — %20 for spaces (URLSearchParams would emit "+", which many clients break).
-  return encodeURIComponent(value);
+function inquiryStatusLabel(naming: NamingOpportunity): string | null {
+  if (!namingOpportunityStatusShowsBadge(naming.status)) return null;
+  return namingOpportunityStatusDisplayLabel(naming.status);
 }
 
-function buildContactMailto(email: string, naming: NamingOpportunity): string {
-  const name = naming.name.trim();
-  const subject = encodeMailtoQueryValue(`Naming opportunity inquiry: ${name}`);
-  const body = encodeMailtoQueryValue(
-    `Hello,\n\nI am interested in learning more about the ${name}.\n\n`,
-  );
-  return `mailto:${email}?subject=${subject}&body=${body}`;
+function buildContactMailto(
+  email: string,
+  tour: Tour,
+  naming: NamingOpportunity,
+  popup?: PopupContent,
+): string {
+  return buildNamingInquiryComposeUrl(email, tour, naming, {
+    statusLabel: inquiryStatusLabel(naming),
+    popup,
+  });
 }
 
 function withStatusCtaIcon(
@@ -311,6 +318,7 @@ function buildCtaFromPreset(
   ctaConfig: NamingOpportunityStatusCtaConfig,
   tour: Tour,
   naming: NamingOpportunity,
+  popup?: PopupContent,
 ): PopupCta | null {
   switch (ctaConfig.preset) {
     case 'none':
@@ -335,7 +343,12 @@ function buildCtaFromPreset(
             label: ctaConfig.label,
             sublabel: ctaConfig.sublabel,
             ariaLabel: ctaConfig.ariaLabel ?? ctaConfig.label,
-            url: buildTourNotifyMeMailto(naming),
+            url: buildNamingNotifyComposeUrl(
+              TOUR_CONTACT_US_EMAIL,
+              tour,
+              naming,
+              { statusLabel: inquiryStatusLabel(naming), popup },
+            ),
             variant: ctaConfig.variant ?? 'primary',
           },
           ctaConfig,
@@ -343,9 +356,8 @@ function buildCtaFromPreset(
       }
 
       const client = resolveTourClient(tour);
-      const email = client?.email?.trim();
-      const url =
-        email ? buildContactMailto(email, naming) : TOUR_CONTACT_US_MAILTO;
+      const email = client?.email?.trim() || TOUR_CONTACT_US_EMAIL;
+      const url = buildContactMailto(email, tour, naming, popup);
       return withStatusCtaIcon(
         {
           label: ctaConfig.label,
@@ -389,9 +401,10 @@ function buildCtasFromConfigs(
   ctaConfigs: NamingOpportunityStatusCtaConfig[],
   tour: Tour,
   naming: NamingOpportunity,
+  popup?: PopupContent,
 ): PopupCta[] {
   return ctaConfigs
-    .map((ctaConfig) => buildCtaFromPreset(ctaConfig, tour, naming))
+    .map((ctaConfig) => buildCtaFromPreset(ctaConfig, tour, naming, popup))
     .filter((cta): cta is PopupCta => cta !== null);
 }
 
@@ -461,6 +474,7 @@ export function resolveNamingOpportunityPopupCtas(
         namingOpportunityStatusConfig(naming.status).ctas,
         tour,
         naming,
+        popup,
       ),
       giftabulatorUrlOverride,
     ),
