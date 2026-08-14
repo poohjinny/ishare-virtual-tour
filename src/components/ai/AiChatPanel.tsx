@@ -595,8 +595,10 @@ export function AiChatPanel({
   /**
    * Re-pin after layout catches up while stick-to-bottom.
    * Small growth (streaming) → instant pin.
-   * Large sudden growth (cards / CTAs / images) → leave reading position;
-   * scroll-to-bottom FAB covers the rest.
+   * Large sudden growth (cards / CTAs / images) → skip this pin so the
+   * reply text isn’t yanked; keep stick so later settles / sends still follow.
+   * (Do not clear stick here — after append, remaining px is large until we
+   * scroll, which used to permanently drop tracking on Enter / big deltas.)
    */
   const settleThreadToBottom = () => {
     if (!stickToBottomRef.current) return;
@@ -609,12 +611,21 @@ export function AiChatPanel({
     lastThreadScrollHeightRef.current = height;
 
     if (growth >= THREAD_CARD_GROWTH_PX) {
-      if (!isNearBottom(root)) {
-        stickToBottomRef.current = false;
-      }
       return;
     }
 
+    scrollThreadToBottom();
+    requestAnimationFrame(() => {
+      if (!stickToBottomRef.current) return;
+      scrollThreadToBottom();
+      const next = messagesRef.current;
+      if (next) lastThreadScrollHeightRef.current = next.scrollHeight;
+    });
+  };
+
+  /** Always pin — used for new user sends (Enter / chip / voice). */
+  const forceThreadToBottom = () => {
+    stickToBottomRef.current = true;
     scrollThreadToBottom();
     requestAnimationFrame(() => {
       if (!stickToBottomRef.current) return;
@@ -685,8 +696,7 @@ export function AiChatPanel({
       !previousKey.startsWith(`${latestUserMessageId}|`);
 
     if (isNewUserTurn) {
-      stickToBottomRef.current = true;
-      settleThreadToBottom();
+      forceThreadToBottom();
       return;
     }
 
