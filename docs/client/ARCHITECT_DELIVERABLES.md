@@ -40,7 +40,7 @@ Confirm you have from sales / client intake:
 | `tourId`   | Opaque `t_*` issued by engineering — not the display title    | `t_l01wnq8eh6`                          |
 | `sceneId`  | Opaque `s_*` issued by engineering — not the scene title      | `s_dtv27wfrbi`                          |
 
-Paths: `assets/{clientId}/{tourId}/…` — [assets/README.md](../assets/README.md)
+Paths: `assets/{clientId}/{tourId}/…` — [assets/README.md](../../assets/README.md)
 
 ---
 
@@ -336,6 +336,6 @@ keys depend on it.
 | Document                                                           | Purpose                             |
 | ------------------------------------------------------------------ | ----------------------------------- |
 | [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | What sales collects from the client |
-| [assets/README.md](../assets/README.md)                            | Repo paths, WebP rules, thumbnails  |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | Scene / hotspot JSON shapes         |
-| [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md)                     | How scene changes feel in-app       |
+| [assets/README.md](../../assets/README.md)                            | Repo paths, WebP rules, thumbnails  |
+| [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                               | Scene / hotspot JSON shapes         |
+| [SCENE_TRANSITIONS.md](../engineering/CODING_GUIDELINES.md#scene-transitions)                     | How scene changes feel in-app       |

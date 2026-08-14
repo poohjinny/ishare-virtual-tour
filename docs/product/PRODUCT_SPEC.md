@@ -1,7 +1,7 @@
 # iShare Virtual Tour — Product Specification
 
 > Stable product contracts: routing, embed, catalog, and JSON schemas.  
-> For backlog and phasing, see [ROADMAP.md](./ROADMAP.md).  
+> For backlog and phasing, see [ROADMAP.md](../ROADMAP.md).  
 > For project context and demo narrative, see
 > [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
 
@@ -24,7 +24,7 @@
 - Glass panels: Explore, Help, Share, naming-opportunity popups, nav previews,
   Tour Guide chat (when enabled).
 - Floor-plan minimap was removed from the product.
-- Component details: [COMPONENTS.md](./COMPONENTS.md).
+- Component details: [COMPONENTS.md](../engineering/COMPONENTS.md).
 
 ---
 
@@ -45,7 +45,7 @@
 - Shares `TourViewerHandle` interface with `PanoramaViewer`.
 - Prototype: markers + anchored panels work; nav-preview / place-overview /
   modal InfoPopup parity with panorama is thinner — see
-  [ROADMAP.md — 3D model tours](./ROADMAP.md#3d-model-tours-production).
+  [ROADMAP.md — 3D model tours](../ROADMAP.md#3d-model-tours-production).
 
 ### Navigation
 
@@ -57,7 +57,7 @@
 
 ### Transitions
 
-See [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md) for tuning. Sequence:
+See [CODING_GUIDELINES — Scene transitions](../engineering/CODING_GUIDELINES.md#scene-transitions) for tuning. Sequence:
 
 1. Pan toward hotspot (optional)
 2. Zoom in (~300ms)
@@ -70,7 +70,7 @@ See [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md) for tuning. Sequence:
 - Nav: animated CSS markers, 48px touch target; optional nav-preview card.
 - Info: React `InfoPopup` modal and/or anchored glass (ESC / backdrop / close).
 - Naming opportunities: anchored glass panels — see
-  [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md).
+  [NAMING.md](./NAMING.md).
 - Place overview: info hotspot with `role: 'placeOverview'`.
 
 ### Tour Guide (Ask Guide)
@@ -80,16 +80,16 @@ See [SCENE_TRANSITIONS.md](./SCENE_TRANSITIONS.md) for tuning. Sequence:
   `SHOW_ASK_GUIDE` stays off; QA with `?askGuide=1`. Force mock with
   `?guideMock=1`.
 - Live: Cloudflare Worker + `VITE_ASK_GUIDE_API_URL` — see
-  [DEPLOY.md — Ask Guide](./DEPLOY.md#ask-guide-live-ai-readiness).
+  [DEPLOY.md — Ask Guide](../ops/DEPLOY.md#ask-guide-live-ai-readiness).
 - Client mock fallback when live is unavailable.
-- Naming / product copy: [PRODUCT_NAMING.md](./PRODUCT_NAMING.md).
+- Naming / product copy: [NAMING.md](./NAMING.md).
 
 ---
 
 ## Data schemas
 
 Source of truth: `tours/*.json`, `tours/catalog.json`.  
-Engineering notes: [CODING_GUIDELINES.md](./CODING_GUIDELINES.md).
+Engineering notes: [CODING_GUIDELINES.md](../engineering/CODING_GUIDELINES.md).
 
 ### Tour (`tours/{tourId}.json`)
 
@@ -186,7 +186,7 @@ https://tour.ishare.ca/{tourId}/{firstScene}?embed=1
 
 Do not rely on `?intro=0` for embeds — use `embed=1` and a tour path.
 
-**Full embed guide:** [EMBED.md](./EMBED.md) — iframe markup, UI differences,
+**Full embed guide:** [EMBED.md](../ops/EMBED.md) — iframe markup, UI differences,
 `postMessage` payloads, parent listener, local QA.
 
 **Code reference:** `src/hooks/useAppSearchParams.ts`,
@@ -199,8 +199,8 @@ Do not rely on `?intro=0` for embeds — use `embed=1` and a tour path.
 | Document                                   | Topic                                 |
 | ------------------------------------------ | ------------------------------------- |
 | [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) | SeekBeak context, demo script         |
-| [ROADMAP.md](./ROADMAP.md)                 | Backlog, phasing (Phase 2+)           |
-| [EMBED.md](./EMBED.md)                     | iframe embed URL, chrome, postMessage |
-| [TECH_STACK.md](./TECH_STACK.md)           | Why this stack; deploy → DEPLOY.md    |
-| [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)   | Platform vs client naming in UI       |
-| [PERFORMANCE.md](./PERFORMANCE.md)         | Performance playbook (tuning guide)   |
+| [ROADMAP.md](../ROADMAP.md)                 | Backlog, phasing (Phase 2+)           |
+| [EMBED.md](../ops/EMBED.md)                     | iframe embed URL, chrome, postMessage |
+| [TECH_STACK.md](../engineering/TECH_STACK.md)           | Why this stack; deploy → DEPLOY.md    |
+| [NAMING.md](./NAMING.md)   | Platform vs client naming in UI       |
+| [PERFORMANCE.md](../engineering/PERFORMANCE.md)         | Performance playbook (tuning guide)   |

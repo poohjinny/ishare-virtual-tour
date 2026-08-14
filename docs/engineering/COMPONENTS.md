@@ -16,7 +16,7 @@ are fine; duplicating whole patterns is not.
 
 ### 1. One visual language
 
-- Design tokens live in [`src/styles/globals.css`](../src/styles/globals.css)
+- Design tokens live in [`src/styles/globals.css`](../../src/styles/globals.css)
   `@theme` (`--color-*`; legacy `--ishare-*` shims during migration).
 - Shared primitives use an `ishare-` class prefix (e.g. `ishare-badge`,
   `ishare-accordion`).
@@ -35,7 +35,7 @@ therefore has **three layers**:
 | **React component**         | Ergonomic JSX where we control the tree       | `Badge.tsx`, `Accordion.tsx`                       |
 | **HTML helpers** (optional) | String builders for marker popups             | `accordionChevronHtml.ts`, `tourGlassPanelHtml.ts` |
 
-Import shared CSS from [`src/main.tsx`](../src/main.tsx) so marker HTML gets the
+Import shared CSS from [`src/main.tsx`](../../src/main.tsx) so marker HTML gets the
 same styles as React.
 
 ### 3. Compose before forking
@@ -213,7 +213,7 @@ When adding panel UI, check whether it belongs **inside** an existing shell with
 
 ## Related docs
 
-- [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) — UI layout, product contracts
-- [ROADMAP.md](./ROADMAP.md) — backlog and phasing
+- [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md) — UI layout, product contracts
+- [ROADMAP.md](../ROADMAP.md) — backlog and phasing
 - [TECH_STACK.md](./TECH_STACK.md) — React, PSV, styling approach
-- [`assets/README.md`](../assets/README.md) — per-client media
+- [`assets/README.md`](../../assets/README.md) — per-client media

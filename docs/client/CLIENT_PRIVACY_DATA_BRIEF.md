@@ -8,7 +8,7 @@
 **Not legal advice.** Align retention, subprocessors, and contact details with
 FMI / iShare before sending externally. Cross-links:
 [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) (intake),
-[EMBED.md](./EMBED.md) (iframe).
+[EMBED.md](../ops/EMBED.md) (iframe).
 
 ---
 
@@ -88,7 +88,7 @@ and your privacy policy.
 
 - Tours are served over **HTTPS**.
 - Embeds need your IT to allow the agreed iframe host (CSP / frame settings).
-- See [EMBED.md](./EMBED.md) for the technical embed checklist.
+- See [EMBED.md](../ops/EMBED.md) for the technical embed checklist.
 
 ---
 

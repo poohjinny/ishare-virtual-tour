@@ -78,7 +78,7 @@ multiple tours (e.g. hospital + inpatient wing campaign).
 | Tour / campaign title    | Yes         | Med/Surg Inpatient                | Facility or project name in Explore             |
 | Tour category            | Yes         | Healthcare                        | From platform list (see below)                  |
 | Product display name     | Optional    | `{Client} Virtual Tour`           | Defaults from organization name                 |
-| Public visibility        | Yes         | `public` / `unlisted` / `private` | See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)        |
+| Public visibility        | Yes         | `public` / `unlisted` / `private` | See [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)        |
 | Enable Tour Guide        | Optional    | yes / no                          | Per-tour Ask Tour Guide FAB (`askGuideEnabled`) |
 | Target go-live date      | Recommended |                                   |                                                 |
 | Primary audience         | Recommended | Major donors, board, public       | Shapes copy tone                                |
@@ -87,7 +87,7 @@ multiple tours (e.g. hospital + inpatient wing campaign).
 Venues, International Aid, Social Services, Tourism.
 
 **Naming hierarchy** (what appears where):
-[PRODUCT_NAMING.md](./PRODUCT_NAMING.md)
+[PRODUCT_NAMING.md](../product/NAMING.md)
 
 ---
 
@@ -156,7 +156,7 @@ one anchored panel in the panorama.
 | -------------------------------------- | -------- | -------------------------------------- | -------------------------------------------------------- |
 | Legal / display name                   | Yes      | Inpatient Bed Rooms Naming Opportunity |                                                          |
 | Campaign price                         | Yes\*    | `25000` or `$25,000`                   | \*Not required for `sold`                                |
-| Status                                 | Yes      | `open`, `reserved`, `soon`, `sold`     | See [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) |
+| Status                                 | Yes      | `open`, `reserved`, `soon`, `sold`     | See [NAMING_OPPORTUNITIES.md](../product/NAMING.md) |
 | Body copy (2–4 short paragraphs)       | Yes      | Stewardship story                      | Supports line breaks                                     |
 | Scene where it appears                 | Yes      | Inpatient Suites                       |                                                          |
 | Physical anchor (what donor is naming) | Yes      | Bed bay area, reception desk           | For architect camera + hotspot                           |
@@ -216,8 +216,8 @@ Optional ambient background music during the tour.
 | Post-launch content owner               | Yes — who updates NO status/prices?  |
 
 **Embed flag:** `?embed=1` for minimal chrome on client sites —
-[EMBED.md](./EMBED.md). Parent iframe `src` is updated per tour at launch
-([ROADMAP Client rollout](./ROADMAP.md#client-rollout-until-cms-exists)).
+[EMBED.md](../ops/EMBED.md). Parent iframe `src` is updated per tour at launch
+([ROADMAP Client rollout](../ROADMAP.md#client-rollout-until-cms-exists)).
 
 ---
 
@@ -275,7 +275,7 @@ Copy for the client:
 | Document                                                 | Purpose                                 |
 | -------------------------------------------------------- | --------------------------------------- |
 | [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md) | 3D team → engineering handoff           |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                     | URLs, catalog visibility, JSON overview |
-| [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md)     | NO statuses and CTAs                    |
-| [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)                 | Display names in the app                |
-| [assets/README.md](../assets/README.md)                  | Where files land in the repo            |
+| [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                     | URLs, catalog visibility, JSON overview |
+| [NAMING_OPPORTUNITIES.md](../product/NAMING.md)     | NO statuses and CTAs                    |
+| [PRODUCT_NAMING.md](../product/NAMING.md)                 | Display names in the app                |
+| [assets/README.md](../../assets/README.md)                  | Where files land in the repo            |

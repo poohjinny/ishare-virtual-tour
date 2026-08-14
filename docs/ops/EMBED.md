@@ -4,8 +4,8 @@
 > differences, parent-page `postMessage`, and local QA.
 
 **Product contract (short):**
-[PRODUCT_SPEC.md](./PRODUCT_SPEC.md#url-query-contract)  
-**Local QA:** [DEV_PANEL.md](./DEV_PANEL.md#viewport--device--embed) — Debug →
+[PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md#url-query-contract)  
+**Local QA:** [DEV_PANEL.md](../engineering/DEV_PANEL.md#viewport--device--embed) — Debug →
 Viewport → Embed mode
 
 ---
@@ -69,7 +69,7 @@ Opens the tour in embed chrome with the naming panel focused (same as non-embed
 | Param                            | Why                                       |
 | -------------------------------- | ----------------------------------------- |
 | `dev=1`                          | Dev panel — local authoring only          |
-| `guideUiTest`, `notFoundTest`, … | QA flags — [DEV_PANEL.md](./DEV_PANEL.md) |
+| `guideUiTest`, `notFoundTest`, … | QA flags — [DEV_PANEL.md](../engineering/DEV_PANEL.md) |
 | `intro=0`                        | Legacy; use `embed=1` + path              |
 
 ---
@@ -105,7 +105,7 @@ Recommendations:
 | Cookie / storage | Tour is static SPA; no login in Phase 1                                                            |
 
 Sales intake:
-[CLIENT_REQUIRED_INFORMATION.md §10](./CLIENT_REQUIRED_INFORMATION.md#10-launch--embed).
+[CLIENT_REQUIRED_INFORMATION.md §10](../client/CLIENT_REQUIRED_INFORMATION.md#10-launch--embed).
 
 ---
 
@@ -233,7 +233,7 @@ iframe harness with `?embed=1`:
 - **Messages** — parent `postMessage` log (`tour:ready` / `tour:scene` /
   `tour:resize`)
 
-See [DEV_PANEL.md](./DEV_PANEL.md#viewport--device--embed).
+See [DEV_PANEL.md](../engineering/DEV_PANEL.md#viewport--device--embed).
 
 ### 3. Manual HTML (optional)
 
@@ -277,7 +277,7 @@ Embed mode **Messages** should show entries when the tour runs in this iframe
 ## Build embed links in code
 
 ```ts
-import { buildAbsoluteEmbedUrl } from '../src/utils/buildShareUrl';
+import { buildAbsoluteEmbedUrl } from '../../src/utils/buildShareUrl';
 
 const url = buildAbsoluteEmbedUrl({
   tourId: 't_l01wnq8eh6',
@@ -295,8 +295,8 @@ Strips `dev` and other internal flags. Used by dev panel **Copy URL**.
 
 | Document                                                           | Topic                                      |
 | ------------------------------------------------------------------ | ------------------------------------------ |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | URL contract, catalog visibility           |
-| [DEV_PANEL.md](./DEV_PANEL.md)                                     | Embed mode — Copy URL/HTML + Messages log  |
-| [TECH_STACK.md](./TECH_STACK.md)                                   | Hosting, static deploy                     |
-| [ROADMAP.md](./ROADMAP.md)                                         | Phase 2+ backlog; Phase 1 embed is shipped |
-| [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client launch / IT intake                  |
+| [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                               | URL contract, catalog visibility           |
+| [DEV_PANEL.md](../engineering/DEV_PANEL.md)                                     | Embed mode — Copy URL/HTML + Messages log  |
+| [TECH_STACK.md](../engineering/TECH_STACK.md)                                   | Hosting, static deploy                     |
+| [ROADMAP.md](../ROADMAP.md)                                         | Phase 2+ backlog; Phase 1 embed is shipped |
+| [CLIENT_REQUIRED_INFORMATION.md](../client/CLIENT_REQUIRED_INFORMATION.md) | Client launch / IT intake                  |

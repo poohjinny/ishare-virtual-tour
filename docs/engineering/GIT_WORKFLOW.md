@@ -249,4 +249,4 @@ When opening a PR, list commits or summarize by task:
 - [ ] Explore → hover location / NO items
 ```
 
-See [README.md](./README.md) for other docs.
+See [README.md](../README.md) for other docs.

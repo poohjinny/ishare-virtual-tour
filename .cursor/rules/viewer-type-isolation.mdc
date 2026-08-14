@@ -62,4 +62,4 @@ padding, and viewer background look unchanged on the type you did not intend to
 change.
 
 Human doc:
-[CODING_GUIDELINES.md — Viewer-type isolation](../docs/CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).
+[CODING_GUIDELINES.md — Viewer-type isolation](../docs/engineering/CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).

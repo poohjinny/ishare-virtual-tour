@@ -13,6 +13,7 @@ import {
 import { resolveTourPublicOrigin } from '../constants/tourOrigin';
 import { buildOgShareCopy } from './ogShareCopy.mjs';
 import { getTourProductFullName } from './tourProductName';
+import { buildGmailComposeUrl } from './gmailCompose';
 
 export interface BuildShareUrlOptions {
   tourId: string;
@@ -107,7 +108,7 @@ function escapeHtmlAttribute(value: string): string {
     .replace(/</g, '&lt;');
 }
 
-/** Ready-to-paste iframe markup for client host pages (see docs/EMBED.md). */
+/** Ready-to-paste iframe markup for client host pages (see docs/ops/EMBED.md). */
 export function buildEmbedIframeHtml(
   options: Omit<BuildShareUrlOptions, 'namingHotspotId'> & { title?: string },
 ): string {
@@ -340,13 +341,10 @@ export function buildShareGmailComposeUrl(
   shareUrl: string,
   message: ShareMessage,
 ): string {
-  const params = new URLSearchParams({
-    view: 'cm',
-    fs: '1',
-    su: buildShareEmailSubject(message),
+  return buildGmailComposeUrl({
+    subject: buildShareEmailSubject(message),
     body: buildShareEmailBody(shareUrl, message),
   });
-  return `https://mail.google.com/mail/?${params.toString()}`;
 }
 
 /** Opens https share intents in a new tab (not for `mailto:` — use native navigation). */

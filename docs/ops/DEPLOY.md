@@ -4,7 +4,7 @@
 > repo), optional Azure Static Web Apps, and ishare.ca iframe wiring.
 
 **Canonical URLs:** [EMBED.md](./EMBED.md) ·
-[PRODUCT_SPEC.md](./PRODUCT_SPEC.md)
+[PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)
 
 ---
 
@@ -23,7 +23,7 @@
 Social apps **do not run JavaScript**. Client-side `useTourOpenGraph` alone is
 not enough for Facebook / Slack / LinkedIn / iMessage cards.
 
-Use the **Cloudflare Worker** [`workers/tour-og/`](../workers/tour-og/): bots
+Use the **Cloudflare Worker** [`workers/tour-og/`](../../workers/tour-og/): bots
 get per-URL `og:*` HTML (scene + `?no=` naming); humans still get the SPA.
 Requires `tour` DNS proxied through Cloudflare — setup in that README.
 
@@ -84,18 +84,18 @@ Do **not** use `build:ghpages` for `tour.ishare.ca` — production uses root
 GitHub Pages cannot run a server. Early live Ask Guide uses a **Cloudflare
 Worker** OpenAI proxy:
 
-- Code: [`workers/ask-guide/`](../workers/ask-guide/)
+- Code: [`workers/ask-guide/`](../../workers/ask-guide/)
 - Routes: `GET/POST …/api/tour/chat/status` and `…/api/tour/chat`
-- Setup: [workers/ask-guide/README.md](../workers/ask-guide/README.md)
+- Setup: [workers/ask-guide/README.md](../../workers/ask-guide/README.md)
 
-Azure Functions in [`api/`](../api/) remain an optional alternative (same
+Azure Functions in [`api/`](../../api/) remain an optional alternative (same
 routes).
 
 ## Share Open Graph Worker
 
 Crawler share-card previews require this Worker (GitHub Pages alone cannot
 inject per-URL `og:*`). Proxy `tour` through Cloudflare and deploy
-[`workers/tour-og/`](../workers/tour-og/) — setup in that README. Build
+[`workers/tour-og/`](../../workers/tour-og/) — setup in that README. Build
 publishes `dist/tours/*.json` for the Worker to read.
 
 ---
@@ -124,8 +124,8 @@ infra team prefers Azure. Build command stays `npm run build`; upload `dist/`.
 **Server-only** (never `VITE_*`): `OPENAI_API_KEY` on the Worker
 (`wrangler secret put`) or Azure Function App; Vite `.env.local` for DEV proxy.
 
-Code: [`src/constants/tourOrigin.ts`](../src/constants/tourOrigin.ts),
-[`src/services/askGuide.ts`](../src/services/askGuide.ts)
+Code: [`src/constants/tourOrigin.ts`](../../src/constants/tourOrigin.ts),
+[`src/services/askGuide.ts`](../../src/services/askGuide.ts)
 
 ---
 
@@ -139,7 +139,7 @@ QA overrides: `?askGuide=1` (force on), `?guideMock=1` (scripted replies).
 | -------------------------------------------------------------------------------- | ----------------------------------- |
 | Chat UI + mock fallback                                                          | Ready                               |
 | DEV live via Vite `/__dev/api/ask-guide` + `OPENAI_API_KEY`                      | Ready                               |
-| Production API — Cloudflare Worker [`workers/ask-guide/`](../workers/ask-guide/) | Live (set `VITE_ASK_GUIDE_API_URL`) |
+| Production API — Cloudflare Worker [`workers/ask-guide/`](../../workers/ask-guide/) | Live (set `VITE_ASK_GUIDE_API_URL`) |
 | Client prod wiring (`VITE_ASK_GUIDE_API_URL`)                                    | Ready                               |
 | Per-tour enable (`askGuideEnabled`)                                              | Ready                               |
 | Global product default (`SHOW_ASK_GUIDE = true`)                                 | Optional — prefer per-tour          |
@@ -200,5 +200,5 @@ Local QA without DNS: Dev → **Debug** → **Viewport** → **Embed mode**.
 | Doc                              | Topic                                |
 | -------------------------------- | ------------------------------------ |
 | [EMBED.md](./EMBED.md)           | Embed contract, `postMessage`, QA    |
-| [TECH_STACK.md](./TECH_STACK.md) | Stack overview                       |
-| [ROADMAP.md](./ROADMAP.md)       | Phase 2+ backlog; Phase 1 is shipped |
+| [TECH_STACK.md](../engineering/TECH_STACK.md) | Stack overview                       |
+| [ROADMAP.md](../ROADMAP.md)       | Phase 2+ backlog; Phase 1 is shipped |

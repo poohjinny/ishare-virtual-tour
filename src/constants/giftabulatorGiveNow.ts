@@ -15,7 +15,7 @@ export const GIFTABULATOR_GIVE_NOW_PRESET = {
  * Bounds applied after preset-ratio scaling — avoids unrealistic values on large NO prices.
  * `maxFromDonation` caps relative to the gift amount; `absoluteMax` is a hard ceiling.
  *
- * @see docs/GIFTABULATOR_GIVE_NOW.md
+ * @see docs/product/GIFTABULATOR.md
  */
 export const GIFTABULATOR_GIVE_NOW_LIMITS = {
   income: {

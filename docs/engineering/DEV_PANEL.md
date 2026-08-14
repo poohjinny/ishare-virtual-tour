@@ -20,7 +20,7 @@
    - Press the backtick key (`` ` ``) when focus is not in an input
 
 `dev` is a **preserved query param** — it stays on the URL as you navigate
-scenes. See [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) for the full URL contract.
+scenes. See [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md) for the full URL contract.
 
 ---
 
@@ -307,7 +307,7 @@ Typical message sequence:
 2. `tour:scene` — on scene or naming-panel change
 3. `tour:resize` — on viewport height change
 
-Full `postMessage` contract: [EMBED.md](./EMBED.md).
+Full `postMessage` contract: [EMBED.md](../ops/EMBED.md).
 
 **Code:** `src/components/dev/DevEmbedPreviewFrame.tsx`,
 `src/hooks/useTourEmbedMessaging.ts`
@@ -346,7 +346,7 @@ page reload. API routes live under `/__dev/api` (Vite plugin
 - **Dev server only** — `npm run build` / production host has no write API.
 - **No auth / audit** — JSON edits are local and immediate; production will use
   Admin + publish
-  ([ROADMAP Sprint B½](./ROADMAP.md#sprint-b½--dev-panel-authoring-dev1)).
+  ([ROADMAP Sprint B½](../ROADMAP.md#sprint-b½--dev-panel-authoring-dev1)).
 - **Click-to-place** — hotspots are positioned by panorama click, not drag (drag
   planned for Admin).
 - **Phone** — panel defaults open and can overlap chrome; see
@@ -358,9 +358,9 @@ page reload. API routes live under `/__dev/api` (Vite plugin
 
 | Document                                                 | Topic                              |
 | -------------------------------------------------------- | ---------------------------------- |
-| [ROADMAP.md](./ROADMAP.md)                               | Dev panel backlog → Admin CMS      |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                     | URL params, embed, schemas         |
-| [EMBED.md](./EMBED.md)                                   | Embed mode — iframe & postMessage  |
+| [ROADMAP.md](../ROADMAP.md)                               | Dev panel backlog → Admin CMS      |
+| [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                     | URL params, embed, schemas         |
+| [EMBED.md](../ops/EMBED.md)                                   | Embed mode — iframe & postMessage  |
 | [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)           | `?dev=1` gating in code            |
-| [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md) | Spatial defaults before dev tuning |
-| [assets/README.md](../assets/README.md)                  | Panorama / logo folder layout      |
+| [ARCHITECT_DELIVERABLES.md](../client/ARCHITECT_DELIVERABLES.md) | Spatial defaults before dev tuning |
+| [assets/README.md](../../assets/README.md)                  | Panorama / logo folder layout      |

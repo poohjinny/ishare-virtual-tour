@@ -1,8 +1,8 @@
 # iShare Virtual Tour — Roadmap
 
 > **What to build next.** Product contracts:
-> [PRODUCT_SPEC.md](./PRODUCT_SPEC.md). Demo narrative:
-> [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
+> [PRODUCT_SPEC.md](./product/PRODUCT_SPEC.md). Demo narrative:
+> [PROJECT_CONTEXT.md](./product/PROJECT_CONTEXT.md).
 
 ---
 
@@ -16,7 +16,7 @@
 | **3** | Scale — 3D parity, analytics | Planned     |
 
 Work **top-down** within the open phase. **Checklists live here only.** When
-embed/mobile feels slow, use [PERFORMANCE.md](./PERFORMANCE.md) (playbook, not a
+embed/mobile feels slow, use [PERFORMANCE.md](./engineering/PERFORMANCE.md) (playbook, not a
 second task list).
 
 ---
@@ -25,7 +25,7 @@ second task list).
 
 Vite + React + PSV, nav/info hotspots, Explore + breadcrumb, zoom+fade,
 InfoPopup / naming panels, mock Guide, multi-tour catalog, embed/dev flags.
-Narrative: [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md).
+Narrative: [PROJECT_CONTEXT.md](./product/PROJECT_CONTEXT.md).
 
 ---
 
@@ -49,13 +49,13 @@ cards use `hotspot-thumbs/` (not runtime crop). See
 ### Sprint B — Orientation & content sync
 
 Delivered: `?dev=1` click-to-place, mobile M0+M1, scene-nav progress bar.
-Remaining polish: [MOBILE.md](./MOBILE.md) P1–P3. Floor-plan minimap cancelled —
+Remaining polish: [MOBILE.md](./engineering/MOBILE.md) P1–P3. Floor-plan minimap cancelled —
 do not restore without a new product decision.
 
 ### Sprint B½ — Dev panel authoring (`?dev=1`)
 
 Local JSON authoring is the precursor to Phase 2 Admin CMS. Usage:
-[DEV_PANEL.md](./DEV_PANEL.md). Admin will iframe this viewer — do not embed PSV
+[DEV_PANEL.md](./engineering/DEV_PANEL.md). Admin will iframe this viewer — do not embed PSV
 in the admin bundle.
 
 **Still open (carry into Admin):**
@@ -158,19 +158,25 @@ preview tokens.
 Start with **JSONB** `draft_json` / `published_json` per tour; normalize scenes
 and hotspots when hotspot drag editor lands (Phase 3).
 
-Core tables: `clients`, `tours`, `assets`, `publish_log`, admin `users` / roles.
+Core tables: `orgs` (client mirror), `org_licenses`, `org_members`, `invites`,
+`staff_users`, `tour_projects`, `tours`; `assets` / `publish_log` optional.
+
+Table names, access model, and the Ops provision contract live in
+[TOUR_DB.md](./product/TOUR_DB.md) — that doc is
+canonical when the two disagree. Notably: clients are `orgs`, and Tour client
+access is membership only (no owner/admin/member roles).
 
 ### 7 — Admin MVP pages
 
-| Route                              | Purpose                                            | Dev panel today (`?dev=1`)                   |
-| ---------------------------------- | -------------------------------------------------- | -------------------------------------------- |
-| `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                           |
-| `/`                                | dashboard — clients, tours, draft/published status | partial — create tour, catalog visibility    |
-| `/clients/[clientId]`              | tour list, visibility                              | partial — visibility on tour update          |
-| `/tours/[tourId]`                  | tour settings — branding, org                      | partial — tour tab, org, fonts               |
-| `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                     |
-| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move                 |
-| `/tours/[tourId]/preview`          | iframe preview with token URL                      | — (viewer `?dev=1` is the preview today)     |
+| Route                              | Purpose                                            | Dev panel today (`?dev=1`)                |
+| ---------------------------------- | -------------------------------------------------- | ----------------------------------------- |
+| `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                        |
+| `/`                                | dashboard — clients, tours, draft/published status | partial — create tour, catalog visibility |
+| `/clients/[clientId]`              | tour list, visibility                              | partial — visibility on tour update       |
+| `/tours/[tourId]`                  | tour settings — branding, org                      | partial — tour tab, org, fonts            |
+| `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                  |
+| `/tours/[tourId]/scenes/[sceneId]` | hotspot editor (MVP: yaw/pitch + popup form)       | partial — hotspot tab + move              |
+| `/tours/[tourId]/preview`          | iframe preview with token URL                      | — (viewer `?dev=1` is the preview today)  |
 
 Follow-ups: `/tours/[tourId]/naming` (NO + CTA — partial via NO hotspot forms).
 
@@ -259,7 +265,7 @@ server-side (`OPENAI_API_KEY`).
 packing to the server as `POST /v1/tour/chat` — same chat UI, different base
 URL. Do not confuse with today’s Worker `POST /api/tour/chat`.
 
-See [DEPLOY.md — Ask Guide](./DEPLOY.md#ask-guide-live-ai-readiness) and
+See [DEPLOY.md — Ask Guide](./ops/DEPLOY.md#ask-guide-live-ai-readiness) and
 [workers/ask-guide/README.md](../workers/ask-guide/README.md).
 
 ### Database & API (product)
@@ -298,17 +304,17 @@ Onboard new clients / tours:
 - `tours/catalog.json` — client + tour entry
 - **Parent embed cutover (per tour)** — on ishare.ca (or client site), set
   iframe `src` to `https://tour.ishare.ca/{tourId}/{sceneId}?embed=1` when that
-  tour goes live. See [EMBED.md](./EMBED.md) /
-  [DEPLOY.md](./DEPLOY.md#ishareca-iframe-integration). Not a Phase 1 gate — do
+  tour goes live. See [EMBED.md](./ops/EMBED.md) /
+  [DEPLOY.md](./ops/DEPLOY.md#ishareca-iframe-integration). Not a Phase 1 gate — do
   it as each tour launches.
 
 ### Accessibility & performance (ongoing)
 
 - Extend keyboard navigation and screen reader labels
 - CDN or asset pipeline for large panoramas —
-  [PERFORMANCE P0 — CDN / cache](./PERFORMANCE.md#p0--panorama-assets-highest-impact)
+  [PERFORMANCE P0 — CDN / cache](./engineering/PERFORMANCE.md#p0--panorama-assets-highest-impact)
 - Error recovery and slow-network messaging
-- Full playbook: [PERFORMANCE.md](./PERFORMANCE.md)
+- Full playbook: [PERFORMANCE.md](./engineering/PERFORMANCE.md)
 
 **Phasing note:** Database integration may move earlier if multiple clients and
 live pricing updates become urgent.
@@ -363,8 +369,8 @@ Production-readiness still needs:
 | Hotspot coordinates off          | `?dev=1` dev panel — click logger + CRUD                                                                           |
 | Overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                             |
 | Tour Guide live gaps             | Worker key / URL health; richer `assembleTourContext`; keep global ON off — enable per tour                        |
-| Large panorama load on mobile    | [PERFORMANCE P0](./PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./PERFORMANCE.md#p1--preload-strategy) |
-| React UI overlap on phone        | [MOBILE.md](./MOBILE.md) — layout pass M1–M2                                                                       |
+| Large panorama load on mobile    | [PERFORMANCE P0](./engineering/PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./engineering/PERFORMANCE.md#p1--preload-strategy) |
+| React UI overlap on phone        | [MOBILE.md](./engineering/MOBILE.md) — layout pass M1–M2                                                                       |
 | JSON edits bypass admin audit    | Dev panel local-only; Admin + publish for production                                                               |
 
 ---
@@ -373,18 +379,18 @@ Production-readiness still needs:
 
 | Document                                                           | Relevance                                           |
 | ------------------------------------------------------------------ | --------------------------------------------------- |
-| [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                               | URL contract, catalog visibility, schemas           |
-| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)                         | SeekBeak context, stakeholder demo script           |
-| [TECH_STACK.md](./TECH_STACK.md)                                   | Why this stack                                      |
-| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)                     | Engineering conventions                             |
-| [DEV_PANEL.md](./DEV_PANEL.md)                                     | Dev panel usage (`?dev=1`)                          |
-| [EMBED.md](./EMBED.md)                                             | Embed mode (`?embed=1`) — iframe & postMessage      |
-| [DEPLOY.md](./DEPLOY.md)                                           | `tour.ishare.ca`                                    |
-| [PERFORMANCE.md](./PERFORMANCE.md)                                 | Performance playbook (how to tune; not a task list) |
-| [MOBILE.md](./MOBILE.md)                                           | React UI layout on phone                            |
+| [PRODUCT_SPEC.md](./product/PRODUCT_SPEC.md)                               | URL contract, catalog visibility, schemas           |
+| [PROJECT_CONTEXT.md](./product/PROJECT_CONTEXT.md)                         | SeekBeak context, stakeholder demo script           |
+| [TECH_STACK.md](./engineering/TECH_STACK.md)                                   | Why this stack                                      |
+| [CODING_GUIDELINES.md](./engineering/CODING_GUIDELINES.md)                     | Engineering conventions                             |
+| [DEV_PANEL.md](./engineering/DEV_PANEL.md)                                     | Dev panel usage (`?dev=1`)                          |
+| [EMBED.md](./ops/EMBED.md)                                             | Embed mode (`?embed=1`) — iframe & postMessage      |
+| [DEPLOY.md](./ops/DEPLOY.md)                                           | `tour.ishare.ca`                                    |
+| [PERFORMANCE.md](./engineering/PERFORMANCE.md)                                 | Performance playbook (how to tune; not a task list) |
+| [MOBILE.md](./engineering/MOBILE.md)                                           | React UI layout on phone                            |
 | [assets/README.md](../assets/README.md)                            | Per-client asset layout                             |
-| [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | Client intake checklist (sales)                     |
-| [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md)           | 3D architect → engineering handoff                  |
+| [CLIENT_REQUIRED_INFORMATION.md](./client/CLIENT_REQUIRED_INFORMATION.md) | Client intake checklist (sales)                     |
+| [ARCHITECT_DELIVERABLES.md](./client/ARCHITECT_DELIVERABLES.md)           | 3D architect → engineering handoff                  |
 
 ---
 

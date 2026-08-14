@@ -7,22 +7,22 @@ linked specs.
 
 ## Document map
 
-| Topic                          | Document                                               | When to read                                             |
-| ------------------------------ | ------------------------------------------------------ | -------------------------------------------------------- |
-| **Git commit / push**          | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                   | Before every push                                        |
-| **Tailwind + custom CSS**      | [STYLING.md](./STYLING.md)                             | Migrating off colocated CSS; **rem-first** chrome sizing |
-| **Shared UI (React + HTML)**   | [COMPONENTS.md](./COMPONENTS.md)                       | Badges, accordions, glass panels                         |
-| **Naming opportunity CTAs**    | [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md)   | NO popups, status, Giftabulator footer                   |
-| **Giftabulator give-now URLs** | [GIFTABULATOR_GIVE_NOW.md](./GIFTABULATOR_GIVE_NOW.md) | `calc` prefill, preset, bounded scaling                  |
-| **Product / copy names**       | [PRODUCT_NAMING.md](./PRODUCT_NAMING.md)               | Tab title, Help, Guide, splash                           |
-| **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                       | Why Vite/PSV/Three; deploy → DEPLOY.md                   |
-| **Performance playbook**       | [PERFORMANCE.md](./PERFORMANCE.md)                     | When embed/mobile feels slow (no task list)              |
-| **Mobile React UI layout**     | [MOBILE.md](./MOBILE.md)                               | Phone chrome, collisions, safe-area                      |
-| **Client assets**              | [`assets/README.md`](../assets/README.md)              | Panoramas, logos, new client                             |
-| **Backlog & phasing**          | [ROADMAP.md](./ROADMAP.md)                             | What to build next                                       |
-| **Product contracts**          | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md)                   | URL, embed, catalog, schemas                             |
-| **Dev panel (`?dev=1`)**       | [DEV_PANEL.md](./DEV_PANEL.md)                         | Local authoring, Debug tab, embed QA                     |
-| **Embed (`?embed=1`)**         | [EMBED.md](./EMBED.md)                                 | iframe delivery, postMessage, host integration           |
+| Topic                          | Document                                                        | When to read                                               |
+| ------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- |
+| **Git commit / push**          | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                            | Before every push                                          |
+| **Tailwind + custom CSS**      | [STYLING.md](./STYLING.md)                                      | Migrating off colocated CSS; **rem-first** chrome sizing   |
+| **Shared UI (React + HTML)**   | [COMPONENTS.md](./COMPONENTS.md)                                | Badges, accordions, glass panels                           |
+| **Naming opportunity CTAs**    | [NAMING.md](../product/NAMING.md)                               | NO popups, status, Giftabulator footer                     |
+| **Giftabulator**               | [GIFTABULATOR.md](../product/GIFTABULATOR.md) | Give Now URLs / `calc`; future modules                     |
+| **Product / copy names**       | [NAMING.md](../product/NAMING.md)                               | Tab title, Help, Guide, splash                             |
+| **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                                | Why Vite/PSV/Three; deploy → [DEPLOY.md](../ops/DEPLOY.md) |
+| **Performance playbook**       | [PERFORMANCE.md](./PERFORMANCE.md)                              | When embed/mobile feels slow (no task list)                |
+| **Mobile React UI layout**     | [MOBILE.md](./MOBILE.md)                                        | Phone chrome, collisions, safe-area                        |
+| **Client assets**              | [`assets/README.md`](../../assets/README.md)                    | Panoramas, logos, new client                               |
+| **Backlog & phasing**          | [ROADMAP.md](../ROADMAP.md)                                     | What to build next                                         |
+| **Product contracts**          | [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                           | URL, embed, catalog, schemas                               |
+| **Dev panel (`?dev=1`)**       | [DEV_PANEL.md](./DEV_PANEL.md)                                  | Local authoring, Debug tab, embed QA                       |
+| **Embed (`?embed=1`)**         | [EMBED.md](../ops/EMBED.md)                                     | iframe delivery, postMessage, host integration             |
 
 ---
 
@@ -164,7 +164,7 @@ ishare-virtual-tour/
   `useImperativeHandle`.
 - Tour shapes: `src/types/tour.ts` — extend types before loaders/UI.
 - **No path aliases** — relative imports within `src/`.
-- Import marker-shared CSS from [`main.tsx`](../src/main.tsx).
+- Import marker-shared CSS from [`main.tsx`](../../src/main.tsx).
 - Hooks: `useTourState`, `useViewerControlsVisible`, `useTourRouteSync`.
 - Viewer API: `TourViewerHandle` ref (`PanoramaViewer` or `ThreeDViewer`).
 - FAB labels: `src/constants/tourNavActions.ts` (`aria-label` + `title`).
@@ -175,7 +175,7 @@ ishare-virtual-tour/
 
 ### Tokens
 
-[`src/styles/globals.css`](../src/styles/globals.css) — `@theme` tokens and
+[`src/styles/globals.css`](../../src/styles/globals.css) — `@theme` tokens and
 legacy `--ishare-*` shims. No hard-coded hex in feature CSS unless adding a
 token.
 
@@ -205,7 +205,7 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 
 ### Hotspots
 
-- HTML: [`buildMarkers.ts`](../src/viewer-shared/buildMarkers.ts)
+- HTML: [`buildMarkers.ts`](../../src/viewer-shared/buildMarkers.ts)
 - `data-hotspot-type="nav" | "info"` — click routing in `PanoramaViewer`
 - `namingOpportunity` on info popup → anchored glass panel
 
@@ -222,13 +222,37 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 
 ### Scene navigation & URL
 
-- Preload → `setCurrentNode()` — [`transition.ts`](../src/viewer/transition.ts)
-- URL sync — `useTourRouteSync` + [`tourPaths.ts`](../src/utils/tourPaths.ts)
+- Preload → `setCurrentNode()` —
+  [`transition.ts`](../../src/viewer/transition.ts)
+- URL sync — `useTourRouteSync` + [`tourPaths.ts`](../../src/utils/tourPaths.ts)
 - Paths: `/`, `/{sceneId}`, `/{tourId}`, `/{tourId}/{sceneId}`
 - Preserved query: `embed`, `dev`, `guideUiTest`, `notFoundTest`,
   `loadErrorTest`, `disableNavPreview`, …
 - Legacy `?tour=` / `?scene=` → path redirect; old QA aliases (`chatTest`,
   `askGuideMock`, `panoramaErrorTest`) rewrite once to the canonical keys
+
+### Scene transitions
+
+Minimal setup — **Virtual Tour plugin defaults only**.
+
+```ts
+virtualTour.setCurrentNode(sceneId, { showLoader: false });
+```
+
+No custom preload, focus, align, or post-swap camera snap. Plugin defaults:
+`effect: fade`, `speed: 20rpm`, `rotation: true`; we only override
+`showLoader: false` for inter-scene moves.
+
+Avoid:
+
+- `rotateTo` / `zoomTo` on `setCurrentNode` — breaks panorama swap
+- Instant `viewer.rotate()` / `viewer.zoom()` after swap — causes flash
+- Custom `effect: 'none'` on node changes — old texture removed first (white
+  gap)
+
+First load: initial node still uses `effect: 'none'` + `landingTransition.ts`.
+Viewer uses `canvasBackground: '#000'` and `alpha: false` so the page background
+does not show through the fade.
 
 ### Fullscreen
 
@@ -246,24 +270,24 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 ## Tour content & new clients
 
 1. `assets/{clientId}/{tourId}/` + `tours/{tourId}.json`
-2. Register in [`loadTour.ts`](../src/data/loadTour.ts)
-3. `clientId` / `tourId` layout — [`assets/README.md`](../assets/README.md)
+2. Register in [`loadTour.ts`](../../src/data/loadTour.ts)
+3. `clientId` / `tourId` layout — [`assets/README.md`](../../assets/README.md)
 4. **Panoramas:** convert every JPG in `panoramas/` to WebP before commit; JSON
    paths use `.webp` —
-   [`assets/README.md`](../assets/README.md#panoramas--jpg--webp-required)
+   [`assets/README.md`](../../assets/README.md#panoramas--jpg--webp-required)
 5. Conventional media paths are inferred at load (`tourAssetResolve.mjs` +
    `normalizeTourAssets`). Tour JSON and `catalog.json` omit conventional
    `/assets/…` URLs; store overrides / `"logo": true` only. Client favicon is
    probed (png then ico), not a single inferred field.
 
-Naming CTAs: [NAMING_OPPORTUNITIES.md](./NAMING_OPPORTUNITIES.md) — do not
-hand-roll footer buttons in JSON unless overriding.
+Naming CTAs: [NAMING.md](../product/NAMING.md) — do not hand-roll footer buttons
+in JSON unless overriding.
 
 ---
 
 ## Copy & branding
 
-[PRODUCT_NAMING.md](./PRODUCT_NAMING.md):
+[NAMING.md](../product/NAMING.md):
 
 | UI                                 | Source                                                                                      |
 | ---------------------------------- | ------------------------------------------------------------------------------------------- |
@@ -304,7 +328,7 @@ the user toggles Controls (`localStorage` key
 
 ## Onboarding
 
-1. [README.md](../README.md) — `npm install` && `npm run dev`
+1. [README.md](../.../README.md) — `npm install` && `npm run dev`
 2. Read this file + [COMPONENTS.md](./COMPONENTS.md) +
    [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
 3. Walk: `?dev=1` → scene transition → open one NO popup

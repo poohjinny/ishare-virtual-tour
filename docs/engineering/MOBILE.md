@@ -5,7 +5,7 @@
 > **Out of scope:** PSV touch/drag feel, gyro, asset/preload — see
 > [PERFORMANCE.md](./PERFORMANCE.md).  
 > **Task checkboxes:**
-> [ROADMAP Sprint B](./ROADMAP.md#sprint-b--orientation--content-sync).
+> [ROADMAP Sprint B](../ROADMAP.md#sprint-b--orientation--content-sync).
 
 ---
 
@@ -130,7 +130,7 @@ Modals: InfoPopup (sheet ≤640px), ClientIntro (landing)
 - [ ] **InfoPopup** — optional swipe-to-dismiss; header safe-area polish
 - [ ] **Hotspot markers** — 48px touch target per
   ```
-  [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) (CSS in `psv-layer.css`)
+  [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md) (CSS in `psv-layer.css`)
   ```
 
 ### P3 — QA & docs
@@ -202,7 +202,7 @@ Run on a **real phone** after changes:
 
 | Doc                                | Relevance                                 |
 | ---------------------------------- | ----------------------------------------- |
-| [ROADMAP.md](./ROADMAP.md)         | Sprint B delivered; remaining polish here |
+| [ROADMAP.md](../ROADMAP.md)         | Sprint B delivered; remaining polish here |
 | [PERFORMANCE.md](./PERFORMANCE.md) | Bytes, preload                            |
 | [STYLING.md](./STYLING.md)         | Variants + CSS layers                     |
 

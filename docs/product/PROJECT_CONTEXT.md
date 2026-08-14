@@ -1,11 +1,11 @@
 # Project context
 
 > **Why** this project exists and how to run the stakeholder demo.  
-> **What to build next:** [ROADMAP.md](./ROADMAP.md).  
+> **What to build next:** [ROADMAP.md](.../ROADMAP.md).  
 > **Product contracts:** [PRODUCT_SPEC.md](./PRODUCT_SPEC.md).
 
 Phase 0 (proof demo) and **Phase 1 (Production v1)** are complete — see
-[ROADMAP.md](./ROADMAP.md). Parent-site iframe `src` swaps happen per tour at
+[ROADMAP.md](.../ROADMAP.md). Parent-site iframe `src` swaps happen per tour at
 launch (Client rollout), not as a Phase 1 blocker. Active backlog lives in
 ROADMAP only — not duplicated here.
 
@@ -95,5 +95,5 @@ House. Embed demo: `/t_l01wnq8eh6/s_dtv27wfrbi?embed=1` — see
 
 | Document                             | Topic                          |
 | ------------------------------------ | ------------------------------ |
-| [ROADMAP.md](./ROADMAP.md)           | Backlog, Phase 2–3             |
+| [ROADMAP.md](.../ROADMAP.md)           | Backlog, Phase 2–3             |
 | [PRODUCT_SPEC.md](./PRODUCT_SPEC.md) | URL, embed, catalog, schemas   |

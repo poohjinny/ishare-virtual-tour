@@ -2,7 +2,7 @@
 
 Why this repo is a Vite SPA with Photo Sphere Viewer + Three.js, not Next.js.
 **Repo layout:** [CODING_GUIDELINES.md](./CODING_GUIDELINES.md). **Deploy:**
-[DEPLOY.md](./DEPLOY.md). **Embed:** [EMBED.md](./EMBED.md).
+[DEPLOY.md](../ops/DEPLOY.md). **Embed:** [EMBED.md](../ops/EMBED.md).
 
 ## Current versions
 
@@ -28,7 +28,7 @@ The tour is a **client-side WebGL viewer** in an iframe. It does not need SSR,
 SEO landing pages (iShare owns those), or API routes in the same app. Vite gives
 fast HMR and a static `dist/` for Pages. Admin/CMS, if it comes, is a **separate
 Next.js app** that previews this viewer in an iframe — see
-[ROADMAP Phase 2](./ROADMAP.md#phase-2--platform-integration).
+[ROADMAP Phase 2](../ROADMAP.md#phase-2--platform-integration).
 
 ### Photo Sphere Viewer (not raw Three.js for panoramas)
 
@@ -113,12 +113,12 @@ Styling: `@theme` tokens in `globals.css`, layer CSS (`hotspot-layer`,
 
 Parsed in `useAppSearchParams()`. Preserved across in-app nav:
 `PRESERVED_SEARCH_KEYS` in `src/utils/tourPaths.ts`. Product contract:
-[PRODUCT_SPEC.md](./PRODUCT_SPEC.md). QA toggles:
+[PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md). QA toggles:
 [DEV_PANEL.md](./DEV_PANEL.md).
 
 | Param                   | Purpose                               |
 | ----------------------- | ------------------------------------- |
-| `?embed=1`              | Embed chrome — [EMBED.md](./EMBED.md) |
+| `?embed=1`              | Embed chrome — [EMBED.md](../ops/EMBED.md) |
 | `?intro=1` / `?intro=0` | Force / skip intro gallery at `/`     |
 | `?dev=1`                | Dev panel                             |
 | `?no=no_*`              | Open naming opportunity               |
@@ -142,7 +142,7 @@ Parsed in `useAppSearchParams()`. Preserved across in-app nav:
 
 Production host is **`https://tour.ishare.ca`** (GitHub Pages + custom domain +
 Cloudflare Workers for OG and Ask Guide). Do not treat Vercel/Netlify as the
-primary path. Full steps: [DEPLOY.md](./DEPLOY.md).
+primary path. Full steps: [DEPLOY.md](../ops/DEPLOY.md).
 
 ```bash
 npm run build   # sync-assets + typecheck + vite → dist/
@@ -153,5 +153,5 @@ npm run build   # sync-assets + typecheck + vite → dist/
 ## What’s next (stack)
 
 Monorepo viewer + Next admin + public API + Postgres —
-[ROADMAP Phase 2](./ROADMAP.md#phase-2--platform-integration). Do not move the
+[ROADMAP Phase 2](../ROADMAP.md#phase-2--platform-integration). Do not move the
 embed viewer into Next for SSR.

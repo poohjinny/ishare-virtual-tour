@@ -5,7 +5,7 @@ import {
 import type { NamingOpportunity, Tour } from '../types/tour';
 import { getTourClientId } from './tourClientId';
 
-/** Query string for `https://{clientId}.giftabulatornow.com/give-now`. @see docs/GIFTABULATOR_GIVE_NOW.md */
+/** Query string for `https://{clientId}.giftabulatornow.com/give-now`. @see docs/product/GIFTABULATOR.md */
 export function buildGiftabulatorGiveNowSearchParams(
   naming?: NamingOpportunity,
 ): URLSearchParams {

@@ -4,7 +4,7 @@ import { resolveTourClient } from './resolveTourClient';
 /**
  * Client tour product naming (in-app).
  *
- * Platform SaaS name (`iShare Virtual Tour`) — see `docs/PRODUCT_NAMING.md`.
+ * Platform SaaS name (`iShare Virtual Tour`) — see `docs/product/NAMING.md`.
  * Shown on platform-level screens only; in-tour UI uses `getTourProductFullName(tour)`.
  */
 

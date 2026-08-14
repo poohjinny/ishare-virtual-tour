@@ -1,11 +1,11 @@
 # Performance playbook
 
 > **How** to optimize when embed, mobile, or multi-scene tours feel slow.  
-> **What to schedule** (sprints, deploy): [ROADMAP.md](./ROADMAP.md) — the only
+> **What to schedule** (sprints, deploy): [ROADMAP.md](../ROADMAP.md) — the only
 > checklist for committed product work.  
 > Stack context: [TECH_STACK.md](./TECH_STACK.md).
 
-Acceptable for Phase 1 today. When a [ROADMAP](./ROADMAP.md) item or risk
+Acceptable for Phase 1 today. When a [ROADMAP](../ROADMAP.md) item or risk
 triggers tuning, work **top-down P0 → P5** below — do not duplicate tasks here.
 
 ---
@@ -50,13 +50,13 @@ shift meaningfully.
 ## Conventions already in place
 
 - **WebP panoramas** — shared encode settings in
-  [`scripts/lib/panoramaEncode.mjs`](../scripts/lib/panoramaEncode.mjs): **max
+  [`scripts/lib/panoramaEncode.mjs`](../../scripts/lib/panoramaEncode.mjs): **max
   width 8192**, **WebP quality 90** (override via `PANORAMA_MAX_WIDTH` /
   `PANORAMA_WEBP_QUALITY`, or `WEBP_*` aliases). Used by:
   - Dev Panel upload (`saveUploadedPanoramaWebp`)
   - `scripts/convert-jpg-to-webp.mjs`
   - `scripts/recompress-panorama-webp.mjs` Tour JSON references `.webp` only —
-    see [`assets/README.md`](../assets/README.md#panoramas--jpg--webp-required).
+    see [`assets/README.md`](../../assets/README.md#panoramas--jpg--webp-required).
     Byte size is **not** forced to a single MB target; outdoor/high-detail
     scenes stay larger at the same settings.
 
@@ -73,8 +73,8 @@ not a task list.
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Compress exports**    | Fix encode settings (≤8192w, WebP q90 via `panoramaEncode.mjs`) — **not** a uniform MB budget. Expect ~0.5–1.5 MB indoors, several MB for outdoor/foliage at the same settings. |
 | **Resolution tiers**    | Optional mobile/downlink-aware URLs (e.g. 4K desktop, 2K mobile) via tour JSON or loader.                                                                                       |
-| **CDN / cache headers** | Long-cache `public/assets/`; align with iShare embed origin — [ROADMAP Phase 2](./ROADMAP.md#accessibility--performance-ongoing).                                               |
-| **Thumbnail previews**  | Explore location cards use baked `scene-thumbs/`; naming pin cards use `hotspot-thumbs/` — [ROADMAP Sprint A](./ROADMAP.md#sprint-a--embed--demo-safety).                       |
+| **CDN / cache headers** | Long-cache `public/assets/`; align with iShare embed origin — [ROADMAP Phase 2](../ROADMAP.md#accessibility--performance-ongoing).                                               |
+| **Thumbnail previews**  | Explore location cards use baked `scene-thumbs/`; naming pin cards use `hotspot-thumbs/` — [ROADMAP Sprint A](../ROADMAP.md#sprint-a--embed--demo-safety).                       |
 
 **Touch:** `assets/{clientId}/{tourId}/panoramas/`, `tours/*.json` (`panorama`,
 `thumbnail`), deploy/CDN config.
@@ -89,7 +89,7 @@ not a task list.
 | **Connection-aware preload** | Optional later if soft-nav prefetch returns — skip on `saveData` / slow effective types.      |
 | **Cancel in-flight loads**   | On navigate away or embed close — avoid wasted MB when a slow destination fetch is abandoned. |
 
-**Touch:** [`src/viewer/transition.ts`](../src/viewer/transition.ts)
+**Touch:** [`src/viewer/transition.ts`](../../src/viewer/transition.ts)
 (`navigateToScene`, `ensureScenePreloaded`).
 
 ---
@@ -102,9 +102,9 @@ not a task list.
 | **Lazy Dev panel**  | **Shipped** — `DevToolsHost` + device/embed preview frames only when `?dev=1`.             |
 | **Manual chunks**   | **Shipped** — `psv` / `react-vendor` / `three` in [`vite.config.ts`](../vite.config.ts).   |
 | **Lazy-load Guide** | Defer `AiAssistant` FAB shell until open or idle — `AiChatPanel` is already lazy.          |
-| **Per-tour JSON**   | Dynamic `import()` per tour when catalog grows — [`loadTour.ts`](../src/data/loadTour.ts). |
+| **Per-tour JSON**   | Dynamic `import()` per tour when catalog grows — [`loadTour.ts`](../../src/data/loadTour.ts). |
 
-**Touch:** [`src/pages/TourPage.tsx`](../src/pages/TourPage.tsx),
+**Touch:** [`src/pages/TourPage.tsx`](../../src/pages/TourPage.tsx),
 [`vite.config.ts`](../vite.config.ts). Do not raise `chunkSizeWarningLimit` just
 to silence `three` / `index` — those sizes are real.
 
@@ -114,7 +114,7 @@ to silence `three` / `index` — those sizes are real.
 
 | Technique              | Guidance                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices.                                                                                                                                                                                                                                                                                                              |
+| **`render` listeners** | Audit PSV `render` work (e.g. [`anchoredPanelPosition.ts`](../../src/viewer/anchoredPanelPosition.ts)); throttle if hot on low-end devices.                                                                                                                                                                                                                                                                                                              |
 | **Hotspot marker GPU** | Hotspot pills are solid white + alpha (no `backdrop-filter`) to skip a per-frame blur pass — see [Findings log](#findings-log). Chrome animations pause when the tab is hidden or the pointer leaves the browser; main PSV and nav preview mini viewer pause render when the window loses focus (`tourPerfPause.ts`, `navPreviewMiniViewer.ts`). model3d nav preview uses still/image hero (`navPreviewHero.ts`) so the 3D chunk does not import PSV. |
 | **Marker DOM churn**   | Minimize HTML marker add/remove on scene change; profile 10+ hotspots.                                                                                                                                                                                                                                                                                                                                                                                |
 | **Panel measure host** | Cache off-screen NO/nav height per `(popup hash, width)` if repeat opens are hot.                                                                                                                                                                                                                                                                                                                                                                     |
@@ -128,7 +128,7 @@ to silence `three` / `index` — those sizes are real.
 | **CSS audit**    | ~115 KB is fine for Phase 1; purge unused rules as stylesheet grows.       |
 | **Font loading** | `font-display: swap`; subset weights actually used (Roboto / Google Sans). |
 
-**Touch:** [`src/styles/`](../src/styles/), [`src/main.tsx`](../src/main.tsx).
+**Touch:** [`src/styles/`](../../src/styles/), [`src/main.tsx`](../../src/main.tsx).
 
 ---
 
@@ -178,7 +178,7 @@ Mar 2026 baseline (~1.0 MB / 287 KB gzip, one file) was stale.
 | Change                                           | Where                                                               |
 | ------------------------------------------------ | ------------------------------------------------------------------- |
 | `manualChunks`: `psv` / `react-vendor` / `three` | [`vite.config.ts`](../vite.config.ts) — keep one `three` (`dedupe`) |
-| Lazy `DevToolsHost` + device/embed frames        | [`TourPage.tsx`](../src/pages/TourPage.tsx) — production first-load |
+| Lazy `DevToolsHost` + device/embed frames        | [`TourPage.tsx`](../../src/pages/TourPage.tsx) — production first-load |
 
 **Result:** Panorama first-load ~**494 KB gzip** across five JS files. `?dev=1`
 adds DevTools (~38 KB gzip). `three` (~161 KB gzip) still loads with PSV — do
@@ -216,9 +216,9 @@ while the camera was still landing.
 
 | Change                                          | Where                                                                                                                |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| No background panorama prefetch                 | [`transition.ts`](../src/viewer/transition.ts) — load destination only in `navigateToScene` / `ensureScenePreloaded` |
-| Do not kick preload from initial `node-changed` | [`PanoramaViewer.tsx`](../src/viewer/PanoramaViewer.tsx)                                                             |
-| Shared encode: ≤8192w, WebP q90                 | [`panoramaEncode.mjs`](../scripts/lib/panoramaEncode.mjs) — Dev upload, JPG→WebP CLI, optional recompress            |
+| No background panorama prefetch                 | [`transition.ts`](../../src/viewer/transition.ts) — load destination only in `navigateToScene` / `ensureScenePreloaded` |
+| Do not kick preload from initial `node-changed` | [`PanoramaViewer.tsx`](../../src/viewer/PanoramaViewer.tsx)                                                             |
+| Shared encode: ≤8192w, WebP q90                 | [`panoramaEncode.mjs`](../../scripts/lib/panoramaEncode.mjs) — Dev upload, JPG→WebP CLI, optional recompress            |
 | Cap outlier `covered-porch` to 8192w            | Ken assets (~13 MB → ~5.5 MB)                                                                                        |
 
 **Lesson:** For large tours, landing smoothness beats “prefetch everything.”
@@ -276,11 +276,11 @@ viewer with a static preview; move markers into the WebGL scene (`imageLayer` /
 
 | Concern                | Location                                                                                                                  |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Scene load on navigate | [`src/viewer/transition.ts`](../src/viewer/transition.ts)                                                                 |
-| Panorama encode        | [`scripts/lib/panoramaEncode.mjs`](../scripts/lib/panoramaEncode.mjs)                                                     |
-| Viewer mount           | [`src/viewer/PanoramaViewer.tsx`](../src/viewer/PanoramaViewer.tsx)                                                       |
-| Hotspot perf pause     | [`src/viewer-shared/tourPerfPause.ts`](../src/viewer-shared/tourPerfPause.ts) (+ PSV bind in `viewer/viewerPerfPause.ts`) |
-| Nav preview mini PSV   | [`src/viewer-shared/navPreviewMiniViewer.ts`](../src/viewer-shared/navPreviewMiniViewer.ts)                               |
-| Tour asset paths       | [`src/data/loadTour.ts`](../src/data/loadTour.ts)                                                                         |
+| Scene load on navigate | [`src/viewer/transition.ts`](../../src/viewer/transition.ts)                                                                 |
+| Panorama encode        | [`scripts/lib/panoramaEncode.mjs`](../../scripts/lib/panoramaEncode.mjs)                                                     |
+| Viewer mount           | [`src/viewer/PanoramaViewer.tsx`](../../src/viewer/PanoramaViewer.tsx)                                                       |
+| Hotspot perf pause     | [`src/viewer-shared/tourPerfPause.ts`](../../src/viewer-shared/tourPerfPause.ts) (+ PSV bind in `viewer/viewerPerfPause.ts`) |
+| Nav preview mini PSV   | [`src/viewer-shared/navPreviewMiniViewer.ts`](../../src/viewer-shared/navPreviewMiniViewer.ts)                               |
+| Tour asset paths       | [`src/data/loadTour.ts`](../../src/data/loadTour.ts)                                                                         |
 | Build config           | [`vite.config.ts`](../vite.config.ts)                                                                                     |
 | Panorama files         | `assets/{clientId}/{tourId}/panoramas/` → `public/assets/` via sync script                                                |
