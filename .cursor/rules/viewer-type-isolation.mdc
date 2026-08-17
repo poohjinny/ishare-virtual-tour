@@ -15,11 +15,11 @@ change the other.
 
 1. **Know the surface.** Before editing hotspot / marker / viewer chrome /
    background styles or markup, identify whether the change is:
-   - **Panorama-only** (`viewerType: 'panorama'` — PSV, `src/viewer/`, `.psv-*`,
+   - **Panorama-only** (`viewerType: 'panorama'` — PSV, `apps/tour-viewer/src/viewer/`, `.psv-*`,
      most `psv-layer.css`)
-   - **Model3d-only** (`viewerType: 'model3d'` — `src/viewer-3d/`,
+   - **Model3d-only** (`viewerType: 'model3d'` — `apps/tour-viewer/src/viewer-3d/`,
      `.viewer-3d-*`, `viewer-3d-layer.css`, `.hotspot-3d-*`)
-   - **Truly shared** (`src/viewer-shared/`, `hotspot-layer.css`, tokens both
+   - **Truly shared** (`apps/tour-viewer/src/viewer-shared/`, `hotspot-layer.css`, tokens both
      already consume intentionally)
 
 2. **Scope CSS.** Prefer selectors under the owning container:
@@ -47,12 +47,12 @@ change the other.
 
 Treat as high-risk coupling:
 
-- `src/styles/psv-layer.css`, `src/styles/hotspot-layer.css`,
-  `src/styles/viewer-3d-layer.css`, `src/styles/components-layer.css` (hotspot /
+- `apps/tour-viewer/src/styles/psv-layer.css`, `apps/tour-viewer/src/styles/hotspot-layer.css`,
+  `apps/tour-viewer/src/styles/viewer-3d-layer.css`, `apps/tour-viewer/src/styles/components-layer.css` (hotspot /
   glass)
-- `src/viewer-shared/buildMarkers.ts`, `src/viewer-shared/**` shared chrome
-- `src/viewer/**` (PSV-only), `src/viewer-3d/**`
-- `src/styles/globals.css` hotspot / float tokens
+- `apps/tour-viewer/src/viewer-shared/buildMarkers.ts`, `apps/tour-viewer/src/viewer-shared/**` shared chrome
+- `apps/tour-viewer/src/viewer/**` (PSV-only), `apps/tour-viewer/src/viewer-3d/**`
+- `apps/tour-viewer/src/styles/globals.css` hotspot / float tokens
 
 ## Verify
 
