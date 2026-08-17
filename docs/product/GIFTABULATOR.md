@@ -29,10 +29,10 @@ shape, `calc` prefill, preset defaults, and bounded scaling from NO price.
 
 | File                                   | Role                                                                   |
 | -------------------------------------- | ---------------------------------------------------------------------- |
-| `src/constants/giftabulatorGiveNow.ts` | Preset, limits, calc resolution, base64 encode                         |
-| `src/utils/giftabulatorGiveNowUrl.ts`  | Full URL + query string                                                |
-| `src/data/namingOpportunityStatus.ts`  | Calls `buildGiftabulatorGiveNowUrl(tour, naming)` for GT secondary CTA |
-| `src/utils/tourClientId.ts`            | `{clientId}` subdomain (`tour.clientId` or `tour.id`)                  |
+| `apps/tour-viewer/src/constants/giftabulatorGiveNow.ts` | Preset, limits, calc resolution, base64 encode                         |
+| `apps/tour-viewer/src/utils/giftabulatorGiveNowUrl.ts`  | Full URL + query string                                                |
+| `apps/tour-viewer/src/data/namingOpportunityStatus.ts`  | Calls `buildGiftabulatorGiveNowUrl(tour, naming)` for GT secondary CTA |
+| `apps/tour-viewer/src/utils/tourClientId.ts`            | `{clientId}` subdomain (`tour.clientId` or `tour.id`)                  |
 
 ### URL shape
 
@@ -101,7 +101,7 @@ Fixed across all Give Now NO links unless noted:
 | `assetValue`   | `75000`  | Scaled + bounded                             |
 | `assetCost`    | `25000`  | Scaled + bounded (also tied to `assetValue`) |
 
-Edit constants in `src/constants/giftabulatorGiveNow.ts`.
+Edit constants in `apps/tour-viewer/src/constants/giftabulatorGiveNow.ts`.
 
 ### Bounded scaling
 

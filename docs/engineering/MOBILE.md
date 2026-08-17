@@ -22,7 +22,7 @@ ROADMAP. For **how to size chrome** (`rem` vs `px`), see
 
 ## Chrome modes (3 tiers)
 
-Source of truth: `src/constants/tourChrome.ts` + `useTourChromeLayout()`. Prefer
+Source of truth: `apps/tour-viewer/src/constants/tourChrome.ts` + `useTourChromeLayout()`. Prefer
 `matchMedia` over `innerWidth` for JS gating (keeps CSS in sync).
 
 | Mode        | Width      | Breadcrumb               | Nav dock (not `embed`)    | Minimap | PSV bottom pill |
@@ -184,16 +184,16 @@ Run on a **real phone** after changes:
 
 | Concern             | Path                                                                     |
 | ------------------- | ------------------------------------------------------------------------ |
-| Chrome breakpoints  | `src/constants/tourChrome.ts`                                            |
-| Layout hook         | `src/hooks/useTourChromeLayout.ts`                                       |
-| Tour shell          | `src/pages/TourPage.tsx`                                                 |
-| Nav + panels        | `src/components/TourNavFloat.tsx`, `tourNavFloatVariants.ts`             |
-| Hotspot pill chrome | `src/styles/hotspot-layer.css`                                           |
-| PSV navbar / host   | `src/styles/psv-layer.css`, `src/viewer/syncPsvNavbarDesktopControls.ts` |
-| Glass panels        | `src/styles/glass-panels-layer.css`                                      |
-| AI panel            | `src/components/ai/aiAssistantVariants.ts`, `AiChatPanel.tsx`            |
-| Dev overlay         | `src/components/dev/DevTools.tsx`, `devViewPanelVariants.ts`             |
-| Minimap             | `src/components/FloorPlanMinimap.tsx`                                    |
+| Chrome breakpoints  | `apps/tour-viewer/src/constants/tourChrome.ts`                                            |
+| Layout hook         | `apps/tour-viewer/src/hooks/useTourChromeLayout.ts`                                       |
+| Tour shell          | `apps/tour-viewer/src/pages/TourPage.tsx`                                                 |
+| Nav + panels        | `apps/tour-viewer/src/components/TourNavFloat.tsx`, `tourNavFloatVariants.ts`             |
+| Hotspot pill chrome | `apps/tour-viewer/src/styles/hotspot-layer.css`                                           |
+| PSV navbar / host   | `apps/tour-viewer/src/styles/psv-layer.css`, `apps/tour-viewer/src/viewer/syncPsvNavbarDesktopControls.ts` |
+| Glass panels        | `apps/tour-viewer/src/styles/glass-panels-layer.css`                                      |
+| AI panel            | `apps/tour-viewer/src/components/ai/aiAssistantVariants.ts`, `AiChatPanel.tsx`            |
+| Dev overlay         | `apps/tour-viewer/src/components/dev/DevTools.tsx`, `devViewPanelVariants.ts`             |
+| Minimap             | `apps/tour-viewer/src/components/FloorPlanMinimap.tsx`                                    |
 | Viewport meta       | `index.html`                                                             |
 
 ---

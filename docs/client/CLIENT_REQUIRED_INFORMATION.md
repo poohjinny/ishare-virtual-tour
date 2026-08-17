@@ -49,7 +49,7 @@ Copy this into an email or shared doc and tick items off with the client.
 
 ## 1. Organization & contacts
 
-Stored in `tours/catalog.json` under the client record. One client can have
+Stored in `apps/tour-viewer/tours/catalog.json` under the client record. One client can have
 multiple tours (e.g. hospital + inpatient wing campaign).
 
 | Field                                 | Required    | Example                                | Notes                                               |
@@ -129,7 +129,7 @@ no separate knowledge file.
 clinical spec sheet.
 
 **Stored as:** scene `description` (and related place-lead fields) in
-`tours/{tourId}.json`.
+`apps/tour-viewer/tours/{tourId}.json`.
 
 ---
 
@@ -264,7 +264,7 @@ Copy for the client:
 | `tourId`, `clientId`, URL paths          | Engineering                                                             |
 | Panorama renders (WebP)                  | 3D architect → [ARCHITECT_DELIVERABLES.md](./ARCHITECT_DELIVERABLES.md) |
 | Hotspot coordinates (yaw / pitch / zoom) | Engineering (with `?dev=1` tuning)                                      |
-| `tours/{tourId}.json`                    | Engineering                                                             |
+| `apps/tour-viewer/tours/{tourId}.json`                    | Engineering                                                             |
 | Scene thumbnails                         | Engineering                                                             |
 | Catalog registration                     | Engineering                                                             |
 
@@ -278,4 +278,4 @@ Copy for the client:
 | [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                     | URLs, catalog visibility, JSON overview |
 | [NAMING_OPPORTUNITIES.md](../product/NAMING.md)     | NO statuses and CTAs                    |
 | [PRODUCT_NAMING.md](../product/NAMING.md)                 | Display names in the app                |
-| [assets/README.md](../../assets/README.md)                  | Where files land in the repo            |
+| [assets/README.md](../../apps/tour-viewer/assets/README.md)                  | Where files land in the repo            |

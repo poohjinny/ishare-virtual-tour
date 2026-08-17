@@ -7,22 +7,24 @@ linked specs.
 
 ## Document map
 
-| Topic                          | Document                                                        | When to read                                               |
-| ------------------------------ | --------------------------------------------------------------- | ---------------------------------------------------------- |
-| **Git commit / push**          | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                            | Before every push                                          |
-| **Tailwind + custom CSS**      | [STYLING.md](./STYLING.md)                                      | Migrating off colocated CSS; **rem-first** chrome sizing   |
-| **Shared UI (React + HTML)**   | [COMPONENTS.md](./COMPONENTS.md)                                | Badges, accordions, glass panels                           |
-| **Naming opportunity CTAs**    | [NAMING.md](../product/NAMING.md)                               | NO popups, status, Giftabulator footer                     |
-| **Giftabulator**               | [GIFTABULATOR.md](../product/GIFTABULATOR.md) | Give Now URLs / `calc`; future modules                     |
-| **Product / copy names**       | [NAMING.md](../product/NAMING.md)                               | Tab title, Help, Guide, splash                             |
-| **Tech stack & deploy**        | [TECH_STACK.md](./TECH_STACK.md)                                | Why Vite/PSV/Three; deploy → [DEPLOY.md](../ops/DEPLOY.md) |
-| **Performance playbook**       | [PERFORMANCE.md](./PERFORMANCE.md)                              | When embed/mobile feels slow (no task list)                |
-| **Mobile React UI layout**     | [MOBILE.md](./MOBILE.md)                                        | Phone chrome, collisions, safe-area                        |
-| **Client assets**              | [`assets/README.md`](../../assets/README.md)                    | Panoramas, logos, new client                               |
-| **Backlog & phasing**          | [ROADMAP.md](../ROADMAP.md)                                     | What to build next                                         |
-| **Product contracts**          | [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                           | URL, embed, catalog, schemas                               |
-| **Dev panel (`?dev=1`)**       | [DEV_PANEL.md](./DEV_PANEL.md)                                  | Local authoring, Debug tab, embed QA                       |
-| **Embed (`?embed=1`)**         | [EMBED.md](../ops/EMBED.md)                                     | iframe delivery, postMessage, host integration             |
+| Topic                        | Document                                                                       | When to read                                               |
+| ---------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| **Git commit / push**        | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                                           | Before every push                                          |
+| **Tailwind + custom CSS**    | [STYLING.md](./STYLING.md)                                                     | Migrating off colocated CSS; **rem-first** chrome sizing   |
+| **Shared UI (React + HTML)** | [COMPONENTS.md](./COMPONENTS.md)                                               | Badges, accordions, glass panels                           |
+| **Naming opportunity CTAs**  | [NAMING.md](../product/NAMING.md)                                              | NO popups, status, Giftabulator footer                     |
+| **Giftabulator**             | [GIFTABULATOR.md](../product/GIFTABULATOR.md)                                  | Give Now URLs / `calc`; future modules                     |
+| **Product / copy names**     | [NAMING.md](../product/NAMING.md)                                              | Tab title, Help, Guide, splash                             |
+| **Tech stack & deploy**      | [TECH_STACK.md](./TECH_STACK.md)                                               | Why Vite/PSV/Three; deploy → [DEPLOY.md](../ops/DEPLOY.md) |
+| **Performance playbook**     | [PERFORMANCE.md](./PERFORMANCE.md)                                             | When embed/mobile feels slow (no task list)                |
+| **Mobile React UI layout**   | [MOBILE.md](./MOBILE.md)                                                       | Phone chrome, collisions, safe-area                        |
+| **Client assets**            | [`apps/tour-viewer/assets/README.md`](../../apps/tour-viewer/assets/README.md) | Panoramas, logos, new client                               |
+| **Backlog & phasing**        | [ROADMAP.md](../ROADMAP.md)                                                    | What to build next                                         |
+| **Product contracts**        | [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                                  | URL, embed, catalog, schemas                               |
+| **Tour Admin UI**            | [ADMIN_UI.md](./ADMIN_UI.md)                                                   | shadcn admin, hybrid iframe, shared kit later              |
+| **Admin Guide**              | [ADMIN_GUIDE.md](./ADMIN_GUIDE.md)                                             | Authoring assistant shell (not viewer Tour Guide)          |
+| **Dev panel (`?dev=1`)**     | [DEV_PANEL.md](./DEV_PANEL.md)                                                 | Local authoring, Debug tab, embed QA                       |
+| **Embed (`?embed=1`)**       | [EMBED.md](../ops/EMBED.md)                                                    | iframe delivery, postMessage, host integration             |
 
 ---
 
@@ -32,9 +34,9 @@ linked specs.
 - **Git** — one task per commit; see [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)
   (including **End-of-session push** and **Agent checklist**). Never mix
   unrelated routing, shared UI, and docs in one commit.
-- **Config over literals** — tour data in `tours/*.json`, labels in
-  `src/constants/*`, tokens in `globals.css` `@theme`, not scattered in
-  components.
+- **Config over literals** — tour data in `apps/tour-viewer/tours/*.json`,
+  labels in `apps/tour-viewer/src/constants/*`, tokens in `globals.css`
+  `@theme`, not scattered in components.
 - **Rem-first chrome** — size React/CSS UI with `rem` (and tokens) so it follows
   root UI scale; use `px` only when necessary. See
   [STYLING.md § Units](./STYLING.md#units--rem-first-responsive-chrome).
@@ -64,21 +66,22 @@ Shared visuals must work in **both** HTML paths — see
 | `'panorama'` (def) | `PanoramaViewer` (PSV)    | `React.lazy` |
 | `'model3d'`        | `ThreeDViewer` (Three.js) | `React.lazy` |
 
-Both implement `TourViewerHandle` (`src/viewer-shared/viewerHandle.ts`) — the
-imperative contract between orchestrator and renderer.
+Both implement `TourViewerHandle`
+(`apps/tour-viewer/src/viewer-shared/viewerHandle.ts`) — the imperative contract
+between orchestrator and renderer.
 
 ### Viewer-type isolation (panorama vs model3d)
 
 Reuse shared contracts and tour chrome when it helps. **Changing one viewer must
 not silently restyle or resize the other.**
 
-| Surface                 | Own here                                                                 |
-| ----------------------- | ------------------------------------------------------------------------ |
-| Panorama                | `src/viewer/`, `.viewer-container` / `.psv-*`, most of `psv-layer.css`   |
-| Shared hotspot pills    | `hotspot-layer.css` (`.hotspot-nav` / `.hotspot-info` / …)               |
-| Model3d                 | `src/viewer-3d/`, `.viewer-3d-*`, `viewer-3d-layer.css`, `.hotspot-3d-*` |
-| Shared JS (both)        | `src/viewer-shared/` — handle, markers HTML, panel layout, scene depth   |
-| Shared only by decision | Design tokens both already consume; React dock panels                    |
+| Surface                 | Own here                                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| Panorama                | `apps/tour-viewer/src/viewer/`, `.viewer-container` / `.psv-*`, most of `psv-layer.css`   |
+| Shared hotspot pills    | `hotspot-layer.css` (`.hotspot-nav` / `.hotspot-info` / …)                                |
+| Model3d                 | `apps/tour-viewer/src/viewer-3d/`, `.viewer-3d-*`, `viewer-3d-layer.css`, `.hotspot-3d-*` |
+| Shared JS (both)        | `apps/tour-viewer/src/viewer-shared/` — handle, markers HTML, panel layout, scene depth   |
+| Shared only by decision | Design tokens both already consume; React dock panels                                     |
 
 **Required practice**
 
@@ -96,12 +99,12 @@ Cursor enforces this via `.cursor/rules/viewer-type-isolation.mdc`
 
 ### Data over hard-coding
 
-| Content                        | Location                                     |
-| ------------------------------ | -------------------------------------------- |
-| Scenes, hotspots, copy         | `tours/*.json`                               |
-| Naming status / default CTAs   | `src/data/namingOpportunityStatus.ts`        |
-| UX labels (Help, FAB tooltips) | `src/constants/*`                            |
-| Platform / FMI contact         | `src/data/platformContact.ts`, `branding.ts` |
+| Content                        | Location                                                      |
+| ------------------------------ | ------------------------------------------------------------- |
+| Scenes, hotspots, copy         | `apps/tour-viewer/tours/*.json`                               |
+| Naming status / default CTAs   | `apps/tour-viewer/src/data/namingOpportunityStatus.ts`        |
+| UX labels (Help, FAB tooltips) | `apps/tour-viewer/src/constants/*`                            |
+| Platform / FMI contact         | `apps/tour-viewer/src/data/platformContact.ts`, `branding.ts` |
 
 ### Build & assets
 
@@ -110,9 +113,10 @@ npm run dev    # sync-assets + vite
 npm run build  # required before push — see GIT_WORKFLOW.md
 ```
 
-`npm run sync-assets` copies `assets/` → `public/assets/` (runs on `dev` and
-`build`). `postbuild` copies `dist/index.html` → `dist/404.html` for GitHub
-Pages SPA routing — see `scripts/`.
+`npm run sync-assets` copies `apps/tour-viewer/assets/` →
+`apps/tour-viewer/public/assets/` (runs on `dev` and `build`). `postbuild`
+copies `apps/tour-viewer/dist/index.html` → `apps/tour-viewer/dist/404.html` for
+GitHub Pages SPA routing — see `apps/tour-viewer/scripts/`.
 
 ---
 
@@ -120,37 +124,25 @@ Pages SPA routing — see `scripts/`.
 
 ```
 ishare-virtual-tour/
-├── assets/              Source media (synced → public/assets/)
-├── scripts/             Node build scripts (not bundled — run via package.json)
-├── tours/               Tour JSON + catalog.json
-├── public/              Static output + synced assets
-├── src/
-│   ├── components/      React UI + feature CSS
-│   │   ├── dev/         Dev panel (`?dev=1`)
-│   │   ├── explore/     Explore dock + directory
-│   │   └── ui/          Shared primitives (Badge, Accordion, …)
-│   ├── constants/       Copy strings, tour UX labels
-│   ├── data/            Tour load, naming status, platform contact
-│   ├── hooks/           Route sync, controls preference, assistant, …
-│   ├── pages/           TourPage (main shell)
-│   ├── styles/          globals.css (@theme), layout, hotspots
-│   ├── types/           tour.ts — canonical tour schema
-│   ├── utils/           Paths, directory, popup layout, preferences
-│   ├── viewer/          PSV-only (markers, camera, transitions)
-│   ├── viewer-shared/   Shared viewer contract + hotspot/panel helpers
-│   └── viewer-3d/       Three.js GLTF walkthrough (lazy-loaded)
+├── apps/
+│   ├── tour-viewer/     Vite SPA, media, tour JSON, and viewer scripts
+│   │   └── src/         React UI, viewer engines, types, and utilities
+│   └── admin/           Next.js Tour Admin
+├── packages/            Shared schema and API client (planned extraction)
+├── api/                 Optional Azure Functions
+├── workers/             Cloudflare Ask Guide and Open Graph workers
 └── docs/
 ```
 
-| Layer            | Responsibility                                                                                                                                                                                                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `types/tour.ts`  | Shapes only — no runtime logic                                                                                                                                                                                                                                                                   |
-| `data/`          | Load, normalize, naming opportunity rules                                                                                                                                                                                                                                                        |
-| `viewer/`        | PSV-only: markers, camera, transitions                                                                                                                                                                                                                                                           |
-| `viewer-shared/` | Shared contract, hotspot HTML, panel layout, scene graph helpers                                                                                                                                                                                                                                 |
-| `viewer-3d/`     | Three.js GLTF viewer (lazy-loaded for `model3d`)                                                                                                                                                                                                                                                 |
-| `components/`    | React trees + colocated feature CSS. Explore → `explore/`; Dev panel → `dev/`                                                                                                                                                                                                                    |
-| `utils/`         | Stateless helpers shared across layers. Cross-runtime SoT is `*.mjs` + `.d.mts` (`ogShareCopy`, `tourAssetResolve`, `namingDonor`, `legacyTourPathAliases`, `opaqueId`, `clientId`, `slugifyHotspotName`, `namingPriceParse`, `catalogVisibilityCore`); `scripts/lib` re-exports — no twin copy. |
+| Layer            | Responsibility                                                                                                                                                                                                                                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `types/tour.ts`  | Shapes only — no runtime logic                                                                                                                                                                                                                                                                                    |
+| `data/`          | Load, normalize, naming opportunity rules                                                                                                                                                                                                                                                                         |
+| `viewer/`        | PSV-only: markers, camera, transitions                                                                                                                                                                                                                                                                            |
+| `viewer-shared/` | Shared contract, hotspot HTML, panel layout, scene graph helpers                                                                                                                                                                                                                                                  |
+| `viewer-3d/`     | Three.js GLTF viewer (lazy-loaded for `model3d`)                                                                                                                                                                                                                                                                  |
+| `components/`    | React trees + colocated feature CSS. Explore → `explore/`; Dev panel → `dev/`                                                                                                                                                                                                                                     |
+| `utils/`         | Stateless helpers shared across layers. Cross-runtime SoT is `*.mjs` + `.d.mts` (`ogShareCopy`, `tourAssetResolve`, `namingDonor`, `legacyTourPathAliases`, `opaqueId`, `clientId`, `slugifyHotspotName`, `namingPriceParse`, `catalogVisibilityCore`); `apps/tour-viewer/scripts/lib` re-exports — no twin copy. |
 
 ---
 
@@ -162,12 +154,15 @@ ishare-virtual-tour/
   `ComponentNameProps` at top of file.
 - Cross-cutting UI state → custom hooks; imperative child API → ref +
   `useImperativeHandle`.
-- Tour shapes: `src/types/tour.ts` — extend types before loaders/UI.
-- **No path aliases** — relative imports within `src/`.
-- Import marker-shared CSS from [`main.tsx`](../../src/main.tsx).
+- Tour shapes: `apps/tour-viewer/src/types/tour.ts` — extend types before
+  loaders/UI.
+- **No path aliases** — relative imports within `apps/tour-viewer/src/`.
+- Import marker-shared CSS from
+  [`main.tsx`](../../apps/tour-viewer/src/main.tsx).
 - Hooks: `useTourState`, `useViewerControlsVisible`, `useTourRouteSync`.
 - Viewer API: `TourViewerHandle` ref (`PanoramaViewer` or `ThreeDViewer`).
-- FAB labels: `src/constants/tourNavActions.ts` (`aria-label` + `title`).
+- FAB labels: `apps/tour-viewer/src/constants/tourNavActions.ts` (`aria-label` +
+  `title`).
 
 ---
 
@@ -175,9 +170,9 @@ ishare-virtual-tour/
 
 ### Tokens
 
-[`src/styles/globals.css`](../../src/styles/globals.css) — `@theme` tokens and
-legacy `--ishare-*` shims. No hard-coded hex in feature CSS unless adding a
-token.
+[`apps/tour-viewer/src/styles/globals.css`](../../apps/tour-viewer/src/styles/globals.css)
+— `@theme` tokens and legacy `--ishare-*` shims. No hard-coded hex in feature
+CSS unless adding a token.
 
 ### Class prefixes
 
@@ -190,7 +185,7 @@ token.
 | `hotspot-nav__*` / `hotspot-info__*` | PSV hotspot pills                                                          |
 | `viewer-container` / `psv-*`         | PSV chrome in `psv-layer.css`                                              |
 
-Generic patterns → `src/components/ui/` with `ishare-` prefix.
+Generic patterns → `apps/tour-viewer/src/components/ui/` with `ishare-` prefix.
 
 ### Explore directory hover (`tourNavFloatVariants.ts`)
 
@@ -205,7 +200,8 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 
 ### Hotspots
 
-- HTML: [`buildMarkers.ts`](../../src/viewer-shared/buildMarkers.ts)
+- HTML:
+  [`buildMarkers.ts`](../../apps/tour-viewer/src/viewer-shared/buildMarkers.ts)
 - `data-hotspot-type="nav" | "info"` — click routing in `PanoramaViewer`
 - `namingOpportunity` on info popup → anchored glass panel
 
@@ -223,8 +219,9 @@ Generic patterns → `src/components/ui/` with `ishare-` prefix.
 ### Scene navigation & URL
 
 - Preload → `setCurrentNode()` —
-  [`transition.ts`](../../src/viewer/transition.ts)
-- URL sync — `useTourRouteSync` + [`tourPaths.ts`](../../src/utils/tourPaths.ts)
+  [`transition.ts`](../../apps/tour-viewer/src/viewer/transition.ts)
+- URL sync — `useTourRouteSync` +
+  [`tourPaths.ts`](../../apps/tour-viewer/src/utils/tourPaths.ts)
 - Paths: `/`, `/{sceneId}`, `/{tourId}`, `/{tourId}/{sceneId}`
 - Preserved query: `embed`, `dev`, `guideUiTest`, `notFoundTest`,
   `loadErrorTest`, `disableNavPreview`, …
@@ -269,12 +266,14 @@ does not show through the fade.
 
 ## Tour content & new clients
 
-1. `assets/{clientId}/{tourId}/` + `tours/{tourId}.json`
-2. Register in [`loadTour.ts`](../../src/data/loadTour.ts)
-3. `clientId` / `tourId` layout — [`assets/README.md`](../../assets/README.md)
+1. `apps/tour-viewer/assets/{clientId}/{tourId}/` +
+   `apps/tour-viewer/tours/{tourId}.json`
+2. Register in [`loadTour.ts`](../../apps/tour-viewer/src/data/loadTour.ts)
+3. `clientId` / `tourId` layout —
+   [`apps/tour-viewer/assets/README.md`](../../apps/tour-viewer/assets/README.md)
 4. **Panoramas:** convert every JPG in `panoramas/` to WebP before commit; JSON
    paths use `.webp` —
-   [`assets/README.md`](../../assets/README.md#panoramas--jpg--webp-required)
+   [`apps/tour-viewer/assets/README.md`](../../apps/tour-viewer/assets/README.md#panoramas--jpg--webp-required)
 5. Conventional media paths are inferred at load (`tourAssetResolve.mjs` +
    `normalizeTourAssets`). Tour JSON and `catalog.json` omit conventional
    `/assets/…` URLs; store overrides / `"logo": true` only. Client favicon is

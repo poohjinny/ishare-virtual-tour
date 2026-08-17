@@ -4,7 +4,7 @@
 > engineering **after** receiving the client intake
 > ([CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md)).  
 > **Goal:** A complete, consistently named package we can drop into
-> `assets/{clientId}/{tourId}/` and wire into `tours/{tourId}.json` without
+> `apps/tour-viewer/assets/{clientId}/{tourId}/` and wire into `apps/tour-viewer/tours/{tourId}.json` without
 > guesswork.
 
 ---
@@ -40,7 +40,7 @@ Confirm you have from sales / client intake:
 | `tourId`   | Opaque `t_*` issued by engineering — not the display title    | `t_l01wnq8eh6`                          |
 | `sceneId`  | Opaque `s_*` issued by engineering — not the scene title      | `s_dtv27wfrbi`                          |
 
-Paths: `assets/{clientId}/{tourId}/…` — [assets/README.md](../../assets/README.md)
+Paths: `apps/tour-viewer/assets/{clientId}/{tourId}/…` — [assets/README.md](../../apps/tour-viewer/assets/README.md)
 
 ---
 
@@ -260,10 +260,10 @@ You do **not** need to deliver:
 | Item                            | Engineering                                    |
 | ------------------------------- | ---------------------------------------------- |
 | Scene thumbnails                | `npm run generate-thumbnails`                  |
-| WebP re-compress (if oversized) | `scripts/convert-jpg-to-webp.mjs` or manual QA |
-| `tours/{tourId}.json`           | Hotspots, transitions, scene copy              |
+| WebP re-compress (if oversized) | `apps/tour-viewer/scripts/convert-jpg-to-webp.mjs` or manual QA |
+| `apps/tour-viewer/tours/{tourId}.json`           | Hotspots, transitions, scene copy              |
 | Hotspot yaw/pitch/zoom          | Dev panel `?dev=1`                             |
-| Catalog entry                   | `tours/catalog.json`                           |
+| Catalog entry                   | `apps/tour-viewer/tours/catalog.json`                           |
 | 3D model optimization           | Mesh merging, LOD if needed (model3d tours)    |
 | `viewerType` in tour JSON       | Set to `'model3d'` for GLTF tours              |
 
@@ -336,6 +336,6 @@ keys depend on it.
 | Document                                                           | Purpose                             |
 | ------------------------------------------------------------------ | ----------------------------------- |
 | [CLIENT_REQUIRED_INFORMATION.md](./CLIENT_REQUIRED_INFORMATION.md) | What sales collects from the client |
-| [assets/README.md](../../assets/README.md)                            | Repo paths, WebP rules, thumbnails  |
+| [assets/README.md](../../apps/tour-viewer/assets/README.md)                            | Repo paths, WebP rules, thumbnails  |
 | [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                               | Scene / hotspot JSON shapes         |
 | [SCENE_TRANSITIONS.md](../engineering/CODING_GUIDELINES.md#scene-transitions)                     | How scene changes feel in-app       |

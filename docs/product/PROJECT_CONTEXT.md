@@ -51,7 +51,7 @@ popups, Guide, embed.
 
 ## Demo tour — Ken Sargent House
 
-Live content: `tours/t_l01wnq8eh6.json`, [catalog](../tours/catalog.json).
+Live content: `apps/tour-viewer/tours/t_l01wnq8eh6.json`, [catalog](../../apps/tour-viewer/tours/catalog.json).
 Scene ids are opaque (`s_*`); titles are what visitors see.
 
 | Scene          | Id             | Role in the original pitch                         |

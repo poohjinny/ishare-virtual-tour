@@ -16,8 +16,8 @@
 | **3** | Scale — 3D parity, analytics | Planned     |
 
 Work **top-down** within the open phase. **Checklists live here only.** When
-embed/mobile feels slow, use [PERFORMANCE.md](./engineering/PERFORMANCE.md) (playbook, not a
-second task list).
+embed/mobile feels slow, use [PERFORMANCE.md](./engineering/PERFORMANCE.md)
+(playbook, not a second task list).
 
 ---
 
@@ -34,8 +34,8 @@ Narrative: [PROJECT_CONTEXT.md](./product/PROJECT_CONTEXT.md).
 Shipped on `tour.ishare.ca`: `?embed=1` + `postMessage`, Tour not found, baked
 `scene-thumbs` / `hotspot-thumbs`, `?dev=1` authoring, mobile chrome M0+M1, Tour
 Guide live Worker, Play Tour, place overview, share/OG (`workers/tour-og`), 3D
-prototype (`tours/t_ctx4e6rkty.json`), XR v1 panorama, catalog visibility,
-GitHub Pages deploy.
+prototype (`apps/tour-viewer/tours/t_ctx4e6rkty.json`), XR v1 panorama, catalog
+visibility, GitHub Pages deploy.
 
 Parent iframe `src` cutover is per-tour during
 [Client rollout](#client-rollout-until-cms-exists) (not a Phase 1 blocker).
@@ -44,19 +44,19 @@ Parent iframe `src` cutover is per-tour during
 
 Delivered: embed chrome trim, unknown-tour view, baked scene thumbs. Naming pin
 cards use `hotspot-thumbs/` (not runtime crop). See
-[assets/README.md](../assets/README.md).
+[assets/README.md](../apps/tour-viewer/assets/README.md).
 
 ### Sprint B — Orientation & content sync
 
 Delivered: `?dev=1` click-to-place, mobile M0+M1, scene-nav progress bar.
-Remaining polish: [MOBILE.md](./engineering/MOBILE.md) P1–P3. Floor-plan minimap cancelled —
-do not restore without a new product decision.
+Remaining polish: [MOBILE.md](./engineering/MOBILE.md) P1–P3. Floor-plan minimap
+cancelled — do not restore without a new product decision.
 
 ### Sprint B½ — Dev panel authoring (`?dev=1`)
 
 Local JSON authoring is the precursor to Phase 2 Admin CMS. Usage:
-[DEV_PANEL.md](./engineering/DEV_PANEL.md). Admin will iframe this viewer — do not embed PSV
-in the admin bundle.
+[DEV_PANEL.md](./engineering/DEV_PANEL.md). Admin will iframe this viewer — do
+not embed PSV in the admin bundle.
 
 **Still open (carry into Admin):**
 
@@ -74,7 +74,7 @@ Delivered: first-visit hint, OG + share panel, Play Tour, place overview, scene
 duplicate, Guide live Worker + per-tour `askGuideEnabled`, `TourViewerHandle` +
 `ThreeDViewer`, catalog visibility, iframe `postMessage`, deploy pipeline.
 
-3D demo: `tours/t_ctx4e6rkty.json` (Sponza). Remaining 3D gaps:
+3D demo: `apps/tour-viewer/tours/t_ctx4e6rkty.json` (Sponza). Remaining 3D gaps:
 [3D model tours](#3d-model-tours-production).
 
 ---
@@ -93,7 +93,7 @@ Turn JSON files into a maintainable product tied to iShare systems.
 
 | Layer                | Choice                         | Why                                         |
 | -------------------- | ------------------------------ | ------------------------------------------- |
-| **360 embed viewer** | Vite SPA (this repo)           | iframe + WebGL; no SSR benefit              |
+| **360 embed viewer** | Vite SPA (`apps/tour-viewer`)  | iframe + WebGL; no SSR benefit              |
 | **Admin / CMS**      | Next.js (separate app)         | auth, forms, preview iframe, API routes     |
 | **Public API**       | Hono/Fastify or Next API       | embed, iShare, future VR clients            |
 | **DB**               | PostgreSQL                     | client → tour → scene → hotspot relations   |
@@ -101,12 +101,16 @@ Turn JSON files into a maintainable product tied to iShare systems.
 | **AI**               | Azure OpenAI (server)          | keys server-side; see Live AI below         |
 | **360 engine**       | PSV + optional Three.js module | PSV = tour UX; Three = custom 3D / VR later |
 
-### 2 — Monorepo layout (target)
+### 2 — Monorepo layout
+
+**Foundation shipped:** `apps/tour-viewer` and `apps/admin` are npm workspaces.
+Shared packages and the production API are extracted as their first real
+consumers arrive.
 
 ```
 ishare-platform/
 ├── apps/
-│   ├── tour-viewer/          ← this repo (Vite)
+│   ├── tour-viewer/          ← Vite viewer
 │   └── admin/                ← Next.js CMS
 ├── packages/
 │   ├── tour-schema/          ← types, Zod, PublishedTourBundle
@@ -127,9 +131,9 @@ Draft (DB)  →  Preview URL (?preview=token)
            →  Viewer fetches published bundle only
 ```
 
-- `tours/*.json` schema remains the **DB design reference**
-- `PublishedTourBundle` (`src/types/publishedTour.ts`) is the viewer/API
-  contract
+- `apps/tour-viewer/tours/*.json` schema remains the **DB design reference**
+- `PublishedTourBundle` (`apps/tour-viewer/src/types/publishedTour.ts`) is the
+  viewer/API contract
 - Giftabulator sync: **status / price / CTA URL** in DB → included on publish
 
 ### 4 — Deploy domains (target)
@@ -162,16 +166,21 @@ Core tables: `orgs` (client mirror), `org_licenses`, `org_members`, `invites`,
 `staff_users`, `tour_projects`, `tours`; `assets` / `publish_log` optional.
 
 Table names, access model, and the Ops provision contract live in
-[TOUR_DB.md](./product/TOUR_DB.md) — that doc is
-canonical when the two disagree. Notably: clients are `orgs`, and Tour client
-access is membership only (no owner/admin/member roles).
+[TOUR_DB.md](./product/TOUR_DB.md) — that doc is canonical when the two
+disagree. Notably: clients are `orgs`, and Tour client access is membership only
+(no owner/admin/member roles).
 
 ### 7 — Admin MVP pages
+
+UI stack, customization policy, and shared-kit plan:
+[ADMIN_UI.md](./engineering/ADMIN_UI.md).
 
 | Route                              | Purpose                                            | Dev panel today (`?dev=1`)                |
 | ---------------------------------- | -------------------------------------------------- | ----------------------------------------- |
 | `/login`                           | Entra ID / Auth.js                                 | — (local dev only)                        |
-| `/`                                | dashboard — clients, tours, draft/published status | partial — create tour, catalog visibility |
+| `/`                                | redirect → `/overview`                             | —                                         |
+| `/overview`                        | visual catalog — clients + tours                   | partial — local read-only                 |
+| `/tours`                           | dashboard — clients, tours, draft/published status | partial — create tour, catalog visibility |
 | `/clients/[clientId]`              | tour list, visibility                              | partial — visibility on tour update       |
 | `/tours/[tourId]`                  | tour settings — branding, org                      | partial — tour tab, org, fonts            |
 | `/tours/[tourId]/scenes`           | scene list, firstScene, panoramas                  | partial — scene tab CRUD                  |
@@ -188,14 +197,14 @@ API), then move to Admin when auth and publish exist — same payload shapes.
 | Use                         | Approach                                                            |
 | --------------------------- | ------------------------------------------------------------------- |
 | 360 panorama tour           | **PSV** (current)                                                   |
-| 3D model walkthrough (GLTF) | **ThreeDViewer** (`src/viewer-3d/`) — **shipped**                   |
+| 3D model walkthrough (GLTF) | **ThreeDViewer** (`apps/tour-viewer/src/viewer-3d/`) — **shipped**  |
 | Custom 3D depth / overlays  | Extend `ThreeDViewer` or `viewer/extensions/`                       |
 | VR / XR (Phase 3)           | WebXR + Three.js: panorama seated sphere first, then `ThreeDViewer` |
 
 Both viewers conform to `TourViewerHandle`
-(`src/viewer-shared/viewerHandle.ts`). `TourPage` switches via `React.lazy`
-based on `tour.viewerType` — panorama tours never load the Three.js viewer
-chunk.
+(`apps/tour-viewer/src/viewer-shared/viewerHandle.ts`). `TourPage` switches via
+`React.lazy` based on `tour.viewerType` — panorama tours never load the Three.js
+viewer chunk.
 
 **Current state:** ThreeDViewer loads GLTF with OrbitControls; markers and
 anchored panels exist. Remaining gaps vs panorama: nav-preview parity, place
@@ -224,8 +233,9 @@ checklist below.
 
 #### Sprint 2A checklist
 
-- [x] `TourRepository` — `src/services/tourRepository.ts`, JSON + API stubs
-- [x] `PublishedTourBundle` — `src/types/publishedTour.ts`
+- [x] `TourRepository` — `apps/tour-viewer/src/services/tourRepository.ts`,
+      JSON + API stubs
+- [x] `PublishedTourBundle` — `apps/tour-viewer/src/types/publishedTour.ts`
 - [x] `normalizeTourAssets` — shared JSON/API path
 - [x] `loadTourAsync` **/** `VITE_TOUR_API_URL` — env-gated API mode
 - [ ] Extract `packages/tour-schema` in monorepo
@@ -241,13 +251,14 @@ Cloudflare Worker. Tour Guide stays **per-tour** (`askGuideEnabled`); global
 
 - Shared core: [`api/shared/askGuideCore.mjs`](../api/shared/askGuideCore.mjs)
 - DEV proxy: Vite `/__dev/api/ask-guide/*`
-  ([`scripts/lib/askGuideDev.mjs`](../scripts/lib/askGuideDev.mjs))
+  ([`apps/tour-viewer/scripts/lib/askGuideDev.mjs`](../apps/tour-viewer/scripts/lib/askGuideDev.mjs))
 - **Production API:** Cloudflare Worker
   [`workers/ask-guide/`](../workers/ask-guide/) — `GET /api/tour/chat/status`,
   `POST /api/tour/chat`
 - Optional: Azure Functions [`api/`](../api/) (same routes)
-- Client: [`src/services/askGuide.ts`](../src/services/askGuide.ts) —
-  `VITE_ASK_GUIDE_API_URL` (Worker `…/api`); mock when live unavailable /
+- Client:
+  [`apps/tour-viewer/src/services/askGuide.ts`](../apps/tour-viewer/src/services/askGuide.ts)
+  — `VITE_ASK_GUIDE_API_URL` (Worker `…/api`); mock when live unavailable /
   `?guideMock=1`
 
 ```typescript
@@ -282,9 +293,9 @@ See [DEPLOY.md — Ask Guide](./ops/DEPLOY.md#ask-guide-live-ai-readiness) and
 | Giftabulator®        | CTA URLs, calc context, giving flows      |
 | Power Donor Platform | Donor / opportunity data where applicable |
 
-JSON schema in `tours/*.json` remains the reference model for DB design. Client
-id convention (`gphospitalfoundation`, etc.) stays stable across URLs and
-assets.
+JSON schema in `apps/tour-viewer/tours/*.json` remains the reference model for
+DB design. Client id convention (`gphospitalfoundation`, etc.) stays stable
+across URLs and assets.
 
 ### Content admin (CMS)
 
@@ -299,14 +310,15 @@ Scene views, hotspot clicks, popup opens, Giftabulator CTA clicks.
 
 Onboard new clients / tours:
 
-- `assets/{clientId}/` — panoramas, brand
-- `tours/{tourId}.json` — tour config (`import.meta.glob` picks it up)
-- `tours/catalog.json` — client + tour entry
+- `apps/tour-viewer/assets/{clientId}/` — panoramas, brand
+- `apps/tour-viewer/tours/{tourId}.json` — tour config (`import.meta.glob` picks
+  it up)
+- `apps/tour-viewer/tours/catalog.json` — client + tour entry
 - **Parent embed cutover (per tour)** — on ishare.ca (or client site), set
   iframe `src` to `https://tour.ishare.ca/{tourId}/{sceneId}?embed=1` when that
   tour goes live. See [EMBED.md](./ops/EMBED.md) /
-  [DEPLOY.md](./ops/DEPLOY.md#ishareca-iframe-integration). Not a Phase 1 gate — do
-  it as each tour launches.
+  [DEPLOY.md](./ops/DEPLOY.md#ishareca-iframe-integration). Not a Phase 1 gate —
+  do it as each tour launches.
 
 ### Accessibility & performance (ongoing)
 
@@ -364,31 +376,31 @@ Production-readiness still needs:
 
 ## Risks (active)
 
-| Risk                             | Mitigation                                                                                                         |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Hotspot coordinates off          | `?dev=1` dev panel — click logger + CRUD                                                                           |
-| Overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                             |
-| Tour Guide live gaps             | Worker key / URL health; richer `assembleTourContext`; keep global ON off — enable per tour                        |
+| Risk                             | Mitigation                                                                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hotspot coordinates off          | `?dev=1` dev panel — click logger + CRUD                                                                                                   |
+| Overview → entrance disorienting | Tune `targetView` in dev panel or JSON                                                                                                     |
+| Tour Guide live gaps             | Worker key / URL health; richer `assembleTourContext`; keep global ON off — enable per tour                                                |
 | Large panorama load on mobile    | [PERFORMANCE P0](./engineering/PERFORMANCE.md#p0--panorama-assets-highest-impact), [P1](./engineering/PERFORMANCE.md#p1--preload-strategy) |
-| React UI overlap on phone        | [MOBILE.md](./engineering/MOBILE.md) — layout pass M1–M2                                                                       |
-| JSON edits bypass admin audit    | Dev panel local-only; Admin + publish for production                                                               |
+| React UI overlap on phone        | [MOBILE.md](./engineering/MOBILE.md) — layout pass M1–M2                                                                                   |
+| JSON edits bypass admin audit    | Dev panel local-only; Admin + publish for production                                                                                       |
 
 ---
 
 ## Related documents
 
-| Document                                                           | Relevance                                           |
-| ------------------------------------------------------------------ | --------------------------------------------------- |
-| [PRODUCT_SPEC.md](./product/PRODUCT_SPEC.md)                               | URL contract, catalog visibility, schemas           |
-| [PROJECT_CONTEXT.md](./product/PROJECT_CONTEXT.md)                         | SeekBeak context, stakeholder demo script           |
-| [TECH_STACK.md](./engineering/TECH_STACK.md)                                   | Why this stack                                      |
-| [CODING_GUIDELINES.md](./engineering/CODING_GUIDELINES.md)                     | Engineering conventions                             |
-| [DEV_PANEL.md](./engineering/DEV_PANEL.md)                                     | Dev panel usage (`?dev=1`)                          |
-| [EMBED.md](./ops/EMBED.md)                                             | Embed mode (`?embed=1`) — iframe & postMessage      |
-| [DEPLOY.md](./ops/DEPLOY.md)                                           | `tour.ishare.ca`                                    |
-| [PERFORMANCE.md](./engineering/PERFORMANCE.md)                                 | Performance playbook (how to tune; not a task list) |
-| [MOBILE.md](./engineering/MOBILE.md)                                           | React UI layout on phone                            |
-| [assets/README.md](../assets/README.md)                            | Per-client asset layout                             |
+| Document                                                                  | Relevance                                           |
+| ------------------------------------------------------------------------- | --------------------------------------------------- |
+| [PRODUCT_SPEC.md](./product/PRODUCT_SPEC.md)                              | URL contract, catalog visibility, schemas           |
+| [PROJECT_CONTEXT.md](./product/PROJECT_CONTEXT.md)                        | SeekBeak context, stakeholder demo script           |
+| [TECH_STACK.md](./engineering/TECH_STACK.md)                              | Why this stack                                      |
+| [CODING_GUIDELINES.md](./engineering/CODING_GUIDELINES.md)                | Engineering conventions                             |
+| [DEV_PANEL.md](./engineering/DEV_PANEL.md)                                | Dev panel usage (`?dev=1`)                          |
+| [EMBED.md](./ops/EMBED.md)                                                | Embed mode (`?embed=1`) — iframe & postMessage      |
+| [DEPLOY.md](./ops/DEPLOY.md)                                              | `tour.ishare.ca`                                    |
+| [PERFORMANCE.md](./engineering/PERFORMANCE.md)                            | Performance playbook (how to tune; not a task list) |
+| [MOBILE.md](./engineering/MOBILE.md)                                      | React UI layout on phone                            |
+| [assets/README.md](../apps/tour-viewer/assets/README.md)                  | Per-client asset layout                             |
 | [CLIENT_REQUIRED_INFORMATION.md](./client/CLIENT_REQUIRED_INFORMATION.md) | Client intake checklist (sales)                     |
 | [ARCHITECT_DELIVERABLES.md](./client/ARCHITECT_DELIVERABLES.md)           | 3D architect → engineering handoff                  |
 

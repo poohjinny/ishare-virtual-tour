@@ -49,13 +49,13 @@ Intro list row
 - **Do not use** on in-tour chrome (Help welcome, splash, tab title after a tour
   is loaded) — those use the client tour name.
 - Recorded in code as `ISHARE_VIRTUAL_TOUR_NAME` and
-  `PLATFORM_PRODUCT_NAME_PREFIX` in `src/constants/branding.ts`.
+  `PLATFORM_PRODUCT_NAME_PREFIX` in `apps/tour-viewer/src/constants/branding.ts`.
 
 ### Client tour — `{client full name} Virtual Tour`
 
 - Derived from `organization.name` + ` Virtual Tour`.
 - Override per tour with optional `productFullName` in tour JSON.
-- Helper: `getTourProductFullName(tour)` in `src/utils/tourProductName.ts`.
+- Helper: `getTourProductFullName(tour)` in `apps/tour-viewer/src/utils/tourProductName.ts`.
 - Used when the **client tour layer** is active: browser tab title, Help welcome
   line, load splash aria-label, `TourProductBranding` with `clientName` + client
   theme color.
@@ -66,7 +66,7 @@ Intro list row
 - Display name: `Tour Guide` (`VIRTUAL_TOUR_GUIDE_NAME`).
 - FAB label: `Ask Tour Guide` (`VIRTUAL_TOUR_GUIDE_FAB_LABEL`).
 - Composer hint / short CTA: `Ask a question` (`VIRTUAL_TOUR_GUIDE_CTA`).
-- Constants live in `src/constants/branding.ts`.
+- Constants live in `apps/tour-viewer/src/constants/branding.ts`.
 
 ### UI component — `TourProductBranding`
 
@@ -78,10 +78,10 @@ Intro list row
 ### Code references
 
 ```text
-src/constants/branding.ts       ISHARE_VIRTUAL_TOUR_NAME, PLATFORM_PRODUCT_*
-src/utils/tourProductName.ts    getTourProductFullName, getTourClientFullName
-src/components/TourProductBranding.tsx
-src/components/ClientIntroPicker.tsx
+apps/tour-viewer/src/constants/branding.ts       ISHARE_VIRTUAL_TOUR_NAME, PLATFORM_PRODUCT_*
+apps/tour-viewer/src/utils/tourProductName.ts    getTourProductFullName, getTourClientFullName
+apps/tour-viewer/src/components/TourProductBranding.tsx
+apps/tour-viewer/src/components/ClientIntroPicker.tsx
 tours/*.json                    organization.name, title (facility), productFullName (optional)
 ```
 
@@ -90,7 +90,7 @@ tours/*.json                    organization.name, title (facility), productFull
 ## Part 2 — Naming opportunity status & CTAs
 
 Status-driven footer CTAs for naming opportunity popups. Config lives in
-`src/data/namingOpportunityStatus.ts`.
+`apps/tour-viewer/src/data/namingOpportunityStatus.ts`.
 
 ### Status values
 
@@ -163,6 +163,6 @@ Replaces only the secondary GT link. See
 
 ### Adding a status
 
-1. Extend `NamingOpportunityStatus` in `src/types/tour.ts`.
+1. Extend `NamingOpportunityStatus` in `apps/tour-viewer/src/types/tour.ts`.
 2. Add entry to status config in `namingOpportunityStatus.ts` with CTA presets.
 3. Add CSS / badge modifier if needed (`badgeClasses.ts`, hotspot styles).

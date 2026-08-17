@@ -1,18 +1,20 @@
 # Technology stack
 
-Why this repo is a Vite SPA with Photo Sphere Viewer + Three.js, not Next.js.
+Why the monorepo keeps the Vite WebGL viewer and Next.js admin as separate
+applications.
 **Repo layout:** [CODING_GUIDELINES.md](./CODING_GUIDELINES.md). **Deploy:**
 [DEPLOY.md](../ops/DEPLOY.md). **Embed:** [EMBED.md](../ops/EMBED.md).
 
 ## Current versions
 
-From `package.json` (keep this table in sync when bumping):
+From the workspace `package.json` files (keep this table in sync when bumping):
 
 | Layer      | Technology                            | Version          |
 | ---------- | ------------------------------------- | ---------------- |
-| Runtime    | React                                 | ^19              |
+| Runtime    | React                                 | viewer ^19; admin 19.2 |
 | Language   | TypeScript                            | ~5.7             |
 | Build      | Vite                                  | ^6               |
+| Admin      | Next.js                               | 16.3             |
 | 360 viewer | Photo Sphere Viewer + markers + VT    | ^5.11            |
 | 3D viewer  | Three.js (GLTF walkthrough)           | ^0.179           |
 | Styling    | Tailwind 4 + `@theme` tokens + CVA    | ^4               |
@@ -26,8 +28,9 @@ From `package.json` (keep this table in sync when bumping):
 
 The tour is a **client-side WebGL viewer** in an iframe. It does not need SSR,
 SEO landing pages (iShare owns those), or API routes in the same app. Vite gives
-fast HMR and a static `dist/` for Pages. Admin/CMS, if it comes, is a **separate
-Next.js app** that previews this viewer in an iframe — see
+fast HMR and a static `apps/tour-viewer/dist/` for Pages. The CMS is the
+**separate Next.js app** in `apps/admin`; it will preview this viewer in an
+iframe — see
 [ROADMAP Phase 2](../ROADMAP.md#phase-2--platform-integration).
 
 ### Photo Sphere Viewer (not raw Three.js for panoramas)
@@ -39,11 +42,11 @@ before product work.
 
 ### Three.js (model3d walkthrough)
 
-`ThreeDViewer` (`src/viewer-3d/`, `React.lazy`) loads GLTF/GLB when
+`ThreeDViewer` (`apps/tour-viewer/src/viewer-3d/`, `React.lazy`) loads GLTF/GLB when
 `tour.viewerType === 'model3d'`. Three.js is already a PSV transitive
 dependency; it is a direct dep so both viewers share one copy (`vite.config`
 `dedupe: ['three']`). Both implement `TourViewerHandle`
-(`src/viewer-shared/viewerHandle.ts`). **Do not silently restyle one viewer
+(`apps/tour-viewer/src/viewer-shared/viewerHandle.ts`). **Do not silently restyle one viewer
 while fixing the other** —
 [viewer-type isolation](./CODING_GUIDELINES.md#viewer-type-isolation-panorama-vs-model3d).
 
@@ -55,8 +58,8 @@ while fixing the other** —
   `askGuideEnabled`; global `SHOW_ASK_GUIDE` stays off; QA `?askGuide=1`.
 - **Share / Facebook:** humans see SPA meta (WebP scene-thumbs). Crawlers hit
   `workers/tour-og` for HTML + JPEG (`/og/jpg/…`). Copy is shared via
-  `src/utils/ogShareCopy.mjs`. Donor normalize/credit:
-  `src/utils/namingDonor.mjs` (scripts re-export).
+  `apps/tour-viewer/src/utils/ogShareCopy.mjs`. Donor normalize/credit:
+  `apps/tour-viewer/src/utils/namingDonor.mjs` (scripts re-export).
 
 ---
 
@@ -112,7 +115,7 @@ Styling: `@theme` tokens in `globals.css`, layer CSS (`hotspot-layer`,
 ## URL query flags
 
 Parsed in `useAppSearchParams()`. Preserved across in-app nav:
-`PRESERVED_SEARCH_KEYS` in `src/utils/tourPaths.ts`. Product contract:
+`PRESERVED_SEARCH_KEYS` in `apps/tour-viewer/src/utils/tourPaths.ts`. Product contract:
 [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md). QA toggles:
 [DEV_PANEL.md](./DEV_PANEL.md).
 

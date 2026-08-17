@@ -10,14 +10,14 @@ Admin implementation.
 
 Related:
 
-- [FMI-SUITE-OPS-ACCOUNTS-ACCESS.md](../../fmi-suite-dashboard/docs/FMI-SUITE-OPS-ACCOUNTS-ACCESS.md)
+- [FMI-SUITE-OPS-ACCOUNTS-ACCESS.md](../../../fmi-suite-dashboard/docs/FMI-SUITE-OPS-ACCOUNTS-ACCESS.md)
   — thin Ops: client + licenses + empty tenant; Tour adds client invite
   (membership, no roles yet)
 - [ROADMAP.md](../ROADMAP.md) Phase 2 — JSONB `draft_json` / `published_json`
   first; normalize scenes/hotspots later
-- Viewer contract: `src/types/publishedTour.ts` (`PublishedTourBundle`),
-  `src/types/tour.ts` (`Tour`)
-- API stub: `src/services/apiTourRepository.ts` (`GET /v1/tours/:id`)
+- Viewer contract: `apps/tour-viewer/src/types/publishedTour.ts` (`PublishedTourBundle`),
+  `apps/tour-viewer/src/types/tour.ts` (`Tour`)
+- API stub: `apps/tour-viewer/src/services/apiTourRepository.ts` (`GET /v1/tours/:id`)
 
 ---
 
@@ -255,7 +255,7 @@ Public serve also requires `org_licenses.enabled = true`.
 | `published_at`      | timestamptz null |                                           |
 | `updated_at`        | timestamptz      |                                           |
 
-`draft_json` / `published_json` match `Tour` in `src/types/tour.ts` after
+`draft_json` / `published_json` match `Tour` in `apps/tour-viewer/src/types/tour.ts` after
 normalize.
 
 ### `publish_log` (optional in v0)
@@ -356,12 +356,12 @@ null → 404 / not listed).
 
 | Today (repo)                       | Tour DB                                                    |
 | ---------------------------------- | ---------------------------------------------------------- |
-| `tours/catalog.json` → `clients[]` | `orgs` (+ branding mirror) + `org_licenses`                |
+| `apps/tour-viewer/tours/catalog.json` → `clients[]` | `orgs` (+ branding mirror) + `org_licenses`                |
 | `clients[].tours[]`                | `tour_projects` (+ catalog fields)                         |
-| `tours/{tourId}.json`              | `tours.draft_json` (authoring)                             |
+| `apps/tour-viewer/tours/{tourId}.json`              | `tours.draft_json` (authoring)                             |
 | Built/deployed public tour JSON    | `tours.published_json`                                     |
 | `PublishedTourBundle`              | API: `published_json` + meta from `tour_projects` + `orgs` |
-| `assets/{clientId}/…`              | Paths in tour JSON; optional `assets` index later          |
+| `apps/tour-viewer/assets/{clientId}/…`              | Paths in tour JSON; optional `assets` index later          |
 
 **Viewer rule:** `GET /v1/tours/:id` returns `PublishedTourBundle` from
 `published_json` only when:
@@ -552,7 +552,7 @@ Checklist only:
 1. Postgres DDL matching §3: `orgs`, `org_licenses`, `org_tour_settings`,
    `org_members`, `staff_users`, `invites`, `tour_projects`, `tours` (`assets` /
    `publish_log` optional).
-2. Seed one real tour: `catalog.json` + `tours/t_l01wnq8eh6.json` → `orgs` +
+2. Seed one real tour: `catalog.json` + `apps/tour-viewer/tours/t_l01wnq8eh6.json` → `orgs` +
    license + `tour_projects` + draft/published JSONB.
 3. `GET /v1/tours/:id` → `PublishedTourBundle` (+ license checks); wire
    `ApiTourRepository`.

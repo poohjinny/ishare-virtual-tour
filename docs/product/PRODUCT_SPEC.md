@@ -50,14 +50,18 @@
 ### Navigation
 
 - **TourNavFloat** — Explore, Share, Help (embed hides Share/Help).
-- **Breadcrumb + history** — back / forward across visited scenes.
+- **Breadcrumb + history** — back / forward across visited scenes. A crumb is a
+  split control: the place name goes there (the current crumb is plain text) and
+  the chevron opens the nearby-places menu.
 - **Play Tour** — optional guided walkthrough when `tour.playTour` is set.
 - **`targetView`** on nav transitions (yaw / pitch / zoom).
 - Navigation disabled during transitions.
 
 ### Transitions
 
-See [CODING_GUIDELINES — Scene transitions](../engineering/CODING_GUIDELINES.md#scene-transitions) for tuning. Sequence:
+See
+[CODING_GUIDELINES — Scene transitions](../engineering/CODING_GUIDELINES.md#scene-transitions)
+for tuning. Sequence:
 
 1. Pan toward hotspot (optional)
 2. Zoom in (~300ms)
@@ -69,8 +73,7 @@ See [CODING_GUIDELINES — Scene transitions](../engineering/CODING_GUIDELINES.m
 
 - Nav: animated CSS markers, 48px touch target; optional nav-preview card.
 - Info: React `InfoPopup` modal and/or anchored glass (ESC / backdrop / close).
-- Naming opportunities: anchored glass panels — see
-  [NAMING.md](./NAMING.md).
+- Naming opportunities: anchored glass panels — see [NAMING.md](./NAMING.md).
 - Place overview: info hotspot with `role: 'placeOverview'`.
 
 ### Tour Guide (Ask Guide)
@@ -88,10 +91,11 @@ See [CODING_GUIDELINES — Scene transitions](../engineering/CODING_GUIDELINES.m
 
 ## Data schemas
 
-Source of truth: `tours/*.json`, `tours/catalog.json`.  
-Engineering notes: [CODING_GUIDELINES.md](../engineering/CODING_GUIDELINES.md).
+Source of truth: `apps/tour-viewer/tours/*.json`,
+`apps/tour-viewer/tours/catalog.json`. Engineering notes:
+[CODING_GUIDELINES.md](../engineering/CODING_GUIDELINES.md).
 
-### Tour (`tours/{tourId}.json`)
+### Tour (`apps/tour-viewer/tours/{tourId}.json`)
 
 - `viewerType` — `'panorama'` (default) or `'model3d'`.
 - `firstScene` — starting scene id.
@@ -105,7 +109,7 @@ Engineering notes: [CODING_GUIDELINES.md](../engineering/CODING_GUIDELINES.md).
 - Hotspot types: `nav` | `info` (naming via `namingId`; place overview via
   `role: 'placeOverview'`). Nav may include preview / `instant` / `targetView`.
 
-### Catalog (`tours/catalog.json`)
+### Catalog (`apps/tour-viewer/tours/catalog.json`)
 
 - `categories[]` — display order on client intro.
 - `clients[]` — each with `id`, `name`, `tours[]`, contact, optional `branding`
@@ -176,7 +180,7 @@ excluded from `isKnownTourId` until dev gating exists.
 **Path vs query:** Tour and scene identity live in the path
 (`/{tourId}/{sceneId}`). Product flags (`embed`, `no`, Guide flags) stay in the
 query. Preserved across in-app navigation via `PRESERVED_SEARCH_KEYS` in
-`src/utils/tourPaths.ts`.
+`apps/tour-viewer/src/utils/tourPaths.ts`.
 
 **Canonical embed link:**
 
@@ -186,21 +190,22 @@ https://tour.ishare.ca/{tourId}/{firstScene}?embed=1
 
 Do not rely on `?intro=0` for embeds — use `embed=1` and a tour path.
 
-**Full embed guide:** [EMBED.md](../ops/EMBED.md) — iframe markup, UI differences,
-`postMessage` payloads, parent listener, local QA.
+**Full embed guide:** [EMBED.md](../ops/EMBED.md) — iframe markup, UI
+differences, `postMessage` payloads, parent listener, local QA.
 
-**Code reference:** `src/hooks/useAppSearchParams.ts`,
-`src/constants/tourEmbed.ts`, `src/hooks/useTourEmbedMessaging.ts`.
+**Code reference:** `apps/tour-viewer/src/hooks/useAppSearchParams.ts`,
+`apps/tour-viewer/src/constants/tourEmbed.ts`,
+`apps/tour-viewer/src/hooks/useTourEmbedMessaging.ts`.
 
 ---
 
 ## Related documents
 
-| Document                                   | Topic                                 |
-| ------------------------------------------ | ------------------------------------- |
-| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md) | SeekBeak context, demo script         |
-| [ROADMAP.md](../ROADMAP.md)                 | Backlog, phasing (Phase 2+)           |
+| Document                                        | Topic                                 |
+| ----------------------------------------------- | ------------------------------------- |
+| [PROJECT_CONTEXT.md](./PROJECT_CONTEXT.md)      | SeekBeak context, demo script         |
+| [ROADMAP.md](../ROADMAP.md)                     | Backlog, phasing (Phase 2+)           |
 | [EMBED.md](../ops/EMBED.md)                     | iframe embed URL, chrome, postMessage |
-| [TECH_STACK.md](../engineering/TECH_STACK.md)           | Why this stack; deploy → DEPLOY.md    |
-| [NAMING.md](./NAMING.md)   | Platform vs client naming in UI       |
-| [PERFORMANCE.md](../engineering/PERFORMANCE.md)         | Performance playbook (tuning guide)   |
+| [TECH_STACK.md](../engineering/TECH_STACK.md)   | Why this stack; deploy → DEPLOY.md    |
+| [NAMING.md](./NAMING.md)                        | Platform vs client naming in UI       |
+| [PERFORMANCE.md](../engineering/PERFORMANCE.md) | Performance playbook (tuning guide)   |

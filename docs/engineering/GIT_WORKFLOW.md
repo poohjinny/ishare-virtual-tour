@@ -48,7 +48,7 @@ git diff
 Stage **only files for the current task**:
 
 ```bash
-git add src/components/TourGlassPanel.css src/viewer/anchoredPanelPosition.ts
+git add apps/tour-viewer/src/components/TourGlassPanel.css apps/tour-viewer/src/viewer/anchoredPanelPosition.ts
 ```
 
 Avoid `git add .` until you are sure everything in the tree belongs to one task.

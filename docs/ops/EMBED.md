@@ -53,7 +53,7 @@ https://tour.ishare.ca/t_l01wnq8eh6/s_dtv27wfrbi?embed=1
 
 `embed` is preserved when the visitor navigates inside the tour (scene changes,
 Explore picks, naming deep links). See `PRESERVED_SEARCH_KEYS` in
-`src/utils/tourPaths.ts`.
+`apps/tour-viewer/src/utils/tourPaths.ts`.
 
 ### Naming-opportunity deep link in embed
 
@@ -153,7 +153,7 @@ with target `'*'`; origin checks belong on the parent.
 
 | `type`        | When fired                                                | Fields                                                           |
 | ------------- | --------------------------------------------------------- | ---------------------------------------------------------------- |
-| `tour:ready`  | Once — first panorama reveal (splash done, viewer usable) | `tourId`, `sceneId`                                              |
+| `tour:ready`  | Once — first panorama reveal (splash overlay fading). Posted from any iframe, not only `embed=1`. | `tourId`, `sceneId`                                              |
 | `tour:scene`  | Every scene change or naming panel open/close after ready | `tourId`, `sceneId`, `namingHotspotId` (`null` if none)          |
 | `tour:resize` | Initial load + viewport height changes (`ResizeObserver`) | `tourId`, `height` (px, `document.documentElement.clientHeight`) |
 
@@ -187,9 +187,10 @@ with target `'*'`; origin checks belong on the parent.
 }
 ```
 
-`postMessage` is **not sent** when `embed=1` is missing, even inside an iframe.
+`tour:ready` is also posted when the tour is iframed without `embed=1` (admin
+authoring preview). `tour:scene` and `tour:resize` still require `embed=1`.
 
-**Code:** `src/constants/tourEmbed.ts`, `src/hooks/useTourEmbedMessaging.ts`
+**Code:** `apps/tour-viewer/src/constants/tourEmbed.ts`, `apps/tour-viewer/src/hooks/useTourEmbedMessaging.ts`
 
 ### Optional: auto-resize iframe
 
@@ -277,7 +278,7 @@ Embed mode **Messages** should show entries when the tour runs in this iframe
 ## Build embed links in code
 
 ```ts
-import { buildAbsoluteEmbedUrl } from '../../src/utils/buildShareUrl';
+import { buildAbsoluteEmbedUrl } from '../../apps/tour-viewer/src/utils/buildShareUrl';
 
 const url = buildAbsoluteEmbedUrl({
   tourId: 't_l01wnq8eh6',

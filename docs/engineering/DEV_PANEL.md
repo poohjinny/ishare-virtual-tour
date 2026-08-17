@@ -1,8 +1,9 @@
 # Dev panel — authoring & QA (`?dev=1`)
 
-> Local tour authoring and QA UI in the Vite viewer. Writes `tours/*.json`,
-> catalog entries, and assets via the dev API (`/__dev/api`). **Not available in
-> production builds** — precursor to Phase 2 Admin CMS.
+> Local tour authoring and QA UI in the Vite viewer. Writes
+> `apps/tour-viewer/tours/*.json`, catalog entries, and assets via the dev API
+> (`/__dev/api`). **Not available in production builds** — precursor to Phase 2
+> Admin CMS.
 
 ---
 
@@ -20,7 +21,8 @@
    - Press the backtick key (`` ` ``) when focus is not in an input
 
 `dev` is a **preserved query param** — it stays on the URL as you navigate
-scenes. See [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md) for the full URL contract.
+scenes. See [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md) for the full URL
+contract.
 
 ---
 
@@ -28,11 +30,11 @@ scenes. See [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md) for the full URL contr
 
 Authoring touches two catalog layers plus per-tour JSON:
 
-| Layer          | Source                                     | What it holds                                                                                                              |
-| -------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| **Client**     | `tours/catalog.json` → `clients[]`         | Display name, website, contact, **shared branding** (logo, favicon, primary color, fonts)                                  |
-| **Tour entry** | `tours/catalog.json` → `clients[].tours[]` | Tour id, display name, category, `visibility`, optional `summary`                                                          |
-| **Tour body**  | `tours/{tourId}.json`                      | Scenes, hotspots, naming catalog, transitions, immersive bg, optional **tour-only** `branding`, optional `askGuideEnabled` |
+| Layer          | Source                                                      | What it holds                                                                                                              |
+| -------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **Client**     | `apps/tour-viewer/tours/catalog.json` → `clients[]`         | Display name, website, contact, **shared branding** (logo, favicon, primary color, fonts)                                  |
+| **Tour entry** | `apps/tour-viewer/tours/catalog.json` → `clients[].tours[]` | Tour id, display name, category, `visibility`, optional `summary`                                                          |
+| **Tour body**  | `apps/tour-viewer/tours/{tourId}.json`                      | Scenes, hotspots, naming catalog, transitions, immersive bg, optional **tour-only** `branding`, optional `askGuideEnabled` |
 
 **Branding resolution** (runtime): `catalog.clients[].branding` is the default;
 `tour.branding` overrides when present. Conventional logo/favicon paths are
@@ -43,16 +45,18 @@ uses `brandingMode: 'client' | 'custom'` to choose where uploads are saved.
 
 **Asset paths**
 
-| Branding mode   | Logo / favicon path                                                                                          |
-| --------------- | ------------------------------------------------------------------------------------------------------------ |
-| Client (shared) | Logo: `assets/{clientId}/brand/logo.png`. Favicon: `assets/{clientId}/favicon.png\|ico` (not under `brand/`) |
-| Tour (custom)   | Logo: `assets/{clientId}/{tourId}/brand/logo.png`. Favicon: `assets/{clientId}/{tourId}/favicon.png\|ico`    |
+| Branding mode   | Logo / favicon path                                                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Client (shared) | Logo: `apps/tour-viewer/assets/{clientId}/brand/logo.png`. Favicon: `apps/tour-viewer/assets/{clientId}/favicon.png\|ico` (not under `brand/`) |
+| Tour (custom)   | Logo: `apps/tour-viewer/assets/{clientId}/{tourId}/brand/logo.png`. Favicon: `apps/tour-viewer/assets/{clientId}/{tourId}/favicon.png\|ico`    |
 
-Panoramas and scene thumbs stay under `assets/{clientId}/{tourId}/panoramas/`
-and `…/scene-thumbs/`. Pin-card bakes go under `…/hotspot-thumbs/` (`h_*`).
+Panoramas and scene thumbs stay under
+`apps/tour-viewer/assets/{clientId}/{tourId}/panoramas/` and `…/scene-thumbs/`.
+Pin-card bakes go under `…/hotspot-thumbs/` (`h_*`).
 
-**Code:** `src/utils/resolveTourBranding.ts`, `scripts/lib/tourBrandDev.mjs`,
-`scripts/lib/tourCatalogDev.mjs`
+**Code:** `apps/tour-viewer/src/utils/resolveTourBranding.ts`,
+`apps/tour-viewer/scripts/lib/tourBrandDev.mjs`,
+`apps/tour-viewer/scripts/lib/tourCatalogDev.mjs`
 
 ---
 
@@ -79,10 +83,11 @@ and `…/scene-thumbs/`. Pin-card bakes go under `…/hotspot-thumbs/` (`h_*`).
 
 Sticky **Intro** opens the tour picker at `/?intro=1` (not a Debug flag card).
 
-**Code:** `src/constants/devPanel.ts`, `src/components/dev/DevTools.tsx`,
-`src/components/dev/DevViewPanel.tsx` (shell; tab bodies: `DevSceneTabPanel`,
-`DevScenesListPanel`, `DevNamingCatalogPanel`, `DevToursCatalogPanel`,
-`DevClientPanel`)
+**Code:** `apps/tour-viewer/src/constants/devPanel.ts`,
+`apps/tour-viewer/src/components/dev/DevTools.tsx`,
+`apps/tour-viewer/src/components/dev/DevViewPanel.tsx` (shell; tab bodies:
+`DevSceneTabPanel`, `DevScenesListPanel`, `DevNamingCatalogPanel`,
+`DevToursCatalogPanel`, `DevClientPanel`)
 
 ---
 
@@ -247,8 +252,8 @@ client.
 
 ## Debug tab
 
-Two accordion cards (source: `src/constants/devUrlFlags.ts`). Toggles apply
-immediately via URL `replace` (no full page reload).
+Two accordion cards (source: `apps/tour-viewer/src/constants/devUrlFlags.ts`).
+Toggles apply immediately via URL `replace` (no full page reload).
 
 ### URL flags
 
@@ -309,8 +314,32 @@ Typical message sequence:
 
 Full `postMessage` contract: [EMBED.md](../ops/EMBED.md).
 
-**Code:** `src/components/dev/DevEmbedPreviewFrame.tsx`,
-`src/hooks/useTourEmbedMessaging.ts`
+**Code:** `apps/tour-viewer/src/components/dev/DevEmbedPreviewFrame.tsx`,
+`apps/tour-viewer/src/hooks/useTourEmbedMessaging.ts`
+
+### Inbound — Admin editor scene hop (`?dev=1`)
+
+The one message the viewer **accepts** from its host. The Admin visual editor
+keeps a single iframe mounted while staff move between scenes, so it asks the
+running viewer to navigate instead of rebuilding the URL (which would replay the
+splash and the panorama download):
+
+```json
+{
+  "source": "ishare-admin-preview",
+  "type": "tour:navigate",
+  "tourId": "t_l01wnq8eh6",
+  "sceneId": "s_dtv27wfrbi"
+}
+```
+
+Accepted only when the sender is the framing window, `?dev=1` is on, and the
+tour / scene ids match the loaded tour; it then runs the same path as a
+breadcrumb pick (pause autoplay, sync URL, `navigateToScene`). Nothing else can
+drive the viewer from outside.
+
+**Code:** `apps/tour-viewer/src/utils/devParentBridge.ts`,
+`apps/admin/src/lib/preview-click.ts`
 
 ---
 
@@ -324,16 +353,16 @@ preserving query flags (`dev`, `embed`, etc.).
 
 ## What gets written
 
-| Action                                     | Files / paths touched                                             |
-| ------------------------------------------ | ----------------------------------------------------------------- |
-| Tour CRUD                                  | `tours/{id}.json`, `tours/catalog.json`                           |
-| Client contact / shared branding (Clients) | `tours/catalog.json` `clients[]`                                  |
-| Tour-only branding                         | `tours/{id}.json` `branding`, `assets/{clientId}/{tourId}/brand/` |
-| Client branding                            | `catalog.json` `clients[].branding`, `assets/{clientId}/brand/`   |
-| Scene / hotspot / naming catalog           | `tours/{id}.json` (scene graph + `namingOpportunities`)           |
-| Scene duplicate                            | `tours/{id}.json` (+ optional cloned naming assets)               |
-| Panorama / scene thumb                     | `assets/{clientId}/{tourId}/panoramas/`, `…/scene-thumbs/`        |
-| Naming pin thumb                           | `assets/{clientId}/{tourId}/hotspot-thumbs/{hotspotId}.webp`      |
+| Action                                     | Files / paths touched                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Tour CRUD                                  | `apps/tour-viewer/tours/{id}.json`, `apps/tour-viewer/tours/catalog.json`                           |
+| Client contact / shared branding (Clients) | `apps/tour-viewer/tours/catalog.json` `clients[]`                                                   |
+| Tour-only branding                         | `apps/tour-viewer/tours/{id}.json` `branding`, `apps/tour-viewer/assets/{clientId}/{tourId}/brand/` |
+| Client branding                            | `catalog.json` `clients[].branding`, `apps/tour-viewer/assets/{clientId}/brand/`                    |
+| Scene / hotspot / naming catalog           | `apps/tour-viewer/tours/{id}.json` (scene graph + `namingOpportunities`)                            |
+| Scene duplicate                            | `apps/tour-viewer/tours/{id}.json` (+ optional cloned naming assets)                                |
+| Panorama / scene thumb                     | `apps/tour-viewer/assets/{clientId}/{tourId}/panoramas/`, `…/scene-thumbs/`                         |
+| Naming pin thumb                           | `apps/tour-viewer/assets/{clientId}/{tourId}/hotspot-thumbs/{hotspotId}.webp`                       |
 
 The viewer refreshes from an in-memory dev cache after mutations — no manual
 page reload. API routes live under `/__dev/api` (Vite plugin
@@ -356,11 +385,11 @@ page reload. API routes live under `/__dev/api` (Vite plugin
 
 ## Related documents
 
-| Document                                                 | Topic                              |
-| -------------------------------------------------------- | ---------------------------------- |
-| [ROADMAP.md](../ROADMAP.md)                               | Dev panel backlog → Admin CMS      |
-| [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                     | URL params, embed, schemas         |
-| [EMBED.md](../ops/EMBED.md)                                   | Embed mode — iframe & postMessage  |
-| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)           | `?dev=1` gating in code            |
+| Document                                                         | Topic                              |
+| ---------------------------------------------------------------- | ---------------------------------- |
+| [ROADMAP.md](../ROADMAP.md)                                      | Dev panel backlog → Admin CMS      |
+| [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                    | URL params, embed, schemas         |
+| [EMBED.md](../ops/EMBED.md)                                      | Embed mode — iframe & postMessage  |
+| [CODING_GUIDELINES.md](./CODING_GUIDELINES.md)                   | `?dev=1` gating in code            |
 | [ARCHITECT_DELIVERABLES.md](../client/ARCHITECT_DELIVERABLES.md) | Spatial defaults before dev tuning |
-| [assets/README.md](../../assets/README.md)                  | Panorama / logo folder layout      |
+| [assets/README.md](../../apps/tour-viewer/assets/README.md)      | Panorama / logo folder layout      |

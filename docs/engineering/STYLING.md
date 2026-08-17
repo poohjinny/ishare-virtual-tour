@@ -1,7 +1,7 @@
 # Styling — Tailwind-first
 
 > How we style **iShare Virtual Tour**.  
-> Theme: [globals.css](../../src/styles/globals.css) · Components:
+> Theme: [globals.css](../../apps/tour-viewer/src/styles/globals.css) · Components:
 > [COMPONENTS.md](./COMPONENTS.md)
 
 ---
@@ -41,13 +41,13 @@ React components         ← className + cn() + cva()
 
 | File                                | Role                                                              |
 | ----------------------------------- | ----------------------------------------------------------------- |
-| `src/styles/globals.css`            | `@import 'tailwindcss'`, full `@theme`, legacy `--ishare-*` shims |
-| `src/styles/components-layer.css`   | `@layer components` — badge/accordion/skeleton for HTML markers   |
-| `src/styles/glass-panels-layer.css` | `@layer components` — glass panel, nav preview, info popup shells |
-| `src/styles/hotspot-layer.css`      | Shared HTML hotspot pill chrome (PSV + 3D CSS2D)                  |
-| `src/styles/psv-layer.css`          | PSV navbar chrome + PSV marker host stacking / enter              |
-| `src/lib/cn.ts`                     | `clsx` + `tailwind-merge` helper                                  |
-| `src/utils/clientTheme.ts`          | Sets `--brand-primary*` at runtime per tour                       |
+| `apps/tour-viewer/src/styles/globals.css`            | `@import 'tailwindcss'`, full `@theme`, legacy `--ishare-*` shims |
+| `apps/tour-viewer/src/styles/components-layer.css`   | `@layer components` — badge/accordion/skeleton for HTML markers   |
+| `apps/tour-viewer/src/styles/glass-panels-layer.css` | `@layer components` — glass panel, nav preview, info popup shells |
+| `apps/tour-viewer/src/styles/hotspot-layer.css`      | Shared HTML hotspot pill chrome (PSV + 3D CSS2D)                  |
+| `apps/tour-viewer/src/styles/psv-layer.css`          | PSV navbar chrome + PSV marker host stacking / enter              |
+| `apps/tour-viewer/src/lib/cn.ts`                     | `clsx` + `tailwind-merge` helper                                  |
+| `apps/tour-viewer/src/utils/clientTheme.ts`          | Sets `--brand-primary*` at runtime per tour                       |
 
 ---
 
@@ -84,7 +84,7 @@ duplicate hex elsewhere.
 Tour **React / CSS chrome** sizes with **`rem`** (and tokenized spacing/type) so
 it follows the app UI scale. Root `font-size` is a viewport `clamp()` in
 `globals.css` (`--ishare-font-size-base`); JS readers use
-[`uiScale.ts`](../../src/utils/uiScale.ts). The PSV / Three canvas stays
+[`uiScale.ts`](../../apps/tour-viewer/src/utils/uiScale.ts). The PSV / Three canvas stays
 px-projected and is not scaled by rem.
 
 **Default:** padding, gap, radius, widths/heights, icon `font-size`, panel
@@ -104,19 +104,19 @@ Layout breakpoints and chrome collisions remain in [MOBILE.md](./MOBILE.md).
 ## Icons
 
 **Default: Material Symbols Rounded** (ligature font). The font is loaded in
-[`index.html`](../../index.html); base styles live in
-[`glass-panels-layer.css`](../../src/styles/glass-panels-layer.css)
+[`index.html`](../../apps/tour-viewer/index.html); base styles live in
+[`glass-panels-layer.css`](../../apps/tour-viewer/src/styles/glass-panels-layer.css)
 (`.material-symbols-rounded`).
 
 | When                                             | Approach                                                                                                |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| **New UI icon** (buttons, menus, CTAs, tooltips) | Material glyph in a `<span>` — see [`glassPanelCtaIcons.tsx`](../../src/components/glassPanelCtaIcons.tsx) |
+| **New UI icon** (buttons, menus, CTAs, tooltips) | Material glyph in a `<span>` — see [`glassPanelCtaIcons.tsx`](../../apps/tour-viewer/src/components/glassPanelCtaIcons.tsx) |
 | **Custom SVG**                                   | Only when explicitly requested (brand mark, one-off art direction, animation the font cannot do)        |
 
 **React pattern (preferred):** use
-[`MaterialSymbol.tsx`](../../src/components/ui/MaterialSymbol.tsx) with size tokens
+[`MaterialSymbol.tsx`](../../apps/tour-viewer/src/components/ui/MaterialSymbol.tsx) with size tokens
 from
-[`materialSymbolClasses.ts`](../../src/components/ui/materialSymbolClasses.ts).
+[`materialSymbolClasses.ts`](../../apps/tour-viewer/src/components/ui/materialSymbolClasses.ts).
 
 ```tsx
 import { MaterialSymbol } from './ui/MaterialSymbol';

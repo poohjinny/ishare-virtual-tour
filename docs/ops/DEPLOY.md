@@ -14,9 +14,9 @@
 | ------------------ | --------------------------------------------------------- |
 | Viewer URL         | `https://tour.ishare.ca`                                  |
 | Embed pattern      | `https://tour.ishare.ca/{tourId}/{sceneId}?embed=1`       |
-| Build              | `npm run build` (`base: /`, `.env.production`)            |
-| SPA fallback       | `dist/404.html` (copied from `index.html` in `postbuild`) |
-| Tour JSON (public) | `dist/tours/*.json` — fetched by the Open Graph Worker    |
+| Build              | `npm run build` (`base: /`, viewer `.env.production`)                   |
+| SPA fallback       | `apps/tour-viewer/dist/404.html` (copied in `postbuild`)                |
+| Tour JSON (public) | `apps/tour-viewer/dist/tours/*.json` — fetched by the Open Graph Worker |
 
 ### Share link previews (Open Graph)
 
@@ -28,17 +28,18 @@ get per-URL `og:*` HTML (scene + `?no=` naming); humans still get the SPA.
 Requires `tour` DNS proxied through Cloudflare — setup in that README.
 
 After Worker + Pages deploy, re-scrape in Facebook Sharing Debugger. Expect a
-scene/naming thumbnail, not `assets/brand/logo_ishare.png`.
+scene/naming thumbnail, not `/assets/brand/logo_ishare.png`.
 
 ---
 
 ## GitHub Pages (CI in this repo)
 
-Workflow: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml)
+Workflow: [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)
 
 On push to `main`:
 
-1. `npm run build` — production bundle + `public/CNAME` → `dist/CNAME`
+1. `npm run build` — production bundle + viewer `apps/tour-viewer/public/CNAME` →
+   `apps/tour-viewer/dist/CNAME`
 2. GitHub Pages deploy
 
 ### One-time GitHub + DNS setup
@@ -96,20 +97,21 @@ routes).
 Crawler share-card previews require this Worker (GitHub Pages alone cannot
 inject per-URL `og:*`). Proxy `tour` through Cloudflare and deploy
 [`workers/tour-og/`](../../workers/tour-og/) — setup in that README. Build
-publishes `dist/tours/*.json` for the Worker to read.
+publishes `apps/tour-viewer/dist/tours/*.json` for the Worker to read.
 
 ---
 
 ## Azure Static Web Apps (alternative)
 
-`public/staticwebapp.config.json` ships with the build:
+`apps/tour-viewer/public/staticwebapp.config.json` ships with the build:
 
 - SPA `navigationFallback` → `index.html` (excludes `/api/*` and `/assets/*`)
 - Long-cache headers for `/assets/*`
 - `/api/*` left for linked Azure Functions (Ask Guide) if you use SWA + `api/`
 
 Point `tour.ishare.ca` CNAME to the SWA endpoint instead of GitHub Pages if your
-infra team prefers Azure. Build command stays `npm run build`; upload `dist/`.
+infra team prefers Azure. Build command stays `npm run build`; upload
+`apps/tour-viewer/dist/`.
 
 ---
 
@@ -122,10 +124,11 @@ infra team prefers Azure. Build command stays `npm run build`; upload `dist/`.
 | `VITE_ASK_GUIDE_API_URL`  | Production / preview                 | Ask Guide API base ending in `/api` (Cloudflare Worker URL). Unset in DEV → Vite `/__dev/api/ask-guide/*`; unset in production → same-origin `/api` (SWA only) |
 
 **Server-only** (never `VITE_*`): `OPENAI_API_KEY` on the Worker
-(`wrangler secret put`) or Azure Function App; Vite `.env.local` for DEV proxy.
+(`wrangler secret put`) or Azure Function App;
+`apps/tour-viewer/.env.local` for the Vite DEV proxy.
 
-Code: [`src/constants/tourOrigin.ts`](../../src/constants/tourOrigin.ts),
-[`src/services/askGuide.ts`](../../src/services/askGuide.ts)
+Code: [`apps/tour-viewer/src/constants/tourOrigin.ts`](../../apps/tour-viewer/src/constants/tourOrigin.ts),
+[`apps/tour-viewer/src/services/askGuide.ts`](../../apps/tour-viewer/src/services/askGuide.ts)
 
 ---
 
