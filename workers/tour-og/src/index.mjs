@@ -21,16 +21,16 @@ import {
   isDefaultNamingDescription,
   isDefaultSceneDescription,
   pickAuthoredShareDescription,
-} from '../../../src/utils/ogShareCopy.mjs';
-import { namingSearchValueMatches } from '../../../src/utils/namingOpportunitySearch.mjs';
+} from '../../../apps/tour-viewer/src/utils/ogShareCopy.mjs';
+import { namingSearchValueMatches } from '../../../apps/tour-viewer/src/utils/namingOpportunitySearch.mjs';
 import {
   canonicalizeTourPathId,
   isLegacyTourPathAlias,
-} from '../../../src/utils/legacyTourPathAliases.mjs';
+} from '../../../apps/tour-viewer/src/utils/legacyTourPathAliases.mjs';
 import {
   resolveClientLogoPath,
   resolveSceneThumbnailPath,
-} from '../../../src/utils/tourAssetResolve.mjs';
+} from '../../../apps/tour-viewer/src/utils/tourAssetResolve.mjs';
 
 const BOT_UA =
   /facebookexternalhit|Facebot|facebookcatalog|meta-externalagent|meta-externalfetcher|meta-webindexer|Twitterbot|LinkedInBot|Slackbot|Discordbot|WhatsApp\/|TelegramBot|SkypeUriPreview|Pinterest|redditbot|Embedly|Iframely|Quora Link Preview|Showyoubot|outbrain|vkShare|W3C_Validator|bingbot|Googlebot|Applebot|iMessageBot|Slack-ImgProxy|kakaotalk-scrap|Linespider|LineBot|BitlyBot|Snapchat|PetalBot/i;

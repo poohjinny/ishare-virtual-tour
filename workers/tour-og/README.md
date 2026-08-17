@@ -7,8 +7,8 @@ Contract:
 
 - **Bot UA** → `200` HTML with `og:*` / `twitter:*` from `/tours/{id}.json`
   (including `?no=` naming, `no_*` catalog id). Title/description come from
-  shared `src/utils/ogShareCopy.mjs` (same rules as in-app Share). Scene
-  thumbnails and client logo come from `src/utils/tourAssetResolve.mjs`
+  shared `apps/tour-viewer/src/utils/ogShareCopy.mjs` (same rules as in-app Share). Scene
+  thumbnails and client logo come from `apps/tour-viewer/src/utils/tourAssetResolve.mjs`
   (conventional paths inferred when JSON omits them). Includes
   `meta-externalfetcher` (Facebook).
 - **Path ids** → opaque `t_*` / `s_*`. Known kebab / client-id tour segments
@@ -68,8 +68,8 @@ curl -sA "facebookexternalhit/1.1" "http://127.0.0.1:8787/t_l01wnq8eh6/s_h310pim
 
 ## Smoke (production)
 
-1. Deploy a build that includes `dist/tours/` and WebP thumbnails under
-   `assets/`.
+1. Deploy a build that includes `apps/tour-viewer/dist/tours/` and WebP
+   thumbnails under `apps/tour-viewer/dist/assets/`.
 2. Deploy this Worker and attach `tour.ishare.ca/*`.
 3. **Disable Cloudflare Managed robots.txt** (Dashboard → zone `ishare.ca` → AI
    Crawl Control / robots.txt managed feature).
