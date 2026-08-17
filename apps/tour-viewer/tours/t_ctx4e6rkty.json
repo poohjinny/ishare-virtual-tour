@@ -1,0 +1,195 @@
+{
+  "id": "t_ctx4e6rkty",
+  "clientId": "ishare-demos",
+  "viewerType": "model3d",
+  "model": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf",
+  "title": "3D Walkthrough Demo",
+  "category": "Demo",
+  "firstScene": "s_hpajghgqrv",
+  "scenes": {
+    "s_hpajghgqrv": {
+      "id": "s_hpajghgqrv",
+      "title": "Overall",
+      "description": "Classic Sponza architecture test scene — open atrium with arches and columns.",
+      "defaultView": {
+        "yaw": -88.9,
+        "pitch": -7.8,
+        "zoom": 5.96,
+        "target": {
+          "x": -0.75,
+          "y": 4.16,
+          "z": -0.32
+        }
+      },
+      "hotspots": []
+    },
+    "s_xihtcolrwu": {
+      "id": "s_xihtcolrwu",
+      "title": "1st Floor",
+      "description": "Ground-level walk through the Sponza colonnade — arches, columns, and the open atrium floor.",
+      "defaultView": {
+        "yaw": -90.7,
+        "pitch": -0.6,
+        "zoom": 1.35,
+        "target": {
+          "x": 8.41,
+          "y": 1.58,
+          "z": -0.36
+        }
+      },
+      "hotspots": []
+    },
+    "s_kanukh723s": {
+      "id": "s_kanukh723s",
+      "title": "2nd Floor",
+      "description": "Upper gallery walkway overlooking the atrium — same model, elevated viewpoint.",
+      "defaultView": {
+        "yaw": -92,
+        "pitch": -6,
+        "zoom": 1.35,
+        "target": {
+          "x": -8.02,
+          "y": 5.3,
+          "z": -0.17
+        }
+      },
+      "hotspots": []
+    }
+  },
+  "hotspots": [
+    {
+      "id": "h_v1p651z85c",
+      "type": "info",
+      "position": {
+        "x": -11.33,
+        "y": 1.98,
+        "z": -0.28
+      },
+      "namingId": "no_usze08342k",
+      "popup": {
+        "display": "anchored",
+        "title": "Naming Opportunity",
+        "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments.\n\nModeled after the bright, modern spaces in our ACE Unit—known and loved by patients and care teams alike—these rooms are designed to promote healing with features like natural light, enhanced privacy, and room to move with ease. Be a part of the care that happens here—where healing, comfort, and compassion come together.",
+        "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+      },
+      "sceneId": "s_hpajghgqrv",
+      "targetView": {
+        "yaw": -90.1,
+        "pitch": 0,
+        "zoom": 1.35,
+        "target": {
+          "x": -9.39,
+          "y": 1.58,
+          "z": -0.27
+        }
+      }
+    },
+    {
+      "id": "h_fug5ybz0mq",
+      "type": "info",
+      "position": {
+        "x": 2.44,
+        "y": 1.29,
+        "z": 1.56
+      },
+      "namingId": "no_s7mvw1ktv1",
+      "popup": {
+        "display": "anchored",
+        "title": "Naming Opportunity - 3",
+        "body": "test is a naming opportunity at 3D Walkthrough Demo. Recognition details, donor benefits, and placement copy will be confirmed with the foundation team."
+      },
+      "sceneId": "s_hpajghgqrv",
+      "targetView": {
+        "yaw": 3.4,
+        "pitch": -1,
+        "zoom": 1.35,
+        "target": {
+          "x": 2.29,
+          "y": 1.26,
+          "z": -0.01
+        }
+      }
+    },
+    {
+      "id": "h_k1z4zpwai4",
+      "type": "info",
+      "position": {
+        "x": -11.39,
+        "y": 5.09,
+        "z": -0.31
+      },
+      "namingId": "no_winyzawbk5",
+      "popup": {
+        "display": "anchored",
+        "title": "Naming Opportunity - 2",
+        "body": "It’s where patients rest, recover, and receive round-the-clock care and support from the QCH team. Thoughtfully designed for safety, comfort, and peace of mind, these rooms help create a calm, reassuring environment during some of life’s most vulnerable moments.",
+        "videoUrl": "https://share.synthesia.io/embeds/videos/e2d08fd3-0345-4fd6-8f70-e3bf3b8e6ebc"
+      },
+      "targetView": {
+        "yaw": -89.5,
+        "pitch": -6.8,
+        "zoom": 2.51,
+        "target": {
+          "x": -11.39,
+          "y": 5.09,
+          "z": -0.31
+        }
+      },
+      "sceneId": "s_kanukh723s"
+    },
+    {
+      "id": "h_xr6za83jfc",
+      "type": "nav",
+      "position": {
+        "x": -9.4,
+        "y": 1.1,
+        "z": -0.29
+      },
+      "targetScene": "s_xihtcolrwu",
+      "targetView": {
+        "yaw": -90.7,
+        "pitch": -0.6,
+        "zoom": 1.35,
+        "target": {
+          "x": 8.41,
+          "y": 1.58,
+          "z": -0.36
+        }
+      }
+    },
+    {
+      "id": "h_pyd29bbr59",
+      "type": "nav",
+      "position": {
+        "x": 7.2,
+        "y": 4.11,
+        "z": -0.29
+      },
+      "targetScene": "s_kanukh723s"
+    }
+  ],
+  "namingOpportunities": {
+    "no_usze08342k": {
+      "id": "no_usze08342k",
+      "name": "Naming Opportunity",
+      "price": 75000,
+      "status": "open"
+    },
+    "no_s7mvw1ktv1": {
+      "id": "no_s7mvw1ktv1",
+      "name": "Naming Opportunity - 3",
+      "price": 10000,
+      "status": "reserved"
+    },
+    "no_winyzawbk5": {
+      "id": "no_winyzawbk5",
+      "name": "Naming Opportunity - 2",
+      "price": 25000,
+      "status": "sold"
+    }
+  },
+  "defaultTransition": {
+    "speed": "500ms",
+    "effect": "fade"
+  }
+}

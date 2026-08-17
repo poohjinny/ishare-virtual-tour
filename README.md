@@ -1,4 +1,4 @@
-# iShare Virtual Tour
+# iShare Tour Platform
 
 In-house 360° / 3D virtual tour for iShare fundraising — panorama (Photo Sphere
 Viewer) and model3d (Three.js), embedded on ishare.ca and client sites as a
@@ -14,12 +14,22 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
+`npm run dev` starts **both** local apps:
+
+- Viewer → [http://localhost:5173](http://localhost:5173)
+- Admin → [http://localhost:5174](http://localhost:5174)
+
+```bash
+npm run dev:viewer   # viewer only :5173
+npm run dev:admin    # admin only  :5174
+```
 
 ### Build for production
 
 ```bash
-npm run build
+npm run build           # alias for build:viewer (Pages CI)
+npm run build:viewer
+npm run build:admin
 npm run preview
 ```
 
@@ -29,7 +39,7 @@ Deploy: [docs/ops/DEPLOY.md](docs/ops/DEPLOY.md).
 
 Start at `/` (client intro) or a direct `/{tourId}/{sceneId}` link. Move with
 **Explore**, pulsing **nav hotspots**, breadcrumb, or **Back**. Scene titles and
-opaque ids live in each `tours/t_*.json` — not kebab slugs.
+opaque ids live in each `apps/tour-viewer/tours/t_*.json` — not kebab slugs.
 
 Ken Sargent House (demo path): **Overview** (`s_dtv27wfrbi`) → **Main Entrance**
 (`s_zlz39v1fjz`) → **Reception** (`s_vddzraqi1q`).
@@ -37,8 +47,9 @@ Ken Sargent House (demo path): **Overview** (`s_dtv27wfrbi`) → **Main Entrance
 ## Routes
 
 Path-based URLs — `{tourId}` (`t_*`) and `{sceneId}` (`s_*`) come from
-[`tours/catalog.json`](tours/catalog.json) and each tour JSON. Scene changes
-update the address bar; browser back/forward works.
+[`apps/tour-viewer/tours/catalog.json`](apps/tour-viewer/tours/catalog.json) and
+each tour JSON. Scene changes update the address bar; browser back/forward
+works.
 
 | Path                  | Description                                               |
 | --------------------- | --------------------------------------------------------- |
@@ -89,32 +100,33 @@ Contract: [docs/ops/EMBED.md](docs/ops/EMBED.md).
 ## Project structure
 
 ```
-assets/{clientId}/{tourId}/   panoramas, scene-thumbs, hotspot-thumbs, naming, brand
-public/assets/                Auto-synced copy (served at /assets/…)
-tours/                        `{tourId}.json`, `catalog.json`
+apps/
+  tour-viewer/                Vite viewer (`tour.ishare.ca`)
+    assets/                   Source tour media
+    apps/tour-viewer/public/assets/            Auto-synced copy (served at /assets/…)
+    tours/                    `{tourId}.json`, `catalog.json`
+    src/                      Viewer application source
+  admin/                      Next.js CMS (`admin.ishare.ca`, target)
+packages/                     Shared schema and API client (next extraction)
 workers/tour-og/              Crawler OG HTML (Facebook / LinkedIn)
 workers/ask-guide/            Production Tour Guide API
-src/
-  viewer/                     Photo Sphere Viewer (panorama)
-  viewer-3d/                  Three.js GLTF walkthrough (lazy)
-  viewer-shared/              TourViewerHandle, shared markers
-  components/                 React chrome (Explore, Dev, Guide, …)
-  pages/TourPage.tsx          SPA orchestrator
 docs/                         Index: docs/README.md (product/ engineering/ ops/ client/)
 ```
 
 ## Assets
 
-Add files under `assets/{clientId}/{tourId}/` (see
-[`assets/README.md`](assets/README.md)). **Panorama JPGs in `panoramas/` must be
-converted to WebP** before the tour uses them. Conventional paths are inferred
-at load — do not store `/assets/…` URLs in JSON unless they are overrides.
+Add files under `apps/tour-viewer/assets/{clientId}/{tourId}/` (see
+[`apps/tour-viewer/assets/README.md`](apps/tour-viewer/assets/README.md).
+**Panorama JPGs in `panoramas/` must be converted to WebP** before the tour uses
+them. Conventional paths are inferred at load — do not store `/assets/…` URLs in
+JSON unless they are overrides.
 
 ```bash
 npm run sync-assets
 ```
 
-Copies `assets/` → `public/assets/` (also runs on `dev` and `build`).
+Copies `apps/tour-viewer/assets/` → `apps/tour-viewer/public/assets/` (also runs
+on `dev` and `build`).
 
 ## Hotspot & landing coordinate tuning
 
@@ -141,8 +153,8 @@ See [docs/ops/DEPLOY.md](docs/ops/DEPLOY.md#ask-guide-live-ai-readiness).
 
 ## Tech stack
 
-Vite + React + TypeScript · Photo Sphere Viewer · Three.js (model3d) ·
-Cloudflare Workers (OG + Ask Guide). Why:
+Vite + React + TypeScript viewer · Next.js admin · Photo Sphere Viewer ·
+Three.js (model3d) · Cloudflare Workers (OG + Ask Guide). Why:
 [docs/engineering/TECH_STACK.md](docs/engineering/TECH_STACK.md).
 
 ## Documentation
@@ -151,9 +163,10 @@ Cloudflare Workers (OG + Ask Guide). Why:
 | -------------------------------------------------------------------------------- | --------------------------------- |
 | [`docs/README.md`](docs/README.md)                                               | Documentation index               |
 | [`docs/engineering/CODING_GUIDELINES.md`](docs/engineering/CODING_GUIDELINES.md) | Engineering conventions & doc map |
+| [`docs/engineering/ADMIN_UI.md`](docs/engineering/ADMIN_UI.md)                   | Tour Admin UI — shadcn rules      |
 | [`docs/engineering/GIT_WORKFLOW.md`](docs/engineering/GIT_WORKFLOW.md)           | Commit/push — one task per commit |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md)                                             | What to build next (Phase 2+)     |
-| [`docs/product/PRODUCT_SPEC.md`](docs/product/PRODUCT_SPEC.md)                                   | URL, embed, catalog, schemas      |
+| [`docs/product/PRODUCT_SPEC.md`](docs/product/PRODUCT_SPEC.md)                   | URL, embed, catalog, schemas      |
 | [`docs/product/PROJECT_CONTEXT.md`](docs/product/PROJECT_CONTEXT.md)             | SeekBeak context, demo script     |
 | [`docs/engineering/TECH_STACK.md`](docs/engineering/TECH_STACK.md)               | Why this stack                    |
 | [`docs/ops/DEPLOY.md`](docs/ops/DEPLOY.md)                                       | `tour.ishare.ca` deploy           |

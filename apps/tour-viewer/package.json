@@ -1,0 +1,46 @@
+{
+  "name": "@ishare/tour-viewer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "sync-assets": "node scripts/sync-assets.mjs",
+    "generate-thumbnails": "node scripts/generate-scene-thumbnails.mjs && node scripts/generate-naming-thumbnails.mjs",
+    "generate-scene-thumbnails": "node scripts/generate-scene-thumbnails.mjs",
+    "generate-naming-thumbnails": "node scripts/generate-naming-thumbnails.mjs",
+    "dev": "npm run sync-assets && vite",
+    "build": "npm run sync-assets && tsgo -b && vite build",
+    "build:ghpages": "npm run sync-assets && tsgo -b && vite build --mode ghpages",
+    "typecheck": "tsgo -b",
+    "postbuild": "node scripts/postbuild.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@photo-sphere-viewer/core": "^5.11.0",
+    "@photo-sphere-viewer/markers-plugin": "^5.11.0",
+    "@photo-sphere-viewer/virtual-tour-plugin": "^5.11.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.2",
+    "tailwind-merge": "^3.6.0",
+    "three": "^0.179.1"
+  },
+  "overrides": {
+    "three": "$three"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.179.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260421.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.35.1",
+    "tailwindcss": "^4.3.1",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.0"
+  }
+}

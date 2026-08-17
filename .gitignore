@@ -8,9 +8,9 @@ dist
 # Azure Functions local secrets
 api/local.settings.json
 
-# Generated from assets/ via npm run sync-assets
-public/assets
-public/favicon.ico
+# Generated from apps/tour-viewer/assets/ via npm run sync-assets
+apps/tour-viewer/public/assets
+apps/tour-viewer/public/favicon.ico
 
 # Wrangler dry-run output
 workers/**/dist-dry
