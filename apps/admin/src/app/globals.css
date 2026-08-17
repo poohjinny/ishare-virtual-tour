@@ -1,0 +1,1136 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Body UI density: Tailwind `text-sm` defaults to 14px — keep the token, drop to 13. */
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: calc(1.25 / 0.8125);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-roboto);
+  --font-mono: var(--font-roboto-mono);
+  --font-heading: var(--font-google-sans-flex);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-6: var(--chart-6);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/*
+ * Admin-ui baseline: calm neutrals + restrained iShare green accent.
+ * Chart tokens are chromatic for categorical rollups (not grayscale).
+ */
+:root {
+  --background: oklch(0.985 0.006 210);
+  --foreground: oklch(0.22 0.02 230);
+  --card: oklch(1 0.004 210);
+  --card-foreground: oklch(0.22 0.02 230);
+  --popover: oklch(1 0.004 210);
+  --popover-foreground: oklch(0.22 0.02 230);
+  --primary: #237a4b;
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.96 0.012 210);
+  --secondary-foreground: oklch(0.3 0.04 210);
+  --muted: oklch(0.96 0.01 210);
+  --muted-foreground: oklch(0.5 0.02 230);
+  --accent: oklch(0.95 0.025 210);
+  --accent-foreground: oklch(0.32 0.06 210);
+  --destructive: oklch(0.58 0.16 27);
+  --success: oklch(0.62 0.08 155);
+  --success-foreground: oklch(0.28 0.04 155);
+  --warning: oklch(0.78 0.08 80);
+  --warning-foreground: oklch(0.36 0.05 80);
+  --info: oklch(0.68 0.07 230);
+  --info-foreground: oklch(0.3 0.04 230);
+  --border: oklch(0.9 0.015 210);
+  --input: oklch(0.9 0.015 210);
+  --ring: #2f8f5b;
+  --chart-1: oklch(0.72 0.06 210);
+  --chart-2: oklch(0.76 0.07 155);
+  --chart-3: oklch(0.8 0.07 80);
+  --chart-4: oklch(0.74 0.06 300);
+  --chart-5: oklch(0.76 0.06 30);
+  --chart-6: oklch(0.74 0.08 15);
+  --radius: 0.625rem;
+  --admin-info-subject-width: 8.5rem;
+  /*
+   * Stat ink: hero counts and their icon carry the card's hue, pulled toward the
+   * text color so a pale tone still reads at display size.
+   */
+  --stat-ink-mix: 35%;
+  --stat-ink-primary: color-mix(
+    in oklch,
+    var(--primary),
+    var(--foreground) var(--stat-ink-mix)
+  );
+  --stat-ink-success: color-mix(
+    in oklch,
+    var(--success),
+    var(--foreground) var(--stat-ink-mix)
+  );
+  --stat-ink-warning: color-mix(
+    in oklch,
+    var(--warning),
+    var(--foreground) var(--stat-ink-mix)
+  );
+  --stat-ink-info: color-mix(
+    in oklch,
+    var(--info),
+    var(--foreground) var(--stat-ink-mix)
+  );
+  --sidebar: oklch(0.98 0.008 210);
+  --sidebar-foreground: oklch(0.22 0.02 230);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.94 0.03 210);
+  --sidebar-accent-foreground: oklch(0.3 0.05 210);
+  --sidebar-border: oklch(0.9 0.015 210);
+  --sidebar-ring: var(--ring);
+  /* Badge colors are mixed from one item token: label ink, then pale surface. */
+  --badge-label-mix: 55%;
+  --badge-surface-mix: 16%;
+  /* Hero chips fill with the item color, so the label flips to white. */
+  --badge-on-solid: oklch(1 0 0);
+  /*
+   * Pastel -> solid: same hue, chroma up and lightness down together. Raising
+   * chroma alone at pastel lightness only reads fluorescent.
+   */
+  --badge-solid-chroma: 1.9;
+  --badge-solid-lightness: 0.74;
+  /* Viewer-aligned status chips — same hex as tour-viewer naming + Dev manage. */
+  --status-open: #15803d;
+  --status-reserved: #9a6b12;
+  --status-soon: #0284c7;
+  --status-sold: #007b8b;
+  --status-public: var(--visibility-public);
+  --status-unlisted: var(--visibility-unlisted);
+  --status-internal: var(--visibility-internal);
+  --status-naming: #9d174d;
+  --status-place: #a16207;
+  /* Semantic item palettes — chart fills are the shared source of truth. */
+  --visibility-public: oklch(0.72 0.06 210);
+  --visibility-unlisted: oklch(0.84 0.012 250);
+  --visibility-internal: oklch(0.76 0.08 70);
+  --license-licensed: oklch(0.76 0.07 155);
+  --license-unlicensed: oklch(0.84 0.012 250);
+  --viewer-panorama: oklch(0.72 0.06 210);
+  --viewer-model3d: oklch(0.74 0.06 300);
+  /* Category fills — same pastel set charts used (includes rose for healthcare). */
+  --category-healthcare: oklch(0.74 0.08 15);
+  --category-education: oklch(0.74 0.06 300);
+  --category-culture: oklch(0.8 0.07 80);
+  --category-sporting: oklch(0.76 0.07 155);
+  --category-aid: oklch(0.76 0.06 30);
+  --category-social: oklch(0.72 0.06 275);
+  --category-tourism: oklch(0.75 0.06 230);
+  --category-demo: oklch(0.72 0.06 195);
+}
+
+.dark {
+  --background: oklch(0.16 0.02 230);
+  --foreground: oklch(0.97 0.01 210);
+  --card: oklch(0.21 0.025 230);
+  --card-foreground: oklch(0.97 0.01 210);
+  --popover: oklch(0.21 0.025 230);
+  --popover-foreground: oklch(0.97 0.01 210);
+  --primary: #72c98f;
+  --primary-foreground: #17221c;
+  --secondary: oklch(0.28 0.03 230);
+  --secondary-foreground: oklch(0.97 0.01 210);
+  --muted: oklch(0.28 0.025 230);
+  --muted-foreground: oklch(0.72 0.02 210);
+  --accent: oklch(0.3 0.04 210);
+  --accent-foreground: oklch(0.95 0.02 210);
+  --destructive: oklch(0.7 0.14 22);
+  --success: oklch(0.74 0.08 155);
+  --success-foreground: oklch(0.92 0.02 155);
+  --warning: oklch(0.8 0.08 80);
+  --warning-foreground: oklch(0.92 0.02 80);
+  --info: oklch(0.74 0.07 230);
+  --info-foreground: oklch(0.92 0.02 230);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: #62b982;
+  --chart-1: oklch(0.7 0.06 210);
+  --chart-2: oklch(0.72 0.07 155);
+  --chart-3: oklch(0.76 0.07 80);
+  --chart-4: oklch(0.7 0.06 300);
+  --chart-5: oklch(0.72 0.06 30);
+  --chart-6: oklch(0.7 0.08 15);
+  --sidebar: oklch(0.19 0.025 230);
+  --sidebar-foreground: oklch(0.97 0.01 210);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.28 0.04 210);
+  --sidebar-accent-foreground: oklch(0.95 0.02 210);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: var(--ring);
+  --status-open: #86efac;
+  --status-reserved: #fbbf24;
+  --status-soon: #7dd3fc;
+  --status-sold: oklch(0.72 0.09 210);
+  --status-naming: #fbcfe8;
+  --status-place: #fef08a;
+  --visibility-public: #7dd3fc;
+  --visibility-unlisted: oklch(0.45 0.015 250);
+  --visibility-internal: oklch(0.72 0.08 70);
+  --license-licensed: oklch(0.72 0.07 155);
+  --license-unlicensed: oklch(0.45 0.015 250);
+  --viewer-panorama: oklch(0.7 0.06 210);
+  --viewer-model3d: oklch(0.7 0.06 300);
+  --category-healthcare: oklch(0.7 0.08 15);
+  --category-education: oklch(0.7 0.06 300);
+  --category-culture: oklch(0.76 0.07 80);
+  --category-sporting: oklch(0.72 0.07 155);
+  --category-aid: oklch(0.72 0.06 30);
+  --category-social: oklch(0.68 0.06 275);
+  --category-tourism: oklch(0.7 0.06 230);
+  --category-demo: oklch(0.68 0.06 195);
+}
+
+/*
+ * The four accent choices as standing tokens. Each accent block below reads its
+ * own `--primary` from here, so the Settings picker can paint every option at
+ * once — and in the current mode — without repeating a palette at the call site.
+ */
+:root {
+  /*
+   * The iShare symbol's gold. Brand ink rather than a theme choice, so it holds
+   * in both modes; the gold accent option is the same color by definition.
+   */
+  --ishare-brand-gold: #fdb930;
+  --admin-accent-blue: oklch(0.48 0.09 210);
+  --admin-accent-green: #237a4b;
+  --admin-accent-gold: var(--ishare-brand-gold);
+  --admin-accent-red: oklch(0.52 0.17 25);
+}
+
+.dark {
+  --admin-accent-blue: oklch(0.72 0.09 210);
+  --admin-accent-green: #72c98f;
+  --admin-accent-gold: var(--ishare-brand-gold);
+  --admin-accent-red: oklch(0.7 0.15 25);
+}
+
+:root:not([data-admin-accent]),
+:root[data-admin-accent='blue'] {
+  --primary: var(--admin-accent-blue);
+  --primary-foreground: oklch(0.99 0.01 210);
+  --accent: oklch(0.95 0.025 210);
+  --accent-foreground: oklch(0.32 0.06 210);
+  --ring: oklch(0.55 0.08 210);
+  --chart-1: oklch(0.72 0.06 210);
+  --sidebar-accent: oklch(0.94 0.03 210);
+  --sidebar-accent-foreground: oklch(0.3 0.05 210);
+}
+
+:root[data-admin-accent='green'] {
+  --primary: var(--admin-accent-green);
+  --primary-foreground: #ffffff;
+  --accent: oklch(0.95 0.03 150);
+  --accent-foreground: oklch(0.31 0.07 150);
+  --ring: #2f8f5b;
+  --chart-1: oklch(0.7 0.08 150);
+  --sidebar-accent: oklch(0.94 0.03 150);
+  --sidebar-accent-foreground: oklch(0.31 0.07 150);
+}
+
+:root[data-admin-accent='gold'] {
+  --primary: var(--admin-accent-gold);
+  --primary-foreground: oklch(0.24 0.04 65);
+  --accent: oklch(0.95 0.05 80);
+  --accent-foreground: oklch(0.32 0.08 65);
+  --ring: oklch(0.66 0.13 75);
+  --chart-1: oklch(0.78 0.1 80);
+  --sidebar-accent: oklch(0.94 0.05 80);
+  --sidebar-accent-foreground: oklch(0.32 0.08 65);
+}
+
+:root[data-admin-accent='red'] {
+  --primary: var(--admin-accent-red);
+  --primary-foreground: oklch(0.99 0.01 25);
+  --accent: oklch(0.95 0.035 25);
+  --accent-foreground: oklch(0.34 0.08 25);
+  --ring: oklch(0.58 0.13 25);
+  --chart-1: oklch(0.7 0.09 25);
+  --sidebar-accent: oklch(0.94 0.035 25);
+  --sidebar-accent-foreground: oklch(0.34 0.08 25);
+}
+
+.dark:not([data-admin-accent]),
+.dark[data-admin-accent='blue'] {
+  --primary: var(--admin-accent-blue);
+  --primary-foreground: oklch(0.18 0.03 230);
+  --accent: oklch(0.3 0.04 210);
+  --accent-foreground: oklch(0.95 0.02 210);
+  --ring: oklch(0.62 0.08 210);
+  --chart-1: oklch(0.7 0.06 210);
+  --sidebar-accent: oklch(0.28 0.04 210);
+  --sidebar-accent-foreground: oklch(0.95 0.02 210);
+}
+
+.dark[data-admin-accent='green'] {
+  --primary: var(--admin-accent-green);
+  --primary-foreground: #17221c;
+  --accent: oklch(0.29 0.05 150);
+  --accent-foreground: oklch(0.94 0.03 150);
+  --ring: #62b982;
+  --chart-1: oklch(0.7 0.08 150);
+  --sidebar-accent: oklch(0.28 0.05 150);
+  --sidebar-accent-foreground: oklch(0.94 0.03 150);
+}
+
+.dark[data-admin-accent='gold'] {
+  --primary: var(--admin-accent-gold);
+  --primary-foreground: oklch(0.2 0.04 65);
+  --accent: oklch(0.31 0.06 75);
+  --accent-foreground: oklch(0.95 0.04 80);
+  --ring: oklch(0.72 0.13 75);
+  --chart-1: oklch(0.76 0.1 80);
+  --sidebar-accent: oklch(0.3 0.06 75);
+  --sidebar-accent-foreground: oklch(0.95 0.04 80);
+}
+
+.dark[data-admin-accent='red'] {
+  --primary: var(--admin-accent-red);
+  --primary-foreground: oklch(0.18 0.03 25);
+  --accent: oklch(0.3 0.05 25);
+  --accent-foreground: oklch(0.95 0.025 25);
+  --ring: oklch(0.64 0.13 25);
+  --chart-1: oklch(0.68 0.1 25);
+  --sidebar-accent: oklch(0.29 0.05 25);
+  --sidebar-accent-foreground: oklch(0.95 0.025 25);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+    /* Boot fallback for the no-script render; mirrors GUIDE_DOCK_WIDTH_DEFAULT. */
+    --guide-dock-width: 22rem;
+    /* Same contract for the rail; mirrors SIDEBAR_WIDTH_DEFAULT. */
+    --sidebar-width: 16rem;
+  }
+}
+
+/*
+  Guide dock boot state — the rail defaults to open, so the SSR HTML paints
+  expanded and would animate shut on hydration for anyone who closed it. The
+  pre-hydration script in the root layout stamps this attribute (and the width
+  property above); `admin-guide-dock.ts` keeps both in sync afterwards, so they
+  always agree with the rail's own `data-state`.
+
+  Unlayered on purpose: the rail's width comes from a Tailwind utility, and the
+  utilities layer would win over a `@layer components` rule at any specificity.
+*/
+html[data-guide-dock='0'] [data-slot='admin-guide-rail'] {
+  width: 0;
+}
+
+/*
+ * Thin scrollbar — same recipe as tour-viewer `.ishare-scrollbar`. Form cards
+ * own the scroll inside an authoring drawer, so they wear the same bar.
+ * Do not set scrollbar-width/color on Chromium (that draws the thick OS bar).
+ */
+.ishare-scrollbar {
+  /* intentional: no scrollbar-* here for Blink */
+}
+
+/*
+ * Toast pill. Sonner injects its own stylesheet **unlayered**, so these rules
+ * cannot live in `@layer components` — any layer loses to unlayered CSS no
+ * matter how specific. Keep them at top level and out-specify sonner instead.
+ *
+ * One status token (`--toast-item`) drives icon, tint, text, and dismiss, mixed
+ * with the same ratios as item badges. Rounded rectangle to match cards/sheets
+ * — not a pill. Sonner also hangs the dismiss control off the top-left corner
+ * by default (`translate(-35%)`) — pull it inside as a trailing ghost control.
+ */
+.admin-toaster [data-sonner-toast][data-styled='true'] {
+  --toast-item: var(--muted-foreground);
+  gap: --spacing(2);
+  width: max-content;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: --spacing(2.5) --spacing(2) --spacing(2.5) --spacing(3.5);
+  border: 1px solid color-mix(in oklab, var(--toast-item) 28%, var(--card));
+  border-radius: var(--radius-lg);
+  background: color-mix(
+    in oklab,
+    var(--toast-item) var(--badge-surface-mix),
+    var(--card)
+  );
+  color: color-mix(
+    in oklab,
+    var(--toast-item) var(--badge-label-mix),
+    var(--foreground)
+  );
+  box-shadow:
+    0 1px 2px oklch(0.22 0.02 230 / 0.06),
+    0 8px 24px oklch(0.22 0.02 230 / 0.08);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-size: 0.8125rem;
+}
+
+/* The trailing pad belongs to the dismiss control — without one, match the lead. */
+.admin-toaster
+  [data-sonner-toast][data-styled='true']:not(:has([data-close-button])) {
+  padding-inline-end: --spacing(3.5);
+}
+
+.admin-toaster [data-sonner-toast][data-type='success'] {
+  --toast-item: var(--success);
+}
+
+.admin-toaster [data-sonner-toast][data-type='error'] {
+  --toast-item: var(--destructive);
+}
+
+.admin-toaster [data-sonner-toast][data-type='warning'] {
+  --toast-item: var(--warning);
+}
+
+.admin-toaster [data-sonner-toast][data-type='info'] {
+  --toast-item: var(--info);
+}
+
+.admin-toaster [data-sonner-toast][data-type='loading'] {
+  --toast-item: var(--muted-foreground);
+}
+
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-icon],
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-icon] svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  color: var(--toast-item);
+}
+
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-content] {
+  gap: 0;
+  /* Space before CTA / dismiss — better than a fixed min-width for short copy. */
+  padding-inline-end: --spacing(12);
+}
+
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-title] {
+  font-family: var(--font-heading), var(--font-sans), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-description] {
+  color: color-mix(in oklab, var(--toast-item) 35%, var(--muted-foreground));
+  font-size: 0.6875rem;
+  line-height: 1.4;
+}
+
+.admin-toaster[data-sonner-toaster]
+  [data-sonner-toast][data-styled='true']
+  [data-close-button] {
+  position: static;
+  left: auto;
+  right: auto;
+  top: auto;
+  order: 1;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: --spacing(1);
+  transform: none;
+  border: 0;
+  border-radius: var(--radius-md);
+  opacity: 1;
+  background: transparent;
+  color: var(--toast-item);
+}
+
+.admin-toaster[data-sonner-toaster]
+  [data-sonner-toast][data-styled='true']
+  [data-close-button]
+  svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.admin-toaster[data-sonner-toaster]
+  [data-sonner-toast][data-styled='true']
+  [data-close-button]:hover {
+  background: color-mix(in oklab, var(--toast-item) 18%, transparent);
+  border-color: transparent;
+}
+
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-button] {
+  height: 1.5rem;
+  border-radius: var(--radius-md);
+  /* Same status ink as the toast — not a one-size primary CTA. */
+  background: var(--toast-item);
+  color: var(--badge-on-solid);
+  font-family: var(--font-heading), var(--font-sans), sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-button]:hover {
+  filter: brightness(0.92);
+}
+
+.admin-toaster [data-sonner-toast][data-styled='true'] [data-cancel] {
+  background: color-mix(in oklab, var(--toast-item) 22%, var(--card));
+  color: color-mix(in oklab, var(--toast-item) 55%, var(--foreground));
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  :is(.ishare-scrollbar, .admin-form) {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--foreground) 22%, transparent)
+      transparent;
+  }
+}
+
+@supports selector(::-webkit-scrollbar) {
+  :is(.ishare-scrollbar, .admin-form) {
+    scrollbar-width: unset;
+    scrollbar-color: unset;
+  }
+}
+
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar {
+  width: 0.4375rem;
+  height: 0.4375rem;
+}
+
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-button:start:decrement,
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-button:end:increment,
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-button:vertical:start:decrement,
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-button:vertical:end:increment,
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-button:horizontal:start:decrement,
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-button:horizontal:end:increment {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--foreground) 22%, transparent);
+  border-radius: 999px;
+}
+
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklch, var(--foreground) 48%, transparent);
+}
+
+:is(.ishare-scrollbar, .admin-form)::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@layer components {
+  .type-display {
+    @apply font-heading text-2xl font-semibold tracking-tight md:text-[1.75rem];
+  }
+
+  .type-heading {
+    @apply font-heading text-lg font-semibold tracking-tight md:text-xl;
+  }
+
+  .type-title {
+    @apply font-heading text-base font-semibold tracking-tight;
+  }
+
+  /*
+   * Sidebar brand lockup title. A half-step above this app's `text-sm` so it
+   * out-reads the nav labels beside it, and medium rather than semibold: at
+   * rail size the heavier cut reads as a shout next to a page's `.type-title`.
+   */
+  .type-brand {
+    @apply font-heading text-[0.90625rem] font-medium tracking-tight;
+  }
+
+  .type-label {
+    @apply font-heading text-xs font-medium tracking-wide text-foreground/80;
+  }
+
+  .type-body {
+    @apply text-[0.8125rem] leading-relaxed;
+  }
+
+  .type-meta {
+    @apply text-[0.6875rem] leading-relaxed text-muted-foreground;
+  }
+
+  /* One form rhythm for the card and any nested tab panels that still share it. */
+  .admin-form,
+  [data-slot='admin-form-card'] {
+    --admin-form-gap: --spacing(7);
+    /* Side-by-side field gutter — a touch wider than a single spacing step. */
+    --admin-form-column-gap: --spacing(4);
+  }
+
+  .admin-form {
+    --admin-field-gap: --spacing(2);
+    /* Extra air between FormDescription and the control (label→desc stays tight). */
+    --admin-description-control-gap: --spacing(1.5);
+    /*
+     * Half of the empty leading a line box adds around its text. Resolved on the
+     * element that uses it, so each text size trims its own.
+     */
+    --admin-leading-trim: calc((1lh - 1em) / -2);
+    @apply grid rounded-lg border bg-card p-4;
+    gap: var(--admin-form-gap);
+  }
+
+  /*
+   * Equal space on both sides of the divider. Block-flow parents (a card
+   * wrapping panels) need the gap as a margin…
+   */
+  [data-slot='sticky-form-actions'] {
+    margin-top: var(--admin-form-gap, calc(var(--spacing) * 7));
+    padding-top: var(--admin-form-gap, calc(var(--spacing) * 7));
+  }
+
+  /* …while a grid form already spaced it, and a margin would double it. */
+  .admin-form > [data-slot='sticky-form-actions'] {
+    margin-top: 0;
+  }
+
+  /*
+   * Sit on the card's bottom edge so the sticky background leaves no gap. The
+   * card must not clip its overflow: `overflow: hidden` would make it the
+   * sticky scrollport and pin this row to its padding box, eating the space
+   * above the divider.
+   */
+  .admin-form > [data-slot='sticky-form-actions'],
+  [data-slot='admin-form-card'] > [data-slot='sticky-form-actions'] {
+    margin-bottom: calc(var(--spacing) * -4);
+  }
+
+  /* Nested panels inside a shared card — drop the nested ring and padding. */
+  [data-slot='admin-form-card'] > .admin-form {
+    @apply rounded-none border-0 bg-transparent p-0;
+  }
+
+  /*
+   * Authoring drawer: the sheet does not scroll, so the card caps at the space
+   * under the header and scrolls inside its own frame. Scrolling the drawer
+   * instead ran the card under the drawer's bottom edge, which sliced its
+   * bottom border off and left the pinned action row closing nothing.
+   * `both-edges` reserves the gutter on either side, so the fields stay
+   * centered and folding a section cannot shift them sideways.
+   */
+  [data-slot='sheet-content'] .admin-form {
+    max-height: 100%;
+    overflow-y: auto;
+    scrollbar-gutter: stable both-edges;
+  }
+
+  /*
+   * The sticky row's own bottom padding is the card's bottom inset here, so it
+   * ends on the border rather than hanging over it.
+   */
+  [data-slot='sheet-content']
+    .admin-form:has(> [data-slot='sticky-form-actions']) {
+    padding-bottom: 0;
+  }
+
+  [data-slot='sheet-content'] .admin-form > [data-slot='sticky-form-actions'] {
+    margin-bottom: 0;
+  }
+
+  /*
+   * One fold beat, wherever the fold lives: save-form sections and the
+   * sidebar's catalog groups open and close on the same timing.
+   */
+  [data-slot='collapsible-form-section'],
+  [data-slot='brand-font-preview'],
+  .admin-sidebar-fold {
+    --admin-fold-open-ms: 220ms;
+    --admin-fold-close-ms: 180ms;
+  }
+
+  /*
+   * Fold groups inside one save form. A hairline separates siblings so closed
+   * headers still read as a list; open content keeps the field gap.
+   */
+  [data-slot='collapsible-form-section'] {
+    gap: var(--admin-form-gap, calc(var(--spacing) * 7));
+  }
+
+  .admin-form
+    > [data-slot='collapsible-form-section']
+    + [data-slot='collapsible-form-section'] {
+    border-top: 1px solid var(--border);
+    padding-top: var(--admin-form-gap);
+  }
+
+  /* Fold / static section bodies inherit the form's row rhythm. */
+  [data-slot='form-section-body'] {
+    display: grid;
+    gap: var(--admin-form-gap, calc(var(--spacing) * 7));
+  }
+
+  /*
+   * Static FormSection stacks (create drawers, naming edit). Sibling dividers
+   * match collapsible folds and the viewer Dev panel's divided subsections.
+   */
+  [data-slot='form-section'] {
+    gap: var(--admin-form-gap, calc(var(--spacing) * 7));
+  }
+
+  .admin-form > [data-slot='form-section'] + [data-slot='form-section'] {
+    border-top: 1px solid var(--border);
+    padding-top: var(--admin-form-gap);
+  }
+
+  /* A little more air under the section heading than between field rows. */
+  [data-slot='form-section'] > [data-slot='form-section-heading'],
+  [data-slot='form-section-body'] > [data-slot='form-section-heading'] {
+    padding-bottom: --spacing(2);
+  }
+
+  /*
+   * Radix measures the panel and exposes its height, so the fold can animate
+   * from 0 instead of `auto`. Fade trails the height so text does not smear.
+   */
+  @keyframes admin-fold-open {
+    from {
+      height: 0;
+      opacity: 0;
+    }
+
+    to {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+  }
+
+  @keyframes admin-fold-close {
+    from {
+      height: var(--radix-collapsible-content-height);
+      opacity: 1;
+    }
+
+    to {
+      height: 0;
+      opacity: 0;
+    }
+  }
+
+  [data-slot='collapsible-form-section']
+    > [data-slot='collapsible-content'][data-state='open'],
+  [data-slot='brand-font-preview']
+    > [data-slot='collapsible-content'][data-state='open'],
+  .admin-sidebar-fold[data-state='open'] {
+    animation: admin-fold-open var(--admin-fold-open-ms) ease-out;
+  }
+
+  [data-slot='collapsible-form-section']
+    > [data-slot='collapsible-content'][data-state='closed'],
+  [data-slot='brand-font-preview']
+    > [data-slot='collapsible-content'][data-state='closed'],
+  .admin-sidebar-fold[data-state='closed'] {
+    animation: admin-fold-close var(--admin-fold-close-ms) ease-in;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-slot='collapsible-form-section'] > [data-slot='collapsible-content'],
+    [data-slot='brand-font-preview'] > [data-slot='collapsible-content'],
+    .admin-sidebar-fold {
+      animation: none;
+    }
+  }
+
+  /*
+   * One field cell: label / control / hint stay tight, and content-start keeps
+   * them at the top so a neighbour with a hint cannot push a hint-less field's
+   * control down in the same row. Multi-column rows share a wider column gutter.
+   */
+  .admin-form :is(.grid.gap-1, .grid.gap-2):not([class*='grid-cols']) {
+    @apply content-start;
+    gap: var(--admin-field-gap);
+  }
+
+  /*
+   * The label's line box hangs below its text and the hint's relaxed line box
+   * hangs above, so an equal gap reads tighter over a control than under it.
+   * Trim both, and the field gap is what you actually see.
+   */
+  .admin-form :is(.grid.gap-1, .grid.gap-2) > :is(label, [data-slot='label']) {
+    margin-bottom: var(--admin-leading-trim);
+  }
+
+  .admin-form
+    :is(.grid.gap-1, .grid.gap-2)
+    > :is(.type-meta, [data-slot='form-description'], [data-slot='form-hint']) {
+    margin-top: var(--admin-leading-trim);
+  }
+
+  .admin-form :is(.grid.gap-1, .grid.gap-2) > [data-slot='form-description'] {
+    margin-bottom: var(--admin-description-control-gap);
+  }
+
+  /* Supporting copy for the row above sits as close as one inside a field. */
+  .admin-form
+    > *
+    + :is([data-slot='form-description'], [data-slot='form-hint']) {
+    margin-top: calc(
+      var(--admin-field-gap) - var(--admin-form-gap) + var(--admin-leading-trim)
+    );
+  }
+
+  /*
+   * Checkbox + label on row 1; hint in column 2 so it lines up with the label,
+   * not the box. Same field gap / leading trim as other cells. Shrink-to-fit so
+   * a short option does not claim a whole form row and several can share one
+   * wrapping row; long supporting copy still wraps at the container width.
+   */
+  .admin-form [data-slot='checkbox-field'] {
+    display: grid;
+    grid-template-columns: auto minmax(0, auto);
+    align-items: center;
+    column-gap: --spacing(2);
+    row-gap: var(--admin-field-gap);
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .admin-form [data-slot='checkbox-field'] > :is(label, [data-slot='label']) {
+    margin-bottom: var(--admin-leading-trim);
+  }
+
+  .admin-form
+    [data-slot='checkbox-field']
+    > :is([data-slot='form-description'], [data-slot='form-hint']) {
+    grid-column-start: 2;
+    margin-top: var(--admin-leading-trim);
+  }
+
+  /* Label + description sit closer than label + control in a normal field. */
+  .admin-form [data-slot='checkbox-field'] > [data-slot='form-description'] {
+    margin-top: calc(var(--admin-leading-trim) - --spacing(1));
+  }
+
+  /* Quieter than body meta — supporting copy sits under controls. */
+  .admin-form
+    :is([data-slot='form-description'], [data-slot='form-hint'], .type-meta) {
+    @apply text-muted-foreground/70;
+  }
+
+  .icon-meta {
+    @apply size-3;
+  }
+
+  /* Label-adjacent only — quieter than the text. Not for CTAs. */
+  .icon-inline {
+    @apply size-3.5 text-muted-foreground/70;
+  }
+
+  .icon-control {
+    @apply size-4;
+  }
+
+  @keyframes chart-stroke {
+    from {
+      stroke-dasharray: 0 999;
+    }
+  }
+
+  @keyframes chart-bar {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  /*
+   * Duration, delay, and easing all come from `chartFillTimeline`: each segment
+   * carries its slice of one sweep-wide ease curve. Do not set a whole easing
+   * here — a full ease per segment brakes and restarts at every join.
+   */
+  .chart-animate-stroke,
+  .chart-animate-bar {
+    animation-duration: var(--chart-fill-ms, 0ms);
+    animation-delay: var(--chart-fill-delay, 0ms);
+    animation-timing-function: var(--chart-fill-ease, linear);
+    animation-fill-mode: both;
+  }
+
+  /* Held until `ChartMotionGate` sees an idle main thread — see that file. */
+  html[data-chart-motion='hold']
+    :is(.chart-animate-stroke, .chart-animate-bar) {
+    animation-play-state: paused;
+  }
+
+  .chart-animate-stroke {
+    animation-name: chart-stroke;
+  }
+
+  .chart-animate-bar {
+    transform-origin: left center;
+    animation-name: chart-bar;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chart-animate-stroke,
+    .chart-animate-bar {
+      animation: none;
+    }
+  }
+
+  /*
+   * Viewer preview-hero-skeleton (components-layer.css): muted fill + compositor
+   * shimmer. Overlay sits on AssetImage until decode; Debug holds it and hides
+   * the bitmap. Background is --muted so admin dark mode stays on tokens.
+   */
+  .admin-media-slot {
+    position: absolute;
+    inset: 0;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .admin-media-slot .preview-hero-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  .admin-media-slot:not(.is-loading) .preview-hero-skeleton {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .admin-media-slot .admin-media-img {
+    display: block;
+  }
+
+  .admin-media-slot.is-forced .admin-media-img {
+    visibility: hidden;
+  }
+
+  .preview-hero-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--muted);
+  }
+
+  .preview-hero-skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 25%,
+      rgb(255 255 255 / 0.75) 50%,
+      transparent 75%
+    );
+    transform: translateX(-100%);
+    animation: preview-hero-shimmer 1.4s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .dark .preview-hero-skeleton::after {
+    background: linear-gradient(
+      100deg,
+      transparent 25%,
+      rgb(255 255 255 / 0.14) 50%,
+      transparent 75%
+    );
+  }
+
+  @keyframes preview-hero-shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .preview-hero-skeleton::after {
+      animation: none;
+      display: none;
+    }
+
+    .admin-media-slot:not(.is-loading) .preview-hero-skeleton {
+      transition: none;
+    }
+  }
+}
+
+/*
+ * Form controls fill their field cell. The select trigger ships as w-fit — right
+ * for toolbars and the peer switcher, wrong beside a full-width input, and with
+ * whitespace-nowrap a long value pushes past the drawer. min-w-0 lets the value
+ * clamp instead. This has to sit in the utilities layer: a components-layer rule
+ * loses to the w-fit in the trigger's own class list no matter its specificity.
+ */
+@layer utilities {
+  /*
+   * Field labels need to beat Label's default utilities. Full foreground so
+   * they read clearly above muted descriptions/hints.
+   */
+  .admin-form label,
+  .admin-form [data-slot='label'] {
+    @apply font-heading text-xs font-medium tracking-wide text-foreground;
+  }
+
+  /*
+   * Option rows inside a radio group — quieter than field labels; selected is
+   * bold. These are choice values (like SelectItem), not the field caption, so
+   * they stay on `font-sans`. Spacing lives here rather than in the caller's
+   * class list. A dot reads lighter than a checkbox square, so it takes a
+   * tighter gutter than the checkbox row's 8px to look the same, and
+   * `line-height: 1` centers the text on its em box against the dot the way
+   * Label's `leading-none` does.
+   */
+  .admin-form [data-slot='radio-group'] > label {
+    @apply font-sans text-xs font-normal tracking-normal normal-case text-muted-foreground;
+    align-items: center;
+    gap: --spacing(1.5);
+    line-height: 1;
+  }
+
+  .admin-form
+    [data-slot='radio-group']
+    > label:has([data-slot='radio-group-item'][data-checked]),
+  .admin-form
+    [data-slot='radio-group']
+    > label:has([data-slot='radio-group-item'][data-state='checked']) {
+    @apply font-semibold text-foreground;
+  }
+
+  .admin-form [data-slot='select-trigger'] {
+    @apply w-full min-w-0;
+  }
+
+  /*
+   * A leading icon owns the field's left inset, so the value starts clear of
+   * it. Utilities layer for the same reason as above: the input's own `px-2.5`
+   * would otherwise win.
+   */
+  [data-slot='input-group'] > [data-slot='input'],
+  [data-slot='input-group'] > [data-slot='select-trigger'] {
+    padding-left: --spacing(8);
+  }
+
+  /*
+   * Side-by-side fields read cramped at the row's own vertical gap. Utilities
+   * layer for the same reason: the `gap-*` shorthand on the row would win here.
+   */
+  .admin-form [class*='grid-cols'] {
+    column-gap: var(--admin-form-column-gap);
+  }
+
+  /*
+   * Badge painted from one semantic item token: theme-colored label on a pale
+   * mix of the same color. Callers pass the item color as `--badge-item`.
+   * Utilities layer so it beats the variant's own text-foreground.
+   */
+  .badge-item {
+    background-color: color-mix(
+      in oklab,
+      var(--badge-item) var(--badge-surface-mix),
+      var(--card)
+    );
+    color: color-mix(
+      in oklab,
+      var(--badge-item) var(--badge-label-mix),
+      var(--foreground)
+    );
+  }
+
+  /* Gallery hero chips — same item hue, chroma toned up for cover-art contrast. */
+  .badge-item-solid {
+    background-color: oklch(
+      from var(--badge-item) calc(l * var(--badge-solid-lightness))
+        calc(c * var(--badge-solid-chroma)) h
+    );
+    color: var(--badge-on-solid);
+  }
+
+  /*
+   * PeerSwitcher is modal={false}. The authoring preview iframe (PSV/WebGL)
+   * steals focus during the load splash and can close the crumb menu on the
+   * same press that opened it. Mute the iframe while splash is up, and while
+   * a chrome menu is open.
+   */
+  .admin-preview-iframe.is-splashing {
+    pointer-events: none;
+  }
+
+  body:has(
+      :is(
+        [data-slot='dropdown-menu-content'],
+        [data-slot='dropdown-menu-sub-content'],
+        [data-slot='select-content']
+      ):is([data-state='open'], [data-open])
+    )
+    .admin-preview-iframe {
+    pointer-events: none;
+  }
+}

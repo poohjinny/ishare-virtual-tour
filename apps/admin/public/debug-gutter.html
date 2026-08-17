@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>drawer scrollbar gutter probe</title>
+    <link
+      rel="stylesheet"
+      href="/_next/static/chunks/%5Broot-of-the-server%5D__1ietj6i._.css"
+    />
+  </head>
+  <body class="bg-background text-foreground">
+    <div
+      id="sheet"
+      data-slot="sheet-content"
+      data-side="right"
+      class="ishare-scrollbar flex w-full flex-col gap-4 overflow-y-auto [scrollbar-gutter:stable] bg-popover text-sm text-popover-foreground"
+      style="position: fixed; inset: 0 0 0 auto; width: 640px; height: 100%"
+    >
+      <div data-slot="sheet-header" class="flex flex-col gap-1 px-6 pt-6">
+        <div data-slot="sheet-title" class="type-heading text-foreground">
+          Edit tour
+        </div>
+        <div
+          data-slot="sheet-description"
+          class="type-body text-muted-foreground"
+        >
+          Authoring drawer probe
+        </div>
+      </div>
+
+      <div class="px-6 pb-6">
+        <form class="admin-form">
+          <div id="short" class="grid gap-2">
+            <label data-slot="label">Tour title</label>
+            <input
+              class="h-9 w-full rounded-md border bg-transparent px-3"
+              value="Probe tour"
+            />
+          </div>
+          <div id="tall" hidden class="grid gap-2">
+            <textarea
+              style="height: 1200px"
+              class="w-full rounded-md border bg-transparent px-3 py-2"
+            ></textarea>
+          </div>
+          <div
+            data-slot="sticky-form-actions"
+            class="sticky bottom-0 z-10 flex flex-wrap items-center gap-3 border-t bg-card/95 pb-4 backdrop-blur"
+          >
+            <button class="h-9 rounded-md border px-4" type="button">
+              Cancel
+            </button>
+            <button
+              class="h-9 rounded-md bg-primary px-4 text-primary-foreground"
+              type="button"
+            >
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      window.addEventListener('load', () => {
+        const sheet = document.getElementById('sheet');
+        const short = document.getElementById('short');
+        const tall = document.getElementById('tall');
+        const collapsedLeft = short.getBoundingClientRect().left;
+        const collapsedRight = short.getBoundingClientRect().right;
+        tall.hidden = false;
+        const expandedLeft = short.getBoundingClientRect().left;
+        const expandedRight = short.getBoundingClientRect().right;
+        const out = {
+          gutter: getComputedStyle(sheet).scrollbarGutter,
+          scrolls: sheet.scrollHeight > sheet.clientHeight,
+          fieldShiftLeft: expandedLeft - collapsedLeft,
+          fieldShiftRight: expandedRight - collapsedRight,
+        };
+        const pre = document.createElement('pre');
+        pre.style.cssText =
+          'position:fixed;left:8px;top:8px;background:#fff;color:#000;padding:8px;font:12px monospace;z-index:99';
+        pre.textContent = JSON.stringify(out, null, 2);
+        document.body.appendChild(pre);
+      });
+    </script>
+  </body>
+</html>
