@@ -39,17 +39,23 @@ export function InfoFieldList({
   children,
   columns = 1,
   className,
+  layout = 'inline',
 }: {
   children: ReactNode;
   columns?: 1 | 2;
   className?: string;
+  /** Preview-adjacent details: icon + label over the value. Compact cards stay `inline`. */
+  layout?: 'stack' | 'inline';
 }) {
   return (
     <dl
       className={cn(
-        'grid items-start gap-x-3 gap-y-3',
-        columns === 1 && 'grid-cols-[auto_minmax(0,1fr)]',
-        columns === 2 &&
+        'grid items-start',
+        layout === 'stack' && 'grid-cols-1 gap-y-4',
+        layout === 'inline' && 'gap-x-3 gap-y-3',
+        layout === 'inline' && columns === 1 && 'grid-cols-[auto_minmax(0,1fr)]',
+        layout === 'inline' &&
+          columns === 2 &&
           'grid-cols-[auto_minmax(0,1fr)] sm:grid-cols-[var(--admin-info-subject-width)_minmax(0,1fr)_var(--admin-info-subject-width)_minmax(0,1fr)] sm:gap-x-8',
         className,
       )}
@@ -76,8 +82,9 @@ export function InfoField({
   const subject = (
     <dt
       className={cn(
-        'type-body inline-flex items-center gap-1.5 font-heading text-foreground',
-        layout === 'inline' && 'whitespace-nowrap',
+        'type-body inline-flex items-center text-muted-foreground',
+        layout === 'stack' && 'gap-2',
+        layout === 'inline' && 'gap-1.5 whitespace-nowrap',
       )}
     >
       {Icon ?
@@ -109,9 +116,16 @@ export function InfoField({
   }
 
   return (
-    <div className='grid gap-1'>
+    <div className='grid min-w-0 gap-1'>
       {subject}
-      <dd className='type-body text-foreground'>{value}</dd>
+      <dd
+        className={cn(
+          'type-body min-w-0 break-words text-foreground',
+          Icon && 'pl-[calc(--spacing(3.5)+--spacing(2))]',
+        )}
+      >
+        {value}
+      </dd>
     </div>
   );
 }

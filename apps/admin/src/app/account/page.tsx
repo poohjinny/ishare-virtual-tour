@@ -28,7 +28,7 @@ export default function AccountPage() {
           <AccountProfileForm />
 
           <Card className="h-full border-info/15">
-            <CardHeader className="gap-2">
+            <CardHeader>
               <div className="flex items-center gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info">
                   <ShieldCheck aria-hidden="true" className="size-5" />

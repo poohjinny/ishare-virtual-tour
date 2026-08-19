@@ -15,7 +15,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -84,9 +83,9 @@ function AccountProfileEditor({
         </Avatar>
         <div className="grid min-w-0 gap-1.5">
           <Badge variant="info">{ADMIN_ACCOUNT_COPY.identityStatus}</Badge>
-          <CardTitle>
-            <h2>{form.name || ADMIN_ACCOUNT_COPY.form.emptyName}</h2>
-          </CardTitle>
+          <h2 className="type-title leading-snug">
+            {form.name || ADMIN_ACCOUNT_COPY.form.emptyName}
+          </h2>
           <CardDescription>
             {ADMIN_ACCOUNT_COPY.identityDescription}
           </CardDescription>

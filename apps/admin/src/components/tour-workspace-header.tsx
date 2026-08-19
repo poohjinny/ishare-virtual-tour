@@ -1,4 +1,5 @@
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, PencilRuler } from 'lucide-react';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { MediaThumb } from '@/components/branded-avatar';
@@ -10,9 +11,13 @@ import {
 } from '@/components/page-header';
 import { PeerSwitcher } from '@/components/peer-switcher';
 import { ViewerTypeBadge, VisibilityBadge } from '@/components/status-badges';
-import { TourWorkspaceNav } from '@/components/tour-workspace-nav';
+import {
+  TourWorkspaceLead,
+  TourWorkspaceNav,
+} from '@/components/tour-workspace-nav';
 import { Button } from '@/components/ui/button';
-import { TOUR_FORM_COPY } from '@/lib/authoring-copy';
+import { showTourVisualEditor, tourVisualEditPath } from '@/lib/admin-routes';
+import { AUTHORING_SURFACE, TOUR_FORM_COPY } from '@/lib/authoring-copy';
 import type { TourVisibility } from '@/lib/tour-catalog';
 import type { AdminViewerType } from '@/lib/tour-detail';
 import type { AdminTourOverview } from '@/lib/tour-overview';
@@ -26,7 +31,6 @@ export function TourWorkspaceHeader({
   overview,
   overviews,
   actions,
-  lead,
 }: {
   tourId: string;
   title: string;
@@ -36,9 +40,9 @@ export function TourWorkspaceHeader({
   overview?: AdminTourOverview;
   overviews: AdminTourOverview[];
   actions?: ReactNode;
-  /** Tab-panel lead — current workspace tab copy, directly under the tabs. */
-  lead?: ReactNode;
 }) {
+  const showEditor = showTourVisualEditor(viewerType);
+
   return (
     <PageChrome>
       <PageHeader
@@ -81,6 +85,14 @@ export function TourWorkspaceHeader({
         actions={
           <>
             <HeaderEditButton />
+            {showEditor ?
+              <Button variant='outline' size='sm' asChild>
+                <Link href={tourVisualEditPath(tourId)}>
+                  <PencilRuler aria-hidden='true' />
+                  {AUTHORING_SURFACE.edit.label}
+                </Link>
+              </Button>
+            : null}
             {actions}
             <Button variant='outline' size='sm' asChild>
               <a
@@ -95,12 +107,11 @@ export function TourWorkspaceHeader({
           </>
         }
       />
-      <WorkspaceTabs lead={lead}>
+      <WorkspaceTabs lead={<TourWorkspaceLead tourId={tourId} />}>
         <TourWorkspaceNav
           tourId={tourId}
           sceneCount={overview?.sceneCount}
           namingCount={overview?.namingCount}
-          showEditor={viewerType === 'panorama'}
         />
       </WorkspaceTabs>
     </PageChrome>

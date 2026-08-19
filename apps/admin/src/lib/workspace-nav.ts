@@ -4,13 +4,15 @@ import {
   Info,
   ListTree,
   MapPinned,
-  PencilRuler,
   type LucideIcon,
 } from 'lucide-react';
 
+import { tourPath } from '@/lib/admin-routes';
+
 /**
  * One definition of the tour/client workspace surfaces, so every tab bar that
- * renders them stays in step.
+ * renders them stays in step. The panorama editor is a tool route
+ * (`/tours/[tourId]/edit`), not a workspace tab.
  */
 
 type WorkspaceMatch = 'exact' | 'prefix';
@@ -24,23 +26,14 @@ export interface WorkspaceNavItem {
 
 export interface TourWorkspaceNavItem extends WorkspaceNavItem {
   countKey?: 'scenes' | 'namings';
-  /** Panorama-only surface — model3d tours have no visual editor. */
-  editorOnly?: boolean;
 }
 
 export interface ClientWorkspaceNavItem extends WorkspaceNavItem {
   countKey?: 'tours';
 }
 
-const TOUR_WORKSPACE_ITEMS: TourWorkspaceNavItem[] = [
+export const TOUR_WORKSPACE_ITEMS: TourWorkspaceNavItem[] = [
   { suffix: '', label: 'Details', icon: Info, match: 'exact' },
-  {
-    suffix: '/edit',
-    label: 'Editor',
-    icon: PencilRuler,
-    match: 'exact',
-    editorOnly: true,
-  },
   {
     suffix: '/scenes',
     label: 'Scenes',
@@ -68,10 +61,6 @@ export const CLIENT_WORKSPACE_ITEMS: ClientWorkspaceNavItem[] = [
   },
 ];
 
-export function tourWorkspaceItems(showEditor: boolean) {
-  return TOUR_WORKSPACE_ITEMS.filter((item) => !item.editorOnly || showEditor);
-}
-
 export function isWorkspaceItemActive(
   pathname: string,
   href: string,
@@ -79,4 +68,14 @@ export function isWorkspaceItemActive(
 ) {
   if (match === 'exact') return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/** Details / Scenes / Namings list — not Layout, scene, or naming children. */
+export function isTourWorkspaceSurface(pathname: string, tourId: string) {
+  const base = tourPath(tourId);
+  return (
+    pathname === base ||
+    pathname === `${base}/scenes` ||
+    pathname === `${base}/namings`
+  );
 }

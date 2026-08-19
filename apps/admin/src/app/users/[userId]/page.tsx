@@ -29,7 +29,7 @@ export default async function UserDetailPage(
       parents={[{ href: '/users', label: 'Users' }]}
     >
       <PageMain>
-        <UserDetailPanel initialAccount={account} />
+        <UserDetailPanel key={account.id} initialAccount={account} />
       </PageMain>
     </AdminShell>
   );

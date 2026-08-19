@@ -1,16 +1,18 @@
 import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
 
 import { BrandedAvatar } from '@/components/branded-avatar';
-import { ClientWorkspaceNav } from '@/components/client-workspace-nav';
+import {
+  ClientWorkspaceLead,
+  ClientWorkspaceNav,
+  ClientWorkspaceSwitcher,
+} from '@/components/client-workspace-nav';
 import { HeaderEditButton } from '@/components/header-edit';
 import {
   PageChrome,
   PageHeader,
   WorkspaceTabs,
 } from '@/components/page-header';
-import { PeerSwitcher } from '@/components/peer-switcher';
 import {
   LicenseBadge,
   ViewerTypeBadge,
@@ -19,7 +21,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { clientLogoUrl } from '@/lib/admin-media';
 import {
-  adminClientCatalog,
   type AdminClientSummary,
   type TourVisibility,
 } from '@/lib/tour-catalog';
@@ -30,17 +31,11 @@ export function ClientWorkspaceHeader({
   tourCount,
   visibilities = [],
   viewerTypes = [],
-  switchHrefTemplate = '/clients/{id}',
-  lead,
 }: {
   client: AdminClientSummary;
   tourCount: number;
   visibilities?: TourVisibility[];
   viewerTypes?: AdminViewerType[];
-  /** Keep the active workspace tab when switching clients. */
-  switchHrefTemplate?: string;
-  /** Tab-panel lead — current workspace tab copy, directly under the tabs. */
-  lead?: ReactNode;
 }) {
   return (
     <PageChrome>
@@ -54,20 +49,7 @@ export function ClientWorkspaceHeader({
             className='h-full w-20 self-stretch'
           />
         }
-        switcher={
-          <PeerSwitcher
-            variant='title'
-            label='Switch client'
-            value={client.id}
-            options={adminClientCatalog.map((item) => ({
-              value: item.id,
-              label: item.name,
-              image: clientLogoUrl(item.id),
-            }))}
-            hrefTemplate={switchHrefTemplate}
-            imageFit='contain'
-          />
-        }
+        switcher={<ClientWorkspaceSwitcher client={client} />}
         meta={
           <>
             <LicenseBadge licensed={client.licensed} />
@@ -93,7 +75,7 @@ export function ClientWorkspaceHeader({
           </>
         }
       />
-      <WorkspaceTabs lead={lead}>
+      <WorkspaceTabs lead={<ClientWorkspaceLead clientId={client.id} />}>
         <ClientWorkspaceNav clientId={client.id} tourCount={tourCount} />
       </WorkspaceTabs>
     </PageChrome>

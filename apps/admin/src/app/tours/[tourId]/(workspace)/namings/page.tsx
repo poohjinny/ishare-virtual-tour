@@ -1,12 +1,8 @@
 import { notFound } from 'next/navigation';
 
 import { AdminShell } from '@/components/admin-shell';
-import { HeaderEditProvider } from '@/components/header-edit';
 import { NamingManager } from '@/components/naming-manager';
-import { PageMain } from '@/components/page-header';
 import { TourEditorPanel } from '@/components/tour-editor-panel';
-import { TourWorkspaceHeader } from '@/components/tour-workspace-header';
-import { AUTHORING_SURFACE } from '@/lib/authoring-copy';
 import { adminTourCatalog, getAdminTour } from '@/lib/tour-catalog';
 import { getAdminTourDetail } from '@/lib/tour-detail';
 import { getAdminTourNamings } from '@/lib/tour-namings';
@@ -51,29 +47,14 @@ export default async function TourNamingsPage(
         },
       ]}
     >
-      <HeaderEditProvider canEdit={canEdit}>
-        <PageMain>
-          <TourWorkspaceHeader
-            tourId={tour.id}
-            title={overview?.title ?? tour.name}
-            summary={tour.summary}
-            visibility={tour.visibility}
-            viewerType={detail.viewerType}
-            overview={overview}
-            overviews={overviews}
-            lead={AUTHORING_SURFACE.namings.description}
-          />
-
-          <NamingManager
-            canEdit={canEdit}
-            clientId={tour.clientId}
-            namings={namings}
-            scenes={scenes}
-            tourId={tour.id}
-          />
-          <TourEditorPanel canEdit={canEdit} info={false} tour={detail} />
-        </PageMain>
-      </HeaderEditProvider>
+      <NamingManager
+        canEdit={canEdit}
+        clientId={tour.clientId}
+        namings={namings}
+        scenes={scenes}
+        tourId={tour.id}
+      />
+      <TourEditorPanel canEdit={canEdit} info={false} tour={detail} />
     </AdminShell>
   );
 }

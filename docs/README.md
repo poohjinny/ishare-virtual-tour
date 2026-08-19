@@ -56,19 +56,30 @@ docs/
 
 ### `engineering/`
 
+#### Admin
+
+| Document                                       | Description                                                           |
+| ---------------------------------------------- | --------------------------------------------------------------------- |
+| [ADMIN_UI.md](./engineering/ADMIN_UI.md)       | Tour Admin (`apps/admin`) — shadcn rules, hybrid UI, shared kit later |
+| [ADMIN_GUIDE.md](./engineering/ADMIN_GUIDE.md) | Admin authoring assistant overview (shell → tools later)              |
+
+#### Viewer
+
+| Document                                       | Description                                                     |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| [COMPONENTS.md](./engineering/COMPONENTS.md)   | Shared UI components — React and HTML marker popups             |
+| [STYLING.md](./engineering/STYLING.md)         | Tailwind + custom CSS; rem-first responsive units               |
+| [DEV_PANEL.md](./engineering/DEV_PANEL.md)     | Local authoring / QA UI (`?dev=1`)                              |
+| [MOBILE.md](./engineering/MOBILE.md)           | React chrome layout on phone — breakpoints, QA                  |
+| [PERFORMANCE.md](./engineering/PERFORMANCE.md) | Performance playbook — P0–P5 (tasks only in ROADMAP)            |
+
+#### Shared
+
 | Document                                                   | Description                                                           |
 | ---------------------------------------------------------- | --------------------------------------------------------------------- |
 | [CODING_GUIDELINES.md](./engineering/CODING_GUIDELINES.md) | Engineering reference — structure, viewer-type isolation, transitions |
-| [ADMIN_UI.md](./engineering/ADMIN_UI.md)                   | Tour Admin (`apps/admin`) — shadcn rules, hybrid UI, shared kit later |
-| [ADMIN_GUIDE.md](./engineering/ADMIN_GUIDE.md)             | Admin authoring assistant overview (shell → tools later)              |
-| [DEV_PANEL.md](./engineering/DEV_PANEL.md)                 | Local authoring / QA UI (`?dev=1`)                                    |
-| [DEV_PANEL.md](./engineering/DEV_PANEL.md)                 | Dev panel (`?dev=1`) — Scene/Scenes/Namings/Tours/Clients/Debug       |
 | [GIT_WORKFLOW.md](./engineering/GIT_WORKFLOW.md)           | Git commit/push guidelines — one task per commit                      |
-| [STYLING.md](./engineering/STYLING.md)                     | Tailwind + custom CSS; rem-first responsive units                     |
 | [TECH_STACK.md](./engineering/TECH_STACK.md)               | Why this stack (PSV + Three.js, Workers, not Next.js)                 |
-| [COMPONENTS.md](./engineering/COMPONENTS.md)               | Shared UI components — React and HTML marker popups                   |
-| [PERFORMANCE.md](./engineering/PERFORMANCE.md)             | Performance playbook — P0–P5 (tasks only in ROADMAP)                  |
-| [MOBILE.md](./engineering/MOBILE.md)                       | React chrome layout on phone — breakpoints, QA                        |
 
 ### `ops/`
 

@@ -123,6 +123,7 @@ export function adminStaffCrumbPeers(
     label: 'Switch user',
     hrefTemplate: '/users/{id}',
     imageFit: 'cover' as const,
+    shape: 'circle' as const,
     options: adminStaffAccounts(identity).map((account) => ({
       value: account.id,
       label: account.name,

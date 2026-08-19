@@ -17,6 +17,26 @@ export const cardLinkClass =
   'cursor-pointer text-primary underline-offset-4 transition-colors duration-200 hover:underline';
 
 /**
+ * Media + label in a menu or select. `gap-2.5` is a half-step wider than
+ * glyph rows on `DropdownMenuItem` / `SelectItem` (`gap-2`). Whether the
+ * mark is a `PersonAvatar` circle or a `BrandedAvatar` / `OptionThumb`
+ * tile. Do not set a different gap at the call site; wrap the media +
+ * label in this class even inside a menu item so those primitives keep
+ * their default for Edit/Delete icon rows.
+ */
+export const mediaLabelClass = 'inline-flex min-w-0 items-center gap-2.5';
+
+/** Same pairing in a breadcrumb trail chip — one step tighter than menus. */
+export const breadcrumbMediaLabelClass = cn(mediaLabelClass, 'gap-2');
+
+/**
+ * Color swatch + hex/label. Tighter than a breadcrumb media row (`gap-2`);
+ * do not reuse `mediaLabelClass` here — dots sit closer than avatars or
+ * thumbs.
+ */
+export const colorLabelClass = 'inline-flex min-w-0 items-center gap-1';
+
+/**
  * Leading media column — hug the logo/thumb (`w-0`) and keep a short trail so
  * the title sits close. Also pulls the next title cell’s left pad in (default
  * table `pl-4` is too roomy after art). `h-px` is the percentage base a table
@@ -37,3 +57,9 @@ export const tableBadgeClass = 'w-full';
 
 /** Shrink a badge column to its content so leftover table width does not inflate it. */
 export const tableBadgeCellClass = 'w-0';
+
+/**
+ * Trailing row-actions column — keep it narrow and end-aligned so the kebab
+ * hugs the row’s right edge. Do not make this column sticky.
+ */
+export const tableActionsCellClass = 'w-10 text-end';

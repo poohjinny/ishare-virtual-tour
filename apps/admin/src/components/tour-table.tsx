@@ -4,8 +4,9 @@ import { useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   ExternalLink,
   LayoutList,
-  MoreHorizontal,
+  MoreVertical,
   Pencil,
+  PencilRuler,
   Settings2,
   Trash2,
 } from 'lucide-react';
@@ -30,7 +31,7 @@ import { TourEditorPanel } from '@/components/tour-editor-panel';
 import { useSortableRows } from '@/hooks/use-sortable-rows';
 import { useFlipList } from '@/hooks/use-flip-list';
 import { useTableRowActionMenu } from '@/hooks/use-table-row-action-menu';
-import { TOUR_FORM_COPY } from '@/lib/authoring-copy';
+import { AUTHORING_SURFACE, TOUR_FORM_COPY } from '@/lib/authoring-copy';
 import { showFormError, showFormSuccess } from '@/lib/form-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -62,11 +63,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { deleteLocalTour, fetchLocalTour } from '@/lib/admin-dev-api';
-import { tourVisualEditPath } from '@/lib/admin-routes';
+import { showTourVisualEditor, tourVisualEditPath } from '@/lib/admin-routes';
 import type { AdminTourDetail } from '@/lib/tour-detail';
 import type { AdminTourOverview } from '@/lib/tour-overview';
 import {
   cn,
+  tableActionsCellClass,
   tableBadgeCellClass,
   tableBadgeClass,
   tableMediaCellClass,
@@ -202,10 +204,6 @@ export function TourTable({
   }
 
   async function openEdit(tour: AdminTourOverview) {
-    if (tour.viewerType === 'panorama') {
-      router.push(tourVisualEditPath(tour.id));
-      return;
-    }
     setEditBusyId(tour.id);
     try {
       const detail = await prefetchTour(tour.id);
@@ -304,7 +302,7 @@ export function TourTable({
                 onSort={toggle}
                 className={cn('hidden sm:table-cell', tableBadgeCellClass)}
               />
-              <TableHead className='w-12'>
+              <TableHead className={tableActionsCellClass}>
                 <span className='sr-only'>Actions</span>
               </TableHead>
             </TableRow>
@@ -327,6 +325,7 @@ export function TourTable({
             : null}
             {rows.map((tour) => {
               const menuProps = rowActionMenu.menuProps(tour.id);
+              const showEditor = showTourVisualEditor(tour.viewerType);
               return (
                 <TableRow
                   key={tour.id}
@@ -384,7 +383,7 @@ export function TourTable({
                       className={tableBadgeClass}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className={tableActionsCellClass}>
                     <DropdownMenu
                       {...menuProps}
                       onOpenChange={(open) => {
@@ -401,7 +400,7 @@ export function TourTable({
                               aria-label={`Actions for ${tour.title}`}
                               disabled={editBusyId === tour.id}
                             >
-                              <MoreHorizontal aria-hidden='true' />
+                              <MoreVertical aria-hidden='true' />
                             </Button>
                           </DropdownMenuTrigger>
                         </TooltipTrigger>
@@ -428,6 +427,14 @@ export function TourTable({
                             Open live tour
                           </a>
                         </DropdownMenuItem>
+                        {showEditor ?
+                          <DropdownMenuItem asChild>
+                            <Link href={tourVisualEditPath(tour.id)}>
+                              <PencilRuler aria-hidden='true' />
+                              {AUTHORING_SURFACE.edit.openLabel}
+                            </Link>
+                          </DropdownMenuItem>
+                        : null}
                         {canEdit ?
                           <DropdownMenuItem
                             disabled={editBusyId === tour.id}

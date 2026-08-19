@@ -1,12 +1,8 @@
 import { notFound } from 'next/navigation';
 
 import { AdminShell } from '@/components/admin-shell';
-import { HeaderEditProvider } from '@/components/header-edit';
-import { PageMain } from '@/components/page-header';
 import { SceneManagePanel } from '@/components/scene-manage-panel';
 import { TourEditorPanel } from '@/components/tour-editor-panel';
-import { TourWorkspaceHeader } from '@/components/tour-workspace-header';
-import { AUTHORING_SURFACE } from '@/lib/authoring-copy';
 import { adminTourCatalog, getAdminTour } from '@/lib/tour-catalog';
 import { getAdminTourDetail } from '@/lib/tour-detail';
 import {
@@ -47,28 +43,13 @@ export default async function TourScenesPage(
         },
       ]}
     >
-      <HeaderEditProvider canEdit={canEdit}>
-        <PageMain>
-          <TourWorkspaceHeader
-            tourId={tour.id}
-            title={overview?.title ?? tour.name}
-            summary={tour.summary}
-            visibility={tour.visibility}
-            viewerType={detail.viewerType}
-            overview={overview}
-            overviews={overviews}
-            lead={AUTHORING_SURFACE.scenes.description}
-          />
-
-          <SceneManagePanel
-            canEdit={canEdit}
-            scenes={scenes}
-            tourId={tour.id}
-            viewerType={detail.viewerType}
-          />
-          <TourEditorPanel canEdit={canEdit} info={false} tour={detail} />
-        </PageMain>
-      </HeaderEditProvider>
+      <SceneManagePanel
+        canEdit={canEdit}
+        scenes={scenes}
+        tourId={tour.id}
+        viewerType={detail.viewerType}
+      />
+      <TourEditorPanel canEdit={canEdit} info={false} tour={detail} />
     </AdminShell>
   );
 }

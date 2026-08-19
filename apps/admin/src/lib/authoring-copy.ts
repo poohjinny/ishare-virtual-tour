@@ -44,9 +44,10 @@ export const AUTHORING_SURFACE = {
       "Build and organize every scene on this tour. Add new panoramas or viewpoints, edit titles and visibility, and reorder the Explore tour list. Group Up/Down changes list order only — not the nav-graph floor links visitors follow in the viewer.",
   },
   edit: {
-    label: "Editor",
+    label: "Layout",
+    openLabel: "Open layout",
     description:
-      "Panorama visual editor — pick a scene, place and move hotspots in the live viewer, and set the opening camera. Everyday authoring happens here; Details and Scenes stay for catalog metadata and list management.",
+      "Panorama layout — pick a scene, place and move hotspots in the live viewer, and set the opening camera. Everyday authoring happens here; Details and Scenes stay for catalog metadata and list management.",
   },
   scene: {
     label: "Scene",
@@ -63,6 +64,14 @@ export const AUTHORING_SURFACE = {
     description:
       "Local QA tools for this page. Toggle preserved URL flags without a reload, and open Tour Guide / chat / frozen UI fixtures to verify chrome and layouts while you author.",
   },
+} as const;
+
+/**
+ * In-page iframe split heading. Header Preview and kebab Open preview still
+ * open a new tab — same word, different destination.
+ */
+export const PREVIEW_PANE_COPY = {
+  title: "Preview",
 } as const;
 
 export const CATALOG_VISIBILITY_OPTIONS = [
@@ -99,16 +108,16 @@ export const INFO_DISPLAY_OPTIONS = [
 
 export const HOTSPOT_SECTION = {
   panorama: {
-    title: "Manage hotspots",
+    title: "Hotspots",
     description:
-      "Placements on this scene — nav, naming (where), info, and place overview. Naming business fields live on the Naming tab.",
+      "Placements on this scene — nav, naming (where), info, and place overview. Naming business fields live on the naming opportunity.",
     emptyMessage: "No hotspots on this scene yet.",
     addButtonLabel: "Add hotspot",
   },
   model3d: {
-    title: "Manage hotspots",
+    title: "Hotspots",
     description:
-      "All placements on the 3D model — nav, naming (where), and info. Optional home viewpoint is for authoring; pins still appear in every view. Naming business fields live on the Naming tab.",
+      "All placements on the 3D model — nav, naming (where), and info. Optional home viewpoint is for authoring; pins still appear in every view. Naming business fields live on the naming opportunity.",
     emptyMessage: "No hotspots on this model yet.",
     addButtonLabel: "Add hotspot",
   },
@@ -150,7 +159,7 @@ export const NAMING_CATALOG_SECTION = {
   createButtonLabel: "Create naming",
   manageTitle: "Naming list",
   manageDescription:
-    "Naming opportunities for this tour — status, price, donor, and copy. Place pins from the Editor or Scene → Hotspots.",
+    "Naming opportunities for this tour — status, price, donor, and copy. Place pins from Layout or Scene → Hotspots.",
 } as const;
 
 export const EXPERIENCE_COPY = {
@@ -373,6 +382,7 @@ export const NAMING_FORM_COPY = {
   contentSectionDescription: "Body copy and video for the naming card.",
   donorSection: "Donor",
   donorSectionDescription: "Recognition details when the opportunity is sold.",
+  placementsSection: "Placements",
   nameOptional: "Name (optional)",
   namePlaceholder: "Uses scene title when empty",
   nameDescription: "Public name of this naming opportunity.",
@@ -613,7 +623,7 @@ export const ADMIN_DEBUG_COPY = {
       hint: "Hide media and hold the viewer shimmer so you can check the fixture",
     },
     paused:
-      "Viewer preview paused. Turn off Pause preview iframe in Admin Debug.",
+      "Preview paused. Turn off Pause preview iframe in Admin Debug.",
   },
   navigation: {
     label: "Navigation",

@@ -4,14 +4,21 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * Route width and section rhythm. `workbench` is for a tool route whose canvas
- * is the content — the panorama editor: it trades the reading-column cap for
- * display width and tightens the section beat so the canvas keeps the height.
+ * Route width and section rhythm. Catalog / reading routes stay `default`
+ * (content height — do not fill). `split` keeps that reading-column cap and
+ * section beat so lead copy stays, but fills the remaining viewport so the
+ * preview stage can grow (tour Details, scene child). `workbench` is for a
+ * tool route whose canvas is the content — the panorama editor: it trades the
+ * reading-column cap for display width, fills under the tool header, and
+ * tightens the section beat so the canvas keeps the height.
  */
 const PAGE_MAIN_VARIANTS = {
-  default: 'max-w-7xl [--page-section-gap:3rem] md:[--page-section-gap:4rem]',
+  default:
+    'h-auto max-w-7xl flex-none [--page-section-gap:3rem] md:[--page-section-gap:4rem]',
+  split:
+    'h-full max-w-7xl min-h-0 flex-1 overflow-hidden [--page-section-gap:3rem] md:[--page-section-gap:4rem]',
   workbench:
-    'max-w-[120rem] [--page-section-gap:2rem] md:[--page-section-gap:2.5rem]',
+    'h-full max-w-[120rem] min-h-0 flex-1 overflow-hidden [--page-section-gap:2rem] md:[--page-section-gap:2.5rem]',
 } as const;
 
 /** Shared page chrome: consistent padding, gap, and heading scale. */
@@ -27,7 +34,7 @@ export function PageMain({
   return (
     <main
       className={cn(
-        'mx-auto flex w-full flex-1 flex-col gap-(--page-section-gap) p-4 md:p-6',
+        'mx-auto flex w-full flex-col gap-(--page-section-gap) p-4 md:p-6',
         PAGE_MAIN_VARIANTS[variant],
         // Intro blocks (identity, tabs + lead, summary stats) sit closer to the
         // block they introduce than sections sit to each other — always half the
@@ -63,7 +70,7 @@ export function PageHeader({
   return (
     <div
       data-slot='page-header'
-      className={cn('flex min-w-0 items-stretch gap-4', className)}
+      className={cn('flex min-w-0 items-start gap-4', className)}
     >
       {media ?
         <div className='flex min-h-0 w-fit shrink-0 self-stretch'>{media}</div>
@@ -90,7 +97,7 @@ export function PageHeader({
         : null}
       </div>
       {actions ?
-        <div className='flex shrink-0 items-center gap-2 self-center'>
+        <div className='flex shrink-0 items-center gap-2'>
           {actions}
         </div>
       : null}

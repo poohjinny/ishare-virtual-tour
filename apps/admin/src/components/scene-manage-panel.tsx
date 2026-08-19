@@ -13,9 +13,10 @@ import {
   LayoutList,
   Link2,
   ListTree,
-  MoreHorizontal,
-  Pencil,
+  MoreVertical,
+  PencilRuler,
   Plus,
+  Settings2,
   Trash2,
   Type,
 } from 'lucide-react';
@@ -80,12 +81,16 @@ import {
   fileToBase64,
   reorderLocalScenes,
 } from '@/lib/admin-dev-api';
-import { tourVisualEditPath } from '@/lib/admin-routes';
-import { SCENE_FORM_COPY } from '@/lib/authoring-copy';
+import {
+  TOUR_LAYOUT_FROM_SCENES,
+  tourVisualEditPath,
+} from '@/lib/admin-routes';
+import { AUTHORING_SURFACE, SCENE_FORM_COPY } from '@/lib/authoring-copy';
 import type { AdminViewerType } from '@/lib/tour-detail';
 import type { AdminSceneSummary } from '@/lib/tour-scenes';
 import {
   cn,
+  tableActionsCellClass,
   tableBadgeCellClass,
   tableBadgeClass,
   tableMediaCellClass,
@@ -453,7 +458,7 @@ export function SceneManagePanel({
         }
       />
 
-      <div className='overflow-hidden rounded-xl border'>
+      <div className='overflow-hidden rounded-xl border bg-card'>
         <Table>
           <TableHeader>
             <TableRow className='hover:bg-transparent'>
@@ -487,7 +492,7 @@ export function SceneManagePanel({
                 sortDir={sortDir}
                 onSort={toggle}
               />
-              <TableHead className='w-40'>
+              <TableHead className={tableActionsCellClass}>
                 <span className='sr-only'>Actions</span>
               </TableHead>
             </TableRow>
@@ -514,10 +519,7 @@ export function SceneManagePanel({
                 <TableRow
                   key={scene.id}
                   ref={flipRef(scene.id)}
-                  {...rowActionMenu.rowActionProps(
-                    scene.id,
-                    !canEdit || busy,
-                  )}
+                  {...rowActionMenu.rowActionProps(scene.id, busy)}
                   onDragOver={(event) => {
                     if (!canReorder || !dragId) return;
                     event.preventDefault();
@@ -600,45 +602,63 @@ export function SceneManagePanel({
                   <TableCell>
                     <Badge variant='secondary'>{scene.hotspotCount}</Badge>
                   </TableCell>
-                  <TableCell>
-                    <div className='flex items-center justify-end gap-1'>
-                      <Button variant='outline' size='sm' asChild>
-                        <Link
-                          href={buildAdminPreviewUrl(tourId, {
-                            sceneId: scene.id,
-                          })}
-                          target='_blank'
-                          rel='noreferrer'
-                        >
-                          <ExternalLink aria-hidden='true' />
-                          Preview
-                        </Link>
-                      </Button>
-                      {canEdit ?
-                        <DropdownMenu
-                          {...rowActionMenu.menuProps(scene.id)}
-                        >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  type='button'
-                                  size='icon'
-                                  variant='ghost'
-                                  aria-label={`Actions for ${scene.title}`}
-                                  disabled={busy}
-                                >
-                                  <MoreHorizontal aria-hidden='true' />
-                                </Button>
-                              </DropdownMenuTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>Scene actions</TooltipContent>
-                          </Tooltip>
-                          <DropdownMenuContent
-                            align='end'
-                            {...rowActionMenu.contentProps(scene.id)}
+                  <TableCell className={tableActionsCellClass}>
+                    <DropdownMenu {...rowActionMenu.menuProps(scene.id)}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type='button'
+                              size='icon'
+                              variant='ghost'
+                              aria-label={`Actions for ${scene.title}`}
+                              disabled={busy}
+                            >
+                              <MoreVertical aria-hidden='true' />
+                            </Button>
+                          </DropdownMenuTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>Scene actions</TooltipContent>
+                      </Tooltip>
+                      <DropdownMenuContent
+                        align='end'
+                        {...rowActionMenu.contentProps(scene.id)}
+                      >
+                        <DropdownMenuLabel>Scene actions</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/tours/${tourId}/scenes/${scene.id}`}>
+                            <Settings2 aria-hidden='true' />
+                            View details
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <a
+                            href={buildAdminPreviewUrl(tourId, {
+                              sceneId: scene.id,
+                            })}
+                            target='_blank'
+                            rel='noreferrer'
                           >
-                            <DropdownMenuLabel>Scene actions</DropdownMenuLabel>
+                            <ExternalLink aria-hidden='true' />
+                            Open preview
+                          </a>
+                        </DropdownMenuItem>
+                        {viewerType === 'panorama' ?
+                          <DropdownMenuItem asChild>
+                            <Link
+                              href={tourVisualEditPath(
+                                tourId,
+                                scene.id,
+                                TOUR_LAYOUT_FROM_SCENES,
+                              )}
+                            >
+                              <PencilRuler aria-hidden='true' />
+                              {AUTHORING_SURFACE.edit.openLabel}
+                            </Link>
+                          </DropdownMenuItem>
+                        : null}
+                        {canEdit ?
+                          <>
                             <DropdownMenuItem
                               disabled={!canReorder || index === 0}
                               onSelect={() => void moveScene(index, -1)}
@@ -669,18 +689,6 @@ export function SceneManagePanel({
                                 )
                               }
                             />
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href={
-                                  viewerType === 'panorama' ?
-                                    tourVisualEditPath(tourId, scene.id)
-                                  : `/tours/${tourId}/scenes/${scene.id}`
-                                }
-                              >
-                                <Pencil aria-hidden='true' />
-                                Edit
-                              </Link>
-                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <ConfirmDeleteDialog
                               title={`Delete “${scene.title}”?`}
@@ -703,10 +711,10 @@ export function SceneManagePanel({
                                 </DropdownMenuItem>
                               }
                             />
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      : null}
-                    </div>
+                          </>
+                        : null}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               );

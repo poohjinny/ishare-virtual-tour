@@ -99,6 +99,8 @@ body {
   --chart-6: oklch(0.74 0.08 15);
   --radius: 0.625rem;
   --admin-info-subject-width: 8.5rem;
+  /* Floating menus: PeerSwitcher, Select, long action lists. Same 24rem cap as toast / PeerSwitcher width. */
+  --admin-dropdown-max-height: 24rem;
   /*
    * Stat ink: hero counts and their icon carry the card's hue, pulled toward the
    * text color so a pale tone still reads at display size.
@@ -383,6 +385,7 @@ html[data-guide-dock='0'] [data-slot='admin-guide-rail'] {
 /*
  * Thin scrollbar — same recipe as tour-viewer `.ishare-scrollbar`. Form cards
  * own the scroll inside an authoring drawer, so they wear the same bar.
+ * Floating menus wear it on the primitive next to `.admin-menu-scroll`.
  * Do not set scrollbar-width/color on Chromium (that draws the thick OS bar).
  */
 .ishare-scrollbar {
@@ -599,8 +602,21 @@ html[data-guide-dock='0'] [data-slot='admin-guide-rail'] {
     @apply font-heading text-lg font-semibold tracking-tight md:text-xl;
   }
 
+  /*
+   * List / non-card titles — one step above body (14px). Do not use `text-sm`:
+   * that token is remapped to 0.8125rem for body density. Card headings use
+   * `.type-eyebrow` instead; do not uppercase this role globally.
+   */
   .type-title {
-    @apply font-heading text-base font-semibold tracking-tight;
+    @apply font-heading text-[0.875rem] font-semibold tracking-tight;
+  }
+
+  /*
+   * Card section headings (`CardTitle` only). Smaller than body, tracked,
+   * uppercase, semibold, muted. Page titles stay `.type-display`.
+   */
+  .type-eyebrow {
+    @apply font-heading text-xs font-semibold leading-none tracking-widest uppercase text-muted-foreground/70;
   }
 
   /*
@@ -622,6 +638,25 @@ html[data-guide-dock='0'] [data-slot='admin-guide-rail'] {
 
   .type-meta {
     @apply text-[0.6875rem] leading-relaxed text-muted-foreground;
+  }
+
+  /*
+   * Floating menus (DropdownMenu, Select, submenu). Cap at the token and the
+   * remaining viewport, then overflow so a long peer list cannot cover the page.
+   * Pair with `.ishare-scrollbar` on the primitive — same thin bar as Guide /
+   * main chrome. Stay in this layer so `data-[state=closed]:overflow-hidden`
+   * can still win for the exit hold. Do not invent max-h-* at a call site.
+   */
+  .admin-menu-scroll {
+    max-height: min(
+      var(--admin-dropdown-max-height),
+      var(
+        --radix-dropdown-menu-content-available-height,
+        var(--radix-select-content-available-height, 100%)
+      )
+    );
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   /* One form rhythm for the card and any nested tab panels that still share it. */
@@ -673,6 +708,14 @@ html[data-guide-dock='0'] [data-slot='admin-guide-rail'] {
   /* Nested panels inside a shared card — drop the nested ring and padding. */
   [data-slot='admin-form-card'] > .admin-form {
     @apply rounded-none border-0 bg-transparent p-0;
+  }
+
+  /*
+   * Form rhythm on CardContent: the card already owns heading→body via
+   * `--card-spacing`. Don't let `.admin-form`'s `p-4` stack on top of it.
+   */
+  [data-slot='card-content'].admin-form {
+    @apply rounded-none border-0 bg-transparent py-0;
   }
 
   /*

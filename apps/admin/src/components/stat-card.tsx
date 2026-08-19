@@ -7,7 +7,6 @@ import {
   DonutLegend,
   type DonutSlice,
 } from '@/components/donut-chart';
-import { CardTitle } from '@/components/ui/card';
 import {
   chartShares,
   chartStartTimes,
@@ -121,16 +120,16 @@ function StatPillEyebrow({
       : null}
       <div className='flex min-w-0 items-baseline gap-2'>
         {showValue ?
-          <CardTitle
+          <span
             className={cn(
-              'font-heading text-3xl tabular-nums tracking-tight',
+              'font-heading text-3xl leading-snug tabular-nums tracking-tight',
               valueClass,
             )}
           >
             {typeof value === 'number' ?
               <AnimatedStatValue value={value} />
             : value}
-          </CardTitle>
+          </span>
         : null}
         <span className='type-label uppercase tracking-[0.14em] text-muted-foreground'>
           {label}

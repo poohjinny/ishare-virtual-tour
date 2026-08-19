@@ -4,13 +4,54 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { PeerSwitcher } from '@/components/peer-switcher';
 import { Badge } from '@/components/ui/badge';
+import { clientLogoUrl } from '@/lib/admin-media';
 import { clientPath } from '@/lib/admin-routes';
+import { AUTHORING_SURFACE } from '@/lib/authoring-copy';
+import {
+  adminClientCatalog,
+  type AdminClientSummary,
+} from '@/lib/tour-catalog';
 import {
   CLIENT_WORKSPACE_ITEMS,
   isWorkspaceItemActive,
 } from '@/lib/workspace-nav';
 import { cn } from '@/lib/utils';
+
+export function ClientWorkspaceLead({ clientId }: { clientId: string }) {
+  const pathname = usePathname();
+  const base = clientPath(clientId);
+  if (pathname === `${base}/tours`) {
+    return AUTHORING_SURFACE.clientTours.description;
+  }
+  if (pathname === base) return AUTHORING_SURFACE.clientDetails.description;
+  return null;
+}
+
+export function ClientWorkspaceSwitcher({
+  client,
+}: {
+  client: AdminClientSummary;
+}) {
+  const pathname = usePathname();
+  const onTours = pathname === `${clientPath(client.id)}/tours`;
+
+  return (
+    <PeerSwitcher
+      variant='title'
+      label='Switch client'
+      value={client.id}
+      options={adminClientCatalog.map((item) => ({
+        value: item.id,
+        label: item.name,
+        image: clientLogoUrl(item.id),
+      }))}
+      hrefTemplate={onTours ? '/clients/{id}/tours' : '/clients/{id}'}
+      imageFit='contain'
+    />
+  );
+}
 
 export function ClientWorkspaceNav({
   clientId,

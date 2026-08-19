@@ -5,7 +5,7 @@ import {
   ExternalLink,
   LayoutList,
   Mail,
-  MoreHorizontal,
+  MoreVertical,
   Pencil,
   Settings2,
   Trash2,
@@ -55,6 +55,8 @@ import { clientLogoUrl } from '@/lib/admin-media';
 import type { AdminClientSummary } from '@/lib/tour-catalog';
 import {
   cn,
+  colorLabelClass,
+  tableActionsCellClass,
   tableBadgeCellClass,
   tableBadgeClass,
   tableLinkClass,
@@ -193,7 +195,7 @@ export function ClientTable({
                 sortDir={sortDir}
                 onSort={toggle}
               />
-              <TableHead className='w-12'>
+              <TableHead className={tableActionsCellClass}>
                 <span className='sr-only'>Actions</span>
               </TableHead>
             </TableRow>
@@ -262,7 +264,7 @@ export function ClientTable({
                 </TableCell>
                 <TableCell>
                   {client.brandColor ?
-                    <span className='inline-flex items-center gap-2'>
+                    <span className={colorLabelClass}>
                       <ColorSwatch color={client.brandColor} />
                       <span className='font-mono text-xs text-muted-foreground'>
                         {client.brandColor}
@@ -273,7 +275,7 @@ export function ClientTable({
                 <TableCell>
                   <Badge variant='secondary'>{client.tours.length}</Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell className={tableActionsCellClass}>
                   <DropdownMenu {...rowActionMenu.menuProps(client.id)}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -283,7 +285,7 @@ export function ClientTable({
                             size='icon'
                             aria-label={`Actions for ${client.name}`}
                           >
-                            <MoreHorizontal aria-hidden='true' />
+                            <MoreVertical aria-hidden='true' />
                           </Button>
                         </DropdownMenuTrigger>
                       </TooltipTrigger>

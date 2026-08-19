@@ -3,6 +3,7 @@ import {
   HandHeart,
   ImageOff,
   MapPin,
+  PencilRuler,
   View,
   type LucideIcon,
 } from 'lucide-react';
@@ -16,6 +17,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { showTourVisualEditor, tourVisualEditPath } from '@/lib/admin-routes';
+import { AUTHORING_SURFACE } from '@/lib/authoring-copy';
 import type { AdminTourOverview } from '@/lib/tour-overview';
 
 function CoverFallback({ label }: { label: string }) {
@@ -56,11 +59,13 @@ function CatalogCountLink({
   icon: Icon,
   label,
   count,
+  hint,
 }: {
   href: string;
   icon: LucideIcon;
   label: string;
-  count: number;
+  count?: number;
+  hint?: string;
 }) {
   return (
     <Tooltip>
@@ -71,10 +76,12 @@ function CatalogCountLink({
         >
           <Icon aria-hidden='true' className='icon-inline' />
           <span>{label}</span>
-          <span className='tabular-nums text-foreground'>{count}</span>
+          {count != null ?
+            <span className='tabular-nums text-foreground'>{count}</span>
+          : null}
         </Link>
       </TooltipTrigger>
-      <TooltipContent>Open {label.toLowerCase()}</TooltipContent>
+      <TooltipContent>{hint ?? `Open ${label.toLowerCase()}`}</TooltipContent>
     </Tooltip>
   );
 }
@@ -131,6 +138,14 @@ function TourCard({ tour }: { tour: AdminTourOverview }) {
           label='Namings'
           count={tour.namingCount}
         />
+        {showTourVisualEditor(tour.viewerType) ?
+          <CatalogCountLink
+            href={tourVisualEditPath(tour.id)}
+            icon={PencilRuler}
+            label={AUTHORING_SURFACE.edit.label}
+            hint={AUTHORING_SURFACE.edit.openLabel}
+          />
+        : null}
       </div>
     </article>
   );

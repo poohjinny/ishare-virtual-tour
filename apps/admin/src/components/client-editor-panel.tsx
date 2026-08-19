@@ -40,8 +40,9 @@ import { useHeaderEdit } from '@/components/header-edit';
 import { PendingButton } from '@/components/pending-button';
 import { LicenseBadge } from '@/components/status-badges';
 import { showFormError, showFormSuccess } from '@/lib/form-toast';
+import { colorLabelClass } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Sheet,
   SheetContent,
@@ -61,7 +62,11 @@ import {
 } from '@/lib/admin-dev-api';
 import { clientFaviconUrls, clientLogoUrl } from '@/lib/admin-media';
 import { httpHref, mapsHref } from '@/lib/admin-routes';
-import { BRANDING_COPY, CLIENT_FORM_COPY } from '@/lib/authoring-copy';
+import {
+  AUTHORING_SURFACE,
+  BRANDING_COPY,
+  CLIENT_FORM_COPY,
+} from '@/lib/authoring-copy';
 import type { AdminClientSummary } from '@/lib/tour-catalog';
 
 function initialClient(client?: AdminClientSummary): AdminClientPayload {
@@ -487,6 +492,9 @@ export function ClientEditorPanel({
     <>
       {info ?
         <Card>
+          <CardHeader>
+            <CardTitle>{AUTHORING_SURFACE.clientDetails.label}</CardTitle>
+          </CardHeader>
           <CardContent>
             <InfoFieldList columns={2}>
               <InfoField layout='inline' icon={ShieldCheck} label='License'>
@@ -540,7 +548,7 @@ export function ClientEditorPanel({
                 : '—'}
               </InfoField>
               <InfoField layout='inline' icon={Pipette} label='Color'>
-                <span className='inline-flex items-center gap-2'>
+                <span className={colorLabelClass}>
                   {savedForm.primaryColor ?
                     <ColorSwatch color={savedForm.primaryColor} />
                   : null}

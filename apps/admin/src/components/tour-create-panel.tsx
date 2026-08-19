@@ -63,24 +63,19 @@ import type {
   AdminImmersiveMode,
   AdminTransitionEffect,
 } from '@/lib/tour-detail';
-import { TOURS_PATH } from '@/lib/admin-routes';
+import { TOURS_PATH, tourPath } from '@/lib/admin-routes';
 
-export function TourCreatePanel({
-  canEdit,
-  categories,
-  clients,
-  defaultOpen = false,
-}: {
-  canEdit: boolean;
-  categories: string[];
-  clients: AdminClientSummary[];
-  defaultOpen?: boolean;
-}) {
-  const router = useRouter();
-  const [form, setForm] = useState<
-    Omit<AdminTourCreate, 'panoramaFileBase64' | 'panoramaFileName' | 'tourId'>
-  >({
-    clientId: '',
+type TourCreateForm = Omit<
+  AdminTourCreate,
+  'panoramaFileBase64' | 'panoramaFileName' | 'tourId'
+>;
+
+function emptyTourCreateForm(
+  categories: string[],
+  clientId = '',
+): TourCreateForm {
+  return {
+    clientId,
     tourTitle: '',
     tourSummary: '',
     category: categories[0] ?? '',
@@ -99,7 +94,27 @@ export function TourCreatePanel({
     immersivePlaylistText: '',
     immersivePlaylistManifest: '',
     immersiveVolume: '',
-  });
+  };
+}
+
+export function TourCreatePanel({
+  canEdit,
+  categories,
+  clients,
+  defaultOpen = false,
+  lockedClientId,
+}: {
+  canEdit: boolean;
+  categories: string[];
+  clients: AdminClientSummary[];
+  defaultOpen?: boolean;
+  /** When set, the tour is created under this client — no client picker. */
+  lockedClientId?: string;
+}) {
+  const router = useRouter();
+  const [form, setForm] = useState<TourCreateForm>(() =>
+    emptyTourCreateForm(categories, lockedClientId ?? ''),
+  );
   const [open, setOpen] = useState(defaultOpen);
   const [panorama, setPanorama] = useState<File | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -118,10 +133,12 @@ export function TourCreatePanel({
     if (!panorama) return;
     setIsSaving(true);
     try {
+      const clientId = lockedClientId ?? form.clientId;
       const result = await createLocalTour({
         ...form,
+        clientId,
         logoAlt:
-          clients.find((client) => client.id === form.clientId)?.name ??
+          clients.find((client) => client.id === clientId)?.name ??
           form.tourTitle,
         logoFileBase64:
           form.brandingMode === 'custom' && logoFile ?
@@ -136,9 +153,13 @@ export function TourCreatePanel({
         panoramaFileName: panorama.name,
       });
       showFormSuccess('Tour created.');
+      setForm(emptyTourCreateForm(categories, lockedClientId ?? ''));
+      setPanorama(null);
+      setLogoFile(null);
+      setFaviconFile(null);
       setOpen(false);
-      if (typeof result.tourId === 'string') {
-        router.push(`/tours/${result.tourId}`);
+      if (!lockedClientId && typeof result.tourId === 'string') {
+        router.push(tourPath(result.tourId));
       }
       router.refresh();
     } catch (error) {
@@ -158,39 +179,41 @@ export function TourCreatePanel({
       onOpenChange={changeOpen}
     >
       <form className='admin-form' onSubmit={submit}>
-        <CollapsibleFormSection
-          title={TOUR_FORM_COPY.clientSection}
-          icon={Building2}
-          description={TOUR_FORM_COPY.clientSectionDescription}
-          defaultOpen
-        >
-          <div className='grid gap-2'>
-            <Label>Client</Label>
-            <FormDescription>
-              {TOUR_FORM_COPY.clientDescription}
-            </FormDescription>
-            <InputGroup icon={Building2}>
-              <Select
-                value={form.clientId || undefined}
-                onValueChange={(clientId) =>
-                  setForm((current) => ({ ...current, clientId }))
-                }
-                disabled={!canEdit}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={TOUR_FORM_COPY.clientPlaceholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </InputGroup>
-          </div>
-        </CollapsibleFormSection>
+        {lockedClientId ?
+          null
+        : <CollapsibleFormSection
+            title={TOUR_FORM_COPY.clientSection}
+            icon={Building2}
+            description={TOUR_FORM_COPY.clientSectionDescription}
+            defaultOpen
+          >
+            <div className='grid gap-2'>
+              <Label>Client</Label>
+              <FormDescription>
+                {TOUR_FORM_COPY.clientDescription}
+              </FormDescription>
+              <InputGroup icon={Building2}>
+                <Select
+                  value={form.clientId || undefined}
+                  onValueChange={(clientId) =>
+                    setForm((current) => ({ ...current, clientId }))
+                  }
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={TOUR_FORM_COPY.clientPlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </InputGroup>
+            </div>
+          </CollapsibleFormSection>}
 
         <CollapsibleFormSection
           title={TOUR_FORM_COPY.detailsSection}
@@ -637,27 +660,7 @@ export function TourCreatePanel({
           <FormCancelButton
             disabled={isSaving}
             onReset={() => {
-              setForm({
-                clientId: '',
-                tourTitle: '',
-                tourSummary: '',
-                category: categories[0] ?? '',
-                firstSceneTitle: 'Overview',
-                visibility: 'unlisted',
-                askGuideEnabled: false,
-                brandingMode: 'client',
-                primaryColor: '',
-                logoAlt: '',
-                fontFamily: '',
-                fontSourceUrl: '',
-                transitionEffect: 'fade',
-                transitionSpeed: '500ms',
-                immersiveMode: 'platform',
-                immersiveAudio: '',
-                immersivePlaylistText: '',
-                immersivePlaylistManifest: '',
-                immersiveVolume: '',
-              });
+              setForm(emptyTourCreateForm(categories, lockedClientId ?? ''));
               setPanorama(null);
               setLogoFile(null);
               setFaviconFile(null);

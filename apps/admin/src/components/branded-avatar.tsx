@@ -1,5 +1,10 @@
 import { AssetImage } from '@/components/asset-image';
-import { cn } from '@/lib/utils';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar';
+import { cn, mediaLabelClass } from '@/lib/utils';
 
 function initials(label: string) {
   return label
@@ -8,6 +13,40 @@ function initials(label: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('');
+}
+
+/**
+ * Person identity — always a circle. Missing or failed photos keep the same
+ * disc with initials. Logos and thumbs stay on `BrandedAvatar` / `OptionThumb`.
+ */
+export function PersonAvatar({
+  src,
+  label,
+  size = 'default',
+  className,
+}: {
+  src?: string;
+  label: string;
+  size?: 'xs' | 'sm' | 'default' | 'lg';
+  className?: string;
+}) {
+  const compact = size === 'xs';
+  const avatarSize = compact ? 'sm' : size;
+
+  return (
+    <Avatar
+      size={avatarSize}
+      className={cn('shrink-0', compact && 'size-5', className)}
+      aria-hidden='true'
+    >
+      {src ? <AvatarImage src={src} alt='' /> : null}
+      <AvatarFallback
+        className={cn(compact && 'text-[10px] font-semibold')}
+      >
+        {initials(label) || '?'}
+      </AvatarFallback>
+    </Avatar>
+  );
 }
 
 export function BrandedAvatar({
@@ -179,7 +218,7 @@ export function SceneOptionLabel({
   thumbnailUrl?: string;
 }) {
   return (
-    <span className='flex items-center gap-2'>
+    <span className={mediaLabelClass}>
       <OptionThumb src={thumbnailUrl} label={title} size='xs' />
       {title}
     </span>

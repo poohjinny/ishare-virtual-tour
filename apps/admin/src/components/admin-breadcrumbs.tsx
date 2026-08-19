@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   MapPin,
   MapPinned,
+  PencilRuler,
   Settings2,
   UserRound,
   Users,
@@ -41,6 +42,8 @@ export interface CrumbPeers {
   hrefTemplate: string;
   label: string;
   imageFit?: "cover" | "contain";
+  /** Person identity — circular avatar, including the no-photo fallback. */
+  shape?: "circle";
 }
 
 export interface AdminCrumb {
@@ -264,6 +267,9 @@ export function renderNavIcon(
   }
   if (label === "Namings" || /\/namings$/.test(path)) {
     return createElement(HandHeart, iconProps);
+  }
+  if (label === "Layout" || /\/edit$/.test(path)) {
+    return createElement(PencilRuler, iconProps);
   }
   return null;
 }

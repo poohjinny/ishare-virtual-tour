@@ -41,11 +41,10 @@ keep this file an **overview**, not a full design dump.
 ## UI placement
 
 - Entry: Admin header **Guide** toggle (Debug when enabled).
-- Identity: Lucide `Sparkles`, on both the header toggle and the dock header
-  tile. The toggle is a plain ghost `icon` button like Debug — muted when idle,
-  primary accent while the dock is open through `buttonVariants`
-  `aria-pressed` — and adds no chrome of its own. It is deliberately not the
-  sidebar's `symbol_ishare.png`, which stays the product lockup.
+- Identity: Lucide `Sparkles` on the header toggle and the dock header tile.
+  The toggle is the same header ghost `icon` button as Debug. Rank, size, and
+  open-state tone live in [ADMIN_UI.md](./ADMIN_UI.md) (`Button`, Guide) — this
+  file does not restyle it.
 - Panel: right **dock** beside page content — not a modal Sheet. Workspace stays
   usable while chatting. Drag the left edge to resize (`288`–`512`px),
   double-click it to reset; width persists in `localStorage`. Resize handle is
@@ -65,8 +64,8 @@ keep this file an **overview**, not a full design dump.
   it outranks the Tailwind width utility.
 - Composer: same field as the viewer Tour Guide input — single-line input with
   mic + send **inside** the field and no separator border above it — but Admin
-  chrome (`rounded-lg` field, rounded-square icon buttons), not the viewer's
-  glass capsule.
+  chrome, not the viewer's glass capsule. Composer icon buttons pick `Button`
+  from [ADMIN_UI.md](./ADMIN_UI.md); they are not a second size system.
 - Voice input: `useSpeechToText` (`src/hooks/use-speech-to-text.ts`) is a
   trimmed port of the viewer hook (no audio level meter). Dictation fills the
   field and sending stays explicit; the mic is hidden when the browser has no
@@ -105,6 +104,6 @@ Implementation: `apps/admin/src/components/admin-guide-panel.tsx`
 
 | Document                          | Role                                  |
 | --------------------------------- | ------------------------------------- |
-| [ADMIN_UI.md](./ADMIN_UI.md)      | Admin console patterns + overlay jobs |
+| [ADMIN_UI.md](./ADMIN_UI.md)      | Admin visual spec (Button, chrome)    |
 | [NAMING.md](../product/NAMING.md) | Tour Guide vs other “guide” wording   |
 | [ROADMAP.md](../ROADMAP.md)       | Phase 2 Admin / auth sequencing       |

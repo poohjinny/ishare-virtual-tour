@@ -7,24 +7,41 @@ linked specs.
 
 ## Document map
 
-| Topic                        | Document                                                                       | When to read                                               |
-| ---------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| **Git commit / push**        | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md)                                           | Before every push                                          |
-| **Tailwind + custom CSS**    | [STYLING.md](./STYLING.md)                                                     | Migrating off colocated CSS; **rem-first** chrome sizing   |
-| **Shared UI (React + HTML)** | [COMPONENTS.md](./COMPONENTS.md)                                               | Badges, accordions, glass panels                           |
-| **Naming opportunity CTAs**  | [NAMING.md](../product/NAMING.md)                                              | NO popups, status, Giftabulator footer                     |
-| **Giftabulator**             | [GIFTABULATOR.md](../product/GIFTABULATOR.md)                                  | Give Now URLs / `calc`; future modules                     |
-| **Product / copy names**     | [NAMING.md](../product/NAMING.md)                                              | Tab title, Help, Guide, splash                             |
-| **Tech stack & deploy**      | [TECH_STACK.md](./TECH_STACK.md)                                               | Why Vite/PSV/Three; deploy → [DEPLOY.md](../ops/DEPLOY.md) |
-| **Performance playbook**     | [PERFORMANCE.md](./PERFORMANCE.md)                                             | When embed/mobile feels slow (no task list)                |
-| **Mobile React UI layout**   | [MOBILE.md](./MOBILE.md)                                                       | Phone chrome, collisions, safe-area                        |
-| **Client assets**            | [`apps/tour-viewer/assets/README.md`](../../apps/tour-viewer/assets/README.md) | Panoramas, logos, new client                               |
-| **Backlog & phasing**        | [ROADMAP.md](../ROADMAP.md)                                                    | What to build next                                         |
-| **Product contracts**        | [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                                  | URL, embed, catalog, schemas                               |
-| **Tour Admin UI**            | [ADMIN_UI.md](./ADMIN_UI.md)                                                   | shadcn admin, hybrid iframe, shared kit later              |
-| **Admin Guide**              | [ADMIN_GUIDE.md](./ADMIN_GUIDE.md)                                             | Authoring assistant shell (not viewer Tour Guide)          |
-| **Dev panel (`?dev=1`)**     | [DEV_PANEL.md](./DEV_PANEL.md)                                                 | Local authoring, Debug tab, embed QA                       |
-| **Embed (`?embed=1`)**       | [EMBED.md](../ops/EMBED.md)                                                    | iframe delivery, postMessage, host integration             |
+### Admin
+
+| Topic             | Document                           | When to read                                      |
+| ----------------- | ---------------------------------- | ------------------------------------------------- |
+| **Tour Admin UI** | [ADMIN_UI.md](./ADMIN_UI.md)       | shadcn admin, hybrid iframe, shared kit later     |
+| **Admin Guide**   | [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) | Authoring assistant shell (not viewer Tour Guide) |
+
+### Viewer
+
+| Topic                        | Document                           | When to read                                             |
+| ---------------------------- | ---------------------------------- | -------------------------------------------------------- |
+| **Shared UI (React + HTML)** | [COMPONENTS.md](./COMPONENTS.md)   | Badges, accordions, glass panels                         |
+| **Tailwind + custom CSS**    | [STYLING.md](./STYLING.md)         | Migrating off colocated CSS; **rem-first** chrome sizing |
+| **Dev panel (`?dev=1`)**     | [DEV_PANEL.md](./DEV_PANEL.md)     | Local authoring, Debug tab, embed QA                     |
+| **Mobile React UI layout**   | [MOBILE.md](./MOBILE.md)           | Phone chrome, collisions, safe-area                      |
+| **Performance playbook**     | [PERFORMANCE.md](./PERFORMANCE.md) | When embed/mobile feels slow (no task list)              |
+
+### Shared
+
+| Topic                   | Document                             | When to read                                               |
+| ----------------------- | ------------------------------------ | ---------------------------------------------------------- |
+| **Git commit / push**   | [GIT_WORKFLOW.md](./GIT_WORKFLOW.md) | Before every push                                          |
+| **Tech stack & deploy** | [TECH_STACK.md](./TECH_STACK.md)     | Why Vite/PSV/Three; deploy → [DEPLOY.md](../ops/DEPLOY.md) |
+
+### Product / ops
+
+| Topic                       | Document                                                                       | When to read                                   |
+| --------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------- |
+| **Naming opportunity CTAs** | [NAMING.md](../product/NAMING.md)                                              | NO popups, status, Giftabulator footer         |
+| **Giftabulator**            | [GIFTABULATOR.md](../product/GIFTABULATOR.md)                                  | Give Now URLs / `calc`; future modules         |
+| **Product / copy names**    | [NAMING.md](../product/NAMING.md)                                              | Tab title, Help, Guide, splash                 |
+| **Client assets**           | [`apps/tour-viewer/assets/README.md`](../../apps/tour-viewer/assets/README.md) | Panoramas, logos, new client                   |
+| **Backlog & phasing**       | [ROADMAP.md](../ROADMAP.md)                                                    | What to build next                             |
+| **Product contracts**       | [PRODUCT_SPEC.md](../product/PRODUCT_SPEC.md)                                  | URL, embed, catalog, schemas                   |
+| **Embed (`?embed=1`)**      | [EMBED.md](../ops/EMBED.md)                                                    | iframe delivery, postMessage, host integration |
 
 ---
 

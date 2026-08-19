@@ -84,7 +84,7 @@ export default async function OverviewPage() {
           <SectionHeader
             id='overview-tours'
             title={AUTHORING_SURFACE.tours.label}
-            description='Open a tour, or jump straight to its scenes or namings.'
+            description='Open a tour, or jump straight to its scenes, namings, or layout.'
             icon={MapPinned}
           />
           <TourGallery tours={tours} />

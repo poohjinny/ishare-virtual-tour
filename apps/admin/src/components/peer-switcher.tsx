@@ -4,14 +4,18 @@ import { useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 
-import { BrandedAvatar, OptionThumb } from '@/components/branded-avatar';
+import {
+  BrandedAvatar,
+  OptionThumb,
+  PersonAvatar,
+} from '@/components/branded-avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { breadcrumbMediaLabelClass, cn, mediaLabelClass } from '@/lib/utils';
 
 export function PeerSwitcher({
   label,
@@ -23,6 +27,7 @@ export function PeerSwitcher({
   current = false,
   fallbackImage,
   href,
+  shape,
 }: {
   label: string;
   value: string;
@@ -37,6 +42,8 @@ export function PeerSwitcher({
   /** `title` replaces the page heading. `crumb` is the breadcrumb control. */
   variant?: 'default' | 'title' | 'crumb';
   imageFit?: 'cover' | 'contain';
+  /** Person identity — circular avatar, including the no-photo fallback. */
+  shape?: 'circle';
   /** Current breadcrumb page — foreground label. */
   current?: boolean;
   fallbackImage?: string;
@@ -56,8 +63,11 @@ export function PeerSwitcher({
       fallbackImage
     : undefined);
 
+  const personMark = shape === 'circle';
   const crumbMark =
-    crumbImage ?
+    personMark ?
+      <PersonAvatar src={crumbImage} label={title} size='xs' />
+    : crumbImage ?
       <BrandedAvatar
         src={crumbImage}
         fallbackSrc={crumbFallback}
@@ -77,7 +87,7 @@ export function PeerSwitcher({
       return (
         <span
           className={cn(
-            'inline-flex min-w-0 items-center gap-1.5',
+            breadcrumbMediaLabelClass,
             current && 'font-medium text-foreground',
           )}
         >
@@ -129,7 +139,10 @@ export function PeerSwitcher({
           <Link
             href={href}
             title={title}
-            className='group flex min-w-0 items-center gap-1.5 transition-colors duration-200 hover:text-primary'
+            className={cn(
+              'group transition-colors duration-200 hover:text-primary',
+              breadcrumbMediaLabelClass,
+            )}
           >
             {crumbMark}
             <span className='min-w-0 truncate underline-offset-4 group-hover:underline'>
@@ -138,7 +151,7 @@ export function PeerSwitcher({
           </Link>
         : <span
             aria-current={current ? 'page' : undefined}
-            className='flex min-w-0 items-center gap-1.5'
+            className={breadcrumbMediaLabelClass}
           >
             {crumbMark}
             <span className='min-w-0 truncate'>{title}</span>
@@ -168,15 +181,19 @@ export function PeerSwitcher({
         aria-label={label}
         className='inline-flex h-auto max-w-72 cursor-pointer items-center gap-1.5 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/30 focus-visible:outline-none'
       >
-        {selected?.image ?
-          <span className='flex min-w-0 items-center gap-2'>
-            <OptionThumb
-              src={selected.image}
-              label={selected.label}
-              fit={imageFit}
-              loading='eager'
-            />
-            <span className='truncate'>{selected.label}</span>
+        {personMark || selected?.image ?
+          <span className={mediaLabelClass}>
+            {personMark ?
+              <PersonAvatar src={selected?.image} label={title} />
+            : <OptionThumb
+                src={selected?.image}
+                label={selected?.label ?? title}
+                fit={imageFit}
+                loading='eager'
+              />}
+            <span className='truncate'>
+              {personMark ? title : (selected?.label ?? title)}
+            </span>
           </span>
         : <span className='truncate'>{title}</span>}
         {chevron}
@@ -203,17 +220,23 @@ export function PeerSwitcher({
           return (
             <DropdownMenuItem key={option.value} asChild>
               <Link href={href} aria-current={active ? 'page' : undefined}>
-                {option.image ?
-                  <OptionThumb
-                    src={loadThumbs ? option.image : undefined}
-                    fallbackSrc={loadThumbs ? option.fallbackImage : undefined}
-                    label={option.label}
-                    fit={imageFit}
-                    loading='lazy'
-                  />
-                : null}
-                <span className='min-w-0 flex-1 whitespace-nowrap'>
-                  {option.label}
+                <span className={cn(mediaLabelClass, 'flex-1')}>
+                  {personMark ?
+                    <PersonAvatar src={option.image} label={option.label} />
+                  : option.image ?
+                    <OptionThumb
+                      src={loadThumbs ? option.image : undefined}
+                      fallbackSrc={
+                        loadThumbs ? option.fallbackImage : undefined
+                      }
+                      label={option.label}
+                      fit={imageFit}
+                      loading='lazy'
+                    />
+                  : null}
+                  <span className='min-w-0 flex-1 whitespace-nowrap'>
+                    {option.label}
+                  </span>
                 </span>
                 {active ?
                   <Check aria-hidden='true' className='text-primary' />

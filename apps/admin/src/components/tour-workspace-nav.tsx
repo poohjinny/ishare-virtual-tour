@@ -4,37 +4,43 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import { PeerSwitcher } from '@/components/peer-switcher';
 import { Badge } from '@/components/ui/badge';
 import { tourPath } from '@/lib/admin-routes';
-import { isWorkspaceItemActive, tourWorkspaceItems } from '@/lib/workspace-nav';
+import { AUTHORING_SURFACE } from '@/lib/authoring-copy';
+import {
+  isWorkspaceItemActive,
+  TOUR_WORKSPACE_ITEMS,
+} from '@/lib/workspace-nav';
 import { cn } from '@/lib/utils';
+
+export function TourWorkspaceLead({ tourId }: { tourId: string }) {
+  const pathname = usePathname();
+  const base = tourPath(tourId);
+  if (pathname === base) return AUTHORING_SURFACE.details.description;
+  if (pathname === `${base}/scenes`) return AUTHORING_SURFACE.scenes.description;
+  if (pathname === `${base}/namings`) {
+    return AUTHORING_SURFACE.namings.description;
+  }
+  return null;
+}
 
 export function TourWorkspaceNav({
   tourId,
-  scenes = [],
-  sceneId,
   sceneCount,
   namingCount,
-  showEditor = false,
 }: {
   tourId: string;
-  scenes?: Array<{ id: string; title: string; thumbnailUrl?: string }>;
-  sceneId?: string;
   sceneCount?: number;
   namingCount?: number;
-  /** Panorama tours only — hides the visual Editor tab when false. */
-  showEditor?: boolean;
 }) {
   const pathname = usePathname();
   const base = tourPath(tourId);
   const tabListRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState({ left: 0, width: 0 });
   const counts = {
-    scenes: sceneCount ?? scenes.length,
+    scenes: sceneCount ?? 0,
     namings: namingCount ?? 0,
   };
-  const items = tourWorkspaceItems(showEditor);
 
   useLayoutEffect(() => {
     const list = tabListRef.current;
@@ -46,7 +52,7 @@ export function TourWorkspaceNav({
     const parent = list.getBoundingClientRect();
     const rect = active.getBoundingClientRect();
     setIndicator({ left: rect.left - parent.left, width: rect.width });
-  }, [pathname, counts.scenes, counts.namings, showEditor]);
+  }, [pathname, counts.scenes, counts.namings]);
 
   return (
     <nav
@@ -54,7 +60,7 @@ export function TourWorkspaceNav({
       className='flex flex-wrap items-center gap-3 border-b'
     >
       <div ref={tabListRef} className='relative flex flex-wrap gap-x-6'>
-        {items.map((item) => {
+        {TOUR_WORKSPACE_ITEMS.map((item) => {
           const href = `${base}${item.suffix}`;
           const active = isWorkspaceItemActive(pathname, href, item.match);
           const Icon = item.icon;
@@ -99,18 +105,6 @@ export function TourWorkspaceNav({
           }}
         />
       </div>
-      {sceneId && scenes.length > 1 ?
-        <PeerSwitcher
-          label='Switch scene'
-          value={sceneId}
-          options={scenes.map((scene) => ({
-            value: scene.id,
-            label: scene.title,
-            image: scene.thumbnailUrl,
-          }))}
-          hrefTemplate={`/tours/${tourId}/scenes/{id}`}
-        />
-      : null}
     </nav>
   );
 }

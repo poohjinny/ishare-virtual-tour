@@ -21,11 +21,60 @@ export function tourEditHref(tourId: string) {
   return `${tourPath(tourId)}?${TOUR_EDIT_QUERY_KEY}=${TOUR_EDIT_QUERY_VALUE}` as const;
 }
 
-/** Panorama visual editor workspace (scenes + hotspots in one screen). */
-export function tourVisualEditPath(tourId: string, sceneId?: string) {
+/** Layout Close return — allowlisted tokens, not a free URL. */
+export const TOUR_LAYOUT_FROM_QUERY_KEY = 'from';
+export const TOUR_LAYOUT_FROM_SCENES = 'scenes';
+const TOUR_LAYOUT_FROM_SCENE_PREFIX = 'scene:';
+
+export function tourLayoutFromScene(sceneId: string) {
+  return `${TOUR_LAYOUT_FROM_SCENE_PREFIX}${sceneId}`;
+}
+
+/** Panorama layout tool route (scenes + hotspots in one screen). */
+export function tourVisualEditPath(
+  tourId: string,
+  sceneId?: string,
+  from?: string,
+) {
   const base = `${tourPath(tourId)}/edit` as const;
-  if (!sceneId) return base;
-  return `${base}?scene=${encodeURIComponent(sceneId)}` as const;
+  const params = new URLSearchParams();
+  if (sceneId) params.set('scene', sceneId);
+  if (from) params.set(TOUR_LAYOUT_FROM_QUERY_KEY, from);
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
+}
+
+/**
+ * Layout Close target. Missing or unknown `from` → tour Details.
+ * `scene:` must still exist on the tour so a deleted opener cannot 404.
+ */
+export function tourLayoutCloseHref(
+  tourId: string,
+  from: string | undefined,
+  knownSceneIds?: readonly string[],
+) {
+  const details = tourPath(tourId);
+  if (!from) return details;
+  if (from === TOUR_LAYOUT_FROM_SCENES) return `${details}/scenes`;
+  if (from.startsWith(TOUR_LAYOUT_FROM_SCENE_PREFIX)) {
+    const sceneId = from.slice(TOUR_LAYOUT_FROM_SCENE_PREFIX.length);
+    if (
+      !sceneId ||
+      sceneId.includes('/') ||
+      sceneId.includes('?') ||
+      sceneId.includes('#')
+    ) {
+      return details;
+    }
+    if (knownSceneIds && !knownSceneIds.includes(sceneId)) return details;
+    return `${details}/scenes/${sceneId}`;
+  }
+  return details;
+}
+
+/** Details header Layout — same gate for catalog kebabs. */
+export function showTourVisualEditor(viewerType: string) {
+  return viewerType === 'panorama';
 }
 
 /** Absolute http(s) href — adds `https://` when the stored value has no scheme. */

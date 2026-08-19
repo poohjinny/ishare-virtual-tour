@@ -49,7 +49,7 @@ function SettingsCardHeading({
   description: ReactNode;
 }) {
   return (
-    <CardHeader className='gap-2'>
+    <CardHeader>
       <div className='flex items-center gap-3'>
         <span
           className={cn(

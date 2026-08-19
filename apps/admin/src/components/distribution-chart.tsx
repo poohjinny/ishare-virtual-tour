@@ -129,8 +129,8 @@ export function DistributionCard({
 
   return (
     <Card className={className}>
-      <CardHeader className='pb-3'>
-        <CardTitle className='type-title'>{title}</CardTitle>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className='flex flex-col gap-5 sm:flex-row sm:items-center'>

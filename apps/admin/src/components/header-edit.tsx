@@ -1,10 +1,20 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { Pencil } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import {
+  TOUR_EDIT_QUERY_KEY,
+  TOUR_EDIT_QUERY_VALUE,
+} from '@/lib/admin-routes';
 
 const HeaderEditContext = createContext<{
   canEdit: boolean;
@@ -30,9 +40,18 @@ export function HeaderEditProvider({
 
   function setOpen(next: boolean) {
     setOpenState(next);
-    if (!next && clearHref) {
+    if (next) return;
+    if (clearHref) {
       router.replace(clearHref, { scroll: false });
+      return;
     }
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get(TOUR_EDIT_QUERY_KEY) !== TOUR_EDIT_QUERY_VALUE) {
+      return;
+    }
+    url.searchParams.delete(TOUR_EDIT_QUERY_KEY);
+    router.replace(`${url.pathname}${url.search}`, { scroll: false });
   }
 
   return (
@@ -40,6 +59,18 @@ export function HeaderEditProvider({
       {children}
     </HeaderEditContext.Provider>
   );
+}
+
+/** Opens the workspace Edit sheet from Guide `?edit=tour` without remounting chrome. */
+export function HeaderEditIntent({ active }: { active: boolean }) {
+  const ctx = useHeaderEdit();
+
+  useEffect(() => {
+    if (active) ctx?.setOpen(true);
+    // ctx identity changes each provider render; only the query flag should open.
+  }, [active]); // eslint-disable-line react-hooks/exhaustive-deps -- query flag only
+
+  return null;
 }
 
 export function HeaderEditButton() {

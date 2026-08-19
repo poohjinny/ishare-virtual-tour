@@ -10,7 +10,7 @@ import {
   AdminGuideTrigger,
 } from '@/components/admin-guide-panel';
 import { AccountMenu } from '@/components/account-menu';
-import { BrandedAvatar } from '@/components/branded-avatar';
+import { BrandedAvatar, PersonAvatar } from '@/components/branded-avatar';
 import {
   BreadcrumbProvider,
   renderNavIcon,
@@ -40,7 +40,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useAdminAccentBoot } from '@/lib/admin-accent-store';
 import { useShowAdminDebug } from '@/lib/admin-debug';
-import { cn } from '@/lib/utils';
+import { breadcrumbMediaLabelClass, cn } from '@/lib/utils';
 
 function CrumbLabel({
   href,
@@ -48,6 +48,7 @@ function CrumbLabel({
   image,
   fallbackImage,
   imageFit = 'contain',
+  shape,
   pathname,
 }: {
   href?: string;
@@ -55,13 +56,18 @@ function CrumbLabel({
   image?: string;
   fallbackImage?: string;
   imageFit?: 'cover' | 'contain';
+  shape?: 'circle';
   pathname: string;
 }) {
-  const icon = image ? null : renderNavIcon(href, label, pathname);
+  const personMark = shape === 'circle';
+  const icon =
+    image || personMark ? null : renderNavIcon(href, label, pathname);
 
   return (
-    <>
-      {image ?
+    <span className={breadcrumbMediaLabelClass}>
+      {personMark ?
+        <PersonAvatar src={image} label={label} size='xs' />
+      : image ?
         <BrandedAvatar
           src={image}
           fallbackSrc={fallbackImage}
@@ -75,7 +81,7 @@ function CrumbLabel({
       <span className='min-w-0 truncate underline-offset-4 transition-colors duration-200 group-hover:text-primary group-hover:underline'>
         {label}
       </span>
-    </>
+    </span>
   );
 }
 
@@ -99,6 +105,7 @@ function CrumbSwitch({
       options={peers.options}
       hrefTemplate={peers.hrefTemplate}
       imageFit={peers.imageFit}
+      shape={peers.shape}
       fallbackImage={fallbackImage}
       href={href}
     />
@@ -147,7 +154,7 @@ function AdminHeader() {
                     <BreadcrumbLink asChild className='group'>
                       <Link
                         href={parent.href}
-                        className='inline-flex min-w-0 items-center gap-1.5'
+                        className='min-w-0'
                         title={parent.label}
                       >
                         <CrumbLabel
@@ -156,6 +163,7 @@ function AdminHeader() {
                           image={parent.image}
                           fallbackImage={parent.fallbackImage}
                           imageFit={parent.peers?.imageFit}
+                          shape={parent.peers?.shape}
                           pathname={pathname}
                         />
                       </Link>
@@ -166,6 +174,7 @@ function AdminHeader() {
                       image={parent.image}
                       fallbackImage={parent.fallbackImage}
                       imageFit={parent.peers?.imageFit}
+                      shape={parent.peers?.shape}
                       pathname={pathname}
                     />
                   }
@@ -183,12 +192,13 @@ function AdminHeader() {
                 current
                 fallbackImage={currentFallbackImage ?? currentImage}
               />
-            : <BreadcrumbPage className='inline-flex min-w-0 items-center gap-1.5'>
+            : <BreadcrumbPage className='min-w-0'>
                 <CrumbLabel
                   label={currentPage}
                   image={currentImage}
                   fallbackImage={currentFallbackImage}
                   imageFit={currentPeers?.imageFit}
+                  shape={currentPeers?.shape}
                   pathname={pathname}
                 />
               </BreadcrumbPage>
@@ -220,7 +230,7 @@ export function AdminChrome({ children }: { children: ReactNode }) {
             <AdminHeader />
             <div className='flex min-h-0 min-w-0 flex-1 overflow-hidden'>
               {/* The page scrolls here, not on <html>, so it needs the thin bar. */}
-              <div className='ishare-scrollbar min-h-0 min-w-0 flex-1 overflow-auto [scrollbar-gutter:stable]'>
+              <div className='ishare-scrollbar flex min-h-0 min-w-0 flex-1 flex-col overflow-auto [scrollbar-gutter:stable]'>
                 {children}
               </div>
               <AdminGuideDock />

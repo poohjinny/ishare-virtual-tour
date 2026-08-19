@@ -1,15 +1,21 @@
-import { ExternalLink, Pencil } from 'lucide-react';
+import { ExternalLink, PencilRuler } from 'lucide-react';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { AdminShell } from '@/components/admin-shell';
-import { HeaderEditProvider } from '@/components/header-edit';
-import { PageMain } from '@/components/page-header';
-import { TourEditorPanel } from '@/components/tour-editor-panel';
-import { TourVisualEditor } from '@/components/tour-visual-editor';
-import { TourWorkspaceHeader } from '@/components/tour-workspace-header';
+import { PageHeader, PageMain } from '@/components/page-header';
+import {
+  EditorCloseButton,
+  TourVisualEditor,
+} from '@/components/tour-visual-editor';
 import { Button } from '@/components/ui/button';
-import { tourPath, tourVisualEditPath } from '@/lib/admin-routes';
+import {
+  showTourVisualEditor,
+  TOUR_LAYOUT_FROM_QUERY_KEY,
+  tourLayoutCloseHref,
+  tourPath,
+  tourVisualEditPath,
+} from '@/lib/admin-routes';
 import { AUTHORING_SURFACE } from '@/lib/authoring-copy';
 import { adminTourCatalog, getAdminTour } from '@/lib/tour-catalog';
 import { getAdminTourDetail } from '@/lib/tour-detail';
@@ -36,7 +42,7 @@ export default async function TourVisualEditPage(props: {
 
   if (!tour || !detail) notFound();
 
-  if (detail.viewerType !== 'panorama') {
+  if (!showTourVisualEditor(detail.viewerType)) {
     redirect(`/tours/${tour.id}/scenes`);
   }
 
@@ -47,14 +53,16 @@ export default async function TourVisualEditPage(props: {
 
   const requestedSceneId =
     typeof query.scene === 'string' ? query.scene : undefined;
+  const fromQuery = query[TOUR_LAYOUT_FROM_QUERY_KEY];
+  const layoutFrom = typeof fromQuery === 'string' ? fromQuery : undefined;
 
-  // The bare tab URL renders the first scene, so entering the tab is a single
-  // navigation; only an unknown `?scene=` bounces back.
+  // The bare tool URL renders the first scene, so entering the editor is a
+  // single navigation; only an unknown `?scene=` bounces back.
   if (
     requestedSceneId &&
     !scenes.some((item) => item.id === requestedSceneId)
   ) {
-    redirect(tourVisualEditPath(tour.id));
+    redirect(tourVisualEditPath(tour.id, undefined, layoutFrom));
   }
 
   const sceneId =
@@ -76,7 +84,6 @@ export default async function TourVisualEditPage(props: {
   return (
     <AdminShell
       currentPage={AUTHORING_SURFACE.edit.label}
-      currentImage={scene.thumbnailUrl}
       parents={[
         { href: '/tours', label: 'Tours' },
         {
@@ -88,45 +95,39 @@ export default async function TourVisualEditPage(props: {
         },
       ]}
     >
-      <HeaderEditProvider canEdit={canEdit}>
-        <PageMain variant='workbench'>
-          <TourWorkspaceHeader
-            tourId={tour.id}
-            title={overview?.title ?? tour.name}
-            summary={tour.summary}
-            visibility={tour.visibility}
-            viewerType={detail.viewerType}
-            overview={overview}
-            overviews={overviews}
-            actions={
-              <>
-                <Button variant='outline' size='sm' asChild>
-                  <Link href={`/tours/${tour.id}/scenes/${scene.id}`}>
-                    <Pencil aria-hidden='true' />
-                    Scene details
-                  </Link>
-                </Button>
-                <Button variant='ghost' size='sm' asChild>
-                  <Link href={openPreviewUrl} target='_blank' rel='noreferrer'>
-                    <ExternalLink aria-hidden='true' />
-                    Open preview
-                  </Link>
-                </Button>
-              </>
-            }
-          />
+      <PageMain variant='workbench'>
+        <PageHeader
+          title={AUTHORING_SURFACE.edit.label}
+          icon={PencilRuler}
+          actions={
+            <>
+              <Button variant='outline' size='sm' asChild>
+                <Link href={openPreviewUrl} target='_blank' rel='noreferrer'>
+                  <ExternalLink aria-hidden='true' />
+                  Preview
+                </Link>
+              </Button>
+              <EditorCloseButton
+                href={tourLayoutCloseHref(
+                  tour.id,
+                  layoutFrom,
+                  scenes.map((item) => item.id),
+                )}
+              />
+            </>
+          }
+        />
 
-          <TourVisualEditor
-            canEdit={canEdit}
-            namings={namings}
-            previewRoute={previewRoute}
-            scene={scene}
-            scenes={scenes}
-            tourId={tour.id}
-          />
-          <TourEditorPanel canEdit={canEdit} info={false} tour={detail} />
-        </PageMain>
-      </HeaderEditProvider>
+        <TourVisualEditor
+          canEdit={canEdit}
+          layoutFrom={layoutFrom}
+          namings={namings}
+          previewRoute={previewRoute}
+          scene={scene}
+          scenes={scenes}
+          tourId={tour.id}
+        />
+      </PageMain>
     </AdminShell>
   );
 }

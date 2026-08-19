@@ -15,13 +15,14 @@ import {
   ArrowUp,
   Camera,
   Copy,
+  ExternalLink,
   HandHeart,
   Layers3,
   Link2,
   ListTree,
   MapPin,
   MonitorPlay,
-  MoreHorizontal,
+  MoreVertical,
   PanelLeft,
   PanelRight,
   PanelTop,
@@ -31,8 +32,10 @@ import {
   Shapes,
   Trash2,
   Type,
+  X,
   type LucideIcon,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { SceneOptionLabel, MediaThumb } from '@/components/branded-avatar';
@@ -40,7 +43,6 @@ import { ConfirmDeleteDialog } from '@/components/confirm-delete-dialog';
 import { CreateSheet } from '@/components/create-panel-shell';
 import { FileInput } from '@/components/file-input';
 import {
-  CheckboxField,
   CollapsibleFormSection,
   FormDescription,
   FormHint,
@@ -55,7 +57,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
-  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
@@ -87,7 +88,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { fileToBase64 } from '@/lib/admin-dev-api';
 import { tourVisualEditPath } from '@/lib/admin-routes';
 import {
   HOTSPOT_FORM_COPY,
@@ -115,6 +115,7 @@ import type {
   AdminSceneSummary,
 } from '@/lib/tour-scenes';
 import { cn } from '@/lib/utils';
+import { buildAdminPreviewUrl } from '@/lib/viewer-url';
 
 /**
  * Pane names are shared by the mobile tabs (below xl) and the desktop fold
@@ -122,7 +123,7 @@ import { cn } from '@/lib/utils';
  */
 const EDITOR_PANES = {
   scenes: { label: 'Scenes', tabIcon: Layers3, foldIcon: PanelLeft },
-  viewer: { label: 'Viewer', tabIcon: MonitorPlay },
+  viewer: { label: 'Preview', tabIcon: MonitorPlay },
   inspector: { label: 'Inspector', tabIcon: Pencil, foldIcon: PanelRight },
 } as const;
 
@@ -140,20 +141,11 @@ const EDITOR_COLUMN = {
 } as const;
 
 /**
- * The stage is a definite height, not a floor: the columns scroll inside it, so
- * a long scene list or an open hotspot inspector cannot stretch the row and
- * leave the viewer as a tall black box. `22rem` is the chrome above the stage
- * (Admin header, route padding, tour identity, tabs, toolbar); the clamp keeps a
- * short laptop usable and stops a tall display from inflating the columns.
+ * Hug the heading so heading→body follows Card on every column.
+ * Title + actions still center on CardHeader (`items-center`, eyebrow
+ * `leading-none`); do not pad title-only headers to a button row.
  */
-const EDITOR_STAGE_HEIGHT = 'clamp(30rem, calc(100svh - 22rem), 54rem)';
-
-/**
- * All three column headers reserve the height of a `sm` action button, so the
- * scene list, the viewer, and the inspector start on the same line whether or
- * not a header carries an action.
- */
-const EDITOR_HEADER_CLASS = 'min-h-7.5 shrink-0 items-center';
+const EDITOR_HEADER_CLASS = 'shrink-0';
 
 type MobilePane = (typeof EDITOR_PANE_IDS)[number];
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -163,6 +155,36 @@ const DEFAULT_PANORAMA_POSITION: PreviewClickAxis[] = [
   { axis: 'yaw', value: 0 },
   { axis: 'pitch', value: 0 },
 ];
+
+const editorConfirmLeaveRef = { current: () => true };
+
+/** Tool header Close — same `confirmLeave` as scene switches, not a second modal. */
+export function EditorCloseButton({ href }: { href: string }) {
+  return (
+    <Button variant='outline' size='sm' asChild>
+      <Link
+        href={href}
+        onClick={(event) => {
+          if (
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+          ) {
+            return;
+          }
+          if (!editorConfirmLeaveRef.current()) {
+            event.preventDefault();
+          }
+        }}
+      >
+        <X aria-hidden='true' />
+        Close
+      </Link>
+    </Button>
+  );
+}
 
 /** Folds one side column away so the viewer can use its width. */
 function PaneFoldToggle({
@@ -647,6 +669,7 @@ function SelectedHotspotInspector({
 
 export function TourVisualEditor({
   canEdit,
+  layoutFrom,
   namings,
   previewRoute,
   scene,
@@ -654,6 +677,7 @@ export function TourVisualEditor({
   tourId,
 }: {
   canEdit: boolean;
+  layoutFrom?: string;
   namings: AdminNamingOpportunity[];
   previewRoute: string;
   scene: AdminSceneDetail;
@@ -675,13 +699,7 @@ export function TourVisualEditor({
   );
   const hotspotEditDirtyRef = useRef(false);
   const [liveView, setLiveView] = useState<PreviewClickAxis[] | null>(null);
-  const [createSceneOpen, setCreateSceneOpen] = useState(false);
   const [createHotspotOpen, setCreateHotspotOpen] = useState(false);
-
-  const [sceneTitle, setSceneTitle] = useState('');
-  const [sceneDescription, setSceneDescription] = useState('');
-  const [createPlaceOverview, setCreatePlaceOverview] = useState(false);
-  const [panoramaFile, setPanoramaFile] = useState<File | null>(null);
   const [replacePanoramaFile, setReplacePanoramaFile] = useState<File | null>(
     null,
   );
@@ -706,11 +724,6 @@ export function TourVisualEditor({
     : selectedHotspot ? 'move'
     : 'browse';
 
-  const createDirty =
-    Boolean(sceneTitle.trim()) ||
-    Boolean(sceneDescription.trim()) ||
-    Boolean(panoramaFile) ||
-    createPlaceOverview;
   const hotspotCreateDirty =
     createHotspotOpen ||
     Boolean(hotspotName.trim()) ||
@@ -720,7 +733,7 @@ export function TourVisualEditor({
 
   useEffect(() => {
     function onBeforeUnload(event: BeforeUnloadEvent) {
-      if (!createDirty && !hotspotCreateDirty && !hotspotEditDirtyRef.current) {
+      if (!hotspotCreateDirty && !hotspotEditDirtyRef.current) {
         return;
       }
       event.preventDefault();
@@ -728,7 +741,7 @@ export function TourVisualEditor({
     }
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [createDirty, hotspotCreateDirty]);
+  }, [hotspotCreateDirty]);
 
   useEffect(() => {
     if (!canEdit) return;
@@ -743,13 +756,20 @@ export function TourVisualEditor({
   }, [canEdit, createHotspotOpen]);
 
   const confirmLeave = useCallback(() => {
-    if (!createDirty && !hotspotCreateDirty && !hotspotEditDirtyRef.current) {
+    if (!hotspotCreateDirty && !hotspotEditDirtyRef.current) {
       return true;
     }
     return window.confirm(
-      'You have unsaved changes in the editor. Leave this scene anyway?',
+      'You have unsaved changes in the layout. Leave this scene anyway?',
     );
-  }, [createDirty, hotspotCreateDirty]);
+  }, [hotspotCreateDirty]);
+
+  editorConfirmLeaveRef.current = confirmLeave;
+  useEffect(() => {
+    return () => {
+      editorConfirmLeaveRef.current = () => true;
+    };
+  }, []);
 
   const runSave = useCallback(
     async (action: () => Promise<void>, options?: { soft?: boolean }) => {
@@ -797,60 +817,7 @@ export function TourVisualEditor({
     if (nextSceneId === scene.id) return;
     if (!confirmLeave()) return;
     resetSceneWork();
-    router.push(tourVisualEditPath(tourId, nextSceneId));
-  }
-
-  async function handleCreateScene(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!sceneTitle.trim()) {
-      showFormError(
-        new Error('Scene title is required'),
-        'Scene title is required',
-      );
-      return;
-    }
-    if (!panoramaFile) {
-      showFormError(
-        new Error('Panorama file is required'),
-        'Panorama file is required',
-      );
-      return;
-    }
-    const ok = await runSave(async () => {
-      const result = await tourAuthoringRepository.createScene(tourId, {
-        title: sceneTitle.trim(),
-        description: sceneDescription,
-        createPlaceOverview,
-        panoramaFileBase64: await fileToBase64(panoramaFile),
-        panoramaFileName: panoramaFile.name,
-      });
-      setSceneTitle('');
-      setSceneDescription('');
-      setCreatePlaceOverview(false);
-      setPanoramaFile(null);
-      setCreateSceneOpen(false);
-      showFormSuccess('Scene created.');
-      const createdId =
-        (
-          result &&
-          typeof result === 'object' &&
-          'scene' in result &&
-          result.scene &&
-          typeof result.scene === 'object' &&
-          'id' in result.scene &&
-          typeof (result.scene as { id?: unknown }).id === 'string'
-        ) ?
-          (result.scene as { id: string }).id
-        : undefined;
-      if (createdId) {
-        resetSceneWork();
-        router.push(tourVisualEditPath(tourId, createdId));
-      } else {
-        publishPreviewReload();
-        router.refresh();
-      }
-    });
-    if (!ok) return;
+    router.push(tourVisualEditPath(tourId, nextSceneId, layoutFrom));
   }
 
   async function moveScene(index: number, direction: -1 | 1) {
@@ -890,7 +857,7 @@ export function TourVisualEditor({
       const fallback =
         scenes.find((item) => item.id !== sceneId)?.id ?? undefined;
       resetSceneWork();
-      if (fallback) router.push(tourVisualEditPath(tourId, fallback));
+      if (fallback) router.push(tourVisualEditPath(tourId, fallback, layoutFrom));
       else router.push(`/tours/${tourId}/scenes`);
     });
   }
@@ -989,107 +956,6 @@ export function TourVisualEditor({
             {scenes.length}
           </Badge>
         </CardTitle>
-        {canEdit ?
-          <CardAction>
-            <CreateSheet
-              title={SCENE_FORM_COPY.addTitle}
-              description={SCENE_FORM_COPY.addPanoramaDescription}
-              triggerLabel='Add'
-              disabled={busy}
-              open={createSceneOpen}
-              onOpenChange={(open) => {
-                if (!open && createDirty) {
-                  if (!window.confirm('Discard the new scene draft?')) return;
-                }
-                setCreateSceneOpen(open);
-              }}
-            >
-              <form className='admin-form' onSubmit={handleCreateScene}>
-                <CollapsibleFormSection
-                  title={SCENE_FORM_COPY.basicsSection}
-                  icon={Settings2}
-                  description={SCENE_FORM_COPY.basicsSectionDescription}
-                  defaultOpen
-                >
-                  <div className='grid gap-2'>
-                    <Label htmlFor='visual-scene-title'>Title</Label>
-                    <InputGroup icon={Type}>
-                      <Input
-                        id='visual-scene-title'
-                        value={sceneTitle}
-                        onChange={(event) => setSceneTitle(event.target.value)}
-                        placeholder={SCENE_FORM_COPY.titlePlaceholder}
-                        required
-                      />
-                    </InputGroup>
-                  </div>
-                  <div className='grid gap-2'>
-                    <Label htmlFor='visual-scene-description'>
-                      Description
-                    </Label>
-                    <Textarea
-                      id='visual-scene-description'
-                      value={sceneDescription}
-                      onChange={(event) =>
-                        setSceneDescription(event.target.value)
-                      }
-                      placeholder={SCENE_FORM_COPY.descriptionPlaceholder}
-                    />
-                  </div>
-                </CollapsibleFormSection>
-                <CollapsibleFormSection
-                  title={SCENE_FORM_COPY.mediaSection}
-                  icon={Layers3}
-                  description={SCENE_FORM_COPY.mediaSectionDescription}
-                  defaultOpen
-                >
-                  <div className='grid gap-2'>
-                    <Label htmlFor='visual-scene-panorama'>Panorama</Label>
-                    <FileInput
-                      id='visual-scene-panorama'
-                      accept='image/*'
-                      file={panoramaFile}
-                      onFileChange={setPanoramaFile}
-                      aspect='video'
-                    />
-                    <FormHint>
-                      {SCENE_FORM_COPY.panoramaFileDescription}
-                    </FormHint>
-                  </div>
-                  <CheckboxField
-                    id='visual-scene-overview'
-                    label={SCENE_FORM_COPY.createPlaceOverview}
-                    description={SCENE_FORM_COPY.createPlaceOverviewDescription}
-                    hint={SCENE_FORM_COPY.createPlaceOverviewHint}
-                    checked={createPlaceOverview}
-                    onCheckedChange={setCreatePlaceOverview}
-                  />
-                </CollapsibleFormSection>
-                <StickyFormActions>
-                  <FormCancelButton
-                    disabled={busy}
-                    onReset={() => {
-                      setSceneTitle('');
-                      setSceneDescription('');
-                      setCreatePlaceOverview(false);
-                      setPanoramaFile(null);
-                      setCreateSceneOpen(false);
-                    }}
-                  />
-                  <PendingButton
-                    type='submit'
-                    pending={busy}
-                    pendingLabel='Creating…'
-                    disabled={!sceneTitle.trim() || !panoramaFile}
-                  >
-                    <Plus aria-hidden='true' />
-                    {SCENE_FORM_COPY.createButton}
-                  </PendingButton>
-                </StickyFormActions>
-              </form>
-            </CreateSheet>
-          </CardAction>
-        : null}
       </CardHeader>
       <CardContent className='ishare-scrollbar min-h-0 flex-1 overflow-y-auto'>
         {/* A definite column, not one measured by the rows: a truncated title
@@ -1120,8 +986,18 @@ export function TourVisualEditor({
                       className='w-14 shrink-0'
                     />
                     <span className='min-w-0 flex-1 space-y-1'>
-                      <span className='block truncate font-medium'>
-                        {item.title}
+                      <span className='flex min-w-0 items-center gap-1.5'>
+                        <span className='min-w-0 truncate font-medium'>
+                          {item.title}
+                        </span>
+                        <Badge
+                          variant='secondary'
+                          size='sm'
+                          className='tabular-nums'
+                          aria-label={`Pin ${index + 1}`}
+                        >
+                          {index + 1}
+                        </Badge>
                       </span>
                       <span className='flex flex-wrap items-center gap-1'>
                         <VisibilityBadge
@@ -1133,10 +1009,6 @@ export function TourVisualEditor({
                             First
                           </Badge>
                         : null}
-                        <span className='type-meta'>
-                          {item.hotspotCount}{' '}
-                          {item.hotspotCount === 1 ? 'pin' : 'pins'}
-                        </span>
                       </span>
                     </span>
                   </button>
@@ -1146,20 +1018,43 @@ export function TourVisualEditor({
                       leave the trigger hanging high. */}
                   {canEdit ?
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          type='button'
-                          size='icon-sm'
-                          variant='ghost'
-                          className='self-center'
-                          aria-label={`Actions for ${item.title}`}
-                          disabled={busy}
-                        >
-                          <MoreHorizontal aria-hidden='true' />
-                        </Button>
-                      </DropdownMenuTrigger>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              type='button'
+                              size='icon-sm'
+                              variant='ghost'
+                              className='self-center'
+                              aria-label={`Actions for ${item.title}`}
+                              disabled={busy}
+                            >
+                              <MoreVertical aria-hidden='true' />
+                            </Button>
+                          </DropdownMenuTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>Scene actions</TooltipContent>
+                      </Tooltip>
                       <DropdownMenuContent align='end'>
                         <DropdownMenuLabel>Scene actions</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/tours/${tourId}/scenes/${item.id}`}>
+                            <Settings2 aria-hidden='true' />
+                            View details
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <a
+                            href={buildAdminPreviewUrl(tourId, {
+                              sceneId: item.id,
+                            })}
+                            target='_blank'
+                            rel='noreferrer'
+                          >
+                            <ExternalLink aria-hidden='true' />
+                            Open preview
+                          </a>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           disabled={index === 0}
                           onSelect={() => void moveScene(index, -1)}
@@ -1219,7 +1114,7 @@ export function TourVisualEditor({
       </CardHeader>
       {/* Form rhythm without a second frame: the column is already a card, so
           the field tokens stay and the box the recipe would draw comes off. */}
-      <CardContent className='admin-form min-h-0 flex-1 overflow-y-auto rounded-none border-0 bg-transparent py-0 [--admin-form-gap:var(--card-spacing)]'>
+      <CardContent className='admin-form min-h-0 flex-1 overflow-y-auto [--admin-form-gap:var(--card-spacing)]'>
         <InspectorSection icon={Camera} title='Start view'>
           <FormDescription>
             {SCENE_FORM_COPY.applyDefaultViewDescription}
@@ -1234,7 +1129,7 @@ export function TourVisualEditor({
             type='button'
             size='sm'
             variant='outline'
-            className='w-fit'
+            className='w-fit gap-1.5'
             disabled={
               !canEdit || busy || (liveView ?? scene.defaultView).length === 0
             }
@@ -1544,15 +1439,17 @@ export function TourVisualEditor({
     setOpenPanes((current) => ({ ...current, [pane]: !current[pane] }));
   }
 
+  // Fills the workbench under the tool header. The 1fr row is the stage:
+  // columns scroll inside it instead of stretching the page.
   return (
-    <div className='grid gap-4'>
+    <div className='grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-4'>
       {/* One toolbar for the whole editor: which panes are open, what a click on
           the panorama will do, and whether the last write landed. */}
       <div className='flex flex-wrap items-center gap-x-3 gap-y-2'>
         <div
           className='flex gap-1 rounded-lg border bg-muted/40 p-1 xl:hidden'
           role='tablist'
-          aria-label='Editor panes'
+          aria-label='Layout panes'
         >
           {EDITOR_PANE_IDS.map((id) => {
             const pane = EDITOR_PANES[id];
@@ -1602,11 +1499,10 @@ export function TourVisualEditor({
           would measure the scene list and grow past the stage height, and a
           column that is taller than its scroll box never scrolls. */}
       <div
-        className='grid h-(--editor-stage) grid-rows-[minmax(0,1fr)] gap-4 xl:grid-cols-(--editor-columns)'
+        className='grid min-h-0 grid-rows-[minmax(0,1fr)] gap-4 xl:grid-cols-(--editor-columns)'
         style={
           {
             '--editor-columns': editorColumns,
-            '--editor-stage': EDITOR_STAGE_HEIGHT,
           } as CSSProperties
         }
       >

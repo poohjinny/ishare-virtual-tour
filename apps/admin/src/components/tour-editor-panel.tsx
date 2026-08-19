@@ -10,7 +10,6 @@ import {
   Info,
   MessageCircle,
   Palette,
-  Pipette,
   Repeat,
   Save,
   Sparkles,
@@ -48,7 +47,8 @@ import { PendingButton } from '@/components/pending-button';
 import { InputGroup } from '@/components/input-group';
 import { ViewerTypeBadge, VisibilityBadge } from '@/components/status-badges';
 import { showFormError, showFormSuccess } from '@/lib/form-toast';
-import { Card, CardContent } from '@/components/ui/card';
+import { colorLabelClass } from '@/lib/utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Sheet,
   SheetContent,
@@ -216,51 +216,50 @@ export function TourEditorPanel({
   return (
     <>
       {info ?
-        <Card className='h-full'>
-          <CardContent className='flex-1'>
-            <InfoFieldList>
-              <InfoField layout='inline' icon={Type} label='Title'>
+        <Card className='max-h-full min-h-0'>
+          <CardHeader className='shrink-0'>
+            <CardTitle>{AUTHORING_SURFACE.details.label}</CardTitle>
+          </CardHeader>
+          <CardContent className='ishare-scrollbar min-h-0 flex-1 overflow-y-auto'>
+            <InfoFieldList layout='stack'>
+              <InfoField icon={Type} label='Title'>
                 {savedValues.tourTitle}
               </InfoField>
-              <InfoField layout='inline' icon={Building2} label='Client'>
+              <InfoField icon={Building2} label='Client'>
                 <InfoLink href={`/clients/${tour.clientId}`}>
                   {tour.clientName}
                 </InfoLink>
               </InfoField>
-              <InfoField layout='inline' icon={Tag} label='Category'>
+              <InfoField icon={Tag} label='Category'>
                 {savedValues.category}
               </InfoField>
-              <InfoField layout='inline' icon={Eye} label='Visibility'>
+              <InfoField icon={Eye} label='Visibility'>
                 <VisibilityBadge visibility={savedValues.visibility} />
               </InfoField>
-              <InfoField layout='inline' icon={View} label='Viewer'>
+              <InfoField icon={View} label='Viewer'>
                 <ViewerTypeBadge viewerType={tour.viewerType} />
               </InfoField>
-              <InfoField
-                layout='inline'
-                icon={MessageCircle}
-                label='Tour Guide'
-              >
+              <InfoField icon={MessageCircle} label='Tour Guide'>
                 {savedValues.askGuideEnabled ? 'On' : 'Off'}
               </InfoField>
-              <InfoField layout='inline' icon={AlignLeft} label='Summary'>
+              <InfoField icon={AlignLeft} label='Summary'>
                 {savedValues.tourSummary || '—'}
               </InfoField>
-              <InfoField layout='inline' icon={Repeat} label='Transition'>
+              <InfoField icon={Repeat} label='Transition'>
                 {savedValues.transitionEffect}
               </InfoField>
-              <InfoField layout='inline' icon={Headphones} label='Immersive'>
+              <InfoField icon={Headphones} label='Immersive'>
                 {immersiveLabel}
               </InfoField>
-              <InfoField layout='inline' icon={Palette} label='Branding'>
-                {brandingLabel}
-              </InfoField>
-              <InfoField layout='inline' icon={Pipette} label='Color'>
-                <span className='inline-flex items-center gap-2'>
-                  {savedValues.primaryColor ?
-                    <ColorSwatch color={savedValues.primaryColor} />
-                  : null}
-                  {savedValues.primaryColor || '—'}
+              <InfoField icon={Palette} label='Branding'>
+                <span className='flex flex-col gap-1'>
+                  {brandingLabel}
+                  <span className={colorLabelClass}>
+                    {savedValues.primaryColor ?
+                      <ColorSwatch color={savedValues.primaryColor} />
+                    : null}
+                    {savedValues.primaryColor || '—'}
+                  </span>
                 </span>
               </InfoField>
             </InfoFieldList>

@@ -17,7 +17,14 @@ export function EditorPreviewSplit({
   const [mobilePane, setMobilePane] = useState<'editor' | 'preview'>('editor');
 
   return (
-    <div className={cn('grid gap-4 xl:gap-6', className)}>
+    <div
+      className={cn(
+        'grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-4',
+        // Editor is a capped column; Preview is the growing pane (width + height).
+        'xl:grid-cols-[minmax(18rem,24rem)_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)] xl:gap-6',
+        className,
+      )}
+    >
       <div
         className='flex w-fit gap-1 rounded-lg border bg-muted/40 p-1 xl:hidden'
         role='tablist'
@@ -53,16 +60,16 @@ export function EditorPreviewSplit({
       </div>
       <div
         className={cn(
-          mobilePane === 'editor' ? 'block' : 'hidden',
-          'h-full xl:block',
+          mobilePane === 'editor' ? 'flex' : 'hidden',
+          'h-full min-h-0 min-w-0 flex-col overflow-hidden xl:flex',
         )}
       >
         {editor}
       </div>
       <div
         className={cn(
-          mobilePane === 'preview' ? 'block' : 'hidden',
-          'h-full xl:block',
+          mobilePane === 'preview' ? 'flex' : 'hidden',
+          'h-full min-h-0 min-w-0 flex-1 flex-col xl:flex',
         )}
       >
         {preview}

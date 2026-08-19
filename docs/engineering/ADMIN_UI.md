@@ -28,7 +28,7 @@ viewer.
 | Main page | Page identity and vertically separated content sections | `PageMain` + `PageHeader` |
 | Catalog | Browse, filter, sort, create, and row actions | Domain table or gallery with `SectionHeader` |
 | Workspace | Stable entity identity across peer tabs | `PageChrome` + domain `*WorkspaceHeader` + `WorkspaceTabs` |
-| Editor | Structured controls beside an interactive viewer preview | `EditorPreviewSplit` or `TourVisualEditor` |
+| Editor | Structured controls beside a live iframe | `EditorPreviewSplit` or `TourVisualEditor` |
 | Authoring drawer | Create or edit one record while retaining page context | `CreateSheet` or shared authoring sheet classes |
 | Guide dock | Ongoing help while the page remains usable | `AdminGuideDock`; see [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) |
 | Account | Personal identity and session state | `/account` |
@@ -66,24 +66,28 @@ another version from `components/ui`.
 | --- | --- | --- | --- |
 | `AdminChrome` | Rendering persistent sidebar/header/Guide chrome | Building route content | `components/admin-chrome.tsx` |
 | `AdminShell` | Publishing route breadcrumb context | Adding a second visual shell | `components/admin-shell.tsx` |
-| `PageMain` | Every route body; `variant='workbench'` for a tool route whose canvas is the content | A nested card or sheet body | `components/page-header.tsx`; `/settings`, `/tours/[tourId]/edit` |
+| `PageMain` | Every route body; `variant='split'` for a catalog-width preview stage that fills remaining height; `variant='workbench'` for a tool route whose canvas is the content | A nested card or sheet body | `components/page-header.tsx`; `/settings`, `/tours/[tourId]`, `/tours/[tourId]/edit` |
 | `PageHeader` | Naming a standalone page or deeper route | A peer section or workspace tab panel | `components/page-header.tsx`; `/account` |
 | `PageChrome` | Grouping stable workspace identity, tabs, and lead copy | A standalone catalog page | `components/page-header.tsx`; tour workspace routes |
 | `WorkspaceTabs` / `PageLead` | Introducing the active workspace panel | Repeating entity identity or slicing one form | `components/page-header.tsx`; `tour-workspace-header.tsx` |
-| Domain `*WorkspaceHeader` | Keeping tour/client title, media, status, and actions stable across tabs | A deeper scene route | `tour-workspace-header.tsx`, `client-workspace-header.tsx` |
+| Domain `*WorkspaceHeader` | Keeping tour/client title, media, status, and actions stable across tabs | A scene or naming child detail, or the panorama Layout tool | `tour-workspace-header.tsx`, `client-workspace-header.tsx` |
 | `SectionHeader` | Introducing a table, gallery, or peer page block | Form subsections | `components/page-header.tsx`; `tour-table.tsx` |
-| `PeerSwitcher` | Navigating among same-level tours, clients, or scenes | Selecting a form value | `components/peer-switcher.tsx`, `admin-breadcrumbs.tsx` |
+| `PeerSwitcher` | Navigating among same-level tours, clients, scenes, or namings | Selecting a form value | `components/peer-switcher.tsx`, `admin-breadcrumbs.tsx` |
 
 Avoid reinventing route padding, title/action rows, breadcrumb menus, or
-workspace identity chrome.
+workspace identity chrome. `PageHeader` is left identity (media, title,
+badges) and right actions, `items-start`.
 
 Ordinary routes are a reading column, so `PageMain` caps their width and gives
-sections a generous beat. A workbench route is not reading material: its canvas
-should use the display, so `variant='workbench'` trades the reading cap for
-width and tightens the section beat. The variant states only the section gap —
-the intro pull is always half of it — so do not re-declare a gap or a pull at a
-call site. Reach for it when a route's value scales with pixels, not when a page
-merely feels full.
+sections a generous beat. A `split` route stays in that reading column (same
+cap and beat, lead copy stays) but fills the remaining viewport so
+`EditorPreviewSplit` can grow — tour Details and the scene child. A workbench
+route is not reading material: its canvas should use the display, so
+`variant='workbench'` trades the reading cap for width and tightens the
+section beat. The variant states only the section gap — the intro pull is
+always half of it — so do not re-declare a gap or a pull at a call site. Reach
+for workbench when a route's value scales with pixels, not when a page merely
+feels full; do not put Details on workbench just to fill height.
 
 ### Actions, links, and feedback
 
@@ -99,7 +103,11 @@ merely feels full.
 | Form toast helpers | Reporting the final success/error of a form action | Duplicating the same result below the form | `lib/form-toast.ts` |
 | `NavigationProgress` | Link-driven route transitions | Button work or data loading inside a page | `components/navigation-progress.tsx` |
 
-Button rank is semantic:
+`Button` has two axes — `variant` (rank) and `size`. Call sites pick both from
+`buttonVariants`; they do not invent height, padding, icon size, or tone
+(`h-10`, `size-[42px]`, `text-muted-foreground`, …).
+
+Rank (`variant`) is semantic:
 
 - default: the main create, save, or edit commitment;
 - `outline`: adjacent utility or secondary navigation;
@@ -107,11 +115,25 @@ Button rank is semantic:
 - `destructive`: irreversible work, normally behind confirmation;
 - `link`: button behavior that must visually read as an inline link.
 
+Size (`size`) is a pick-list. Labelled and icon-only ranks are paired
+(labelled is a half-step taller than the matching square).
+
+| `size` | Use when | Do not |
+| --- | --- | --- |
+| `default` | Main labelled action in a cluster | Local `h-*` / `px-*` on `Button` |
+| `sm` | Compact labelled (dense rows, secondary toolbars) | A second “almost sm” height |
+| `xs` | Extra-compact labelled | Mixing `xs` padding onto `sm` |
+| `lg` | Rare, larger labelled | Default-plus-two-pixels |
+| `icon` / `icon-sm` / `icon-xs` / `icon-lg` | Icon-only; match the labelled rank | A hand-built square or circular control |
+
+Need a new step? Add it in `components/ui/button.tsx` and a row here — not at
+the call site.
+
 Use one strong action per cluster. Primary actions include a leading Lucide icon.
 Write icons bare and let `buttonVariants` own size, spacing, and tone. Icon-only
-buttons require an `aria-label` and normally a Tooltip.
+buttons require an `aria-label` and normally a Tooltip. They are `Button` with
+an `icon*` size — never a hand-built square.
 
-Icon-only controls are `Button` with an `icon*` size — never a hand-built square.
 Tone belongs to `buttonVariants`: a `ghost` icon button idles one step down and
 returns to full strength on hover, focus, an open menu (`aria-expanded`), or a
 pressed toggle (`aria-pressed`), which also carries the primary accent. Filled
@@ -125,6 +147,9 @@ muted glyph and the open dock reads through `aria-pressed`, which
 `buttonVariants` renders as the primary accent. Keep the sidebar's
 `symbol_ishare.png` lockup as the product signature, and do not give another
 control a custom mark to make it stand out.
+
+Viewer docks / glass / hotspots are a different app:
+[COMPONENTS.md](./COMPONENTS.md).
 
 ### Forms and authoring
 
@@ -144,7 +169,7 @@ control a custom mark to make it stand out.
 | `FileInput` | Selecting an asset with current/picked-file feedback | A detached native file input and custom preview | `components/file-input.tsx` |
 | `BrandFontField` | Choosing a preset/platform/Google brand font | Building another font picker | `components/brand-font-field.tsx` |
 | `ColorSwatch` | Showing or controlling a brand color | Hand-rolling a square color sample | `components/color-swatch.tsx` |
-| `InfoFieldList` / `InfoField` | Displaying immutable entity details | Simulating display values with disabled inputs | `components/form-status.tsx`; workspace details |
+| `InfoFieldList` / `InfoField` | Displaying immutable entity details. Preview-adjacent cards use `layout='stack'` (icon + label over the value); compact entity cards stay `inline`. Labels are muted (`text-muted-foreground`); values stay body/foreground | Simulating display values with disabled inputs | `components/form-status.tsx`; workspace details |
 
 A standard create/edit form is one `.admin-form`, optional form sections, and
 one `StickyFormActions`. Field copy—labels, descriptions, hints, placeholders,
@@ -176,7 +201,7 @@ values may remain read-only controls when selection/copying is useful.
 | `TableFilterDropdown` | Multi-select catalog filters | Filtering to one entity from a growing list | `components/table-filter-dropdown.tsx` |
 | `Select` in the section action row | Narrowing a catalog to one owning entity | A short fixed enum that reads better as checkboxes | `components/ui/select.tsx`; `tour-table.tsx` client filter |
 | `TableEmptyState` | Empty catalog or no filter matches | Bare muted text in a table row | `components/table-empty-state.tsx` |
-| Shared table class recipes | Media, badge, and compact semantic columns | Copying width/padding recipes into each table | `lib/utils.ts` |
+| Shared table class recipes | Media, badge, actions, and compact semantic columns | Copying width/padding recipes into each table | `lib/utils.ts` |
 | `Badge` | Compact entity metadata or a short state | Sentences, unavailable notices, empty values, or setup guidance | `components/ui/badge.tsx` |
 | Domain status badges | Visibility, license, category, naming, viewer, hotspot, or staff role/status semantics | Selecting colors at the call site | `components/status-badges.tsx` |
 | `StatCardGrid` / `StatCard` | Real summary counts and categorical rollups | Invented vanity metrics or one-off chart chrome | `components/stat-card.tsx`; `/overview` |
@@ -211,11 +236,16 @@ sentences. Missing values remain muted text.
 | `CreateSheet` | Creating a catalog record from a section action | A long-lived companion panel | `components/create-panel-shell.tsx` |
 | Authoring sheet classes | Any create/edit drawer not covered by `CreateSheet` | Repeating drawer width/padding at call sites | `AUTHORING_SHEET_CLASS`, `AUTHORING_SHEET_BODY_CLASS` |
 | `DropdownMenu` | Row or compact chrome actions | Form selection or persistent navigation | `components/ui/dropdown-menu.tsx`; domain tables |
+| `.admin-menu-scroll` | Capping a floating list (dropdown, select, submenu) and scrolling it | Page chrome, Guide dock body, or a second `max-h-*` at a call site | `globals.css` (`--admin-dropdown-max-height`); `dropdown-menu.tsx`, `select.tsx` |
 | `AlertDialog` | A short irreversible decision | Long forms | `ConfirmDeleteDialog` |
 | `Tooltip` | Labelling an icon-only control or decoding an unclear short label | Repeating visible prose | `components/ui/tooltip.tsx` |
 | `AdminGuideDock` | Ongoing assistance beside active work | An authoring Sheet or replacement form | `components/admin-guide-panel.tsx` |
 | `AssetImage` | Viewer-hosted media with loading/fallback behavior | Raw images for baked viewer assets | `components/asset-image.tsx` |
-| `BrandedAvatar`, `MediaThumb`, `OptionThumb` | Known logo/thumb presentation jobs | Repeating image shells and fallbacks | `components/branded-avatar.tsx` |
+| `BrandedAvatar`, `MediaThumb`, `OptionThumb` | Known logo/thumb presentation jobs | Repeating image shells, or person identity (use `PersonAvatar`) | `components/branded-avatar.tsx` |
+| `PersonAvatar` | Staff/user identity — always a circle; initials when the photo is missing or fails | Client logos or tour thumbs | `components/branded-avatar.tsx` |
+| `mediaLabelClass` | Pairing that media with a label in a menu or select (`gap-2.5`) | Table cells, identity headers, crumb trail chips, or glyph rows that keep the primitive `gap-2` | `lib/utils.ts`; `peer-switcher.tsx`, `SceneOptionLabel` |
+| `breadcrumbMediaLabelClass` | Same pairing on a breadcrumb trail chip (`gap-2`) | Open menus, selects, or `PeerSwitcher` list rows | `lib/utils.ts`; `admin-chrome.tsx`, `peer-switcher.tsx` crumb trigger |
+| `colorLabelClass` | Pairing a `ColorSwatch` with its hex/label (`gap-1`) | Media+label rows (`mediaLabelClass` / breadcrumb chips) | `lib/utils.ts`; tour Branding, client Color |
 
 Sheets are temporary task surfaces. Dialogs are short blocking decisions. The
 Guide is persistent companion context. Choose by job, even when all three occur
@@ -274,7 +304,23 @@ on the same route.
   group keeps one row `checked` and re-applies its value on select, a
   multi-select group toggles each row on its own.
 - Icon-to-label spacing and row padding belong to the shared dropdown item
-  styles. Do not wrap menu content in per-call gap or padding spans.
+  styles (`gap-2`). A media + label row is a half-step wider:
+  `mediaLabelClass` (`gap-2.5`) after `PersonAvatar`, `BrandedAvatar`, or
+  `OptionThumb`, including `PeerSwitcher` menu rows that pair the same
+  combo. Breadcrumb trail chips use `breadcrumbMediaLabelClass` (`gap-2`).
+  Wrap that pair in the matching class; do not change the primitive
+  default, which also serves Edit/Delete glyph rows.
+- Floating menus share one height-and-scroll recipe. `--admin-dropdown-max-height`
+  (`24rem`, the same cap as toast / PeerSwitcher width) and the remaining
+  viewport, whichever is smaller. Overflow uses `.ishare-scrollbar` — the thin
+  bar already on the main column, Guide panel, sheets, and authoring forms.
+  `DropdownMenuContent`, `DropdownMenuSubContent`, and `SelectContent` apply
+  `.admin-menu-scroll` plus `.ishare-scrollbar`; call sites do not add `max-h-*`,
+  `overflow-*`, or a second scrollbar recipe. Keep keyboard scrolling: do not
+  leave a long list on `overflow: hidden` without a max-height. Admin has no
+  Combobox or Command palette yet; a new one takes those two classes rather than
+  a local rem. The bar's visual source is Guide / main chrome, not the dock's
+  layout — dock behavior stays in [ADMIN_GUIDE.md](./ADMIN_GUIDE.md).
 - Same-level peer navigation uses links in `PeerSwitcher`, not a Select.
 - The sidebar carries the primary admin destinations: Overview, the Tours and
   Clients catalogs, and master-level Users. Tours and Clients are collapsible
@@ -302,9 +348,10 @@ on the same route.
   `SidebarMenuSubButton`, so the level below reads as lighter without cramping.
   Do not re-height or re-pad a row per call site.
 - "Workspace" is a context, not a sidebar section: it means one tour or client
-  is open. Its surfaces (Details, Editor, Scenes, Namings, and the client's
-  Tours) belong to the page's workspace tab bar and are never mirrored in the
-  rail.
+  is open. Its surfaces (Details, Scenes, Namings, and the client's Tours)
+  belong to the page's workspace tab bar and are never mirrored in the rail.
+  The panorama Layout tool is a standalone tool route (`/tours/[tourId]/edit`), not
+  a workspace tab.
 - The accent-washed row is the current page and nothing else. In a catalog
   group that page is always a fold item — `All tours` on the catalog page, the
   entity on its own pages — and an active row also thickens to medium. The wash
@@ -400,8 +447,59 @@ remains the source of truth for writes.
 
 ### Row actions and status
 
-- Use a `DropdownMenu` for row actions. Keep ordinary actions together, Edit
-  near the end, and Delete last.
+Use a `DropdownMenu` for catalog and list row actions. Put every row action in
+that menu; do not park a labelled sibling (`Preview`, `Open`) beside the kebab.
+Catalog row overflow is a vertical kebab (`MoreVertical`); a horizontal
+ellipsis is not the row trigger. The actions column is end-aligned and narrow
+(`tableActionsCellClass`) so the kebab hugs the row’s right edge; do not make
+it sticky. Keep the kebab on catalog rows even when the reader cannot edit, so
+View details and Open stay available; gate Edit, Duplicate, Move, and Delete.
+
+Canonical order:
+
+1. **Open** — View details when the entity has a page, then Open live / Open
+   website / Open preview / Open layout when those destinations exist.
+2. **Transform** — Duplicate, Move up/down, and other domain actions that already
+   have an API.
+3. **Edit** — the authoring surface (sheet or layout tool), last among ordinary
+   actions. Omit it when that surface is the same destination as View details.
+4. **Delete** — last, `variant='destructive'`, behind `ConfirmDeleteDialog`,
+   separated from the rest. Do not add separators merely because an action opens
+   a different component.
+
+Do not invent Archive, Duplicate, or other verbs without a backend. Tour
+Unlisted visibility is the stand-in for archive; there is no tour/client/user
+or hotspot duplicate API.
+
+| Entity | View details | Open | Duplicate | Move | Edit | Delete |
+| --- | --- | --- | --- | --- | --- | --- |
+| Tour | workspace | Open live tour; Open layout (panorama only) | — | — | metadata sheet | yes |
+| Client | workspace | Open website when set | — | — | sheet | yes |
+| User | `/users/[id]` | — | — | — | sheet | yes (UI-only) |
+| Scene catalog | scene page | Open preview; Open layout (panorama only) | yes | yes | — | yes |
+| Scene editor list | scene page | Open preview | yes | yes | omit (already in the layout) | yes |
+| Naming | naming page | — | yes | — | omit (on-page Edit on the detail page) | yes |
+| Hotspot | — | — | — | — | sheet | yes |
+
+Outbound Open labels — same destination, paired names; headers stay short,
+kebabs keep the verb:
+
+- **Live** (header) and **Open live tour** (kebab) are the published tour
+  viewer (`https://tour.ishare.ca/{tourId}`). Tour-level only. Keep **Live** on
+  the Details header; do not add Live to every kebab.
+- **Preview** (header) and **Open preview** (kebab) are the scene-scoped
+  authoring viewer (`buildAdminPreviewUrl` with the current or row scene) in a
+  **new tab**. Use these on scene/layout surfaces; they are not a synonym for
+  Live. The in-page iframe split heading is also **Preview** (`PREVIEW_PANE_COPY`)
+  — same word, in-page not new tab. Do not lengthen the pane to “Viewer preview”.
+- **Open website** is the client’s site — do not rename it. **Layout** (header,
+  Overview gallery) and **Open layout** (kebab) are panorama `/edit`, not meta
+  Edit. Header short labels are **Live**, **Preview**, **Layout**; kebab verbs
+  stay **Open live tour**, **Open preview**, **Open layout**.
+- Do not put the same destination on both the header and the kebab of the same
+  page. Catalog kebab Open jumps from a list; header Open is for the record
+  you are on. Detail pages keep the header control.
+
 - Rows with an action menu open that same controlled `DropdownMenu` on
   right-click, at the pointer rather than under the kebab, through
   `useTableRowActionMenu`. Reuse the one menu; do not copy its items into a
@@ -413,8 +511,6 @@ remains the source of truth for writes.
   option copy stays readable, with the leading icon — and the trigger's chevron —
   sitting on the first line beside the label rather than centering against the
   hint below it. That is the one deliberate exception.
-- Separate Delete when the menu needs a pause before irreversible work; do not
-  add separators merely because an action opens a different component.
 - Plain status words use domain badges. Add a Tooltip only when the short label
   is coded or unclear.
 - Reuse semantic color mappings from `semantic-colors.ts` and
@@ -437,8 +533,13 @@ remains the source of truth for writes.
   in the sidebar's separate `Admin` group, not a personal Account-menu item.
   The catalog name links to `/users/[userId]`, whose durable detail layout owns
   identity, contact, access, assignment, and audit surfaces. Invite stays a
-  short catalog sheet; detail editing is on-page. Placeholder rows, invites,
-  edits, and deletes must not pretend to persist.
+  short catalog sheet; detail editing is on-page. The user detail header
+  follows the workspace header recipe (avatar, PeerSwitcher title, role/status,
+  labeled Edit) without workspace tabs. Staff identity marks — breadcrumb
+  chip, PeerSwitcher rows, catalog column, and detail header — use circular
+  `PersonAvatar`. Missing or failed photos keep the same circle with initials;
+  do not use the logo tile (`BrandedAvatar`) or leave an empty gap.
+  Placeholder rows, invites, edits, and deletes must not pretend to persist.
 - Staff roles use the shared `StaffRoleBadge` everywhere they are displayed:
   Master uses info, Editor uses accent, and Viewer uses secondary treatment.
 - `/settings` owns appearance, environment connection details, and Debug
@@ -464,42 +565,72 @@ remains the source of truth for writes.
 - Catalog pages browse and act across entities. Workspace pages keep one
   entity's identity stable while tabs switch tasks.
 - A naming is a tour child, never a top-level Admin entity. The naming catalog
-  links to `/tours/[tourId]/namings/[namingId]`; the child detail keeps the tour
-  workspace header and tabs, then owns opportunity, donor, placement, and edit
-  content. Sheets remain appropriate for create, duplicate, and delete
-  confirmation, not for the primary naming detail.
+  links to `/tours/[tourId]/namings/[namingId]`. Scene and naming child details
+  follow the user detail pattern: `PageHeader` + breadcrumbs, no tour workspace
+  tabs. The panorama Layout tool is the same kind of tool route (`Tours > {tour} >
+  Layout`), not a workspace tab and not inside Scene detail. The scene child is
+  `SceneEditorPanel` (`Settings` | `Hotspots`) beside preview; hotspot
+  create/edit lives in that Hotspots tab and the panorama Layout inspector —
+  not a separate Manage hotspots route or catalog CTA. The naming child owns
+  opportunity, donor, and placement read sections, plus
+  on-page edit via the header Edit toggle (same recipe as user detail — not a
+  sheet, not an always-on form). Sheets remain appropriate for create,
+  duplicate, and delete confirmation. Catalog rows omit Edit because View
+  details goes to that page.
 - Tour and client workspace headers own their Edit and external-link actions
-  across all peer tabs.
+  across all peer tabs. Tour headers also own **Live**; panorama tour headers
+  also own **Layout** (`outline`), distinct from filled **Edit** (meta
+  sheet). In-workspace catalogs put **Add …** on the table `SectionHeader`
+  (Filter → create), not the entity header: client Tours has **Add tour** with
+  the client locked; `/tours` still lets you pick a client.
 - Info cards contain fields only when the page header already supplies identity.
 - Linked values use `cardLinkClass`; empty values use the standard muted
   placeholder.
 - Viewer media URLs come from `admin-media.ts` / `viewer-url.ts` and render
   through the shared media components.
 
-### Panorama editor
+### Panorama layout
 
-The visual editor is panorama-only. Model3d tours use scene management and do
-not expose the Editor tab.
+The Layout tool is panorama-only. It is a tool route
+(`/tours/[tourId]/edit`) with `PageHeader` + breadcrumbs, not a workspace tab.
+Model3d tours have no **Layout** control; `/edit` still redirects to
+`/scenes`. Layout tool header = **Preview** (new tab) + **Close**. Close
+returns to the screen that opened Layout (`?from=`), and falls back to tour
+Details when `from` is missing or invalid. Scene details is not a header
+action (row kebab View details remains).
 
+- Panorama Details header **Layout** (`outline`, next to filled **Edit**
+  for the meta sheet) goes to `/tours/[id]/edit`. Scene detail **Layout**
+  goes to `/edit?scene=` with `from` for that scene page. Scenes row kebab
+  **Open layout** (panorama) goes to `/edit?scene=` with `from` for the Scenes list.
+  Tours catalog and client Tours tab: **Edit** always opens the meta sheet;
+  **Open layout** (panorama only) goes to `/edit`. Overview gallery cards
+  jump to the same `/edit` from **Layout** (panorama only) beside Scenes and
+  Namings; they have no kebab. Model3d cards omit it. Close from those
+  catalog entries is Details.
 - The Scenes list is catalog navigation for both viewer types: its primary cell
-  opens the scene detail page. The editor is reached through the Editor tab or
-  the row menu's Edit action, so a panorama row never jumps straight into the
-  editor from its title.
+  opens the scene detail page. A panorama row never jumps straight into Layout
+  from its title.
 
 - The viewer is the hero of this route, so the layout spends space on it. The
-  page runs as a `workbench`, the tab drops its lead copy, the preview card runs
-  `compact` (no explanatory header copy, and the surrounding stage owns the
-  height), and the side columns are capped so every extra pixel lands on the
-  viewer instead of stretching a panel of forms.
+  page runs as a `workbench` with a tool `PageHeader` (no workspace tabs, no
+  lead — the canvas is the content), the
+  preview card runs `compact` (heading **Preview**, no explanatory description,
+  and the surrounding stage owns the height), and the side columns are capped so
+  every extra pixel lands on the viewer instead of stretching a panel of forms.
+  Tour Details and Scene child splits use the same in-page heading **Preview**.
+  That pane title is the iframe column; header **Preview** still opens a new tab.
 - The three columns share one chrome: `sm` cards on the same padding step, one
   gap, and headers that reserve the height of a `sm` action button so the scene
   list, the viewer, and the inspector start on the same line whether or not a
   header carries an action. A count belongs beside the thing it counts, not in a
   card description line that only exists to hold it.
-- The stage is a definite, clamped height read from the viewport — not a
-  `min-height` floor. The columns scroll inside it, so a long scene list or an
-  open hotspot inspector cannot stretch the row and leave the viewer as a tall
-  black box, and a short laptop still gets a usable panorama.
+- The stage is a definite height: it fills the `workbench` under the tool
+  `PageHeader`, not a `min-height` floor or a `100svh` guess. The columns
+  scroll inside it, so a long scene list or an open hotspot inspector cannot
+  stretch the row and leave the viewer as a tall black box. Tour Details and
+  the scene child do the same fill under workspace chrome / the scene header
+  via `variant='split'` (catalog width, default beat) — not workbench.
 - Inspector groups all wear the same box, glyph, and heading row; a row inside a
   group carries a tint rather than a border of its own, because the card is
   already the frame. The column keeps the form tokens without the frame the
@@ -523,7 +654,7 @@ not expose the Editor tab.
 - Authoring operations go through `tourAuthoringRepository`; components should
   not depend directly on the eventual draft/publish adapter.
 
-Do not broaden a panorama editor change into model3d behavior without an
+Do not broaden a panorama Layout change into model3d behavior without an
 explicit product decision.
 
 ### Motion and accessibility
@@ -557,15 +688,21 @@ explicit product decision.
 | `lib/admin-routes.ts` | Route construction and authoring destinations |
 | `lib/workspace-nav.ts` | Tour/client workspace surfaces shared by the workspace tab bars |
 | `lib/tour-authoring-repository.ts` | UI-facing authoring operations |
-| `lib/utils.ts` | `cn` and shared link/table class recipes |
+| `lib/utils.ts` | `cn` and shared link/table/`mediaLabelClass` / `breadcrumbMediaLabelClass` / `colorLabelClass` recipes |
 | `lib/chart-motion.ts` | Shared chart timing and easing |
 | `lib/admin-sidebar-rail.ts` | Sidebar rail width bounds, persistence, and boot property |
 | `lib/admin-accent.ts` + `--admin-accent-*` | Accent ids, storage/boot contract, and the paint each accent shows in a picker |
 | `lib/loading-timing.ts` | Reveal delay for route skeletons and navigation progress |
 
-Type roles are `.type-display`, `.type-heading`, `.type-title`, `.type-label`,
-`.type-body`, and `.type-meta`. Use the role instead of recreating a font-size,
-weight, and color bundle. `.type-brand` is the sidebar brand lockup title, a
+Type roles are `.type-display`, `.type-heading`, `.type-title`, `.type-eyebrow`,
+`.type-label`, `.type-body`, and `.type-meta`. Use the role instead of recreating
+a font-size, weight, and color bundle. Card heading is `.type-eyebrow` on
+`CardTitle` (`text-xs`, uppercase, `tracking-widest`, `font-semibold`, `text-foreground/80`) — including Layout
+`Card size="sm"` columns, which share the same `CardTitle`. Do not apply
+eyebrow to page titles (`.type-display` / `PageHeader`). `.type-title` remains
+for list and non-card headings. InfoField labels are muted body
+(`text-muted-foreground`); values stay body/foreground.
+`.type-brand` is the sidebar brand lockup title, a
 half-step above this app's `text-sm`. `.icon-inline` is for label-adjacent
 marks in text rows, not buttons — including the leading icon an `InputGroup`
 puts inside field chrome. Icons that only introduce a value read one step below
@@ -607,7 +744,7 @@ Current route families:
 - `/overview`: visual client/tour summary;
 - `/clients` and `/clients/[clientId]/*`: client catalog and workspace;
 - `/tours` and `/tours/[tourId]/*`: tour catalog, workspace, scenes, naming
-  child details, and panorama editor;
+  child details, and panorama layout;
 - `/users` and `/users/[userId]`: staff catalog and UI-only staff detail;
 - `/account`: identity/session;
 - `/settings`: Admin preferences and environment.
@@ -651,6 +788,7 @@ restyle viewer layers.
 | Document | Role |
 | --- | --- |
 | [ADMIN_GUIDE.md](./ADMIN_GUIDE.md) | Admin authoring assistant behavior and dock implementation |
+| [COMPONENTS.md](./COMPONENTS.md) | Viewer chrome / glass / hotspot pick-list (not Admin) |
 | [DEV_PANEL.md](./DEV_PANEL.md) | Local authoring UI and payload parity |
 | [ROADMAP.md](../ROADMAP.md) | Phase and route architecture |
 | [TOUR_DB.md](../product/TOUR_DB.md) | Organizations, access, draft/publish |

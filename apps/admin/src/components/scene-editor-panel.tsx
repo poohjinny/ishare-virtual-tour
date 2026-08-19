@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
+  AlignLeft,
   Eye,
   FileImage,
   Hash,
   Link2,
   MapPin,
-  MoreHorizontal,
+  MoreVertical,
   Pencil,
   Plus,
   Save,
@@ -21,6 +22,7 @@ import { useRouter } from 'next/navigation';
 
 import { SceneOptionLabel } from '@/components/branded-avatar';
 import { ConfirmDeleteDialog } from '@/components/confirm-delete-dialog';
+import { useHeaderEdit } from '@/components/header-edit';
 import { FileInput } from '@/components/file-input';
 import {
   AUTHORING_SHEET_BODY_CLASS,
@@ -52,6 +54,7 @@ import { showFormError, showFormSuccess } from '@/lib/form-toast';
 import { Button } from '@/components/ui/button';
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -71,6 +74,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -124,6 +128,7 @@ import type {
   AdminSceneDetail,
   AdminSceneSummary,
 } from '@/lib/tour-scenes';
+import { tableActionsCellClass } from '@/lib/utils';
 
 function HotspotSheet({
   canEdit,
@@ -245,7 +250,7 @@ function HotspotSheet({
               aria-label={`Actions for ${displayName}`}
               disabled={isSaving}
             >
-              <MoreHorizontal aria-hidden='true' />
+              <MoreVertical aria-hidden='true' />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' {...menuContentProps}>
@@ -254,6 +259,7 @@ function HotspotSheet({
               <Pencil aria-hidden='true' />
               Edit
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <ConfirmDeleteDialog
               title={`Delete “${displayName}”?`}
               description='This hotspot will be permanently removed from the scene. This action cannot be undone.'
@@ -535,7 +541,10 @@ export function SceneEditorPanel({
   );
   const [panoramaFile, setPanoramaFile] = useState<File | null>(null);
   const [hotspotCreateOpen, setHotspotCreateOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const localEdit = useState(false);
+  const headerEdit = useHeaderEdit();
+  const editOpen = headerEdit?.open ?? localEdit[0];
+  const setEditOpen = headerEdit?.setOpen ?? localEdit[1];
   const [hotspotKind, setHotspotKind] =
     useState<AdminHotspotCreate['kind']>('nav');
   const [hotspotName, setHotspotName] = useState('');
@@ -588,7 +597,7 @@ export function SceneEditorPanel({
       await updateLocalScene(tourId, scene.id, form);
       setSavedValues(form);
       showFormSuccess('Scene saved to local JSON.');
-      setSettingsOpen(false);
+      setEditOpen(false);
       router.refresh();
     } catch (error) {
       showFormError(error, 'Scene save failed.');
@@ -678,44 +687,42 @@ export function SceneEditorPanel({
   );
 
   return (
-    <Tabs defaultValue='settings'>
-      <TabsList level='secondary'>
-        <TabsTrigger value='settings'>
-          <Settings2 aria-hidden='true' />
-          Settings
-        </TabsTrigger>
-        <TabsTrigger value='hotspots'>
-          <MapPin aria-hidden='true' />
-          Hotspots
-        </TabsTrigger>
-      </TabsList>
+    <>
+      <Tabs defaultValue='settings' className='h-full min-h-0'>
+        <TabsList level='secondary' className='shrink-0'>
+          <TabsTrigger value='settings'>
+            <Settings2 aria-hidden='true' />
+            Settings
+          </TabsTrigger>
+          <TabsTrigger value='hotspots'>
+            <MapPin aria-hidden='true' />
+            Hotspots
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value='settings' className='grid gap-4'>
-        <Card>
-          <CardHeader className='flex-row items-start justify-between gap-4'>
+      <TabsContent
+        value='settings'
+        className='flex min-h-0 flex-col overflow-hidden'
+      >
+        <Card className='max-h-full min-h-0'>
+          <CardHeader className='shrink-0'>
             <CardTitle>Scene</CardTitle>
-            {canEdit ?
-              <Button size='sm' onClick={() => setSettingsOpen(true)}>
-                <Pencil aria-hidden='true' />
-                Edit
-              </Button>
-            : null}
           </CardHeader>
-          <CardContent>
-            <InfoFieldList>
-              <InfoField layout='inline' label='Title'>
+          <CardContent className='ishare-scrollbar min-h-0 flex-1 overflow-y-auto'>
+            <InfoFieldList layout='stack'>
+              <InfoField icon={Type} label='Title'>
                 {savedValues.title}
               </InfoField>
-              <InfoField layout='inline' label='Visibility'>
+              <InfoField icon={Eye} label='Visibility'>
                 <VisibilityBadge visibility={savedValues.visibility} />
               </InfoField>
-              <InfoField layout='inline' label='Description'>
+              <InfoField icon={AlignLeft} label='Description'>
                 {savedValues.description || '—'}
               </InfoField>
               {viewerType === 'panorama' ?
                 <>
                   <InfoField
-                    layout='inline'
+                    icon={Link2}
                     label={SCENE_FORM_COPY.previewVideo}
                   >
                     {savedValues.previewVideoUrl ?
@@ -724,7 +731,7 @@ export function SceneEditorPanel({
                       </InfoLink>
                     : '—'}
                   </InfoField>
-                  <InfoField layout='inline' label={SCENE_FORM_COPY.bodyVideo}>
+                  <InfoField icon={Link2} label={SCENE_FORM_COPY.bodyVideo}>
                     {savedValues.videoUrl ?
                       <InfoLink href={httpHref(savedValues.videoUrl)}>
                         {savedValues.videoUrl}
@@ -736,21 +743,338 @@ export function SceneEditorPanel({
             </InfoFieldList>
           </CardContent>
         </Card>
-        <Sheet
-          open={settingsOpen}
-          onOpenChange={(open) => {
-            setSettingsOpen(open);
-            if (!open) setForm(savedValues);
-          }}
-        >
-          <SheetContent className={AUTHORING_SHEET_CLASS}>
-            <SheetHeader>
-              <SheetTitle>Edit scene</SheetTitle>
-              <SheetDescription>
-                {AUTHORING_SURFACE.scene.description}
-              </SheetDescription>
-            </SheetHeader>
-            <div className={AUTHORING_SHEET_BODY_CLASS}>
+      </TabsContent>
+
+      <TabsContent
+        value='hotspots'
+        className='flex min-h-0 flex-col overflow-hidden'
+      >
+        <Card className='max-h-full min-h-0'>
+          <CardHeader className='shrink-0'>
+            <CardTitle>{hotspotSection.title}</CardTitle>
+            <CardDescription>
+              {scene.hotspotCount}{' '}
+              {scene.hotspotCount === 1 ? 'hotspot' : 'hotspots'} on this
+              scene.
+              {hotspotSection.description ?
+                ` ${hotspotSection.description}`
+              : null}
+            </CardDescription>
+            {canEdit ?
+              <CardAction>
+                <CreateSheet
+                  title={hotspotSection.addButtonLabel}
+                  description='Click the preview to set the pin, then fill the fields.'
+                  triggerLabel={hotspotSection.addButtonLabel}
+                  open={hotspotCreateOpen}
+                  onOpenChange={setHotspotCreateOpen}
+                >
+                <form className='admin-form' onSubmit={handleHotspotCreate}>
+                  <CollapsibleFormSection
+                    title={HOTSPOT_FORM_COPY.targetSection}
+                    icon={Settings2}
+                    description={HOTSPOT_FORM_COPY.targetSectionDescription}
+                    defaultOpen
+                  >
+                    <div className='grid gap-2'>
+                      <Label htmlFor='new-hotspot-kind'>New hotspot type</Label>
+                      <FormDescription>
+                        {HOTSPOT_FORM_COPY.typeDescription}
+                      </FormDescription>
+                      <InputGroup icon={Shapes}>
+                        <Select
+                          value={hotspotKind}
+                          onValueChange={(value) =>
+                            setHotspotKind(value as AdminHotspotCreate['kind'])
+                          }
+                        >
+                          <SelectTrigger id='new-hotspot-kind'>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='nav'>Navigation</SelectItem>
+                            <SelectItem value='info'>Information</SelectItem>
+                            <SelectItem value='naming'>
+                              Naming placement
+                            </SelectItem>
+                            {viewerType === 'panorama' ?
+                              <SelectItem value='place-overview'>
+                                Place overview
+                              </SelectItem>
+                            : null}
+                          </SelectContent>
+                        </Select>
+                      </InputGroup>
+                    </div>
+
+                    {hotspotKind === 'nav' || hotspotKind === 'info' ?
+                      <div className='grid gap-2'>
+                        <Label htmlFor='new-hotspot-name'>
+                          {hotspotKind === 'nav' ? 'Label' : 'Title'}
+                        </Label>
+                        <FormDescription>
+                          {hotspotKind === 'nav' ?
+                            HOTSPOT_FORM_COPY.labelDescription
+                          : HOTSPOT_FORM_COPY.titleDescription}
+                        </FormDescription>
+                        <InputGroup icon={Type}>
+                          <Input
+                            id='new-hotspot-name'
+                            value={hotspotName}
+                            onChange={(event) =>
+                              setHotspotName(event.target.value)
+                            }
+                            placeholder={
+                              hotspotKind === 'nav' ?
+                                HOTSPOT_FORM_COPY.labelPlaceholder
+                              : HOTSPOT_FORM_COPY.titlePlaceholder
+                            }
+                            required={hotspotKind === 'info'}
+                          />
+                        </InputGroup>
+                      </div>
+                    : null}
+
+                    {hotspotKind === 'nav' ?
+                      <div className='grid gap-2'>
+                        <Label>Target scene</Label>
+                        <FormDescription>
+                          {HOTSPOT_FORM_COPY.targetSceneDescription}
+                        </FormDescription>
+                        <Select
+                          value={hotspotTarget}
+                          onValueChange={setHotspotTarget}
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                HOTSPOT_FORM_COPY.targetScenePlaceholder
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {scenes
+                              .filter((entry) => entry.id !== scene.id)
+                              .map((entry) => (
+                                <SelectItem key={entry.id} value={entry.id}>
+                                  <SceneOptionLabel
+                                    title={entry.title}
+                                    thumbnailUrl={entry.thumbnailUrl}
+                                  />
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    : null}
+
+                    {hotspotKind === 'naming' ?
+                      <div className='grid gap-2'>
+                        <Label>Naming opportunity</Label>
+                        <FormDescription>
+                          {HOTSPOT_FORM_COPY.namingDescription}
+                        </FormDescription>
+                        <InputGroup icon={MapPin}>
+                          <Select
+                            value={hotspotNamingId}
+                            onValueChange={setHotspotNamingId}
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={
+                                  HOTSPOT_FORM_COPY.namingPlaceholder
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {namings.map((naming) => (
+                                <SelectItem key={naming.id} value={naming.id}>
+                                  {naming.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </InputGroup>
+                      </div>
+                    : null}
+                  </CollapsibleFormSection>
+
+                  {hotspotKind === 'info' ?
+                    <CollapsibleFormSection
+                      title={HOTSPOT_FORM_COPY.contentSection}
+                      icon={Pencil}
+                      description={HOTSPOT_FORM_COPY.contentSectionDescription}
+                    >
+                      <div className='grid gap-2'>
+                        <Label htmlFor='new-hotspot-body'>Body</Label>
+                        <FormDescription>
+                          {HOTSPOT_FORM_COPY.bodyDescription}
+                        </FormDescription>
+                        <Textarea
+                          id='new-hotspot-body'
+                          value={hotspotBody}
+                          onChange={(event) =>
+                            setHotspotBody(event.target.value)
+                          }
+                          placeholder={HOTSPOT_FORM_COPY.bodyPlaceholder}
+                        />
+                      </div>
+                    </CollapsibleFormSection>
+                  : null}
+
+                  <CollapsibleFormSection
+                    title={HOTSPOT_FORM_COPY.placementSection}
+                    icon={MapPin}
+                    description={HOTSPOT_FORM_COPY.placementSectionDescription}
+                  >
+                    <div className='grid gap-2'>
+                      <Label>Position</Label>
+                      <FormDescription>
+                        {HOTSPOT_FORM_COPY.positionDescription}
+                      </FormDescription>
+                      <HotspotPositionFields
+                        idPrefix='new-hotspot-position'
+                        position={hotspotPosition}
+                        onChange={(axis, value) =>
+                          setHotspotPosition((current) =>
+                            current.map((entry) =>
+                              entry.axis === axis ? { ...entry, value } : entry,
+                            ),
+                          )
+                        }
+                      />
+                    </div>
+                  </CollapsibleFormSection>
+                  <StickyFormActions>
+                    <FormCancelButton
+                      disabled={isSaving}
+                      onReset={() => {
+                        setHotspotKind('nav');
+                        setHotspotName('');
+                        setHotspotTarget('');
+                        setHotspotNamingId('');
+                        setHotspotBody('');
+                        setHotspotPosition(
+                          viewerType === 'model3d' ?
+                            [
+                              { axis: 'x', value: 0 },
+                              { axis: 'y', value: 0 },
+                              { axis: 'z', value: 0 },
+                            ]
+                          : [
+                              { axis: 'yaw', value: 0 },
+                              { axis: 'pitch', value: 0 },
+                            ],
+                        );
+                        setHotspotCreateOpen(false);
+                      }}
+                    />
+                    <Button
+                      type='submit'
+                      size='sm'
+                      disabled={
+                        isSaving ||
+                        (hotspotKind === 'nav' && !hotspotTarget) ||
+                        (hotspotKind === 'naming' && !hotspotNamingId)
+                      }
+                    >
+                      <Plus aria-hidden='true' />
+                      {hotspotSection.addButtonLabel}
+                    </Button>
+                  </StickyFormActions>
+                </form>
+                </CreateSheet>
+              </CardAction>
+            : null}
+          </CardHeader>
+          <CardContent className='admin-form ishare-scrollbar min-h-0 flex-1 overflow-y-auto'>
+            {scene.hotspots.length > 0 ?
+              <div className='overflow-hidden rounded-lg border'>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Hotspot</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Destination</TableHead>
+                      <TableHead className={tableActionsCellClass}>
+                        <span className='sr-only'>Actions</span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {scene.hotspots.map((hotspot) => {
+                      const menuProps = rowActionMenu.menuProps(hotspot.id);
+                      return (
+                        <TableRow
+                          key={hotspot.id}
+                          {...rowActionMenu.rowActionProps(
+                            hotspot.id,
+                            !canEdit,
+                          )}
+                        >
+                          <TableCell>
+                            <div className='font-medium'>
+                              {hotspot.label || 'Untitled hotspot'}
+                            </div>
+                            <div className='font-mono type-meta'>
+                              {hotspot.id}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <HotspotTypeBadge
+                              type={hotspot.type}
+                              namingId={hotspot.namingId}
+                            />
+                          </TableCell>
+                          <TableCell className='font-mono text-xs'>
+                            {hotspot.targetScene ?? hotspot.namingId ?? '—'}
+                          </TableCell>
+                          <TableCell className={tableActionsCellClass}>
+                            <HotspotSheet
+                              canEdit={canEdit}
+                              hotspot={hotspot}
+                              menuContentProps={rowActionMenu.contentProps(
+                                hotspot.id,
+                              )}
+                              menuOpen={menuProps.open}
+                              namings={namings}
+                              onChanged={handleHotspotChanged}
+                              onMenuOpenChange={menuProps.onOpenChange}
+                              sceneId={scene.id}
+                              scenes={scenes}
+                              tourId={tourId}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            : <p className='text-sm text-muted-foreground'>
+                {hotspotSection.emptyMessage}
+              </p>
+            }
+          </CardContent>
+        </Card>
+      </TabsContent>
+      </Tabs>
+
+      <Sheet
+        open={editOpen}
+        onOpenChange={(open) => {
+          setEditOpen(open);
+          if (!open) setForm(savedValues);
+        }}
+      >
+        <SheetContent className={AUTHORING_SHEET_CLASS}>
+          <SheetHeader>
+            <SheetTitle>Edit scene</SheetTitle>
+            <SheetDescription>
+              {AUTHORING_SURFACE.scene.description}
+            </SheetDescription>
+          </SheetHeader>
+          <div className={AUTHORING_SHEET_BODY_CLASS}>
               <form className='admin-form' onSubmit={handleSubmit}>
                 <CollapsibleFormSection
                   title={SCENE_FORM_COPY.basicsSection}
@@ -967,7 +1291,7 @@ export function SceneEditorPanel({
                     disabled={isSaving}
                     onReset={() => {
                       setForm(savedValues);
-                      setSettingsOpen(false);
+                      setEditOpen(false);
                     }}
                   />
                   <PendingButton
@@ -984,318 +1308,6 @@ export function SceneEditorPanel({
             </div>
           </SheetContent>
         </Sheet>
-      </TabsContent>
-
-      <TabsContent value='hotspots'>
-        <Card>
-          <CardHeader className='flex-row items-start justify-between gap-4'>
-            <div className='space-y-1.5'>
-              <CardTitle>{hotspotSection.title}</CardTitle>
-              <CardDescription>
-                {scene.hotspotCount}{' '}
-                {scene.hotspotCount === 1 ? 'hotspot' : 'hotspots'} on this
-                scene.
-                {hotspotSection.description ?
-                  ` ${hotspotSection.description}`
-                : null}
-              </CardDescription>
-            </div>
-            {canEdit ?
-              <CreateSheet
-                title={hotspotSection.addButtonLabel}
-                description='Click the preview to set the pin, then fill the fields.'
-                triggerLabel={hotspotSection.addButtonLabel}
-                open={hotspotCreateOpen}
-                onOpenChange={setHotspotCreateOpen}
-              >
-                <form className='admin-form' onSubmit={handleHotspotCreate}>
-                  <CollapsibleFormSection
-                    title={HOTSPOT_FORM_COPY.targetSection}
-                    icon={Settings2}
-                    description={HOTSPOT_FORM_COPY.targetSectionDescription}
-                    defaultOpen
-                  >
-                    <div className='grid gap-2'>
-                      <Label htmlFor='new-hotspot-kind'>New hotspot type</Label>
-                      <FormDescription>
-                        {HOTSPOT_FORM_COPY.typeDescription}
-                      </FormDescription>
-                      <InputGroup icon={Shapes}>
-                        <Select
-                          value={hotspotKind}
-                          onValueChange={(value) =>
-                            setHotspotKind(value as AdminHotspotCreate['kind'])
-                          }
-                        >
-                          <SelectTrigger id='new-hotspot-kind'>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='nav'>Navigation</SelectItem>
-                            <SelectItem value='info'>Information</SelectItem>
-                            <SelectItem value='naming'>
-                              Naming placement
-                            </SelectItem>
-                            {viewerType === 'panorama' ?
-                              <SelectItem value='place-overview'>
-                                Place overview
-                              </SelectItem>
-                            : null}
-                          </SelectContent>
-                        </Select>
-                      </InputGroup>
-                    </div>
-
-                    {hotspotKind === 'nav' || hotspotKind === 'info' ?
-                      <div className='grid gap-2'>
-                        <Label htmlFor='new-hotspot-name'>
-                          {hotspotKind === 'nav' ? 'Label' : 'Title'}
-                        </Label>
-                        <FormDescription>
-                          {hotspotKind === 'nav' ?
-                            HOTSPOT_FORM_COPY.labelDescription
-                          : HOTSPOT_FORM_COPY.titleDescription}
-                        </FormDescription>
-                        <InputGroup icon={Type}>
-                          <Input
-                            id='new-hotspot-name'
-                            value={hotspotName}
-                            onChange={(event) =>
-                              setHotspotName(event.target.value)
-                            }
-                            placeholder={
-                              hotspotKind === 'nav' ?
-                                HOTSPOT_FORM_COPY.labelPlaceholder
-                              : HOTSPOT_FORM_COPY.titlePlaceholder
-                            }
-                            required={hotspotKind === 'info'}
-                          />
-                        </InputGroup>
-                      </div>
-                    : null}
-
-                    {hotspotKind === 'nav' ?
-                      <div className='grid gap-2'>
-                        <Label>Target scene</Label>
-                        <FormDescription>
-                          {HOTSPOT_FORM_COPY.targetSceneDescription}
-                        </FormDescription>
-                        <Select
-                          value={hotspotTarget}
-                          onValueChange={setHotspotTarget}
-                        >
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                HOTSPOT_FORM_COPY.targetScenePlaceholder
-                              }
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {scenes
-                              .filter((entry) => entry.id !== scene.id)
-                              .map((entry) => (
-                                <SelectItem key={entry.id} value={entry.id}>
-                                  <SceneOptionLabel
-                                    title={entry.title}
-                                    thumbnailUrl={entry.thumbnailUrl}
-                                  />
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    : null}
-
-                    {hotspotKind === 'naming' ?
-                      <div className='grid gap-2'>
-                        <Label>Naming opportunity</Label>
-                        <FormDescription>
-                          {HOTSPOT_FORM_COPY.namingDescription}
-                        </FormDescription>
-                        <InputGroup icon={MapPin}>
-                          <Select
-                            value={hotspotNamingId}
-                            onValueChange={setHotspotNamingId}
-                          >
-                            <SelectTrigger>
-                              <SelectValue
-                                placeholder={
-                                  HOTSPOT_FORM_COPY.namingPlaceholder
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {namings.map((naming) => (
-                                <SelectItem key={naming.id} value={naming.id}>
-                                  {naming.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </InputGroup>
-                      </div>
-                    : null}
-                  </CollapsibleFormSection>
-
-                  {hotspotKind === 'info' ?
-                    <CollapsibleFormSection
-                      title={HOTSPOT_FORM_COPY.contentSection}
-                      icon={Pencil}
-                      description={HOTSPOT_FORM_COPY.contentSectionDescription}
-                    >
-                      <div className='grid gap-2'>
-                        <Label htmlFor='new-hotspot-body'>Body</Label>
-                        <FormDescription>
-                          {HOTSPOT_FORM_COPY.bodyDescription}
-                        </FormDescription>
-                        <Textarea
-                          id='new-hotspot-body'
-                          value={hotspotBody}
-                          onChange={(event) =>
-                            setHotspotBody(event.target.value)
-                          }
-                          placeholder={HOTSPOT_FORM_COPY.bodyPlaceholder}
-                        />
-                      </div>
-                    </CollapsibleFormSection>
-                  : null}
-
-                  <CollapsibleFormSection
-                    title={HOTSPOT_FORM_COPY.placementSection}
-                    icon={MapPin}
-                    description={HOTSPOT_FORM_COPY.placementSectionDescription}
-                  >
-                    <div className='grid gap-2'>
-                      <Label>Position</Label>
-                      <FormDescription>
-                        {HOTSPOT_FORM_COPY.positionDescription}
-                      </FormDescription>
-                      <HotspotPositionFields
-                        idPrefix='new-hotspot-position'
-                        position={hotspotPosition}
-                        onChange={(axis, value) =>
-                          setHotspotPosition((current) =>
-                            current.map((entry) =>
-                              entry.axis === axis ? { ...entry, value } : entry,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                  </CollapsibleFormSection>
-                  <StickyFormActions>
-                    <FormCancelButton
-                      disabled={isSaving}
-                      onReset={() => {
-                        setHotspotKind('nav');
-                        setHotspotName('');
-                        setHotspotTarget('');
-                        setHotspotNamingId('');
-                        setHotspotBody('');
-                        setHotspotPosition(
-                          viewerType === 'model3d' ?
-                            [
-                              { axis: 'x', value: 0 },
-                              { axis: 'y', value: 0 },
-                              { axis: 'z', value: 0 },
-                            ]
-                          : [
-                              { axis: 'yaw', value: 0 },
-                              { axis: 'pitch', value: 0 },
-                            ],
-                        );
-                        setHotspotCreateOpen(false);
-                      }}
-                    />
-                    <Button
-                      type='submit'
-                      size='sm'
-                      disabled={
-                        isSaving ||
-                        (hotspotKind === 'nav' && !hotspotTarget) ||
-                        (hotspotKind === 'naming' && !hotspotNamingId)
-                      }
-                    >
-                      <Plus aria-hidden='true' />
-                      {hotspotSection.addButtonLabel}
-                    </Button>
-                  </StickyFormActions>
-                </form>
-              </CreateSheet>
-            : null}
-          </CardHeader>
-          <CardContent className='admin-form'>
-            {scene.hotspots.length > 0 ?
-              <div className='overflow-hidden rounded-lg border'>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Hotspot</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Destination</TableHead>
-                      <TableHead className='w-12'>
-                        <span className='sr-only'>Actions</span>
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {scene.hotspots.map((hotspot) => {
-                      const menuProps = rowActionMenu.menuProps(hotspot.id);
-                      return (
-                        <TableRow
-                          key={hotspot.id}
-                          {...rowActionMenu.rowActionProps(
-                            hotspot.id,
-                            !canEdit,
-                          )}
-                        >
-                          <TableCell>
-                            <div className='font-medium'>
-                              {hotspot.label || 'Untitled hotspot'}
-                            </div>
-                            <div className='font-mono type-meta'>
-                              {hotspot.id}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <HotspotTypeBadge
-                              type={hotspot.type}
-                              namingId={hotspot.namingId}
-                            />
-                          </TableCell>
-                          <TableCell className='font-mono text-xs'>
-                            {hotspot.targetScene ?? hotspot.namingId ?? '—'}
-                          </TableCell>
-                          <TableCell>
-                            <HotspotSheet
-                              canEdit={canEdit}
-                              hotspot={hotspot}
-                              menuContentProps={rowActionMenu.contentProps(
-                                hotspot.id,
-                              )}
-                              menuOpen={menuProps.open}
-                              namings={namings}
-                              onChanged={handleHotspotChanged}
-                              onMenuOpenChange={menuProps.onOpenChange}
-                              sceneId={scene.id}
-                              scenes={scenes}
-                              tourId={tourId}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            : <p className='text-sm text-muted-foreground'>
-                {hotspotSection.emptyMessage}
-              </p>
-            }
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+    </>
   );
 }

@@ -59,7 +59,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useNavigationPending } from '@/components/navigation-progress';
 import { usePausePreviewIframe } from '@/lib/admin-debug';
-import { ADMIN_DEBUG_COPY, DEBUG_VIEWPORT_COPY } from '@/lib/authoring-copy';
+import {
+  ADMIN_DEBUG_COPY,
+  DEBUG_VIEWPORT_COPY,
+  PREVIEW_PANE_COPY,
+} from '@/lib/authoring-copy';
 import type { AdminViewerType } from '@/lib/tour-detail';
 import { cn } from '@/lib/utils';
 import {
@@ -152,12 +156,6 @@ const DEBUG_FLAG_ICONS: Record<
   guideUiTest: LayoutTemplate,
 };
 
-/**
- * Floor for a card that sizes itself. A compact stage is measured by the frame
- * around it instead, so the editor's viewer column cannot outgrow its row.
- */
-const PREVIEW_STAGE_FLOOR = 'min-h-[42rem]';
-
 type ViewportMode = 'live' | 'device' | 'embed';
 type DebugFlagGroup = (typeof ADMIN_PREVIEW_FLAG_TOGGLES)[number]['group'];
 type DevicePresetId = (typeof DEVICE_PRESETS)[number]['id'];
@@ -234,8 +232,8 @@ export function TourPreviewPanel({
   /** When set, iframe arms on this Admin path instead of the scene/detail route. */
   previewRoute?: string;
   /**
-   * The panorama editor already names and frames the viewer, so the card drops
-   * its explanatory copy and lets the surrounding stage own the height.
+   * Layout tool column: keep the Preview heading, drop explanatory copy, and
+   * let the surrounding stage own the height.
    */
   compact?: boolean;
   /**
@@ -465,15 +463,19 @@ export function TourPreviewPanel({
   }
 
   return (
-    <Card size={compact ? 'sm' : 'default'} className='h-full'>
-      {/* Compact sits beside the editor's other column headers, so the title
-          centers on the action row instead of hanging at its top. */}
-      <CardHeader className={cn(compact && 'items-center')}>
-        <CardTitle>Viewer preview</CardTitle>
+    <Card
+      size={compact ? 'sm' : 'default'}
+      className='h-full min-h-0 min-w-0 flex-1'
+    >
+      {/* Compact still names the pane Preview so it lines up with the other
+          column headers; Reload / Debug stay on that row. Scene/tour splits
+          use the same heading. */}
+      <CardHeader className='shrink-0'>
+        <CardTitle>{PREVIEW_PANE_COPY.title}</CardTitle>
         {compact ? null : (
           <CardDescription>
-            Local {viewerType} viewer in authoring mode. Debug flags rebuild the
-            iframe URL.
+            Local {viewerType} viewer in authoring mode. Debug flags rebuild
+            the iframe URL.
           </CardDescription>
         )}
         <CardAction>
@@ -629,7 +631,6 @@ export function TourPreviewPanel({
               tabIndex={-1}
               className={cn(
                 'admin-preview-iframe size-full bg-black',
-                !compact && PREVIEW_STAGE_FLOOR,
                 !previewSettled && 'is-splashing',
               )}
               {...(!previewSettled ? { inert: true } : {})}
@@ -642,10 +643,7 @@ export function TourPreviewPanel({
               allowFullScreen
             />
           : <div
-              className={cn(
-                'flex size-full items-center justify-center bg-muted p-6 text-center',
-                !compact && PREVIEW_STAGE_FLOOR,
-              )}
+              className='flex size-full items-center justify-center bg-muted p-6 text-center'
               style={
                 viewportMode === 'device' && device ?
                   { height: device.height, minHeight: device.height }

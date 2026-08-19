@@ -5,10 +5,11 @@ import Link from 'next/link';
 import {
   LayoutList,
   Mail,
-  MoreHorizontal,
+  MoreVertical,
   Pencil,
   Phone,
   Save,
+  Settings2,
   ShieldCheck,
   Trash2,
   UserPlus,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { PersonAvatar } from '@/components/branded-avatar';
 import {
   AUTHORING_SHEET_BODY_CLASS,
   AUTHORING_SHEET_CLASS,
@@ -35,11 +37,6 @@ import {
   StaffRoleBadge,
   StaffStatusBadge,
 } from '@/components/status-badges';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -80,10 +77,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useSortableRows } from '@/hooks/use-sortable-rows';
 import { useTableRowActionMenu } from '@/hooks/use-table-row-action-menu';
-import {
-  adminAccountInitials,
-  useAdminAccountIdentity,
-} from '@/lib/admin-account';
+import { useAdminAccountIdentity } from '@/lib/admin-account';
 import {
   ADMIN_STAFF_ROLES,
   ADMIN_USERS_COPY,
@@ -94,6 +88,7 @@ import {
 import { STAFF_ROLE_ICONS } from '@/lib/semantic-icons';
 import {
   cn,
+  tableActionsCellClass,
   tableBadgeCellClass,
   tableBadgeClass,
   tableLinkClass,
@@ -245,9 +240,12 @@ function InviteUserPanel() {
 export function UserEditorForm({
   account,
   onClose,
+  showIdentity = true,
 }: {
   account: AdminStaffAccount;
   onClose: () => void;
+  /** Sheet editors need a lockup; the user detail header already supplies it. */
+  showIdentity?: boolean;
 }) {
   const saved = {
     name: account.name,
@@ -276,27 +274,24 @@ export function UserEditorForm({
 
   return (
     <form className='admin-form' onSubmit={submit}>
-      {/* Who is being edited — the same avatar lockup the Account profile
-          leads with, following the fields as they change. */}
-      <div className='flex items-center gap-3 rounded-lg border bg-muted/25 p-4'>
-        <Avatar size='lg'>
-          {account.avatarSrc ?
-            <AvatarImage src={account.avatarSrc} alt='' />
-          : null}
-          <AvatarFallback>
-            {adminAccountInitials(form.name || account.name)}
-          </AvatarFallback>
-        </Avatar>
-        <div className='grid min-w-0 gap-1.5'>
-          <span className='type-title truncate'>
-            {form.name || ADMIN_USERS_COPY.editEmptyName}
-          </span>
-          <div className='flex flex-wrap items-center gap-1.5'>
-            <StaffRoleBadge role={form.role} />
-            <StaffStatusBadge status={account.status} />
+      {showIdentity ?
+        <div className='flex items-center gap-3 rounded-lg border bg-muted/25 p-4'>
+          <PersonAvatar
+            src={account.avatarSrc}
+            label={form.name || account.name}
+            size='lg'
+          />
+          <div className='grid min-w-0 gap-1.5'>
+            <span className='type-title truncate'>
+              {form.name || ADMIN_USERS_COPY.editEmptyName}
+            </span>
+            <div className='flex flex-wrap items-center gap-1.5'>
+              <StaffRoleBadge role={form.role} />
+              <StaffStatusBadge status={account.status} />
+            </div>
           </div>
         </div>
-      </div>
+      : null}
 
       <CollapsibleFormSection
         title={ADMIN_USERS_COPY.contactSection}
@@ -489,7 +484,7 @@ export function UsersTable() {
                 onSort={toggle}
                 className={tableBadgeCellClass}
               />
-              <TableHead className='w-12'>
+              <TableHead className={tableActionsCellClass}>
                 <span className='sr-only'>Actions</span>
               </TableHead>
             </TableRow>
@@ -501,14 +496,11 @@ export function UsersTable() {
                 {...rowActionMenu.rowActionProps(account.id)}
               >
                 <TableCell className={tableMediaCellClass}>
-                  <Avatar className='size-9'>
-                    {account.avatarSrc ?
-                      <AvatarImage src={account.avatarSrc} alt='' />
-                    : null}
-                    <AvatarFallback>
-                      {adminAccountInitials(account.name)}
-                    </AvatarFallback>
-                  </Avatar>
+                  <PersonAvatar
+                    src={account.avatarSrc}
+                    label={account.name}
+                    className='size-9'
+                  />
                 </TableCell>
                 <TableCell>
                   <Link
@@ -569,7 +561,7 @@ export function UsersTable() {
                     className={tableBadgeClass}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell className={tableActionsCellClass}>
                   <DropdownMenu {...rowActionMenu.menuProps(account.id)}>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -579,7 +571,7 @@ export function UsersTable() {
                             size='icon'
                             aria-label={`Actions for ${account.name}`}
                           >
-                            <MoreHorizontal aria-hidden='true' />
+                            <MoreVertical aria-hidden='true' />
                           </Button>
                         </DropdownMenuTrigger>
                       </TooltipTrigger>
@@ -590,6 +582,12 @@ export function UsersTable() {
                       {...rowActionMenu.contentProps(account.id)}
                     >
                       <DropdownMenuLabel>User actions</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href={`/users/${account.id}`}>
+                          <Settings2 aria-hidden='true' />
+                          View details
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => openEditor(account)}>
                         <Pencil aria-hidden='true' />
                         Edit
